@@ -4,11 +4,11 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Interactive and dynamic graphics for multivariate data using R</title>
+  <title>Chapter 6 Linear discriminant analysis and MANOVA | Interactive and dynamic graphics for multivariate data using R</title>
   <meta name="description" content="This is a book about exploring multivariate data." />
   <meta name="generator" content="bookdown 0.20 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Interactive and dynamic graphics for multivariate data using R" />
+  <meta property="og:title" content="Chapter 6 Linear discriminant analysis and MANOVA | Interactive and dynamic graphics for multivariate data using R" />
   <meta property="og:type" content="book" />
   
   
@@ -16,7 +16,7 @@
   
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Interactive and dynamic graphics for multivariate data using R" />
+  <meta name="twitter:title" content="Chapter 6 Linear discriminant analysis and MANOVA | Interactive and dynamic graphics for multivariate data using R" />
   
   <meta name="twitter:description" content="This is a book about exploring multivariate data." />
   
@@ -31,8 +31,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-
-<link rel="next" href="intro.html"/>
+<link rel="prev" href="regression-methods.html"/>
+<link rel="next" href="trees-and-forests.html"/>
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
@@ -176,19 +176,99 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="header">
-<h1 class="title">Interactive and dynamic graphics for multivariate data using R</h1>
-<p class="author"><em>Di Cook, Ursula Laa, Stuart Lee, Earo Wang</em></p>
-<p class="date"><em>2021-02-08</em></p>
-</div>
-<div id="preface" class="section level1 unnumbered">
-<h1>Preface</h1>
-<p>Why write this book</p>
-<p>What is expected of the reader</p>
-<p>What packages to install</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="index.html#cb1-1"></a><span class="kw">install.packages</span>(<span class="st">&quot;mulgar&quot;</span>)</span>
-<span id="cb1-2"><a href="index.html#cb1-2"></a><span class="co"># or the development version</span></span>
-<span id="cb1-3"><a href="index.html#cb1-3"></a><span class="co"># devtools::install_github(&quot;dicook/mulgar&quot;)</span></span></code></pre></div>
+<div id="linear-discriminant-analysis-and-manova" class="section level1">
+<h1><span class="header-section-number">Chapter 6</span> Linear discriminant analysis and MANOVA</h1>
+<p>Discriminant analysis dates to the early 1900s. Fisher’s linear
+discriminant  determines a linear combination of the
+variables that separates two classes by comparing the differences
+between class means with the variance of values within each class. It
+makes no assumptions about the distribution of the data. Linear
+discriminant analysis (LDA), as proposed by ,
+formalizes Fisher’s approach by imposing the assumption that the data
+values for each class arise from a <span class="math inline">\(p\)</span>-dimensional multivariate normal
+distribution, which shares a common variance–covariance matrix with data
+from other classes. Under this assumption, Fisher’s linear
+discriminant gives the optimal separation between the two groups.</p>
+<p>For two equally weighted groups, where <span class="math inline">\(Y\)</span> is coded as <span class="math inline">\(\{0, 1\}\)</span>, the LDA rule is:</p>
+
+<p>where ${}_k $ are the class mean vectors of an
+<span class="math inline">\(n\times p\)</span> data matrix <span class="math inline">\(\blX_k ~~(k=1,2)\)</span>,</p>
+<p><span class="math display">\[
+\blS_{\rm pooled} = \frac{(n_1-1)
+\blS_1}{(n_1-1)+(n_2-1)} + \frac{(n_2-1) \blS_2}{(n_1-1)+(n_2-1)}
+\]</span></p>
+<p>is the pooled variance–covariance matrix, and</p>
+<p><span class="math display">\[ 
+\blS_k = \frac{1}{n-1}\sum_{i=1}^{n}
+(\blX_{ki}-\bar{\blX}_k)(\blX_{ki}-\bar{\blX}_k)&#39;, ~~k=1,2
+\]</span></p>
+<p>is the class variance–covariance matrix. The linear
+discriminant part of this rule is
+<span class="math inline">\((\bar{\blX}_1-\bar{\blX}_2)&#39;\blS^{-1}_{\rm pooled}\)</span>, which defines
+the linear combination of variables that best separates the two
+groups. To define a classification rule, we compute the value of the
+new observation <span class="math inline">\(\blX_0\)</span> on this line and compare it with the value of
+the average of the two class means <span class="math inline">\((\bar{\blX}_1+\bar{\blX}_2)/2\)</span> on
+the same line.
+%Computing the value of the new observation <span class="math inline">\(\blX_0\)</span> on this
+%line and comparing it with the value of the average of the two class
+%means <span class="math inline">\((\bar{\blX}_1+\bar{\blX}_2)/2\)</span> on this line gives the
+%classification rule.</p>
+<p>For multiple <span class="math inline">\((g)\)</span> classes, the rule and the discriminant space are
+constructed using the between-group sum-of-squares matrix,</p>
+<p><span class="math display">\[
+\blB =
+\sum_{k=1}^g n_k(\bar{\blX}_k-\bar{\blX})(\bar{\blX}_k-\bar{\blX})&#39; 
+\]</span></p>
+<p>which measures the differences between the class means,
+compared with the overall data mean <span class="math inline">\(\bar{\blX}\)</span> and the within-group
+sum-of-squares matrix,</p>
+<p><span class="math display">\[
+\blW =
+\sum_{k=1}^g\sum_{i=1}^{n_k}
+(\blX_{ki}-\bar{\blX}_k)(\blX_{ki}-\bar{\blX}_k)&#39;
+\]</span></p>
+<p>which measures the variation of values around each class mean.
+The linear discriminant space is generated by computing the
+eigenvectors (canonical coordinates) of <span class="math inline">\(\blW^{-1}\blB\)</span>, and this is
+the space where the group means are most separated with respect to the
+pooled variance–covariance. The resulting classification rule is to
+allocate a new observation to the class with the highest value of</p>
+<p><span class="math display">\[\begin{eqnarray}
+\bar{\blX}_k&#39;\blS^{-1}_{\rm pooled}\blX_0 - 
+\frac{1}{2}\bar{\blX}_k&#39;\blS^{-1}_{\rm pooled}\bar{\blX}_k ~~~k=1,...,g \label{lda-rule}
+\end{eqnarray}\]</span></p>
+<p>which results in allocating the new observation into the
+class with the closest mean.</p>
+<p>This LDA approach is widely applicable, but it is useful
+to check the underlying assumptions on which it depends: (1)
+that the cluster structure corresponding to each class forms an
+ellipse, showing that the class is consistent with a sample from a
+multivariate normal distribution, and (2) that the variance of values
+around each mean is nearly the same. Figure~
+illustrates two datasets, of which only one is consistent with these
+assumptions. Other parametric models, such as quadratic discriminant
+analysis or logistic regression, also depend on assumptions
+about the data which should be validated.  </p>
+<p>% Figure 1</p>
+<p>Our description is derived from <span class="citation">(<span class="citeproc-not-found" data-reference-id="VR02"><strong>???</strong></span>)</span> and
+<span class="citation">(<span class="citeproc-not-found" data-reference-id="Ri96"><strong>???</strong></span>)</span>. A good general treatment of parametric methods for
+supervised classification can be found in <span class="citation">(<span class="citeproc-not-found" data-reference-id="JW02"><strong>???</strong></span>)</span> or another
+similar multivariate analysis textbook. Missing from multivariate
+textbooks is a good explanation of the use of interactive graphics
+both to check the assumptions underlying the methods and to explore
+the results. This chapter fills this gap.</p>
+<p>Algorithmic methods have overtaken parametric methods in the practice
+of supervised classification. A parametric method such as linear
+discriminant analysis yields a set of interpretable output parameters, so
+it leaves a clear trail helping us to understand what was done to
+produce the results. An algorithmic method, on the other hand, is
+more or less a black box, with various input parameters that are
+adjusted to tune the algorithm. The algorithm’s input and output
+parameters do not always correspond in any obvious way to the
+interpretation of the results. All the same, these methods can be
+very powerful and their use is not limited by requirements about
+variable distributions as is the case with parametric methods.</p>
 
 </div>
             </section>
@@ -196,8 +276,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           </div>
         </div>
       </div>
-
-<a href="intro.html" class="navigation navigation-next navigation-unique" aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="regression-methods.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="trees-and-forests.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
