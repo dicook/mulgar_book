@@ -1,0 +1,51 @@
+options(warn = 1)
+library(bookdown)
+options(bookdown.render.file_scope = FALSE)
+library(cliapp)
+start_app(theme = simple_theme())
+
+cli_h1("Preprocessing")
+# spelling check
+cli_h2("Spelling check")
+rmd_files <- list.files(path = "Rmd/", pattern = "*.Rmd", full.names = TRUE, recursive = TRUE)
+wordlist <- readLines("WORDLIST")
+spell_gb <- spelling::spell_check_files(rmd_files, wordlist, "en_GB")
+spell_us <- spelling::spell_check_files(rmd_files, wordlist, "en_US")
+spell_res <- intersect(spell_gb[[1]], spell_us[[1]])
+if (length(spell_res) > 0) {
+  print(subset(spell_gb, spell_gb[[1]] %in% spell_res))
+  stop("Can you please fix typos listed above first?", call. = FALSE)
+}
+
+# convert pdf to png for html output
+cli_h2("Coverting pdf to png")
+img_pdf <- list.files("img/", pattern = "*.pdf")
+for (i in img_pdf) {
+  file_pdf <- paste0("img/", i)
+  dest_pdf <- paste0("img/", sub("pdf$", "png", i))
+  if (file.exists(dest_pdf)) {
+    next
+  }
+  magick::image_write(
+    magick::image_read(file_pdf, 300), dest_pdf, "png",
+    density = 300
+  )
+}
+
+cli_h1("Compiling")
+
+if (Sys.getenv("RSTUDIO") != "1" && Sys.info()['sysname'] == "Darwin") {
+  Sys.setenv('RSTUDIO_PANDOC' = '/Applications/RStudio.app/Contents/MacOS/pandoc')
+}
+
+# provide default formats if necessary
+formats <- commandArgs(trailingOnly = TRUE)
+if (length(formats) == 0) {
+  formats <- c("bookdown::pdf_book", "bookdown::gitbook")
+}
+# render the book to all formats
+for (fmt in formats) {
+  render_book("index.Rmd", fmt, quiet = FALSE)
+}
+
+cli_alert_success("You Rock!")
