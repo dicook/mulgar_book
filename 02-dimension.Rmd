@@ -2,3 +2,46 @@
 
 This chapter will focus on methods for reducing dimension, and how the tour, with linked plots, can be used to assist: PCA, MDS, tSNE, factor analysis
 
+## Principal component analysis (PCA) of the PISA test scores
+
+```{r pca_libraries}
+library(tidyverse)
+library(ICtest)
+```
+
+The 2018 OECD PISA data can be accessed at
+https://webfs.oecd.org/pisa2018/SPSS_STU_QQQ.zip, and read into R using this code:
+
+```{r eval=FALSE, echo=TRUE}
+library(haven)
+stu_qqq <- read_sav(here::here("data", "SPSS_STU_QQQ.zip")) 
+PISA_scores_2018 <- stu_qqq %>% 
+  select(CNT, PV1MATH:PV10SCIE) %>%
+  filter(CNT == "AUS")
+# Keep country, and scores
+saveRDS(PISA_scores_2018, file=here::here("data", "PISA_scores_2018.rds"))
+```
+
+Select one country. We are interested in examining the association between the scores. Because the association might be different for each country, PCA should be conducted separately for each country. All the scores are measured in the same units, so for this data we'd recommend computing PCA on the original scale, that is, the variance-covariance matrix. 
+
+Plan:
+
+- compute PCs
+- explore proportion of variance 
+- examine loadings
+- tour on top few PCs, using PCA tour
+
+```{r}
+PISA_scores_2018 <- readRDS(here::here("data", "PISA_scores_2018.rds"))
+PISA_pca <- prcomp(PISA_scores_2018[,-1], scale = FALSE)
+PISA_pca <- PCAasymp(PISA_scores_2018[,-1], k=28)
+```
+
+```{r eval=FALSE}
+options(digits=2)
+summary(PISA_pca) 
+```
+
+```{r}
+ggscreeplot(PISA_pca)
+```
