@@ -4,9 +4,10 @@ This chapter will focus on methods for reducing dimension, and how the tour, wit
 
 ## Principal component analysis (PCA) of the PISA test scores
 
-```{r pca_libraries}
+```{r pca_libraries, echo=FALSE, message=FALSE, error=FALSE, warning=FALSE}
 library(tidyverse)
 library(ICtest)
+library(tourr)
 ```
 
 The 2018 OECD PISA data can be accessed at
@@ -33,8 +34,8 @@ Plan:
 
 ```{r}
 PISA_scores_2018 <- readRDS(here::here("data", "PISA_scores_2018.rds"))
-PISA_pca <- prcomp(PISA_scores_2018[,-1], scale = FALSE)
-PISA_pca <- PCAasymp(PISA_scores_2018[,-1], k=28)
+# PISA_pca <- prcomp(PISA_scores_2018[,-1], scale = FALSE)
+PISA_pca <- PCAasymp(PISA_scores_2018[,-1], k=28) # Testing out this package!
 ```
 
 ```{r eval=FALSE}
@@ -44,4 +45,12 @@ summary(PISA_pca)
 
 ```{r}
 ggscreeplot(PISA_pca)
+```
+
+```{r}
+PISA_pca$W[,1]
+```
+
+```{r eval=FALSE}
+animate_xy(PISA_scores_2018[sample(1:nrow(PISA_scores_2018), 1000),-1])
 ```
