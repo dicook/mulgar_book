@@ -24,7 +24,7 @@
 <meta name="author" content="Di Cook, Ursula Laa, Stuart Lee, Earo Wang" />
 
 
-<meta name="date" content="2021-06-02" />
+<meta name="date" content="2021-06-13" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -153,7 +153,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="2" data-path="toolbox.html"><a href="toolbox.html"><i class="fa fa-check"></i><b>2</b> Toolbox</a></li>
 <li class="chapter" data-level="3" data-path="dimension-reduction.html"><a href="dimension-reduction.html"><i class="fa fa-check"></i><b>3</b> Dimension reduction</a>
 <ul>
-<li class="chapter" data-level="3.1" data-path="dimension-reduction.html"><a href="dimension-reduction.html#principal-component-analysis-pca-of-the-pisa-test-scores"><i class="fa fa-check"></i><b>3.1</b> Principal component analysis (PCA) of the PISA test scores</a></li>
+<li class="chapter" data-level="3.1" data-path="dimension-reduction.html"><a href="dimension-reduction.html#principal-component-analysis-pca-of-the-pisa-test-scores"><i class="fa fa-check"></i><b>3.1</b> Principal component analysis (PCA) of the PISA test scores</a>
+<ul>
+<li class="chapter" data-level="3.1.1" data-path="dimension-reduction.html"><a href="dimension-reduction.html#take-a-look-at-the-raw-data"><i class="fa fa-check"></i><b>3.1.1</b> Take a look at the raw data</a></li>
+</ul></li>
 </ul></li>
 <li class="chapter" data-level="4" data-path="data.html"><a href="data.html"><i class="fa fa-check"></i><b>4</b> Data</a>
 <ul>
@@ -201,38 +204,42 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>This chapter will focus on methods for reducing dimension, and how the tour, with linked plots, can be used to assist: PCA, MDS, tSNE, factor analysis</p>
 <div id="principal-component-analysis-pca-of-the-pisa-test-scores" class="section level2" number="3.1">
 <h2><span class="header-section-number">3.1</span> Principal component analysis (PCA) of the PISA test scores</h2>
-<p>The 2018 OECD PISA data can be accessed at
-<a href="https://webfs.oecd.org/pisa2018/SPSS_STU_QQQ.zip" class="uri">https://webfs.oecd.org/pisa2018/SPSS_STU_QQQ.zip</a>, and read into R using this code:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="dimension-reduction.html#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(haven)</span>
-<span id="cb1-2"><a href="dimension-reduction.html#cb1-2" aria-hidden="true" tabindex="-1"></a>stu_qqq <span class="ot">&lt;-</span> <span class="fu">read_sav</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;data&quot;</span>, <span class="st">&quot;SPSS_STU_QQQ.zip&quot;</span>)) </span>
-<span id="cb1-3"><a href="dimension-reduction.html#cb1-3" aria-hidden="true" tabindex="-1"></a>PISA_scores_2018 <span class="ot">&lt;-</span> stu_qqq <span class="sc">%&gt;%</span> </span>
-<span id="cb1-4"><a href="dimension-reduction.html#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(CNT, PV1MATH<span class="sc">:</span>PV10SCIE) <span class="sc">%&gt;%</span></span>
-<span id="cb1-5"><a href="dimension-reduction.html#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(CNT <span class="sc">==</span> <span class="st">&quot;AUS&quot;</span>)</span>
-<span id="cb1-6"><a href="dimension-reduction.html#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Keep country, and scores</span></span>
-<span id="cb1-7"><a href="dimension-reduction.html#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(PISA_scores_2018, <span class="at">file=</span>here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;data&quot;</span>, <span class="st">&quot;PISA_scores_2018.rds&quot;</span>))</span></code></pre></div>
 <p>Select one country. We are interested in examining the association between the scores. Because the association might be different for each country, PCA should be conducted separately for each country. All the scores are measured in the same units, so for this data we’d recommend computing PCA on the original scale, that is, the variance-covariance matrix.</p>
 <p>Plan:</p>
 <ul>
+<li>show data in a tour</li>
 <li>compute PCs</li>
 <li>explore proportion of variance</li>
 <li>examine loadings</li>
 <li>tour on top few PCs, using PCA tour</li>
 </ul>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="dimension-reduction.html#cb2-1" aria-hidden="true" tabindex="-1"></a>PISA_scores_2018 <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;data&quot;</span>, <span class="st">&quot;PISA_scores_2018.rds&quot;</span>))</span>
-<span id="cb2-2"><a href="dimension-reduction.html#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># PISA_pca &lt;- prcomp(PISA_scores_2018[,-1], scale = FALSE)</span></span>
-<span id="cb2-3"><a href="dimension-reduction.html#cb2-3" aria-hidden="true" tabindex="-1"></a>PISA_pca <span class="ot">&lt;-</span> <span class="fu">PCAasymp</span>(PISA_scores_2018[,<span class="sc">-</span><span class="dv">1</span>], <span class="at">k=</span><span class="dv">28</span>) <span class="co"># Testing out this package!</span></span></code></pre></div>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="dimension-reduction.html#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">digits=</span><span class="dv">2</span>)</span>
-<span id="cb3-2"><a href="dimension-reduction.html#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(PISA_pca) </span></code></pre></div>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="dimension-reduction.html#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggscreeplot</span>(PISA_pca)</span></code></pre></div>
+<div id="take-a-look-at-the-raw-data" class="section level3" number="3.1.1">
+<h3><span class="header-section-number">3.1.1</span> Take a look at the raw data</h3>
+<p>There are 30 variables here. 30D space is huge so generally this is too many variables to watch in a tour. Here the structure is very simple so its easy to see. Trying to display the axes is a different matter, for most directions there is a small contribution from many of the 30 variables, resulting is small axis lines but over-crowded labels.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="dimension-reduction.html#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(pisa)</span>
+<span id="cb1-2"><a href="dimension-reduction.html#cb1-2" aria-hidden="true" tabindex="-1"></a>pisa_oz <span class="ot">&lt;-</span> pisa <span class="sc">%&gt;%</span> <span class="fu">filter</span>(CNT <span class="sc">==</span> <span class="st">&quot;AUS&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="dimension-reduction.html#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">44</span>)</span>
+<span id="cb2-2"><a href="dimension-reduction.html#cb2-2" aria-hidden="true" tabindex="-1"></a>pisa_oz_500 <span class="ot">&lt;-</span> pisa_oz[<span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(pisa_oz), <span class="dv">500</span>),<span class="sc">-</span><span class="dv">1</span>]</span>
+<span id="cb2-3"><a href="dimension-reduction.html#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Run the tour in real time</span></span>
+<span id="cb2-4"><a href="dimension-reduction.html#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">animate_xy</span>(pisa_oz_500 , </span>
+<span id="cb2-5"><a href="dimension-reduction.html#cb2-5" aria-hidden="true" tabindex="-1"></a>           <span class="at">axes=</span><span class="st">&quot;bottomleft&quot;</span>, <span class="at">half_range =</span> <span class="fl">1.5</span>)</span>
+<span id="cb2-6"><a href="dimension-reduction.html#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Save a tour path, and select a few images to show</span></span>
+<span id="cb2-7"><a href="dimension-reduction.html#cb2-7" aria-hidden="true" tabindex="-1"></a>pisa_t1 <span class="ot">&lt;-</span> <span class="fu">interpolate</span>(<span class="fu">save_history</span>(pisa_oz_500, <span class="at">max =</span> <span class="dv">20</span>))</span>
+<span id="cb2-8"><a href="dimension-reduction.html#cb2-8" aria-hidden="true" tabindex="-1"></a>pisa_tbl1 <span class="ot">&lt;-</span> <span class="fu">convert_proj_tibble</span>(pisa_t1)</span>
+<span id="cb2-9"><a href="dimension-reduction.html#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Try animation.hook = &quot;gifski&quot;</span></span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="dimension-reduction.html#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Show a set of 10 projections</span></span>
+<span id="cb3-2"><a href="dimension-reduction.html#cb3-2" aria-hidden="true" tabindex="-1"></a>indx <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">1</span>, <span class="dv">101</span>, <span class="dv">10</span>)</span>
+<span id="cb3-3"><a href="dimension-reduction.html#cb3-3" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> pisa_tbl1 <span class="sc">%*%</span> </span>
+<span id="cb3-4"><a href="dimension-reduction.html#cb3-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(frame <span class="sc">%in%</span> indx)</span>
+<span id="cb3-5"><a href="dimension-reduction.html#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Ok, stuck here - not filtering, and then have to work ou</span></span>
+<span id="cb3-6"><a href="dimension-reduction.html#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co"># how to transform to make data and plots for a selection # of frames</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="dimension-reduction.html#cb4-1" aria-hidden="true" tabindex="-1"></a>PISA_pca <span class="ot">&lt;-</span> <span class="fu">prcomp</span>(pisa[,<span class="sc">-</span><span class="dv">1</span>], <span class="at">scale =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb4-2"><a href="dimension-reduction.html#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">screeplot</span>(PISA_pca, <span class="at">type=</span><span class="st">&quot;l&quot;</span>)</span></code></pre></div>
 <p><img src="mulgar_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="dimension-reduction.html#cb5-1" aria-hidden="true" tabindex="-1"></a>PISA_pca<span class="sc">$</span>W[,<span class="dv">1</span>]</span></code></pre></div>
-<pre><code>##  [1] -0.1605569 -0.1578317 -0.1580663 -0.1604076 -0.1625818 -0.1592074
-##  [7] -0.1582129 -0.1603973 -0.1600472 -0.1621041 -0.2006686 -0.2013460
-## [13] -0.2019339 -0.2023198 -0.2016969 -0.2019220 -0.2019200 -0.2009122
-## [19] -0.2025301 -0.2002237 -0.1836736 -0.1842205 -0.1843087 -0.1820182
-## [25] -0.1862982 -0.1837010 -0.1846414 -0.1816329 -0.1846858 -0.1831040</code></pre>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="dimension-reduction.html#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">animate_xy</span>(PISA_scores_2018[<span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(PISA_scores_2018), <span class="dv">1000</span>),<span class="sc">-</span><span class="dv">1</span>])</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="dimension-reduction.html#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">digits=</span><span class="dv">2</span>)</span>
+<span id="cb5-2"><a href="dimension-reduction.html#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(PISA_pca) </span></code></pre></div>
 
+</div>
 </div>
 </div>
             </section>

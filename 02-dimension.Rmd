@@ -6,36 +6,53 @@ This chapter will focus on methods for reducing dimension, and how the tour, wit
 
 ```{r pca_libraries, echo=FALSE, message=FALSE, error=FALSE, warning=FALSE}
 library(tidyverse)
-library(ICtest)
 library(tourr)
-```
-
-The 2018 OECD PISA data can be accessed at
-https://webfs.oecd.org/pisa2018/SPSS_STU_QQQ.zip, and read into R using this code:
-
-```{r eval=FALSE, echo=TRUE}
-library(haven)
-stu_qqq <- read_sav(here::here("data", "SPSS_STU_QQQ.zip")) 
-PISA_scores_2018 <- stu_qqq %>% 
-  select(CNT, PV1MATH:PV10SCIE) %>%
-  filter(CNT == "AUS")
-# Keep country, and scores
-saveRDS(PISA_scores_2018, file=here::here("data", "PISA_scores_2018.rds"))
+library(mulgar)
 ```
 
 Select one country. We are interested in examining the association between the scores. Because the association might be different for each country, PCA should be conducted separately for each country. All the scores are measured in the same units, so for this data we'd recommend computing PCA on the original scale, that is, the variance-covariance matrix. 
 
 Plan:
 
+- show data in a tour
 - compute PCs
 - explore proportion of variance 
 - examine loadings
 - tour on top few PCs, using PCA tour
 
+### Take a look at the raw data
+
+There are 30 variables here. 30D space is huge so generally this is too many variables to watch in a tour. Here the structure is very simple so its easy to see. Trying to display the axes is a different matter, for most directions there is a small contribution from many of the 30 variables, resulting is small axis lines but over-crowded labels.
+
 ```{r}
-PISA_scores_2018 <- readRDS(here::here("data", "PISA_scores_2018.rds"))
-# PISA_pca <- prcomp(PISA_scores_2018[,-1], scale = FALSE)
-PISA_pca <- PCAasymp(PISA_scores_2018[,-1], k=28) # Testing out this package!
+data(pisa)
+pisa_oz <- pisa %>% filter(CNT == "AUS")
+```
+
+```{r eval=FALSE}
+set.seed(44)
+pisa_oz_500 <- pisa_oz[sample(1:nrow(pisa_oz), 500),-1]
+# Run the tour in real time
+animate_xy(pisa_oz_500 , 
+           axes="bottomleft", half_range = 1.5)
+# Save a tour path, and select a few images to show
+pisa_t1 <- interpolate(save_history(pisa_oz_500, max = 20))
+pisa_tbl1 <- convert_proj_tibble(pisa_t1)
+# Try animation.hook = "gifski"
+```
+
+```{r eval=FALSE}
+# Show a set of 10 projections
+indx <- seq(1, 101, 10)
+d <- pisa_tbl1 %*% 
+  dplyr::filter(frame %in% indx)
+# Ok, stuck here - not filtering, and then have to work ou
+# how to transform to make data and plots for a selection # of frames
+```
+
+```{r}
+PISA_pca <- prcomp(pisa[,-1], scale = FALSE)
+screeplot(PISA_pca, type="l")
 ```
 
 ```{r eval=FALSE}
@@ -43,15 +60,3 @@ options(digits=2)
 summary(PISA_pca) 
 ```
 
-```{r}
-ggscreeplot(PISA_pca)
-```
-
-```{r}
-PISA_pca$W[,1]
-```
-
-```{r eval=FALSE}
-animate_xy(PISA_scores_2018[sample(1:nrow(PISA_scores_2018), 500),-1])
-# Try animation.hook = “gifski”
-```
