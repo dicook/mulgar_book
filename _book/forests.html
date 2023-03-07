@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.335">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Interactive and dynamic graphics for high-dimensional data using R - 7&nbsp; Trees and forests</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./nn.html" rel="next">
+<link href="./LDA.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+    <div class="container-fluid d-flex justify-content-between">
+      <h1 class="quarto-secondary-nav-title"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Trees and forests</span></h1>
+      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Interactive and dynamic graphics for high-dimensional data using R</a> 
+    </div>
+      </div>
+      <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">Preface</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./intro.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./toolbox.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Toolbox</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./dimension.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Dimension reduction</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./data.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Data</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./regression.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Regression methods</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./LDA.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Linear discriminant analysis and MANOVA</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./forests.html" class="sidebar-item-text sidebar-link active"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Trees and forests</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./nn.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Neural networks and deep learning</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./hierarchical-clustering.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Hierarchical clustering</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./kmeans-clustering.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">k-means clustering</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./model-based-clustering.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">model-based clustering</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./multivariate-time-series.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Multivariate time series</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">References</a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#trees" id="toc-trees" class="nav-link active" data-scroll-target="#trees"><span class="toc-section-number">7.1</span>  Trees</a></li>
+  <li><a href="#random-forests" id="toc-random-forests" class="nav-link" data-scroll-target="#random-forests"><span class="toc-section-number">7.2</span>  Random forests</a></li>
+  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises">Exercises</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Trees and forests</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<p>Topics to include:</p>
+<ul>
+<li>trees</li>
+<li>forests</li>
+<li>boosted trees</li>
+<li>PP forest</li>
+</ul>
+<section id="trees" class="level2" data-number="7.1">
+<h2 data-number="7.1" class="anchored" data-anchor-id="trees"><span class="header-section-number">7.1</span> Trees</h2>
+<p>The tree algorithm is a widely used algorithmic method. The tree algorithm generates a classification rule by sequentially splitting the data into two buckets. Splits are made between sorted data values of individual variables, with the goal of obtaining pure classes on each side of the split. The inputs for a simple tree classifier commonly include (1) an impurity measure, an indication of the relative diversity among the cases in the terminal nodes; (2) a parameter that sets the minimum number of cases in a node, or the minimum number of observations in a terminal node of the tree; and (3) a complexity measure that controls the growth of a tree, balancing the use of a simple generalizable tree against a more accurate tree tailored to the sample. When applying tree methods, exploring the effects of the input parameters on the tree is instructive; for example, it helps us to assess the stability of the tree model.</p>
+<p>Although algorithmic models do not depend on distributional assumptions, that does not mean that every algorithm is suitable for all data. For example, the tree model works best when all variables are independent within each class, because it does not take such dependencies into account. As always, visualization can help us to determine whether a particular model should be applied. In classification problems, it is useful to explore the cluster structure, comparing the clusters with the classes and looking for evidence of correlation within each class. The upper left-hand plot in Fig.~<span class="math inline">\(\ref{lda-assumptions}\)</span> shows a strong correlation between and within each cluster, which indicates that the tree model may not give good results for the . The plots in Fig.~<span class="math inline">\(\ref{misclassifications}\)</span> provide added evidence. They use background color to display the class predictions for LDA and a tree. The LDA boundaries, which are formed from a linear combination of and , look more appropriate than the rectangular boundaries of the tree classifier.</p>
+% Figure 2
+<p> and include thorough discussions of algorithms for supervised classification presented from a modeling perspective with a theoretical emphasis. is an early volume describing and illustrating both classical statistical methods and algorithms for supervised classification. All three books contain some excellent examples of the use of graphics to examine two-dimensional (2D) boundaries generated by different classifiers. The discussions in these and other writings on data mining algorithms take a less exploratory approach than that of this chapter, and they lack treatments of the use of graphics to examine the high-dimensional spaces in which the classifiers operate.</p>
+<p> </p>
+<p>A classifier’s performance is usually assessed using its error or, conversely, its accuracy. Error is calculated by comparing the predicted class with the known true class, using a misclassification table. For example, below are the respective misclassification tables for LDA and the tree classifier applied to the :</p>
+<p>The total error is the number of misclassified samples divided by the total number of cases: <span class="math inline">\(4/74=0.054\)</span> for LDA and <span class="math inline">\(5/74=0.068\)</span> for the tree classifier.</p>
+<p>It is informative to study the misclassified cases and to see which pockets of the data space contain more error. The misclassified cases for LDA and tree classifiers are highlighted (large orange <span class="math inline">\(\times\)</span>es and large green circles) in Fig.~<span class="math inline">\(\ref{misclassifications}\)</span>. Some errors made by the tree classifier, such as the uppermost large green circle, seem especially egregious. As noted earlier, they result from the limitations of the algorithm when variables are correlated.</p>
+<p></p>
+<p>To be useful, the error estimate should predict the performance of the classifier on new samples not yet seen. However, if the error is calculated using the same data that was used by the classifier, it is likely to be too low. Many methods are used to avoid double-dipping from the data, including several types of . A simple example of cross-validation is to split the data into a training sample (used by the classifier) and a test sample (used for calculating error).</p>
+<p> </p>
+<p>Ensemble methods build cross-validation into the error calculations. Ensembles are constructed by using multiple classifiers and by pooling the predictions using a voting scheme. A random forest , for example, builds in cross-validation by constructing multiple trees, each of which is generated by randomly sampling the input variables and the cases. Because each tree is built using a sample of the cases, there is in effect a training sample and a test sample for each tree. (See Sect.~<span class="math inline">\(\ref{random-forests}\)</span> for more detail.)</p>
+<p></p>
+</section>
+<section id="random-forests" class="level2" data-number="7.2">
+<h2 data-number="7.2" class="anchored" data-anchor-id="random-forests"><span class="header-section-number">7.2</span> Random forests</h2>
+<p>A random forest is a classifier that is built from multiple trees generated by randomly sampling the cases and the variables. The random sampling (with replacement) of cases has the fortunate effect of creating a training (<code>in-bag'') and a test (</code>out-of-bag’’) sample for each tree computed. The class of each case in the out-of-bag sample for each tree is predicted, and the predictions for all trees are combined into a vote for the class identity.</p>
+<p>A random forest is a computationally intensive method, a ``black box’’ classifier, but it produces various diagnostics that make the outcome less mysterious. Some diagnostics that help us to assess the model are the votes, the measures of variable importance, the error estimate, and as usual, the misclassification tables.</p>
+<p></p>
+<p>We test the method on the by building a random forest classifier of 500 trees, using the R package :</p>
+% Insert page break to avoid breaking the R output.
+% Figure 11
+<p>Each tree used a random sample of four of the eight variables, as well as a random sample of about a third of the 572 cases. The votes are displayed in the left-hand plot of Fig.~<span class="math inline">\(\ref{olive-forest}\)</span>, next to a projection from a 2D tour. Since there are three classes, the votes form a triangle, with one vertex for each region, with oils from the South at the far right, Sardinian oils at the top, and Northern oils at the lower left. Samples that are consistently classified correctly are close to the vertices; cases that are commonly misclassified are further from a vertex. Although forests perfectly classify this data, the number of points falling between the Northern and the Sardinian vertices suggests some potential for error in classifying future samples.</p>
+<p>For more understanding of the votes, we turn to another diagnostic: variable importance. Forests return two measures of variable importance, both of which give similar results. Based on the Gini measure, the most important variables, in order, are , , , , , , , and .</p>
+<p>Some of this ordering is as expected, given the initial graphical inspection of the data (Sect.~<span class="math inline">\(\ref{class-plots}\)</span>). The importance of was our first discovery, as shown in the top row of Fig.~<span class="math inline">\(\ref{olive-1d}\)</span>. And yes, is next in importance: The first two plots in Fig.~<span class="math inline">\(\ref{olive-2d}\)</span> make that clear. The surprise is that the forest should consider to be less important than . This is not what we found, as shown in the right-hand plot in that figure.</p>
+<p>Did we overlook something important in our earlier investigation? We return to the use of the manual manipulation of the tour to see whether does in fact perform better than at finding a gap between the two regions. But it does not. By overlooking the importance of , the random forest never finds an adequate gap between the oils of the Northern and the Sardinian regions, and that probably explains why there is more confusion about some Northern samples than there should be.</p>
+<p>We rebuild the forest using a new variable constructed from a linear combination of and (), just as we did when applying the single tree classifier. Since correlated variables reduce each other’s importance, we need to remove and when we add . Once we have done this, the confusion between Northern and Sardinian oils disappears (Fig.~<span class="math inline">\(\ref{olive-forest}\)</span>, lower plot): The points are now tightly clumped at each vertex, which indicates more certainty in their class predictions. The new variable becomes the second most important variable according to the importance diagnostic.</p>
+<p>% Need R code here and output - variable importance</p>
+<p>Classifying the oils by the three large s is too easy a problem for forests; they are designed to tackle more challenging classification tasks. We will use them to examine the oils from the areas in the Southern region (North and South Apulia, Calabria, and Sicily). Remember the initial graphical inspection of the data, which showed that oils from the four areas were not completely separable. The samples from Sicily overlapped those of the three other areas. We will use a forest classifier to see how well it can differentiate the Southern oils by :</p>
+% Insert newpage to pull the first two lines to the next page
+<p>After experimenting with several input parameters, we show the results for a forest of 1,500 trees, sampling two variables at each tree node, and yielding an error rate of 0.068. The misclassification table is:</p>
+<p>The error of the forest is surprisingly low, but the error is definitely not uniform across classes. Predictions for Sicily are wrong about a third of the time. Figure~<span class="math inline">\(\ref{olive-forest2}\)</span> shows some more interesting aspects of the results. For this figure, the following table describes the correspondence between area and symbol:</p>
+<p></p>
+<p>Look first at the top row of the figure. The misclassification table is represented by a jittered scatterplot, at the left. A plot from a 2D tour of the four voting variables is in the center. Because there are four groups, the votes lie on a 3D tetrahedron (a simplex). The votes from three of the areas are pretty well separated, one at each ``corner,’’ but those from Sicily overlap all of them. Remember that when points are clumped at the vertex, class members are consistently predicted correctly. Since this does not occur for Sicilian oils, we see that there is more uncertainty in the predictions for this area.</p>
+<p>The plot at right confirms this observation. It is a projection from a 2D tour of the four most important variables, showing a pattern we have seen before. We can achieve pretty good separation of the oils from North Apulia, Calabria, and South Apulia, but the oils from Sicily overlap all three clusters. Clearly these are tough samples to classify correctly.</p>
+% Figure 12
+<p>We remove the Sicilian oils from the plots so we can focus on the other three areas (bottom row of plots). The points representing North Apulian oils form a very tight cluster at a vertex, with three exceptions. Two of these points are misclassified as Calabrian, and we have highlighted them as large filled circles by painting the misclassification plot.</p>
+<p>The pattern of the votes (middle plot) suggests that there is high certainty in the predictions for North Apulian oils, with the exception of these two samples. When we watch the votes in the tour for a while, we see that the votes of these two samples travel as if they were in a cluster all their own, which is distinct from the remaining North Apulian oils.</p>
+<p>However, when we look at the data, we find the votes for these two samples a bit puzzling. We watch the four most important variables in the tour for a while (as in the right plot), and these two points do not behave as if they were in a distinct cluster; they travel with the rest of the samples from North Apulia. They do seem to be outliers with respect their class, but they are not so far from their group <sub>—</sub> it is a bit surprising that the forest has trouble classifying these cases.</p>
+<p>Rather than exploring the other misclassifications, we leave that for the reader.</p>
+<p>In summary, a random forest is a useful method for tackling tough classification problems. Its diagnostics provide a rich basis for graphical exploration, which helps us to digest and evaluate the solution.</p>
+</section>
+<section id="exercises" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="exercises">Exercises</h2>
+<ol type="1">
+<li>For the :
+<ol type="a">
+<li>Split the samples from North Italy into <span class="math inline">\(2/3\)</span> training and <span class="math inline">\(1/3\)</span> test samples for each area.</li>
+<li>Build a tree model to classify the oils by for the three areas of North Italy. Which are the most important variables? Make plots of these variables. What is the accuracy of the model for the training and test sets?</li>
+<li>Build a random forest to classify oils into the three areas of North Italy. Compare the order of importance of variables with what you found from a single tree. Make a parallel coordinate plot in the order of variable importance.</li>
+</ol></li>
+</ol>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./LDA.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Linear discriminant analysis and MANOVA</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./nn.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Neural networks and deep learning</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+</body></html>
