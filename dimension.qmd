@@ -1,12 +1,23 @@
 # Dimension reduction
 
-This chapter will focus on methods for reducing dimension, and how the tour, with linked plots, can be used to assist: PCA, MDS, tSNE, factor analysis
+This chapter will focus on methods for reducing dimension, and how the tour can be used to assist with the common methods such as principal component analysis (PCA), multidimensional scaling (MDS), t-stochastic neighbour embedding (t-SNE), and factor analysis.
 
-## Principal component analysis (PCA) of the PISA test scores
+## Principal component analysis (PCA) 
 
-```{r pca_libraries, echo=FALSE, message=FALSE, error=FALSE, warning=FALSE}
+This is a statistical technique used to reduce the dimensionality of a large dataset while retaining as much information as possible. PCA identifies the underlying structure of the data by finding a new set of variables, known as principal components (PCs), that are linear combinations of the original variables. The PCs can be used as a new set of variables to represent the data in a lower-dimensional space. 
+
+PCA is conducted by finding the directions where the projected data has the highest variance, that is, are most spread. Because the goal is to find a smaller number of variables that contain the similar information, the amount of variance explained by the selected PCs is examined. 
+
+PCA summarises linear relationships, and the dimension reduction is achieved by using combinations of variables that are highly correlated. However, high correlation can also occur when there are outliers, or clustering. PCA is commonly used to detect these patterns also. PCA also is not very effective when the distribution of the variables is highly skewed, so it can be helpful to transform variables before computing the PCA.
+
+We would start by examining the data using a grand tour. The goal is to check whether there might be potential issues for PCA, such as skewness, outliers or clustering, or even non-linear dependencies. 
+
+We'll use the AFLW data as the example. This data has player statistics for all the matches in the 2021 season. We would be interested to know which variables contain similar information, and thus might be combined into single variables. We would expect that 30 statistics possibly group into a few small sets, such as offensive and defensive skills. We might also expect that some of the statistics are skewed, most players have low values and just a handful of players are stellar. It is also possible that there are some extreme values. These are interesting features, but they will distract from the main purpose of grouping the statistics. Thus the tour is used to check for potential problems with the data prior to conducting PCA.
+
+```{r}
+#| label: pca-libraries
 #| eval: TRUE
-#| echo: FALSE
+#| echo: TRUE
 #| message: FALSE
 #| error: FALSE
 #| warning: FALSE
@@ -15,7 +26,21 @@ library(tourr)
 library(mulgar)
 ```
 
-Select one country. We are interested in examining the association between the scores. Because the association might be different for each country, PCA should be conducted separately for each country. All the scores are measured in the same units, so for this data we'd recommend computing PCA on the original scale, that is, the variance-covariance matrix.
+```{r}
+#| label: aflw-gt
+#| eval: false
+render_gif(aflw[,7:36], 
+           grand_tour(), 
+           display_xy(),
+           gif_file="gifs/aflw_gt.gif",
+           frames=500,
+           loop=FALSE)
+```
+![Grand tour of the AFLW player statistics](gifs/aflw_gt.gif)
+
+The data is surprisingly good! There is a small amount of skewness, and there are no major outliers. There are no major issues that need to be addressed before PCA. 
+
+<!-- Select one country. We are interested in examining the association between the scores. Because the association might be different for each country, PCA should be conducted separately for each country. All the scores are measured in the same units, so for this data we'd recommend computing PCA on the original scale, that is, the variance-covariance matrix.
 
 Plan:
 
@@ -27,14 +52,18 @@ Plan:
 
 ### Take a look at the raw data
 
-There are 30 variables here. 30D space is huge so generally this is too many variables to watch in a tour. Here the structure is very simple so its easy to see. Trying to display the axes is a different matter, for most directions there is a small contribution from many of the 30 variables, resulting is small axis lines but over-crowded labels.
+There are 30 variables here. 30D space is huge so generally this is too many variables to watch in a tour. Here the structure is very simple so its easy to see. Trying to display the axes is a different matter, for most directions there is a small contribution from many of the 30 variables, resulting is small axis lines but over-crowded labels. -->
 
 ```{r}
+#| eval: FALSE
+#| echo: FALSE
 data(pisa)
 pisa_oz <- pisa %>% filter(CNT == "AUS")
 ```
 
 ```{r eval=FALSE}
+#| eval: FALSE
+#| echo: FALSE
 set.seed(44)
 pisa_oz_500 <- pisa_oz[sample(1:nrow(pisa_oz), 500),-1]
 # Run the tour in real time
@@ -47,6 +76,8 @@ pisa_tbl1 <- convert_proj_tibble(pisa_t1)
 ```
 
 ```{r eval=FALSE}
+#| eval: FALSE
+#| echo: FALSE
 # Show a set of 10 projections
 indx <- seq(1, 101, 10)
 d <- pisa_tbl1 %*% 
@@ -56,11 +87,15 @@ d <- pisa_tbl1 %*%
 ```
 
 ```{r}
+#| eval: FALSE
+#| echo: FALSE
 PISA_pca <- prcomp(pisa[,-1], scale = FALSE)
 screeplot(PISA_pca, type="l")
 ```
 
 ```{r eval=FALSE}
+#| eval: FALSE
+#| echo: FALSE
 options(digits=2)
 summary(PISA_pca) 
 ```
