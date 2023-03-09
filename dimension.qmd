@@ -21,13 +21,23 @@ We'll use the AFLW data as the example. This data has player statistics for all 
 #| message: FALSE
 #| error: FALSE
 #| warning: FALSE
+#| code-fold: false
 library(tidyverse)
 library(tourr)
 library(mulgar)
 ```
 
+To look at all of the 30 player statistics in a grand tour use the `animate_xy()` function as follows:
+
 ```{r}
 #| label: aflw-gt
+#| eval: false
+#| code-fold: false
+animate_xy(aflw[,7:36])
+```
+
+```{r}
+#| label: aflw-gif
 #| eval: false
 render_gif(aflw[,7:36], 
            grand_tour(), 
@@ -36,9 +46,27 @@ render_gif(aflw[,7:36],
            frames=500,
            loop=FALSE)
 ```
+
+The gif here is the saved version of the grand tour, made using the `render_gif()` function.
+
 ![Grand tour of the AFLW player statistics](gifs/aflw_gt.gif)
 
 The data is surprisingly good! There is a small amount of skewness, and there are no major outliers. There are no major issues that need to be addressed before PCA. 
+
+```{r}
+#| label: aflw-pca
+aflw_pca <- prcomp(aflw[,7:36], 
+               scale = TRUE, 
+               retx=TRUE)
+ggscree(aflw_pca)
+
+library(gt)
+aflw_pca$rotation[,1:5] %>%
+  as_tibble(rownames="Variable") %>% 
+  gt() %>%
+  fmt_number(columns = c(PC1, PC2, PC3, PC4, PC5),
+             decimals = 2)
+```
 
 <!-- Select one country. We are interested in examining the association between the scores. Because the association might be different for each country, PCA should be conducted separately for each country. All the scores are measured in the same units, so for this data we'd recommend computing PCA on the original scale, that is, the variance-covariance matrix.
 
