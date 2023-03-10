@@ -2,15 +2,15 @@
 
 This chapter will focus on methods for reducing dimension, and how the tour can be used to assist with the common methods such as principal component analysis (PCA), multidimensional scaling (MDS), t-stochastic neighbour embedding (t-SNE), and factor analysis.
 
-## Principal component analysis (PCA) 
+## Principal component analysis (PCA)
 
-This is a statistical technique used to reduce the dimensionality of a large dataset while retaining as much information as possible. PCA identifies the underlying structure of the data by finding a new set of variables, known as principal components (PCs), that are linear combinations of the original variables. The PCs can be used as a new set of variables to represent the data in a lower-dimensional space. 
+This is a statistical technique used to reduce the dimensionality of a large dataset while retaining as much information as possible. PCA identifies the underlying structure of the data by finding a new set of variables, known as principal components (PCs), that are linear combinations of the original variables. The PCs can be used as a new set of variables to represent the data in a lower-dimensional space.
 
-PCA is conducted by finding the directions where the projected data has the highest variance, that is, are most spread. Because the goal is to find a smaller number of variables that contain the similar information, the amount of variance explained by the selected PCs is examined. 
+PCA is conducted by finding the directions where the projected data has the highest variance, that is, are most spread. Because the goal is to find a smaller number of variables that contain the similar information, the amount of variance explained by the selected PCs is examined.
 
 PCA summarises linear relationships, and the dimension reduction is achieved by using combinations of variables that are highly correlated. However, high correlation can also occur when there are outliers, or clustering. PCA is commonly used to detect these patterns also. PCA also is not very effective when the distribution of the variables is highly skewed, so it can be helpful to transform variables before computing the PCA.
 
-We would start by examining the data using a grand tour. The goal is to check whether there might be potential issues for PCA, such as skewness, outliers or clustering, or even non-linear dependencies. 
+We would start by examining the data using a grand tour. The goal is to check whether there might be potential issues for PCA, such as skewness, outliers or clustering, or even non-linear dependencies.
 
 We'll use the AFLW data as the example. This data has player statistics for all the matches in the 2021 season. We would be interested to know which variables contain similar information, and thus might be combined into single variables. We would expect that 30 statistics possibly group into a few small sets, such as offensive and defensive skills. We might also expect that some of the statistics are skewed, most players have low values and just a handful of players are stellar. It is also possible that there are some extreme values. These are interesting features, but they will distract from the main purpose of grouping the statistics. Thus the tour is used to check for potential problems with the data prior to conducting PCA.
 
@@ -51,23 +51,36 @@ The gif here is the saved version of the grand tour, made using the `render_gif(
 
 ![Grand tour of the AFLW player statistics](gifs/aflw_gt.gif)
 
-The data is surprisingly good! There is a small amount of skewness, and there are no major outliers. There are no major issues that need to be addressed before PCA. 
+The data is surprisingly good! There is a small amount of skewness, and there are no major outliers. There are no major issues that need to be addressed before PCA.
+
+Below we have the conventional summaries of the PCA, a scree plot showing the reduction in variance to be explained when each additional PC is considered. It is also conventional to look at a table summarising the proportions of variance explained by PCs, but with 30 variables it is easier to make some decision on the number of PCs needed based on the scree plot.
 
 ```{r}
 #| label: aflw-pca
 aflw_pca <- prcomp(aflw[,7:36], 
                scale = TRUE, 
                retx=TRUE)
-ggscree(aflw_pca)
 
+ggscree(aflw_pca)
+```
+
+From the scree plot, we see a sharp drop from one to two, two to three and then smaller drops. After 5 PCs the variance gradually, gradually decays. Although, 2-3 PCs might be adequate, we will choose 5 PCs to examine more closely. This explains `r round(summary(aflw_pca)$importance[3,5]*100,1)`% of the variance.
+
+```{r}
+#| label: aflw-pcs
 library(gt)
 aflw_pca$rotation[,1:5] %>%
   as_tibble(rownames="Variable") %>% 
+  arrange(desc(PC1), desc(PC2), desc(PC3)) %>%
   gt() %>%
   fmt_number(columns = c(PC1, PC2, PC3, PC4, PC5),
              decimals = 2)
 ```
 
+When there are as many variables as this, it can be hard to digest the combinations of variables most contributing to each PC. Rearranging the table by sorting on a selected PC can help. This table has been sorted according to the PC1 coefficients.
+
+
+```{=html}
 <!-- Select one country. We are interested in examining the association between the scores. Because the association might be different for each country, PCA should be conducted separately for each country. All the scores are measured in the same units, so for this data we'd recommend computing PCA on the original scale, that is, the variance-covariance matrix.
 
 Plan:
@@ -81,7 +94,7 @@ Plan:
 ### Take a look at the raw data
 
 There are 30 variables here. 30D space is huge so generally this is too many variables to watch in a tour. Here the structure is very simple so its easy to see. Trying to display the axes is a different matter, for most directions there is a small contribution from many of the 30 variables, resulting is small axis lines but over-crowded labels. -->
-
+```
 ```{r}
 #| eval: FALSE
 #| echo: FALSE
