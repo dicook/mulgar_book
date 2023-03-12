@@ -38,7 +38,7 @@ To look at all of the 30 player statistics in a grand tour use the `animate_xy()
 #| label: aflw-gt
 #| eval: false
 #| code-fold: false
-animate_xy(aflw_std[,7:35], half_range=1.5)
+animate_xy(aflw_std[,7:35], half_range=0.8)
 ```
 
 ```{r}
@@ -46,7 +46,7 @@ animate_xy(aflw_std[,7:35], half_range=1.5)
 #| eval: false
 render_gif(aflw_std[,7:35], 
            grand_tour(), 
-           display_xy(half_range=1.5),
+           display_xy(half_range=0.8),
            gif_file="gifs/aflw_gt.gif",
            frames=500,
            loop=FALSE)
@@ -56,7 +56,7 @@ The gif here is the saved version of the grand tour, made using the `render_gif(
 
 ![Grand tour of the AFLW player statistics](gifs/aflw_gt.gif)
 
-The data is surprisingly good! There is a small amount of skewness, and there are no major outliers. There are no major issues that need to be addressed before PCA.
+The data is surprisingly good! There is a small amount of skewness, and there are no major outliers. Skewness indicates that most players have reasonably similar skills (bunching of points), except for a few key players (outliers. The skewness could be reduced by applying a log or square root transformation to some variables prior to running the PCA, but there are no major issues that would affect PCA.
 
 Below we have the conventional summaries of the PCA, a scree plot showing the reduction in variance to be explained when each additional PC is considered. It is also conventional to look at a table summarising the proportions of variance explained by PCs, but with 30 variables it is easier to make some decision on the number of PCs needed based on the scree plot.
 
@@ -84,7 +84,7 @@ aflw_pca$rotation[,1:4] %>%
 
 When there are as many variables as this, it can be hard to digest the combinations of variables most contributing to each PC. Rearranging the table by sorting on a selected PC can help. This table has been sorted according to the PC 1 coefficients. 
 
-PC 1 is primarily composed of `disposals`, `possessions`, `kicks`, `metres`, `uncontested`, `contested`, .... Actually almost all variables positively contribute, albeit in different amounts! It is quite common in PCA for the first PC to be a combination of all variables, although it might commonly be a closer to equal contribution, and it tells us that there is one main direction of variation in the data. For PC 1 in the AFLW data, PCA is telling us that the primary variation is through a combination of skills, and this maps to basic football playing skills, where some skills are more worthy. 
+PC 1 is primarily composed of `disposals`, `possessions`, `kicks`, `metres`, `uncontested`, `contested`, .... Actually almost all variables positively contribute, albeit in different amounts! It is quite common in PCA for the first PC to be a combination of all variables, although it might commonly be a closer to equal contribution, and it tells us that there is one main direction of variation in the data. For PC 1 in the AFLW data, PCA is telling us that the primary variation is through a combination of skills, and this maps to basic football playing skills, where some skills (e.g. disposals, possessions, kicks, ...) are more important. 
 
 Thus the second PC might be the more interesting. PC 2 is primarily a combination of `shots`, `goals`, `marks_in50`, `accuracy`, and `behinds` contrasted against `rebounds_in50` and `intercepts`. The negative coefficients are primary offensive skills and the positive coefficients are defensive skills. This PC is reasonable measure of the offensive vs defensive skills of a player. 
 
@@ -100,9 +100,12 @@ library(spinifex)
 library(plotly)
 library(htmlwidgets)
 set.seed(20)
-aflw_pct <- save_history(aflw_pca$x[,1:4], 
+b <- basis_random(4, 2)
+aflw_pct <- tourr::save_history(aflw_pca$x[,1:4], 
                     tour_path = grand_tour(),
+                    start = b,
                     max_bases = 10)
+# aflw_pct <- aflw_pct[,,2:11]
 aflw_pctour <- ggtour(aflw_pct, aflw_pca$x[,1:4], 
        angle=0.05, 
        basis_label = colnames(aflw_pca$x[,1:4]),
