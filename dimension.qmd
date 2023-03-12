@@ -25,6 +25,11 @@ We'll use the AFLW data as the example. This data has player statistics for all 
 library(tidyverse)
 library(tourr)
 library(mulgar)
+data(aflw)
+scale2 <- function(x, na.rm = FALSE) (x - mean(x, na.rm = na.rm)) / sd(x, na.rm)
+aflw_std <- aflw %>%
+  ungroup() %>%
+  mutate_if(is.numeric, scale2, na.rm=TRUE)
 ```
 
 To look at all of the 30 player statistics in a grand tour use the `animate_xy()` function as follows:
@@ -33,15 +38,15 @@ To look at all of the 30 player statistics in a grand tour use the `animate_xy()
 #| label: aflw-gt
 #| eval: false
 #| code-fold: false
-animate_xy(aflw[,7:35])
+animate_xy(aflw_std[,7:35], half_range=1.5)
 ```
 
 ```{r}
 #| label: aflw-gif
 #| eval: false
-render_gif(aflw[,7:35], 
+render_gif(aflw_std[,7:35], 
            grand_tour(), 
-           display_xy(),
+           display_xy(half_range=1.5),
            gif_file="gifs/aflw_gt.gif",
            frames=500,
            loop=FALSE)
@@ -57,8 +62,8 @@ Below we have the conventional summaries of the PCA, a scree plot showing the re
 
 ```{r}
 #| label: aflw-pca
-aflw_pca <- prcomp(aflw[,7:35], 
-               scale = TRUE, 
+aflw_pca <- prcomp(aflw_std[,7:35], 
+               scale = FALSE, 
                retx=TRUE)
 
 ggscree(aflw_pca)
@@ -111,7 +116,7 @@ htmlwidgets::saveWidget(aflw_pctourgg,
 ```
 
 ```{=html}
-<iframe width="1000" height="800" src="html/aflw_pca.html" title="Animation of AFLW four PCs with interactive labelling. "></iframe>
+<iframe width="750" height="500" src="html/aflw_pca.html" title="Animation of AFLW four PCs with interactive labelling. "></iframe>
 ```
 
 ```{r}
