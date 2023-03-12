@@ -93,7 +93,7 @@ We would continue to interpret each PC by examining large coefficients to help d
 #| code-fold: true
 library(spinifex)
 library(plotly)
-library(htmltools)
+library(htmlwidgets)
 set.seed(20)
 aflw_pct <- save_history(aflw_pca$x[,1:4], 
                     tour_path = grand_tour(),
@@ -103,9 +103,11 @@ aflw_pctour <- ggtour(aflw_pct, aflw_pca$x[,1:4],
        basis_label = colnames(aflw_pca$x[,1:4]),
        data_label=paste0(aflw$surname, aflw$given_name)) +
   proto_default()
-animate_plotly(aflw_pctour)
-save_html(animate_plotly(aflw_pctour),
-          file="html/aflw_pca.html")
+aflw_pctourgg <- animate_plotly(aflw_pctour,
+                                width=700, height=450)
+htmlwidgets::saveWidget(aflw_pctourgg,
+          file="html/aflw_pca.html",
+          selfcontained = TRUE)
 ```
 
 ```{=html}
@@ -126,6 +128,13 @@ save_html(animate_plotly(aflw_pctour),
 # animate_xy(aflw_pca$x[,1:5])
 ```
 
+Follow with 
+
+- an explanation of first view PC1 v PC2 
+- then as PC3 is introduced, the three axes (generally good, offensive vs defensive?)
+- unusual players
+- why not show the original variables (too many)
+- using a sequence of still plots
 
 
 ```{=html}
