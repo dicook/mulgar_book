@@ -33,13 +33,13 @@ To look at all of the 30 player statistics in a grand tour use the `animate_xy()
 #| label: aflw-gt
 #| eval: false
 #| code-fold: false
-animate_xy(aflw[,7:36])
+animate_xy(aflw[,7:35])
 ```
 
 ```{r}
 #| label: aflw-gif
 #| eval: false
-render_gif(aflw[,7:36], 
+render_gif(aflw[,7:35], 
            grand_tour(), 
            display_xy(),
            gif_file="gifs/aflw_gt.gif",
@@ -57,27 +57,75 @@ Below we have the conventional summaries of the PCA, a scree plot showing the re
 
 ```{r}
 #| label: aflw-pca
-aflw_pca <- prcomp(aflw[,7:36], 
+aflw_pca <- prcomp(aflw[,7:35], 
                scale = TRUE, 
                retx=TRUE)
 
 ggscree(aflw_pca)
 ```
 
-From the scree plot, we see a sharp drop from one to two, two to three and then smaller drops. After 5 PCs the variance gradually, gradually decays. Although, 2-3 PCs might be adequate, we will choose 5 PCs to examine more closely. This explains `r round(summary(aflw_pca)$importance[3,5]*100,1)`% of the variance.
+From the scree plot, we see a sharp drop from one to two, two to three and then smaller drops. After four PCs the variance gradually, gradually decays. We will choose four PCs to examine more closely. This explains `r round(summary(aflw_pca)$importance[3,4]*100,1)`% of the variance.
 
 ```{r}
 #| label: aflw-pcs
 library(gt)
-aflw_pca$rotation[,1:5] %>%
+aflw_pca$rotation[,1:4] %>%
   as_tibble(rownames="Variable") %>% 
   arrange(desc(PC1), desc(PC2), desc(PC3)) %>%
   gt() %>%
-  fmt_number(columns = c(PC1, PC2, PC3, PC4, PC5),
+  fmt_number(columns = c(PC1, PC2, PC3, PC4),
              decimals = 2)
 ```
 
-When there are as many variables as this, it can be hard to digest the combinations of variables most contributing to each PC. Rearranging the table by sorting on a selected PC can help. This table has been sorted according to the PC1 coefficients.
+When there are as many variables as this, it can be hard to digest the combinations of variables most contributing to each PC. Rearranging the table by sorting on a selected PC can help. This table has been sorted according to the PC 1 coefficients. 
+
+PC 1 is primarily composed of `disposals`, `possessions`, `kicks`, `metres`, `uncontested`, `contested`, .... Actually almost all variables positively contribute, albeit in different amounts! It is quite common in PCA for the first PC to be a combination of all variables, although it might commonly be a closer to equal contribution, and it tells us that there is one main direction of variation in the data. For PC 1 in the AFLW data, PCA is telling us that the primary variation is through a combination of skills, and this maps to basic football playing skills, where some skills are more worthy. 
+
+Thus the second PC might be the more interesting. PC 2 is primarily a combination of `shots`, `goals`, `marks_in50`, `accuracy`, and `behinds` contrasted against `rebounds_in50` and `intercepts`. The negative coefficients are primary offensive skills and the positive coefficients are defensive skills. This PC is reasonable measure of the offensive vs defensive skills of a player. 
+
+We would continue to interpret each PC by examining large coefficients to help decide how many PCs are a suitable summary of the information in the data. Briefly, PC 3 is a measure of worth of the player because `time_pct` has a large coefficient, so players that are on the field longer will contribute strongly to this new variable. It also has large (an opposite) contributions from `clearances`, `tackles`, `contested_marks`. PC 4 appears to be related to aggressive play with `clangers`, `turnovers`, `bounces` and `frees_against` featuring. So all four PCs have useful information. (Note, if we had continued to examine large coefficients on PC 5 we would find that all variables already have had reasonably large coefficients on PC 1-4, which supports restricting attention to the first four.)
+
+<!-- We might then use a PCA tour to examine the reduced dimension data, with the original variable axes. This is high-dimensional version of a 2D biplot, as shown below. -->
+
+```{r}
+#| label: aflw-plotly
+#| eval: false
+#| code-fold: true
+library(spinifex)
+library(plotly)
+library(htmltools)
+set.seed(20)
+aflw_pct <- save_history(aflw_pca$x[,1:4], 
+                    tour_path = grand_tour(),
+                    max_bases = 10)
+aflw_pctour <- ggtour(aflw_pct, aflw_pca$x[,1:4], 
+       angle=0.05, 
+       basis_label = colnames(aflw_pca$x[,1:4]),
+       data_label=paste0(aflw$surname, aflw$given_name)) +
+  proto_default()
+animate_plotly(aflw_pctour)
+save_html(animate_plotly(aflw_pctour),
+          file="html/aflw_pca.html")
+```
+
+```{=html}
+<iframe width="780" height="500" src="html/aflw_pca.html" title="Animation of AFLW four PCs with interactive labelling. "></iframe>
+```
+
+```{r}
+#| label: aflw-pcatour
+#| eval: false
+#| echo: false
+#| code-fold: false
+# animate_pca(aflw_pca$x[,1:5], 
+#             pc_coefs = aflw_pca$rotation[,1:5],
+#             col = "orange",
+#             pch = 16, 
+#             cex = 0.5,
+#             half_range=1.5)
+# animate_xy(aflw_pca$x[,1:5])
+```
+
 
 
 ```{=html}
