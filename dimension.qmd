@@ -22,7 +22,8 @@ We'll use the AFLW data as the example. This data has player statistics for all 
 #| error: FALSE
 #| warning: FALSE
 #| code-fold: false
-library(tidyverse)
+library(dplyr)
+library(ggplot2)
 library(tourr)
 library(mulgar)
 data(aflw)
@@ -71,7 +72,7 @@ aflw_pca <- prcomp(aflw_std[,7:35],
 ggscree(aflw_pca)
 ```
 
-From the scree plot, we see a sharp drop from one to two, two to three and then smaller drops. After four PCs the variance gradually, gradually decays. We will choose four PCs to examine more closely. This explains `r round(summary(aflw_pca)$importance[3,4]*100,1)`% of the variance.
+From the scree plot, we see a sharp drop from one to two, two to three and then smaller drops. After four PCs the variance drops again at six PCs and then gradually decays. We will choose four PCs to examine more closely. This explains `r round(summary(aflw_pca)$importance[3,4]*100,1)`% of the variance.
 
 ```{r}
 #| label: aflw-pcs
@@ -94,11 +95,12 @@ We would continue to interpret each PC by examining large coefficients to help d
 
 <!-- We might then use a PCA tour to examine the reduced dimension data, with the original variable axes. This is high-dimensional version of a 2D biplot, as shown below. -->
 
+Ideally, when we tour the four PCs, we'd like to be able to stop and identify players. This involves creating a pre-computed animation, with additional mouse-over. This is only feasible with a small number of observations, like the AFLW data, because all of the animation frames are constructed in a single object and passed to `plotly`.
+
 ```{r}
 #| label: aflw-plotly
 #| eval: false
 #| code-fold: true
-library(spinifex)
 library(plotly)
 library(htmlwidgets)
 set.seed(20)
@@ -106,16 +108,44 @@ b <- basis_random(4, 2)
 aflw_pct <- tourr::save_history(aflw_pca$x[,1:4], 
                     tour_path = grand_tour(),
                     start = b,
-                    max_bases = 10)
-# aflw_pct <- aflw_pct[,,2:11]
-aflw_pctour <- ggtour(aflw_pct, aflw_pca$x[,1:4], 
-       angle=0.05, 
-       basis_label = colnames(aflw_pca$x[,1:4]),
-       data_label=paste0(aflw$surname, aflw$given_name)) +
-  proto_default()
-aflw_pctourgg <- animate_plotly(aflw_pctour,
-                                width=700, height=450)
-htmlwidgets::saveWidget(aflw_pctourgg,
+                    max_bases = 5)
+aflw_pcti <- interpolate(aflw_pct, 0.1)
+aflw_anim <- render_anim(aflw_pca$x[,1:4],
+                         frames=aflw_pcti, 
+             obs_labels=paste0(aflw$surname,
+                               aflw$given_name))
+
+aflw_gp <- ggplot() +
+     geom_path(data=aflw_anim$circle, 
+               aes(x=c1, y=c2,
+                   frame=frame)) +
+     geom_segment(data=aflw_anim$axes, 
+                  aes(x=x1, y=y1, 
+                      xend=x2, yend=y2, 
+                      frame=frame)) +
+     geom_text(data=aflw_anim$axes, 
+               aes(x=x2, y=y2, 
+                   frame=frame, 
+                   label=axis_labels)) +
+     geom_point(data=aflw_anim$frames, 
+                aes(x=P1, y=P2, 
+                    frame=frame, 
+                    label=obs_labels)) +
+     xlim(-1,1) + ylim(-1,1) +
+     coord_equal() +
+     theme_bw() +
+     theme(axis.text=element_blank(),
+         axis.title=element_blank(),
+         axis.ticks=element_blank(),
+         panel.grid=element_blank())
+aflw_pctour <- ggplotly(aflw_gp,
+                        width=500,
+                        height=550) %>%
+       animation_button(label="Go") %>%
+       animation_slider(len=0.8, x=0.5,
+                        xanchor="center")
+
+htmlwidgets::saveWidget(aflw_pctour,
           file="html/aflw_pca.html",
           selfcontained = TRUE)
 ```
