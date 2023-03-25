@@ -27,10 +27,10 @@ library(ggplot2)
 library(tourr)
 library(mulgar)
 data(aflw)
-scale2 <- function(x, na.rm = FALSE) (x - mean(x, na.rm = na.rm)) / sd(x, na.rm)
 aflw_std <- aflw %>%
-  ungroup() %>%
-  mutate_if(is.numeric, scale2, na.rm=TRUE)
+  mutate_if(is.numeric, function(x) (x-
+      mean(x, na.rm=TRUE))/
+      sd(x, na.rm=TRUE))
 ```
 
 To look at all of the 30 player statistics in a grand tour use the `animate_xy()` function as follows:
@@ -213,6 +213,8 @@ The branch pattern is an interesting one, because it tells us there is some comb
 PCA is useful for getting a sense of the variation in a high-dimensional data set. Interpreting the principal components is often useful, but it can be discombobulating. For the AFLW data it would be good to think about it as a guide to the main directions of variation and to follow with a more direct engineering of variables into interesting player characteristics. For example, calculate offensive skill as an equal combination of goals, accuracy,  shots, behinds. A set of new variables specifically computed to measure particular skills would make explaining an analysis easier.   
 
 ### Model in the data space
+
+
 
 ## Non-linear dimension reduction
 
