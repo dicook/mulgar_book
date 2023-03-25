@@ -62,9 +62,9 @@ The data is surprisingly good! There is a small amount of skewness, and there ar
 Below we have the conventional summary of the PCA, a scree plot showing the reduction in variance to be explained when each additional PC is considered. It is also conventional to look at a table summarising the proportions of variance explained by PCs, but with 30 variables it is easier to make some decision on the number of PCs needed based on the scree plot.
 
 ```{r}
-#| label: aflw-pca
-#| fig-caption: "Scree plot showing decay in variance of PCs"
-#| alt-text: Scree plot showing decay in variance of PCs
+#| label: fig-aflw-pca
+#| fig-cap: "Scree plot showing decay in variance of PCs."
+#| alt-text: "Scree plot showing variance vertically against PC number horizontally. Variance drops from close to 10 for PC 1 to about 1.2 for PC 4 then slowly decays through to PC 30."
 aflw_pca <- prcomp(aflw_std[,7:35], 
                scale = FALSE, 
                retx=TRUE)
@@ -72,10 +72,11 @@ aflw_pca <- prcomp(aflw_std[,7:35],
 ggscree(aflw_pca)
 ```
 
-From the scree plot, we see a sharp drop from one to two, two to three and then smaller drops. After four PCs the variance drops again at six PCs and then gradually decays. We will choose four PCs to examine more closely. This explains `r round(summary(aflw_pca)$importance[3,4]*100,1)`% of the variance.
+From the scree plot in @fig-aflw-pca, we see a sharp drop from one to two, two to three and then smaller drops. After four PCs the variance drops again at six PCs and then gradually decays. We will choose four PCs to examine more closely. This explains `r round(summary(aflw_pca)$importance[3,4]*100,1)`% of the variance.
 
 ```{r}
-#| label: aflw-pcs
+#| label: tbl-aflw-pcs
+#| tbl-cap: "Coefficients for the first four PCs."
 library(gt)
 aflw_pca$rotation[,1:4] %>%
   as_tibble(rownames="Variable") %>% 
@@ -85,7 +86,7 @@ aflw_pca$rotation[,1:4] %>%
              decimals = 2)
 ```
 
-When there are as many variables as this, it can be hard to digest the combinations of variables most contributing to each PC. Rearranging the table by sorting on a selected PC can help. This table has been sorted according to the PC 1 coefficients.
+When there are as many variables as this, it can be hard to digest the combinations of variables most contributing to each PC. Rearranging the table by sorting on a selected PC can help. @tbl-aflw-pcs has been sorted according to the PC 1 coefficients.
 
 PC 1 is primarily composed of `disposals`, `possessions`, `kicks`, `metres`, `uncontested`, `contested`, .... Actually almost all variables positively contribute, albeit in different amounts! It is quite common in PCA for the first PC to be a combination of all variables, although it might commonly be a closer to equal contribution, and it tells us that there is one main direction of variation in the data. For PC 1 in the AFLW data, PCA is telling us that the primary variation is through a combination of skills, and this maps to basic football playing skills, where some skills (e.g. disposals, possessions, kicks, ...) are more important.
 
@@ -95,7 +96,7 @@ We would continue to interpret each PC by examining large coefficients to help d
 
 <!-- We might then use a PCA tour to examine the reduced dimension data, with the original variable axes. This is high-dimensional version of a 2D biplot, as shown below. -->
 
-Ideally, when we tour the four PCs, we'd like to be able to stop and identify players. This involves creating a pre-computed animation, with additional mouse-over. This is only feasible with a small number of observations, like the AFLW data, because all of the animation frames are constructed in a single object and passed to `plotly`.
+Ideally, when we tour the four PCs, we'd like to be able to stop and identify players. This involves creating a pre-computed animation, with additional mouse-over. This is only feasible with a small number of observations, like the AFLW data, because all of the animation frames are constructed in a single object and passed to `plotly`. This object gets large very quickly!
 
 ```{r}
 #| label: aflw-plotly
