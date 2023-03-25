@@ -85,11 +85,11 @@ aflw_pca$rotation[,1:4] %>%
              decimals = 2)
 ```
 
-When there are as many variables as this, it can be hard to digest the combinations of variables most contributing to each PC. Rearranging the table by sorting on a selected PC can help. This table has been sorted according to the PC 1 coefficients. 
+When there are as many variables as this, it can be hard to digest the combinations of variables most contributing to each PC. Rearranging the table by sorting on a selected PC can help. This table has been sorted according to the PC 1 coefficients.
 
-PC 1 is primarily composed of `disposals`, `possessions`, `kicks`, `metres`, `uncontested`, `contested`, .... Actually almost all variables positively contribute, albeit in different amounts! It is quite common in PCA for the first PC to be a combination of all variables, although it might commonly be a closer to equal contribution, and it tells us that there is one main direction of variation in the data. For PC 1 in the AFLW data, PCA is telling us that the primary variation is through a combination of skills, and this maps to basic football playing skills, where some skills (e.g. disposals, possessions, kicks, ...) are more important. 
+PC 1 is primarily composed of `disposals`, `possessions`, `kicks`, `metres`, `uncontested`, `contested`, .... Actually almost all variables positively contribute, albeit in different amounts! It is quite common in PCA for the first PC to be a combination of all variables, although it might commonly be a closer to equal contribution, and it tells us that there is one main direction of variation in the data. For PC 1 in the AFLW data, PCA is telling us that the primary variation is through a combination of skills, and this maps to basic football playing skills, where some skills (e.g. disposals, possessions, kicks, ...) are more important.
 
-Thus the second PC might be the more interesting. PC 2 is primarily a combination of `shots`, `goals`, `marks_in50`, `accuracy`, and `behinds` contrasted against `rebounds_in50` and `intercepts`. The negative coefficients are primary offensive skills and the positive coefficients are defensive skills. This PC is reasonable measure of the offensive vs defensive skills of a player. 
+Thus the second PC might be the more interesting. PC 2 is primarily a combination of `shots`, `goals`, `marks_in50`, `accuracy`, and `behinds` contrasted against `rebounds_in50` and `intercepts`. The negative coefficients are primary offensive skills and the positive coefficients are defensive skills. This PC is reasonable measure of the offensive vs defensive skills of a player.
 
 We would continue to interpret each PC by examining large coefficients to help decide how many PCs are a suitable summary of the information in the data. Briefly, PC 3 is a measure of worth of the player because `time_pct` has a large coefficient, so players that are on the field longer will contribute strongly to this new variable. It also has large (and opposite) contributions from `clearances`, `tackles`, `contested_marks`. PC 4 appears to be related to aggressive play with `clangers`, `turnovers`, `bounces` and `frees_against` featuring. So all four PCs have useful information. (Note, if we had continued to examine large coefficients on PC 5 we would find that all variables already have had reasonably large coefficients on PC 1-4, which supports restricting attention to the first four.)
 
@@ -148,7 +148,8 @@ aflw_pctour <- ggplotly(aflw_gp,
                         height=550) %>%
        animation_button(label="Go") %>%
        animation_slider(len=0.8, x=0.5,
-                        xanchor="center")
+                        xanchor="center") %>%
+       animation_opts(easing="linear", transition = 0)
 
 htmlwidgets::saveWidget(aflw_pctour,
           file="html/aflw_pca.html",
@@ -158,12 +159,14 @@ htmlwidgets::saveWidget(aflw_pctour,
 ```{=html}
 <iframe width="750" height="550" src="html/aflw_pca.html" title="Animation of AFLW four PCs with interactive labelling. "></iframe>
 ```
-
 ```{r}
-#| label: aflw-pcatour
 #| eval: false
 #| echo: false
 #| code-fold: false
+#| label: fig-aflw-pcatour
+#| fig-cap: "Grand tour of the first four PCs."
+#| fig-width: 5
+#| fig-height: 5
 # animate_pca(aflw_pca$x[,1:5], 
 #             pc_coefs = aflw_pca$rotation[,1:5],
 #             col = "orange",
@@ -173,13 +176,16 @@ htmlwidgets::saveWidget(aflw_pctour,
 # animate_xy(aflw_pca$x[,1:5])
 ```
 
-The shape of the four PCs is similar to that of all the variables, bunching of points in the centre with a lot of moderate outliers. 
+The shape of the four PCs is similar to that of all the variables, bunching of points in the centre with a lot of moderate outliers.
 
 ```{r}
-#| label: aflw-pcaplots
+#| label: fig-aflw-pcaplots
 #| eval: true
 #| message: false
 #| warning: false
+#| fig-cap: "Frame 18 replotted so that players can be identified on mouseover."
+#| fig-width: 5
+#| fig-height: 5
 library(plotly)
 load("data/aflw_pct.rda")
 aflw_pcti <- interpolate(aflw_pct, 0.1)
@@ -203,18 +209,15 @@ pg18 <- ggplot() +
 ggplotly(pg18, width=500, height=500)
 ```
 
-For any particular frame, like 18 re-plotted below, we can investigate further. Here there is a branching pattern, where the branch points in the direction of PC 1. Mouseover the players at the tip of this branch and we find players like Alyce Parker, Brittany Bonnici, Dana Hooker, Kiara Bowers. If you look up the bios of these players you'll find they all have generally good player descriptions like "elite disposals", "powerful left foot", "hard-running midfielder", "best and fairest".  
+For any particular frame, like 18 re-plotted in @fig-aflw-pcaplots, we can investigate further. Here there is a branching pattern, where the branch points in the direction of PC 1. Mouseover the players at the tip of this branch and we find players like Alyce Parker, Brittany Bonnici, Dana Hooker, Kiara Bowers. If you look up the bios of these players you'll find they all have generally good player descriptions like "elite disposals", "powerful left foot", "hard-running midfielder", "best and fairest".
 
-In the direction of PC 2, you'll find players like Lauren Ahrens, Stacey Livingstone who are star defenders. Players in this end of PC 1, have high scores on `intercepts` and `rebounds_in50`. 
+In the direction of PC 2, you'll find players like Lauren Ahrens, Stacey Livingstone who are star defenders. Players in this end of PC 1, have high scores on `intercepts` and `rebounds_in50`.
 
-Another interesting frame for inspecting PC 2 is 59. PC 2 at one end has players with high goal scoring skills, and the other good defending skills. So mousing over the other end of PC 2 finds players like Gemma Houghton and Katie Brennan who are known for their goal scoring. 
-The branch pattern is an interesting one, because it tells us there is some combination of skills that are lacking among all players, primarily this appears to be there some distinction between defenders skills and general playing skills. It's not as simple as this because the branching is only visible when PC 1 and PC 2 are examined with PC 3. 
+Another interesting frame for inspecting PC 2 is 59. PC 2 at one end has players with high goal scoring skills, and the other good defending skills. So mousing over the other end of PC 2 finds players like Gemma Houghton and Katie Brennan who are known for their goal scoring. The branch pattern is an interesting one, because it tells us there is some combination of skills that are lacking among all players, primarily this appears to be there some distinction between defenders skills and general playing skills. It's not as simple as this because the branching is only visible when PC 1 and PC 2 are examined with PC 3.
 
-PCA is useful for getting a sense of the variation in a high-dimensional data set. Interpreting the principal components is often useful, but it can be discombobulating. For the AFLW data it would be good to think about it as a guide to the main directions of variation and to follow with a more direct engineering of variables into interesting player characteristics. For example, calculate offensive skill as an equal combination of goals, accuracy,  shots, behinds. A set of new variables specifically computed to measure particular skills would make explaining an analysis easier.   
+PCA is useful for getting a sense of the variation in a high-dimensional data set. Interpreting the principal components is often useful, but it can be discombobulating. For the AFLW data it would be good to think about it as a guide to the main directions of variation and to follow with a more direct engineering of variables into interesting player characteristics. For example, calculate offensive skill as an equal combination of goals, accuracy, shots, behinds. A set of new variables specifically computed to measure particular skills would make explaining an analysis easier.
 
 ### Model in the data space
-
-
 
 ## Non-linear dimension reduction
 
@@ -222,8 +225,8 @@ Might need to use liminal here.
 
 ## Exercises
 
-1. Make a scatterplot matrix of the first four PCs. Is the branch pattern visible in any pair?
-2. Construct five new variables to measure these skills offense, defense, playing time, ball movement, errors. Using the tour, examine the relationship between these variables. Map out how a few players could be characterised based on these directions of skills. 
+1.  Make a scatterplot matrix of the first four PCs. Is the branch pattern visible in any pair?
+2.  Construct five new variables to measure these skills offense, defense, playing time, ball movement, errors. Using the tour, examine the relationship between these variables. Map out how a few players could be characterised based on these directions of skills.
 
 ```{r}
 #| label: aflw-pairs
@@ -235,6 +238,7 @@ library(GGally)
 ggscatmat(aflw_pca$x, columns=1:4)
 ```
 
+```{=html}
 <!--Follow with 
 
 - an explanation of first view PC1 v PC2 
@@ -242,8 +246,7 @@ ggscatmat(aflw_pca$x, columns=1:4)
 - unusual players
 - why not show the original variables (too many)
 - using a sequence of still plots-->
-
-
+```
 ```{=html}
 <!-- Select one country. We are interested in examining the association between the scores. Because the association might be different for each country, PCA should be conducted separately for each country. All the scores are measured in the same units, so for this data we'd recommend computing PCA on the original scale, that is, the variance-covariance matrix.
 
