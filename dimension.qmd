@@ -168,10 +168,6 @@ Animation of AFLW four PCs with interactive labelling.
 #| eval: false
 #| echo: false
 #| code-fold: false
-#| label: fig-aflw-pcatour
-#| fig-cap: "Grand tour of the first four PCs."
-#| fig-width: 5
-#| fig-height: 5
 # animate_pca(aflw_pca$x[,1:5], 
 #             pc_coefs = aflw_pca$rotation[,1:5],
 #             col = "orange",
@@ -211,7 +207,7 @@ pg18 <- ggplot() +
     axis.title=element_blank(),
     axis.ticks=element_blank(),
     panel.grid=element_blank())
-ggplotly(pg18, width=500, height=500)
+ggplotly(pg18, width=650, height=650)
 ```
 
 For any particular frame, like 18 re-plotted in @fig-aflw-pcaplots, we can investigate further. Here there is a branching pattern, where the branch points in the direction of PC 1. Mouseover the players at the tip of this branch and we find players like Alyce Parker, Brittany Bonnici, Dana Hooker, Kiara Bowers. If you look up the bios of these players you'll find they all have generally good player descriptions like "elite disposals", "powerful left foot", "hard-running midfielder", "best and fairest".
@@ -223,6 +219,20 @@ Another interesting frame for inspecting PC 2 is 59. PC 2 at one end has players
 PCA is useful for getting a sense of the variation in a high-dimensional data set. Interpreting the principal components is often useful, but it can be discombobulating. For the AFLW data it would be good to think about it as a guide to the main directions of variation and to follow with a more direct engineering of variables into interesting player characteristics. For example, calculate offensive skill as an equal combination of goals, accuracy, shots, behinds. A set of new variables specifically computed to measure particular skills would make explaining an analysis easier.
 
 ### Model in the data space
+
+```{r}
+#| eval: FALSE
+data(pisa)
+pisa_std <- apply(pisa[,-1], 2, function(x) (x-mean(x))/sd(x))[sample(1:nrow(pisa), 1000),c(1:5, 11:15, 21:25)]
+pisa_pca <- prcomp(pisa_std)
+ggscree(pisa_pca)
+animate_xy(pisa_std, half_range=1)
+
+pisa_model <- pca_model(pisa_pca, s=2)
+
+pisa_all <- rbind(pisa_model$points, pisa_std)
+animate_xy(pisa_all, edges=pisa_model$edges, edges.col="orange")
+```
 
 ## Non-linear dimension reduction
 
