@@ -1,0 +1,316 @@
+## Principal component analysis (PCA)
+
+This is a statistical technique used to reduce the dimensionality of a large dataset while retaining as much information as possible. PCA identifies the underlying structure of the data by finding a new set of variables, known as principal components (PCs), that are linear combinations of the original variables. The PCs can be used as a new set of variables to represent the data in a lower-dimensional space.
+
+PCA is conducted by finding the directions where the projected data has the highest variance, that is, are most spread. Because the goal is to find a smaller number of variables that contain the similar information, the amount of variance explained by the selected PCs is examined.
+
+PCA summarises linear relationships, and the dimension reduction is achieved by using combinations of variables that are highly correlated. However, high correlation can also occur when there are outliers, or clustering. PCA is commonly used to detect these patterns also. PCA also is not very effective when the distribution of the variables is highly skewed, so it can be helpful to transform variables before computing the PCA.
+
+We would start by examining the data using a grand tour. The goal is to check whether there might be potential issues for PCA, such as skewness, outliers or clustering, or even non-linear dependencies.
+
+We'll use the AFLW data as the example. This data has player statistics for all the matches in the 2021 season. We would be interested to know which variables contain similar information, and thus might be combined into single variables. We would expect that 30 statistics possibly group into a few small sets, such as offensive and defensive skills. We might also expect that some of the statistics are skewed, most players have low values and just a handful of players are stellar. It is also possible that there are some extreme values. These are interesting features, but they will distract from the main purpose of grouping the statistics. Thus the tour is used to check for potential problems with the data prior to conducting PCA.
+
+```{r}
+#| label: pca-libraries
+#| eval: TRUE
+#| echo: TRUE
+#| message: FALSE
+#| error: FALSE
+#| warning: FALSE
+#| code-fold: false
+library(dplyr)
+library(ggplot2)
+library(tourr)
+library(mulgar)
+data(aflw)
+aflw_std <- aflw %>%
+  mutate_if(is.numeric, function(x) (x-
+      mean(x, na.rm=TRUE))/
+      sd(x, na.rm=TRUE))
+```
+
+To look at all of the 30 player statistics in a grand tour use the `animate_xy()` function as follows:
+
+```{r}
+#| label: aflw-gt
+#| eval: false
+#| code-fold: false
+animate_xy(aflw_std[,7:35], half_range=0.9)
+```
+
+```{r}
+#| label: aflw-gif
+#| eval: false
+render_gif(aflw_std[,7:35], 
+           grand_tour(), 
+           display_xy(half_range=0.9),
+           gif_file="gifs/aflw_gt.gif",
+           frames=500,
+           loop=FALSE)
+```
+
+The gif here is the saved version of the grand tour, made using the `render_gif()` function.
+
+![Grand tour of the AFLW player statistics](gifs/aflw_gt.gif)
+
+The data is surprisingly good! There is a small amount of skewness, and there are no major outliers. Skewness indicates that most players have reasonably similar skills (bunching of points), except for some key players (moderate outliers). The skewness could be reduced by applying a log or square root transformation to some variables prior to running the PCA. However, we elect not to do this because there are no major issues that would affect PCA. The moderate outliers are players that are interesting and we'd like to be able to explore these more with the analysis.
+
+Below we have the conventional summary of the PCA, a scree plot showing the reduction in variance to be explained when each additional PC is considered. It is also conventional to look at a table summarising the proportions of variance explained by PCs, but with 30 variables it is easier to make some decision on the number of PCs needed based on the scree plot.
+
+```{r}
+#| label: fig-aflw-pca
+#| fig-cap: "Scree plot showing decay in variance of PCs."
+#| alt-text: "Scree plot showing variance vertically against PC number horizontally. Variance drops from close to 10 for PC 1 to about 1.2 for PC 4 then slowly decays through to PC 30."
+aflw_pca <- prcomp(aflw_std[,7:35], 
+               scale = FALSE, 
+               retx=TRUE)
+
+ggscree(aflw_pca)
+```
+
+From the scree plot in @fig-aflw-pca, we see a sharp drop from one to two, two to three and then smaller drops. After four PCs the variance drops again at six PCs and then gradually decays. We will choose four PCs to examine more closely. This explains `r round(summary(aflw_pca)$importance[3,4]*100,1)`% of the variance.
+
+```{r}
+#| label: tbl-aflw-pcs
+#| tbl-cap: "Coefficients for the first four PCs."
+library(gt)
+aflw_pca$rotation[,1:4] %>%
+  as_tibble(rownames="Variable") %>% 
+  arrange(desc(PC1), desc(PC2), desc(PC3)) %>%
+  gt() %>%
+  fmt_number(columns = c(PC1, PC2, PC3, PC4),
+             decimals = 2)
+```
+
+When there are as many variables as this, it can be hard to digest the combinations of variables most contributing to each PC. Rearranging the table by sorting on a selected PC can help. @tbl-aflw-pcs has been sorted according to the PC 1 coefficients.
+
+PC 1 is primarily composed of `disposals`, `possessions`, `kicks`, `metres`, `uncontested`, `contested`, .... Actually almost all variables positively contribute, albeit in different amounts! It is quite common in PCA for the first PC to be a combination of all variables, although it might commonly be a closer to equal contribution, and it tells us that there is one main direction of variation in the data. For PC 1 in the AFLW data, PCA is telling us that the primary variation is through a combination of skills, and this maps to basic football playing skills, where some skills (e.g. disposals, possessions, kicks, ...) are more important.
+
+Thus the second PC might be the more interesting. PC 2 is primarily a combination of `shots`, `goals`, `marks_in50`, `accuracy`, and `behinds` contrasted against `rebounds_in50` and `intercepts`. The negative coefficients are primary offensive skills and the positive coefficients are defensive skills. This PC is reasonable measure of the offensive vs defensive skills of a player.
+
+We would continue to interpret each PC by examining large coefficients to help decide how many PCs are a suitable summary of the information in the data. Briefly, PC 3 is a measure of worth of the player because `time_pct` has a large coefficient, so players that are on the field longer will contribute strongly to this new variable. It also has large (and opposite) contributions from `clearances`, `tackles`, `contested_marks`. PC 4 appears to be related to aggressive play with `clangers`, `turnovers`, `bounces` and `frees_against` featuring. So all four PCs have useful information. (Note, if we had continued to examine large coefficients on PC 5 we would find that all variables already have had reasonably large coefficients on PC 1-4, which supports restricting attention to the first four.)
+
+<!-- We might then use a PCA tour to examine the reduced dimension data, with the original variable axes. This is high-dimensional version of a 2D biplot, as shown below. -->
+
+Ideally, when we tour the four PCs, we'd like to be able to stop and identify players. This involves creating a pre-computed animation, with additional mouse-over. This is only feasible with a small number of observations, like the AFLW data, because all of the animation frames are constructed in a single object and passed to `plotly`. This object gets large very quickly!
+
+```{r}
+#| label: aflw-plotly
+#| eval: false
+#| code-fold: true
+library(plotly)
+library(htmlwidgets)
+set.seed(20)
+b <- basis_random(4, 2)
+aflw_pct <- tourr::save_history(aflw_pca$x[,1:4], 
+                    tour_path = grand_tour(),
+                    start = b,
+                    max_bases = 5)
+# To reconstruct projected data plots, later
+save(aflw_pct, file="data/aflw_pct.rda") 
+aflw_pcti <- interpolate(aflw_pct, 0.1)
+aflw_anim <- render_anim(aflw_pca$x[,1:4],
+                         frames=aflw_pcti, 
+             obs_labels=paste0(aflw$surname,
+                               aflw$given_name))
+
+aflw_gp <- ggplot() +
+     geom_path(data=aflw_anim$circle, 
+               aes(x=c1, y=c2,
+                   frame=frame), linewidth=0.1) +
+     geom_segment(data=aflw_anim$axes, 
+                  aes(x=x1, y=y1, 
+                      xend=x2, yend=y2, 
+                      frame=frame), 
+                  linewidth=0.1) +
+     geom_text(data=aflw_anim$axes, 
+               aes(x=x2, y=y2, 
+                   frame=frame, 
+                   label=axis_labels), 
+               size=5) +
+     geom_point(data=aflw_anim$frames, 
+                aes(x=P1, y=P2, 
+                    frame=frame, 
+                    label=obs_labels), 
+                alpha=0.8) +
+     xlim(-1,1) + ylim(-1,1) +
+     coord_equal() +
+     theme_bw() +
+     theme(axis.text=element_blank(),
+         axis.title=element_blank(),
+         axis.ticks=element_blank(),
+         panel.grid=element_blank())
+aflw_pctour <- ggplotly(aflw_gp,
+                        width=500,
+                        height=550) %>%
+       animation_button(label="Go") %>%
+       animation_slider(len=0.8, x=0.5,
+                        xanchor="center") %>%
+       animation_opts(easing="linear", transition = 0)
+
+htmlwidgets::saveWidget(aflw_pctour,
+          file="html/aflw_pca.html",
+          selfcontained = TRUE)
+```
+
+::: {#fig-aflw-pcatour}
+```{=html}
+<iframe width="750" height="550" src="html/aflw_pca.html" title="Animation of AFLW four PCs with interactive labelling. "></iframe>
+```
+Animation of AFLW four PCs with interactive labelling.
+:::
+
+```{r}
+#| eval: false
+#| echo: false
+#| code-fold: false
+# animate_pca(aflw_pca$x[,1:5], 
+#             pc_coefs = aflw_pca$rotation[,1:5],
+#             col = "orange",
+#             pch = 16, 
+#             cex = 0.5,
+#             half_range=1.5)
+# animate_xy(aflw_pca$x[,1:5])
+```
+
+From @fig-aflw-pcatour the shape of the four PCs is similar to that of all the variables, bunching of points in the centre with a lot of moderate outliers.
+
+```{r}
+#| label: fig-aflw-pcaplots
+#| eval: true
+#| message: false
+#| warning: false
+#| fig-cap: "Frame 18 replotted so that players can be identified on mouseover."
+#| fig-width: 5
+#| fig-height: 5
+library(plotly)
+load("data/aflw_pct.rda")
+aflw_pcti <- interpolate(aflw_pct, 0.1)
+f18 <- matrix(aflw_pcti[,,18], ncol=2)
+p18 <- render_proj(aflw_pca$x[,1:4], f18, 
+                   obs_labels=paste0(aflw$surname,
+                               aflw$given_name))
+pg18 <- ggplot() +
+  geom_path(data=p18$circle, aes(x=c1, y=c2)) +
+  geom_segment(data=p18$axes, aes(x=x1, y=y1, xend=x2, yend=y2)) +
+  geom_text(data=p18$axes, aes(x=x2, y=y2, label=rownames(p18$axes))) +
+  geom_point(data=p18$data_prj, aes(x=P1, y=P2, label=obs_labels)) +
+  xlim(-1,1) + ylim(-1, 1) +
+  ggtitle("Frame 18") +
+  theme_bw() +
+  theme(aspect.ratio=1,
+    axis.text=element_blank(),
+    axis.title=element_blank(),
+    axis.ticks=element_blank(),
+    panel.grid=element_blank())
+ggplotly(pg18, width=650, height=650)
+```
+
+For any particular frame, like 18 re-plotted in @fig-aflw-pcaplots, we can investigate further. Here there is a branching pattern, where the branch points in the direction of PC 1. Mouseover the players at the tip of this branch and we find players like Alyce Parker, Brittany Bonnici, Dana Hooker, Kiara Bowers. If you look up the bios of these players you'll find they all have generally good player descriptions like "elite disposals", "powerful left foot", "hard-running midfielder", "best and fairest".
+
+In the direction of PC 2, you'll find players like Lauren Ahrens, Stacey Livingstone who are star defenders. Players in this end of PC 1, have high scores on `intercepts` and `rebounds_in50`.
+
+Another interesting frame for inspecting PC 2 is 59. PC 2 at one end has players with high goal scoring skills, and the other good defending skills. So mousing over the other end of PC 2 finds players like Gemma Houghton and Katie Brennan who are known for their goal scoring. The branch pattern is an interesting one, because it tells us there is some combination of skills that are lacking among all players, primarily this appears to be there some distinction between defenders skills and general playing skills. It's not as simple as this because the branching is only visible when PC 1 and PC 2 are examined with PC 3.
+
+PCA is useful for getting a sense of the variation in a high-dimensional data set. Interpreting the principal components is often useful, but it can be discombobulating. For the AFLW data it would be good to think about it as a guide to the main directions of variation and to follow with a more direct engineering of variables into interesting player characteristics. For example, calculate offensive skill as an equal combination of goals, accuracy, shots, behinds. A set of new variables specifically computed to measure particular skills would make explaining an analysis easier.
+
+### Model in the data space
+
+```{r}
+#| eval: FALSE
+data(pisa)
+pisa_std <- apply(pisa[,-1], 2, function(x) (x-mean(x))/sd(x))[sample(1:nrow(pisa), 1000),c(1:5, 11:15, 21:25)]
+pisa_pca <- prcomp(pisa_std)
+ggscree(pisa_pca)
+animate_xy(pisa_std, half_range=1)
+
+pisa_model <- pca_model(pisa_pca, s=2)
+
+pisa_all <- rbind(pisa_model$points, pisa_std)
+animate_xy(pisa_all, edges=pisa_model$edges, edges.col="orange")
+```
+
+## Exercises
+
+1.  Make a scatterplot matrix of the first four PCs. Is the branch pattern visible in any pair?
+2.  Construct five new variables to measure these skills offense, defense, playing time, ball movement, errors. Using the tour, examine the relationship between these variables. Map out how a few players could be characterised based on these directions of skills.
+
+```{r}
+#| label: aflw-pairs
+#| eval: false
+#| echo: false
+#| message: false
+#| warning: false
+library(GGally)
+ggscatmat(aflw_pca$x, columns=1:4)
+```
+
+```{=html}
+<!--Follow with 
+
+- an explanation of first view PC1 v PC2 
+- then as PC3 is introduced, the three axes (generally good, offensive vs defensive?)
+- unusual players
+- why not show the original variables (too many)
+- using a sequence of still plots-->
+```
+```{=html}
+<!-- Select one country. We are interested in examining the association between the scores. Because the association might be different for each country, PCA should be conducted separately for each country. All the scores are measured in the same units, so for this data we'd recommend computing PCA on the original scale, that is, the variance-covariance matrix.
+
+Plan:
+
+-   show data in a tour
+-   compute PCs
+-   explore proportion of variance
+-   examine loadings
+-   tour on top few PCs, using PCA tour
+
+### Take a look at the raw data
+
+There are 30 variables here. 30D space is huge so generally this is too many variables to watch in a tour. Here the structure is very simple so its easy to see. Trying to display the axes is a different matter, for most directions there is a small contribution from many of the 30 variables, resulting is small axis lines but over-crowded labels. -->
+```
+```{r}
+#| eval: FALSE
+#| echo: FALSE
+data(pisa)
+pisa_oz <- pisa %>% filter(CNT == "AUS")
+```
+
+```{r eval=FALSE}
+#| eval: FALSE
+#| echo: FALSE
+set.seed(44)
+pisa_oz_500 <- pisa_oz[sample(1:nrow(pisa_oz), 500),-1]
+# Run the tour in real time
+animate_xy(pisa_oz_500 , 
+           axes="bottomleft", half_range = 1.5)
+# Save a tour path, and select a few images to show
+pisa_t1 <- interpolate(save_history(pisa_oz_500, max = 20))
+pisa_tbl1 <- convert_proj_tibble(pisa_t1)
+# Try animation.hook = "gifski"
+```
+
+```{r eval=FALSE}
+#| eval: FALSE
+#| echo: FALSE
+# Show a set of 10 projections
+indx <- seq(1, 101, 10)
+d <- pisa_tbl1 %*% 
+  dplyr::filter(frame %in% indx)
+# Ok, stuck here - not filtering, and then have to work ou
+# how to transform to make data and plots for a selection # of frames
+```
+
+```{r}
+#| eval: FALSE
+#| echo: FALSE
+PISA_pca <- prcomp(pisa[,-1], scale = FALSE)
+screeplot(PISA_pca, type="l")
+```
+
+```{r eval=FALSE}
+#| eval: FALSE
+#| echo: FALSE
+options(digits=2)
+summary(PISA_pca) 
+```
