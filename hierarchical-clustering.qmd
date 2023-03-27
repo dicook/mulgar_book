@@ -14,7 +14,7 @@ uses the maximum interpoint distance, and average linkage uses the average of th
 #| eval: true
 #| message: false
 #| warning: false
-#| fig-cap: "Hierarchical clustering on simulated data: (left) data, (middle) dendrogram, (right) dendrogram on the data."
+#| fig-cap: "Hierarchical clustering on simulated data: (left) data, (middle) dendrogram, (right) dendrogram on the data. Nodes of the dendrogram indicated by `+` when it is drawn on the data."
 #| fig-width: 9
 #| fig-height: 3
 library(ggplot2)
@@ -35,15 +35,15 @@ ph <- ggdendrogram(cl_hw, labels = FALSE)
 cl_hfly <- hierfly(simple_clusters, cl_hw, scale=FALSE)
 
 pdh <- ggplot() +
+  geom_segment(data=cl_hfly$segments, 
+                aes(x=x, xend=xend,
+                    y=y, yend=yend)) +
   geom_point(data=cl_hfly$data, 
              aes(x=x1, y=x2,
                  shape=factor(node),
                  colour=factor(node),
                  size=1-node)) +
-  geom_segment(data=cl_hfly$segments, 
-                aes(x=x, xend=xend,
-                    y=y, yend=yend)) +
-  scale_shape_manual(values = c(16, 1)) +
+  scale_shape_manual(values = c(16, 3)) +
   scale_colour_manual(values = c("orange", "black")) +
   scale_size(limits=c(0,17)) +
   theme(aspect.ratio=1, legend.position="none")
@@ -52,6 +52,7 @@ library(patchwork)
 pd + ph + pdh + plot_layout(ncol=3)
 ```
 
+@fig-hc-sim illustrates the hierarchical clustering approach, and the dendrogram representation of the results. 
 
 --THIS STUFF IS THE OLD MATERIAL--
 
