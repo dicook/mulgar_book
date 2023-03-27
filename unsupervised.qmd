@@ -1,3 +1,330 @@
 # Unsupervised learning
 
-This chapter will methods for visualising data and models when there is **no** response variable.
+Unsupervised classification, or cluster analysis, organizes observations into similar groups. Cluster analysis is a commonly used, appealing, and conceptually intuitive statistical method. Some of its uses include market segmentation, where customers are grouped into clusters with similar attributes for targeted marketing; gene expression analysis, where genes with similar expression patterns are grouped together; and the creation of taxonomies for animals, insects, or plants. Clustering can be used as a way of reducing a massive amount of data because observations within a cluster can be summarized by its centre. Also, clustering effectively subsets the data thus simplifying analysis because observations in each cluster can be analyzed separately.  
+
+Organizing objects into groups is a task that comes naturally to humans, even to small children. Perhaps this is why it is an appealing method of data analysis. However, cluster analysis is more complex than it initially appears. Many people imagine that it will produce neatly separated clusters like those in the top left plot of @fig-ideal-clusters, but it almost never does. Such ideal clusters are rarely encountered in real data, so we often need to modify our objective from ``find the natural clusters in this data. Instead, we need to ``organize the cases into groups that are similar in some way.'' Even though this may seem disappointing when compared with the ideal, it is still often an effective means of simplifying and understanding a dataset.
+
+```{r}
+#| label: fig-ideal-clusters
+#| echo: FALSE
+#| fig-width: 5
+#| fig-height: 5
+#| out-width: "100%"
+#| fig-cap: Examples of clustering patterns
+#| fig-show: asis
+d.separated.clusters <- matrix(rnorm(99*2), ncol=2)
+d.separated.clusters[1:33,1] <-
+  d.separated.clusters[1:33,1]+8
+d.separated.clusters[34:66,2] <-
+  d.separated.clusters[34:66,2]+8
+d.separated.clusters[34:66,1] <-
+  d.separated.clusters[34:66,1]+4
+d.unseparated.clusters <- matrix(rnorm(99*2), ncol=2)
+vc <- matrix(c(1,0.6,0.6,1),ncol=2,byrow=T)
+d.unseparated.clusters <- d.unseparated.clusters%*%vc
+d.nuisance <- matrix(rnorm(99*2), ncol=2)
+d.nuisance[1:49,1] <- d.nuisance[1:49,1]+8
+d.odd.shapes <- matrix(rnorm(99*2),ncol=2)
+d.odd.shapes[1:66,2] <- (d.odd.shapes[1:66,1])^2-5 + rnorm(66)*0.6
+d.odd.shapes[1:66,1] <- d.odd.shapes[1:66,1]*3
+
+d.separated.clusters <-
+  data.frame(d.separated.clusters)
+d.unseparated.clusters <-
+  data.frame(d.unseparated.clusters)
+d.nuisance <-
+  data.frame(d.nuisance)
+d.odd.shapes <-
+  data.frame(d.odd.shapes)
+library(ggplot2)
+library(patchwork)
+p1 <- ggplot(d.separated.clusters, aes(x=X1, y=X2)) + 
+  geom_point() + 
+  theme(aspect.ratio=1,
+        axis.text = element_blank(),
+        axis.title = element_blank(),
+        axis.ticks = element_blank(),
+        panel.background = element_rect("white"),
+        panel.border = element_rect("black", fill=NA, 
+             linewidth = 0.5))
+p2 <- ggplot(d.unseparated.clusters, aes(x=X1, y=X2)) + 
+  geom_point() + 
+  theme(aspect.ratio=1,
+        axis.text = element_blank(),
+        axis.title = element_blank(),
+        axis.ticks = element_blank(),
+        panel.background = element_rect("white"),
+        panel.border = element_rect("black", fill=NA, 
+             linewidth = 0.5))
+p3 <- ggplot(d.nuisance, aes(x=X1, y=X2)) + 
+  geom_point() + 
+  theme(aspect.ratio=1,
+        axis.text = element_blank(),
+        axis.title = element_blank(),
+        axis.ticks = element_blank(),
+        panel.background = element_rect("white"),
+        panel.border = element_rect("black", fill=NA, 
+             linewidth = 0.5))
+p4 <- ggplot(d.odd.shapes, aes(x=X1, y=X2)) + 
+  geom_point() + 
+  theme(aspect.ratio=1,
+        axis.text = element_blank(),
+        axis.title = element_blank(),
+        axis.ticks = element_blank(),
+        panel.background = element_rect("white"),
+        panel.border = element_rect("black", fill=NA, 
+             linewidth = 0.5))
+print(p1 + p2 + p3 + p4 + plot_layout(ncol=2))
+```
+
+<!--
+%  Figure 1
+\begin{figure}[ht]
+\centerline{\includegraphics[width=4in]{chap-clust/ideal.pdf}}
+\caption[Structures in data and their impact on cluster
+analysis]{Different structures in data and their impact on cluster
+analysis.  When there are well-separated groups {\bf (top left)}, it is
+simple to group similar observations.  Even when there are not {\bf
+(top right)}, grouping observations may still be useful. There may be
+nuisance variables that do not contribute to the clustering {\bf
+(bottom left)}, and there may oddly shaped clusters {\bf (bottom
+right)}.}
+\label{ideal-clusters}
+\end{figure}
+-->
+
+At the heart of the clustering process is the work of discovering which variables are most important for defining the groups.  It is often true that we only require a subset of the variables for finding clusters, whereas another subset (called \Term{nuisance variables}) has no impact.  In the bottom left plot of @ideal-clusters, it is
+clear that the variable plotted horizontally is important for splitting this data into two clusters, whereas the variable plotted vertically is a nuisance variable. Nuisance is an apt term for these variables, because they can radically change the interpoint distances and impair the clustering process.
+\index{cluster analysis!interpoint distance}
+\index{cluster analysis!nuisance variable}
+
+Dynamic graphical methods help us to find and understand the cluster structure in high dimensions.  With the tools in our toolbox, primarily tours, along with linked scatterplots and parallel coordinate plots, we can see clusters in high-dimensional spaces. We can detect gaps between clusters, the shape and relative positions of clusters, and the presence of nuisance variables.  We can even find unusually shaped clusters, like those in the bottom right plot in
+@fig-ideal-clusters.  In simple situations we can use graphics alone to group observations into clusters, using a ``spin and brush'' method. In more difficult data problems, we can assess and refine numerical solutions using graphics.\index{brushing!persistent}
+\index{cluster analysis!spin and brush}
+
+This chapter discusses the use of interactive and dynamic graphics in the clustering of data.  Section \ref{clust-bg} introduces cluster analysis, focusing on interpoint distance measures. Section
+\ref{clust-graphics} describes an example of a purely graphical approach to cluster analysis, the spin and brush method. In the example shown in that section, we were able to find simplifications of the data that had not been found using numerical clustering methods, and to find a variety of structures in high-dimensional space. Section
+\ref{clust-num} describes methods for {reducing} the interpoint distance
+matrix to an intercluster distance matrix using hierarchical
+algorithms and model-based clustering, and shows how graphical tools
+are used to assess the results of numerical methods. Section
+\ref{clust-recap} summarizes the chapter and revisits the data
+analysis strategies used in the examples. A good companion to the
+material presented in this chapter is \citeasnoun{VR02}, which provides
+data and code for practical examples of cluster analysis using R.
+Section \ref{clust-recap} summarizes the chapter and revisits the data
+analysis strategies used in the examples.
+
+### Background {#sec-clust-bg}
+
+Before we can begin finding groups of cases that are similar, we need
+to decide on a definition of similarity.  How is similarity defined?
+Consider a dataset with three cases and four variables, described in matrix
+format as
+
+\begin{eqnarray*}
+\blX = \left[ \begin{array}{c} 
+     \blX_1 \\ \blX_2 \\ \blX_3 \\ 
+%\blX_4 \\
+%     \blX_5 \\ \blX_6 \\ \blX_7 \\ \blX_8 \\ \blX_9 
+     \end{array} \right] = 
+     \left[ \begin{array}{rrrr}
+       7.3 & 7.6 & 7.7 & 8.0 \\
+       7.4 & 7.2 & 7.3 & 7.2 \\
+       4.1 & 4.6 & 4.6 & 4.8 \\
+     \end{array} \right]
+\end{eqnarray*}
+
+\noindent which is plotted in @similarity1. 
+The Euclidean distance between two cases (rows of the matrix) is defined as
+
+\begin{eqnarray*}
+d_{\rm Euc}(\blX_i,\blX_j) &=& ||\blX_i-\blX_j|| %\\
+% &=& \sqrt{(X_{i1}-X_{j1})^2+\dots + (X_{ip}-X_{jp})^2},
+~~~~~~i,j=1,\dots, n,
+\end{eqnarray*}
+
+\noindent where $||\blX_i||=\sqrt{X_{i1}^2+X_{i2}^2+\dots +X_{ip}^2}$.
+For example, the Euclidean distance between cases 1 and 2 in the above
+data, is
+
+\[
+\sqrt{(7.3-7.4)^2+(7.6-7.2)^2+(7.7-7.3)^2+(8.0-7.2)^2} = 1.0.
+\]
+
+\index{cluster analysis!interpoint distance}
+
+\noindent For the three cases, the interpoint Euclidean distance matrix is
+
+\begin{eqnarray*}
+d_{\rm Euc} =
+\left[ \begin{array}{ccc}
+ 0.0  ~&     &   \\ 
+ 1.0 ~&  0.0 ~  &  \\
+ 6.3 ~& 5.5 ~&  0.0 ~ \\
+\end{array} \right]
+\begin{array}{r}
+\blX_1 \\ \blX_2 \\ \blX_3 \\
+\end{array}
+\end{eqnarray*}
+
+<!--
+% Figure 2
+\begin{figure}[htp]
+\centerline{{\includegraphics[width=3in]{chap-clust/similarity1.pdf}}
+ {\includegraphics[width=2in]{chap-clust/similarity2.pdf}}}
+\caption[Clustering the example data]{Clustering the example data.
+The scatterplot matrix {\bf (left)} shows that cases 1 and 2 have
+similar values.  The parallel coordinate plot {\bf (right)} allows a
+comparison of other structure, which shows the similarity in the profiles
+on cases 1 and 3.  }
+\label{similarity1}
+\end{figure}
+-->
+
+\noindent Cases 1 and 2 are more similar to each other than they are to case 3, because the Euclidean distance between cases 1 and 2 is much smaller than the distance between cases 1 and 3 and between cases
+2 and 3.
+
+There are many different ways to calculate similarity.  In recent years similarity measures based on correlation distance have become common. Correlation distance is typically used where similarity of structure is more important than similarity in magnitude. 
+
+\index{parallel coordinate plot}
+
+As an example, see the parallel coordinate plot of the sample data at the right of @similarity1.  Cases 1 and 3 are widely separated, but their shapes are similar (low, medium, medium, high). Case 2, although overlapping with Case 1, has a very different shape (high, medium, medium, low).  The correlation between two cases is defined as
+
+\begin{eqnarray}
+\rho(\blX_i,\blX_j) = \frac{(\blX_i-c_i)'(\blX_j-c_j)}
+{\sqrt{(\blX_i-c_i)'(\blX_i-c_i)} \sqrt{(\blX_j-c_j)'(\blX_j-c_j)}}
+\label{corc}
+\end{eqnarray}
+
+\noindent When $c_i, c_j$ are the sample means
+$\bar{\blX}_i,\bar{\blX}_j$, then $\rho$ is the Pearson correlation
+coefficient. If, indeed, they are set at 0, as is commonly done,
+$\rho$ is a generalized correlation that describes the angle between
+the two data vectors. The correlation is then converted to a distance
+metric; one equation for doing so is as follows:
+
+\begin{eqnarray*}
+d_{\rm Cor}(\blX_i,\blX_j) = \sqrt{2(1-\rho(\blX_i,\blX_j))}
+\end{eqnarray*}
+
+The above distance metric will treat cases that are strongly negatively correlated as the most distant.
+
+The interpoint distance matrix for the sample data using $d_{\rm Cor}$ and the Pearson correlation coefficient is
+
+\begin{eqnarray*}
+d_{\rm Cor} = 
+\left[ \begin{array}{rrrrrrrrr}
+ 0.0  ~&     &  \\
+ 3.6 ~ & 0.0 ~ &  \\
+ 0.1 ~ & 3.8 ~ &  0.0 ~\\
+\end{array} \right]
+\end{eqnarray*}
+% dist4 in R code 
+
+\noindent By this metric, cases 1 and 3 are the most similar, because  the correlation distance is smaller between these two cases than the other pairs of cases. 
+\index{cluster analysis!interpoint distance}
+
+Note that these interpoint distances differ dramatically from those for Euclidean distance.  As a consequence, the way the cases would be clustered is also be very different. Choosing the appropriate distance measure is an important part of a cluster analysis.
+
+After a distance metric has been chosen and a cluster analysis has been performed, the analyst must evaluate the results, and this is actually a difficult task.  A cluster analysis does not generate $p$-values or other numerical criteria, and the process tends to produce hypotheses rather than testing them.  Even the most determined attempts to produce the ``best'' results using modeling and validation techniques may result in clusters that, although seemingly significant, are useless for practical purposes.  As a result, cluster analysis is best thought of as an exploratory technique, and it can be quite useful despite the lack of formal validation because of its power in data simplification.
+
+The context in which the data arises is the key to 
+assessing the results.  If the clusters can be characterized in a sensible manner, and they increase our knowledge of the data, then we are on the right track.  To use an even more pragmatic criterion, if
+a company can gain an economic advantage by using a particular clustering method to carve up their customer database, then that is the method they should use.
+
+
+### Purely graphics {#sec-clust-graphics}
+
+\index{brushing!persistent}
+\index{tour}
+\index{cluster analysis!spin and brush}
+
+A purely graphical spin and brush approach to cluster analysis works well when there are good separations between groups, even when there are marked differences in variance structures between groups or when groups have non-linear boundaries. It does not work very well when there are clusters that overlap, or when there are no distinct clusters but rather we simply wish to partition the data. In these situations it may be better to begin with a numerical solution and to use visual tools to evaluate it, perhaps making refinements subsequently.  Several examples of the spin and brush approach are documented in the literature, such as @CBCH95 and @WWS99.
+
+\index{datasets!\Data{PRIM7}}
+
+This description of the spin and brush approach on \Data{PRIM7}, a particle physics dataset, follows that in \citeasnoun{CBCH95}. The data contains seven variables.  We have no labels for the data, so when we begin, all the points have the same color and glyph. Watch the data in a tour for a few minutes and you will see that there are no natural clusters, but there is clearly structure.
+
+\index{projection pursuit!indexes}
+\index{projection pursuit!indexes!holes}
+\index{projection pursuit!indexes!central mass}
+\index{principal component analysis}
+
+We will use the projection pursuit guided tour to help us find that structure.  We will tour on the principal components, rather than the raw variables, because that improves the performance of the projection pursuit indexes.  Two indexes are useful for detecting
+clusters: holes and central mass. The holes index is sensitive to projections where there are few points (i.e., a hole) in the center. The central mass index is the opposite: It is sensitive to projections
+that have too many points in the center. These indexes are explained in @chap-toolbox.
+
+The holes index is usually the most useful for clustering, but not for the particle physics data, because it does not have a ``hole'' at the center.  The central mass index is the most appropriate here. Alternate between optimization (a guided tour) and the unguided grand tour to find local maxima, each of which is a projection that is potentially useful for revealing clusters.  The process is illustrated in @fig-prim7-tour.
+
+The top left plot shows the initial default projection, the second principal component plotted against the first. The plot next to it shows the projected data corresponding to the first local maximum found by the guided tour. It has three strands of points stretching out from the central clump and several outliers. We brush the points along each strand, in red, blue, and orange, and we paint the outliers with open circles.  (See the next two plots.)  We continue by choosing a new random start for the guided tour, and then waiting until new territory in the data is discovered. \index{brushing!persistent}
+
+The optimization settles on a projection where there are three strands visible, as observed in the leftmost plot in the second row. Two strands have been previously brushed, but a new one has appeared; this is painted yellow. 
+
+We also notice that there is another new strand hidden below the red strand. It is barely distinguishable from the red strand in this projection, but the two strands separate widely in other projections.
+It is tricky to brush it, because it is not well separated in this projection.  We use a trick: Hide the red points, brush the new strand green, and ``unhide'' the red points again (middle plot in the second row).
+
+Five clusters have been easily identified, and now finding new clusters in this data is increasingly difficult. After several more alternations between the grand tour and the guided tour, we find something new (shown in the rightmost plot in the second row): One
+more strand has emerged, and we paint it pink.
+
+<!-- % Figure 3
+\begin{figure}[htp]
+\centerline{{\includegraphics[width=1.5in]{chap-clust/prim7-pp1.pdf}}
+ {\includegraphics[width=1.5in]{chap-clust/prim7-pp2.pdf}}
+ {\includegraphics[width=1.5in]{chap-clust/prim7-pp5.pdf}}}
+\smallskip
+\centerline{{\includegraphics[width=1.5in]{chap-clust/prim7-pp7.pdf}}
+ {\includegraphics[width=1.5in]{chap-clust/prim7-pp8.pdf}}
+ {\includegraphics[width=1.5in]{chap-clust/prim7-pp9.pdf}}}
+\centerline{{\includegraphics[width=1.5in]{chap-clust/prim7-pp10.pdf}}
+  {\includegraphics[width=1.5in]{chap-clust/prim7-pp11.pdf}}
+  {\includegraphics[width=1.5in]{chap-clust/prim7-pp13.pdf}}}
+\caption[Stages of ``spin and brush'' on \Data{PRIM7}]{Stages of spin
+and brush on \Data{PRIM7}.  The high-dimensional geometry emerges as
+the clusters are painted.}
+\label{prim7-tour}
+\end{figure}
+-->
+
+The results at this stage are summarized by the bottom row of plots. There is a very visible triangular component (in gray) revealed when all of the colored points are hidden. We check the shape of this
+cluster by drawing lines between outer points to contain the inner ones. Touring after the lines are drawn helps to check how well they match the shape of the clusters. The colored groups pair up at each
+vertex, and we draw in the shape of these too --- a single line matches the structures reasonably well.
+
+The final step of the spin and brush clustering is to clean up this solution, touching up the color groups by continuing to tour, and repainting a point here and there.  When we finish, we have found seven clusters in this data that form a very strong geometric object
+in the data space: a two-dimensional (2D) triangle, with two one-dimensional (1D) strands extending in different directions from each vertex.  The lines confirm our understanding of this object's shape, because the points stay close to the lines in all of the projections observed in a tour.
+
+<!-- % Figure 4
+\begin{figure}
+\centerline{
+   \includegraphics[width=1.5in]{chap-clust/prim7-pp13-model.pdf}
+   \includegraphics[width=3in]{chap-clust/prim7-par.pdf}
+}
+\caption[The \Data{PRIM7} model summarized]{The \Data{PRIM7} model
+summarized.  The model summary {\bf (left)} was formed by adding line
+segments manually.  In the parallel coordinate plot, the profiles
+highlighted in dark gray correspond to the points in the 2D triangle
+at the center of the model.  }
+\label{prim7-model}
+\end{figure}
+-->
+
+The next stage of cluster analysis is to characterize the nature of the clusters. To do that, we would calculate summary statistics for each cluster, and plot the clusters (@fig-prim7-model). When we plot the clusters of the particle physics data, we find that the 2D triangle exists primarily in the plane defined by X3 and X5. If you do the same, notice that the variance in measurements for the gray group is large in variables X3 and X5, but negligible in the other
+variables. The linear pieces can also be characterized by their distributions on each of the variables.  With this example, we have shown that it is possible to uncover very unusual clusters in data without any domain knowledge.
+
+Here are several tips about the spin and brush approach. 
+
+- Save the
+dataset frequently during the exploration of a complex dataset,
+being sure to save your colors and glyphs, because it may take several
+sessions to arrive at a final clustering.  
+- Manual controls are useful
+for refining the optimal projection because another projection in the
+neighborhood may be more revealing.  
+- The holes index is usually the
+most successful projection pursuit index for finding clusters.
+- Principal component coordinates may provide a better starting point
+than the raw variables.
+
+Finally, the spin and brush method will not
+work well if there are no clear separations in the data, and the  clusters are high-dimensional, unlike the low-dimensional clusters found in this example.
+
