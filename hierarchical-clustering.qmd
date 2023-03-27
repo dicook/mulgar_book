@@ -7,7 +7,53 @@
 
 Hierarchical cluster algorithms sequentially fuse neighboring points to form ever-larger clusters, starting from a full interpoint distance
 matrix. \Term{Distance between clusters} is described by a "linkage method": For example, single linkage uses the smallest interpoint distance between the members of a pair of clusters, complete linkage
-uses the maximum interpoint distance, and average linkage uses the average of the interpoint distances. A good discussion on cluster analysis can be found in @JW02 or @Ev01.
+uses the maximum interpoint distance, and average linkage uses the average of the interpoint distances. A good discussion on cluster analysis can be found in @HOML, on [Wikipedia](https://en.wikipedia.org/wiki/Cluster_analysis) or any multivariate textbook.
+
+```{r}
+#| label: fig-hc-sim
+#| eval: true
+#| message: false
+#| warning: false
+#| fig-cap: "Hierarchical clustering on simulated data: (left) data, (middle) dendrogram, (right) dendrogram on the data."
+#| fig-width: 9
+#| fig-height: 3
+library(ggplot2)
+library(mulgar)
+data(simple_clusters)
+# Data has two well-separated clusters
+pd <- ggplot(simple_clusters, aes(x=x1, y=x2)) +
+  geom_point(colour="orange", size=2) +
+  theme(aspect.ratio=1)
+
+# Compute hierarchical clustering with Ward's linkage
+cl_hw <- hclust(dist(simple_clusters[,1:2]),
+                method="ward.D2")
+library(ggdendro)
+ph <- ggdendrogram(cl_hw, labels = FALSE)
+
+# Compute dendrogram in data
+cl_hfly <- hierfly(simple_clusters, cl_hw, scale=FALSE)
+
+pdh <- ggplot() +
+  geom_point(data=cl_hfly$data, 
+             aes(x=x1, y=x2,
+                 shape=factor(node),
+                 colour=factor(node),
+                 size=1-node)) +
+  geom_segment(data=cl_hfly$segments, 
+                aes(x=x, xend=xend,
+                    y=y, yend=yend)) +
+  scale_shape_manual(values = c(16, 1)) +
+  scale_colour_manual(values = c("orange", "black")) +
+  scale_size(limits=c(0,17)) +
+  theme(aspect.ratio=1, legend.position="none")
+
+library(patchwork)
+pd + ph + pdh + plot_layout(ncol=3)
+```
+
+
+--THIS STUFF IS THE OLD MATERIAL--
 
 @fig-prim7-hier contains several plots that illustrate the results of the hierarchical clustering of the particle physics data; we used Euclidean interpoint distances and the average linkage method. This is computed by:
 
