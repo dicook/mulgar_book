@@ -5,11 +5,26 @@
 \index{cluster analysis!hierarchical}
 \index{cluster analysis!intercluster distance (linkage)}
 
+
+
 ## Overview
 
 Hierarchical cluster algorithms sequentially fuse neighboring points to form ever-larger clusters, starting from a full interpoint distance
 matrix. @fig-hc-sim illustrates the hierarchical clustering approach for a simple simulated data set (a) with two well-separated clusters in 2D. The dendrogram (b) is a representation of the order that points are joined into clusters. The dendrogram strongly indicates two clusters because there are two branches branches representing the last join are much longer than all of the other branches. Although, the dendrogram is usually a good summary of the steps taken by the algorithm, it can be misleading. The dendrogram might strongly suggest a clustering but it might be a terrible solution. To check this we need to show the model with the data, as shown in plot (c). The segments show how the points and clusters are joined. Note that once points are joined into a cluster, the centroid of that cluster is used as the join location with other points or other clusters, and this is represented by a "+". We can see that the longest edge is the one stretching across the gap between the two clusters, which is the location where the dendrogram would be cut to produce the two-cluster solution. This two-cluster solution is shown in plot (d). 
 
+```{r}
+#| label: hc-libraries
+#| message: FALSE
+library(ggplot2)
+library(mulgar)
+library(ggdendro)
+library(dplyr)
+library(patchwork)
+library(palmerpenguins)
+library(tourr)
+library(plotly)
+library(htmlwidgets)
+```
 
 ```{r}
 #| label: fig-hc-sim
@@ -19,8 +34,6 @@ matrix. @fig-hc-sim illustrates the hierarchical clustering approach for a simpl
 #| fig-cap: "Hierarchical clustering on simulated data: (a) data, (b) dendrogram, (c) dendrogram on the data, and (d) two cluster solution. Nodes of the dendrogram indicated by `+` when it is drawn on the data."
 #| fig-width: 5
 #| fig-height: 5
-library(ggplot2)
-library(mulgar)
 data(simple_clusters)
 # Data has two well-separated clusters
 pd <- ggplot(simple_clusters, aes(x=x1, y=x2)) +
@@ -31,7 +44,6 @@ pd <- ggplot(simple_clusters, aes(x=x1, y=x2)) +
 # Compute hierarchical clustering with Ward's linkage
 cl_hw <- hclust(dist(simple_clusters[,1:2]),
                 method="ward.D2")
-library(ggdendro)
 cl_ggd <- dendro_data(cl_hw, type = "triangle")
 ph <- ggplot() +
   geom_segment(data=cl_ggd$segments, 
@@ -61,7 +73,6 @@ pdh <- ggplot() +
   theme(aspect.ratio=1, legend.position="none")
 
 # Show result
-library(dplyr)
 simple_clusters <- simple_clusters %>%
   mutate(clw = factor(cutree(cl_hw, 2)))
 pc <- ggplot(simple_clusters) +
@@ -71,7 +82,6 @@ pc <- ggplot(simple_clusters) +
   ggtitle("(d)") +
   theme(aspect.ratio=1, legend.position="none")
 
-library(patchwork)
 pd + ph + pdh + pc + plot_layout(ncol=2)
 ```
 
@@ -318,13 +328,9 @@ pd2c + pd2hc + pc_d2c +
 
 Check the data: pretend we don't know the clusters. Think you can see three elliptical clusters. One is further from the others.
 
-GENERATE ONE TOUR PATH FOR ALL FOLLOWING TOURS
-THEN ALSO GENERATE A PLOTLY ANIMATION
-
 ```{r}
 #| label: penguins
 #| code-fold: true
-library(palmerpenguins)
 penguins <- penguins %>%
   na.omit() # 11 observations out of 344 removed
 # use only vars of interest, and standardise
@@ -344,7 +350,6 @@ penguins_cl <- penguins[,c(1, 3:6)] %>%
 #| label: penguins-gt
 #| eval: false
 #| code-fold: false
-library(tourr)
 set.seed(20230329)
 b <- basis_random(4,2)
 pt1 <- save_history(penguins_cl[,1:4], 
@@ -438,7 +443,6 @@ render_gif(p_s_hfly$data[,1:4],
 ```{r}
 #| label: penguins-hfly-plotly
 #| eval: FALSE
-library(plotly)
 load("data/penguins_tour_path.rda")
 # Create a smaller one, for space concerns
 pt1i <- interpolate(pt1[,,1:5], 0.1)
@@ -487,7 +491,6 @@ pwg <- ggplotly(pw_gp, width=450, height=500) %>%
        animation_slider(len=0.8, x=0.5,
                         xanchor="center") %>%
        animation_opts(easing="linear", transition = 0)
-library(htmlwidgets)
 htmlwidgets::saveWidget(pwg,
           file="html/penguins_cl_ward.html",
           selfcontained = TRUE)
