@@ -27,11 +27,20 @@ This is data from the 2021 Women's Australian Football League. These are average
 ### Variables {.unnumbered}
 
 ```{r}
+#| label: load-data-libraries
 #| echo: FALSE
 #| message: FALSE
 #| warning: FALSE
 library(mulgar)
 library(dplyr)
+```
+
+```{r}
+#| label: data-aflw
+#| echo: FALSE
+#| message: FALSE
+#| warning: FALSE
+data(aflw)
 glimpse(aflw)
 ```
 
@@ -50,7 +59,7 @@ The code for downloading and pre-processing the data is available at the [mulgar
 ## Palmer penguins
 
 ```{r}
-#| label: penguins-tsne
+#| label: penguins
 #| message: FALSE
 #| eval: FALSE
 library(palmerpenguins)
@@ -64,6 +73,53 @@ penguins_sub <- penguins[,c(1, 3:6)] %>%
          bd = bill_depth_mm,
          fl = flipper_length_mm,
          bm = body_mass_g)
+save(penguins_sub, file="data/penguins_sub.rda")
+```
+
+### Description {.unnumbered}
+
+This data measure four physical characteristics of three species of penguins.  
+
+### Variables {.unnumbered}
+
+|Name      | Description     |
+|:---------|:----------------|
+|`species` | a factor denoting penguin species (Adélie, Chinstrap and Gentoo) |
+|`bl`      | a number denoting bill length (millimeters) |`bd`      | a number denoting bill depth (millimeters) |
+|`fl`      | an integer denoting flipper length (millimeters) |
+|`bm`      | an integer denoting body mass (grams) |
+
+### Purpose {.unnumbered}
+
+The primary goal is to find a combination of the four variables where the three species are distinct. This is also a useful data set to illustrate cluster analysis.
+
+### Source {.unnumbered}
+
+Details of the penguins data can be found at [https://allisonhorst.github.io/palmerpenguins/](https://allisonhorst.github.io/palmerpenguins/), and @penguins is the package source.
+
+### Pre-processing {.unnumbered}
+
+The data is loaded from the `palmerpenguins` package. The four physical measurement variables and the species are selected, and the penguins with missing values are removed. Variables are standardised, and their names are shortened.
+
+
+```{r}
+#| label: penguins_echo
+#| message: FALSE
+#| eval: FALSE
+#| echo: TRUE
+#| code-fold: FALSE
+library(palmerpenguins)
+penguins <- penguins %>%
+  na.omit() # 11 observations out of 344 removed
+# use only vars of interest, and standardise
+# them for easier interpretation
+penguins_sub <- penguins[,c(1, 3:6)] %>% 
+  mutate(across(where(is.numeric),  ~ scale(.)[,1])) %>%
+  rename(bl = bill_length_mm,
+         bd = bill_depth_mm,
+         fl = flipper_length_mm,
+         bm = body_mass_g)
+save(penguins_sub, file="data/penguins_sub.rda")
 ```
 
 ## Notes to self
