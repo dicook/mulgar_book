@@ -16,7 +16,6 @@ library(mulgar)
 library(ggdendro)
 library(dplyr)
 library(patchwork)
-library(palmerpenguins)
 library(tourr)
 library(plotly)
 library(htmlwidgets)
@@ -326,19 +325,7 @@ Check the data: pretend we don't know the clusters. Think you can see three elli
 ```{r}
 #| label: penguins
 #| code-fold: true
-penguins <- penguins %>%
-  na.omit() # 11 observations out of 344 removed
-# use only vars of interest, and standardise
-# them for easier interpretation
-penguins_cl <- penguins[,c(1, 3:6)] %>% 
-  mutate(across(where(is.numeric),  ~
-                  mulgar:::scale2(.))) %>%
-  rename(bl = bill_length_mm,
-         bd = bill_depth_mm,
-         fl = flipper_length_mm,
-         bm = body_mass_g) %>%
-  select(bl, bd, fl, bm, species) %>%
-  as.data.frame()
+load("data/penguins_sub.rda")
 ```
 
 ```{r}
@@ -347,11 +334,11 @@ penguins_cl <- penguins[,c(1, 3:6)] %>%
 #| code-fold: false
 set.seed(20230329)
 b <- basis_random(4,2)
-pt1 <- save_history(penguins_cl[,1:4], 
+pt1 <- save_history(penguins_sub[,1:4], 
                     max_bases = 500, 
                     start = b)
 save(pt1, file="data/penguins_tour_path.rda")
-animate_xy(penguins_cl[,1:4], 
+animate_xy(penguins_sub[,1:4], 
            tour_path = planned_tour(pt1), 
            axes="off", rescale=FALSE, 
            half_range = 3.5)
@@ -361,7 +348,7 @@ animate_xy(penguins_cl[,1:4],
 #| label: penguins-gif
 #| eval: false
 load("data/penguins_tour_path.rda")
-render_gif(penguins_cl[,1:4], 
+render_gif(penguins_sub[,1:4], 
            planned_tour(pt1), 
            display_xy(half_range=0.9, axes="off"),
            gif_file="gifs/penguins_gt.gif",
@@ -373,12 +360,14 @@ render_gif(penguins_cl[,1:4],
 
 ```{r}
 #| label: penguins-hclust
-p_dist <- dist(penguins_cl[,1:4])
+p_dist <- dist(penguins_sub[,1:4])
 p_hcw <- hclust(p_dist, method="ward.D2")
 p_hcs <- hclust(p_dist, method="single")
 
-p_clw <- penguins_cl %>% mutate(cl = factor(cutree(p_hcw, 3)))
-p_cls <- penguins_cl %>% mutate(cl = factor(cutree(p_hcs, 3)))
+p_clw <- penguins_sub %>% 
+  mutate(cl = factor(cutree(p_hcw, 3)))
+p_cls <- penguins_sub %>% 
+  mutate(cl = factor(cutree(p_hcs, 3)))
 
 p_w_hfly <- hierfly(p_clw, p_hcw, scale=FALSE)
 p_s_hfly <- hierfly(p_cls, p_hcs, scale=FALSE)
@@ -442,8 +431,9 @@ render_gif(p_s_hfly$data[,1:4],
 load("data/penguins_tour_path.rda")
 # Create a smaller one, for space concerns
 pt1i <- interpolate(pt1[,,1:5], 0.1)
-pw_anim <- render_anim(p_w_hfly$data, vars=1:4,
-                         frames=pt1i, 
+pw_anim <- render_anim(p_w_hfly$data,
+                       vars=1:4,
+                       frames=pt1i, 
                        edges = p_w_hfly$edges,
              obs_labels=paste0(1:nrow(p_w_hfly$data),
                                p_w_hfly$data$cl))

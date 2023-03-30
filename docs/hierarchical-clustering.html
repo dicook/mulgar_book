@@ -257,7 +257,7 @@ div.csl-indent {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./model-based-clustering.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Model-based clustering</span></a>
+  <a href="./model-based-clustering.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">| label: tab-covariances</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -365,10 +365,9 @@ div.csl-indent {
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggdendro)</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(patchwork)</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(palmerpenguins)</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tourr)</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(plotly)</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(htmlwidgets)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tourr)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(plotly)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(htmlwidgets)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell">
@@ -686,29 +685,17 @@ div.csl-indent {
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>penguins <span class="ot">&lt;-</span> penguins <span class="sc">%&gt;%</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">na.omit</span>() <span class="co"># 11 observations out of 344 removed</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co"># use only vars of interest, and standardise</span></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co"># them for easier interpretation</span></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>penguins_cl <span class="ot">&lt;-</span> penguins[,<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span><span class="sc">:</span><span class="dv">6</span>)] <span class="sc">%&gt;%</span> </span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">where</span>(is.numeric),  <span class="sc">~</span></span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>                  mulgar<span class="sc">:::</span><span class="fu">scale2</span>(.))) <span class="sc">%&gt;%</span></span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">bl =</span> bill_length_mm,</span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>         <span class="at">bd =</span> bill_depth_mm,</span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>         <span class="at">fl =</span> flipper_length_mm,</span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>         <span class="at">bm =</span> body_mass_g) <span class="sc">%&gt;%</span></span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(bl, bd, fl, bm, species) <span class="sc">%&gt;%</span></span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"data/penguins_sub.rda"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">20230329</span>)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">basis_random</span>(<span class="dv">4</span>,<span class="dv">2</span>)</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>pt1 <span class="ot">&lt;-</span> <span class="fu">save_history</span>(penguins_cl[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], </span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>pt1 <span class="ot">&lt;-</span> <span class="fu">save_history</span>(penguins_sub[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], </span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>                    <span class="at">max_bases =</span> <span class="dv">500</span>, </span>
 <span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>                    <span class="at">start =</span> b)</span>
 <span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="fu">save</span>(pt1, <span class="at">file=</span><span class="st">"data/penguins_tour_path.rda"</span>)</span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="fu">animate_xy</span>(penguins_cl[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], </span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="fu">animate_xy</span>(penguins_sub[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], </span>
 <span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>           <span class="at">tour_path =</span> <span class="fu">planned_tour</span>(pt1), </span>
 <span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>           <span class="at">axes=</span><span class="st">"off"</span>, <span class="at">rescale=</span><span class="cn">FALSE</span>, </span>
 <span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>           <span class="at">half_range =</span> <span class="fl">3.5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -717,7 +704,7 @@ div.csl-indent {
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"data/penguins_tour_path.rda"</span>)</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">render_gif</span>(penguins_cl[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], </span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">render_gif</span>(penguins_sub[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], </span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>           <span class="fu">planned_tour</span>(pt1), </span>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>           <span class="fu">display_xy</span>(<span class="at">half_range=</span><span class="fl">0.9</span>, <span class="at">axes=</span><span class="st">"off"</span>),</span>
 <span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>           <span class="at">gif_file=</span><span class="st">"gifs/penguins_gt.gif"</span>,</span>
@@ -734,15 +721,17 @@ div.csl-indent {
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>p_dist <span class="ot">&lt;-</span> <span class="fu">dist</span>(penguins_cl[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>])</span>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>p_dist <span class="ot">&lt;-</span> <span class="fu">dist</span>(penguins_sub[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>])</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>p_hcw <span class="ot">&lt;-</span> <span class="fu">hclust</span>(p_dist, <span class="at">method=</span><span class="st">"ward.D2"</span>)</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>p_hcs <span class="ot">&lt;-</span> <span class="fu">hclust</span>(p_dist, <span class="at">method=</span><span class="st">"single"</span>)</span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>p_clw <span class="ot">&lt;-</span> penguins_cl <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">cl =</span> <span class="fu">factor</span>(<span class="fu">cutree</span>(p_hcw, <span class="dv">3</span>)))</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>p_cls <span class="ot">&lt;-</span> penguins_cl <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">cl =</span> <span class="fu">factor</span>(<span class="fu">cutree</span>(p_hcs, <span class="dv">3</span>)))</span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>p_w_hfly <span class="ot">&lt;-</span> <span class="fu">hierfly</span>(p_clw, p_hcw, <span class="at">scale=</span><span class="cn">FALSE</span>)</span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>p_s_hfly <span class="ot">&lt;-</span> <span class="fu">hierfly</span>(p_cls, p_hcs, <span class="at">scale=</span><span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>p_clw <span class="ot">&lt;-</span> penguins_sub <span class="sc">%&gt;%</span> </span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">cl =</span> <span class="fu">factor</span>(<span class="fu">cutree</span>(p_hcw, <span class="dv">3</span>)))</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>p_cls <span class="ot">&lt;-</span> penguins_sub <span class="sc">%&gt;%</span> </span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">cl =</span> <span class="fu">factor</span>(<span class="fu">cutree</span>(p_hcs, <span class="dv">3</span>)))</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>p_w_hfly <span class="ot">&lt;-</span> <span class="fu">hierfly</span>(p_clw, p_hcw, <span class="at">scale=</span><span class="cn">FALSE</span>)</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>p_s_hfly <span class="ot">&lt;-</span> <span class="fu">hierfly</span>(p_cls, p_hcs, <span class="at">scale=</span><span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell">
@@ -810,104 +799,105 @@ div.csl-indent {
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"data/penguins_tour_path.rda"</span>)</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a smaller one, for space concerns</span></span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>pt1i <span class="ot">&lt;-</span> <span class="fu">interpolate</span>(pt1[,,<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>], <span class="fl">0.1</span>)</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>pw_anim <span class="ot">&lt;-</span> <span class="fu">render_anim</span>(p_w_hfly<span class="sc">$</span>data, <span class="at">vars=</span><span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>,</span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>                         <span class="at">frames=</span>pt1i, </span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>                       <span class="at">edges =</span> p_w_hfly<span class="sc">$</span>edges,</span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>             <span class="at">obs_labels=</span><span class="fu">paste0</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(p_w_hfly<span class="sc">$</span>data),</span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>                               p_w_hfly<span class="sc">$</span>data<span class="sc">$</span>cl))</span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>pw_gp <span class="ot">&lt;-</span> <span class="fu">ggplot</span>() <span class="sc">+</span></span>
-<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>     <span class="co">#geom_path(data=pw_anim$circle, </span></span>
-<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>     <span class="co">#          aes(x=c1, y=c2,</span></span>
-<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>     <span class="co">#              frame=frame), linewidth=0.1) +</span></span>
-<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>     <span class="co">#geom_segment(data=pw_anim$axes, </span></span>
-<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>     <span class="co">#             aes(x=x1, y=y1, </span></span>
-<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>     <span class="co">#                 xend=x2, yend=y2, </span></span>
-<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>     <span class="co">#                 frame=frame), </span></span>
-<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>     <span class="co">#             linewidth=0.1) +</span></span>
-<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>     <span class="co">#geom_text(data=pw_anim$axes, </span></span>
-<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>     <span class="co">#          aes(x=x2, y=y2, </span></span>
-<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>     <span class="co">#              frame=frame, </span></span>
-<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>     <span class="co">#              label=axis_labels), </span></span>
-<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>     <span class="co">#          size=5) +</span></span>
-<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>     <span class="fu">geom_segment</span>(<span class="at">data=</span>pw_anim<span class="sc">$</span>edges, </span>
-<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>                    <span class="fu">aes</span>(<span class="at">x=</span>x, <span class="at">xend=</span>xend,</span>
-<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>                        <span class="at">y=</span>y, <span class="at">yend=</span>yend,</span>
-<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>                        <span class="at">frame=</span>frame)) <span class="sc">+</span></span>
-<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>     <span class="fu">geom_point</span>(<span class="at">data=</span>pw_anim<span class="sc">$</span>frames, </span>
-<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a>                <span class="fu">aes</span>(<span class="at">x=</span>P1, <span class="at">y=</span>P2, </span>
-<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a>                    <span class="at">frame=</span>frame, </span>
-<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a>                    <span class="at">shape=</span><span class="fu">factor</span>(node),</span>
-<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a>                    <span class="at">label=</span>obs_labels), </span>
-<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a>                <span class="at">alpha=</span><span class="fl">0.8</span>, <span class="at">size=</span><span class="dv">1</span>) <span class="sc">+</span></span>
-<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a>     <span class="fu">xlim</span>(<span class="sc">-</span><span class="dv">1</span>,<span class="dv">1</span>) <span class="sc">+</span> <span class="fu">ylim</span>(<span class="sc">-</span><span class="dv">1</span>,<span class="dv">1</span>) <span class="sc">+</span></span>
-<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a>     <span class="fu">scale_shape_manual</span>(<span class="at">values=</span><span class="fu">c</span>(<span class="dv">16</span>, <span class="dv">46</span>)) <span class="sc">+</span></span>
-<span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a>     <span class="fu">coord_equal</span>() <span class="sc">+</span></span>
-<span id="cb11-37"><a href="#cb11-37" aria-hidden="true" tabindex="-1"></a>     <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
-<span id="cb11-38"><a href="#cb11-38" aria-hidden="true" tabindex="-1"></a>     <span class="fu">theme</span>(<span class="at">legend.position=</span><span class="st">"none"</span>, </span>
-<span id="cb11-39"><a href="#cb11-39" aria-hidden="true" tabindex="-1"></a>           <span class="at">axis.text=</span><span class="fu">element_blank</span>(),</span>
-<span id="cb11-40"><a href="#cb11-40" aria-hidden="true" tabindex="-1"></a>           <span class="at">axis.title=</span><span class="fu">element_blank</span>(),</span>
-<span id="cb11-41"><a href="#cb11-41" aria-hidden="true" tabindex="-1"></a>           <span class="at">axis.ticks=</span><span class="fu">element_blank</span>(),</span>
-<span id="cb11-42"><a href="#cb11-42" aria-hidden="true" tabindex="-1"></a>           <span class="at">panel.grid=</span><span class="fu">element_blank</span>())</span>
-<span id="cb11-43"><a href="#cb11-43" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-44"><a href="#cb11-44" aria-hidden="true" tabindex="-1"></a>pwg <span class="ot">&lt;-</span> <span class="fu">ggplotly</span>(pw_gp, <span class="at">width=</span><span class="dv">450</span>, <span class="at">height=</span><span class="dv">500</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb11-45"><a href="#cb11-45" aria-hidden="true" tabindex="-1"></a>       <span class="fu">animation_button</span>(<span class="at">label=</span><span class="st">"Go"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb11-46"><a href="#cb11-46" aria-hidden="true" tabindex="-1"></a>       <span class="fu">animation_slider</span>(<span class="at">len=</span><span class="fl">0.8</span>, <span class="at">x=</span><span class="fl">0.5</span>,</span>
-<span id="cb11-47"><a href="#cb11-47" aria-hidden="true" tabindex="-1"></a>                        <span class="at">xanchor=</span><span class="st">"center"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb11-48"><a href="#cb11-48" aria-hidden="true" tabindex="-1"></a>       <span class="fu">animation_opts</span>(<span class="at">easing=</span><span class="st">"linear"</span>, <span class="at">transition =</span> <span class="dv">0</span>)</span>
-<span id="cb11-49"><a href="#cb11-49" aria-hidden="true" tabindex="-1"></a>htmlwidgets<span class="sc">::</span><span class="fu">saveWidget</span>(pwg,</span>
-<span id="cb11-50"><a href="#cb11-50" aria-hidden="true" tabindex="-1"></a>          <span class="at">file=</span><span class="st">"html/penguins_cl_ward.html"</span>,</span>
-<span id="cb11-51"><a href="#cb11-51" aria-hidden="true" tabindex="-1"></a>          <span class="at">selfcontained =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb11-52"><a href="#cb11-52" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-53"><a href="#cb11-53" aria-hidden="true" tabindex="-1"></a><span class="co"># Single</span></span>
-<span id="cb11-54"><a href="#cb11-54" aria-hidden="true" tabindex="-1"></a>ps_anim <span class="ot">&lt;-</span> <span class="fu">render_anim</span>(p_s_hfly<span class="sc">$</span>data, <span class="at">vars=</span><span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>,</span>
-<span id="cb11-55"><a href="#cb11-55" aria-hidden="true" tabindex="-1"></a>                         <span class="at">frames=</span>pt1i, </span>
-<span id="cb11-56"><a href="#cb11-56" aria-hidden="true" tabindex="-1"></a>                       <span class="at">edges =</span> p_s_hfly<span class="sc">$</span>edges,</span>
-<span id="cb11-57"><a href="#cb11-57" aria-hidden="true" tabindex="-1"></a>             <span class="at">obs_labels=</span><span class="fu">paste0</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(p_s_hfly<span class="sc">$</span>data),</span>
-<span id="cb11-58"><a href="#cb11-58" aria-hidden="true" tabindex="-1"></a>                               p_s_hfly<span class="sc">$</span>data<span class="sc">$</span>cl))</span>
-<span id="cb11-59"><a href="#cb11-59" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-60"><a href="#cb11-60" aria-hidden="true" tabindex="-1"></a>ps_gp <span class="ot">&lt;-</span> <span class="fu">ggplot</span>() <span class="sc">+</span></span>
-<span id="cb11-61"><a href="#cb11-61" aria-hidden="true" tabindex="-1"></a>     <span class="co">#geom_path(data=pw_anim$circle, </span></span>
-<span id="cb11-62"><a href="#cb11-62" aria-hidden="true" tabindex="-1"></a>     <span class="co">#          aes(x=c1, y=c2,</span></span>
-<span id="cb11-63"><a href="#cb11-63" aria-hidden="true" tabindex="-1"></a>     <span class="co">#              frame=frame), linewidth=0.1) +</span></span>
-<span id="cb11-64"><a href="#cb11-64" aria-hidden="true" tabindex="-1"></a>     <span class="co">#geom_segment(data=pw_anim$axes, </span></span>
-<span id="cb11-65"><a href="#cb11-65" aria-hidden="true" tabindex="-1"></a>     <span class="co">#             aes(x=x1, y=y1, </span></span>
-<span id="cb11-66"><a href="#cb11-66" aria-hidden="true" tabindex="-1"></a>     <span class="co">#                 xend=x2, yend=y2, </span></span>
-<span id="cb11-67"><a href="#cb11-67" aria-hidden="true" tabindex="-1"></a>     <span class="co">#                 frame=frame), </span></span>
-<span id="cb11-68"><a href="#cb11-68" aria-hidden="true" tabindex="-1"></a>     <span class="co">#             linewidth=0.1) +</span></span>
-<span id="cb11-69"><a href="#cb11-69" aria-hidden="true" tabindex="-1"></a>     <span class="co">#geom_text(data=pw_anim$axes, </span></span>
-<span id="cb11-70"><a href="#cb11-70" aria-hidden="true" tabindex="-1"></a>     <span class="co">#          aes(x=x2, y=y2, </span></span>
-<span id="cb11-71"><a href="#cb11-71" aria-hidden="true" tabindex="-1"></a>     <span class="co">#              frame=frame, </span></span>
-<span id="cb11-72"><a href="#cb11-72" aria-hidden="true" tabindex="-1"></a>     <span class="co">#              label=axis_labels), </span></span>
-<span id="cb11-73"><a href="#cb11-73" aria-hidden="true" tabindex="-1"></a>     <span class="co">#          size=5) +</span></span>
-<span id="cb11-74"><a href="#cb11-74" aria-hidden="true" tabindex="-1"></a>     <span class="fu">geom_segment</span>(<span class="at">data=</span>ps_anim<span class="sc">$</span>edges, </span>
-<span id="cb11-75"><a href="#cb11-75" aria-hidden="true" tabindex="-1"></a>                    <span class="fu">aes</span>(<span class="at">x=</span>x, <span class="at">xend=</span>xend,</span>
-<span id="cb11-76"><a href="#cb11-76" aria-hidden="true" tabindex="-1"></a>                        <span class="at">y=</span>y, <span class="at">yend=</span>yend,</span>
-<span id="cb11-77"><a href="#cb11-77" aria-hidden="true" tabindex="-1"></a>                        <span class="at">frame=</span>frame)) <span class="sc">+</span></span>
-<span id="cb11-78"><a href="#cb11-78" aria-hidden="true" tabindex="-1"></a>     <span class="fu">geom_point</span>(<span class="at">data=</span>ps_anim<span class="sc">$</span>frames, </span>
-<span id="cb11-79"><a href="#cb11-79" aria-hidden="true" tabindex="-1"></a>                <span class="fu">aes</span>(<span class="at">x=</span>P1, <span class="at">y=</span>P2, </span>
-<span id="cb11-80"><a href="#cb11-80" aria-hidden="true" tabindex="-1"></a>                    <span class="at">frame=</span>frame, </span>
-<span id="cb11-81"><a href="#cb11-81" aria-hidden="true" tabindex="-1"></a>                    <span class="at">shape=</span><span class="fu">factor</span>(node),</span>
-<span id="cb11-82"><a href="#cb11-82" aria-hidden="true" tabindex="-1"></a>                    <span class="at">label=</span>obs_labels), </span>
-<span id="cb11-83"><a href="#cb11-83" aria-hidden="true" tabindex="-1"></a>                <span class="at">alpha=</span><span class="fl">0.8</span>, <span class="at">size=</span><span class="dv">1</span>) <span class="sc">+</span></span>
-<span id="cb11-84"><a href="#cb11-84" aria-hidden="true" tabindex="-1"></a>     <span class="fu">xlim</span>(<span class="sc">-</span><span class="dv">1</span>,<span class="dv">1</span>) <span class="sc">+</span> <span class="fu">ylim</span>(<span class="sc">-</span><span class="dv">1</span>,<span class="dv">1</span>) <span class="sc">+</span></span>
-<span id="cb11-85"><a href="#cb11-85" aria-hidden="true" tabindex="-1"></a>     <span class="fu">scale_shape_manual</span>(<span class="at">values=</span><span class="fu">c</span>(<span class="dv">16</span>, <span class="dv">46</span>)) <span class="sc">+</span></span>
-<span id="cb11-86"><a href="#cb11-86" aria-hidden="true" tabindex="-1"></a>     <span class="fu">coord_equal</span>() <span class="sc">+</span></span>
-<span id="cb11-87"><a href="#cb11-87" aria-hidden="true" tabindex="-1"></a>     <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
-<span id="cb11-88"><a href="#cb11-88" aria-hidden="true" tabindex="-1"></a>     <span class="fu">theme</span>(<span class="at">legend.position=</span><span class="st">"none"</span>, </span>
-<span id="cb11-89"><a href="#cb11-89" aria-hidden="true" tabindex="-1"></a>           <span class="at">axis.text=</span><span class="fu">element_blank</span>(),</span>
-<span id="cb11-90"><a href="#cb11-90" aria-hidden="true" tabindex="-1"></a>           <span class="at">axis.title=</span><span class="fu">element_blank</span>(),</span>
-<span id="cb11-91"><a href="#cb11-91" aria-hidden="true" tabindex="-1"></a>           <span class="at">axis.ticks=</span><span class="fu">element_blank</span>(),</span>
-<span id="cb11-92"><a href="#cb11-92" aria-hidden="true" tabindex="-1"></a>           <span class="at">panel.grid=</span><span class="fu">element_blank</span>())</span>
-<span id="cb11-93"><a href="#cb11-93" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-94"><a href="#cb11-94" aria-hidden="true" tabindex="-1"></a>psg <span class="ot">&lt;-</span> <span class="fu">ggplotly</span>(ps_gp, <span class="at">width=</span><span class="dv">450</span>, <span class="at">height=</span><span class="dv">500</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb11-95"><a href="#cb11-95" aria-hidden="true" tabindex="-1"></a>       <span class="fu">animation_button</span>(<span class="at">label=</span><span class="st">"Go"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb11-96"><a href="#cb11-96" aria-hidden="true" tabindex="-1"></a>       <span class="fu">animation_slider</span>(<span class="at">len=</span><span class="fl">0.8</span>, <span class="at">x=</span><span class="fl">0.5</span>,</span>
-<span id="cb11-97"><a href="#cb11-97" aria-hidden="true" tabindex="-1"></a>                        <span class="at">xanchor=</span><span class="st">"center"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb11-98"><a href="#cb11-98" aria-hidden="true" tabindex="-1"></a>       <span class="fu">animation_opts</span>(<span class="at">easing=</span><span class="st">"linear"</span>, <span class="at">transition =</span> <span class="dv">0</span>)</span>
-<span id="cb11-99"><a href="#cb11-99" aria-hidden="true" tabindex="-1"></a>htmlwidgets<span class="sc">::</span><span class="fu">saveWidget</span>(psg,</span>
-<span id="cb11-100"><a href="#cb11-100" aria-hidden="true" tabindex="-1"></a>          <span class="at">file=</span><span class="st">"html/penguins_cl_single.html"</span>,</span>
-<span id="cb11-101"><a href="#cb11-101" aria-hidden="true" tabindex="-1"></a>          <span class="at">selfcontained =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>pw_anim <span class="ot">&lt;-</span> <span class="fu">render_anim</span>(p_w_hfly<span class="sc">$</span>data,</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>                       <span class="at">vars=</span><span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>,</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>                       <span class="at">frames=</span>pt1i, </span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>                       <span class="at">edges =</span> p_w_hfly<span class="sc">$</span>edges,</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>             <span class="at">obs_labels=</span><span class="fu">paste0</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(p_w_hfly<span class="sc">$</span>data),</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>                               p_w_hfly<span class="sc">$</span>data<span class="sc">$</span>cl))</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>pw_gp <span class="ot">&lt;-</span> <span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>     <span class="co">#geom_path(data=pw_anim$circle, </span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>     <span class="co">#          aes(x=c1, y=c2,</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>     <span class="co">#              frame=frame), linewidth=0.1) +</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>     <span class="co">#geom_segment(data=pw_anim$axes, </span></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>     <span class="co">#             aes(x=x1, y=y1, </span></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>     <span class="co">#                 xend=x2, yend=y2, </span></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>     <span class="co">#                 frame=frame), </span></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>     <span class="co">#             linewidth=0.1) +</span></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>     <span class="co">#geom_text(data=pw_anim$axes, </span></span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>     <span class="co">#          aes(x=x2, y=y2, </span></span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>     <span class="co">#              frame=frame, </span></span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>     <span class="co">#              label=axis_labels), </span></span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>     <span class="co">#          size=5) +</span></span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>     <span class="fu">geom_segment</span>(<span class="at">data=</span>pw_anim<span class="sc">$</span>edges, </span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>                    <span class="fu">aes</span>(<span class="at">x=</span>x, <span class="at">xend=</span>xend,</span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>                        <span class="at">y=</span>y, <span class="at">yend=</span>yend,</span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>                        <span class="at">frame=</span>frame)) <span class="sc">+</span></span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a>     <span class="fu">geom_point</span>(<span class="at">data=</span>pw_anim<span class="sc">$</span>frames, </span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a>                <span class="fu">aes</span>(<span class="at">x=</span>P1, <span class="at">y=</span>P2, </span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a>                    <span class="at">frame=</span>frame, </span>
+<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a>                    <span class="at">shape=</span><span class="fu">factor</span>(node),</span>
+<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a>                    <span class="at">label=</span>obs_labels), </span>
+<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a>                <span class="at">alpha=</span><span class="fl">0.8</span>, <span class="at">size=</span><span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a>     <span class="fu">xlim</span>(<span class="sc">-</span><span class="dv">1</span>,<span class="dv">1</span>) <span class="sc">+</span> <span class="fu">ylim</span>(<span class="sc">-</span><span class="dv">1</span>,<span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a>     <span class="fu">scale_shape_manual</span>(<span class="at">values=</span><span class="fu">c</span>(<span class="dv">16</span>, <span class="dv">46</span>)) <span class="sc">+</span></span>
+<span id="cb11-37"><a href="#cb11-37" aria-hidden="true" tabindex="-1"></a>     <span class="fu">coord_equal</span>() <span class="sc">+</span></span>
+<span id="cb11-38"><a href="#cb11-38" aria-hidden="true" tabindex="-1"></a>     <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb11-39"><a href="#cb11-39" aria-hidden="true" tabindex="-1"></a>     <span class="fu">theme</span>(<span class="at">legend.position=</span><span class="st">"none"</span>, </span>
+<span id="cb11-40"><a href="#cb11-40" aria-hidden="true" tabindex="-1"></a>           <span class="at">axis.text=</span><span class="fu">element_blank</span>(),</span>
+<span id="cb11-41"><a href="#cb11-41" aria-hidden="true" tabindex="-1"></a>           <span class="at">axis.title=</span><span class="fu">element_blank</span>(),</span>
+<span id="cb11-42"><a href="#cb11-42" aria-hidden="true" tabindex="-1"></a>           <span class="at">axis.ticks=</span><span class="fu">element_blank</span>(),</span>
+<span id="cb11-43"><a href="#cb11-43" aria-hidden="true" tabindex="-1"></a>           <span class="at">panel.grid=</span><span class="fu">element_blank</span>())</span>
+<span id="cb11-44"><a href="#cb11-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-45"><a href="#cb11-45" aria-hidden="true" tabindex="-1"></a>pwg <span class="ot">&lt;-</span> <span class="fu">ggplotly</span>(pw_gp, <span class="at">width=</span><span class="dv">450</span>, <span class="at">height=</span><span class="dv">500</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb11-46"><a href="#cb11-46" aria-hidden="true" tabindex="-1"></a>       <span class="fu">animation_button</span>(<span class="at">label=</span><span class="st">"Go"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb11-47"><a href="#cb11-47" aria-hidden="true" tabindex="-1"></a>       <span class="fu">animation_slider</span>(<span class="at">len=</span><span class="fl">0.8</span>, <span class="at">x=</span><span class="fl">0.5</span>,</span>
+<span id="cb11-48"><a href="#cb11-48" aria-hidden="true" tabindex="-1"></a>                        <span class="at">xanchor=</span><span class="st">"center"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb11-49"><a href="#cb11-49" aria-hidden="true" tabindex="-1"></a>       <span class="fu">animation_opts</span>(<span class="at">easing=</span><span class="st">"linear"</span>, <span class="at">transition =</span> <span class="dv">0</span>)</span>
+<span id="cb11-50"><a href="#cb11-50" aria-hidden="true" tabindex="-1"></a>htmlwidgets<span class="sc">::</span><span class="fu">saveWidget</span>(pwg,</span>
+<span id="cb11-51"><a href="#cb11-51" aria-hidden="true" tabindex="-1"></a>          <span class="at">file=</span><span class="st">"html/penguins_cl_ward.html"</span>,</span>
+<span id="cb11-52"><a href="#cb11-52" aria-hidden="true" tabindex="-1"></a>          <span class="at">selfcontained =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb11-53"><a href="#cb11-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-54"><a href="#cb11-54" aria-hidden="true" tabindex="-1"></a><span class="co"># Single</span></span>
+<span id="cb11-55"><a href="#cb11-55" aria-hidden="true" tabindex="-1"></a>ps_anim <span class="ot">&lt;-</span> <span class="fu">render_anim</span>(p_s_hfly<span class="sc">$</span>data, <span class="at">vars=</span><span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>,</span>
+<span id="cb11-56"><a href="#cb11-56" aria-hidden="true" tabindex="-1"></a>                         <span class="at">frames=</span>pt1i, </span>
+<span id="cb11-57"><a href="#cb11-57" aria-hidden="true" tabindex="-1"></a>                       <span class="at">edges =</span> p_s_hfly<span class="sc">$</span>edges,</span>
+<span id="cb11-58"><a href="#cb11-58" aria-hidden="true" tabindex="-1"></a>             <span class="at">obs_labels=</span><span class="fu">paste0</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(p_s_hfly<span class="sc">$</span>data),</span>
+<span id="cb11-59"><a href="#cb11-59" aria-hidden="true" tabindex="-1"></a>                               p_s_hfly<span class="sc">$</span>data<span class="sc">$</span>cl))</span>
+<span id="cb11-60"><a href="#cb11-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-61"><a href="#cb11-61" aria-hidden="true" tabindex="-1"></a>ps_gp <span class="ot">&lt;-</span> <span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb11-62"><a href="#cb11-62" aria-hidden="true" tabindex="-1"></a>     <span class="co">#geom_path(data=pw_anim$circle, </span></span>
+<span id="cb11-63"><a href="#cb11-63" aria-hidden="true" tabindex="-1"></a>     <span class="co">#          aes(x=c1, y=c2,</span></span>
+<span id="cb11-64"><a href="#cb11-64" aria-hidden="true" tabindex="-1"></a>     <span class="co">#              frame=frame), linewidth=0.1) +</span></span>
+<span id="cb11-65"><a href="#cb11-65" aria-hidden="true" tabindex="-1"></a>     <span class="co">#geom_segment(data=pw_anim$axes, </span></span>
+<span id="cb11-66"><a href="#cb11-66" aria-hidden="true" tabindex="-1"></a>     <span class="co">#             aes(x=x1, y=y1, </span></span>
+<span id="cb11-67"><a href="#cb11-67" aria-hidden="true" tabindex="-1"></a>     <span class="co">#                 xend=x2, yend=y2, </span></span>
+<span id="cb11-68"><a href="#cb11-68" aria-hidden="true" tabindex="-1"></a>     <span class="co">#                 frame=frame), </span></span>
+<span id="cb11-69"><a href="#cb11-69" aria-hidden="true" tabindex="-1"></a>     <span class="co">#             linewidth=0.1) +</span></span>
+<span id="cb11-70"><a href="#cb11-70" aria-hidden="true" tabindex="-1"></a>     <span class="co">#geom_text(data=pw_anim$axes, </span></span>
+<span id="cb11-71"><a href="#cb11-71" aria-hidden="true" tabindex="-1"></a>     <span class="co">#          aes(x=x2, y=y2, </span></span>
+<span id="cb11-72"><a href="#cb11-72" aria-hidden="true" tabindex="-1"></a>     <span class="co">#              frame=frame, </span></span>
+<span id="cb11-73"><a href="#cb11-73" aria-hidden="true" tabindex="-1"></a>     <span class="co">#              label=axis_labels), </span></span>
+<span id="cb11-74"><a href="#cb11-74" aria-hidden="true" tabindex="-1"></a>     <span class="co">#          size=5) +</span></span>
+<span id="cb11-75"><a href="#cb11-75" aria-hidden="true" tabindex="-1"></a>     <span class="fu">geom_segment</span>(<span class="at">data=</span>ps_anim<span class="sc">$</span>edges, </span>
+<span id="cb11-76"><a href="#cb11-76" aria-hidden="true" tabindex="-1"></a>                    <span class="fu">aes</span>(<span class="at">x=</span>x, <span class="at">xend=</span>xend,</span>
+<span id="cb11-77"><a href="#cb11-77" aria-hidden="true" tabindex="-1"></a>                        <span class="at">y=</span>y, <span class="at">yend=</span>yend,</span>
+<span id="cb11-78"><a href="#cb11-78" aria-hidden="true" tabindex="-1"></a>                        <span class="at">frame=</span>frame)) <span class="sc">+</span></span>
+<span id="cb11-79"><a href="#cb11-79" aria-hidden="true" tabindex="-1"></a>     <span class="fu">geom_point</span>(<span class="at">data=</span>ps_anim<span class="sc">$</span>frames, </span>
+<span id="cb11-80"><a href="#cb11-80" aria-hidden="true" tabindex="-1"></a>                <span class="fu">aes</span>(<span class="at">x=</span>P1, <span class="at">y=</span>P2, </span>
+<span id="cb11-81"><a href="#cb11-81" aria-hidden="true" tabindex="-1"></a>                    <span class="at">frame=</span>frame, </span>
+<span id="cb11-82"><a href="#cb11-82" aria-hidden="true" tabindex="-1"></a>                    <span class="at">shape=</span><span class="fu">factor</span>(node),</span>
+<span id="cb11-83"><a href="#cb11-83" aria-hidden="true" tabindex="-1"></a>                    <span class="at">label=</span>obs_labels), </span>
+<span id="cb11-84"><a href="#cb11-84" aria-hidden="true" tabindex="-1"></a>                <span class="at">alpha=</span><span class="fl">0.8</span>, <span class="at">size=</span><span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb11-85"><a href="#cb11-85" aria-hidden="true" tabindex="-1"></a>     <span class="fu">xlim</span>(<span class="sc">-</span><span class="dv">1</span>,<span class="dv">1</span>) <span class="sc">+</span> <span class="fu">ylim</span>(<span class="sc">-</span><span class="dv">1</span>,<span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb11-86"><a href="#cb11-86" aria-hidden="true" tabindex="-1"></a>     <span class="fu">scale_shape_manual</span>(<span class="at">values=</span><span class="fu">c</span>(<span class="dv">16</span>, <span class="dv">46</span>)) <span class="sc">+</span></span>
+<span id="cb11-87"><a href="#cb11-87" aria-hidden="true" tabindex="-1"></a>     <span class="fu">coord_equal</span>() <span class="sc">+</span></span>
+<span id="cb11-88"><a href="#cb11-88" aria-hidden="true" tabindex="-1"></a>     <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb11-89"><a href="#cb11-89" aria-hidden="true" tabindex="-1"></a>     <span class="fu">theme</span>(<span class="at">legend.position=</span><span class="st">"none"</span>, </span>
+<span id="cb11-90"><a href="#cb11-90" aria-hidden="true" tabindex="-1"></a>           <span class="at">axis.text=</span><span class="fu">element_blank</span>(),</span>
+<span id="cb11-91"><a href="#cb11-91" aria-hidden="true" tabindex="-1"></a>           <span class="at">axis.title=</span><span class="fu">element_blank</span>(),</span>
+<span id="cb11-92"><a href="#cb11-92" aria-hidden="true" tabindex="-1"></a>           <span class="at">axis.ticks=</span><span class="fu">element_blank</span>(),</span>
+<span id="cb11-93"><a href="#cb11-93" aria-hidden="true" tabindex="-1"></a>           <span class="at">panel.grid=</span><span class="fu">element_blank</span>())</span>
+<span id="cb11-94"><a href="#cb11-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-95"><a href="#cb11-95" aria-hidden="true" tabindex="-1"></a>psg <span class="ot">&lt;-</span> <span class="fu">ggplotly</span>(ps_gp, <span class="at">width=</span><span class="dv">450</span>, <span class="at">height=</span><span class="dv">500</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb11-96"><a href="#cb11-96" aria-hidden="true" tabindex="-1"></a>       <span class="fu">animation_button</span>(<span class="at">label=</span><span class="st">"Go"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb11-97"><a href="#cb11-97" aria-hidden="true" tabindex="-1"></a>       <span class="fu">animation_slider</span>(<span class="at">len=</span><span class="fl">0.8</span>, <span class="at">x=</span><span class="fl">0.5</span>,</span>
+<span id="cb11-98"><a href="#cb11-98" aria-hidden="true" tabindex="-1"></a>                        <span class="at">xanchor=</span><span class="st">"center"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb11-99"><a href="#cb11-99" aria-hidden="true" tabindex="-1"></a>       <span class="fu">animation_opts</span>(<span class="at">easing=</span><span class="st">"linear"</span>, <span class="at">transition =</span> <span class="dv">0</span>)</span>
+<span id="cb11-100"><a href="#cb11-100" aria-hidden="true" tabindex="-1"></a>htmlwidgets<span class="sc">::</span><span class="fu">saveWidget</span>(psg,</span>
+<span id="cb11-101"><a href="#cb11-101" aria-hidden="true" tabindex="-1"></a>          <span class="at">file=</span><span class="st">"html/penguins_cl_single.html"</span>,</span>
+<span id="cb11-102"><a href="#cb11-102" aria-hidden="true" tabindex="-1"></a>          <span class="at">selfcontained =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div id="fig-penguins-cl-wards" class="quarto-figure quarto-figure-center anchored">
@@ -928,6 +918,8 @@ div.csl-indent {
 @fig-prim7-hier contains several plots that illustrate the results of the hierarchical clustering of the particle physics data; we used Euclidean interpoint distances and the average linkage method. This is computed by:
 
 ```
+
+
 > library(rggobi)
 > d.prim7 <- read.csv("prim7.csv")
 > d.prim7.dist <- dist(d.prim7)
