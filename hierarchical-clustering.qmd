@@ -19,6 +19,8 @@ library(patchwork)
 library(tourr)
 library(plotly)
 library(htmlwidgets)
+#library(RColorBrewer)
+library(colorspace)
 ```
 
 ```{r}
@@ -73,7 +75,7 @@ simple_clusters <- simple_clusters %>%
 pc <- ggplot(simple_clusters) +
   geom_point(aes(x=x1, y=x2, colour=clw), 
              size=2, alpha=0.8) +
-  scale_colour_brewer(palette="Set1") +
+  scale_colour_discrete_qualitative(palette = "Dark 3") +
   ggtitle("(d)") +
   theme(aspect.ratio=1, legend.position="none")
 
@@ -173,7 +175,7 @@ d1 <- d1 %>%
 pc_d1s <- ggplot(d1) +
   geom_point(aes(x=x1, y=x2, colour=cls), 
              size=2, alpha=0.8) +
-  scale_colour_brewer(palette="Set1") +
+  scale_colour_discrete_qualitative(palette = "Dark 3") +
   ggtitle("(c) Two-cluster solution") +
   theme(aspect.ratio=1, legend.position="none")
 
@@ -214,7 +216,7 @@ d1 <- d1 %>%
 pc_d1w <- ggplot(d1) +
   geom_point(aes(x=x1, y=x2, colour=clw), 
              size=2, alpha=0.8) +
-  scale_colour_brewer(palette="Set1") +
+  scale_colour_discrete_qualitative(palette = "Dark 3") +
   ggtitle("(f) Two-cluster solution") +
   theme(aspect.ratio=1, legend.position="none")
 
@@ -268,7 +270,7 @@ d2 <- d2 %>%
 pc_d2c <- ggplot(d2) +
   geom_point(aes(x=x1, y=x2, colour=clc), 
              size=2, alpha=0.8) +
-  scale_colour_brewer(palette="Set1") +
+  scale_colour_discrete_qualitative(palette = "Dark 3") +
   ggtitle("(c) Two-cluster solution") +
   theme(aspect.ratio=1, legend.position="none")
 
@@ -309,7 +311,7 @@ d2 <- d2 %>%
 pc_d2w <- ggplot(d2) +
   geom_point(aes(x=x1, y=x2, colour=clw), 
              size=2, alpha=0.8) +
-  scale_colour_brewer(palette="Set1") +
+  scale_colour_discrete_qualitative(palette = "Dark 3") +
   ggtitle("(f) Two-cluster solution") +
   theme(aspect.ratio=1, legend.position="none")
 
@@ -421,13 +423,87 @@ render_gif(p_s_hfly$data[,1:4],
 
 ```
 
+```{r}
+#| echo: FALSE
+p_hcw_dd <- dendro_data(p_hcw, type = "triangle")
+pw_dd <- ggplot() +
+  geom_segment(data=p_hcw_dd$segments, 
+               aes(x = x, y = y, 
+                   xend = xend, yend = yend)) + 
+  geom_point(data=p_hcw_dd$labels, aes(x=x, y=y),
+             alpha=0.8) +
+  theme_dendro()
+```
+
+```{r}
+#| echo: FALSE
+p_hcs_dd <- dendro_data(p_hcs, type = "triangle")
+ps_dd <- ggplot() +
+  geom_segment(data=p_hcs_dd$segments, 
+               aes(x = x, y = y, 
+                   xend = xend, yend = yend)) + 
+  geom_point(data=p_hcs_dd$labels, aes(x=x, y=y),
+             alpha=0.8) +
+  theme_dendro()
+```
+
+```{r}
+#| label: fig-penguins-w3
+#| echo: FALSE
+#| eval: FALSE
+#| fig-cap: Wards linkage 
+clrs <- qualitative_hcl(3, "Dark 3")
+w3_col <- clrs[p_w_hfly$data$cl[p_w_hfly$data$node == 0]]
+render_gif(p_w_hfly$data[p_w_hfly$data$node == 0, 1:4], 
+           planned_tour(pt1), 
+           display_xy(half_range=0.9,   
+                      col=w3_col,
+                      axes = "off"),
+           gif_file="gifs/penguins_w3.gif",
+           frames=500,
+           loop=FALSE)
+```
+
+```{r}
+#| label: fig-penguins-s3
+#| echo: FALSE
+#| eval: FALSE
+#| fig-cap: single linkage
+clrs <- qualitative_hcl(3, "Dark 3")
+s3_col <- clrs[p_s_hfly$data$cl[p_w_hfly$data$node == 0]]
+render_gif(p_s_hfly$data[p_w_hfly$data$node == 0,1:4], 
+           planned_tour(pt1), 
+           display_xy(half_range=0.9,   
+                      col=s3_col,
+                      axes = "off"),
+           gif_file="gifs/penguins_s3.gif",
+           frames=500,
+           loop=FALSE)
+```
+
 ::: {#fig-penguins-hfly layout-ncol=2}
+
+```{r}
+#| label: fig-penguins-ddw
+#| fig-cap: Wards linkage 
+pw_dd
+```
+
+```{r}
+#| label: fig-penguins-dds
+#| fig-cap: single linkage 
+ps_dd
+```
 
 ![Wards linkage](gifs/penguins_hflyw.gif){#fig-penguins-hflyw fig-alt="Tour showing the dendrogram for Wards linkage clustering on the penguins data in 4D. You can see that it connects points within each clump and then connects between clusters."}
 
 ![Single linkage](gifs/penguins_hflys.gif){#fig-penguins-hflyw fig-alt="Tour showing the dendrogram for single linkage clustering on the penguins data in 4D. You can see that the connections are like asterisks, connecting towards the center of each clump and there are a couple of long connections between clusters."}
 
-Dendrogram for Wards linkage of the penguins data
+![Wards linkage](gifs/penguins_w3.gif){#fig-penguins-w3}
+
+![Single linkage](gifs/penguins_s3.gif){#fig-penguins-s3}
+
+Dendrograms for Wards and single linkage of the penguins data, shown in 2D (top) and in 4D (middle), and the three-cluster solution of each.
 :::
 
 ```{r}
@@ -477,7 +553,8 @@ pw_gp <- ggplot() +
            axis.ticks=element_blank(),
            panel.grid=element_blank())
 
-pwg <- ggplotly(pw_gp, width=450, height=500) %>%
+pwg <- ggplotly(pw_gp, width=450, height=500,
+                tooltip="label") %>%
        animation_button(label="Go") %>%
        animation_slider(len=0.8, x=0.5,
                         xanchor="center") %>%
@@ -527,7 +604,8 @@ ps_gp <- ggplot() +
            axis.ticks=element_blank(),
            panel.grid=element_blank())
 
-psg <- ggplotly(ps_gp, width=450, height=500) %>%
+psg <- ggplotly(ps_gp, width=450, height=500,
+                tooltip="label") %>%
        animation_button(label="Go") %>%
        animation_slider(len=0.8, x=0.5,
                         xanchor="center") %>%
@@ -537,7 +615,7 @@ htmlwidgets::saveWidget(psg,
           selfcontained = TRUE)
 ```
 
-::: {#fig-penguins-hfly-plotly}
+::: {#fig-penguins-hfly-plotly fig-align="center"}
 
 <iframe width="500" height="500" src="html/penguins_cl_ward.html" title="Animation of dendrogram from Wards linkage clustering of the penguins data."></iframe>
 
