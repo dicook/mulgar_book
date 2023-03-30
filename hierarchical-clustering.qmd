@@ -376,13 +376,30 @@ p_s_hfly <- hierfly(p_cls, p_hcs, scale=FALSE)
 ```
 
 ```{r}
+# Generate the dendrograms in 2D
+p_hcw_dd <- dendro_data(p_hcw)
+pw_dd <- ggplot() +
+  geom_segment(data=p_hcw_dd$segments, 
+               aes(x = x, y = y, 
+                   xend = xend, yend = yend)) + 
+  geom_point(data=p_hcw_dd$labels, aes(x=x, y=y),
+             alpha=0.8) +
+  theme_dendro()
+
+p_hcs_dd <- dendro_data(p_hcs)
+ps_dd <- ggplot() +
+  geom_segment(data=p_hcs_dd$segments, 
+               aes(x = x, y = y, 
+                   xend = xend, yend = yend)) + 
+  geom_point(data=p_hcs_dd$labels, aes(x=x, y=y),
+             alpha=0.8) +
+  theme_dendro()
+```
+
+```{r}
 #| label: penguins-hfly
 #| eval: FALSE
 load("data/penguins_tour_path.rda")
-# library(RColorBrewer)
-#pal <- brewer.pal(length(unique(p_w_hfly$data$cl)), "Set2")
-#colw <- pal[p_w_hfly$data$cl]
-#cols <- pal[p_s_hfly$data$cl]
 glyphs <- c(16, 46)
 pchw <- glyphs[p_w_hfly$data$node+1]
 pchs <- glyphs[p_s_hfly$data$node+1]
@@ -421,37 +438,7 @@ render_gif(p_s_hfly$data[,1:4],
            frames=500,
            loop=FALSE)
 
-```
-
-```{r}
-#| echo: FALSE
-p_hcw_dd <- dendro_data(p_hcw, type = "triangle")
-pw_dd <- ggplot() +
-  geom_segment(data=p_hcw_dd$segments, 
-               aes(x = x, y = y, 
-                   xend = xend, yend = yend)) + 
-  geom_point(data=p_hcw_dd$labels, aes(x=x, y=y),
-             alpha=0.8) +
-  theme_dendro()
-```
-
-```{r}
-#| echo: FALSE
-p_hcs_dd <- dendro_data(p_hcs, type = "triangle")
-ps_dd <- ggplot() +
-  geom_segment(data=p_hcs_dd$segments, 
-               aes(x = x, y = y, 
-                   xend = xend, yend = yend)) + 
-  geom_point(data=p_hcs_dd$labels, aes(x=x, y=y),
-             alpha=0.8) +
-  theme_dendro()
-```
-
-```{r}
-#| label: fig-penguins-w3
-#| echo: FALSE
-#| eval: FALSE
-#| fig-cap: Wards linkage 
+# Show three cluster solutions
 clrs <- qualitative_hcl(3, "Dark 3")
 w3_col <- clrs[p_w_hfly$data$cl[p_w_hfly$data$node == 0]]
 render_gif(p_w_hfly$data[p_w_hfly$data$node == 0, 1:4], 
@@ -462,13 +449,7 @@ render_gif(p_w_hfly$data[p_w_hfly$data$node == 0, 1:4],
            gif_file="gifs/penguins_w3.gif",
            frames=500,
            loop=FALSE)
-```
 
-```{r}
-#| label: fig-penguins-s3
-#| echo: FALSE
-#| eval: FALSE
-#| fig-cap: single linkage
 clrs <- qualitative_hcl(3, "Dark 3")
 s3_col <- clrs[p_s_hfly$data$cl[p_w_hfly$data$node == 0]]
 render_gif(p_s_hfly$data[p_w_hfly$data$node == 0,1:4], 
@@ -486,12 +467,14 @@ render_gif(p_s_hfly$data[p_w_hfly$data$node == 0,1:4],
 ```{r}
 #| label: fig-penguins-ddw
 #| fig-cap: Wards linkage 
+#| echo: FALSE
 pw_dd
 ```
 
 ```{r}
 #| label: fig-penguins-dds
 #| fig-cap: single linkage 
+#| echo: FALSE
 ps_dd
 ```
 
