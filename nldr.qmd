@@ -1,4 +1,54 @@
 ## Non-linear dimension reduction
 
-Might need to use liminal here.
+```{r}
+#| label: trees-tsne
+#| message: FALSE
+#| eval: FALSE
+library(liminal)
+library(Rtsne)
+data(fake_trees)
+set.seed(2020)
+tsne <- Rtsne::Rtsne(dplyr::select(fake_trees, dplyr::starts_with("dim")))
+tsne_df <- data.frame(tsneX = tsne$Y[, 1],
+                      tsneY = tsne$Y[, 2])
+limn_tour_link(
+  tsne_df,
+  fake_trees,
+  cols = dim1:dim10,
+  color = branches
+)
+```
 
+![Linked views of t-SNE dimension reduction with a tour of the fake trees data. The t-SNE view clearly shows ten 1D non-linear clusters, while the tour of the full 100 variables suggests a lot more variation in the data, and less difference between clusters. ](images/fake_trees1.png){#fig-trees1}
+
+![Focus on the green cluster which is split by t-SNE. The shape as viewed in many linear projections shown by the tour shows that it is a single curved cluster. The split is an artifact of the t-SNE mapping.](images/fake_trees2.png){#fig-trees2}
+![Focus on the purple cluster which splits the green cluster in the t-SNE view. The tour shows that these two clusters are distinct, but are close in one neighbourhood of the 100D space. The close proximity in the t-SNE view is reasonable.](images/fake_trees3.png){#fig-trees3}
+
+![The t-SNE mapping of the penguins data inaccurately splits one of the clusters. The three clusters are clearly distinct when viewed with the tour.](images/penguins-tsne.png){#fig-penguins-tsne}
+
+```{r}
+#| label: penguins-tsne
+#| message: FALSE
+#| eval: FALSE
+library(palmerpenguins)
+penguins <- penguins %>%
+  na.omit() # 11 observations out of 344 removed
+# use only vars of interest, and standardise
+# them for easier interpretation
+penguins_sub <- penguins[,c(1, 3:6)] %>% 
+  mutate(across(where(is.numeric),  ~ scale(.)[,1])) %>%
+  rename(bl = bill_length_mm,
+         bd = bill_depth_mm,
+         fl = flipper_length_mm,
+         bm = body_mass_g)
+
+set.seed(2022)
+p_tsne <- Rtsne::Rtsne(penguins_sub[,2:5])
+p_tsne_df <- data.frame(tsneX = p_tsne$Y[, 1], tsneY = p_tsne$Y[, 2])
+limn_tour_link(
+  p_tsne_df,
+  penguins_sub,
+  cols = bl:bm,
+  color = species
+)
+```
