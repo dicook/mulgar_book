@@ -1,8 +1,4 @@
----
-editor: 
-  markdown: 
-    wrap: 72
----
+## Model-based clustering
 
 \index{cluster analysis!model-based} \# Model-based clustering
 
@@ -36,16 +32,58 @@ shaped data. When the variances (diagonals) are different or the variables are c
 
 \index{Bayes Information Criterion (BIC)}
 
-The models are typically scored using the Bayes Information Criterion (BIC), which is based on the log likelihood, number of variables, and number of mixture components. They should also be assessed using graphical methods, as we demonstrate using the \Data{penguins} data. We start with two of the four real-valued variables () and the three `species`.
+The models are typically scored using the Bayes Information Criterion (BIC), which is based on the log likelihood, number of variables, and number of mixture components. They should also be assessed using graphical methods, as we demonstrate using the \Data{penguins} data. We start with two of the four real-valued variables (`bl`, `fl`) and the three `species`.
 
-    > library(mclust)
-    > d.crabs <- read.csv("australian-crabs.csv")
-    > d.blue.crabs <- subset(d.crabs,
-        species=="Blue", select=c(sex,FL:BD))
+```{r}
+#| label: fig-penguins-bl-fl
+#| fig-cap: "Scatterplot of flipper length by bill length of the penguins data."
+#| fig-width: 5
+#| fig-height: 5
+library(ggplot2)
+#library(colorspace)
+load("data/penguins_sub.rda")
+ggplot(penguins_sub, aes(x=bl, 
+                         y=fl)) + #, 
+                         #colour=species)) +
+  geom_point() +
+  geom_density2d() +
+  #scale_color_discrete_qualitative("Dark 3") +
+  theme(aspect.ratio = 1)
+```
 
-\noindent The goal is to determine whether model-based methods can
-discover clusters that will distinguish between the two sexes.
+```{r}
+#| label: penguins-mc
+#| message: FALSE
+#| fig-width: 5
+#| fig-height: 5
+library(mclust)
+library(mulgar)
+penguins_BIC <- mclustBIC(penguins_sub[,c(1,3)])
+ggmcbic(penguins_BIC, cl=2:9, top=4)
+penguins_mc <- Mclust(penguins_sub[,c(1,3)], 
+                      G=3, 
+                      modelNames = "EVE")
+penguins_mce <- mc_ellipse(penguins_mc)
+penguins_cl <- penguins_sub[,c(1,3)]
+penguins_cl$cl <- factor(penguins_mc$classification)
+ggplot() +
+   geom_point(data=penguins_cl, aes(x=bl, y=fl,
+                                    colour=cl)) +
+   geom_point(data=penguins_mce$ell, aes(x=bl, y=fl,
+                                         colour=cl),
+              shape=4) +
+   geom_point(data=penguins_mce$mn, aes(x=bl, y=fl,
+                                        colour=cl),
+              shape=3, size=2) +
+   theme(aspect.ratio=1, legend.position="none")
 
+```
+
+
+
+\noindent The goal is to determine whether model-based methods can discover clusters that will distinguish between the three species.
+
+<!--
 ```{=html}
 <!--
 % Figure 6 -- too large for the page, but maybe it can just
@@ -64,22 +102,15 @@ of the three best models, EEV-2 {\bf (middle right)}, EEV-3 {\bf
 (bottom left)}, and VVV-2 {\bf (bottom right)}.}
 \label{model-based1}
 \end{figure*}
--->
+
 ```
-@fig-model-based1 contains the plots we will use to examine the results
-of model-based clustering on this reduced dataset. The top leftmost plot
-shows the data, with male and female crabs distinguished by color and
-glyph. The two sexes correspond to long cigar-shaped objects that
-overlap a bit, particularly for smaller crabs. The "cigars" are not
-perfectly regular: The variance of the data is smaller at small values
-for both sexes, so that our cigars are somewhat wedge-shaped. The
-orientation of the longest direction of variance differs slightly
-between groups too: The association has a steeper slope for female crabs
-than for males, because female crabs have relatively larger `rear width`
-than male crabs. With the heterogeneity in variance--covariance, this
-data does not strictly adhere to the multivariate normal mixture model
-underlying model-based methods, but we hope that the departure from
-regularity is not so extreme that it prevents the model from working.
+-->
+
+@fig-model-based1 contains the plots we will use to examine the results of model-based clustering on this reduced dataset. The top leftmost plot shows the data, with male and female crabs distinguished by color and
+glyph. The two sexes correspond to long cigar-shaped objects that overlap a bit, particularly for smaller crabs. The "cigars" are not perfectly regular: The variance of the data is smaller at small values
+for both sexes, so that our cigars are somewhat wedge-shaped. The orientation of the longest direction of variance differs slightly between groups too: The association has a steeper slope for female crabs
+than for males, because female crabs have relatively larger `rear width` than male crabs. With the heterogeneity in variance-covariance, this
+data does not strictly adhere to the multivariate normal mixture model underlying model-based methods, but we hope that the departure from regularity is not so extreme that it prevents the model from working.
 
 The top right plot shows the BIC results for a full range of models,
 EEE, EEV, and VVV variance-covariance parametrization for one to nine
