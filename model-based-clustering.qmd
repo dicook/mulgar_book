@@ -1,26 +1,37 @@
-## Model-based clustering {#sec-mclust}
+# Model-based clustering {#sec-mclust}
 
-\index{cluster analysis!model-based} \# Model-based clustering
+\index{cluster analysis!model-based} 
 
-Model-based clustering @FR02 fits a multivariate normal mixture model to the data. It uses the EM algorithm to fit the parameters for the mean, variance--covariance of each population, and the mixing proportion. The variance-covariance matrix is re-parametrized using an
- eigen-decomposition
+## Overview
+
+Model-based clustering @FR02 fits a multivariate normal mixture model to the data. It uses the EM algorithm to fit the parameters for the mean, variance--covariance of each population, and the mixing proportion. The variance-covariance matrix is re-parametrized using an eigen-decomposition
 
 $$
 \Sigma_k = \lambda_kD_kA_kD_k', ~~~k=1, \dots, g ~~\mbox{(number of clusters)}
 $$
 
-\noindent resulting in several model choices, ranging from simple to
-complex:
+\noindent resulting in several model choices, ranging from simple to complex, as shown in @tbl-covariances.
 
 ```{r}
-#| label: tab-covariances
-#| echo: FALSE
+#| label: mc-libraries
 #| message: FALSE
 library(dplyr)
 library(kableExtra)
+library(ggplot2)
+library(mclust)
+library(mulgar)
+library(patchwork)
+library(colorspace)
+library(tourr)
+```
+
+```{r}
+#| label: tbl-covariances
+#| tbl-cap: "Parameterizations of the covariance matrix."
+#| echo: FALSE
+#| message: FALSE
 readr::read_csv('misc/mclust-covariances.csv') %>%
-  knitr::kable(caption = 'Parameterizations of the covariance matrix',
-                align = c('c', 'c', 'c', 'c', 'c', 'c')) %>%
+  knitr::kable(align = c('c', 'c', 'c', 'c', 'c', 'c')) %>%
   kableExtra::kable_styling(full_width = FALSE)
 ```
 
@@ -29,15 +40,17 @@ shaped data. When the variances (diagonals) are different or the variables are c
 
 \index{Bayes Information Criterion (BIC)}
 
-The models are typically scored using the Bayes Information Criterion (BIC), which is based on the log likelihood, number of variables, and number of mixture components. They should also be assessed using graphical methods, as we demonstrate using the \Data{penguins} data. We start with two of the four real-valued variables (`bl`, `fl`) and the three `species`.
+The models are typically scored using the Bayes Information Criterion (BIC), which is based on the log likelihood, number of variables, and number of mixture components. They should also be assessed using graphical methods, as we demonstrate using the \Data{penguins} data. 
+
+## Two variables
+
+We start with two of the four real-valued variables (`bl`, `fl`) and the three `species`. The goal is to determine whether model-based methods can discover clusters that closely correspond to the three species. Based on the scatterplot in @fig-penguins-bl-fl we would expect it to do well, and suggest an elliptical variance-covariance of roughly equal sizes as the model.
 
 ```{r}
 #| label: fig-penguins-bl-fl
 #| fig-cap: "Scatterplot of flipper length by bill length of the penguins data."
 #| fig-width: 5
 #| fig-height: 5
-library(ggplot2)
-#library(colorspace)
 load("data/penguins_sub.rda")
 ggplot(penguins_sub, aes(x=bl, 
                          y=fl)) + #, 
@@ -49,60 +62,144 @@ ggplot(penguins_sub, aes(x=bl,
 ```
 
 ```{r}
-#| label: penguins-mc
+#| label: fig-penguins-bl-fl-mc
 #| message: FALSE
-#| fig-width: 5
-#| fig-height: 5
-library(mclust)
-library(mulgar)
+#| fig-width: 8
+#| fig-height: 4
+#| fig-cap: "Summary plots from model-based clustering: (a) BIC values for clusters 2-9 of top four models, (b) variance-covariance ellipses and cluster means (+) corresponding to the best model. The best model is three-cluster EVE, which has differently shaped variance-covariances albeit the same volume and orientation."
 penguins_BIC <- mclustBIC(penguins_sub[,c(1,3)])
-ggmcbic(penguins_BIC, cl=2:9, top=4)
+ggmc <- ggmcbic(penguins_BIC, cl=2:9, top=4) + ggtitle("(a)")
 penguins_mc <- Mclust(penguins_sub[,c(1,3)], 
                       G=3, 
                       modelNames = "EVE")
 penguins_mce <- mc_ellipse(penguins_mc)
 penguins_cl <- penguins_sub[,c(1,3)]
 penguins_cl$cl <- factor(penguins_mc$classification)
-ggplot() +
+ggell <- ggplot() +
    geom_point(data=penguins_cl, aes(x=bl, y=fl,
-                                    colour=cl)) +
+                                    colour=cl),
+              alpha=0.3) +
    geom_point(data=penguins_mce$ell, aes(x=bl, y=fl,
                                          colour=cl),
-              shape=4) +
+              shape=16) +
    geom_point(data=penguins_mce$mn, aes(x=bl, y=fl,
                                         colour=cl),
               shape=3, size=2) +
-   theme(aspect.ratio=1, legend.position="none")
-
+  scale_color_discrete_qualitative(palette = "Dark 3") +
+   theme(aspect.ratio=1, legend.position="none") +
+  ggtitle("(b)")
+ggmc + ggell + plot_layout(ncol=2)
 ```
 
+@fig-penguins-bl-fl-mc summarises the results. All models agree that three clusters is the best. The different variance-covariance models for three clusters have similar BIC values with EVE (different shape, same volume and orientation) being slightly higher. These plots are made from the `mclust` package output using the `ggmcbic` and `mc_ellipse` functions fro the `mulgar` package.
 
+## High-dimensions
 
-\noindent The goal is to determine whether model-based methods can discover clusters that will distinguish between the three species.
+Now we will examine how model-based clustering will group the penguins data using all four variables. 
 
-<!--
-```{=html}
-<!--
-% Figure 6 -- too large for the page, but maybe it can just
-%   be reduced in the R code.
-\begin{figure*}[htbp]
-\centerline{\includegraphics[width=4.5in]{chap-clust/mclust.pdf}}
-\caption[Model-based clustering of a reduced set of \Data{Australian
-Crabs}]{Model-based clustering of a reduced set of \Data{Australian
-Crabs}.  A scatterplot {\bf (top left)} shows the data with values of
-\Vbl{sex} labeled.  A plot of the BIC values for the full range of
-models {\bf (top right)} shows that the best model organizes the cases
-into two clusters using EEV parametrization.  We label the cases by
-cluster for the best model {\bf (middle left)}.  The remaining three
-plots include ellipses representing the variance--covariance estimates
-of the three best models, EEV-2 {\bf (middle right)}, EEV-3 {\bf
-(bottom left)}, and VVV-2 {\bf (bottom right)}.}
-\label{model-based1}
-\end{figure*}
-
+```{r}
+#| label: fig-penguins-bic
+#| fig-cap: "BIC values for the top models for 2-9 clusters on the penguins data. The interpretation is mixed: if one were to choose three clusters any of the variance-covariance models would be equally as good, but the very best model is the four-cluster VEE."
+#| fig-width: 6
+#| fig-height: 4
+#| fig-align: "center"
+penguins_BIC <- mclustBIC(penguins_sub[,1:4])
+ggmc <- ggmcbic(penguins_BIC, cl=2:9, top=7) 
+ggmc
 ```
--->
 
+```{r}
+#| eval: FALSE
+#| label: best-mclust
+penguins_mc <- Mclust(penguins_sub[,1:4], 
+                      G=4, 
+                      modelNames = "VEE")
+penguins_mce <- mc_ellipse(penguins_mc)
+penguins_cl <- penguins_sub
+penguins_cl$cl <- factor(penguins_mc$classification)
+
+penguins_mc_data <- penguins_cl %>%
+  select(bl:bm, cl) %>%
+  mutate(type = "data") %>%
+  bind_rows(bind_cols(penguins_mce$ell,
+                      type=rep("ellipse",
+                               nrow(penguins_mce$ell)))) %>%
+  mutate(type = factor(type))
+
+animate_xy(penguins_mc_data[,1:4],
+           col=penguins_mc_data$cl,
+           pch=c(4, 20)[as.numeric(penguins_mc_data$type)], 
+           axes="off")
+
+# Save the animated gif
+load("data/penguins_tour_path.rda")
+render_gif(penguins_mc_data[,1:4], 
+           planned_tour(pt1), 
+           display_xy(col=penguins_mc_data$cl,
+               pch=c(4, 20)[
+                 as.numeric(penguins_mc_data$type)], 
+                      axes="off"),
+           gif_file="gifs/penguins_best_mc.gif",
+           frames=500,
+           loop=FALSE)
+```
+
+```{r}
+#| eval: FALSE
+#| label: simpler-mclust
+penguins_mc <- Mclust(penguins_sub[,1:4], 
+                      G=3, 
+                      modelNames = "EEE")
+penguins_mce <- mc_ellipse(penguins_mc)
+penguins_cl <- penguins_sub
+penguins_cl$cl <- factor(penguins_mc$classification)
+
+penguins_mc_data <- penguins_cl %>%
+  select(bl:bm, cl) %>%
+  mutate(type = "data") %>%
+  bind_rows(bind_cols(penguins_mce$ell,
+                      type=rep("ellipse",
+                               nrow(penguins_mce$ell)))) %>%
+  mutate(type = factor(type))
+
+animate_xy(penguins_mc_data[,1:4],
+           col=penguins_mc_data$cl,
+           pch=c(4, 20)[as.numeric(penguins_mc_data$type)], 
+           axes="off")
+
+# Save the animated gif
+load("data/penguins_tour_path.rda")
+render_gif(penguins_mc_data[,1:4], 
+           planned_tour(pt1), 
+           display_xy(col=penguins_mc_data$cl,
+               pch=c(4, 20)[
+                 as.numeric(penguins_mc_data$type)], 
+                      axes="off"),
+           gif_file="gifs/penguins_simpler_mc.gif",
+           frames=500,
+           loop=FALSE)
+```
+::: {#fig-penguins-mc layout-ncol=2}
+
+![Best model: four-cluster VEE](gifs/penguins_best_mc.gif){#fig-penguins-best_mc fig-alt="FIX ME" fig.align="center"}
+
+![Three-cluster EEE](gifs/penguins_simpler_mc.gif){#fig-penguins-simpler_mc fig-alt="FIX ME" fig.align="center"}
+
+Examining the model-based clustering results for the penguins data: (a) best model according to BIC value, (b) simpler three-cluster model. Dots are ellipse points, and "x" are data points. It is important to note that the three cluster solution fits the data better, even though it has a lower BIC. 
+:::
+
+
+```{r}
+#| eval: FALSE
+#| echo: FALSE
+penguins_cl %>% 
+  count(species, cl) %>%
+  pivot_wider(names_from=cl, 
+              values_from=n, 
+              values_fill=0)
+```
+
+<!--
 @fig-model-based1 contains the plots we will use to examine the results of model-based clustering on this reduced dataset. The top leftmost plot shows the data, with male and female crabs distinguished by color and
 glyph. The two sexes correspond to long cigar-shaped objects that overlap a bit, particularly for smaller crabs. The "cigars" are not perfectly regular: The variance of the data is smaller at small values
 for both sexes, so that our cigars are somewhat wedge-shaped. The orientation of the longest direction of variance differs slightly between groups too: The association has a steeper slope for female crabs
@@ -188,6 +285,7 @@ save us from producing page upon page of plots. They allow us to look at
 many projections of the data, which enables us to conceptualize the
 shapes and relationships between clusters in more than two dimensions.
 
+
 @fig-model-based2 displays the graphics for the corresponding
 high-dimensional investigation using all five variables and four classes
 (two species, two sexes) of the \Data{Australian Crabs}. The cluster
@@ -201,7 +299,6 @@ of the blue species, and the yellow and orange points are the male and
 female crabs of the orange species. This table will help you keep track:
 
 ```{=html}
-<!--
 \begin{center}
 \begin{tabular}{l@{\hspace{.1in}}l@{\hspace{.1in}}l} \hline
 \T \B & Male & Female \\ \hline
@@ -209,12 +306,12 @@ female crabs of the orange species. This table will help you keep track:
 \B Orange Species & yellow circles & orange rectangles \\\hline
 \end{tabular}
 \end{center}
--->
 ```
+
 The clusters corresponding to the classes are long thin wedges in five
 dimensions (5D), with more separation and more variability at larger
 values, as we saw in the subset just discussed. The rightmost plot shows
-the \`\`looking down the barrel'' view of the wedges. At small values
+the looking down the barrel'' view of the wedges. At small values
 the points corresponding to the sexes are mixed (leftmost plot). The
 species are reasonably well separated even for small crabs (middle
 plot). The variance--covariance is wedge-shaped rather than elliptical,
@@ -222,7 +319,6 @@ but again we hope that modeling based on the normal distribution that
 has elliptical variance--covariance will be adequate.
 
 ```{=html}
-<!--
 % Figure 7
 \begin{figure*}[htbp]
 \centerline{{\includegraphics[width=1.5in]{chap-clust/crabs7.pdf}}
@@ -241,8 +337,8 @@ corresponding to the variance--covariance in the four-cluster model
 known groups in the data.}
 \label{model-based2}
 \end{figure*}
--->
 ```
+
 In the results from model-based clustering, there is very little
 difference in BIC value for variance--covariance models EEE, EEV, VEV,
 and VVV, with a number of clusters from three to eight. The best model
@@ -297,4 +393,4 @@ cluster analysis are very useful for understanding the solution, and
 choosing an appropriate model. Tours are very helpful for examining the
 results in higher dimensions, for arbitrary numbers of variables.
 
-\index{cluster analysis!self-organizing maps (SOM)}
+-->
