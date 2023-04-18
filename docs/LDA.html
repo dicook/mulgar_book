@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Interactive and dynamic graphics for high-dimensional data using R - 5&nbsp; Linear discriminant analysis and MANOVA</title>
+<title>Interactive and dynamic graphics for high-dimensional data using R - 5&nbsp; Linear discriminant analysis</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -155,7 +155,7 @@ div.csl-indent {
   <header id="quarto-header" class="headroom fixed-top">
   <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
     <div class="container-fluid d-flex justify-content-between">
-      <h1 class="quarto-secondary-nav-title"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Linear discriminant analysis and MANOVA</span></h1>
+      <h1 class="quarto-secondary-nav-title"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Linear discriminant analysis</span></h1>
       <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
         <i class="bi bi-chevron-right"></i>
       </button>
@@ -223,7 +223,7 @@ div.csl-indent {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./LDA.html" class="sidebar-item-text sidebar-link active"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Linear discriminant analysis and MANOVA</span></a>
+  <a href="./LDA.html" class="sidebar-item-text sidebar-link active"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Linear discriminant analysis</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -330,7 +330,7 @@ div.csl-indent {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title d-none d-lg-block"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Linear discriminant analysis and MANOVA</span></h1>
+<h1 class="title d-none d-lg-block"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Linear discriminant analysis</span></h1>
 </div>
 
 
@@ -356,7 +356,7 @@ div.csl-indent {
 <p><em>else allocate it to group 2,</em></p>
 <p>where ${X}_k $ are the class mean vectors of an <span class="math inline">\(n\times p\)</span> data matrix <span class="math inline">\(X_k ~~(k=1,2)\)</span>,</p>
 <p><span class="math display">\[S_{\rm pooled} = \frac{(n_1-1) S_1}{(n_1-1)+(n_2-1)} + \frac{(n_2-1) S_2}{(n_1-1)+(n_2-1)}\]</span></p>
-<p>is the pooled variance–covariance matrix, and</p>
+<p>is the pooled variance-covariance matrix, and</p>
 <p><span class="math display">\[S_k = \frac{1}{n-1}\sum_{i=1}^{n}
 (X_{ki}-\bar{X}_k)(X_{ki}-\bar{X}_k)', ~~k=1,2\]</span></p>
 <p>is the class variance–covariance matrix. The linear discriminant part of this rule is <span class="math inline">\((\bar{X}_1-\bar{X}_2)'S^{-1}_{\rm pooled}\)</span>, which defines the linear combination of variables that best separates the two groups. To define a classification rule, we compute the value of the new observation <span class="math inline">\(X_0\)</span> on this line and compare it with the value of the average of the two class means <span class="math inline">\((\bar{X}_1+\bar{X}_2)/2\)</span> on the same line.</p>
@@ -392,7 +392,7 @@ div.csl-indent {
 <span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>p_ell <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
 <span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">unique</span>(penguins_sub<span class="sc">$</span>species)) {</span>
 <span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  x <span class="ot">&lt;-</span> penguins_sub <span class="sc">%&gt;%</span> dplyr<span class="sc">::</span><span class="fu">filter</span>(species <span class="sc">==</span> i)</span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  e <span class="ot">&lt;-</span> <span class="fu">gen_xvar_ellipse</span>(x[,<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>])</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  e <span class="ot">&lt;-</span> <span class="fu">gen_xvar_ellipse</span>(x[,<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>], <span class="at">n=</span><span class="dv">150</span>, <span class="at">nstd=</span><span class="fl">1.5</span>)</span>
 <span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  e<span class="sc">$</span>species <span class="ot">&lt;-</span> i</span>
 <span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>  p_ell <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(p_ell, e)</span>
 <span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>}</span>
@@ -432,7 +432,7 @@ div.csl-indent {
 <span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>b_ell <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
 <span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">unique</span>(bushfires<span class="sc">$</span>cause)) {</span>
 <span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  x <span class="ot">&lt;-</span> bushfires <span class="sc">%&gt;%</span> dplyr<span class="sc">::</span><span class="fu">filter</span>(cause <span class="sc">==</span> i)</span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  e <span class="ot">&lt;-</span> <span class="fu">gen_xvar_ellipse</span>(x[,<span class="fu">c</span>(<span class="dv">57</span>, <span class="dv">59</span>)])</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  e <span class="ot">&lt;-</span> <span class="fu">gen_xvar_ellipse</span>(x[,<span class="fu">c</span>(<span class="dv">57</span>, <span class="dv">59</span>)], <span class="at">n=</span><span class="dv">150</span>, <span class="at">nstd=</span><span class="dv">2</span>)</span>
 <span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  e<span class="sc">$</span>cause <span class="ot">&lt;-</span> i</span>
 <span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  b_ell <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(b_ell, e)</span>
 <span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>}</span>
@@ -456,8 +456,9 @@ div.csl-indent {
 </div>
 </div>
 </div>
-<p>Our description is derived from <span class="citation" data-cites="VR02">Venables and Ripley (<a href="references.html#ref-VR02" role="doc-biblioref">2002</a>)</span> and <span class="citation" data-cites="Ri96">Ripley (<a href="references.html#ref-Ri96" role="doc-biblioref">1996</a>)</span>. A good general treatment of parametric methods for supervised classification can be found in <span class="citation" data-cites="JW02">Johnson and Wichern (<a href="references.html#ref-JW02" role="doc-biblioref">2002</a>)</span> or another similar multivariate analysis textbook. Missing from multivariate textbooks is a good explanation of the use of interactive graphics both to check the assumptions underlying the methods and to explore the results. This chapter fills this gap.</p>
-<p>Algorithmic methods have overtaken parametric methods in the practice of supervised classification. A parametric method such as linear discriminant analysis yields a set of interpretable output parameters, so it leaves a clear trail helping us to understand what was done to produce the results. An algorithmic method, on the other hand, is more or less a black box, with various input parameters that are adjusted to tune the algorithm. The algorithm’s input and output parameters do not always correspond in any obvious way to the interpretation of the results. All the same, these methods can be very powerful and their use is not limited by requirements about variable distributions as is the case with parametric methods.</p>
+<p>Our description is derived from <span class="citation" data-cites="VR02">Venables and Ripley (<a href="references.html#ref-VR02" role="doc-biblioref">2002</a>)</span> and <span class="citation" data-cites="Ri96">Ripley (<a href="references.html#ref-Ri96" role="doc-biblioref">1996</a>)</span>. A good general treatment of parametric methods for supervised classification can be found in <span class="citation" data-cites="JW02">Johnson and Wichern (<a href="references.html#ref-JW02" role="doc-biblioref">2002</a>)</span> or another similar multivariate analysis textbook. It’s also useful to know that hypothesis testing for difference in multivariate means using multivariate analysis of variance (MANOVA) uses the same assumption of equal variance-covariances. The method of looking at ellipses here can be used to check that assumption, too.</p>
+<p>Multivariate textbooks are generally lacking in good explanations of how to use interactive graphics both to check the assumptions underlying the methods and to explore the results. This chapter aims to fill this gap.</p>
+<p>Algorithmic methods have overtaken parametric methods in the practice of supervised classification. A parametric method such as linear discriminant analysis yields a set of interpretable output parameters, so it leaves a clear trail helping us to understand what was done to produce the results. An algorithmic method, on the other hand, is more or less a black box, with various input parameters that are adjusted to tune the algorithm. The algorithm’s input and output parameters do not always correspond in any obvious way to the interpretation of the results. Because if it’s simplicity, if the assumptions (approximately) hold, LDA can provide an elegant classification solution.</p>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" role="doc-bibliography" style="display: none">

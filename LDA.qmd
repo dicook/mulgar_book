@@ -1,4 +1,4 @@
-# Linear discriminant analysis and MANOVA
+# Linear discriminant analysis
 
 Discriminant analysis dates to the early 1900s. It's one of the most elegant and simple techniques for both modeling separation between groups, and producing a low-dimensional representation of the differences between groups. 
 
@@ -22,7 +22,7 @@ $n\times p$ data matrix $X_k ~~(k=1,2)$,
 
 $$S_{\rm pooled} = \frac{(n_1-1) S_1}{(n_1-1)+(n_2-1)} + \frac{(n_2-1) S_2}{(n_1-1)+(n_2-1)}$$
 
-is the pooled variance--covariance matrix, and
+is the pooled variance-covariance matrix, and
 
 $$S_k = \frac{1}{n-1}\sum_{i=1}^{n}
 (X_{ki}-\bar{X}_k)(X_{ki}-\bar{X}_k)', ~~k=1,2$$
@@ -81,7 +81,7 @@ lda1 <- ggplot(penguins_sub, aes(x=bl,
 p_ell <- NULL
 for (i in unique(penguins_sub$species)) {
   x <- penguins_sub %>% dplyr::filter(species == i)
-  e <- gen_xvar_ellipse(x[,1:2])
+  e <- gen_xvar_ellipse(x[,1:2], n=150, nstd=1.5)
   e$species <- i
   p_ell <- bind_rows(p_ell, e)
 }
@@ -116,7 +116,7 @@ lda3 <- ggplot(bushfires, aes(x=log_dist_cfa,
 b_ell <- NULL
 for (i in unique(bushfires$cause)) {
   x <- bushfires %>% dplyr::filter(cause == i)
-  e <- gen_xvar_ellipse(x[,c(57, 59)])
+  e <- gen_xvar_ellipse(x[,c(57, 59)], n=150, nstd=2)
   e$cause <- i
   b_ell <- bind_rows(b_ell, e)
 }
@@ -134,7 +134,10 @@ ggarrange(lda3, lda4, ncol=2,
 ```
 
 Our description is derived from @VR02 and @Ri96. A good general treatment of parametric methods for supervised classification can be found in @JW02 or another
-similar multivariate analysis textbook. Missing from multivariate textbooks is a good explanation of the use of interactive graphics both to check the assumptions underlying the methods and to explore the results. This chapter fills this gap.
+similar multivariate analysis textbook. It's also useful to know that hypothesis testing for difference in multivariate means using multivariate analysis of variance (MANOVA) uses the same assumption of equal variance-covariances. The method of looking at ellipses here can be used to check that assumption, too.
 
-Algorithmic methods have overtaken parametric methods in the practice of supervised classification.  A parametric method such as linear discriminant analysis yields a set of interpretable output parameters, so it leaves a clear trail helping us to understand what was done to produce the results.  An algorithmic method, on the other hand, is more or less a black box, with various input parameters that are adjusted to tune the algorithm.  The algorithm's input and output parameters do not always correspond in any obvious way to the interpretation of the results.  All the same, these methods can be
-very powerful and their use is not limited by requirements about variable distributions as is the case with parametric methods.
+Multivariate textbooks are generally lacking in good explanations of how to use interactive graphics both to check the assumptions underlying the methods and to explore the results. This chapter aims to fill this gap.
+
+Algorithmic methods have overtaken parametric methods in the practice of supervised classification.  A parametric method such as linear discriminant analysis yields a set of interpretable output parameters, so it leaves a clear trail helping us to understand what was done to produce the results.  An algorithmic method, on the other hand, is more or less a black box, with various input parameters that are adjusted to tune the algorithm.  The algorithm's input and output parameters do not always correspond in any obvious way to the interpretation of the results.  Because if it's simplicity, if the assumptions (approximately) hold, LDA can provide an elegant classification solution.
+
+
