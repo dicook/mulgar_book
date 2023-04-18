@@ -20,6 +20,69 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1.6em;
   vertical-align: middle;
 }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
 div.csl-bib-body { }
 div.csl-entry {
   clear: both;
@@ -283,39 +346,129 @@ div.csl-indent {
 </header>
 
 <p>Discriminant analysis dates to the early 1900s. It’s one of the most elegant and simple techniques for both modeling separation between groups, and producing a low-dimensional representation of the differences between groups.</p>
-<p>Fisher’s linear discriminant computes a linear combination of the variables that separates two classes by comparing the differences between class means with the variance of values within each class. It makes no assumptions about the distribution of the data.</p>
-<p>Linear discriminant analysis (LDA), as proposed by , formalizes Fisher’s approach, by recognising that it arises from making the assumption that the data values for each class arise from a <span class="math inline">\(p\)</span>-dimensional multivariate normal distribution, sharing a common variance-covariance matrix with data from other classes. When this assumption holds, Fisher’s linear discriminant gives the optimal separation between the two groups.</p>
+<p>Fisher’s linear discriminant <span class="citation" data-cites="Fi36">(<a href="references.html#ref-Fi36" role="doc-biblioref">Fisher 1936</a>)</span> computes a linear combination of the variables that separates two classes by comparing the differences between class means with the variance of values within each class. It makes no assumptions about the distribution of the data.</p>
+<p>Linear discriminant analysis (LDA), as proposed by <span class="citation" data-cites="Rao48">Rao (<a href="references.html#ref-Rao48" role="doc-biblioref">1948</a>)</span>, formalizes Fisher’s approach, by recognising that it arises from making the assumption that the data values for each class arise from a <span class="math inline">\(p\)</span>-dimensional multivariate normal distribution, sharing a common variance-covariance matrix with data from other classes. When this assumption holds, Fisher’s linear discriminant gives the optimal separation between the two groups.</p>
 <p>For two equally weighted groups, where <span class="math inline">\(Y\)</span> is coded as <span class="math inline">\(\{0, 1\}\)</span>, the LDA rule is:</p>
-<p><em>Allocate a new observation <span class="math inline">\(\blX_0\)</span> to group 1 if</em></p>
-<p><span class="math display">\[(\bar{\blX}_1-\bar{\blX}_2)'\blS^{-1}_{\rm pooled}\blX_0 \geq
-  \frac{1}{2}(\bar{\blX}_1-\bar{\blX}_2)'\blS^{-1}_{\rm pooled}
-  (\bar{\blX}_1+\bar{\blX}_2)\]</span></p>
+<p><em>Allocate a new observation <span class="math inline">\(X_0\)</span> to group 1 if</em></p>
+<p><span class="math display">\[(\bar{X}_1-\bar{X}_2)'S^{-1}_{\rm pooled}X_0 \geq
+  \frac{1}{2}(\bar{X}_1-\bar{X}_2)'S^{-1}_{\rm pooled}
+  (\bar{X}_1+\bar{X}_2)\]</span></p>
 <p><em>else allocate it to group 2,</em></p>
-<p>where ${}_k $ are the class mean vectors of an <span class="math inline">\(n\times p\)</span> data matrix <span class="math inline">\(\blX_k ~~(k=1,2)\)</span>,</p>
-<p><span class="math display">\[\blS_{\rm pooled} = \frac{(n_1-1) \blS_1}{(n_1-1)+(n_2-1)} + \frac{(n_2-1) \blS_2}{(n_1-1)+(n_2-1)}\]</span></p>
+<p>where ${X}_k $ are the class mean vectors of an <span class="math inline">\(n\times p\)</span> data matrix <span class="math inline">\(X_k ~~(k=1,2)\)</span>,</p>
+<p><span class="math display">\[S_{\rm pooled} = \frac{(n_1-1) S_1}{(n_1-1)+(n_2-1)} + \frac{(n_2-1) S_2}{(n_1-1)+(n_2-1)}\]</span></p>
 <p>is the pooled variance–covariance matrix, and</p>
-<p><span class="math display">\[\blS_k = \frac{1}{n-1}\sum_{i=1}^{n}
-(\blX_{ki}-\bar{\blX}_k)(\blX_{ki}-\bar{\blX}_k)', ~~k=1,2\]</span></p>
-<p>is the class variance–covariance matrix. The linear discriminant part of this rule is <span class="math inline">\((\bar{\blX}_1-\bar{\blX}_2)'\blS^{-1}_{\rm pooled}\)</span>, which defines the linear combination of variables that best separates the two groups. To define a classification rule, we compute the value of the new observation <span class="math inline">\(\blX_0\)</span> on this line and compare it with the value of the average of the two class means <span class="math inline">\((\bar{\blX}_1+\bar{\blX}_2)/2\)</span> on the same line. %Computing the value of the new observation <span class="math inline">\(\blX_0\)</span> on this %line and comparing it with the value of the average of the two class %means <span class="math inline">\((\bar{\blX}_1+\bar{\blX}_2)/2\)</span> on this line gives the %classification rule.</p>
+<p><span class="math display">\[S_k = \frac{1}{n-1}\sum_{i=1}^{n}
+(X_{ki}-\bar{X}_k)(X_{ki}-\bar{X}_k)', ~~k=1,2\]</span></p>
+<p>is the class variance–covariance matrix. The linear discriminant part of this rule is <span class="math inline">\((\bar{X}_1-\bar{X}_2)'S^{-1}_{\rm pooled}\)</span>, which defines the linear combination of variables that best separates the two groups. To define a classification rule, we compute the value of the new observation <span class="math inline">\(X_0\)</span> on this line and compare it with the value of the average of the two class means <span class="math inline">\((\bar{X}_1+\bar{X}_2)/2\)</span> on the same line.</p>
 <p>For multiple <span class="math inline">\((g)\)</span> classes, the rule and the discriminant space are constructed using the between-group sum-of-squares matrix,</p>
-<p><span class="math display">\[\blB=\sum_{k=1}^g n_k(\bar{\blX}_k-\bar{\blX})(\bar{\blX}_k-\bar{\blX})'\]</span></p>
-<p>which measures the differences between the class means, compared with the overall data mean <span class="math inline">\(\bar{\blX}\)</span> and the within-group sum-of-squares matrix,</p>
-<p><span class="math display">\[\blW =
+<p><span class="math display">\[B=\sum_{k=1}^g n_k(\bar{X}_k-\bar{X})(\bar{X}_k-\bar{X})'\]</span></p>
+<p>which measures the differences between the class means, compared with the overall data mean <span class="math inline">\(\bar{X}\)</span> and the within-group sum-of-squares matrix,</p>
+<p><span class="math display">\[W =
 \sum_{k=1}^g\sum_{i=1}^{n_k}
-(\blX_{ki}-\bar{\blX}_k)(\blX_{ki}-\bar{\blX}_k)'\]</span></p>
-<p>which measures the variation of values around each class mean. The linear discriminant space is generated by computing the eigenvectors (canonical coordinates) of <span class="math inline">\(\blW^{-1}\blB\)</span>, and this is the space where the group means are most separated with respect to the pooled variance–covariance. The resulting classification rule is to allocate a new observation to the class with the highest value of</p>
-<p><span class="math display">\[\bar{\blX}_k'\blS^{-1}_{\rm pooled}\blX_0 -
-\frac{1}{2}\bar{\blX}_k'\blS^{-1}_{\rm pooled}\bar{\blX}_k ~~~k=1,...,g\]</span></p>
+(X_{ki}-\bar{X}_k)(X_{ki}-\bar{X}_k)'\]</span></p>
+<p>which measures the variation of values around each class mean. The linear discriminant space is generated by computing the eigenvectors (canonical coordinates) of <span class="math inline">\(W^{-1}B\)</span>, and this is the space where the group means are most separated with respect to the pooled variance–covariance. The resulting classification rule is to allocate a new observation to the class with the highest value of</p>
+<p><span class="math display">\[\bar{X}_k'S^{-1}_{\rm pooled}X_0 -
+\frac{1}{2}\bar{X}_k'S^{-1}_{\rm pooled}\bar{X}_k ~~~k=1,...,g\]</span></p>
 <p>which results in allocating the new observation into the class with the closest mean.</p>
-<p>This LDA approach is widely applicable, but it is useful to check the underlying assumptions on which it depends: (1) that the cluster structure corresponding to each class forms an ellipse, showing that the class is consistent with a sample from a multivariate normal distribution, and (2) that the variance of values around each mean is nearly the same. Figure~<span class="math inline">\(\ref{lda-assumptions}\)</span> illustrates two datasets, of which only one is consistent with these assumptions. Other parametric models, such as quadratic discriminant analysis or logistic regression, also depend on assumptions about the data which should be validated. </p>
-<p>% Figure 1</p>
-<p>Our description is derived from <span class="citation" data-cites="VR02">Venables and Ripley (<a href="#ref-VR02" role="doc-biblioref">2002</a>)</span> and <span class="citation" data-cites="Ri96">Ripley (<a href="#ref-Ri96" role="doc-biblioref">1996</a>)</span>. A good general treatment of parametric methods for supervised classification can be found in <span class="citation" data-cites="JW02">Johnson and Wichern (<a href="#ref-JW02" role="doc-biblioref">2002</a>)</span> or another similar multivariate analysis textbook. Missing from multivariate textbooks is a good explanation of the use of interactive graphics both to check the assumptions underlying the methods and to explore the results. This chapter fills this gap.</p>
+<p>This LDA approach is widely applicable, but it is useful to check the underlying assumptions on which it depends: (1) that the cluster structure corresponding to each class forms an ellipse, showing that the class is consistent with a sample from a multivariate normal distribution, and (2) that the variance of values around each mean is nearly the same. <a href="#fig-lda-assumptions1">Figure&nbsp;<span>5.1</span></a> and <a href="#fig-lda-assumptions2">Figure&nbsp;<span>5.2</span></a> illustrates two datasets, of which only one is consistent with these assumptions. Other parametric models, such as quadratic discriminant analysis or logistic regression, also depend on assumptions about the data which should be validated. </p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(colorspace)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mulgar)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(MASS)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggpubr)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"data/penguins_sub.rda"</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>lda1 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(penguins_sub, <span class="fu">aes</span>(<span class="at">x=</span>bl, </span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>                         <span class="at">y=</span>bd, </span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>                         <span class="at">colour=</span>species)) <span class="sc">+</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_discrete_qualitative</span>(<span class="st">"Dark 3"</span>) <span class="sc">+</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlim</span>(<span class="sc">-</span><span class="fl">2.5</span>, <span class="dv">3</span>) <span class="sc">+</span> <span class="fu">ylim</span>(<span class="sc">-</span><span class="fl">2.5</span>, <span class="fl">2.5</span>) <span class="sc">+</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"(a)"</span>) <span class="sc">+</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">aspect.ratio =</span> <span class="dv">1</span>) </span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>p_ell <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">unique</span>(penguins_sub<span class="sc">$</span>species)) {</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  x <span class="ot">&lt;-</span> penguins_sub <span class="sc">%&gt;%</span> dplyr<span class="sc">::</span><span class="fu">filter</span>(species <span class="sc">==</span> i)</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  e <span class="ot">&lt;-</span> <span class="fu">gen_xvar_ellipse</span>(x[,<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>])</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  e<span class="sc">$</span>species <span class="ot">&lt;-</span> i</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>  p_ell <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(p_ell, e)</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>lda2 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(p_ell, <span class="fu">aes</span>(<span class="at">x=</span>bl, </span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>                         <span class="at">y=</span>bd, </span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>                         <span class="at">colour=</span>species)) <span class="sc">+</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_discrete_qualitative</span>(<span class="st">"Dark 3"</span>) <span class="sc">+</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlim</span>(<span class="sc">-</span><span class="fl">2.5</span>, <span class="dv">3</span>) <span class="sc">+</span> <span class="fu">ylim</span>(<span class="sc">-</span><span class="fl">2.5</span>, <span class="fl">2.5</span>) <span class="sc">+</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"(b)"</span>) <span class="sc">+</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">aspect.ratio =</span> <span class="dv">1</span>)</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a><span class="fu">ggarrange</span>(lda1, lda2, <span class="at">ncol=</span><span class="dv">2</span>, </span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>          <span class="at">common.legend =</span> <span class="cn">TRUE</span>, <span class="at">legend =</span> <span class="st">"bottom"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-lda-assumptions1" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="LDA_files/figure-html/fig-lda-assumptions1-1.png" class="img-fluid figure-img" width="768"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;5.1: Scatterplot of flipper length by bill length of the penguins data, and corresponding variance-covariance ellipses. There is a small amount of difference between the ellipses, but they are similar enough to be confident in assuming the population variance-covariances are equal.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Now repeat for a data set that violates assumptions</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(bushfires)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>lda3 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(bushfires, <span class="fu">aes</span>(<span class="at">x=</span>log_dist_cfa, </span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>                         <span class="at">y=</span>log_dist_road, </span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>                         <span class="at">colour=</span>cause)) <span class="sc">+</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_discrete_qualitative</span>(<span class="st">"Dark 3"</span>) <span class="sc">+</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlim</span>(<span class="dv">6</span>, <span class="dv">11</span>) <span class="sc">+</span> <span class="fu">ylim</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="fl">10.5</span>) <span class="sc">+</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"(a)"</span>) <span class="sc">+</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">aspect.ratio =</span> <span class="dv">1</span>)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>b_ell <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">unique</span>(bushfires<span class="sc">$</span>cause)) {</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  x <span class="ot">&lt;-</span> bushfires <span class="sc">%&gt;%</span> dplyr<span class="sc">::</span><span class="fu">filter</span>(cause <span class="sc">==</span> i)</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  e <span class="ot">&lt;-</span> <span class="fu">gen_xvar_ellipse</span>(x[,<span class="fu">c</span>(<span class="dv">57</span>, <span class="dv">59</span>)])</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  e<span class="sc">$</span>cause <span class="ot">&lt;-</span> i</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  b_ell <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(b_ell, e)</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>lda4 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(b_ell, <span class="fu">aes</span>(<span class="at">x=</span>log_dist_cfa, </span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>                         <span class="at">y=</span>log_dist_road, </span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>                         <span class="at">colour=</span>cause)) <span class="sc">+</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_discrete_qualitative</span>(<span class="st">"Dark 3"</span>) <span class="sc">+</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlim</span>(<span class="dv">6</span>, <span class="dv">11</span>) <span class="sc">+</span> <span class="fu">ylim</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="fl">10.5</span>) <span class="sc">+</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"(b)"</span>) <span class="sc">+</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">aspect.ratio =</span> <span class="dv">1</span>)</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="fu">ggarrange</span>(lda3, lda4, <span class="at">ncol=</span><span class="dv">2</span>, </span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>          <span class="at">common.legend =</span> <span class="cn">TRUE</span>, <span class="at">legend =</span> <span class="st">"bottom"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-lda-assumptions2" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="LDA_files/figure-html/fig-lda-assumptions2-1.png" class="img-fluid figure-img" width="768"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;5.2: Scatterplot of distance to cfa and road for the bushfires data, and corresponding variance-covariance ellipses. There is a lot of difference between the ellipses, so it cannot be assumed that the population variance-covariances are equal.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Our description is derived from <span class="citation" data-cites="VR02">Venables and Ripley (<a href="references.html#ref-VR02" role="doc-biblioref">2002</a>)</span> and <span class="citation" data-cites="Ri96">Ripley (<a href="references.html#ref-Ri96" role="doc-biblioref">1996</a>)</span>. A good general treatment of parametric methods for supervised classification can be found in <span class="citation" data-cites="JW02">Johnson and Wichern (<a href="references.html#ref-JW02" role="doc-biblioref">2002</a>)</span> or another similar multivariate analysis textbook. Missing from multivariate textbooks is a good explanation of the use of interactive graphics both to check the assumptions underlying the methods and to explore the results. This chapter fills this gap.</p>
 <p>Algorithmic methods have overtaken parametric methods in the practice of supervised classification. A parametric method such as linear discriminant analysis yields a set of interpretable output parameters, so it leaves a clear trail helping us to understand what was done to produce the results. An algorithmic method, on the other hand, is more or less a black box, with various input parameters that are adjusted to tune the algorithm. The algorithm’s input and output parameters do not always correspond in any obvious way to the interpretation of the results. All the same, these methods can be very powerful and their use is not limited by requirements about variable distributions as is the case with parametric methods.</p>
 
 
-<div id="refs" class="references csl-bib-body hanging-indent" role="doc-bibliography">
+<div id="refs" class="references csl-bib-body hanging-indent" role="doc-bibliography" style="display: none">
+<div id="ref-Fi36" class="csl-entry" role="doc-biblioentry">
+Fisher, R. A. 1936. <span>“The <span>U</span>se of <span>M</span>ultiple <span>M</span>easurements in <span>T</span>axonomic <span>P</span>roblems.”</span> <em>Annals of Eugenics</em> 7: 179–88.
+</div>
 <div id="ref-JW02" class="csl-entry" role="doc-biblioentry">
 Johnson, R. A., and D. W. Wichern. 2002. <em>Applied Multivariate Statistical Analysis (5th Ed)</em>. Englewood Cliffs, NJ: Prentice-Hall.
+</div>
+<div id="ref-Rao48" class="csl-entry" role="doc-biblioentry">
+Rao, C. R. 1948. <span>“The <span>U</span>tilization of <span>M</span>ultiple <span>M</span>easurements in <span>P</span>roblems of <span>B</span>iological <span>C</span>lassification (with Discussion).”</span> <em>Journal of the Royal Statistical Society, Series B</em> 10: 159–203.
 </div>
 <div id="ref-Ri96" class="csl-entry" role="doc-biblioentry">
 Ripley, B. 1996. <em>Pattern <span>R</span>ecognition and <span>N</span>eural <span>N</span>etworks</em>. Cambridge: Cambridge University Press.

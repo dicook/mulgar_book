@@ -149,73 +149,8 @@ Collated data was part of Weihao Li's Honours thesis, which is not publicly avai
 
 ### Pre-processing {.unnumbered}
 
-One observation with missing values was removed. The 60 variables are too many to view with a tour, so it should be pre-processed using principal component analysis. The categorical variables of FOR_TYPE and FOR_CAT are removed. It would be possible to keep these if they are converted to dummy (binary variables).
+The 60 variables are too many to view with a tour, so it should be pre-processed using principal component analysis. The categorical variables of FOR_TYPE and FOR_CAT are removed. It would be possible to keep these if they are converted to dummy (binary variables).
 
-
-```{r}
-#| eval: false
-#| echo: false
-bushfires <- read_csv("data/bushfires_2019-2020.csv") %>% na.omit() # Just one case has missings on forest vars
-
-bushfires_sub <- bushfires[,c(5, 8:45, 48:55, 57:60)] %>%
-  mutate(cause = factor(cause))
-
-bushfires_pca <- prcomp(bushfires_sub[,-51],
-                        scale=TRUE, retx=TRUE)
-ggscree(bushfires_pca)
-
-bushfires_pcs <- bushfires_pca$x[,1:7] %>%
-  as_tibble() %>%
-  mutate(cause = factor(bushfires$cause))
-
-library(tourr)
-animate_xy(bushfires_pcs[,1:7],
-           guided_tour(lda_pp(bushfires_pcs$cause)),
-           col=bushfires_pcs$cause)
-
-bushfires_pca$rotation[,2]
-ggplot(bushfires, aes(x=FOR_CODE)) + geom_density()
-ggplot(bushfires, aes(x=COVER)) + geom_density()
-ggplot(bushfires, aes(x=HEIGHT)) + geom_density()
-ggplot(bushfires, aes(x=FOREST)) + geom_density()
-ggplot(bushfires, aes(x=arf28)) + geom_density()
-
-library(randomForest)
-bushfires_rf <- randomForest(cause~.,
-                             data=bushfires_sub,
-                             importance=TRUE)
-bushfires_rf_votes <- bushfires_rf$votes %>%
-  as_tibble() %>%
-  mutate(cause = bushfires_sub$cause)
-
-animate_xy(bushfires_rf_votes[,1:4],
-           col=bushfires_rf_votes$cause)
-
-# Project 4D into 3D
-library(geozoo)
-proj <- t(geozoo::f_helmert(4)[-1,])
-b_rf_v_p <- as.matrix(bushfires_rf_votes[,1:4]) %*% proj
-colnames(b_rf_v_p) <- c("x1", "x2", "x3")
-b_rf_v_p <- b_rf_v_p %>%
-  as.data.frame() %>%
-  mutate(cause = bushfires_sub$cause)
-  
-# Add simplex
-simp <- simplex(p=3)
-sp <- data.frame(simp$points)
-colnames(sp) <- c("x1", "x2", "x3")
-sp$cause = "simplex"
-b_rf_v_p_s <- bind_rows(sp, b_rf_v_p) %>%
-  mutate(cause = factor(cause))
-labels <- c("accident" , "arson", 
-                "burning_off", "lightning", 
-                rep("", 1021))
-animate_xy(b_rf_v_p_s[,1:3], col=b_rf_v_p_s$cause, 
-           axes = "off",
-           edges=as.matrix(simp$edges),
-           obs_labels=labels)
-  
-```
 
 ## Notes to self
 

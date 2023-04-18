@@ -9,13 +9,11 @@ Topics to include:
 
 ## Trees
 
-The tree algorithm @BFOS84 is a widely used algorithmic method. The tree algorithm generates a classification rule by sequentially splitting the data into two buckets. Splits are made between sorted data values of individual variables, with the goal of obtaining pure classes on each side of the split. The inputs for a simple tree classifier commonly include (1) an impurity measure, an indication of the relative diversity among the cases in the terminal nodes; (2) a parameter that sets the minimum number of cases in a node, or the
-minimum number of observations in a terminal node of the tree; and (3) a complexity measure that controls the growth of a tree, balancing the use of a simple generalizable tree against a more accurate tree
+The tree algorithm @BFOS84 is a long-established versatile algorithmic method for supervised classification. The basic tree algorithm generates a classification rule by sequentially splitting the data into two buckets. Splits are made between sorted data values of individual variables, with the goal of obtaining pure classes on each side of the split. The inputs for a simple tree classifier commonly include (1) an impurity measure, an indication of the relative diversity among the cases in the terminal nodes; (2) a parameter that sets the minimum number of cases in a node, or the minimum number of observations in a terminal node of the tree; and (3) a complexity measure that controls the growth of a tree, balancing the use of a simple generalizable tree against a more accurate tree
 tailored to the sample.  When applying tree methods, exploring the effects of the input parameters on the tree is instructive; for example, it helps us to assess the stability of the tree model.
 
 Although algorithmic models do not depend on distributional assumptions, that does not mean that every algorithm is suitable for all data.  For
-example, the tree model works best when all variables are independent within each class, because it does not take such dependencies into account.  As always, visualization can help us to determine whether a particular model should be applied.  In classification problems, it is useful to explore the cluster structure, comparing the clusters with
-the classes and looking for evidence of correlation within each class. The upper left-hand plot in @fig-lda-assumptions shows a strong correlation between `tars1` and `tars2` within each cluster, which indicates that the tree model may not give good results for the \Data{Flea Beetles}.  The plots in @fig-misclassifications provide added evidence.  They use background color to display the class predictions for LDA and a tree. The LDA boundaries, which are formed from a linear combination of `tars1` and `tars2`, look more appropriate than the rectangular boundaries of the tree classifier.
+example, the tree model works best when all variables are independent within each class, because it does not take such dependencies into account.  Visualization can help us to determine whether a particular model should be applied.  In classification problems, it is useful to explore the cluster structure, comparing the clusters with the classes and looking for evidence of correlation within each class. The upper left-hand plot in @fig-lda-assumptions shows a strong correlation between `tars1` and `tars2` within each cluster, which indicates that the tree model may not give good results for the \Data{Flea Beetles}.  The plots in @fig-misclassifications provide added evidence.  They use background color to display the class predictions for LDA and a tree. The LDA boundaries, which are formed from a linear combination of `tars1` and `tars2`, look more appropriate than the rectangular boundaries of the tree classifier.
 
 <!--
 % Figure 2
@@ -94,6 +92,72 @@ built using a sample of the cases, there is in effect a training sample and a te
 \index{classification methods!random forest}
 
 ## Random forests 
+
+```{r}
+#| eval: false
+#| echo: false
+library(mulgar)
+load(bushfires)
+
+bushfires_sub <- bushfires[,c(5, 8:45, 48:55, 57:60)] %>%
+  mutate(cause = factor(cause))
+
+bushfires_pca <- prcomp(bushfires_sub[,-51],
+                        scale=TRUE, retx=TRUE)
+ggscree(bushfires_pca)
+
+bushfires_pcs <- bushfires_pca$x[,1:7] %>%
+  as_tibble() %>%
+  mutate(cause = factor(bushfires$cause))
+
+library(tourr)
+animate_xy(bushfires_pcs[,1:7],
+           guided_tour(lda_pp(bushfires_pcs$cause)),
+           col=bushfires_pcs$cause)
+
+bushfires_pca$rotation[,2]
+ggplot(bushfires, aes(x=FOR_CODE)) + geom_density()
+ggplot(bushfires, aes(x=COVER)) + geom_density()
+ggplot(bushfires, aes(x=HEIGHT)) + geom_density()
+ggplot(bushfires, aes(x=FOREST)) + geom_density()
+ggplot(bushfires, aes(x=arf28)) + geom_density()
+
+library(randomForest)
+bushfires_rf <- randomForest(cause~.,
+                             data=bushfires_sub,
+                             importance=TRUE)
+bushfires_rf_votes <- bushfires_rf$votes %>%
+  as_tibble() %>%
+  mutate(cause = bushfires_sub$cause)
+
+animate_xy(bushfires_rf_votes[,1:4],
+           col=bushfires_rf_votes$cause)
+
+# Project 4D into 3D
+library(geozoo)
+proj <- t(geozoo::f_helmert(4)[-1,])
+b_rf_v_p <- as.matrix(bushfires_rf_votes[,1:4]) %*% proj
+colnames(b_rf_v_p) <- c("x1", "x2", "x3")
+b_rf_v_p <- b_rf_v_p %>%
+  as.data.frame() %>%
+  mutate(cause = bushfires_sub$cause)
+  
+# Add simplex
+simp <- simplex(p=3)
+sp <- data.frame(simp$points)
+colnames(sp) <- c("x1", "x2", "x3")
+sp$cause = "simplex"
+b_rf_v_p_s <- bind_rows(sp, b_rf_v_p) %>%
+  mutate(cause = factor(cause))
+labels <- c("accident" , "arson", 
+                "burning_off", "lightning", 
+                rep("", 1021))
+animate_xy(b_rf_v_p_s[,1:3], col=b_rf_v_p_s$cause, 
+           axes = "off",
+           edges=as.matrix(simp$edges),
+           obs_labels=labels)
+  
+```
 
 A random forest [@Br01,@Cu04] is a classifier that is built from multiple trees generated by randomly sampling the cases and the variables.  The random sampling (with replacement) of cases has the fortunate effect of creating a training (``in-bag'') and a test (``out-of-bag'') sample for each tree computed.  The class of each case in the out-of-bag sample for each tree is predicted, and the predictions for all trees are combined into a vote for the class identity.  
 
