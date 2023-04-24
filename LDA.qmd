@@ -184,3 +184,23 @@ Checking the assumption of equal variance-covariance matrices for the 4D penguin
 
 
 ## Examining results
+
+```{r}
+#| eval: false
+library(classifly)
+library(MASS)
+penguins_lda <- lda(species ~ ., penguins_sub, prior = c(1/3, 1/3, 1/3))
+p_lda_boundaries <- explore(penguins_lda, penguins_sub)
+animate_slice(p_lda_boundaries[p_lda_boundaries$.TYPE == "simulated",1:4], col=p_lda_boundaries[p_lda_boundaries$.TYPE == "simulated",6], v_rel=0.02, axes="bottomleft")
+render_gif(p_lda_boundaries[p_lda_boundaries$.TYPE == "simulated",1:4],
+           planned_tour(pt1),
+           display_slice(v_rel=0.02, 
+             col=p_lda_boundaries[ p_lda_boundaries$.TYPE == "simulated",6], 
+             axes="bottomleft"),                     gif_file="gifs/penguins_lda_boundaries.gif",
+           frames=500,
+           loop=FALSE
+           )
+```
+
+
+![](gifs/penguins_lda_boundaries.gif){#fig-lda-4D-boundaries fig-alt="Sliced tour to explore the boundaries produced by the LDA classifier on the penguins data." width=300}
