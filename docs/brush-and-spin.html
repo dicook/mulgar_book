@@ -428,57 +428,155 @@ div.csl-indent {
 <span id="cb1-72"><a href="#cb1-72" aria-hidden="true" tabindex="-1"></a>          <span class="at">selfcontained =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<iframe width="500" height="500" src="html/penguins_brush_and_spin.html" title="Controls to brush and spin to discover the three clusters in the penguins dat.">
+<div id="fig-penguins-brush-and-spin" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<iframe width="600" height="650" src="html/penguins_brush_and_spin.html" title="Controls to brush and spin to discover the three clusters in the penguins data.">
 </iframe>
-<div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(detourr)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">detour</span>(penguins_sub, </span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>       <span class="fu">tour_aes</span>(<span class="at">projection =</span> <span class="sc">-</span>species)) <span class="sc">|&gt;</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>       <span class="fu">tour_path</span>(<span class="fu">grand_tour</span>(<span class="dv">2</span>), <span class="at">fps =</span> <span class="dv">60</span>) <span class="sc">|&gt;</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>       <span class="fu">show_scatter</span>(<span class="at">alpha =</span> <span class="fl">0.7</span>, <span class="at">axes =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co"># remotes::install_github("pfh/langevitour")</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co"># remotes::install_github("plotly/plotly.R")</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(langevitour)</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(crosstalk)</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>shared <span class="ot">&lt;-</span> SharedData<span class="sc">$</span><span class="fu">new</span>(penguins_sub)</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>langevitourWidget <span class="ot">&lt;-</span> <span class="fu">langevitour</span>(</span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    penguins_sub[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], </span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">link=</span>shared,  </span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">pointSize=</span><span class="dv">2</span>,</span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">width=</span><span class="dv">700</span>, <span class="at">height=</span><span class="dv">700</span>)</span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(liminal)</span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="fu">limn_tour</span>(fake_trees, dim1<span class="sc">:</span>dim10)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
+<p></p><figcaption class="figure-caption">Figure&nbsp;8.1: Controls to brush and spin to discover the three clusters in the penguins data. Use the lasso brush to colour points persistently when you see a cluster. Spin and colour again as necessary to identify all the clusters.</figcaption><p></p>
+</figure>
 </div>
-<p></p>
-<p>This description of the spin and brush approach on , a particle physics dataset, follows that in . The data contains seven variables. We have no labels for the data, so when we begin, all the points have the same color and glyph. Watch the data in a tour for a few minutes and you will see that there are no natural clusters, but there is clearly structure.</p>
-<p> </p>
-<p>We will use the projection pursuit guided tour to help us find that structure. We will tour on the principal components, rather than the raw variables, because that improves the performance of the projection pursuit indexes. Two indexes are useful for detecting clusters: holes and central mass. The holes index is sensitive to projections where there are few points (i.e., a hole) in the center. The central mass index is the opposite: It is sensitive to projections that have too many points in the center. These indexes are explained in <span class="citation" data-cites="chap-toolbox">(<a href="references.html#ref-chap-toolbox" role="doc-biblioref"><strong>chap-toolbox?</strong></a>)</span>.</p>
-<p>The holes index is usually the most useful for clustering, but not for the particle physics data, because it does not have a ``hole’’ at the center. The central mass index is the most appropriate here. Alternate between optimization (a guided tour) and the unguided grand tour to find local maxima, each of which is a projection that is potentially useful for revealing clusters. The process is illustrated in <span class="quarto-unresolved-ref">?fig-prim7-tour</span>.</p>
-<p>The top left plot shows the initial default projection, the second principal component plotted against the first. The plot next to it shows the projected data corresponding to the first local maximum found by the guided tour. It has three strands of points stretching out from the central clump and several outliers. We brush the points along each strand, in red, blue, and orange, and we paint the outliers with open circles. (See the next two plots.) We continue by choosing a new random start for the guided tour, and then waiting until new territory in the data is discovered. </p>
-<p>The optimization settles on a projection where there are three strands visible, as observed in the leftmost plot in the second row. Two strands have been previously brushed, but a new one has appeared; this is painted yellow.</p>
-<p>We also notice that there is another new strand hidden below the red strand. It is barely distinguishable from the red strand in this projection, but the two strands separate widely in other projections. It is tricky to brush it, because it is not well separated in this projection. We use a trick: Hide the red points, brush the new strand green, and ``unhide’’ the red points again (middle plot in the second row).</p>
-<p>Five clusters have been easily identified, and now finding new clusters in this data is increasingly difficult. After several more alternations between the grand tour and the guided tour, we find something new (shown in the rightmost plot in the second row): One more strand has emerged, and we paint it pink.</p>
+<div class="cell">
+
+</div>
+<!--
+\index{datasets!\Data{PRIM7}}
+
+This description of the spin and brush approach on \Data{PRIM7}, a
+particle physics dataset, follows that in \citeasnoun{CBCH95}. The data
+contains seven variables. We have no labels for the data, so when we
+begin, all the points have the same color and glyph. Watch the data in a
+tour for a few minutes and you will see that there are no natural
+clusters, but there is clearly structure.
+
+\index{projection pursuit!indexes}
+\index{projection pursuit!indexes!holes}
+\index{projection pursuit!indexes!central mass}
+\index{principal component analysis}
+
+We will use the projection pursuit guided tour to help us find that
+structure. We will tour on the principal components, rather than the raw
+variables, because that improves the performance of the projection
+pursuit indexes. Two indexes are useful for detecting clusters: holes
+and central mass. The holes index is sensitive to projections where
+there are few points (i.e., a hole) in the center. The central mass
+index is the opposite: It is sensitive to projections that have too many
+points in the center. These indexes are explained in @chap-toolbox.
+
+The holes index is usually the most useful for clustering, but not for
+the particle physics data, because it does not have a \`\`hole'' at the
+center. The central mass index is the most appropriate here. Alternate
+between optimization (a guided tour) and the unguided grand tour to find
+local maxima, each of which is a projection that is potentially useful
+for revealing clusters. The process is illustrated in @fig-prim7-tour.
+
+The top left plot shows the initial default projection, the second
+principal component plotted against the first. The plot next to it shows
+the projected data corresponding to the first local maximum found by the
+guided tour. It has three strands of points stretching out from the
+central clump and several outliers. We brush the points along each
+strand, in red, blue, and orange, and we paint the outliers with open
+circles. (See the next two plots.) We continue by choosing a new random
+start for the guided tour, and then waiting until new territory in the
+data is discovered. \index{brushing!persistent}
+
+The optimization settles on a projection where there are three strands
+visible, as observed in the leftmost plot in the second row. Two strands
+have been previously brushed, but a new one has appeared; this is
+painted yellow.
+
+We also notice that there is another new strand hidden below the red
+strand. It is barely distinguishable from the red strand in this
+projection, but the two strands separate widely in other projections. It
+is tricky to brush it, because it is not well separated in this
+projection. We use a trick: Hide the red points, brush the new strand
+green, and \`\`unhide'' the red points again (middle plot in the second
+row).
+
+Five clusters have been easily identified, and now finding new clusters
+in this data is increasingly difficult. After several more alternations
+between the grand tour and the guided tour, we find something new (shown
+in the rightmost plot in the second row): One more strand has emerged,
+and we paint it pink.
+
 % Figure 3
-<p>The results at this stage are summarized by the bottom row of plots. There is a very visible triangular component (in gray) revealed when all of the colored points are hidden. We check the shape of this cluster by drawing lines between outer points to contain the inner ones. Touring after the lines are drawn helps to check how well they match the shape of the clusters. The colored groups pair up at each vertex, and we draw in the shape of these too — a single line matches the structures reasonably well.</p>
-<p>The final step of the spin and brush clustering is to clean up this solution, touching up the color groups by continuing to tour, and repainting a point here and there. When we finish, we have found seven clusters in this data that form a very strong geometric object in the data space: a two-dimensional (2D) triangle, with two one-dimensional (1D) strands extending in different directions from each vertex. The lines confirm our understanding of this object’s shape, because the points stay close to the lines in all of the projections observed in a tour.</p>
+\begin{figure}[htp]
+\centerline{{\includegraphics[width=1.5in]{chap-clust/prim7-pp1.pdf}}
+ {\includegraphics[width=1.5in]{chap-clust/prim7-pp2.pdf}}
+ {\includegraphics[width=1.5in]{chap-clust/prim7-pp5.pdf}}}
+\smallskip
+\centerline{{\includegraphics[width=1.5in]{chap-clust/prim7-pp7.pdf}}
+ {\includegraphics[width=1.5in]{chap-clust/prim7-pp8.pdf}}
+ {\includegraphics[width=1.5in]{chap-clust/prim7-pp9.pdf}}}
+\centerline{{\includegraphics[width=1.5in]{chap-clust/prim7-pp10.pdf}}
+  {\includegraphics[width=1.5in]{chap-clust/prim7-pp11.pdf}}
+  {\includegraphics[width=1.5in]{chap-clust/prim7-pp13.pdf}}}
+\caption[Stages of ``spin and brush'' on \Data{PRIM7}]{Stages of spin
+and brush on \Data{PRIM7}.  The high-dimensional geometry emerges as
+the clusters are painted.}
+\label{prim7-tour}
+\end{figure}
+
+The results at this stage are summarized by the bottom row of plots.
+There is a very visible triangular component (in gray) revealed when all
+of the colored points are hidden. We check the shape of this cluster by
+drawing lines between outer points to contain the inner ones. Touring
+after the lines are drawn helps to check how well they match the shape
+of the clusters. The colored groups pair up at each vertex, and we draw
+in the shape of these too --- a single line matches the structures
+reasonably well.
+
+The final step of the spin and brush clustering is to clean up this
+solution, touching up the color groups by continuing to tour, and
+repainting a point here and there. When we finish, we have found seven
+clusters in this data that form a very strong geometric object in the
+data space: a two-dimensional (2D) triangle, with two one-dimensional
+(1D) strands extending in different directions from each vertex. The
+lines confirm our understanding of this object's shape, because the
+points stay close to the lines in all of the projections observed in a
+tour.
+
 % Figure 4
-<p>The next stage of cluster analysis is to characterize the nature of the clusters. To do that, we would calculate summary statistics for each cluster, and plot the clusters (<span class="quarto-unresolved-ref">?fig-prim7-model</span>). When we plot the clusters of the particle physics data, we find that the 2D triangle exists primarily in the plane defined by X3 and X5. If you do the same, notice that the variance in measurements for the gray group is large in variables X3 and X5, but negligible in the other variables. The linear pieces can also be characterized by their distributions on each of the variables. With this example, we have shown that it is possible to uncover very unusual clusters in data without any domain knowledge.</p>
-<p>Here are several tips about the spin and brush approach.</p>
-<ul>
-<li>Save the dataset frequently during the exploration of a complex dataset, being sure to save your colors and glyphs, because it may take several sessions to arrive at a final clustering.<br>
-</li>
-<li>Manual controls are useful for refining the optimal projection because another projection in the neighborhood may be more revealing.<br>
-</li>
-<li>The holes index is usually the most successful projection pursuit index for finding clusters.</li>
-<li>Principal component coordinates may provide a better starting point than the raw variables.</li>
-</ul>
-<p>Finally, the spin and brush method will not work well if there are no clear separations in the data, and the clusters are high-dimensional, unlike the low-dimensional clusters found in this example.</p>
+\begin{figure}
+\centerline{
+   \includegraphics[width=1.5in]{chap-clust/prim7-pp13-model.pdf}
+   \includegraphics[width=3in]{chap-clust/prim7-par.pdf}
+}
+\caption[The \Data{PRIM7} model summarized]{The \Data{PRIM7} model
+summarized.  The model summary {\bf (left)} was formed by adding line
+segments manually.  In the parallel coordinate plot, the profiles
+highlighted in dark gray correspond to the points in the 2D triangle
+at the center of the model.  }
+\label{prim7-model}
+\end{figure}
+
+The next stage of cluster analysis is to characterize the nature of the
+clusters. To do that, we would calculate summary statistics for each
+cluster, and plot the clusters (@fig-prim7-model). When we plot the
+clusters of the particle physics data, we find that the 2D triangle
+exists primarily in the plane defined by X3 and X5. If you do the same,
+notice that the variance in measurements for the gray group is large in
+variables X3 and X5, but negligible in the other variables. The linear
+pieces can also be characterized by their distributions on each of the
+variables. With this example, we have shown that it is possible to
+uncover very unusual clusters in data without any domain knowledge.
+
+Here are several tips about the spin and brush approach.
+
+-   Save the dataset frequently during the exploration of a complex
+    dataset, being sure to save your colors and glyphs, because it may
+    take several sessions to arrive at a final clustering.\
+-   Manual controls are useful for refining the optimal projection
+    because another projection in the neighborhood may be more
+    revealing.\
+-   The holes index is usually the most successful projection pursuit
+    index for finding clusters.
+-   Principal component coordinates may provide a better starting point
+    than the raw variables.
+
+Finally, the spin and brush method will not work well if there are no
+clear separations in the data, and the clusters are high-dimensional,
+unlike the low-dimensional clusters found in this example.
+-->
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" role="doc-bibliography" style="display: none">
