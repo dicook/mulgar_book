@@ -1,11 +1,19 @@
-## Brush-and-spin approach {#sec-clust-graphics}
+## Spin and brush approach {#sec-clust-graphics}
 
 \index{brushing!persistent} \index{tour}
 \index{cluster analysis!spin and brush}
 
-A purely graphical spin and brush approach to cluster analysis works well when there are good separations between groups, even when there are marked differences in variance structures between groups or when groups have non-linear boundaries. It does not work very well when there are clusters that overlap, or when there are no distinct clusters but rather
-we simply wish to partition the data. In these situations it may be better to begin with a numerical solution and to use visual tools to evaluate it, perhaps making refinements subsequently. Several examples of the spin and brush approach are documented in the literature, such as
-@CBCH95 and @WWS99.
+When the data to be clustered is purely numeric, and if the clusters are well-separated, a purely graphical spin and brush approach to cluster analysis works well. This is true even when there are nuisance variables and/or cases, marked differences in variance structures between groups or when groups have non-linear boundaries. It does not work very well when there are clusters that overlap, or when there are no distinct clusters but rather
+we simply wish to partition the data. In these situations it may be better to begin with a numerical solution and to use visual tools to evaluate it, perhaps making refinements subsequently. Several examples of the spin and brush approach are documented in the literature, such as @CBCH95 and @WWS99.
+
+The spin and brush approach is simply:
+
+1. Run the (grand) tour.
+2. Stop when you see a separated cluster of points.
+3. Paint the cluster a chosen colour.
+4. Repeat 1-2 until the data is grouped, and when no other separated cluster is visible in any projection. You may need to re-paint some points if they appear to be grouped incorrectly in a different projection, or paint more points that after spinning most likely belong to an existing group.
+
+It can help to be able to remove a cluster, to de-clutter the display, in order to find more clusters.
 
 ```{r}
 #| eval: false
@@ -64,14 +72,14 @@ clrs <- grDevices::hcl.colors(6, palette="Zissou 1")
 options(digits = 2)
 
 p_b_s <- proj_data %>%
-  plot_ly(x = ~x, y = ~y, frame = ~step, color = I("gray80")) %>%
+  plot_ly(x = ~x, y = ~y, frame = ~step, color = I("gray80"),
+          xaxis = ax, yaxis = ax, width=600, height=600) %>%
   config(displaylogo = FALSE, 
-         modeBarButtonsToRemove = c("toImage", "sendDataToCloud", "editInChartStudio", "zoom2d", "zoomIn2d", "zoomOut2d", "pan2d", "drawclosedpath", "drawopenpath", "autoScale2d", "hoverClosestCartesian", "hoverCompareCartesian", "resetScale2d")) %>%
+         modeBarButtonsToRemove = c("sendDataToCloud", "editInChartStudio", "zoom2d", "zoomIn2d", "zoomOut2d", "pan2d", "drawclosedpath", "drawopenpath", "autoScale2d", "hoverClosestCartesian", "hoverCompareCartesian", "resetScale2d")) %>%
   add_segments(xend = 0, yend = 0) %>%
   add_text(text = ~measure) %>%
   add_markers(color = I("black"), data = tour_data, text = ~id, ids = ~id, hoverinfo = "text") %>%
   hide_legend() %>%
-  layout(xaxis = ax, yaxis = ax, width=600, height=600) %>%
   animation_opts(50, transition = 0, redraw = FALSE) %>%
   highlight(on = "plotly_selected", 
             off = "plotly_doubleclick",
