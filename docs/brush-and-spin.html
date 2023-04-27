@@ -481,8 +481,32 @@ div.csl-indent {
 <span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>       <span class="fu">show_scatter</span>(<span class="at">alpha =</span> <span class="fl">0.7</span>, <span class="at">axes =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <ol start="3" type="1">
-<li>(CHALLENGE) Use the spin and brush technique to identify the branches of the <code>fake_trees</code> data available in the <code>liminal</code> package (originally from <a href="https://phate.readthedocs.io/en/stable/">PHATE</a>).</li>
+<li>Use the spin and brush technique to identify the branches of the <code>fake_trees</code> data available in the <code>liminal</code> package (originally from <a href="https://phate.readthedocs.io/en/stable/">PHATE</a>). The result should look something like this:</li>
 </ol>
+<div id="fig-fake-trees-sb" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="images/fake_trees_sb.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;8.3: Example solution after spin and brush on fake_trees data.</figcaption><p></p>
+</figure>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(detourr)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(liminal)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mulgar)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"fake_trees"</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Original data is 100D, so need to reduce dimension using PCA first</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>ft_pca <span class="ot">&lt;-</span> <span class="fu">prcomp</span>(fake_trees[,<span class="dv">1</span><span class="sc">:</span><span class="dv">100</span>], </span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>                 <span class="at">scale=</span><span class="cn">TRUE</span>, <span class="at">retx=</span><span class="cn">TRUE</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="fu">ggscree</span>(ft_pca)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="fu">detour</span>(<span class="fu">as.data.frame</span>(ft_pca<span class="sc">$</span>x[,<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>]), </span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>       <span class="fu">tour_aes</span>(<span class="at">projection =</span> PC1<span class="sc">:</span>PC10)) <span class="sc">|&gt;</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>       <span class="fu">tour_path</span>(<span class="fu">grand_tour</span>(<span class="dv">2</span>), <span class="at">fps =</span> <span class="dv">60</span>, <span class="at">max_bases=</span><span class="dv">50</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>       <span class="fu">show_scatter</span>(<span class="at">alpha =</span> <span class="fl">0.7</span>, <span class="at">axes =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
 <!--
 \index{datasets!\Data{PRIM7}}
 

@@ -154,22 +154,25 @@ detour(multicluster,
 
 ```
 
-3. (CHALLENGE) Use the spin and brush technique to identify the branches of the `fake_trees` data available in the `liminal` package (originally from [PHATE](https://phate.readthedocs.io/en/stable/)).
+3. Use the spin and brush technique to identify the branches of the `fake_trees` data available in the `liminal` package (originally from [PHATE](https://phate.readthedocs.io/en/stable/)). The result should look something like this:
+
+![Example solution after spin and brush on fake_trees data.](images/fake_trees_sb.png){#fig-fake-trees-sb}
 
 ```{r}
 #| eval: false
-#| code-fold: false
 library(detourr)
 library(liminal)
+library(mulgar)
 data("fake_trees")
 
-# Use a random starting basis because the first two variables make it too easy
-strt <- tourr::basis_random(10, 2)
-detour(multicluster, 
-       tour_aes(projection = -group)) |>
-       tour_path(grand_tour(2), start=strt, fps = 60) |>
+# Original data is 100D, so need to reduce dimension using PCA first
+ft_pca <- prcomp(fake_trees[,1:100], 
+                 scale=TRUE, retx=TRUE)
+ggscree(ft_pca)
+detour(as.data.frame(ft_pca$x[,1:10]), 
+       tour_aes(projection = PC1:PC10)) |>
+       tour_path(grand_tour(2), fps = 60, max_bases=50) |>
        show_scatter(alpha = 0.7, axes = FALSE)
-
 ```
 
 <!--
