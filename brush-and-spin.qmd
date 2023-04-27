@@ -19,6 +19,7 @@ It can help to be able to remove a cluster, to de-clutter the display, in order 
 #| eval: false
 #| message: false
 # Following https://github.com/plotly/plotly.R/blob/master/demo/animation-tour-basic.R
+# TURN INTO A FUNCTION TO MAKE IT EASIER
 library(tourr)
 library(plotly)
 load("data/penguins_sub.rda")
@@ -137,7 +138,39 @@ limn_tour(fake_trees, dim1:dim10)
 ## Exercises
 
 1. Use the spin and brush approach to identify the  three clusters in the `mulgar::clusters` data set.
-2. (CHALLENGE) Use the spin and brush technique to identify the branches of the `fake_trees` data available in the `liminal` package (originally from [PHATE](https://phate.readthedocs.io/en/stable/)).
+2. Use the spin and brush approach to identify the six clusters in the `mulgar::multicluster` data set. (The code below using detourr could be useful.)
+
+```{r}
+#| eval: false
+#| code-fold: false
+library(detourr)
+
+# Use a random starting basis because the first two variables make it too easy
+strt <- tourr::basis_random(10, 2)
+detour(multicluster, 
+       tour_aes(projection = -group)) |>
+       tour_path(grand_tour(2), start=strt, fps = 60) |>
+       show_scatter(alpha = 0.7, axes = FALSE)
+
+```
+
+3. (CHALLENGE) Use the spin and brush technique to identify the branches of the `fake_trees` data available in the `liminal` package (originally from [PHATE](https://phate.readthedocs.io/en/stable/)).
+
+```{r}
+#| eval: false
+#| code-fold: false
+library(detourr)
+library(liminal)
+data("fake_trees")
+
+# Use a random starting basis because the first two variables make it too easy
+strt <- tourr::basis_random(10, 2)
+detour(multicluster, 
+       tour_aes(projection = -group)) |>
+       tour_path(grand_tour(2), start=strt, fps = 60) |>
+       show_scatter(alpha = 0.7, axes = FALSE)
+
+```
 
 <!--
 \index{datasets!\Data{PRIM7}}
