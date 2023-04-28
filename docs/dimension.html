@@ -497,7 +497,75 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p></p><figcaption class="figure-caption">Figure&nbsp;4: Grand tour of the plane with two additional dimensions of pure noise. The collapsing of the points indicates that this is not fully 7D. This only happens when any of x1-x5 are contributing strongly (frame 49 x4, x5; frame 79 x1; frame 115 x2, x3). If x6 or x7 are contributing strongly the data is spread out fully. This tells us that x6 and x7 are not linearly associated, but other variables are.</figcaption><p></p>
 </figure>
 </div>
-<p>The simulated data here is very simple, and what we have learned from the tour could also be learned from principal component analysis. The main purpose here is to explain how to interpret what you see from the tour, in a simple setting.</p>
+<p>The simulated data here is very simple, and what we have learned from the tour could also be learned from principal component analysis. However, if there are small complications, such as outliers or nonlinear relationships, that might not be visible from principal component analysis, the tour can help you to see them.</p>
+<p>Here’s an example with an outlier.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Add several outliers to the plane_noise data</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>plane_noise_outliers <span class="ot">&lt;-</span> plane_noise</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>plane_noise_outliers[<span class="dv">101</span>,] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>, <span class="sc">-</span><span class="dv">2</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>plane_noise_outliers[<span class="dv">102</span>,] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>,<span class="sc">-</span><span class="dv">2</span>, <span class="sc">-</span><span class="dv">2</span>, <span class="dv">0</span>, <span class="dv">0</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="fu">ggscatmat</span>(plane_noise_outliers, <span class="at">columns =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>) <span class="sc">+</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">aspect.ratio=</span><span class="dv">1</span>, <span class="at">axis.text =</span> <span class="fu">element_blank</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-plane-noise-outlier" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="dimension_files/figure-html/fig-plane-noise-outlier-1.png" class="img-fluid figure-img" width="768"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;5: Outliers added to the plane with noise data.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">render_gif</span>(plane_noise_outliers,          </span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>           <span class="fu">grand_tour</span>(), </span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>           <span class="fu">display_xy</span>(),</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">gif_file=</span><span class="st">"gifs/pn_outliers.gif"</span>,</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>           <span class="at">frames=</span><span class="dv">500</span>,</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>           <span class="at">width=</span><span class="dv">200</span>,</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>           <span class="at">height=</span><span class="dv">200</span>)</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(plane_nonlin)</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="fu">render_gif</span>(plane_nonlin,          </span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>           <span class="fu">grand_tour</span>(), </span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>           <span class="fu">display_xy</span>(),</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>           <span class="at">gif_file=</span><span class="st">"gifs/plane_nonlin.gif"</span>,</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>           <span class="at">frames=</span><span class="dv">500</span>,</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>           <span class="at">width=</span><span class="dv">200</span>,</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>           <span class="at">height=</span><span class="dv">200</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div id="fig-outlier-nonlin" class="quarto-layout-panel" data-fig-align="center">
+<figure class="figure">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="gifs/pn_outliers.gif" class="img-fluid figure-img" width="180"></p>
+<p></p><figcaption class="figure-caption">Outliers in addition to 2D plane.</figcaption><p></p>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="gifs/plane_nonlin.gif" class="img-fluid figure-img" width="180"></p>
+<p></p><figcaption class="figure-caption">Non-linear relationship between several variables, primarily x3.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<p></p><figcaption class="figure-caption">Figure&nbsp;6: Examples of different types of dimensionality issues: outliers and nonlinearity. In the left plot, you can see two points far from the others in some projections. Also the two can be seen with different movement patterns, moving faster that other points during the tour. Outliers will affect detection of reduced dimension, but it is easy to ignore with the tour. Non-linear relationships may not be captured by other techniques but are visible with the tour.</figcaption><p></p>
+</figure>
+</div>
+<div class="cell">
+
+</div>
 
 
 

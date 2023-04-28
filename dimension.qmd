@@ -145,4 +145,109 @@ htmlwidgets::saveWidget(pn_tour,
 Grand tour of the plane with two additional dimensions of pure noise. The collapsing of the points indicates that this is not fully 7D. This only happens when any of x1-x5 are contributing strongly (frame 49 x4, x5; frame 79 x1; frame 115 x2, x3). If x6 or x7 are contributing strongly the data is spread out fully. This tells us that x6 and x7 are not linearly associated, but other variables are.
 :::
 
-The simulated data here is very simple, and what we have learned from the tour could also be learned from principal component analysis. The main purpose here is to explain how to interpret what you see from the tour, in a simple setting. 
+The simulated data here is very simple, and what we have learned from the tour could also be learned from principal component analysis. However, if there are small complications, such as outliers or nonlinear relationships, that might not be visible from principal component analysis, the tour can help you to see them.
+
+Here's an example with an outlier. 
+
+```{r}
+#| label: fig-plane-noise-outlier
+#| fig-cap: Outliers added to the plane with noise data. 
+#| fig-height: 4
+#| fig-width: 8
+# Add several outliers to the plane_noise data
+plane_noise_outliers <- plane_noise
+plane_noise_outliers[101,] <- c(2, 2, -2, 0, 0, 0, 0)
+plane_noise_outliers[102,] <- c(0, 0, 0,-2, -2, 0, 0)
+
+ggscatmat(plane_noise_outliers, columns = 1:5) +
+  theme(aspect.ratio=1, axis.text = element_blank())
+```
+
+```{r}
+#| eval: false
+render_gif(plane_noise_outliers,          
+           grand_tour(), 
+           display_xy(),
+           gif_file="gifs/pn_outliers.gif",
+           frames=500,
+           width=200,
+           height=200)
+
+data(plane_nonlin)
+render_gif(plane_nonlin,          
+           grand_tour(), 
+           display_xy(),
+           gif_file="gifs/plane_nonlin.gif",
+           frames=500,
+           width=200,
+           height=200)
+```
+
+::: {#fig-outlier-nonlin fig-align="center" layout-ncol=2}
+
+![Outliers in addition to 2D plane.](gifs/pn_outliers.gif){width=180}
+
+![Non-linear relationship between several variables, primarily x3.](gifs/plane_nonlin.gif){width=180}
+
+Examples of different types of dimensionality issues: outliers and nonlinearity. In the left plot, you can see two points far from the others in some projections. Also the two can be seen with different movement patterns, moving faster that other points during the tour. Outliers will affect detection of reduced dimension, but it is easy to ignore with the tour. Non-linear relationships may not be captured by other techniques but are visible with the tour.
+:::
+
+```{r}
+#| label: plane-outliers
+#| eval: false
+#| code-fold: true
+#| echo: false
+library(ggplot2)
+library(plotly)
+library(htmlwidgets)
+
+set.seed(78)
+b <- basis_random(7, 2)
+pn_t <- tourr::save_history(plane_noise_outliers, 
+                    tour_path = grand_tour(),
+                    start = b,
+                    max_bases = 20)
+pn_t <- interpolate(pn_t, 0.2)
+pn_anim <- render_anim(plane_noise_outliers,
+                         frames=pn_t)
+
+pn_gp <- ggplot() +
+     geom_path(data=pn_anim$circle, 
+               aes(x=c1, y=c2,
+                   frame=frame), linewidth=0.1) +
+     geom_segment(data=pn_anim$axes, 
+                  aes(x=x1, y=y1, 
+                      xend=x2, yend=y2, 
+                      frame=frame), 
+                  linewidth=0.1) +
+     geom_text(data=pn_anim$axes, 
+               aes(x=x2, y=y2, 
+                   frame=frame, 
+                   label=axis_labels), 
+               size=5) +
+     geom_point(data=pn_anim$frames, 
+                aes(x=P1, y=P2, 
+                    frame=frame), 
+                alpha=0.8) +
+     xlim(-1,1) + ylim(-1,1) +
+     coord_equal() +
+     theme_bw() +
+     theme(axis.text=element_blank(),
+         axis.title=element_blank(),
+         axis.ticks=element_blank(),
+         panel.grid=element_blank())
+pn_tour <- ggplotly(pn_gp,
+                        width=500,
+                        height=550) %>%
+       animation_button(label="Go") %>%
+       animation_slider(len=0.8, x=0.5,
+                        xanchor="center") %>%
+       animation_opts(easing="linear", 
+                      transition = 0)
+
+htmlwidgets::saveWidget(pn_tour,
+          file="html/plane_noise.html",
+          selfcontained = TRUE)
+```
+
+
