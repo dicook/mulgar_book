@@ -47,14 +47,14 @@ render_gif(cube5d,
 
 ![5D plane in 5D](gifs/cube5d.gif){width=180}
 
-Different dimensional planes - 2D, 3D, 5D - displayed in a grand tour projecting into 2D. Notice that the 5D in 5D always fills out the box (although it does concentrate some in the middle which is typical when projecting from high to low dimensions. Also you can see that the 2D in 5D, concentrates into a line more than the 3D in 5D. This suggests that it is lower dimensional.)
+Different dimensional planes - 2D, 3D, 5D - displayed in a grand tour projecting into 2D. Notice that the 5D in 5D always fills out the box (although it does concentrate some in the middle which is typical when projecting from high to low dimensions). Also you can see that the 2D in 5D, concentrates into a line more than the 3D in 5D. This suggests that it is lower dimensional. 
 :::
 
 The next step is to determine which variables contribute. In the examples just provided, all variables are linearly associated in the 2D and 2D data. You can check this by making a scatterplot matrix.
 
 ```{r}
 #| label: fig-plane-scatma
-#| fig-cap: Scatterplot matrix of plane data. You can see that x1-x3 are strongly linearly associated, and also x4 and x5.
+#| fig-cap: Scatterplot matrix of plane data. You can see that x1-x3 are strongly linearly associated, and also x4 and x5. When you watch the tour of this data, any time the data collapses into a line you should see only (x1, x2, x3) or (x4, x5). When combinations of x1 and x4 or x5 show, the data should be spread out. 
 #| message: false
 #| warning: false
 library(GGally)
@@ -62,3 +62,83 @@ library(mulgar)
 data(plane)
 ggscatmat(plane)
 ```
+
+To make an example where not all variables contribute, we have added two additional variables to the `plane` data set, which are purely noise.
+
+```{r}
+#| code-fold: false
+# Add two pure noise dimensions to the plane
+plane_noise <- plane
+plane_noise$x6 <- rnorm(100)
+plane_noise$x7 <- rnorm(100)
+```
+
+Now we have 2D structure in 7D, but only five of the variables contribute to the 2D structure, that is, five of the variables are linearly related with each other. The other two variables (x6, x7) are not linearly related to any of the others. 
+
+We can stil see the concentration of points along a line in some dimensions, which tells us that the data is not fully 7D. Then if you look closely at the variable axes you will see that the collapsing to a line only occurs when any of x1-x5 contribute strongly in the direction orthogonal to this. This does not happen when x6 or x7 contribute strongly to a projection - the data is always expanded to fill much of the space. That tells us that x6 and x7 don't substantially contribute to the dimension reduction, that is, they are not linearly related to the other variables.
+
+```{r}
+#| label: plane-plotly
+#| eval: false
+#| code-fold: true
+library(ggplot2)
+library(plotly)
+library(htmlwidgets)
+
+set.seed(78)
+b <- basis_random(7, 2)
+pn_t <- tourr::save_history(plane_noise, 
+                    tour_path = grand_tour(),
+                    start = b,
+                    max_bases = 8)
+pn_t <- interpolate(pn_t, 0.1)
+pn_anim <- render_anim(plane_noise,
+                         frames=pn_t)
+
+pn_gp <- ggplot() +
+     geom_path(data=pn_anim$circle, 
+               aes(x=c1, y=c2,
+                   frame=frame), linewidth=0.1) +
+     geom_segment(data=pn_anim$axes, 
+                  aes(x=x1, y=y1, 
+                      xend=x2, yend=y2, 
+                      frame=frame), 
+                  linewidth=0.1) +
+     geom_text(data=pn_anim$axes, 
+               aes(x=x2, y=y2, 
+                   frame=frame, 
+                   label=axis_labels), 
+               size=5) +
+     geom_point(data=pn_anim$frames, 
+                aes(x=P1, y=P2, 
+                    frame=frame), 
+                alpha=0.8) +
+     xlim(-1,1) + ylim(-1,1) +
+     coord_equal() +
+     theme_bw() +
+     theme(axis.text=element_blank(),
+         axis.title=element_blank(),
+         axis.ticks=element_blank(),
+         panel.grid=element_blank())
+pn_tour <- ggplotly(pn_gp,
+                        width=500,
+                        height=550) %>%
+       animation_button(label="Go") %>%
+       animation_slider(len=0.8, x=0.5,
+                        xanchor="center") %>%
+       animation_opts(easing="linear", 
+                      transition = 0)
+
+htmlwidgets::saveWidget(pn_tour,
+          file="html/plane_noise.html",
+          selfcontained = TRUE)
+```
+
+::: {#fig-plane-noise}
+
+<iframe width="750" height="550" src="html/plane_noise.html" title="Grand tour of the plane with two additional dimensions of pure noise. "></iframe>
+
+Grand tour of the plane with two additional dimensions of pure noise. The collapsing of the points indicates that this is not fully 7D. This only happens when any of x1-x5 are contributing strongly (frame 49 x4, x5; frame 79 x1; frame 115 x2, x3). If x6 or x7 are contributing strongly the data is spread out fully. This tells us that x6 and x7 are not linearly associated, but other variables are.
+:::
+
+The simulated data here is very simple, and what we have learned from the tour could also be learned from principal component analysis. The main purpose here is to explain how to interpret what you see from the tour, in a simple setting. 
