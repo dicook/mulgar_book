@@ -2,3 +2,50 @@
 
 This chapter will focus on methods for reducing dimension, and how the tour can be used to assist with the common methods such as principal component analysis (PCA), multidimensional scaling (MDS), t-stochastic neighbour embedding (t-SNE), and factor analysis.
 
+Dimension is perceived in a tour using the spread of points. When the points are spread far apart, then the data is filling the space. Conversely when the points "collapse" into a sub-region then the data is only partially filling the space, and some dimension reduction to reduce to this smaller dimensional space may be worthwhile. 
+
+```{r}
+#| eval: false
+library(mulgar)
+data(plane)
+data(box)
+render_gif(plane,
+           grand_tour(), 
+           display_xy(),
+           gif_file="gifs/plane.gif",
+           frames=500,
+           width=200,
+           height=200,
+           loop=FALSE)
+render_gif(box,
+           grand_tour(), 
+           display_xy(),
+           gif_file="gifs/box.gif",
+           frames=500,
+           width=200,
+           height=200,
+           loop=FALSE)
+# Simulate full cube
+library(geozoo)
+cube5d <- data.frame(cube.solid.random(p=5, n=300)$points)
+colnames(cube5d) <- paste0("x", 1:5)
+render_gif(cube5d,
+           grand_tour(), 
+           display_xy(),
+           gif_file="gifs/cube5d.gif",
+           frames=500,
+           width=200,
+           height=200,
+           loop=FALSE)
+```
+
+::: {#fig-dimension fig-align="center" layout-ncol=3}
+
+![2D plane in 5D](gifs/plane.gif){width=180}
+
+![3D plane in 5D](gifs/box.gif){width=180}
+
+![5D plane in 5D](gifs/cube5d.gif){width=180}
+
+Different dimensional planes - 2D, 3D, 5D - displayed in a grand tour projecting into 2D. Notice that the 5D in 5D always fills out the box (although it does concentrate some in the middle which is typical when projecting from high to low dimensions. Also you can see that the 2D in 5D, concentrates into a line more than the 3D in 5D. This suggests that it is lower dimensional.)
+:::
