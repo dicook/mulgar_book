@@ -20,6 +20,69 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1.6em;
   vertical-align: middle;
 }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
 </style>
 
 
@@ -62,6 +125,7 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 <link rel="stylesheet" href="style.css">
 </head>
@@ -301,7 +365,101 @@ ul.task-list li input[type="checkbox"] {
 </div>
 <section id="notation-conventions-and-r-objects" class="level2" data-number="1.1">
 <h2 data-number="1.1" class="anchored" data-anchor-id="notation-conventions-and-r-objects"><span class="header-section-number">1.1</span> Notation conventions and R objects</h2>
-<p>The data can be considered to be a matrix of numbers with the columns corresponding to variables, and the</p>
+<p>The data can be considered to be a matrix of numbers with the columns corresponding to variables, and the rows correspond to observations. It can be helpful to write this in mathematical notation, like:</p>
+<p><span class="math display">\[\begin{eqnarray*}
+X_{n\times p} =
+[X_1~X_2~\dots~X_p]_{n\times p} = \left[ \begin{array}{cccc}
+X_{11} &amp; X_{12} &amp; \dots &amp; X_{1p} \\
+X_{21} &amp; X_{22} &amp; \dots &amp; X_{2p}\\
+\vdots &amp; \vdots &amp;  &amp; \vdots \\
+X_{n1} &amp; X_{n2} &amp; \dots &amp; X_{np} \end{array} \right]_{n\times p}
+\end{eqnarray*}\]</span></p>
+<p>where <span class="math inline">\(X\)</span> indicates the the <span class="math inline">\(n\times p\)</span> data matrix, <span class="math inline">\(X_j\)</span> indicates variable <span class="math inline">\(j, j=1, \dots, p\)</span> and <span class="math inline">\(X_{ij}\)</span> indicates the value <span class="math inline">\(j^{th}\)</span> variable of the <span class="math inline">\(i^{th}\)</span> observation. (It can be confusing to distinguish whether one is referring to the observation or a variable, because <span class="math inline">\(X_i\)</span> is used to indicate observation also. When this is done it is usally accompanied by qualifying words such as <strong>observation</strong> <span class="math inline">\(X_3\)</span>, or <strong>variable</strong> <span class="math inline">\(X_3\)</span>.)</p>
+<p>When there is a response variable(s), it is common to consider <span class="math inline">\(X\)</span> to be the predictors, and use <span class="math inline">\(Y\)</span> to indicate the response variable(s). <span class="math inline">\(Y\)</span> could be a matrix, also, and would be <span class="math inline">\(n\times q\)</span>, where commonly <span class="math inline">\(q=1\)</span>. <span class="math inline">\(Y\)</span> could be numeric or categorical, and this would change how it is handled with visualisation.</p>
+<p>To make a low-dimensional projection (shadow) of the data, we need a projection matrix:</p>
+<p><span class="math display">\[\begin{eqnarray*}
+A_{p\times d} = \left[ \begin{array}{cccc}
+A_{11} &amp; A_{12} &amp; \dots &amp; A_{1d} \\
+A_{21} &amp; A_{22} &amp; \dots &amp; A_{2d}\\
+\vdots &amp; \vdots &amp;  &amp; \vdots \\
+A_{p1} &amp; A_{p2} &amp; \dots &amp; A_{pd} \end{array} \right]_{p\times d}
+\end{eqnarray*}\]</span></p>
+<p><span class="math inline">\(A\)</span> should be an orthonormal matrix, which means that the <span class="math inline">\(\sum_{j=1}^p A_{jk}^2=1, k=1, \dots, d\)</span> (columns represent vectors of length 1) and <span class="math inline">\(\sum_{j=1}^p A_{jk}A_{jl}=0, k,l=1, \dots, d\)</span> (columns represent vectors that are orthogonal to each other).</p>
+<p>Then the projected data is written as:</p>
+<p><span class="math display">\[\begin{eqnarray*}
+Y_{n\times d} = XA = \left[ \begin{array}{cccc}
+y_{11} &amp; y_{12} &amp; \dots &amp; y_{1d} \\
+y_{21} &amp; y_{22} &amp; \dots &amp; y_{2d}\\
+\vdots &amp; \vdots &amp;  &amp; \vdots \\
+y_{n1} &amp; y_{n2} &amp; \dots &amp; y_{nd} \end{array} \right]_{n\times d}
+\end{eqnarray*}\]</span></p>
+<p>where <span class="math inline">\(y_{ij} = \sum_{k=1}^p X_{ik}A_{kj}\)</span>. Note that we are using <span class="math inline">\(Y\)</span> as the projected data here, as well as it possibly being used for a response variable. Where necessary, this will be clarified with words in the text, when notation is used in explanations later.</p>
+<p>When using R, if we only have the data corresponding to <span class="math inline">\(X\)</span> it makes sense to use a <code>matrix</code> object. However, if the response variable is included and it is categorical, then we might use a <code>data.frame</code> or a <code>tibble</code> which can accommodate non-numerical values. Then to work with the data, we can use the base R methods:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="fl">1.1</span>, <span class="fl">1.3</span>, <span class="fl">1.4</span>, <span class="fl">1.2</span>, <span class="fl">2.7</span>, <span class="fl">2.6</span>, <span class="fl">2.4</span>, <span class="fl">2.5</span>, <span class="fl">3.5</span>, <span class="fl">3.4</span>, <span class="fl">3.2</span>, <span class="fl">3.6</span>), <span class="at">ncol=</span><span class="dv">4</span>, <span class="at">byrow=</span><span class="cn">TRUE</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>X</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     [,1] [,2] [,3] [,4]
+[1,]  1.1  1.3  1.4  1.2
+[2,]  2.7  2.6  2.4  2.5
+[3,]  3.5  3.4  3.2  3.6</code></pre>
+</div>
+</div>
+<p>which is a data matrix with <span class="math inline">\(n=3, p=4\)</span> and to extract a column (variable):</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>X[,<span class="dv">2</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1.3 2.6 3.4</code></pre>
+</div>
+</div>
+<p>or a row (observation):</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>X[<span class="dv">2</span>,]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 2.7 2.6 2.4 2.5</code></pre>
+</div>
+</div>
+<p>or an individual cell (value):</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>X[<span class="dv">3</span>,<span class="dv">2</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 3.4</code></pre>
+</div>
+</div>
+<p>To make a projection we need an orthonormal matrix:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>A <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="fl">0.707</span>,<span class="fl">0.707</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="fl">0.707</span>,<span class="fl">0.707</span>), <span class="at">ncol=</span><span class="dv">2</span>, <span class="at">byrow=</span><span class="cn">FALSE</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>A</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      [,1]  [,2]
+[1,] 0.707 0.000
+[2,] 0.707 0.000
+[3,] 0.000 0.707
+[4,] 0.000 0.707</code></pre>
+</div>
+</div>
+<p>You can check that it is orthonormal by</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(A[,<span class="dv">1</span>]<span class="sc">^</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.999698</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(A[,<span class="dv">1</span>]<span class="sc">*</span>A[,<span class="dv">2</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+</div>
+<p>and make a projection using matrix multiplication:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>X <span class="sc">%*%</span> A</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       [,1]   [,2]
+[1,] 1.6968 1.8382
+[2,] 3.7471 3.4643
+[3,] 4.8783 4.8076</code></pre>
+</div>
+</div>
+<!-- Most data arrives with a mix of numerical and categorical, and temporal or spatial variables. In this book we are primarily focused on methods to visualise multiple numerical variables. -->
 </section>
 <section id="whats-different-about-space-beyond-2d" class="level2" data-number="1.2">
 <h2 data-number="1.2" class="anchored" data-anchor-id="whats-different-about-space-beyond-2d"><span class="header-section-number">1.2</span> What’s different about space beyond 2D</h2>

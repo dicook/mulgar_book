@@ -6,8 +6,98 @@ High-dimensional data means that we have a large number of numeric features or v
 
 ## Notation conventions and R objects
 
-The data can be considered to be a matrix of numbers with the columns corresponding to variables, and the 
+The data can be considered to be a matrix of numbers with the columns corresponding to variables, and the rows correspond to observations. It can be helpful to write this in mathematical notation, like:
 
+\begin{eqnarray*}
+X_{n\times p} =
+[X_1~X_2~\dots~X_p]_{n\times p} = \left[ \begin{array}{cccc}
+X_{11} & X_{12} & \dots & X_{1p} \\
+X_{21} & X_{22} & \dots & X_{2p}\\
+\vdots & \vdots &  & \vdots \\
+X_{n1} & X_{n2} & \dots & X_{np} \end{array} \right]_{n\times p}
+\end{eqnarray*}
+
+where $X$ indicates the the $n\times p$ data matrix, $X_j$ indicates variable $j, j=1, \dots, p$ and $X_{ij}$ indicates the value $j^{th}$ variable of the $i^{th}$ observation. (It can be confusing to distinguish whether one is referring to the observation or a variable, because $X_i$ is used to indicate observation also. When this is done it is usally accompanied by qualifying words such as **observation** $X_3$, or **variable** $X_3$.)
+
+When there is a response variable(s), it is common to consider $X$ to be the predictors, and use $Y$ to indicate the response variable(s). $Y$ could be a matrix, also, and would be $n\times q$, where commonly $q=1$. $Y$ could be numeric or categorical, and this would change how it is handled with visualisation.
+
+To make a low-dimensional projection (shadow) of the data, we need a projection matrix:
+
+\begin{eqnarray*}
+A_{p\times d} = \left[ \begin{array}{cccc}
+A_{11} & A_{12} & \dots & A_{1d} \\
+A_{21} & A_{22} & \dots & A_{2d}\\
+\vdots & \vdots &  & \vdots \\
+A_{p1} & A_{p2} & \dots & A_{pd} \end{array} \right]_{p\times d}
+\end{eqnarray*}
+
+
+$A$ should be an orthonormal matrix, which means that the $\sum_{j=1}^p A_{jk}^2=1, k=1, \dots, d$ (columns represent vectors of length 1) and $\sum_{j=1}^p A_{jk}A_{jl}=0, k,l=1, \dots, d$ (columns represent vectors that are orthogonal to each other).
+
+Then the projected data is written as:
+
+\begin{eqnarray*}
+Y_{n\times d} = XA = \left[ \begin{array}{cccc}
+y_{11} & y_{12} & \dots & y_{1d} \\
+y_{21} & y_{22} & \dots & y_{2d}\\
+\vdots & \vdots &  & \vdots \\
+y_{n1} & y_{n2} & \dots & y_{nd} \end{array} \right]_{n\times d}
+\end{eqnarray*}
+
+where $y_{ij} = \sum_{k=1}^p X_{ik}A_{kj}$. Note that we are using $Y$ as the projected data here, as well as it possibly being used for a response variable. Where necessary, this will be clarified with words in the text, when notation is used in explanations later.
+
+When using R, if we only have the data corresponding to $X$ it makes sense to use a `matrix` object. However, if the response variable is included and it is categorical, then we might use a `data.frame` or a `tibble` which can accommodate non-numerical values. Then to work with the data, we can use the base R methods:
+
+```{r}
+#| code-fold: false
+X <- matrix(c(1.1, 1.3, 1.4, 1.2, 2.7, 2.6, 2.4, 2.5, 3.5, 3.4, 3.2, 3.6), ncol=4, byrow=TRUE)
+X
+```
+
+which is a data matrix with $n=3, p=4$ and to extract a column (variable):
+
+```{r}
+#| code-fold: false
+X[,2]
+```
+
+or a row (observation):
+
+```{r}
+#| code-fold: false
+X[2,]
+```
+
+or an individual cell (value):
+
+```{r}
+#| code-fold: false
+X[3,2]
+```
+
+To make a projection we need an orthonormal matrix:
+
+```{r}
+#| code-fold: false
+A <- matrix(c(0.707,0.707,0,0,0,0,0.707,0.707), ncol=2, byrow=FALSE)
+A
+```
+You can check that it is orthonormal by
+
+```{r}
+#| code-fold: false
+sum(A[,1]^2)
+sum(A[,1]*A[,2])
+```
+
+and make a projection using matrix multiplication:
+
+```{r}
+#| code-fold: false
+X %*% A
+```
+
+<!-- Most data arrives with a mix of numerical and categorical, and temporal or spatial variables. In this book we are primarily focused on methods to visualise multiple numerical variables. -->
 
 ## What's different about space beyond 2D
 
