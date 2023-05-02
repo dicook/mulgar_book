@@ -1,0 +1,278 @@
+# Support vector machine
+\index{classification methods!support vector machine (SVM)}
+
+% http://www.support-vector-machines.org/SVM_osh.html
+% wikipedia
+
+A support vector machine (SVM) [@Va99] is a binary classification
+method.  An SVM looks for gaps between clusters in the data, based on the extreme observations in each class. In this sense it mirrors the graphical approach described at the start of this chapter, in which we searched for gaps between groups. We describe this method more fully than we did the other algorithms for two reasons: first, because of its apparent similarity to the graphical approach, and second, because it is difficult to find a simple explanation of the method in the literature.
+
+The algorithm takes an $n \times p$ data matrix, where each column is scaled to $[-1,1]$ and each row is labeled as one of two classes ($y_i=+1$ or $-1$), and finds a hyperplane that separates the two groups, if they are separable. Each row of the data matrix is a vector in $p$-dimensional space, denoted as
+
+% Should this be represented as a row instead of a column?  dfs
+
+$$
+X=\left[ \begin{array}{c}
+  x_1 \\ x_2 \\ \vdots \\ x_p \end{array} \right]
+$$
+
+\noindent and the separating hyperplane can be written as
+
+$$
+W'X + b = 0
+$$
+
+\noindent where $W = [ w_1~~ w_2 ~~ \dots ~~ w_p]'$ is the normal
+vector to the separating hyperplane and $b$ is a constant.  The best separating hyperplane is found by maximizing the margin of separation between the two classes as defined by two parallel hyperplanes:
+
+$$
+W'X + b = 1, ~~~~~ W'X + b = -1.
+$$
+
+\noindent These hyperplanes should maximize the distance from the
+separating hyperplane and have no points between them, capitalizing on any gap between the two classes. The distance from the origin to the
+separating hyperplane is $|b|/||W||$, so the distance between the
+two parallel margin hyperplanes is $2/||W||=2/\sqrt{w_1^2+\dots
++w_p^2}$. Maximizing this is the same as minimizing $||W||/2$. To
+ensure that the two classes are separated, and that no points lie
+between the margin hyperplanes we need:
+
+$$
+W'X_i + b \geq 1, ~~~\mbox{  or  } ~~~W'X_i + b \leq -1 ~~~\forall i=1, ..., n
+$$
+
+\noindent which corresponds to
+
+\begin{eqnarray}
+y_i(W'X_i+b)\geq 1 ~~~\forall i=1, ..., n
+\label{svm-crit}
+\end{eqnarray}
+
+\noindent Thus the problem corresponds to
+\begin{quote} 
+{\em minimizing} $\frac{||W||}{2}$ {\em subject to }
+$y_i(X_iW+b)\geq~1 ~~~\forall i=1, ..., n$.
+\end{quote}
+
+\index{SVMLight}
+
+\noindent Interestingly, only the points closest to the margin
+hyperplanes are needed to define the separating hyperplane. We might think of these points as lying on or close to the convex hull of each cluster in the area where the clusters are nearest to each other. These points are called support vectors, and the coefficients of the separating hyperplane are computed from a linear combination of the support vectors $W = \sum_{i=1}^{s} y_i\alpha_iX_i$, where $s$ is the number of support vectors.  We could also use $W = \sum_{i=1}^n y_i\alpha_iX_i$, where $\alpha_i=0$ if $X_i$ is not a support vector. For a good fit the number of support vectors $s$ should be small relative to $n$. Fitting algorithms can achieve gains in efficiency by using only samples of the cases to find suitable support vector candidates; this approach is used in the SVMLight
+[@Jo99] software.
+
+In practice, the assumption that the classes are completely separable is unrealistic. Classification problems rarely present a gap between the classes, such that there are no misclassifications.
+@CV95 relaxed the separability condition to allow some
+misclassified training points by adding a tolerance value $\epsilon_i$ to Equation \ref{svm-crit}, which results in the modified criterion $y_i(W'X_i+b)>1-\epsilon_i, \epsilon_i\geq 0$. Points that meet this criterion but not the stricter one are called slack vectors.
+
+Nonlinear classifiers can be obtained by using nonlinear
+transformations of $X_i$, $\phi(X_i)$ [@BGV92], which is
+implicitly computed during the optimization using a kernel function
+$K$. Common choices of kernels are linear
+$K(x_i,x_j)=x_i'x_j$, polynomial
+$K(x_i,x_j)=(\gamma x_i'x_j+r)^d$, radial basis
+$K(x_i,x_j)=\exp(-\gamma ||x_i-x_j||^2)$, or sigmoid
+functions $K(x_i,x_j)=\mbox{tanh}(\gamma x_i'x_j+r)$, where
+$\gamma>0, r,$ and $d$ are kernel parameters.
+
+% She didn't say to delete the terminating colon here, but by 
+% analogy with these rest, I will.  dfs
+
+The ensuing minimization problem is formulated as
+
+$$
+\mbox{ minimizing } \frac{1}{2}||W|| + C\sum_{i=1}^n \epsilon_i ~~ \mbox{ subject to } 
+y_i(W'\phi(X)+b)>1-\epsilon_i
+$$
+
+\noindent where $\epsilon_i\geq 0$, $C>0$ is a penalty parameter guarding  against over-fitting the training data and $\epsilon$ controls the tolerance for misclassification. The normal to the separating hyperplane $W$ can be written as $\sum_{i=1}^{n}
+y_i\alpha_i{\phi(X_i)}$, where points other than the support and
+slack vectors will have $\alpha_i=0$.  Thus the optimization problem becomes
+
+\begin{eqnarray*}
+\mbox{ minimizing } \frac{1}{2} \sum_{i=1}^n\sum_{j=1}^n y_iy_j\alpha_i\alpha_jK(X_i,X_j)+C\sum_{i=1}^n \epsilon_i \\ ~~~~~~~~~~~\mbox{ subject to } 
+y_i(W'\phi(X)+b)>1-\epsilon_i
+\end{eqnarray*}
+
+\index{R package!e1071}
+\index{R package!libsvm}
+
+We use the `svm` function in the `e1071` package
+[@DHLMW] of R, which uses `libsvm` [@CL], to classify
+the oils of the four areas in the Southern region.  SVM is a binary classifier, but this algorithm overcomes that limitation by comparing classes in pairs, fitting six separate classifiers, and then using a voting scheme to make predictions. To fit the SVM we also need to specify a kernel, or rely on the internal tuning tools of the algorithm to choose this for us.  Automatic tuning in the algorithm chooses a radial basis, but we found that a linear kernel performed better, so that is what we used. (This accords with our earlier visual inspection of the data in @sec-class-plots.)  Here is the R code used to fit the model:
+
+```
+> library(e1071)
+> olive.svm <- best.svm(factor(area) ~ ., data=d.olive.train)
+> olive.svm <- svm(factor(area) ~ ., data=d.olive.sth.train, 
+  type="C-classification", kernel="linear")
+> table(d.olive.sth.train[,1], predict(olive.svm, 
+  d.olive.sth.train))
+   
+      1   2   3   4
+  1  19   0   0   0
+  2   0  42   0   0
+  3   0   0 155   3
+  4   1   2   3  21
+> table(d.olive.sth.test[,1], predict(olive.svm, 
+  d.olive.sth.test))
+   
+     1  2  3  4
+  1  6  0  0  0
+  2  1 12  1  0
+  3  0  0 46  2
+  4  1  1  0  7
+> support.vectors <- olive.svm$index[
+    abs(olive.svm$coefs[,1])<1 &
+    abs(olive.svm$coefs[,2])<1 & abs(olive.svm$coefs[,3])<1]
+> pointtype <- rep(0,323) # training
+> pointtype[247:323] <- 1 # test
+> pointtype[olive.svm$index] <- 2 # slack vectors
+> pointtype[support.vectors] <- 3 # support vectors
+> parea <- c(predict(olive.svm, d.olive.sth.train),
+    predict(olive.svm, d.olive.sth.test))
+> d.olive.svm <- cbind(rbind(d.olive.sth.train, 
+    d.olive.sth.test), parea, pointtype)
+> gd <- ggobi(d.olive.svm)[1]
+> glyph_color(gd) <- c(6,3,2,9)[d.olive.svm$area]
+```
+
+\noindent These are our misclassification tables:
+
+\smallskip
+\noindent \emph{Training:}
+\begin{center}
+\begin{tabular}{l@{\hspace{.3in}}r@{\hspace{1em}}r@{\hspace{1em}}r@{\hspace{1em}}r@{\hspace{1.5em}}r@{\hspace{2em}}r}
+\B & & \multicolumn{4}{c}{Predicted \Vbl{area}} & Error \\
+
+\T & & \multicolumn{1}{c}{North}  & \multicolumn{1}{c}{Calabria} & \multicolumn{1}{c}{South}  & \multicolumn{1}{c}{Sicily} &  \\
+\B & & \multicolumn{1}{c}{Apulia} &  & \multicolumn{1}{c}{Apulia} & & \\  \cline{3-7}
+
+\T         & North Apulia & 19 & 0 & 0 & 0 & 0.000\\
+\Vbl{area} & Calabria & 0 & 42 & 0 &  0 & 0.000\\
+           & South Apulia & 0 & 0 & 155 & {\bf 3} & 0.019\\
+\B         & Sicily & {\bf 1} & {\bf 2} & {\bf 3} & 21 & 0.222 \\ \cline{3-7}
+\T         &        &         &         &         &    & 0.037
+\end{tabular}
+\end{center}
+
+\bigskip
+
+\noindent \emph {Test:}
+\begin{center}
+\begin{tabular}{l@{\hspace{.3in}}r@{\hspace{1em}}r@{\hspace{1em}}r@{\hspace{1em}}r@{\hspace{1.5em}}r@{\hspace{2em}}r}
+\B & & \multicolumn{4}{c}{Predicted \Vbl{area}} & Error \\
+
+\T & & \multicolumn{1}{c}{North}  & \multicolumn{1}{c}{Calabria} & \multicolumn{1}{c}{South}  & \multicolumn{1}{c}{Sicily} &  \\
+\B & & \multicolumn{1}{c}{Apulia} &  & \multicolumn{1}{c}{Apulia} & & \\  \cline{3-7}
+
+\T         & North Apulia & 6 & 0 & 0 & 0 & 0.000\\
+\Vbl{area} & Calabria & {\bf 1} & 12 & {\bf 1} &  0 & 0.143\\
+           & South Apulia & 0 & 0 & 46 & {\bf 2} & 0.042\\
+\B         & Sicily & {\bf 1} & {\bf 1} & 0 & 7 & 0.286 \\  \cline{3-7}
+\T         &        &         &         &         &    & 0.078
+\end{tabular}
+\end{center}
+\bigskip
+
+\noindent The training error is $9/246=0.037$, and the test error is
+$6/77=0.078$.  (The training error is the same as that of the neural network classifier, but the test error is lower.)  Most error is associated with Sicily, which we have seen repeatedly to be an especially difficult class to separate.  In the training data there are no other errors, and in the test data there are just two samples from Calabria mistakenly classified. @fig-olive-svm illustrates our examination of the misclassified cases, one in each row of the figure. (Points corresponding to Sicily were removed from all four plots.)  Each of the two cases is brushed (using a filled red
+circle) in the plot of misclassification table and viewed in a linked 2D tour.  \index{brushing!linked}\index{tour!grand} Both of these cases are on the edge of their clusters so the confusion of classes is reasonable.
+
+% Figure 14
+\begin{figure*}[htbp]
+\centerline{{\includegraphics[width=2.2in]{chap-class/olive-svm6.pdf}}
+ {\includegraphics[width=2.2in]{chap-class/olive-svm7.pdf}}}
+\smallskip
+
+\centerline{{\includegraphics[width=2.2in]{chap-class/olive-svm8.pdf}}
+ {\includegraphics[width=2.2in]{chap-class/olive-svm9.pdf}}}
+\caption[Misclassifications of a support vector machine classifying
+ the oils of the South]{Misclassifications of a support vector machine
+ classifying the oils of the South by \Vbl{area}.  The
+ misclassification table {\bf (left)} is linked to 2D tour plots {\bf
+ (right)}; different misclassifications are examined in each row of
+ plots. (The oils from Sicily, the fourth area, have been removed from
+ all plots.)  }
+\label{olive-svm}
+\end{figure*}
+
+% Figure 15
+\begin{figure*}[htbp]
+\centerline{
+ {\includegraphics[width=1.5in]{chap-class/olive-svm3.pdf}}
+ {\includegraphics[width=1.5in]{chap-class/olive-svm4.pdf}}
+ {\includegraphics[width=1.5in]{chap-class/olive-svm5.pdf}}}
+\caption[Using the tour to examine the choice of support
+vectors]{Using the tour to examine the choice of support vectors when
+classifying Southern oils by \Vbl{area}.  Support vectors are open
+circles, and slack vectors are open rectangles; the data points are
+represented by $+$es and $\times$es.}
+\label{olive-svm2}
+\end{figure*}
+
+The linear SVM classifier uses 20 support vectors and 29 slack vectors
+to define the separating planes between the four areas. It is
+interesting to examine which points are selected as support vectors,
+and where they are located in the data space.  For each pair of
+classes, we expect to find some projection in which the support vectors
+line up on either side of the margin of separation, whereas the slack
+vectors lie closer to the boundary, perhaps mixed in with the points
+of other classes.
+
+\index{tour!grand} \index{tour!manual} The plots in
+@fig-olive-svm2 represent our use of the 2D tour, augmented by
+manual manipulation,~to look for these projections.  (The Sicilian points are again removed.) The support vectors are represented by open circles and the slack vectors by open rectangles, and we have been able to find a number of projections in which the support vectors are on the opposing outer edge of the point clouds for each cluster. 
+
+The linear SVM does a very nice job with this difficult
+classification. The accuracy is almost perfect on three classes,
+and the misclassifications are quite reasonable mistakes, being points that are on the extreme edges of their clusters.  However, this method joins the list of those defeated by the difficult problem of distinguishing the Sicilian oils from the rest.
+
+### Examining boundaries
+
+\index{classification!examining boundaries}
+
+For some classification problems, it is possible to get a good picture of the boundary between two classes. With LDA and SVM classifiers the boundary is described by the equation of a hyperplane. For others the boundary can be determined by evaluating the classifier on points sampled in the data space, using either a regular grid or some more efficient sampling scheme.
+
+% Figure 16
+\begin{figure*}[htbp]
+\centerline{{\includegraphics[width=2in]{chap-class/olive-classifly-lda.pdf}}
+ {\includegraphics[width=2in]{chap-class/olive-classifly-svm.pdf}}}
+\smallskip
+\centerline{{\includegraphics[width=2in]{chap-class/olive-classifly-svm3.pdf}}
+ {\includegraphics[width=2in]{chap-class/olive-classifly-svm5.pdf}}}
+\caption[Classification boundaries for different
+models]{Classification boundaries for different models shown in the 2D
+tour. Points on the boundary are gray stars.  We first compare LDA
+{\bf (top left)} with linear SVM {\bf (top right)} in finding the
+boundary between oils from the North and Sardinia.  Both boundaries
+are too close to the cluster of Northern oils.  We also compare linear
+SVM {\bf (bottom left)} and radial kernel SVM {\bf (bottom right)} in
+finding the boundary between oils from South Apulia and other Southern
+oils.  }
+\label{olive-classifly} 
+\end{figure*}
+
+\index{R package!classifly} \index{tour!grand}
+\index{tour!manual} We use the R package `classifly`
+[@Wi06] to generate points illustrating boundaries, add those
+points to the original data, and display them in GGobi.
+@fig-olive-classifly shows projections of boundaries between
+pairs of classes in the \Data{Olive Oils}.  In each example, we used the 2D tour with manual control~to focus the view on a projection that revealed the boundary between two groups.
+
+% Needs to be checked
+\begin{verbatim}
+> library(classifly)
+> d.olive.sub <- subset(d.olive,region!=1,
+   select=c(region,palmitic:eicosenoic))
+> classifly(d.olive.sub, region~linoleic+oleic+arachidic, 
+   lda)
+> classifly(d.olive.sub, region~linoleic+oleic+arachidic, 
+   svm, probability=TRUE, kernel="linear")
+\end{verbatim}
+
+The top two plots show tour projections of the North (purple) and
+Sardinia (green) oils where the two classes are separated and the
+boundary appears in gray.  The LDA boundary (shown at left) slices too close to the Northern oils. This might be due to the violation of the LDA assumption that the two groups have equal variance; since that is not true here, it places the boundary too close to the group with the larger variance.  The SVM boundary (at right) is a bit closer to the Sardinian oils than the LDA boundary is, yet it is still a tad too close to the oils from the North.
+
+The bottom row of plots examines the more difficult classification of the areas of the South, focusing on separating the South Apulian oils (in pink), which is the largest sample, from the oils of the other areas (all in orange). Perfect separation between the classes does not occur. Both plots are tour projections showing SVM boundaries, the left plot generated by a linear kernel and the right one by a radial
+kernel.  Recall that the radial kernel was selected automatically by the SVM software we used, whereas we actually chose to use a linear kernel.  These pictures illustrate that the linear basis yields a more reasonable boundary between the two groups. The shape of the clusters of the two groups is approximately the same, and there is only a small overlap of the two. The linear boundary fits this structure neatly. The radial kernel wraps around the South Apulian oils.
