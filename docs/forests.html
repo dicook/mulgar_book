@@ -622,8 +622,89 @@ built using a sample of the cases, there is in effect a training sample and a te
 <div class="cell">
 
 </div>
+<p>The votes matrix, reports the proportion of trees each observation is classified as each class. From the tour of the votes matrix, it can be seen to be 2D in 3D space. This is due to the constraint that the three proportions for each observation sum to 1. Using a Helmert matrix, this data can be projected into the 2D space, or more generally the <span class="math inline">\((g-1)\)</span>-dimensional space where it resides. In 2D this is called a ternary diagram, and in higher dimensions the bounding shapes might be considered to be a simplex. The vertices of this shape correspond to <span class="math inline">\((1,0,0), (0,1,0), (0,0,1)\)</span> (and analogously for higher dimensions), which represent perfect confidence, that an observation is classified into that group all the time.</p>
+<p>What we can see here is a concentration of points in the corners of the triangle indicates that most of the penguins are confidently classified into their correct class. Then there is more separation between the Gentoo and the others, than between Chinstrap and Adelie. That means that as a group Gentoo are more distinguishable. Only one of the Gentoo penguins has substantial confusion, mostly confused as a Chinstrap, but occasionally confused as an Adelie – if it was only ever confused as a Chinstrap it would fall on the edge between Gentoo and Chinstrap. There are quite a few Chinstrap and Adelie penguins confused as each other, with a couple of each more confidently predicted to be the other class. This can be seen because there are points of the wrong colour close to those vertices.</p>
+<p>The votes matrix is useful for investigating the fit, but one should remember that there are some structural elements of this data that don’t lend themselves to tree models. Although a forest has the capacity to generate non-linear boundaries by combining predictions from multiple trees, it is still based on the boxy boundaries of trees. This makes it less suitable for the penguins data with elliptical classes. You could use the techniques from the previsou section to explore the boundaries produced by the forest, and you will find that the are more boxy than the LDA models.</p>
+<p>To examine a vote matrix for a problem with more classes, we’ll look at the bushfires data. There are four classes: accident, arson, burning_off, lightning. It is highly imbalanced, with most observations belonging to the lightning class, fires ignited by lightning. We can see that most of the observations lie on the face of lightning, arson and accident. The handful of the burning_off observations lie off this plane, in the direction of burning-off, so are less confused with the other three classes. This could be expected because burning off is highly regulated, and tends to occur before the bushfire season is at risk of starting. The arson cases are hard to classify, frequently confused with lightning or accident, and occasionally burning off. Lightning and accident have many more observations that are confidently classified correctly.</p>
 <div class="cell">
-
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mulgar)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tourr)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(bushfires)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>bushfires_sub <span class="ot">&lt;-</span> bushfires[,<span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">8</span><span class="sc">:</span><span class="dv">45</span>, <span class="dv">48</span><span class="sc">:</span><span class="dv">55</span>, <span class="dv">57</span><span class="sc">:</span><span class="dv">60</span>)] <span class="sc">%&gt;%</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">cause =</span> <span class="fu">factor</span>(cause))</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>bushfires_pca <span class="ot">&lt;-</span> <span class="fu">prcomp</span>(bushfires_sub[,<span class="sc">-</span><span class="dv">51</span>],</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>                        <span class="at">scale=</span><span class="cn">TRUE</span>, <span class="at">retx=</span><span class="cn">TRUE</span>)</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="fu">ggscree</span>(bushfires_pca)</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>bushfires_pcs <span class="ot">&lt;-</span> bushfires_pca<span class="sc">$</span>x[,<span class="dv">1</span><span class="sc">:</span><span class="dv">7</span>] <span class="sc">%&gt;%</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_tibble</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">cause =</span> <span class="fu">factor</span>(bushfires<span class="sc">$</span>cause))</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tourr)</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="fu">animate_xy</span>(bushfires_pcs[,<span class="dv">1</span><span class="sc">:</span><span class="dv">7</span>],</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>           <span class="fu">guided_tour</span>(<span class="fu">lda_pp</span>(bushfires_pcs<span class="sc">$</span>cause)),</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>           <span class="at">col=</span>bushfires_pcs<span class="sc">$</span>cause)</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>bushfires_pca<span class="sc">$</span>rotation[,<span class="dv">2</span>]</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(bushfires, <span class="fu">aes</span>(<span class="at">x=</span>FOR_CODE)) <span class="sc">+</span> <span class="fu">geom_density</span>()</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(bushfires, <span class="fu">aes</span>(<span class="at">x=</span>COVER)) <span class="sc">+</span> <span class="fu">geom_density</span>()</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(bushfires, <span class="fu">aes</span>(<span class="at">x=</span>HEIGHT)) <span class="sc">+</span> <span class="fu">geom_density</span>()</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(bushfires, <span class="fu">aes</span>(<span class="at">x=</span>FOREST)) <span class="sc">+</span> <span class="fu">geom_density</span>()</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(bushfires, <span class="fu">aes</span>(<span class="at">x=</span>arf28)) <span class="sc">+</span> <span class="fu">geom_density</span>()</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(randomForest)</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>bushfires_rf <span class="ot">&lt;-</span> <span class="fu">randomForest</span>(cause<span class="sc">~</span>.,</span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>                             <span class="at">data=</span>bushfires_sub,</span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>                             <span class="at">importance=</span><span class="cn">TRUE</span>)</span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>bushfires_rf_votes <span class="ot">&lt;-</span> bushfires_rf<span class="sc">$</span>votes <span class="sc">%&gt;%</span></span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_tibble</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">cause =</span> bushfires_sub<span class="sc">$</span>cause)</span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a><span class="fu">animate_xy</span>(bushfires_rf_votes[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>],</span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>           <span class="at">col=</span>bushfires_rf_votes<span class="sc">$</span>cause)</span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a><span class="co"># Project 4D into 3D</span></span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(geozoo)</span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>proj <span class="ot">&lt;-</span> <span class="fu">t</span>(geozoo<span class="sc">::</span><span class="fu">f_helmert</span>(<span class="dv">4</span>)[<span class="sc">-</span><span class="dv">1</span>,])</span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a>b_rf_v_p <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(bushfires_rf_votes[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>]) <span class="sc">%*%</span> proj</span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(b_rf_v_p) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>)</span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a>b_rf_v_p <span class="ot">&lt;-</span> b_rf_v_p <span class="sc">%&gt;%</span></span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">cause =</span> bushfires_sub<span class="sc">$</span>cause)</span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a><span class="co"># Add simplex</span></span>
+<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a>simp <span class="ot">&lt;-</span> <span class="fu">simplex</span>(<span class="at">p=</span><span class="dv">3</span>)</span>
+<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a>sp <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(simp<span class="sc">$</span>points)</span>
+<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(sp) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>)</span>
+<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a>sp<span class="sc">$</span>cause <span class="ot">=</span> <span class="st">""</span></span>
+<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a>b_rf_v_p_s <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(sp, b_rf_v_p) <span class="sc">%&gt;%</span></span>
+<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">cause =</span> <span class="fu">factor</span>(cause))</span>
+<span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a>labels <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"accident"</span> , <span class="st">"arson"</span>, </span>
+<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a>                <span class="st">"burning_off"</span>, <span class="st">"lightning"</span>, </span>
+<span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a>                <span class="fu">rep</span>(<span class="st">""</span>, <span class="dv">1021</span>))</span>
+<span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a><span class="fu">animate_xy</span>(b_rf_v_p_s[,<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>], <span class="at">col =</span> b_rf_v_p_s<span class="sc">$</span>cause, </span>
+<span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a>           <span class="at">axes =</span> <span class="st">"off"</span>, <span class="at">half_range =</span> <span class="fl">1.3</span>,</span>
+<span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a>           <span class="at">edges =</span> <span class="fu">as.matrix</span>(simp<span class="sc">$</span>edges),</span>
+<span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a>           <span class="at">obs_labels =</span> labels)</span>
+<span id="cb5-62"><a href="#cb5-62" aria-hidden="true" tabindex="-1"></a><span class="fu">render_gif</span>(b_rf_v_p_s[,<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>],</span>
+<span id="cb5-63"><a href="#cb5-63" aria-hidden="true" tabindex="-1"></a>           <span class="fu">grand_tour</span>(),</span>
+<span id="cb5-64"><a href="#cb5-64" aria-hidden="true" tabindex="-1"></a>           <span class="fu">display_xy</span>(<span class="at">col =</span> b_rf_v_p_s<span class="sc">$</span>cause, </span>
+<span id="cb5-65"><a href="#cb5-65" aria-hidden="true" tabindex="-1"></a>           <span class="at">axes =</span> <span class="st">"off"</span>, <span class="at">half_range =</span> <span class="fl">1.3</span>,</span>
+<span id="cb5-66"><a href="#cb5-66" aria-hidden="true" tabindex="-1"></a>           <span class="at">edges =</span> <span class="fu">as.matrix</span>(simp<span class="sc">$</span>edges),</span>
+<span id="cb5-67"><a href="#cb5-67" aria-hidden="true" tabindex="-1"></a>           <span class="at">obs_labels =</span> labels),</span>
+<span id="cb5-68"><a href="#cb5-68" aria-hidden="true" tabindex="-1"></a>           <span class="at">gif_file=</span><span class="st">"gifs/bushfires_votes.gif"</span>,</span>
+<span id="cb5-69"><a href="#cb5-69" aria-hidden="true" tabindex="-1"></a>           <span class="at">frames=</span><span class="dv">500</span>)  </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div id="fig-b-votes" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="gifs/bushfires_votes.gif" class="img-fluid figure-img" alt="FIX ME" width="300"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;7.4: The 3D votes matrix for the four class bushfires data in a tour.</figcaption><p></p>
+</figure>
 </div>
 <p></p>
 
@@ -800,12 +881,20 @@ In summary, a random forest is a useful method for tackling tough classification
 <section id="exercises" class="level2 unnumbered">
 <h2 class="unnumbered anchored" data-anchor-id="exercises">Exercises</h2>
 <ol type="1">
-<li>For the :
-<ol type="a">
-<li>Split the samples from North Italy into <span class="math inline">\(2/3\)</span> training and <span class="math inline">\(1/3\)</span> test samples for each area.</li>
-<li>Build a tree model to classify the oils by <code>area</code> for the three areas of North Italy. Which are the most important variables? Make plots of these variables. What is the accuracy of the model for the training and test sets?</li>
-<li>Build a random forest to classify oils into the three areas of North Italy. Compare the order of importance of variables with what you found from a single tree. Make a parallel coordinate plot in the order of variable importance.</li>
-</ol></li>
+<li>Compare the boundaries from the random forest model on the penguins data to that of the (a) LDA model, (b) a default tree model.</li>
+<li>Tinker with the parameters of the tree model to force it to fit a tree more closely to the data. Compare the boundaries from this with the default tree, and with the forest model. Is it less boxy than the default tree, but more boxy than the forest model? <!--
+1. For the \Data{Italian Olive Oils}:
+    a. Split the samples from North Italy into $2/3$ training and
+$1/3$ test samples for each area.
+    b. Build a tree model to classify the oils by `area` for the
+three areas of North Italy. Which are the most important
+variables? Make plots of these variables. What is the accuracy of the
+model for the training and test sets?
+    c. Build a random forest to classify oils into the three areas of
+North Italy. Compare the order of importance of variables with what
+you found from a single tree. Make a parallel coordinate plot in the
+order of variable importance.
+--></li>
 </ol>
 
 

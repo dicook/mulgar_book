@@ -231,9 +231,16 @@ render_gif(penguins_rf$votes,
            )
 ```
 
+The votes matrix, reports the proportion of trees each observation is classified as each class. From the tour of the votes matrix, it can be seen to be 2D in 3D space. This is due to the constraint that the three proportions for each observation sum to 1. Using a Helmert matrix, this data can be projected into the 2D space, or more generally the $(g-1)$-dimensional space where it resides. In 2D this is called a ternary diagram, and in higher dimensions the bounding shapes might be considered to be a simplex. The vertices of this shape correspond to $(1,0,0), (0,1,0), (0,0,1)$ (and analogously for higher dimensions), which represent perfect confidence, that an observation is classified into that group all the time.
+
+What we can see here is a concentration of points in the corners of the triangle indicates that most of the penguins are confidently classified into their correct class. Then there is more separation between the Gentoo and the others, than between Chinstrap and Adelie. That means that as a group Gentoo are more distinguishable. Only one of the Gentoo penguins has substantial confusion, mostly confused as a Chinstrap, but occasionally confused as an Adelie -- if it was only ever confused as a Chinstrap it would fall on the edge between Gentoo and Chinstrap. There are quite a few Chinstrap and Adelie penguins confused as each other, with a couple of each more confidently predicted to be the other class. This can be seen because there are points of the wrong colour close to those vertices. 
+
+The votes matrix is useful for investigating the fit, but one should remember that there are some structural elements of this data that don't lend themselves to tree models. Although a forest has the capacity to generate non-linear boundaries by combining predictions from multiple trees, it is still based on the boxy boundaries of trees. This makes it less suitable for the penguins data with elliptical classes. You could use the techniques from the previsou section to explore the boundaries produced by the forest, and you will find that the are more boxy than the LDA models.
+
+To examine a vote matrix for a problem with more classes, we'll look at the bushfires data. There are four classes: accident, arson, burning_off, lightning. It is highly imbalanced, with most observations belonging to the lightning class, fires ignited by lightning. We can see that most of the observations lie on the face of lightning, arson and accident. The handful of the burning_off observations lie off this plane, in the direction of burning-off, so are less confused with the other three classes. This could be expected because burning off is highly regulated, and tends to occur before the bushfire season is at risk of starting. The arson cases are hard to classify, frequently confused with lightning or accident, and occasionally burning off. Lightning and accident have many more observations that are confidently classified correctly. 
+
 ```{r}
 #| eval: false
-#| echo: false
 library(mulgar)
 library(tourr)
 data(bushfires)
@@ -305,7 +312,7 @@ render_gif(b_rf_v_p_s[,1:3],
            frames=500)  
 ```
 
-
+![The 3D votes matrix for the four class bushfires data in a tour.](gifs/bushfires_votes.gif){#fig-b-votes fig-alt="FIX ME" width=300}
 
 \index{R package!\RPackage{randomForest}}
 
@@ -485,6 +492,9 @@ In summary, a random forest is a useful method for tackling tough classification
 
 ## Exercises {-}
 
+1. Compare the boundaries from the random forest model on the penguins data to that of the (a) LDA model, (b) a default tree model.
+2. Tinker with the parameters of the tree model to force it to fit a tree more closely to the data. Compare the boundaries from this with the default tree, and with the forest model. Is it less boxy than the default tree, but more boxy than the forest model?
+<!--
 1. For the \Data{Italian Olive Oils}:
     a. Split the samples from North Italy into $2/3$ training and
 $1/3$ test samples for each area.
@@ -496,3 +506,4 @@ model for the training and test sets?
 North Italy. Compare the order of importance of variables with what
 you found from a single tree. Make a parallel coordinate plot in the
 order of variable importance.
+-->
