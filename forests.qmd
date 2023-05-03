@@ -172,16 +172,8 @@ A random forest is a computationally intensive method, a "black box" classifier,
 
 Here we show how to use the `randomForest` [@Li06] votes matrix for the penguins datato investigate confusion between classes, and observations which are problematic to classify. With only three classes the votes matrix is only a 2D object, and thus easy to examine. With four or more classes the votes matrix needs to be examined in a tour. 
 
-::: {#fig-penguins-votes layout-ncol=2}
-
-![Votes matrix in a tour.](gifs/penguins_rf_votes.gif){#fig-p-votes-tour fig-alt="FIX ME" width=300}
-
 ```{r}
-#| label: fig-p-votes-ggplot
 #| message: false
-#| fig-cap: Votes marix in its 2D space, a ternary diagram.
-#| fig-width: 4
-#| fig-height: 4
 library(randomForest)
 library(dplyr)
 penguins_rf <- randomForest(species~.,
@@ -204,7 +196,7 @@ sp <- data.frame(cbind(simp$points), simp$points[c(2,3,1),])
 colnames(sp) <- c("x1", "x2", "x3", "x4")
 sp$species = sort(unique(penguins_sub$species))
 library(ggthemes)
-ggplot() +
+p_ternary <- ggplot() +
   geom_segment(data=sp, aes(x=x1, y=x2, xend=x3, yend=x4)) +
   geom_text(data=sp, aes(x=x1, y=x2, label=species),
             nudge_x=c(-0.06, 0.07, 0),
@@ -215,12 +207,8 @@ ggplot() +
   theme(aspect.ratio=1, legend.position="none")
 ```
 
-Examining the votes matrix from a random forest fit to the penguins.
-:::
-
 ```{r}
 #| eval: false
-#| echo: false
 render_gif(penguins_rf$votes,
            grand_tour(),
            display_xy(v_rel=0.02, 
@@ -230,6 +218,23 @@ render_gif(penguins_rf$votes,
            loop=FALSE
            )
 ```
+
+::: {#fig-penguins-votes layout-ncol=2}
+
+![Votes matrix in a tour.](gifs/penguins_rf_votes.gif){#fig-p-votes-tour fig-alt="FIX ME" width=300}
+
+```{r}
+#| echo: false
+#| label: fig-p-votes-ggplot
+#| fig-cap: Votes marix in its 2D space, a ternary diagram.
+#| fig-width: 4
+#| fig-height: 4
+p_ternary
+```
+
+Examining the votes matrix from a random forest fit to the penguins.
+:::
+
 
 The votes matrix, reports the proportion of trees each observation is classified as each class. From the tour of the votes matrix, it can be seen to be 2D in 3D space. This is due to the constraint that the three proportions for each observation sum to 1. Using a Helmert matrix, this data can be projected into the 2D space, or more generally the $(g-1)$-dimensional space where it resides. In 2D this is called a ternary diagram, and in higher dimensions the bounding shapes might be considered to be a simplex. The vertices of this shape correspond to $(1,0,0), (0,1,0), (0,0,1)$ (and analogously for higher dimensions), which represent perfect confidence, that an observation is classified into that group all the time.
 
