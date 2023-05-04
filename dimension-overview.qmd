@@ -4,7 +4,11 @@ This chapter will focus on methods for reducing dimension, and how the tour can 
 
 Dimension is perceived in a tour using the spread of points. When the points are spread far apart, then the data is filling the space. Conversely when the points "collapse" into a sub-region then the data is only partially filling the space, and some dimension reduction to reduce to this smaller dimensional space may be worthwhile. 
 
-Let's start with some 2D examples. 
+Let's start with some 2D examples. You need at least two variables to be able to talk about association between variables. @fig-2D shows three plots of two variables. Plot (a) shows two variables that are strongly linearly associated[^2.1], because when `x1` is low, `x2` is low also, and conversely when `x1` is high, `x2` is also high. This can also be seen by the reducton in spread of points (or "collapse") in one direction making the data fill less than the full square of the plot. *So from this we can conclude that the data is not fully 2D.* The second step is to infer which variables contribute to this reduction in dimension. The axes for `x1` and `x2` are drawn extending from $(0,0)$ and because they both extend out of the cloud of points, in the direction away from the collapse of points we can say that they are jointly responsible for the dimension reduction. 
+
+@fig-2D-2 shows a pair of variables that are **not** linearly associated. Variable `x1` is more varied than `x3` but knowing the value on `x1` tells us nothing about possible values on `x3`. Before running a tour all variables are typically scaled to have equal spread. The purpose of the tour is to capture association and relationships between the variables, so any univariate differences should be removed ahead of time. @fig-2D-3 shows what this would look like when `x3` is scaled - the points are fully spread in the full square of the plot. 
+
+[^2.1]: It is generally better to use "associated" than "correlated". Correlated is a statistical quantity, measuring linear association. The term "associated" can be prefaced with the type of association, such as "linear" or "non-linear". 
 
 ```{r}
 library(ggplot2)
@@ -76,6 +80,8 @@ dp3
 
 Explanation of how dimension reduction is perceived in 2D, relative to variables. When an axes extends out of a direction where the points are collapsed, it means that this variable is partially responsible for the reduced dimension.
 :::
+
+Now let's think about what this looks like with five variables. @fig-dimension shows a grand tour on five variables, with (a) showing data that is primarily 2D, (b) has data that is primarily 3D and (c) is fully 5D.  You can see that both (a) and (b) the spread of points collapse in some projections, with it happening more in (a). In (c) the data is always spread out in the square, although it does seem to concentrate or pile in the centre. This piling is typical when projecting from high dimensions to low dimensions. The sage tour [@sagetour] makes a correction for this. 
 
 ```{r}
 #| eval: false
