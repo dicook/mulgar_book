@@ -4,6 +4,78 @@ This chapter will focus on methods for reducing dimension, and how the tour can 
 
 Dimension is perceived in a tour using the spread of points. When the points are spread far apart, then the data is filling the space. Conversely when the points "collapse" into a sub-region then the data is only partially filling the space, and some dimension reduction to reduce to this smaller dimensional space may be worthwhile. 
 
+Let's start with some 2D examples. 
+
+```{r}
+library(ggplot2)
+library(tibble)
+set.seed(6045)
+x1 <- runif(123)
+x2 <- x1 + rnorm(123, sd=0.1)
+x3 <- rnorm(123, sd=0.2)
+df <- tibble(x1 = (x1-mean(x1))/sd(x1), 
+             x2 = (x2-mean(x2))/sd(x2),
+             x3, 
+             x3scaled = (x3-mean(x3))/sd(x3))
+dp1 <- ggplot(df) + 
+  geom_point(aes(x=x1, y=x2)) +
+  xlim(-2.5, 2.5) + ylim(-2.5, 2.5) +
+  annotate("segment", x=0, xend=2, y=0, yend=0) +
+  annotate("segment", x=0, xend=0, y=0, yend=2) +
+  annotate("text", x=2.1, y=0, label="x1") +
+  annotate("text", x=0, y=2.1, label="x2") +
+  theme(aspect.ratio=1)
+dp2 <- ggplot(df) + 
+  geom_point(aes(x=x1, y=x3)) +
+  xlim(-2.5, 2.5) + ylim(-2.5, 2.5) +
+  annotate("segment", x=0, xend=2, y=0, yend=0) +
+  annotate("segment", x=0, xend=0, y=0, yend=2) +
+  annotate("text", x=2.1, y=0, label="x1") +
+  annotate("text", x=0, y=2.1, label="x3") +
+  theme(aspect.ratio=1)
+dp3 <- ggplot(df) + 
+  geom_point(aes(x=x1, y=x3scaled)) +
+  xlim(-2.5, 2.5) + ylim(-2.5, 2.5) +
+  annotate("segment", x=0, xend=2, y=0, yend=0) +
+  annotate("segment", x=0, xend=0, y=0, yend=2) +
+  annotate("text", x=2.1, y=0, label="x1") +
+  annotate("text", x=0, y=2.1, label="x3") +
+  theme(aspect.ratio=1)
+```
+
+::: {#fig-2D  fig-align="center" layout-ncol=3}
+
+```{r}
+#| label: fig-2D-1
+#| echo: false
+#| fig-width: 3
+#| fig-height: 3
+#| fig-cap: Two variables with strong linear association. Both variables contribute to the association, as indicated by their axes extending out from the "collapsed" direction of the points.
+dp1
+```
+
+```{r}
+#| label: fig-2D-2
+#| echo: false
+#| fig-width: 3
+#| fig-height: 3
+#| fig-cap: Two variables with no linear association. But x3 has less variation, so points collapse in this direction.
+dp2
+```
+
+```{r}
+#| label: fig-2D-3
+#| echo: false
+#| fig-width: 3
+#| fig-height: 3
+#| message: false
+#| fig-cap: The situation in plot (b) does not arise in a tour because all variables are (usually) scaled.
+dp3
+```
+
+Explanation of how dimension reduction is perceived in 2D, relative to variables. When an axes extends out of a direction where the points are collapsed, it means that this variable is partially responsible for the reduced dimension.
+:::
+
 ```{r}
 #| eval: false
 library(mulgar)
