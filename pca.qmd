@@ -6,11 +6,18 @@ PCA is conducted by finding the directions where the projected data has the high
 
 PCA summarises linear association, and the dimension reduction is achieved by using combinations of variables that are highly correlated. However, **high correlation can also occur when there are outliers, or clustering. PCA is commonly used to detect these patterns also.** PCA also is not very effective when the distribution of the variables is highly skewed, so it can be helpful to transform variables before computing the PCA.
 
+## Introduction to PCA analysis
+
 We would start by examining the data using a grand tour. The goal is to check whether there might be potential issues for PCA, such as skewness, outliers or clustering, or even non-linear dependencies.
 
-We'll start be showing PCA on the simulated from @sec-dimension-overview. 
+We'll start be showing PCA on the simulated from @sec-dimension-overview. The scree plots show that PCA supports that the data are 2D, 3D and 5D respectively.
 
 ```{r}
+#| message: FALSE
+#| error: FALSE
+#| warning: FALSE
+library(dplyr)
+library(ggplot2)
 library(mulgar)
 data(plane)
 data(box)
@@ -24,7 +31,6 @@ c_pca <- prcomp(cube5d)
 p_scree <- ggscree(p_pca)
 b_scree <- ggscree(b_pca)
 c_scree <- ggscree(c_pca)
-
 ```
 
 ::: {#fig-2D-pca  fig-align="center" layout-ncol=3}
@@ -59,9 +65,60 @@ c_scree
 Scree plots for the three simulated data sets. The 2D in 5D is clearly recognised by PCA to be 2D because the variance drops substantially between 2-3 principal components. The 3D in 5D is possibly 3D because the variance drops from 3-4 principal components. The fully 5D data has no drop in variance, and all values are close to the typical value one would observe if the data was fully 5D.
 :::
 
-## Example: AFLW
 
-We'll use the AFLW data as the example. This data has player statistics for all the matches in the 2021 season. We would be interested to know which variables contain similar information, and thus might be combined into single variables. We would expect that 30 statistics possibly group into a few small sets, such as offensive and defensive skills. We might also expect that some of the statistics are skewed, most players have low values and just a handful of players are stellar. It is also possible that there are some extreme values. These are interesting features, but they will distract from the main purpose of grouping the statistics. Thus the tour is used to check for potential problems with the data prior to conducting PCA.
+The next step is to look at the coefficients for the selected number of PCs. @tbl-plane-pcs shows the coefficients for the first two PCs of the `plane` data. All five variables contribute, with `x1`, `x2`, `x3` contributing more to `PC1`, and `x4`, `x5` contributing more to `PC2`. @tbl-box-pcs shows the coefficients for the first three PCs. Variables `x1`, `x2`, `x3` contribute strongly to `PC1`, `PC2` has contributions from all variables except `x3` and variables `x4` and `x5` contribute strongly to `PC3`. 
+
+```{r}
+#| label: tbl-plane-pcs
+#| tbl-cap: "Coefficients for the first two PCs for the plane data."
+library(gt)
+p_pca$rotation[,1:2] %>%
+  as_tibble(rownames="Variable") %>% 
+  gt() %>%
+  fmt_number(columns = c(PC1, PC2),
+             decimals = 2)
+```
+
+```{r}
+#| label: tbl-box-pcs
+#| tbl-cap: "Coefficients for the first three PCs for the box data."
+b_pca$rotation[,1:3] %>%
+  as_tibble(rownames="Variable") %>% 
+  gt() %>%
+  fmt_number(columns = c(PC1, PC2, PC3),
+             decimals = 2)
+```
+
+In each of these simulated data sets, all five variables contributed to the dimension reduction. If we added two purely noise variables to the plane data, as done in @sec-dimension-overview, the scree plot would indicate that the data is now 4D, and we would get a different interpretation of the coefficients from the PCA. We see that `PC1` and `PC2` are approximately the same as before, with main variables being (`x1`, `x2`, `x3`) and (`x4`, `x5`) respectively. `PC3` and `PC4` are both `x6` and `x7`. 
+
+```{r}
+#| label: fig-plane-noise-scree
+#| fig-cap: Additional noise variables expands the data to 4D. 
+#| code-fold: false
+#| fig-height: 4
+#| fig-width: 4
+plane_noise <- plane
+plane_noise$x6 <- rnorm(100)
+plane_noise$x7 <- rnorm(100)
+plane_noise <- data.frame(apply(plane_noise, 2, function(x) (x-mean(x))/sd(x)))
+
+pn_pca <- prcomp(plane_noise)
+ggscree(pn_pca)
+```
+
+```{r}
+#| label: tbl-plane-noise-pcs
+#| tbl-cap: "Coefficients for the first four PCs for the box data."
+pn_pca$rotation[,1:4] %>%
+  as_tibble(rownames="Variable") %>% 
+  gt() %>%
+  fmt_number(columns = c(PC1, PC2, PC3, PC4),
+             decimals = 2)
+```
+
+### Example: AFLW
+
+We'll use the AFLW data as the example. This data has player statistics for all the matches in the 2021 season. We would be interested to know which variables contain similar information, and thus might be combined into single variables. We would expect that many statistics to group into a few small sets, such as offensive and defensive skills. We might also expect that some of the statistics are skewed, most players have low values and just a handful of players are stellar. It is also possible that there are some extreme values. These are interesting features, but they will distract from the main purpose of grouping the statistics. Thus the tour is used to check for potential problems with the data prior to conducting PCA.
 
 ```{r}
 #| label: pca-libraries
@@ -71,10 +128,7 @@ We'll use the AFLW data as the example. This data has player statistics for all 
 #| error: FALSE
 #| warning: FALSE
 #| code-fold: false
-library(dplyr)
-library(ggplot2)
 library(tourr)
-library(mulgar)
 data(aflw)
 aflw_std <- aflw %>%
   mutate_if(is.numeric, function(x) (x-
@@ -82,7 +136,7 @@ aflw_std <- aflw %>%
       sd(x, na.rm=TRUE))
 ```
 
-To look at all of the 30 player statistics in a grand tour use the `animate_xy()` function as follows:
+To look at all of the `r ncol(aflw_std[,7:35])` player statistics in a grand tour use the `animate_xy()` function as follows:
 
 ```{r}
 #| label: aflw-gt
@@ -106,7 +160,7 @@ The gif here is the saved version of the grand tour, made using the `render_gif(
 
 ![Grand tour of the AFLW player statistics](gifs/aflw_gt.gif){#fig-aflw-gt fig-alt="Tour showing lots of linear projections of the aflw data. You can see linear dependence, and some outliers." fig.align="center"}
 
-The data is surprisingly good! There is a small amount of skewness, and there are no major outliers. Skewness indicates that most players have reasonably similar skills (bunching of points), except for some key players (moderate outliers). The skewness could be reduced by applying a log or square root transformation to some variables prior to running the PCA. However, we elect not to do this because there are no major issues that would affect PCA. The moderate outliers are players that are interesting and we'd like to be able to explore these more with the analysis.
+No major surprises! There is a small amount of skewness, and there are no major outliers. Skewness indicates that most players have reasonably similar skills (bunching of points), except for some key players (the moderate outliers). The skewness could be reduced by applying a log or square root transformation to some variables prior to running the PCA. However, we elect not to do this because the moderate outliers are of interest. These correspond to talented players that we'd like to explore further with the analysis.
 
 Below we have the conventional summary of the PCA, a scree plot showing the reduction in variance to be explained when each additional PC is considered. It is also conventional to look at a table summarising the proportions of variance explained by PCs, but with 30 variables it is easier to make some decision on the number of PCs needed based on the scree plot.
 
@@ -267,14 +321,56 @@ Another interesting frame for inspecting PC 2 is 59. PC 2 at one end has players
 
 PCA is useful for getting a sense of the variation in a high-dimensional data set. Interpreting the principal components is often useful, but it can be discombobulating. For the AFLW data it would be good to think about it as a guide to the main directions of variation and to follow with a more direct engineering of variables into interesting player characteristics. For example, calculate offensive skill as an equal combination of goals, accuracy, shots, behinds. A set of new variables specifically computed to measure particular skills would make explaining an analysis easier.
 
-### Model in the data space
+### Example: PISA
+
+The PISA data 
+
+```{r}
+data(pisa)
+pisa_std <- pisa %>%
+  filter(CNT == "Australia") %>%
+  select(-CNT) %>%
+  mutate_all(mulgar:::scale2)
+pisa_pca <- prcomp(pisa_std)
+pisa_scree <- ggscree(pisa_pca)
+```
 
 ```{r}
 #| eval: FALSE
-data(pisa)
-pisa_std <- apply(pisa[,-1], 2, function(x) (x-mean(x))/sd(x))[sample(1:nrow(pisa), 1000),c(1:5, 11:15, 21:25)]
-pisa_pca <- prcomp(pisa_std)
-ggscree(pisa_pca)
+animate_xy(pisa_std, half_range=1)
+render_gif(pisa_std, 
+           grand_tour(), 
+           display_xy(half_range=0.9),
+           gif_file="gifs/pisa_gt.gif",
+           frames=500,
+           width=400,
+           height=400,
+           loop=FALSE)
+```
+
+::: {#fig-pisa-pca  fig-align="center" layout-ncol=2}
+
+```{r}
+#| label: fig-pisa-scree
+#| eval: true
+#| message: false
+#| warning: false
+#| fig-cap: "Scree plot for the PCA on the pisa data suggests that the data is 1D."
+#| fig-width: 5
+#| fig-height: 5
+#| echo: false
+pisa_scree
+```
+
+![Grand tour of the pisa data.](gifs/pisa_gt.gif){#fig-pisa-gt fig-alt="Tour showing lots of linear projections of the pisa data. You can see strong linear dependence." fig.align="center"}
+
+Scree plot and tour of the pisa data, with 30 variables being the plausible scores for Australian students.
+:::
+
+## Examining the PCA model in the data space
+
+```{r}
+#| eval: FALSE
 animate_xy(pisa_std, half_range=1)
 
 pisa_model <- pca_model(pisa_pca, d=1, s=2)
