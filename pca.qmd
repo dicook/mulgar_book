@@ -4,9 +4,62 @@ This is a statistical technique used to reduce the dimensionality of a large dat
 
 PCA is conducted by finding the directions where the projected data has the highest variance, that is, are most spread. Because the goal is to find a smaller number of variables that contain the similar information, the amount of variance explained by the selected PCs is examined.
 
-PCA summarises linear relationships, and the dimension reduction is achieved by using combinations of variables that are highly correlated. However, high correlation can also occur when there are outliers, or clustering. PCA is commonly used to detect these patterns also. PCA also is not very effective when the distribution of the variables is highly skewed, so it can be helpful to transform variables before computing the PCA.
+PCA summarises linear association, and the dimension reduction is achieved by using combinations of variables that are highly correlated. However, **high correlation can also occur when there are outliers, or clustering. PCA is commonly used to detect these patterns also.** PCA also is not very effective when the distribution of the variables is highly skewed, so it can be helpful to transform variables before computing the PCA.
 
 We would start by examining the data using a grand tour. The goal is to check whether there might be potential issues for PCA, such as skewness, outliers or clustering, or even non-linear dependencies.
+
+We'll start be showing PCA on the simulated from @sec-dimension-overview. 
+
+```{r}
+library(mulgar)
+data(plane)
+data(box)
+library(geozoo)
+cube5d <- data.frame(cube.solid.random(p=5, n=300)$points)
+colnames(cube5d) <- paste0("x", 1:5)
+cube5d <- data.frame(apply(cube5d, 2, function(x) (x-mean(x))/sd(x)))
+p_pca <- prcomp(plane)
+b_pca <- prcomp(box)
+c_pca <- prcomp(cube5d)
+p_scree <- ggscree(p_pca)
+b_scree <- ggscree(b_pca)
+c_scree <- ggscree(c_pca)
+
+```
+
+::: {#fig-2D-pca  fig-align="center" layout-ncol=3}
+
+```{r}
+#| label: fig-2D-pca1
+#| echo: false
+#| fig-width: 3
+#| fig-height: 3
+#| fig-cap: 2D in 5D
+p_scree
+```
+
+```{r}
+#| label: fig-2D-pca2
+#| echo: false
+#| fig-width: 3
+#| fig-height: 3
+#| fig-cap: 3D in 5D
+b_scree
+```
+
+```{r}
+#| label: fig-2D-pca3
+#| echo: false
+#| fig-width: 3
+#| fig-height: 3
+#| fig-cap: fully 5D
+c_scree
+```
+
+Scree plots for the three simulated data sets. The 2D in 5D is clearly recognised by PCA to be 2D because the variance drops substantially between 2-3 principal components. The 3D in 5D is possibly 3D because the variance drops from 3-4 principal components. The fully 5D data has no drop in variance, and all values are close to the typical value one would observe if the data was fully 5D.
+:::
+
+### Example: AFLW
 
 We'll use the AFLW data as the example. This data has player statistics for all the matches in the 2021 season. We would be interested to know which variables contain similar information, and thus might be combined into single variables. We would expect that 30 statistics possibly group into a few small sets, such as offensive and defensive skills. We might also expect that some of the statistics are skewed, most players have low values and just a handful of players are stellar. It is also possible that there are some extreme values. These are interesting features, but they will distract from the main purpose of grouping the statistics. Thus the tour is used to check for potential problems with the data prior to conducting PCA.
 
