@@ -116,9 +116,9 @@ pn_pca$rotation[,1:4] %>%
              decimals = 2)
 ```
 
-### Example: AFLW
+### Example: aflw
 
-We'll use the AFLW data as the example. This data has player statistics for all the matches in the 2021 season. We would be interested to know which variables contain similar information, and thus might be combined into single variables. We would expect that many statistics to group into a few small sets, such as offensive and defensive skills. We might also expect that some of the statistics are skewed, most players have low values and just a handful of players are stellar. It is also possible that there are some extreme values. These are interesting features, but they will distract from the main purpose of grouping the statistics. Thus the tour is used to check for potential problems with the data prior to conducting PCA.
+We'll use the `aflw` data as the example. This data has player statistics for all the matches in the 2021 season. We would be interested to know which variables contain similar information, and thus might be combined into single variables. We would expect that many statistics to group into a few small sets, such as offensive and defensive skills. We might also expect that some of the statistics are skewed, most players have low values and just a handful of players are stellar. It is also possible that there are some extreme values. These are interesting features, but they will distract from the main purpose of grouping the statistics. Thus the tour is used to check for potential problems with the data prior to conducting PCA.
 
 ```{r}
 #| label: pca-libraries
@@ -321,9 +321,9 @@ Another interesting frame for inspecting PC 2 is 59. PC 2 at one end has players
 
 PCA is useful for getting a sense of the variation in a high-dimensional data set. Interpreting the principal components is often useful, but it can be discombobulating. For the AFLW data it would be good to think about it as a guide to the main directions of variation and to follow with a more direct engineering of variables into interesting player characteristics. For example, calculate offensive skill as an equal combination of goals, accuracy, shots, behinds. A set of new variables specifically computed to measure particular skills would make explaining an analysis easier.
 
-### Example: PISA
+### Example: pisa
 
-The PISA data 
+The PISA data contains simulated data from math, reading nd science scores. PCA is used here to examine the association between the 30 scores. We might expect that it is 3D, but the result suggests it is primarily 1D. This means that a student that scores well in math, will also score well in reading and science. 
 
 ```{r}
 data(pisa)
@@ -369,6 +369,53 @@ Scree plot and tour of the pisa data, with 30 variables being the plausible scor
 
 ## Examining the PCA model in the data space
 
+When you choose a smaller number of PCs $(k)$ than the number of original variables, this is essentially producing a model for the data. The model is the lower dimensional space. It is analogous to a linear regression model, except that the residuals from the model are $(p-k)$-D. The model is $k$-D. It can be useful to examine this model using the tour. 
+
+We'll start with the simulated data examples used at the beginning of this chapter. The function `pca_model()` from the `mulgar` package can be used to represent the model as a $k$-D plane.
+
+```{r}
+#| eval: false
+plane_pca <- prcomp(plane)
+plane_m <- pca_model(plane_pca)
+plane_m_d <- rbind(plane_m$points, plane)
+animate_xy(plane_m_d, edges=plane_m$edges, axes="bottomleft")
+render_gif(plane_m_d, 
+           grand_tour(), 
+           display_xy(half_range=0.9,
+                      edges=plane_m$edges, 
+                      edges.col="orange"),
+           gif_file="gifs/plane_model.gif",
+           frames=500,
+           width=400,
+           height=400,
+           loop=FALSE)
+box_pca <- prcomp(box)
+box_m <- pca_model(box_pca, d=3)
+box_m_d <- rbind(box_m$points, box)
+animate_xy(box_m_d, edges=box_m$edges, axes="bottomleft")
+render_gif(box_m_d, 
+           grand_tour(), 
+           display_xy(half_range=0.9,
+                      edges=box_m$edges, 
+                      edges.col="orange"),
+           gif_file="gifs/box_model.gif",
+           frames=500,
+           width=400,
+           height=400,
+           loop=FALSE)
+```
+
+::: {#fig-plane-box-model  fig-align="center" layout-ncol=2}
+
+![Model for the 2D in 5D data.](gifs/plane_model.gif){#fig-plane-model fig-alt="FIX ME." fig.align="center"}
+
+![Model for the 3D in 5D data.](gifs/box_model.gif){#fig-box-model fig-alt="FIX ME." fig.align="center"}
+
+PCA model overlaid on the data for the 2D in 5D, and 3D in 5D simulated data. 
+:::
+
+### Example: pisa
+
 ```{r}
 #| eval: FALSE
 animate_xy(pisa_std, half_range=1)
@@ -391,6 +438,7 @@ render_gif(pisa_all,
 
 ![PCA model of the PISA data](gifs/pisa_model.gif){#fig-pisa-model fig-alt="Something here" fig.align="center"}
 
+### Example: aflw
 ## Exercises
 
 1.  Make a scatterplot matrix of the first four PCs. Is the branch pattern visible in any pair?
