@@ -347,13 +347,13 @@ div.csl-indent {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#trees" id="toc-trees" class="nav-link active" data-scroll-target="#trees"><span class="toc-section-number">13.1</span>  Trees</a></li>
+  <li><a href="#sec-trees" id="toc-sec-trees" class="nav-link active" data-scroll-target="#sec-trees"><span class="toc-section-number">13.1</span>  Trees</a></li>
   <li><a href="#random-forests" id="toc-random-forests" class="nav-link" data-scroll-target="#random-forests"><span class="toc-section-number">13.2</span>  Random forests</a>
   <ul class="collapse">
   <li><a href="#examining-the-votes-matrix" id="toc-examining-the-votes-matrix" class="nav-link" data-scroll-target="#examining-the-votes-matrix"><span class="toc-section-number">13.2.1</span>  Examining the votes matrix</a></li>
   <li><a href="#using-variable-importance" id="toc-using-variable-importance" class="nav-link" data-scroll-target="#using-variable-importance"><span class="toc-section-number">13.2.2</span>  Using variable importance</a></li>
   </ul></li>
-  <li><a href="#examining-misclassifications" id="toc-examining-misclassifications" class="nav-link" data-scroll-target="#examining-misclassifications"><span class="toc-section-number">13.3</span>  Examining misclassifications</a></li>
+  <li><a href="#sec-forest-errors" id="toc-sec-forest-errors" class="nav-link" data-scroll-target="#sec-forest-errors"><span class="toc-section-number">13.3</span>  Examining misclassifications</a></li>
   <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises">Exercises</a></li>
   </ul>
 </nav>
@@ -363,7 +363,7 @@ div.csl-indent {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title d-none d-lg-block"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Trees and forests</span></h1>
+<h1 class="title"><span id="sec-trees-forests" class="quarto-section-identifier d-none d-lg-block"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Trees and forests</span></span></h1>
 </div>
 
 
@@ -385,8 +385,8 @@ div.csl-indent {
 - boosted trees
 - PP forest
 -->
-<section id="trees" class="level2" data-number="13.1">
-<h2 data-number="13.1" class="anchored" data-anchor-id="trees"><span class="header-section-number">13.1</span> Trees</h2>
+<section id="sec-trees" class="level2" data-number="13.1">
+<h2 data-number="13.1" class="anchored" data-anchor-id="sec-trees"><span class="header-section-number">13.1</span> Trees</h2>
 <p>The tree algorithm <span class="citation" data-cites="BFOS84">Breiman et al. (<a href="references.html#ref-BFOS84" role="doc-biblioref">1984</a>)</span> is a simple and versatile algorithmic method for supervised classification. The basic tree algorithm generates a classification rule by sequentially splitting the data into two buckets. Splits are made between sorted data values of individual variables, with the goal of obtaining pure classes on each side of the split. The inputs for a simple tree classifier commonly include (1) an impurity measure, an indication of the relative diversity among the cases in the terminal nodes; (2) a parameter that sets the minimum number of cases in a node, or the minimum number of observations in a terminal node of the tree; and (3) a complexity measure that controls the growth of a tree, balancing the use of a simple generalizable tree against a more accurate tree tailored to the sample. When applying tree methods, exploring the effects of the input parameters on the tree is instructive; for example, it helps us to assess the stability of the tree model.</p>
 <p>Although algorithmic models do not depend on distributional assumptions, that does not mean that every algorithm is suitable for all data. For example, the tree model works best when all variables are independent within each class, because it does not take such dependencies into account. Visualization can help us to determine whether a particular model should be applied. In classification problems, it is useful to explore the cluster structure, comparing the clusters with the classes and looking for evidence of correlation within each class. The plots in <a href="LDA.html#fig-lda-assumptions1">Figure&nbsp;<span>5.1</span></a> and <a href="LDA.html#fig-penguins-lda-ellipses">Figure&nbsp;<span>5.3</span></a> shows a strong correlation between the variables within each species, which indicates that the tree model may not give good results for the penguins data. We’ll show how this is the case with two variables initially, and then extend to the four variables.</p>
 <div id="fig-p-bl-bd-tree" class="quarto-layout-panel">
@@ -508,10 +508,10 @@ Call:
                      Number of trees: 500
 No. of variables tried at each split: 2
 
-        OOB estimate of  error rate: 2.7%
+        OOB estimate of  error rate: 2.4%
 Confusion matrix:
           Adelie Chinstrap Gentoo class.error
-Adelie       142         4      0 0.027397260
+Adelie       143         3      0 0.020547945
 Chinstrap      4        64      0 0.058823529
 Gentoo         0         1    118 0.008403361</code></pre>
 </div>
@@ -625,19 +625,19 @@ Call:
                      Number of trees: 500
 No. of variables tried at each split: 3
 
-        OOB estimate of  error rate: 4.47%
+        OOB estimate of  error rate: 4.07%
 Confusion matrix:
     0   1   2   3   4   5   6   7   8   9 class.error
-0 264   6   2   3   4   4   5   4   5   3  0.12000000
-1  14 286   0   0   0   0   0   0   0   0  0.04666667
-2   9   0 289   0   2   0   0   0   0   0  0.03666667
-3   5   0   0 289   0   0   0   3   0   3  0.03666667
+0 268   5   2   3   5   2   4   1   6   4  0.10666667
+1  12 288   0   0   0   0   0   0   0   0  0.04000000
+2   8   0 290   0   2   0   0   0   0   0  0.03333333
+3   6   0   0 289   0   0   0   3   0   2  0.03666667
 4  13   0   0   0 287   0   0   0   0   0  0.04333333
-5  12   0   0   0   0 288   0   0   0   0  0.04000000
-6  13   0   0   0   0   0 286   0   1   0  0.04666667
-7   6   0   0   4   0   0   0 289   0   1  0.03666667
-8   7   0   0   0   0   0   0   0 293   0  0.02333333
-9   5   0   0   0   0   0   0   0   0 295  0.01666667</code></pre>
+5  10   0   0   0   0 290   0   0   0   0  0.03333333
+6  11   0   0   0   0   0 288   0   1   0  0.04000000
+7   6   0   0   4   0   0   0 290   0   0  0.03333333
+8   6   0   0   0   0   0   0   0 294   0  0.02000000
+9   5   0   0   0   0   0   0   1   0 294  0.02000000</code></pre>
 </div>
 </div>
 <div class="cell">
@@ -719,12 +719,12 @@ Confusion matrix:
 <div class="cell-output-display">
 <div id="tbl-ft-importance" class="anchored">
 
-<div id="zxozyhxppw" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<div id="xzscajhcea" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>html {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
 }
 
-:where(#zxozyhxppw) .gt_table {
+:where(#xzscajhcea) .gt_table {
   display: table;
   border-collapse: collapse;
   margin-left: auto;
@@ -749,7 +749,7 @@ Confusion matrix:
   border-left-color: #D3D3D3;
 }
 
-:where(#zxozyhxppw) .gt_heading {
+:where(#xzscajhcea) .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -761,12 +761,12 @@ Confusion matrix:
   border-right-color: #D3D3D3;
 }
 
-:where(#zxozyhxppw) .gt_caption {
+:where(#xzscajhcea) .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-:where(#zxozyhxppw) .gt_title {
+:where(#xzscajhcea) .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -778,7 +778,7 @@ Confusion matrix:
   border-bottom-width: 0;
 }
 
-:where(#zxozyhxppw) .gt_subtitle {
+:where(#xzscajhcea) .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -790,13 +790,13 @@ Confusion matrix:
   border-top-width: 0;
 }
 
-:where(#zxozyhxppw) .gt_bottom_border {
+:where(#xzscajhcea) .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-:where(#zxozyhxppw) .gt_col_headings {
+:where(#xzscajhcea) .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -811,7 +811,7 @@ Confusion matrix:
   border-right-color: #D3D3D3;
 }
 
-:where(#zxozyhxppw) .gt_col_heading {
+:where(#xzscajhcea) .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -831,7 +831,7 @@ Confusion matrix:
   overflow-x: hidden;
 }
 
-:where(#zxozyhxppw) .gt_column_spanner_outer {
+:where(#xzscajhcea) .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -843,15 +843,15 @@ Confusion matrix:
   padding-right: 4px;
 }
 
-:where(#zxozyhxppw) .gt_column_spanner_outer:first-child {
+:where(#xzscajhcea) .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-:where(#zxozyhxppw) .gt_column_spanner_outer:last-child {
+:where(#xzscajhcea) .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-:where(#zxozyhxppw) .gt_column_spanner {
+:where(#xzscajhcea) .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -863,7 +863,7 @@ Confusion matrix:
   width: 100%;
 }
 
-:where(#zxozyhxppw) .gt_group_heading {
+:where(#xzscajhcea) .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -889,7 +889,7 @@ Confusion matrix:
   text-align: left;
 }
 
-:where(#zxozyhxppw) .gt_empty_group_heading {
+:where(#xzscajhcea) .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -904,15 +904,15 @@ Confusion matrix:
   vertical-align: middle;
 }
 
-:where(#zxozyhxppw) .gt_from_md > :first-child {
+:where(#xzscajhcea) .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-:where(#zxozyhxppw) .gt_from_md > :last-child {
+:where(#xzscajhcea) .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-:where(#zxozyhxppw) .gt_row {
+:where(#xzscajhcea) .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -931,7 +931,7 @@ Confusion matrix:
   overflow-x: hidden;
 }
 
-:where(#zxozyhxppw) .gt_stub {
+:where(#xzscajhcea) .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -944,7 +944,7 @@ Confusion matrix:
   padding-right: 5px;
 }
 
-:where(#zxozyhxppw) .gt_stub_row_group {
+:where(#xzscajhcea) .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -958,11 +958,11 @@ Confusion matrix:
   vertical-align: top;
 }
 
-:where(#zxozyhxppw) .gt_row_group_first td {
+:where(#xzscajhcea) .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-:where(#zxozyhxppw) .gt_summary_row {
+:where(#xzscajhcea) .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -972,16 +972,16 @@ Confusion matrix:
   padding-right: 5px;
 }
 
-:where(#zxozyhxppw) .gt_first_summary_row {
+:where(#xzscajhcea) .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-:where(#zxozyhxppw) .gt_first_summary_row.thick {
+:where(#xzscajhcea) .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-:where(#zxozyhxppw) .gt_last_summary_row {
+:where(#xzscajhcea) .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -991,7 +991,7 @@ Confusion matrix:
   border-bottom-color: #D3D3D3;
 }
 
-:where(#zxozyhxppw) .gt_grand_summary_row {
+:where(#xzscajhcea) .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1001,7 +1001,7 @@ Confusion matrix:
   padding-right: 5px;
 }
 
-:where(#zxozyhxppw) .gt_first_grand_summary_row {
+:where(#xzscajhcea) .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1011,11 +1011,11 @@ Confusion matrix:
   border-top-color: #D3D3D3;
 }
 
-:where(#zxozyhxppw) .gt_striped {
+:where(#xzscajhcea) .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-:where(#zxozyhxppw) .gt_table_body {
+:where(#xzscajhcea) .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1024,7 +1024,7 @@ Confusion matrix:
   border-bottom-color: #D3D3D3;
 }
 
-:where(#zxozyhxppw) .gt_footnotes {
+:where(#xzscajhcea) .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1038,7 +1038,7 @@ Confusion matrix:
   border-right-color: #D3D3D3;
 }
 
-:where(#zxozyhxppw) .gt_footnote {
+:where(#xzscajhcea) .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-left: 4px;
@@ -1047,7 +1047,7 @@ Confusion matrix:
   padding-right: 5px;
 }
 
-:where(#zxozyhxppw) .gt_sourcenotes {
+:where(#xzscajhcea) .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1061,7 +1061,7 @@ Confusion matrix:
   border-right-color: #D3D3D3;
 }
 
-:where(#zxozyhxppw) .gt_sourcenote {
+:where(#xzscajhcea) .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -1069,64 +1069,64 @@ Confusion matrix:
   padding-right: 5px;
 }
 
-:where(#zxozyhxppw) .gt_left {
+:where(#xzscajhcea) .gt_left {
   text-align: left;
 }
 
-:where(#zxozyhxppw) .gt_center {
+:where(#xzscajhcea) .gt_center {
   text-align: center;
 }
 
-:where(#zxozyhxppw) .gt_right {
+:where(#xzscajhcea) .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-:where(#zxozyhxppw) .gt_font_normal {
+:where(#xzscajhcea) .gt_font_normal {
   font-weight: normal;
 }
 
-:where(#zxozyhxppw) .gt_font_bold {
+:where(#xzscajhcea) .gt_font_bold {
   font-weight: bold;
 }
 
-:where(#zxozyhxppw) .gt_font_italic {
+:where(#xzscajhcea) .gt_font_italic {
   font-style: italic;
 }
 
-:where(#zxozyhxppw) .gt_super {
+:where(#xzscajhcea) .gt_super {
   font-size: 65%;
 }
 
-:where(#zxozyhxppw) .gt_footnote_marks {
+:where(#xzscajhcea) .gt_footnote_marks {
   font-style: italic;
   font-weight: normal;
   font-size: 75%;
   vertical-align: 0.4em;
 }
 
-:where(#zxozyhxppw) .gt_asterisk {
+:where(#xzscajhcea) .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-:where(#zxozyhxppw) .gt_indent_1 {
+:where(#xzscajhcea) .gt_indent_1 {
   text-indent: 5px;
 }
 
-:where(#zxozyhxppw) .gt_indent_2 {
+:where(#xzscajhcea) .gt_indent_2 {
   text-indent: 10px;
 }
 
-:where(#zxozyhxppw) .gt_indent_3 {
+:where(#xzscajhcea) .gt_indent_3 {
   text-indent: 15px;
 }
 
-:where(#zxozyhxppw) .gt_indent_4 {
+:where(#xzscajhcea) .gt_indent_4 {
   text-indent: 20px;
 }
 
-:where(#zxozyhxppw) .gt_indent_5 {
+:where(#xzscajhcea) .gt_indent_5 {
   text-indent: 25px;
 }
 </style>
@@ -1152,45 +1152,45 @@ Confusion matrix:
   <tbody class="gt_table_body">
     <tr><td headers="Variable" class="gt_row gt_left">PC1</td>
 <td headers="0" class="gt_row gt_right">0.10</td>
-<td headers="1" class="gt_row gt_right">0.34</td>
+<td headers="1" class="gt_row gt_right">0.35</td>
 <td headers="2" class="gt_row gt_right">0.46</td>
-<td headers="3" class="gt_row gt_right">0.26</td>
-<td headers="4" class="gt_row gt_right">0.20</td>
+<td headers="3" class="gt_row gt_right">0.27</td>
+<td headers="4" class="gt_row gt_right">0.19</td>
 <td headers="5" class="gt_row gt_right">0.48</td>
 <td headers="6" class="gt_row gt_right">0.39</td>
-<td headers="7" class="gt_row gt_right">0.17</td>
+<td headers="7" class="gt_row gt_right">0.18</td>
 <td headers="8" class="gt_row gt_right">0.32</td>
 <td headers="9" class="gt_row gt_right">0.29</td>
 <td headers="Accuracy" class="gt_row gt_right">0.30</td>
-<td headers="Gini" class="gt_row gt_right">466</td></tr>
+<td headers="Gini" class="gt_row gt_right">482</td></tr>
     <tr><td headers="Variable" class="gt_row gt_left">PC2</td>
 <td headers="0" class="gt_row gt_right">0.13</td>
-<td headers="1" class="gt_row gt_right">0.25</td>
-<td headers="2" class="gt_row gt_right">0.23</td>
-<td headers="3" class="gt_row gt_right">0.54</td>
+<td headers="1" class="gt_row gt_right">0.24</td>
+<td headers="2" class="gt_row gt_right">0.22</td>
+<td headers="3" class="gt_row gt_right">0.52</td>
 <td headers="4" class="gt_row gt_right">0.28</td>
 <td headers="5" class="gt_row gt_right">0.30</td>
-<td headers="6" class="gt_row gt_right">0.18</td>
-<td headers="7" class="gt_row gt_right">0.42</td>
-<td headers="8" class="gt_row gt_right">0.24</td>
-<td headers="9" class="gt_row gt_right">0.29</td>
-<td headers="Accuracy" class="gt_row gt_right">0.29</td>
-<td headers="Gini" class="gt_row gt_right">389</td></tr>
+<td headers="6" class="gt_row gt_right">0.17</td>
+<td headers="7" class="gt_row gt_right">0.41</td>
+<td headers="8" class="gt_row gt_right">0.23</td>
+<td headers="9" class="gt_row gt_right">0.28</td>
+<td headers="Accuracy" class="gt_row gt_right">0.28</td>
+<td headers="Gini" class="gt_row gt_right">380</td></tr>
     <tr><td headers="Variable" class="gt_row gt_left">PC3</td>
 <td headers="0" class="gt_row gt_right">0.09</td>
-<td headers="1" class="gt_row gt_right">0.07</td>
+<td headers="1" class="gt_row gt_right">0.06</td>
 <td headers="2" class="gt_row gt_right">0.10</td>
-<td headers="3" class="gt_row gt_right">0.14</td>
-<td headers="4" class="gt_row gt_right">0.55</td>
-<td headers="5" class="gt_row gt_right">0.15</td>
-<td headers="6" class="gt_row gt_right">0.09</td>
-<td headers="7" class="gt_row gt_right">0.13</td>
+<td headers="3" class="gt_row gt_right">0.13</td>
+<td headers="4" class="gt_row gt_right">0.53</td>
+<td headers="5" class="gt_row gt_right">0.16</td>
+<td headers="6" class="gt_row gt_right">0.08</td>
+<td headers="7" class="gt_row gt_right">0.14</td>
 <td headers="8" class="gt_row gt_right">0.19</td>
-<td headers="9" class="gt_row gt_right">0.15</td>
-<td headers="Accuracy" class="gt_row gt_right">0.17</td>
-<td headers="Gini" class="gt_row gt_right">321</td></tr>
+<td headers="9" class="gt_row gt_right">0.17</td>
+<td headers="Accuracy" class="gt_row gt_right">0.16</td>
+<td headers="Gini" class="gt_row gt_right">300</td></tr>
     <tr><td headers="Variable" class="gt_row gt_left">PC4</td>
-<td headers="0" class="gt_row gt_right">0.08</td>
+<td headers="0" class="gt_row gt_right">0.09</td>
 <td headers="1" class="gt_row gt_right">0.45</td>
 <td headers="2" class="gt_row gt_right">0.06</td>
 <td headers="3" class="gt_row gt_right">0.04</td>
@@ -1198,54 +1198,54 @@ Confusion matrix:
 <td headers="5" class="gt_row gt_right">0.04</td>
 <td headers="6" class="gt_row gt_right">0.36</td>
 <td headers="7" class="gt_row gt_right">0.15</td>
-<td headers="8" class="gt_row gt_right">0.08</td>
+<td headers="8" class="gt_row gt_right">0.07</td>
 <td headers="9" class="gt_row gt_right">0.10</td>
-<td headers="Accuracy" class="gt_row gt_right">0.15</td>
-<td headers="Gini" class="gt_row gt_right">341</td></tr>
+<td headers="Accuracy" class="gt_row gt_right">0.14</td>
+<td headers="Gini" class="gt_row gt_right">338</td></tr>
     <tr><td headers="Variable" class="gt_row gt_left">PC5</td>
 <td headers="0" class="gt_row gt_right">0.13</td>
-<td headers="1" class="gt_row gt_right">0.11</td>
+<td headers="1" class="gt_row gt_right">0.12</td>
 <td headers="2" class="gt_row gt_right">0.37</td>
 <td headers="3" class="gt_row gt_right">0.08</td>
-<td headers="4" class="gt_row gt_right">0.17</td>
-<td headers="5" class="gt_row gt_right">0.25</td>
-<td headers="6" class="gt_row gt_right">0.09</td>
+<td headers="4" class="gt_row gt_right">0.16</td>
+<td headers="5" class="gt_row gt_right">0.24</td>
+<td headers="6" class="gt_row gt_right">0.10</td>
 <td headers="7" class="gt_row gt_right">0.11</td>
 <td headers="8" class="gt_row gt_right">0.30</td>
 <td headers="9" class="gt_row gt_right">0.21</td>
 <td headers="Accuracy" class="gt_row gt_right">0.18</td>
-<td headers="Gini" class="gt_row gt_right">338</td></tr>
+<td headers="Gini" class="gt_row gt_right">339</td></tr>
     <tr><td headers="Variable" class="gt_row gt_left">PC6</td>
 <td headers="0" class="gt_row gt_right">0.10</td>
 <td headers="1" class="gt_row gt_right">0.24</td>
-<td headers="2" class="gt_row gt_right">0.23</td>
+<td headers="2" class="gt_row gt_right">0.25</td>
 <td headers="3" class="gt_row gt_right">0.18</td>
 <td headers="4" class="gt_row gt_right">0.05</td>
-<td headers="5" class="gt_row gt_right">0.12</td>
-<td headers="6" class="gt_row gt_right">0.05</td>
-<td headers="7" class="gt_row gt_right">0.28</td>
-<td headers="8" class="gt_row gt_right">0.14</td>
-<td headers="9" class="gt_row gt_right">0.17</td>
+<td headers="5" class="gt_row gt_right">0.13</td>
+<td headers="6" class="gt_row gt_right">0.04</td>
+<td headers="7" class="gt_row gt_right">0.30</td>
+<td headers="8" class="gt_row gt_right">0.15</td>
+<td headers="9" class="gt_row gt_right">0.18</td>
 <td headers="Accuracy" class="gt_row gt_right">0.16</td>
-<td headers="Gini" class="gt_row gt_right">282</td></tr>
+<td headers="Gini" class="gt_row gt_right">296</td></tr>
     <tr><td headers="Variable" class="gt_row gt_left">PC7</td>
-<td headers="0" class="gt_row gt_right">0.06</td>
+<td headers="0" class="gt_row gt_right">0.07</td>
 <td headers="1" class="gt_row gt_right">0.03</td>
-<td headers="2" class="gt_row gt_right">0.16</td>
+<td headers="2" class="gt_row gt_right">0.12</td>
 <td headers="3" class="gt_row gt_right">0.04</td>
-<td headers="4" class="gt_row gt_right">0.04</td>
+<td headers="4" class="gt_row gt_right">0.05</td>
 <td headers="5" class="gt_row gt_right">0.06</td>
 <td headers="6" class="gt_row gt_right">0.12</td>
-<td headers="7" class="gt_row gt_right">0.32</td>
-<td headers="8" class="gt_row gt_right">0.14</td>
+<td headers="7" class="gt_row gt_right">0.31</td>
+<td headers="8" class="gt_row gt_right">0.12</td>
 <td headers="9" class="gt_row gt_right">0.15</td>
 <td headers="Accuracy" class="gt_row gt_right">0.11</td>
-<td headers="Gini" class="gt_row gt_right">237</td></tr>
+<td headers="Gini" class="gt_row gt_right">243</td></tr>
     <tr><td headers="Variable" class="gt_row gt_left">PC8</td>
-<td headers="0" class="gt_row gt_right">0.04</td>
-<td headers="1" class="gt_row gt_right">0.09</td>
-<td headers="2" class="gt_row gt_right">0.02</td>
-<td headers="3" class="gt_row gt_right">0.24</td>
+<td headers="0" class="gt_row gt_right">0.05</td>
+<td headers="1" class="gt_row gt_right">0.08</td>
+<td headers="2" class="gt_row gt_right">0.01</td>
+<td headers="3" class="gt_row gt_right">0.22</td>
 <td headers="4" class="gt_row gt_right">0.06</td>
 <td headers="5" class="gt_row gt_right">0.09</td>
 <td headers="6" class="gt_row gt_right">0.02</td>
@@ -1253,20 +1253,20 @@ Confusion matrix:
 <td headers="8" class="gt_row gt_right">0.08</td>
 <td headers="9" class="gt_row gt_right">0.28</td>
 <td headers="Accuracy" class="gt_row gt_right">0.09</td>
-<td headers="Gini" class="gt_row gt_right">221</td></tr>
+<td headers="Gini" class="gt_row gt_right">222</td></tr>
     <tr><td headers="Variable" class="gt_row gt_left">PC9</td>
 <td headers="0" class="gt_row gt_right">0.07</td>
 <td headers="1" class="gt_row gt_right">0.01</td>
 <td headers="2" class="gt_row gt_right">0.01</td>
-<td headers="3" class="gt_row gt_right">0.01</td>
+<td headers="3" class="gt_row gt_right">0.02</td>
 <td headers="4" class="gt_row gt_right">0.01</td>
 <td headers="5" class="gt_row gt_right">0.01</td>
-<td headers="6" class="gt_row gt_right">0.01</td>
-<td headers="7" class="gt_row gt_right">0.04</td>
-<td headers="8" class="gt_row gt_right">0.06</td>
+<td headers="6" class="gt_row gt_right">0.00</td>
+<td headers="7" class="gt_row gt_right">0.03</td>
+<td headers="8" class="gt_row gt_right">0.05</td>
 <td headers="9" class="gt_row gt_right">0.02</td>
 <td headers="Accuracy" class="gt_row gt_right">0.02</td>
-<td headers="Gini" class="gt_row gt_right">60</td></tr>
+<td headers="Gini" class="gt_row gt_right">55</td></tr>
     <tr><td headers="Variable" class="gt_row gt_left">PC10</td>
 <td headers="0" class="gt_row gt_right">0.04</td>
 <td headers="1" class="gt_row gt_right">0.01</td>
@@ -1279,7 +1279,7 @@ Confusion matrix:
 <td headers="8" class="gt_row gt_right">0.01</td>
 <td headers="9" class="gt_row gt_right">0.01</td>
 <td headers="Accuracy" class="gt_row gt_right">0.01</td>
-<td headers="Gini" class="gt_row gt_right">44</td></tr>
+<td headers="Gini" class="gt_row gt_right">45</td></tr>
   </tbody>
   
   
@@ -1404,8 +1404,8 @@ Confusion matrix:
 </div>
 </section>
 </section>
-<section id="examining-misclassifications" class="level2" data-number="13.3">
-<h2 data-number="13.3" class="anchored" data-anchor-id="examining-misclassifications"><span class="header-section-number">13.3</span> Examining misclassifications</h2>
+<section id="sec-forest-errors" class="level2" data-number="13.3">
+<h2 data-number="13.3" class="anchored" data-anchor-id="sec-forest-errors"><span class="header-section-number">13.3</span> Examining misclassifications</h2>
 <p>To examine misclassifications, we can create a separate variable that identifies the errors or not. Constructing this for each class, and exploring in small steps is helpful. Let’s do this using the random forest model for the penguins fit. There are four Adelie penguins confused with Chinstrap, and similarly four Chinstrap confused with Adelie. There is one Gentoo penguin confused with a Chinstrap. This is interesting, because the Gentoo cluster is well separated from the clusters of the other two penguin species.</p>
 <div class="cell">
 <details>
@@ -1420,10 +1420,10 @@ Call:
                      Number of trees: 500
 No. of variables tried at each split: 2
 
-        OOB estimate of  error rate: 2.7%
+        OOB estimate of  error rate: 2.4%
 Confusion matrix:
           Adelie Chinstrap Gentoo class.error
-Adelie       142         4      0 0.027397260
+Adelie       143         3      0 0.020547945
 Chinstrap      4        64      0 0.058823529
 Gentoo         0         1    118 0.008403361</code></pre>
 </div>
@@ -1461,6 +1461,7 @@ Gentoo         0         1    118 0.008403361</code></pre>
 <span id="cb24-24"><a href="#cb24-24" aria-hidden="true" tabindex="-1"></a>           <span class="at">loop=</span><span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
+<p><a href="#fig-p-errors">Figure&nbsp;<span>13.7</span></a> shows a grand tour, and a guided tour, of the penguins data, where the misclassifications are marked by an asterisk. (If these gifs are too small to see the different glyphs, zoom in to make the figures larger.) It can be seen that the one Gentoo penguin that is mistaken for a Chinstrap by the forest model is always moving with its other Gentoo (yellow) family. It can occasionally be seen to be on the edge of the group, closer to the Chinstraps, in some projections in the grand tour. But in the final projection from the guided tour it is hiding well among the other Gentoos. This is an observation where a mistake has been made because of the inadequacies of the forest algorithm. Forests are only as good as the trees they are constructed from, and we have seen from <a href="#sec-trees"><span>Section&nbsp;13.1</span></a> that the splits only on single variables done by trees does not adequately utilise the covariance structure in each class. They make mistakes based on the boxy nature of the boundaries. This can carry through to the forests model. Even though many trees are combined to generate smoother boundaries, forests do not effectively utilise covariance in clusters either. The other mistakes, where Chinstrap are predicted to be Adelie, and vice versa, are more sensible. These mistaken observations can be seen to lie in the border region between the two clusters, and reflect genuine uncertainty about the classification of penguins in these two species.</p>
 <div id="fig-p-errors" class="quarto-layout-panel">
 <figure class="figure">
 <div class="quarto-layout-row quarto-layout-valign-top">
@@ -1488,10 +1489,13 @@ Gentoo         0         1    118 0.008403361</code></pre>
 <section id="exercises" class="level2 unnumbered">
 <h2 class="unnumbered anchored" data-anchor-id="exercises">Exercises</h2>
 <ol type="1">
-<li>Compare the boundaries from the random forest model on the penguins data to that of the (a) LDA model, (b) a default tree model.</li>
+<li>Using a grand tour compare the boundaries from the random forest model on the penguins data to that of (a) a default tree model, (b) an LDA model. Is it less boxy than the tree model, but still more boxy than that of the LDA model?</li>
 <li>Tinker with the parameters of the tree model to force it to fit a tree more closely to the data. Compare the boundaries from this with the default tree, and with the forest model. Is it less boxy than the default tree, but more boxy than the forest model?</li>
-<li>Fit a random forest model to the <code>bushfires</code> data using the <code>cause</code> variable as the class. What is the out-of-bag error rate for the forest? Are there some classes that have lower error rate than others? Examine the 4D votes matrix with a tour, and describe the confusion between classes.</li>
+<li>Fit a random forest model to the <code>bushfires</code> data using the <code>cause</code> variable as the class. It is a highly imbalanced classification problem. What is the out-of-bag error rate for the forest? Are there some classes that have lower error rate than others? Examine the 4D votes matrix with a tour, and describe the confusion between classes. This is interesting because it is difficult to accurately classify the fire ignition cause, and only some groups are often confused with each other. You should be able to see this from the 3D votes matrix.</li>
 <li>Explore the 5D votes matrix for a random forest on the sketches data. Why does it look star-shaped?</li>
+<li>Choose a cluster (or group of clusters) from the fake_trees data (2, 3, 4, 5, 7, 9) to explore in detail like done in <a href="#sec-forest-errors"><span>Section&nbsp;13.3</span></a>. Be sure to choose which PCs are the most useful using a tour, and follow-up by making a scatterplot showing the best distinction between your chosen cluster and the other observations.</li>
+<li>Examine misclassifications for the fake_trees data between cluster 1 and 0, using the votes matrix instead of the principal components. Describe where these errors fall in the simplex.</li>
+<li>Examine the misclassifications for the sketches data, focusing on cactus sketches that were mistaken for bananas. Follow up by plotting the images of these errors, and describe whether the classifier is correct that these sketches are so poor their true cactus identity cannot be determined.</li>
 </ol>
 <div class="cell">
 

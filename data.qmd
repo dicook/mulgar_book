@@ -151,11 +151,13 @@ Collated data was part of Weihao Li's Honours thesis, which is not publicly avai
 
 The 60 variables are too many to view with a tour, so it should be pre-processed using principal component analysis. The categorical variables of FOR_TYPE and FOR_CAT are removed. It would be possible to keep these if they are converted to dummy (binary variables).
 
+
 ## Program for International Student Assessment 
 
 ### Description {.unnumbered}
 
-The `pisa` data contains plausible scores for math, reading and science of Australian and Indonesian students from the 2018 testing cycle.  The plausible scores are simulated from a model fitted to the original data, to preserve privacy of the students. 
+The `pisa` data contains plausible scores for math, reading and science of Australian and Indonesian students from the 2018 testing cycle.  The plausible scores are simulated from a model fitted to the original data, to preserve privacy of the students.
+
 ### Variables {.unnumbered}
 
 |Name      | Description     |
@@ -176,6 +178,53 @@ The full data is available from https://www.oecd.org/pisa/. There are records of
 ### Pre-processing {.unnumbered}
 
 The data was reduced to country and the plausible scores, and filtered to the two countries. It may be helpful to know that the SPSS format data was used, and was read into R using the `read_sav()` function in the `haven` package. 
+
+## Google Quick Draw 
+
+### Description {.unnumbered}
+
+This data is a subset of images from https://quickdraw.withgoogle.com The subset was created using the quickdraw R package at https://huizezhang-sherry.github.io/quickdraw/. It has 6 different groups: banana, boomerang, cactus, flip flops, kangaroo. Each image is 28x28 pixels. The `sketches_train` data would be used to train a classification model, and the unlabelled `sketches_test` can be used for prediction. 
+
+### Variables {.unnumbered}
+
+|Name      | Description     |
+|:---------|:----------------|
+|`V1-V784`      | grey scale 0-255 |
+|`word` | what the person was asked to draw, NA in the test data |
+|`id` | unique id for each sketch |
+
+### Purpose {.unnumbered}
+
+Primarily this data is useful as an example for supervised classification, and also dimension reduction.
+
+### Source {.unnumbered}
+
+The full data is available from https://quickdraw.withgoogle.com. 
+
+### Pre-processing {.unnumbered}
+
+It is typically useful to pre-process this data into principal components. This code can also be useful for plotting one of the sketches in a recognisable form:
+
+```{r}
+#| code-fold: false
+#| label: fig-sketches
+#| fig-cap: One of the sketches in the subset of training data.
+#| fig-width: 1
+#| fig-height: 1
+library(mulgar)
+library(ggplot2)
+data("sketches_train")
+set.seed(77)
+x <- sketches_train[sample(1:nrow(sketches_train), 1), ]
+print(x$word)
+xm <- data.frame(gry=t(as.matrix(x[,1:784])),
+        x=rep(1:28, 28),
+        y=rep(28:1, rep(28, 28)))
+ggplot(xm, aes(x=x, y=y, fill=gry)) +
+  geom_tile() +
+  scale_fill_gradientn(colors = gray.colors(256, start = 0, end = 1, rev = TRUE )) +
+  theme_void() + theme(legend.position="none")
+```
 
 ## Notes to self
 
