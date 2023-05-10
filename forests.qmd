@@ -194,139 +194,10 @@ What we can see here is a concentration of points in the corners of the triangle
 
 The votes matrix is useful for investigating the fit, but one should remember that there are some structural elements of this data that don't lend themselves to tree models. Although a forest has the capacity to generate non-linear boundaries by combining predictions from multiple trees, it is still based on the boxy boundaries of trees. This makes it less suitable for the penguins data with elliptical classes. You could use the techniques from the previous section to explore the boundaries produced by the forest, and you will find that the are more boxy than the LDA models.
 
-To examine a vote matrix for a problem with more classes, we'll look at the bushfires data. There are four classes: accident, arson, burning_off, lightning. It is highly imbalanced, with most observations belonging to the lightning class, fires ignited by lightning. 
+To examine a vote matrix for a problem with more classes, we will examine the 10 class fake_trees data example. The full data has 100 variables, and we have seen from @sec-clust-graphics that reducing to 10 principal components allows the linear branching structure in the data to be seen. Given that the branches correspond to the classes, it will be interesting to see how well the random forest model performs.
 
 ```{r}
 #| code-fold: false
-library(mulgar)
-library(tourr)
-data(bushfires)
-
-bushfires_sub <- bushfires[,c(5, 8:45, 48:55, 57:60)] %>%
-  mutate(cause = factor(cause))
-```
-
-```{r}
-#| eval: false
-#| echo: false
-# Checking the dependencies between predictors
-bushfires_pca <- prcomp(bushfires_sub[,-51],
-                        scale=TRUE, retx=TRUE)
-ggscree(bushfires_pca)
-
-bushfires_pcs <- bushfires_pca$x[,1:7] %>%
-  as_tibble() %>%
-  mutate(cause = factor(bushfires$cause))
-
-library(tourr)
-animate_xy(bushfires_pcs[,1:7],
-           guided_tour(lda_pp(bushfires_pcs$cause)),
-           col=bushfires_pcs$cause)
-
-bushfires_pca$rotation[,2]
-ggplot(bushfires, aes(x=FOR_CODE)) + geom_density()
-ggplot(bushfires, aes(x=COVER)) + geom_density()
-ggplot(bushfires, aes(x=HEIGHT)) + geom_density()
-ggplot(bushfires, aes(x=FOREST)) + geom_density()
-ggplot(bushfires, aes(x=arf28)) + geom_density()
-```
-
-```{r}
-#| code-fold: false
-library(randomForest)
-bushfires_rf <- randomForest(cause~.,
-                             data=bushfires_sub,
-                             importance=TRUE)
-bushfires_rf
-
-# Create votes matrix data
-bushfires_rf_votes <- bushfires_rf$votes %>%
-  as_tibble() %>%
-  mutate(cause = bushfires_sub$cause)
-
-# Project 4D into 3D
-library(geozoo)
-proj <- t(geozoo::f_helmert(4)[-1,])
-b_rf_v_p <- as.matrix(bushfires_rf_votes[,1:4]) %*% proj
-colnames(b_rf_v_p) <- c("x1", "x2", "x3")
-b_rf_v_p <- b_rf_v_p %>%
-  as.data.frame() %>%
-  mutate(cause = bushfires_sub$cause)
-  
-# Add simplex
-simp <- simplex(p=3)
-sp <- data.frame(simp$points)
-colnames(sp) <- c("x1", "x2", "x3")
-sp$cause = ""
-b_rf_v_p_s <- bind_rows(sp, b_rf_v_p) %>%
-  mutate(cause = factor(cause))
-labels <- c("accident" , "arson", 
-                "burning_off", "lightning", 
-                rep("", nrow(b_rf_v_p)))
-```
-
-```{r}
-#| eval: false
-# Check votes matrix
-animate_xy(bushfires_rf_votes[,1:4],
-           col=bushfires_rf_votes$cause)
-
-# Examine votes matrix with bounding simplex
-animate_xy(b_rf_v_p_s[,1:3], col = b_rf_v_p_s$cause, 
-           axes = "off", half_range = 1.3,
-           edges = as.matrix(simp$edges),
-           obs_labels = labels)
-render_gif(b_rf_v_p_s[,1:3],
-           grand_tour(),
-           display_xy(col = b_rf_v_p_s$cause, 
-           axes = "off", half_range = 1.3,
-           edges = as.matrix(simp$edges),
-           obs_labels = labels),
-           gif_file="gifs/bushfires_votes.gif",
-           frames=500)  
-```
-
-![The 3D votes matrix for the four class bushfires data in a tour.](gifs/bushfires_votes.gif){#fig-b-votes fig-alt="FIX ME" width=300}
-
-We can see that most of the observations lie on the face of lightning, arson and accident. The handful of the burning_off observations lie off this plane, in the direction of burning-off, so are less confused with the other three classes. This could be expected because burning off is highly regulated, and tends to occur before the bushfire season is at risk of starting. The arson cases are hard to classify, frequently confused with lightning or accident, and occasionally burning off. Lightning and accident have many more observations that are confidently classified correctly. 
-
-\index{R package!\RPackage{randomForest}}
-
-### Using variable importance
-
-The variable importance score across all classes, and for each class is useful for choosing variables to enter into a tour, to explore class differences. This is particularly so when there are many variables, as in the bushfires data.
-
-
-
-
-
-```{r}
-library(gt)
-bushfires_rf$importance %>% 
-  as_tibble(rownames="Variable") %>% 
-  rename(Accuracy=MeanDecreaseAccuracy,
-         Gini=MeanDecreaseGini) %>%
-  gt() %>%
-  fmt_number(columns = c(accident, arson, burning_off, lightning, Accuracy),
-             decimals = 3) %>%
-  fmt_number(columns = Gini,
-             decimals = 2)
-```
-
-## Examining misclassifications
-
-Need a linked brushing example showing tour and scatterplot.
-
-## Exercises {-}
-
-1. Compare the boundaries from the random forest model on the penguins data to that of the (a) LDA model, (b) a default tree model.
-2. Tinker with the parameters of the tree model to force it to fit a tree more closely to the data. Compare the boundaries from this with the default tree, and with the forest model. Is it less boxy than the default tree, but more boxy than the forest model?
-3. Fit a random forest model to the forst 10 PCs of `fake_trees` data using the `branches` variable as the class. What is the out-of-bag error rate for the forest? Are there some classes that have lower error rate than others? Examine the 9D votes matrix with a tour. 
-4. Explore the 5D votes matrix for a random forest on the sketches data. Why does it look star-shaped?
-
-```{r}
-#| eval: false
-#| echo: false
 library(mulgar)
 library(dplyr)
 library(liminal)
@@ -338,8 +209,11 @@ library(randomForest)
 ft_rf <- randomForest(branches~., data=ft_pc, 
                             importance=TRUE)
 ft_rf
-ft_rf$importance
+```
 
+```{r}
+#| code-fold: false
+#| eval: false
 ft_rf_votes <- ft_rf$votes %>%
   as_tibble() %>%
   mutate(branches = fake_trees$branches)
@@ -372,6 +246,178 @@ render_gif(f_rf_v_p_s[,1:9],
            obs_labels = labels),
            gif_file="gifs/ft_votes.gif",
            frames=500) 
+```
+
+
+::: {#fig-ft-vites layout-ncol=2}
+
+
+![The 9D votes matrix for the 10 class fake_trees data in a tour.](gifs/ft_votes.gif){#fig-ft-votes-tour fig-alt="FIX ME" width=300}
+
+![Several static views from the tour revealing how clusters connect.](images/ft-votes.png){#fig-ft-votes-prj fig-alt="FIX ME" width=300}
+
+The votes matrix for the fake_trees data has a very striking geometric shape. The branching nature of the clusters is very clear. Most classes are distinct except for a connection with class 0.
+:::
+
+The votes matrix is 9D, but the structure of it is easy to read, and very interesting. The observations are coloured by class. There is one vertex (0) which has connections to all other vertexes. That is, there are points stretching without big breaks from this vertex to every other. It means that some observations in every onther class can be confused with class 0, and class 0 observations can be confused with every other class. All of the other vertexes have a string of points almost entriely along one edge, the edge leading to vertex 0. This shows the lack of confusion with any other class, except 0. 
+
+This pattern is what can be inferred from the confusion matrix, but we can't determine whether the clusters are mostly separated except for a few observations, or some other clustering shape. The visual pattern in the votes matrix is so striking, and gives additional information about the clustering distribution, and shapes of clusters. It reinforces the clusters are linear extending into different dimensions in the 100D space, but really only into about 8D (as we'll see from the variable importance explanation below). We also see that 9 of the clusters are all connected to one cluster.
+
+\index{R package!\RPackage{randomForest}}
+
+### Using variable importance
+
+The variable importance score across all classes, and for each class is useful for choosing variables to enter into a tour, to explore class differences. This is particularly so when there are many variables, as in the fake_trees data. We would also expect that this data will have a difference between importance for some classes.
+
+```{r}
+#| code-fold: false
+#| label: tbl-ft-importance
+#| tbl-cap: Variable importance from the random forest fit to the fake_trees data.
+library(gt)
+ft_rf$importance %>% 
+  as_tibble(rownames="Variable") %>% 
+  rename(Accuracy=MeanDecreaseAccuracy,
+         Gini=MeanDecreaseGini) %>%
+  #arrange(desc(Gini)) %>%
+  gt() %>%
+  fmt_number(columns = c(`0`,`1`,`2`,`3`,`4`,`5`,`6`,`7`,`8`,`9`, Accuracy),
+             decimals = 2) %>%
+  fmt_number(columns = Gini,
+             decimals = 0)
+```
+
+From the variable importance, we can see that PC9 and PC10 do not substantially contribute. That means the 100D data can be reduced to 8 PCs while maintaining the information about the clustering. PC1 is most important overall, but each cluster has a different set of variables that are important. For example, the variables important for distinguishing cluser 1 are PC1, PC2, PC4 and PC6, and for cluster 7 they are PC2, PC6, PC7. We can use this information to choose variables to provide to the tour. It can be helpful to reduce the class variable to focus on a particular class. 
+
+```{r}
+#| eval: false
+#| code-fold: false
+ft_pc <- ft_pc %>%
+  mutate(cl1 = factor(case_when(
+                 branches == "0" ~ "0",
+                 branches == "1" ~ "1",
+                 .default = "other"
+  )))
+animate_xy(ft_pc[,c("PC1", "PC2", "PC4", "PC6")], col=ft_pc$cl1)
+render_gif(ft_pc[,c("PC1", "PC2", "PC4", "PC6")],
+           grand_tour(),
+           display_xy(col=ft_pc$cl1),
+           gif_file="gifs/ft_cl1.gif",
+           frames=500)
+```
+
+
+## Examining misclassifications
+
+Need a linked brushing example showing tour and scatterplot.
+
+## Exercises {-}
+
+1. Compare the boundaries from the random forest model on the penguins data to that of the (a) LDA model, (b) a default tree model.
+2. Tinker with the parameters of the tree model to force it to fit a tree more closely to the data. Compare the boundaries from this with the default tree, and with the forest model. Is it less boxy than the default tree, but more boxy than the forest model?
+3. Fit a random forest model to the `bushfires` data using the `cause` variable as the class. What is the out-of-bag error rate for the forest? Are there some classes that have lower error rate than others? Examine the 4D votes matrix with a tour, and describe the confusion between classes. 
+4. Explore the 5D votes matrix for a random forest on the sketches data. Why does it look star-shaped?
+
+
+```{r}
+#| eval: false
+#| echo: false
+library(mulgar)
+library(tourr)
+data(bushfires)
+
+bushfires_sub <- bushfires[,c(5, 8:45, 48:55, 57:60)] %>%
+  mutate(cause = factor(cause))
+
+# Checking the dependencies between predictors
+bushfires_pca <- prcomp(bushfires_sub[,-51],
+                        scale=TRUE, retx=TRUE)
+ggscree(bushfires_pca)
+
+bushfires_pcs <- bushfires_pca$x[,1:7] %>%
+  as_tibble() %>%
+  mutate(cause = factor(bushfires$cause))
+
+library(tourr)
+animate_xy(bushfires_pcs[,1:7],
+           guided_tour(lda_pp(bushfires_pcs$cause)),
+           col=bushfires_pcs$cause)
+
+bushfires_pca$rotation[,2]
+ggplot(bushfires, aes(x=FOR_CODE)) + geom_density()
+ggplot(bushfires, aes(x=COVER)) + geom_density()
+ggplot(bushfires, aes(x=HEIGHT)) + geom_density()
+ggplot(bushfires, aes(x=FOREST)) + geom_density()
+ggplot(bushfires, aes(x=arf28)) + geom_density()
+
+library(randomForest)
+bushfires_rf <- randomForest(cause~.,
+                             data=bushfires_sub,
+                             importance=TRUE)
+bushfires_rf
+
+# Create votes matrix data
+bushfires_rf_votes <- bushfires_rf$votes %>%
+  as_tibble() %>%
+  mutate(cause = bushfires_sub$cause)
+
+# Project 4D into 3D
+library(geozoo)
+proj <- t(geozoo::f_helmert(4)[-1,])
+b_rf_v_p <- as.matrix(bushfires_rf_votes[,1:4]) %*% proj
+colnames(b_rf_v_p) <- c("x1", "x2", "x3")
+b_rf_v_p <- b_rf_v_p %>%
+  as.data.frame() %>%
+  mutate(cause = bushfires_sub$cause)
+  
+# Add simplex
+simp <- simplex(p=3)
+sp <- data.frame(simp$points)
+colnames(sp) <- c("x1", "x2", "x3")
+sp$cause = ""
+b_rf_v_p_s <- bind_rows(sp, b_rf_v_p) %>%
+  mutate(cause = factor(cause))
+labels <- c("accident" , "arson", 
+                "burning_off", "lightning", 
+                rep("", nrow(b_rf_v_p)))
+
+# Check votes matrix
+animate_xy(bushfires_rf_votes[,1:4],
+           col=bushfires_rf_votes$cause)
+
+# Examine votes matrix with bounding simplex
+animate_xy(b_rf_v_p_s[,1:3], col = b_rf_v_p_s$cause, 
+           axes = "off", half_range = 1.3,
+           edges = as.matrix(simp$edges),
+           obs_labels = labels)
+render_gif(b_rf_v_p_s[,1:3],
+           grand_tour(),
+           display_xy(col = b_rf_v_p_s$cause, 
+           axes = "off", half_range = 1.3,
+           edges = as.matrix(simp$edges),
+           obs_labels = labels),
+           gif_file="gifs/bushfires_votes.gif",
+           frames=500)  
+
+library(gt)
+bushfires_rf$importance %>% 
+  as_tibble(rownames="Variable") %>% 
+  rename(Accuracy=MeanDecreaseAccuracy,
+         Gini=MeanDecreaseGini) %>%
+  arrange(desc(Gini)) %>%
+  gt() %>%
+  fmt_number(columns = c(accident, arson, burning_off, lightning, Accuracy),
+             decimals = 4) %>%
+  fmt_number(columns = Gini,
+             decimals = 2)
+```
+
+```{r}
+#| eval: false
+#| echo: false
+# Answer to Q3
+There are four classes: accident, arson, burning_off, lightning. It is highly imbalanced, with most observations belonging to the lightning class, fires ignited by lightning. 
+
+We can see that most of the observations lie on the face of lightning, arson and accident. The handful of the burning_off observations lie off this plane, in the direction of burning-off, so are less confused with the other three classes. This could be expected because burning off is highly regulated, and tends to occur before the bushfire season is at risk of starting. The arson cases are hard to classify, frequently confused with lightning or accident, and occasionally burning off. Lightning and accident have many more observations that are confidently classified correctly. 
 ```
 
 ```{r}
