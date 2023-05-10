@@ -259,7 +259,7 @@ render_gif(f_rf_v_p_s[,1:9],
 The votes matrix for the fake_trees data has a very striking geometric shape. The branching nature of the clusters is very clear. Most classes are distinct except for a connection with class 0.
 :::
 
-The votes matrix is 9D, but the structure of it is easy to read, and very interesting. The observations are coloured by class. There is one vertex (0) which has connections to all other vertexes. That is, there are points stretching without big breaks from this vertex to every other. It means that some observations in every onther class can be confused with class 0, and class 0 observations can be confused with every other class. All of the other vertexes have a string of points almost entriely along one edge, the edge leading to vertex 0. This shows the lack of confusion with any other class, except 0. Cluster 0 could be considered the trunk of the tree, from which the other clusters grow. 
+The votes matrix is 9D, but the structure of it is easy to read, and very interesting. The observations are coloured by class. There is one vertex (0) which has connections to all other vertexes. That is, there are points stretching without big breaks from this vertex to every other. It means that some observations in every other class can be confused with class 0, and class 0 observations can be confused with every other class. All of the other vertexes have a string of points almost entirely along one edge, the edge leading to vertex 0. This shows the lack of confusion with any other class, except 0. Cluster 0 could be considered the trunk of the tree, from which the other clusters grow. 
 
 This pattern is what can be inferred from the confusion matrix, but we can't determine whether the clusters are mostly separated except for a few observations, or some other clustering shape. The visual pattern in the votes matrix is so striking, and gives additional information about the clustering distribution, and shapes of clusters. It reinforces the clusters are linear extending into different dimensions in the 100D space, but really only into about 8D (as we'll see from the variable importance explanation below). We also see that 9 of the clusters are all connected to one cluster.
 
@@ -286,7 +286,7 @@ ft_rf$importance %>%
              decimals = 0)
 ```
 
-From the variable importance, we can see that PC9 and PC10 do not substantially contribute. That means the 100D data can be reduced to 8 PCs while maintaining the information about the clustering. PC1 is most important overall, but each cluster has a different set of variables that are important. For example, the variables important for distinguishing cluser 1 are PC1, PC2, PC4 and PC6, and for cluster 7 they are PC2, PC6, PC7. We can use this information to choose variables to provide to the tour. It can be helpful to reduce the class variable to focus on a particular class, by creating a new class variable, as follows. 
+From the variable importance, we can see that PC9 and PC10 do not substantially contribute. That means the 100D data can be reduced to 8 PCs while maintaining the information about the clustering. PC1 is most important overall, but each cluster has a different set of variables that are important. For example, the variables important for distinguishing cluster 1 are PC1, PC2, PC4 and PC6, and for cluster 7 they are PC2, PC6, PC7. We can use this information to choose variables to provide to the tour. It can be helpful to reduce the class variable to focus on a particular class, by creating a new class variable, as follows. 
 
 ```{r}
 #| code-fold: false
@@ -309,7 +309,6 @@ render_gif(ft_pc[,c("PC1", "PC2", "PC4", "PC6")],
 ```
 
 ```{r}
-#| code-fold: false
 ft_pc_cl1 <- ggplot(ft_pc, aes(x=PC4, y=PC2, col=cl1)) +
   geom_point() +
   scale_color_viridis_d("") +
@@ -317,23 +316,7 @@ ft_pc_cl1 <- ggplot(ft_pc, aes(x=PC4, y=PC2, col=cl1)) +
   theme(aspect.ratio = 1)
 ```
 
-```{r}
-#| eval: false
-ft_pc <- ft_pc %>%
-  mutate(cl8 = factor(case_when(
-                 branches == "0" ~ "0",
-                 branches == "6" ~ "6",
-                 branches == "1" ~ "1",
-                 branches == "8" ~ "8",
-                 .default = "other"
-  )))
-animate_xy(ft_pc[,c("PC1", "PC2", "PC4", "PC5", "PC6")], col=ft_pc$cl8)
-render_gif(ft_pc[,c("PC1", "PC2", "PC4", "PC5", "PC6")],
-           grand_tour(),
-           display_xy(col=ft_pc$cl8),
-           gif_file="gifs/ft_cl8.gif",
-           frames=500)
-```
+From @fig-ft-cl we can see how cluster 1 is distinct from all of the other observations, albeit with a close connection to the trunk of the tree (cluster 0). The distinction is visible in PC1, PC2, PC4, PC6, but can be seen clearly with just two of these.
 
 ::: {#fig-ft-cl layout-ncol=2}
 
@@ -350,6 +333,57 @@ ft_pc_cl1
 
 Focusing on class 1 in the fake_trees data. The most important variables were PC1, PC2, PC4, PC6. A combination of PC2 and PC4 reveals the difference between cluster 1 and all the other clusters.
 :::
+
+For a problem with this many classes it can be useful to focus on several groups together. We've chosen cluster 8, because it appears to have less of a connection with cluster 0. See the light green cluster in bottom right static plot of @fig-ft-votes-prj is connected more to a different vertex, which is cluster 6 when carefully viewed. This is also suggested by the confusion matrix, where there is one observation from cluster 8 confused with cluster 6, although somewhat contradictory information, most are confused with cluster 0. We have also added cluster 1 to the investigation because it is closely connected to 6 and 8.
+
+```{r}
+#| code-fold: false
+ft_pc <- ft_pc %>%
+  mutate(cl8 = factor(case_when(
+                 branches == "0" ~ "0",
+                 branches == "6" ~ "6",
+                 branches == "1" ~ "1",
+                 branches == "8" ~ "8",
+                 .default = "other"
+  )))
+```
+
+```{r}
+#| eval: false
+animate_xy(ft_pc[,c("PC1", "PC2", "PC4", "PC5", "PC6")], col=ft_pc$cl8)
+render_gif(ft_pc[,c("PC1", "PC2", "PC4", "PC5", "PC6")],
+           grand_tour(),
+           display_xy(col=ft_pc$cl8),
+           gif_file="gifs/ft_cl8.gif",
+           frames=500)
+```
+
+```{r}
+ft_pc_cl8 <- ggplot(ft_pc, aes(x=PC1, y=PC5, col=cl8)) +
+  geom_point() +
+  scale_color_viridis_d("") +
+  theme_minimal() +
+  theme(aspect.ratio = 1)
+```
+
+From @fig-ft-cl2 we can see that clusters 1, 6, and 8 share one end of the trunk (cluster 0). Cluster 8 is almost more closely connected with cluster 6, though, than cluster 0. PC1 and PC5 mostly show the distinction between cluster 8 and the rest of the points, but it is clearer if more variables are used.
+
+::: {#fig-ft-cl2 layout-ncol=2}
+
+![Tour of most important variables for class 1.](gifs/ft_cl8.gif){#fig-ft-cl8 fig-alt="FIX ME" width=300}
+
+```{r}
+#| echo: false
+#| fig-width: 4
+#| fig-height: 4
+#| out-width: 100%
+#| fig-cap: PC1 and PC5 together reveal cluster 8.
+ft_pc_cl8 
+```
+
+Focusing on class 8 in the fake_trees data, relative to nearby clusters 1 and 6. The most important variables for cluster 8 are  PC1, PC2, PC5, but to explore in association with clusters 1 and 6, we include PC4 and PC6. A combination of PC1 and PC5 reveals the difference between cluster 8, 6, 1 and 0. 
+:::
+
 
 ## Examining misclassifications
 
