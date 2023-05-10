@@ -389,7 +389,55 @@ Focusing on class 8 in the fake_trees data, relative to nearby clusters 1 and 6.
 
 ## Examining misclassifications
 
-Need a linked brushing example showing tour and scatterplot.
+To examine misclassifications, we can create a separate variable that identifies the errors or not. Constructing this for each class, and exploring in small steps is helpful. Let's do this using the random forest model for the penguins fit. There are four Adelie penguins confused with Chinstrap, and similarly four Chinstrap confused with Adelie. There is one Gentoo penguin confused with a Chinstrap. This is interesting, because the Gentoo cluster is well separated from the clusters of the other two penguin species. 
+
+```{r}
+penguins_rf
+```
+
+```{r}
+#| code-fold: false
+penguins_errors <- penguins_sub %>%
+  mutate(err = ifelse(penguins_rf$predicted != penguins_rf$y, 1, 0))
+```
+
+```{r}
+#| eval: false
+symbols <- c(20, 8)
+p_pch <- symbols[penguins_errors$err+1]
+animate_xy(penguins_errors[,1:4],
+           col=penguins_errors$species,
+           pch=pch)
+render_gif(penguins_errors[,1:4],
+           grand_tour(),
+           display_xy(col=penguins_errors$species,
+                      pch=p_pch),
+           gif_file="gifs/p_rf_errors.gif",
+           frames=500)
+
+animate_xy(penguins_errors[,1:4],
+           guided_tour(lda_pp(penguins_errors$species)),
+           col=penguins_errors$species,
+           pch=pch)
+
+render_gif(penguins_errors[,1:4],
+           guided_tour(lda_pp(penguins_errors$species)),
+           display_xy(col=penguins_errors$species,
+                      pch=p_pch),
+           gif_file="gifs/p_rf_errors_guided.gif",
+           frames=500,
+           loop=FALSE)
+
+```
+
+::: {#fig-p-errors layout-ncol=2}
+
+![Exploring misclassifications using a grand tour.](gifs/p_rf_errors.gif){#fig-rf-errors fig-alt="FIX ME" width=300}
+
+![Exploring misclassifications using a guided tour.](gifs/p_rf_errors_guided.gif){#fig-rf-errors-guided fig-alt="FIX ME" width=300}
+
+Examining the misclassified cases (marked as asterisks) from a random forest fit to the penguins data. The one Gentoo penguin mistaken for a Chinstrap is a mistake made because the forest method suffers from the same problems as trees - cutting on single variables rather than effectively using covariance structure. The mistakes between the Adelie and Chinstrap penguins are more sensible because all of these observations lie is the bordering regions between the two clusters.
+:::
 
 ## Exercises {-}
 
