@@ -194,17 +194,22 @@ What we can see here is a concentration of points in the corners of the triangle
 
 The votes matrix is useful for investigating the fit, but one should remember that there are some structural elements of this data that don't lend themselves to tree models. Although a forest has the capacity to generate non-linear boundaries by combining predictions from multiple trees, it is still based on the boxy boundaries of trees. This makes it less suitable for the penguins data with elliptical classes. You could use the techniques from the previous section to explore the boundaries produced by the forest, and you will find that the are more boxy than the LDA models.
 
-To examine a vote matrix for a problem with more classes, we'll look at the bushfires data. There are four classes: accident, arson, burning_off, lightning. It is highly imbalanced, with most observations belonging to the lightning class, fires ignited by lightning. We can see that most of the observations lie on the face of lightning, arson and accident. The handful of the burning_off observations lie off this plane, in the direction of burning-off, so are less confused with the other three classes. This could be expected because burning off is highly regulated, and tends to occur before the bushfire season is at risk of starting. The arson cases are hard to classify, frequently confused with lightning or accident, and occasionally burning off. Lightning and accident have many more observations that are confidently classified correctly. 
+To examine a vote matrix for a problem with more classes, we'll look at the bushfires data. There are four classes: accident, arson, burning_off, lightning. It is highly imbalanced, with most observations belonging to the lightning class, fires ignited by lightning. 
 
 ```{r}
-#| eval: false
+#| code-fold: false
 library(mulgar)
 library(tourr)
 data(bushfires)
 
 bushfires_sub <- bushfires[,c(5, 8:45, 48:55, 57:60)] %>%
   mutate(cause = factor(cause))
+```
 
+```{r}
+#| eval: false
+#| echo: false
+# Checking the dependencies between predictors
 bushfires_pca <- prcomp(bushfires_sub[,-51],
                         scale=TRUE, retx=TRUE)
 ggscree(bushfires_pca)
@@ -224,17 +229,20 @@ ggplot(bushfires, aes(x=COVER)) + geom_density()
 ggplot(bushfires, aes(x=HEIGHT)) + geom_density()
 ggplot(bushfires, aes(x=FOREST)) + geom_density()
 ggplot(bushfires, aes(x=arf28)) + geom_density()
+```
 
+```{r}
+#| code-fold: false
 library(randomForest)
 bushfires_rf <- randomForest(cause~.,
                              data=bushfires_sub,
                              importance=TRUE)
+bushfires_rf
+
+# Create votes matrix data
 bushfires_rf_votes <- bushfires_rf$votes %>%
   as_tibble() %>%
   mutate(cause = bushfires_sub$cause)
-
-animate_xy(bushfires_rf_votes[,1:4],
-           col=bushfires_rf_votes$cause)
 
 # Project 4D into 3D
 library(geozoo)
@@ -254,7 +262,16 @@ b_rf_v_p_s <- bind_rows(sp, b_rf_v_p) %>%
   mutate(cause = factor(cause))
 labels <- c("accident" , "arson", 
                 "burning_off", "lightning", 
-                rep("", 1021))
+                rep("", nrow(b_rf_v_p)))
+```
+
+```{r}
+#| eval: false
+# Check votes matrix
+animate_xy(bushfires_rf_votes[,1:4],
+           col=bushfires_rf_votes$cause)
+
+# Examine votes matrix with bounding simplex
 animate_xy(b_rf_v_p_s[,1:3], col = b_rf_v_p_s$cause, 
            axes = "off", half_range = 1.3,
            edges = as.matrix(simp$edges),
@@ -271,11 +288,30 @@ render_gif(b_rf_v_p_s[,1:3],
 
 ![The 3D votes matrix for the four class bushfires data in a tour.](gifs/bushfires_votes.gif){#fig-b-votes fig-alt="FIX ME" width=300}
 
+We can see that most of the observations lie on the face of lightning, arson and accident. The handful of the burning_off observations lie off this plane, in the direction of burning-off, so are less confused with the other three classes. This could be expected because burning off is highly regulated, and tends to occur before the bushfire season is at risk of starting. The arson cases are hard to classify, frequently confused with lightning or accident, and occasionally burning off. Lightning and accident have many more observations that are confidently classified correctly. 
+
 \index{R package!\RPackage{randomForest}}
 
 ### Using variable importance
 
-bushfires data
+The variable importance score across all classes, and for each class is useful for choosing variables to enter into a tour, to explore class differences. This is particularly so when there are many variables, as in the bushfires data.
+
+
+
+
+
+```{r}
+library(gt)
+bushfires_rf$importance %>% 
+  as_tibble(rownames="Variable") %>% 
+  rename(Accuracy=MeanDecreaseAccuracy,
+         Gini=MeanDecreaseGini) %>%
+  gt() %>%
+  fmt_number(columns = c(accident, arson, burning_off, lightning, Accuracy),
+             decimals = 3) %>%
+  fmt_number(columns = Gini,
+             decimals = 2)
+```
 
 ## Examining misclassifications
 

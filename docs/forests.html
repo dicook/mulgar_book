@@ -511,7 +511,7 @@ No. of variables tried at each split: 2
         OOB estimate of  error rate: 2.4%
 Confusion matrix:
           Adelie Chinstrap Gentoo class.error
-Adelie       143         2      1 0.020547945
+Adelie       143         3      0 0.020547945
 Chinstrap      4        64      0 0.058823529
 Gentoo         0         1    118 0.008403361</code></pre>
 </div>
@@ -604,79 +604,85 @@ x       0.4082483  0.4082483 -0.8164966</code></pre>
 <p>The votes matrix, reports the proportion of trees each observation is classified as each class. From the tour of the votes matrix, it can be seen to be 2D in 3D space. This is due to the constraint that the three proportions for each observation sum to 1. Using a Helmert matrix, this data can be projected into the 2D space, or more generally the <span class="math inline">\((g-1)\)</span>-dimensional space where it resides. In 2D this is called a ternary diagram, and in higher dimensions the bounding shapes might be considered to be a simplex. The vertices of this shape correspond to <span class="math inline">\((1,0,0), (0,1,0), (0,0,1)\)</span> (and analogously for higher dimensions), which represent perfect confidence, that an observation is classified into that group all the time.</p>
 <p>What we can see here is a concentration of points in the corners of the triangle indicates that most of the penguins are confidently classified into their correct class. Then there is more separation between the Gentoo and the others, than between Chinstrap and Adelie. That means that as a group Gentoo are more distinguishable. Only one of the Gentoo penguins has substantial confusion, mostly confused as a Chinstrap, but occasionally confused as an Adelie – if it was only ever confused as a Chinstrap it would fall on the edge between Gentoo and Chinstrap. There are quite a few Chinstrap and Adelie penguins confused as each other, with a couple of each more confidently predicted to be the other class. This can be seen because there are points of the wrong colour close to those vertices.</p>
 <p>The votes matrix is useful for investigating the fit, but one should remember that there are some structural elements of this data that don’t lend themselves to tree models. Although a forest has the capacity to generate non-linear boundaries by combining predictions from multiple trees, it is still based on the boxy boundaries of trees. This makes it less suitable for the penguins data with elliptical classes. You could use the techniques from the previous section to explore the boundaries produced by the forest, and you will find that the are more boxy than the LDA models.</p>
-<p>To examine a vote matrix for a problem with more classes, we’ll look at the bushfires data. There are four classes: accident, arson, burning_off, lightning. It is highly imbalanced, with most observations belonging to the lightning class, fires ignited by lightning. We can see that most of the observations lie on the face of lightning, arson and accident. The handful of the burning_off observations lie off this plane, in the direction of burning-off, so are less confused with the other three classes. This could be expected because burning off is highly regulated, and tends to occur before the bushfire season is at risk of starting. The arson cases are hard to classify, frequently confused with lightning or accident, and occasionally burning off. Lightning and accident have many more observations that are confidently classified correctly.</p>
+<p>To examine a vote matrix for a problem with more classes, we’ll look at the bushfires data. There are four classes: accident, arson, burning_off, lightning. It is highly imbalanced, with most observations belonging to the lightning class, fires ignited by lightning.</p>
 <div class="cell">
-<details>
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mulgar)</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tourr)</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(bushfires)</span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>bushfires_sub <span class="ot">&lt;-</span> bushfires[,<span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">8</span><span class="sc">:</span><span class="dv">45</span>, <span class="dv">48</span><span class="sc">:</span><span class="dv">55</span>, <span class="dv">57</span><span class="sc">:</span><span class="dv">60</span>)] <span class="sc">%&gt;%</span></span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">cause =</span> <span class="fu">factor</span>(cause))</span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>bushfires_pca <span class="ot">&lt;-</span> <span class="fu">prcomp</span>(bushfires_sub[,<span class="sc">-</span><span class="dv">51</span>],</span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>                        <span class="at">scale=</span><span class="cn">TRUE</span>, <span class="at">retx=</span><span class="cn">TRUE</span>)</span>
-<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="fu">ggscree</span>(bushfires_pca)</span>
-<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>bushfires_pcs <span class="ot">&lt;-</span> bushfires_pca<span class="sc">$</span>x[,<span class="dv">1</span><span class="sc">:</span><span class="dv">7</span>] <span class="sc">%&gt;%</span></span>
-<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_tibble</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">cause =</span> <span class="fu">factor</span>(bushfires<span class="sc">$</span>cause))</span>
-<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tourr)</span>
-<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a><span class="fu">animate_xy</span>(bushfires_pcs[,<span class="dv">1</span><span class="sc">:</span><span class="dv">7</span>],</span>
-<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>           <span class="fu">guided_tour</span>(<span class="fu">lda_pp</span>(bushfires_pcs<span class="sc">$</span>cause)),</span>
-<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>           <span class="at">col=</span>bushfires_pcs<span class="sc">$</span>cause)</span>
-<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>bushfires_pca<span class="sc">$</span>rotation[,<span class="dv">2</span>]</span>
-<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(bushfires, <span class="fu">aes</span>(<span class="at">x=</span>FOR_CODE)) <span class="sc">+</span> <span class="fu">geom_density</span>()</span>
-<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(bushfires, <span class="fu">aes</span>(<span class="at">x=</span>COVER)) <span class="sc">+</span> <span class="fu">geom_density</span>()</span>
-<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(bushfires, <span class="fu">aes</span>(<span class="at">x=</span>HEIGHT)) <span class="sc">+</span> <span class="fu">geom_density</span>()</span>
-<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(bushfires, <span class="fu">aes</span>(<span class="at">x=</span>FOREST)) <span class="sc">+</span> <span class="fu">geom_density</span>()</span>
-<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(bushfires, <span class="fu">aes</span>(<span class="at">x=</span>arf28)) <span class="sc">+</span> <span class="fu">geom_density</span>()</span>
-<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(randomForest)</span>
-<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a>bushfires_rf <span class="ot">&lt;-</span> <span class="fu">randomForest</span>(cause<span class="sc">~</span>.,</span>
-<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a>                             <span class="at">data=</span>bushfires_sub,</span>
-<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a>                             <span class="at">importance=</span><span class="cn">TRUE</span>)</span>
-<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a>bushfires_rf_votes <span class="ot">&lt;-</span> bushfires_rf<span class="sc">$</span>votes <span class="sc">%&gt;%</span></span>
-<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_tibble</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">cause =</span> bushfires_sub<span class="sc">$</span>cause)</span>
-<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a><span class="fu">animate_xy</span>(bushfires_rf_votes[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>],</span>
-<span id="cb11-37"><a href="#cb11-37" aria-hidden="true" tabindex="-1"></a>           <span class="at">col=</span>bushfires_rf_votes<span class="sc">$</span>cause)</span>
-<span id="cb11-38"><a href="#cb11-38" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-39"><a href="#cb11-39" aria-hidden="true" tabindex="-1"></a><span class="co"># Project 4D into 3D</span></span>
-<span id="cb11-40"><a href="#cb11-40" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(geozoo)</span>
-<span id="cb11-41"><a href="#cb11-41" aria-hidden="true" tabindex="-1"></a>proj <span class="ot">&lt;-</span> <span class="fu">t</span>(geozoo<span class="sc">::</span><span class="fu">f_helmert</span>(<span class="dv">4</span>)[<span class="sc">-</span><span class="dv">1</span>,])</span>
-<span id="cb11-42"><a href="#cb11-42" aria-hidden="true" tabindex="-1"></a>b_rf_v_p <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(bushfires_rf_votes[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>]) <span class="sc">%*%</span> proj</span>
-<span id="cb11-43"><a href="#cb11-43" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(b_rf_v_p) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>)</span>
-<span id="cb11-44"><a href="#cb11-44" aria-hidden="true" tabindex="-1"></a>b_rf_v_p <span class="ot">&lt;-</span> b_rf_v_p <span class="sc">%&gt;%</span></span>
-<span id="cb11-45"><a href="#cb11-45" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb11-46"><a href="#cb11-46" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">cause =</span> bushfires_sub<span class="sc">$</span>cause)</span>
-<span id="cb11-47"><a href="#cb11-47" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb11-48"><a href="#cb11-48" aria-hidden="true" tabindex="-1"></a><span class="co"># Add simplex</span></span>
-<span id="cb11-49"><a href="#cb11-49" aria-hidden="true" tabindex="-1"></a>simp <span class="ot">&lt;-</span> <span class="fu">simplex</span>(<span class="at">p=</span><span class="dv">3</span>)</span>
-<span id="cb11-50"><a href="#cb11-50" aria-hidden="true" tabindex="-1"></a>sp <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(simp<span class="sc">$</span>points)</span>
-<span id="cb11-51"><a href="#cb11-51" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(sp) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>)</span>
-<span id="cb11-52"><a href="#cb11-52" aria-hidden="true" tabindex="-1"></a>sp<span class="sc">$</span>cause <span class="ot">=</span> <span class="st">""</span></span>
-<span id="cb11-53"><a href="#cb11-53" aria-hidden="true" tabindex="-1"></a>b_rf_v_p_s <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(sp, b_rf_v_p) <span class="sc">%&gt;%</span></span>
-<span id="cb11-54"><a href="#cb11-54" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">cause =</span> <span class="fu">factor</span>(cause))</span>
-<span id="cb11-55"><a href="#cb11-55" aria-hidden="true" tabindex="-1"></a>labels <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"accident"</span> , <span class="st">"arson"</span>, </span>
-<span id="cb11-56"><a href="#cb11-56" aria-hidden="true" tabindex="-1"></a>                <span class="st">"burning_off"</span>, <span class="st">"lightning"</span>, </span>
-<span id="cb11-57"><a href="#cb11-57" aria-hidden="true" tabindex="-1"></a>                <span class="fu">rep</span>(<span class="st">""</span>, <span class="dv">1021</span>))</span>
-<span id="cb11-58"><a href="#cb11-58" aria-hidden="true" tabindex="-1"></a><span class="fu">animate_xy</span>(b_rf_v_p_s[,<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>], <span class="at">col =</span> b_rf_v_p_s<span class="sc">$</span>cause, </span>
-<span id="cb11-59"><a href="#cb11-59" aria-hidden="true" tabindex="-1"></a>           <span class="at">axes =</span> <span class="st">"off"</span>, <span class="at">half_range =</span> <span class="fl">1.3</span>,</span>
-<span id="cb11-60"><a href="#cb11-60" aria-hidden="true" tabindex="-1"></a>           <span class="at">edges =</span> <span class="fu">as.matrix</span>(simp<span class="sc">$</span>edges),</span>
-<span id="cb11-61"><a href="#cb11-61" aria-hidden="true" tabindex="-1"></a>           <span class="at">obs_labels =</span> labels)</span>
-<span id="cb11-62"><a href="#cb11-62" aria-hidden="true" tabindex="-1"></a><span class="fu">render_gif</span>(b_rf_v_p_s[,<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>],</span>
-<span id="cb11-63"><a href="#cb11-63" aria-hidden="true" tabindex="-1"></a>           <span class="fu">grand_tour</span>(),</span>
-<span id="cb11-64"><a href="#cb11-64" aria-hidden="true" tabindex="-1"></a>           <span class="fu">display_xy</span>(<span class="at">col =</span> b_rf_v_p_s<span class="sc">$</span>cause, </span>
-<span id="cb11-65"><a href="#cb11-65" aria-hidden="true" tabindex="-1"></a>           <span class="at">axes =</span> <span class="st">"off"</span>, <span class="at">half_range =</span> <span class="fl">1.3</span>,</span>
-<span id="cb11-66"><a href="#cb11-66" aria-hidden="true" tabindex="-1"></a>           <span class="at">edges =</span> <span class="fu">as.matrix</span>(simp<span class="sc">$</span>edges),</span>
-<span id="cb11-67"><a href="#cb11-67" aria-hidden="true" tabindex="-1"></a>           <span class="at">obs_labels =</span> labels),</span>
-<span id="cb11-68"><a href="#cb11-68" aria-hidden="true" tabindex="-1"></a>           <span class="at">gif_file=</span><span class="st">"gifs/bushfires_votes.gif"</span>,</span>
-<span id="cb11-69"><a href="#cb11-69" aria-hidden="true" tabindex="-1"></a>           <span class="at">frames=</span><span class="dv">500</span>)  </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">cause =</span> <span class="fu">factor</span>(cause))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(randomForest)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>bushfires_rf <span class="ot">&lt;-</span> <span class="fu">randomForest</span>(cause<span class="sc">~</span>.,</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>                             <span class="at">data=</span>bushfires_sub,</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>                             <span class="at">importance=</span><span class="cn">TRUE</span>)</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>bushfires_rf</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+ randomForest(formula = cause ~ ., data = bushfires_sub, importance = TRUE) 
+               Type of random forest: classification
+                     Number of trees: 500
+No. of variables tried at each split: 7
+
+        OOB estimate of  error rate: 11.56%
+Confusion matrix:
+            accident arson burning_off lightning class.error
+accident          70     3           0        65  0.49275362
+arson             11     8           1        17  0.78378378
+burning_off        2     0           3         4  0.66666667
+lightning         15     0           0       822  0.01792115</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create votes matrix data</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>bushfires_rf_votes <span class="ot">&lt;-</span> bushfires_rf<span class="sc">$</span>votes <span class="sc">%&gt;%</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_tibble</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">cause =</span> bushfires_sub<span class="sc">$</span>cause)</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Project 4D into 3D</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(geozoo)</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>proj <span class="ot">&lt;-</span> <span class="fu">t</span>(geozoo<span class="sc">::</span><span class="fu">f_helmert</span>(<span class="dv">4</span>)[<span class="sc">-</span><span class="dv">1</span>,])</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>b_rf_v_p <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(bushfires_rf_votes[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>]) <span class="sc">%*%</span> proj</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(b_rf_v_p) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>)</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>b_rf_v_p <span class="ot">&lt;-</span> b_rf_v_p <span class="sc">%&gt;%</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">cause =</span> bushfires_sub<span class="sc">$</span>cause)</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Add simplex</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>simp <span class="ot">&lt;-</span> <span class="fu">simplex</span>(<span class="at">p=</span><span class="dv">3</span>)</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>sp <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(simp<span class="sc">$</span>points)</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(sp) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>)</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>sp<span class="sc">$</span>cause <span class="ot">=</span> <span class="st">""</span></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>b_rf_v_p_s <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(sp, b_rf_v_p) <span class="sc">%&gt;%</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">cause =</span> <span class="fu">factor</span>(cause))</span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>labels <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"accident"</span> , <span class="st">"arson"</span>, </span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>                <span class="st">"burning_off"</span>, <span class="st">"lightning"</span>, </span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>                <span class="fu">rep</span>(<span class="st">""</span>, <span class="fu">nrow</span>(b_rf_v_p)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check votes matrix</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">animate_xy</span>(bushfires_rf_votes[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>],</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">col=</span>bushfires_rf_votes<span class="sc">$</span>cause)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Examine votes matrix with bounding simplex</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="fu">animate_xy</span>(b_rf_v_p_s[,<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>], <span class="at">col =</span> b_rf_v_p_s<span class="sc">$</span>cause, </span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>           <span class="at">axes =</span> <span class="st">"off"</span>, <span class="at">half_range =</span> <span class="fl">1.3</span>,</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>           <span class="at">edges =</span> <span class="fu">as.matrix</span>(simp<span class="sc">$</span>edges),</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>           <span class="at">obs_labels =</span> labels)</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="fu">render_gif</span>(b_rf_v_p_s[,<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>],</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>           <span class="fu">grand_tour</span>(),</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>           <span class="fu">display_xy</span>(<span class="at">col =</span> b_rf_v_p_s<span class="sc">$</span>cause, </span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>           <span class="at">axes =</span> <span class="st">"off"</span>, <span class="at">half_range =</span> <span class="fl">1.3</span>,</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>           <span class="at">edges =</span> <span class="fu">as.matrix</span>(simp<span class="sc">$</span>edges),</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>           <span class="at">obs_labels =</span> labels),</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>           <span class="at">gif_file=</span><span class="st">"gifs/bushfires_votes.gif"</span>,</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>           <span class="at">frames=</span><span class="dv">500</span>)  </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div id="fig-b-votes" class="quarto-figure quarto-figure-center anchored">
@@ -685,11 +691,810 @@ x       0.4082483  0.4082483 -0.8164966</code></pre>
 <p></p><figcaption class="figure-caption">Figure&nbsp;13.4: The 3D votes matrix for the four class bushfires data in a tour.</figcaption><p></p>
 </figure>
 </div>
+<p>We can see that most of the observations lie on the face of lightning, arson and accident. The handful of the burning_off observations lie off this plane, in the direction of burning-off, so are less confused with the other three classes. This could be expected because burning off is highly regulated, and tends to occur before the bushfire season is at risk of starting. The arson cases are hard to classify, frequently confused with lightning or accident, and occasionally burning off. Lightning and accident have many more observations that are confidently classified correctly.</p>
 <p></p>
 </section>
 <section id="using-variable-importance" class="level3" data-number="13.2.2">
 <h3 data-number="13.2.2" class="anchored" data-anchor-id="using-variable-importance"><span class="header-section-number">13.2.2</span> Using variable importance</h3>
-<p>bushfires data</p>
+<p>The variable importance score across all classes, and for each class is useful for choosing variables to enter into a tour, to explore class differences. This is particularly so when there are many variables, as in the bushfires data.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gt)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>bushfires_rf<span class="sc">$</span>importance <span class="sc">%&gt;%</span> </span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_tibble</span>(<span class="at">rownames=</span><span class="st">"Variable"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">Accuracy=</span>MeanDecreaseAccuracy,</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">Gini=</span>MeanDecreaseGini) <span class="sc">%&gt;%</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gt</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fmt_number</span>(<span class="at">columns =</span> <span class="fu">c</span>(accident, arson, burning_off, lightning, Accuracy),</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>             <span class="at">decimals =</span> <span class="dv">3</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fmt_number</span>(<span class="at">columns =</span> Gini,</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>             <span class="at">decimals =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+
+<div id="vyrjjxstyr" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>html {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
+}
+
+:where(#vyrjjxstyr) .gt_table {
+  display: table;
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+:where(#vyrjjxstyr) .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+:where(#vyrjjxstyr) .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+:where(#vyrjjxstyr) .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+:where(#vyrjjxstyr) .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 0;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+:where(#vyrjjxstyr) .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+:where(#vyrjjxstyr) .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+:where(#vyrjjxstyr) .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+:where(#vyrjjxstyr) .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+:where(#vyrjjxstyr) .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+:where(#vyrjjxstyr) .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+:where(#vyrjjxstyr) .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+:where(#vyrjjxstyr) .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+:where(#vyrjjxstyr) .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+:where(#vyrjjxstyr) .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+:where(#vyrjjxstyr) .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+:where(#vyrjjxstyr) .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+:where(#vyrjjxstyr) .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+:where(#vyrjjxstyr) .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+:where(#vyrjjxstyr) .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+:where(#vyrjjxstyr) .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+:where(#vyrjjxstyr) .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+:where(#vyrjjxstyr) .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+:where(#vyrjjxstyr) .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+:where(#vyrjjxstyr) .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+:where(#vyrjjxstyr) .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+:where(#vyrjjxstyr) .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+:where(#vyrjjxstyr) .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+:where(#vyrjjxstyr) .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+:where(#vyrjjxstyr) .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-left: 4px;
+  padding-right: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+:where(#vyrjjxstyr) .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+:where(#vyrjjxstyr) .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+:where(#vyrjjxstyr) .gt_left {
+  text-align: left;
+}
+
+:where(#vyrjjxstyr) .gt_center {
+  text-align: center;
+}
+
+:where(#vyrjjxstyr) .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+:where(#vyrjjxstyr) .gt_font_normal {
+  font-weight: normal;
+}
+
+:where(#vyrjjxstyr) .gt_font_bold {
+  font-weight: bold;
+}
+
+:where(#vyrjjxstyr) .gt_font_italic {
+  font-style: italic;
+}
+
+:where(#vyrjjxstyr) .gt_super {
+  font-size: 65%;
+}
+
+:where(#vyrjjxstyr) .gt_footnote_marks {
+  font-style: italic;
+  font-weight: normal;
+  font-size: 75%;
+  vertical-align: 0.4em;
+}
+
+:where(#vyrjjxstyr) .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+:where(#vyrjjxstyr) .gt_indent_1 {
+  text-indent: 5px;
+}
+
+:where(#vyrjjxstyr) .gt_indent_2 {
+  text-indent: 10px;
+}
+
+:where(#vyrjjxstyr) .gt_indent_3 {
+  text-indent: 15px;
+}
+
+:where(#vyrjjxstyr) .gt_indent_4 {
+  text-indent: 20px;
+}
+
+:where(#vyrjjxstyr) .gt_indent_5 {
+  text-indent: 25px;
+}
+</style>
+<table class="gt_table">
+  
+  <thead class="gt_col_headings">
+    <tr>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="Variable">Variable</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="accident">accident</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="arson">arson</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="burning_off">burning_off</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="lightning">lightning</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="Accuracy">Accuracy</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="Gini">Gini</th>
+    </tr>
+  </thead>
+  <tbody class="gt_table_body">
+    <tr><td headers="Variable" class="gt_row gt_left">FOR_CODE</td>
+<td headers="accident" class="gt_row gt_right">0.011</td>
+<td headers="arson" class="gt_row gt_right">0.003</td>
+<td headers="burning_off" class="gt_row gt_right">0.007</td>
+<td headers="lightning" class="gt_row gt_right">0.005</td>
+<td headers="Accuracy" class="gt_row gt_right">0.006</td>
+<td headers="Gini" class="gt_row gt_right">4.24</td></tr>
+    <tr><td headers="Variable" class="gt_row gt_left">COVER</td>
+<td headers="accident" class="gt_row gt_right">0.012</td>
+<td headers="arson" class="gt_row gt_right">0.006</td>
+<td headers="burning_off" class="gt_row gt_right">0.009</td>
+<td headers="lightning" class="gt_row gt_right">0.004</td>
+<td headers="Accuracy" class="gt_row gt_right">0.005</td>
+<td headers="Gini" class="gt_row gt_right">4.20</td></tr>
+    <tr><td headers="Variable" class="gt_row gt_left">HEIGHT</td>
+<td headers="accident" class="gt_row gt_right">0.006</td>
+<td headers="arson" class="gt_row gt_right">0.002</td>
+<td headers="burning_off" class="gt_row gt_right">0.001</td>
+<td headers="lightning" class="gt_row gt_right">0.003</td>
+<td headers="Accuracy" class="gt_row gt_right">0.003</td>
+<td headers="Gini" class="gt_row gt_right">3.47</td></tr>
+    <tr><td headers="Variable" class="gt_row gt_left">FOREST</td>
+<td headers="accident" class="gt_row gt_right">0.010</td>
+<td headers="arson" class="gt_row gt_right">0.002</td>
+<td headers="burning_off" class="gt_row gt_right">0.004</td>
+<td headers="lightning" class="gt_row gt_right">0.003</td>
+<td headers="Accuracy" class="gt_row gt_right">0.003</td>
+<td headers="Gini" class="gt_row gt_right">2.79</td></tr>
+    <tr><td headers="Variable" class="gt_row gt_left">rf</td>
+<td headers="accident" class="gt_row gt_right">0.001</td>
+<td headers="arson" class="gt_row gt_right">0.000</td>
+<td headers="burning_off" class="gt_row gt_right">0.001</td>
+<td headers="lightning" class="gt_row gt_right">0.000</td>
+<td headers="Accuracy" class="gt_row gt_right">0.000</td>
+<td headers="Gini" class="gt_row gt_right">0.74</td></tr>
+    <tr><td headers="Variable" class="gt_row gt_left">arf7</td>
+<td headers="accident" class="gt_row gt_right">0.001</td>
+<td headers="arson" class="gt_row gt_right">0.001</td>
+<td headers="burning_off" class="gt_row gt_right">0.002</td>
+<td headers="lightning" class="gt_row gt_right">0.002</td>
+<td headers="Accuracy" class="gt_row gt_right">0.002</td>
+<td headers="Gini" class="gt_row gt_right">2.10</td></tr>
+    <tr><td headers="Variable" class="gt_row gt_left">arf14</td>
+<td headers="accident" class="gt_row gt_right">0.005</td>
+<td headers="arson" class="gt_row gt_right">0.004</td>
+<td headers="burning_off" class="gt_row gt_right">0.003</td>
+<td headers="lightning" class="gt_row gt_right">0.005</td>
+<td headers="Accuracy" class="gt_row gt_right">0.005</td>
+<td headers="Gini" class="gt_row gt_right">4.25</td></tr>
+    <tr><td headers="Variable" class="gt_row gt_left">arf28</td>
+<td headers="accident" class="gt_row gt_right">−0.001</td>
+<td headers="arson" class="gt_row gt_right">0.003</td>
+<td headers="burning_off" class="gt_row gt_right">0.003</td>
+<td headers="lightning" class="gt_row gt_right">0.006</td>
+<td headers="Accuracy" class="gt_row gt_right">0.005</td>
+<td headers="Gini" class="gt_row gt_right">3.18</td></tr>
+    <tr><td headers="Variable" class="gt_row gt_left">arf60</td>
+<td headers="accident" class="gt_row gt_right">0.007</td>
+<td headers="arson" class="gt_row gt_right">−0.001</td>
+<td headers="burning_off" class="gt_row gt_right">0.005</td>
+<td headers="lightning" class="gt_row gt_right">0.005</td>
+<td headers="Accuracy" class="gt_row gt_right">0.005</td>
+<td headers="Gini" class="gt_row gt_right">4.42</td></tr>
+    <tr><td headers="Variable" class="gt_row gt_left">arf90</td>
+<td headers="accident" class="gt_row gt_right">0.002</td>
+<td headers="arson" class="gt_row gt_right">0.003</td>
+<td headers="burning_off" class="gt_row gt_right">0.005</td>
+<td headers="lightning" class="gt_row gt_right">0.008</td>
+<td headers="Accuracy" class="gt_row gt_right">0.007</td>
+<td headers="Gini" class="gt_row gt_right">4.72</td></tr>
+    <tr><td headers="Variable" class="gt_row gt_left">arf180</td>
+<td headers="accident" class="gt_row gt_right">0.008</td>
+<td headers="arson" class="gt_row gt_right">0.004</td>
+<td headers="burning_off" class="gt_row gt_right">0.013</td>
+<td headers="lightning" class="gt_row gt_right">0.008</td>
+<td headers="Accuracy" class="gt_row gt_right">0.008</td>
+<td headers="Gini" class="gt_row gt_right">5.03</td></tr>
+    <tr><td headers="Variable" class="gt_row gt_left">arf360</td>
+<td headers="accident" class="gt_row gt_right">0.019</td>
+<td headers="arson" class="gt_row gt_right">0.014</td>
+<td headers="burning_off" class="gt_row gt_right">0.065</td>
+<td headers="lightning" class="gt_row gt_right">0.030</td>
+<td headers="Accuracy" class="gt_row gt_right">0.028</td>
+<td headers="Gini" class="gt_row gt_right">11.07</td></tr>
+    <tr><td headers="Variable" class="gt_row gt_left">arf720</td>
+<td headers="accident" class="gt_row gt_right">0.019</td>
+<td headers="arson" class="gt_row gt_right">0.003</td>
+<td headers="burning_off" class="gt_row gt_right">0.008</td>
+<td headers="lightning" class="gt_row gt_right">0.022</td>
+<td headers="Accuracy" class="gt_row gt_right">0.021</td>
+<td headers="Gini" class="gt_row gt_right">8.55</td></tr>
+    <tr><td headers="Variable" class="gt_row gt_left">se</td>
+<td headers="accident" class="gt_row gt_right">0.001</td>
+<td headers="arson" class="gt_row gt_right">0.004</td>
+<td headers="burning_off" class="gt_row gt_right">0.022</td>
+<td headers="lightning" class="gt_row gt_right">0.002</td>
+<td headers="Accuracy" class="gt_row gt_right">0.002</td>
+<td headers="Gini" class="gt_row gt_right">3.33</td></tr>
+    <tr><td headers="Variable" class="gt_row gt_left">ase7</td>
+<td headers="accident" class="gt_row gt_right">0.003</td>
+<td headers="arson" class="gt_row gt_right">0.005</td>
+<td headers="burning_off" class="gt_row gt_right">0.007</td>
+<td headers="lightning" class="gt_row gt_right">0.002</td>
+<td headers="Accuracy" class="gt_row gt_right">0.002</td>
+<td headers="Gini" class="gt_row gt_right">3.20</td></tr>
+    <tr><td headers="Variable" class="gt_row gt_left">ase14</td>
+<td headers="accident" class="gt_row gt_right">0.015</td>
+<td headers="arson" class="gt_row gt_right">0.004</td>
+<td headers="burning_off" class="gt_row gt_right">0.007</td>
+<td headers="lightning" class="gt_row gt_right">0.008</td>
+<td headers="Accuracy" class="gt_row gt_right">0.008</td>
+<td headers="Gini" class="gt_row gt_right">5.95</td></tr>
+    <tr><td headers="Variable" class="gt_row gt_left">ase28</td>
+<td headers="accident" class="gt_row gt_right">0.014</td>
+<td headers="arson" class="gt_row gt_right">0.012</td>
+<td headers="burning_off" class="gt_row gt_right">0.008</td>
+<td headers="lightning" class="gt_row gt_right">0.007</td>
+<td headers="Accuracy" class="gt_row gt_right">0.008</td>
+<td headers="Gini" class="gt_row gt_right">5.46</td></tr>
+    <tr><td headers="Variable" class="gt_row gt_left">ase60</td>
+<td headers="accident" class="gt_row gt_right">0.009</td>
+<td headers="arson" class="gt_row gt_right">0.013</td>
+<td headers="burning_off" class="gt_row gt_right">0.010</td>
+<td headers="lightning" class="gt_row gt_right">0.007</td>
+<td headers="Accuracy" class="gt_row gt_right">0.007</td>
+<td headers="Gini" class="gt_row gt_right">4.88</td></tr>
+    <tr><td headers="Variable" class="gt_row gt_left">ase90</td>
+<td headers="accident" class="gt_row gt_right">0.012</td>
+<td headers="arson" class="gt_row gt_right">0.009</td>
+<td headers="burning_off" class="gt_row gt_right">0.070</td>
+<td headers="lightning" class="gt_row gt_right">0.010</td>
+<td headers="Accuracy" class="gt_row gt_right">0.011</td>
+<td headers="Gini" class="gt_row gt_right">6.79</td></tr>
+    <tr><td headers="Variable" class="gt_row gt_left">ase180</td>
+<td headers="accident" class="gt_row gt_right">0.002</td>
+<td headers="arson" class="gt_row gt_right">0.018</td>
+<td headers="burning_off" class="gt_row gt_right">0.065</td>
+<td headers="lightning" class="gt_row gt_right">0.007</td>
+<td headers="Accuracy" class="gt_row gt_right">0.007</td>
+<td headers="Gini" class="gt_row gt_right">6.77</td></tr>
+    <tr><td headers="Variable" class="gt_row gt_left">ase360</td>
+<td headers="accident" class="gt_row gt_right">0.039</td>
+<td headers="arson" class="gt_row gt_right">0.013</td>
+<td headers="burning_off" class="gt_row gt_right">−0.006</td>
+<td headers="lightning" class="gt_row gt_right">0.013</td>
+<td headers="Accuracy" class="gt_row gt_right">0.017</td>
+<td headers="Gini" class="gt_row gt_right">11.04</td></tr>
+    <tr><td headers="Variable" class="gt_row gt_left">ase720</td>
+<td headers="accident" class="gt_row gt_right">0.030</td>
+<td headers="arson" class="gt_row gt_right">0.006</td>
+<td headers="burning_off" class="gt_row gt_right">0.003</td>
+<td headers="lightning" class="gt_row gt_right">0.011</td>
+<td headers="Accuracy" class="gt_row gt_right">0.014</td>
+<td headers="Gini" class="gt_row gt_right">7.88</td></tr>
+    <tr><td headers="Variable" class="gt_row gt_left">maxt</td>
+<td headers="accident" class="gt_row gt_right">0.003</td>
+<td headers="arson" class="gt_row gt_right">0.001</td>
+<td headers="burning_off" class="gt_row gt_right">0.015</td>
+<td headers="lightning" class="gt_row gt_right">0.003</td>
+<td headers="Accuracy" class="gt_row gt_right">0.003</td>
+<td headers="Gini" class="gt_row gt_right">4.24</td></tr>
+    <tr><td headers="Variable" class="gt_row gt_left">amaxt7</td>
+<td headers="accident" class="gt_row gt_right">0.002</td>
+<td headers="arson" class="gt_row gt_right">0.005</td>
+<td headers="burning_off" class="gt_row gt_right">0.014</td>
+<td headers="lightning" class="gt_row gt_right">0.004</td>
+<td headers="Accuracy" class="gt_row gt_right">0.003</td>
+<td headers="Gini" class="gt_row gt_right">3.93</td></tr>
+    <tr><td headers="Variable" class="gt_row gt_left">amaxt14</td>
+<td headers="accident" class="gt_row gt_right">0.002</td>
+<td headers="arson" class="gt_row gt_right">0.006</td>
+<td headers="burning_off" class="gt_row gt_right">0.013</td>
+<td headers="lightning" class="gt_row gt_right">0.005</td>
+<td headers="Accuracy" class="gt_row gt_right">0.004</td>
+<td headers="Gini" class="gt_row gt_right">3.69</td></tr>
+    <tr><td headers="Variable" class="gt_row gt_left">amaxt28</td>
+<td headers="accident" class="gt_row gt_right">0.003</td>
+<td headers="arson" class="gt_row gt_right">0.005</td>
+<td headers="burning_off" class="gt_row gt_right">0.005</td>
+<td headers="lightning" class="gt_row gt_right">0.005</td>
+<td headers="Accuracy" class="gt_row gt_right">0.004</td>
+<td headers="Gini" class="gt_row gt_right">3.75</td></tr>
+    <tr><td headers="Variable" class="gt_row gt_left">amaxt60</td>
+<td headers="accident" class="gt_row gt_right">0.003</td>
+<td headers="arson" class="gt_row gt_right">0.006</td>
+<td headers="burning_off" class="gt_row gt_right">−0.002</td>
+<td headers="lightning" class="gt_row gt_right">0.005</td>
+<td headers="Accuracy" class="gt_row gt_right">0.005</td>
+<td headers="Gini" class="gt_row gt_right">3.41</td></tr>
+    <tr><td headers="Variable" class="gt_row gt_left">amaxt90</td>
+<td headers="accident" class="gt_row gt_right">0.005</td>
+<td headers="arson" class="gt_row gt_right">0.008</td>
+<td headers="burning_off" class="gt_row gt_right">0.006</td>
+<td headers="lightning" class="gt_row gt_right">0.007</td>
+<td headers="Accuracy" class="gt_row gt_right">0.007</td>
+<td headers="Gini" class="gt_row gt_right">4.35</td></tr>
+    <tr><td headers="Variable" class="gt_row gt_left">amaxt180</td>
+<td headers="accident" class="gt_row gt_right">0.003</td>
+<td headers="arson" class="gt_row gt_right">0.009</td>
+<td headers="burning_off" class="gt_row gt_right">0.013</td>
+<td headers="lightning" class="gt_row gt_right">0.008</td>
+<td headers="Accuracy" class="gt_row gt_right">0.007</td>
+<td headers="Gini" class="gt_row gt_right">5.34</td></tr>
+    <tr><td headers="Variable" class="gt_row gt_left">amaxt360</td>
+<td headers="accident" class="gt_row gt_right">0.019</td>
+<td headers="arson" class="gt_row gt_right">0.005</td>
+<td headers="burning_off" class="gt_row gt_right">0.007</td>
+<td headers="lightning" class="gt_row gt_right">0.013</td>
+<td headers="Accuracy" class="gt_row gt_right">0.013</td>
+<td headers="Gini" class="gt_row gt_right">7.93</td></tr>
+    <tr><td headers="Variable" class="gt_row gt_left">amaxt720</td>
+<td headers="accident" class="gt_row gt_right">0.015</td>
+<td headers="arson" class="gt_row gt_right">0.000</td>
+<td headers="burning_off" class="gt_row gt_right">0.007</td>
+<td headers="lightning" class="gt_row gt_right">0.010</td>
+<td headers="Accuracy" class="gt_row gt_right">0.010</td>
+<td headers="Gini" class="gt_row gt_right">7.27</td></tr>
+    <tr><td headers="Variable" class="gt_row gt_left">mint</td>
+<td headers="accident" class="gt_row gt_right">0.000</td>
+<td headers="arson" class="gt_row gt_right">0.001</td>
+<td headers="burning_off" class="gt_row gt_right">0.012</td>
+<td headers="lightning" class="gt_row gt_right">0.003</td>
+<td headers="Accuracy" class="gt_row gt_right">0.003</td>
+<td headers="Gini" class="gt_row gt_right">3.50</td></tr>
+    <tr><td headers="Variable" class="gt_row gt_left">amint7</td>
+<td headers="accident" class="gt_row gt_right">0.000</td>
+<td headers="arson" class="gt_row gt_right">0.001</td>
+<td headers="burning_off" class="gt_row gt_right">0.007</td>
+<td headers="lightning" class="gt_row gt_right">0.002</td>
+<td headers="Accuracy" class="gt_row gt_right">0.002</td>
+<td headers="Gini" class="gt_row gt_right">3.03</td></tr>
+    <tr><td headers="Variable" class="gt_row gt_left">amint14</td>
+<td headers="accident" class="gt_row gt_right">0.003</td>
+<td headers="arson" class="gt_row gt_right">0.005</td>
+<td headers="burning_off" class="gt_row gt_right">0.028</td>
+<td headers="lightning" class="gt_row gt_right">0.005</td>
+<td headers="Accuracy" class="gt_row gt_right">0.005</td>
+<td headers="Gini" class="gt_row gt_right">4.26</td></tr>
+    <tr><td headers="Variable" class="gt_row gt_left">amint28</td>
+<td headers="accident" class="gt_row gt_right">0.006</td>
+<td headers="arson" class="gt_row gt_right">0.002</td>
+<td headers="burning_off" class="gt_row gt_right">0.011</td>
+<td headers="lightning" class="gt_row gt_right">0.004</td>
+<td headers="Accuracy" class="gt_row gt_right">0.004</td>
+<td headers="Gini" class="gt_row gt_right">3.70</td></tr>
+    <tr><td headers="Variable" class="gt_row gt_left">amint60</td>
+<td headers="accident" class="gt_row gt_right">0.018</td>
+<td headers="arson" class="gt_row gt_right">0.002</td>
+<td headers="burning_off" class="gt_row gt_right">0.013</td>
+<td headers="lightning" class="gt_row gt_right">0.009</td>
+<td headers="Accuracy" class="gt_row gt_right">0.010</td>
+<td headers="Gini" class="gt_row gt_right">5.92</td></tr>
+    <tr><td headers="Variable" class="gt_row gt_left">amint90</td>
+<td headers="accident" class="gt_row gt_right">0.034</td>
+<td headers="arson" class="gt_row gt_right">0.002</td>
+<td headers="burning_off" class="gt_row gt_right">0.004</td>
+<td headers="lightning" class="gt_row gt_right">0.007</td>
+<td headers="Accuracy" class="gt_row gt_right">0.010</td>
+<td headers="Gini" class="gt_row gt_right">7.38</td></tr>
+    <tr><td headers="Variable" class="gt_row gt_left">amint180</td>
+<td headers="accident" class="gt_row gt_right">0.019</td>
+<td headers="arson" class="gt_row gt_right">0.004</td>
+<td headers="burning_off" class="gt_row gt_right">0.009</td>
+<td headers="lightning" class="gt_row gt_right">0.005</td>
+<td headers="Accuracy" class="gt_row gt_right">0.007</td>
+<td headers="Gini" class="gt_row gt_right">5.20</td></tr>
+    <tr><td headers="Variable" class="gt_row gt_left">amint360</td>
+<td headers="accident" class="gt_row gt_right">0.006</td>
+<td headers="arson" class="gt_row gt_right">0.003</td>
+<td headers="burning_off" class="gt_row gt_right">0.006</td>
+<td headers="lightning" class="gt_row gt_right">0.005</td>
+<td headers="Accuracy" class="gt_row gt_right">0.005</td>
+<td headers="Gini" class="gt_row gt_right">4.65</td></tr>
+    <tr><td headers="Variable" class="gt_row gt_left">dist_camp</td>
+<td headers="accident" class="gt_row gt_right">0.002</td>
+<td headers="arson" class="gt_row gt_right">0.002</td>
+<td headers="burning_off" class="gt_row gt_right">0.002</td>
+<td headers="lightning" class="gt_row gt_right">0.008</td>
+<td headers="Accuracy" class="gt_row gt_right">0.007</td>
+<td headers="Gini" class="gt_row gt_right">8.24</td></tr>
+    <tr><td headers="Variable" class="gt_row gt_left">ws</td>
+<td headers="accident" class="gt_row gt_right">−0.001</td>
+<td headers="arson" class="gt_row gt_right">0.003</td>
+<td headers="burning_off" class="gt_row gt_right">0.003</td>
+<td headers="lightning" class="gt_row gt_right">0.001</td>
+<td headers="Accuracy" class="gt_row gt_right">0.001</td>
+<td headers="Gini" class="gt_row gt_right">3.16</td></tr>
+    <tr><td headers="Variable" class="gt_row gt_left">aws_m0</td>
+<td headers="accident" class="gt_row gt_right">0.001</td>
+<td headers="arson" class="gt_row gt_right">0.002</td>
+<td headers="burning_off" class="gt_row gt_right">0.010</td>
+<td headers="lightning" class="gt_row gt_right">0.003</td>
+<td headers="Accuracy" class="gt_row gt_right">0.003</td>
+<td headers="Gini" class="gt_row gt_right">2.60</td></tr>
+    <tr><td headers="Variable" class="gt_row gt_left">aws_m1</td>
+<td headers="accident" class="gt_row gt_right">0.000</td>
+<td headers="arson" class="gt_row gt_right">0.004</td>
+<td headers="burning_off" class="gt_row gt_right">0.005</td>
+<td headers="lightning" class="gt_row gt_right">0.004</td>
+<td headers="Accuracy" class="gt_row gt_right">0.004</td>
+<td headers="Gini" class="gt_row gt_right">2.59</td></tr>
+    <tr><td headers="Variable" class="gt_row gt_left">aws_m3</td>
+<td headers="accident" class="gt_row gt_right">0.002</td>
+<td headers="arson" class="gt_row gt_right">0.005</td>
+<td headers="burning_off" class="gt_row gt_right">0.009</td>
+<td headers="lightning" class="gt_row gt_right">0.004</td>
+<td headers="Accuracy" class="gt_row gt_right">0.004</td>
+<td headers="Gini" class="gt_row gt_right">3.00</td></tr>
+    <tr><td headers="Variable" class="gt_row gt_left">aws_m6</td>
+<td headers="accident" class="gt_row gt_right">0.002</td>
+<td headers="arson" class="gt_row gt_right">0.006</td>
+<td headers="burning_off" class="gt_row gt_right">0.012</td>
+<td headers="lightning" class="gt_row gt_right">0.002</td>
+<td headers="Accuracy" class="gt_row gt_right">0.002</td>
+<td headers="Gini" class="gt_row gt_right">2.51</td></tr>
+    <tr><td headers="Variable" class="gt_row gt_left">aws_m12</td>
+<td headers="accident" class="gt_row gt_right">0.005</td>
+<td headers="arson" class="gt_row gt_right">0.011</td>
+<td headers="burning_off" class="gt_row gt_right">0.023</td>
+<td headers="lightning" class="gt_row gt_right">0.006</td>
+<td headers="Accuracy" class="gt_row gt_right">0.006</td>
+<td headers="Gini" class="gt_row gt_right">4.63</td></tr>
+    <tr><td headers="Variable" class="gt_row gt_left">aws_m24</td>
+<td headers="accident" class="gt_row gt_right">0.001</td>
+<td headers="arson" class="gt_row gt_right">0.010</td>
+<td headers="burning_off" class="gt_row gt_right">0.043</td>
+<td headers="lightning" class="gt_row gt_right">0.006</td>
+<td headers="Accuracy" class="gt_row gt_right">0.006</td>
+<td headers="Gini" class="gt_row gt_right">5.44</td></tr>
+    <tr><td headers="Variable" class="gt_row gt_left">log_dist_cfa</td>
+<td headers="accident" class="gt_row gt_right">0.051</td>
+<td headers="arson" class="gt_row gt_right">0.092</td>
+<td headers="burning_off" class="gt_row gt_right">0.025</td>
+<td headers="lightning" class="gt_row gt_right">0.011</td>
+<td headers="Accuracy" class="gt_row gt_right">0.019</td>
+<td headers="Gini" class="gt_row gt_right">23.95</td></tr>
+    <tr><td headers="Variable" class="gt_row gt_left">log_dist_camp</td>
+<td headers="accident" class="gt_row gt_right">0.001</td>
+<td headers="arson" class="gt_row gt_right">0.006</td>
+<td headers="burning_off" class="gt_row gt_right">0.005</td>
+<td headers="lightning" class="gt_row gt_right">0.007</td>
+<td headers="Accuracy" class="gt_row gt_right">0.006</td>
+<td headers="Gini" class="gt_row gt_right">7.83</td></tr>
+    <tr><td headers="Variable" class="gt_row gt_left">log_dist_road</td>
+<td headers="accident" class="gt_row gt_right">0.110</td>
+<td headers="arson" class="gt_row gt_right">0.122</td>
+<td headers="burning_off" class="gt_row gt_right">0.000</td>
+<td headers="lightning" class="gt_row gt_right">0.030</td>
+<td headers="Accuracy" class="gt_row gt_right">0.044</td>
+<td headers="Gini" class="gt_row gt_right">51.65</td></tr>
+  </tbody>
+  
+  
+</table>
+</div>
+</div>
+</div>
 </section>
 </section>
 <section id="examining-misclassifications" class="level2" data-number="13.3">
