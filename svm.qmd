@@ -1,11 +1,185 @@
-# Support vector machine
-\index{classification methods!support vector machine (SVM)}
+# Support vector machines
+\index{classification methods!support vector machines (SVM)}
 
-% http://www.support-vector-machines.org/SVM_osh.html
-% wikipedia
+A support vector machine (SVM) [@Va99] looks for gaps between clusters in the data, based on the extreme observations in each class. In this sense it mirrors the graphical approach described @sec-clust-graphics, in which we searched for gaps between groups. It can be viewed as similar to LDA, in that the boundary between classes is a hyper-plane.  The difference between LDA and SVM is the placement of the boundary. LDA uses the means and covariance matrices of the classes to place the boundary, but SVM uses extreme observations.
 
-A support vector machine (SVM) [@Va99] is a binary classification
-method.  An SVM looks for gaps between clusters in the data, based on the extreme observations in each class. In this sense it mirrors the graphical approach described at the start of this chapter, in which we searched for gaps between groups. We describe this method more fully than we did the other algorithms for two reasons: first, because of its apparent similarity to the graphical approach, and second, because it is difficult to find a simple explanation of the method in the literature.
+::: info
+The key elements of the SVM model to examine are:
+
+- support vectors
+- separating hyper-plane.
+
+:::
+
+## Example: simple 2D
+
+To illustrate the approach, we use two simple simulated data examples. Both have only two variables, and two classes. Explaining SVM is easier when there are just two groups. In the first data set the two classes have different covariances matrices, which will cause trouble for LDA, but SVM should see the gap between the two clusters and place the separating hyper-plane in the middle of the gap. In the second data set the two groups are concentric circles, with the inner one solid. A non-linear SVM should be fitted to this data, which should see circular gap between the two classes. 
+
+Note that the `svm` function in the `e1071` package will automatically scale observations into the range $[0,1]$. To make it easier to examine the fitted model, it is best to scale your data first, and then fit the model.
+
+```{r}
+# Toy examples
+library(mulgar)
+library(ggplot2)
+set.seed(1071)
+n1 <- 162
+vc1 <- matrix(c(1, -0.7, -0.7, 1), ncol=2, byrow=TRUE)
+c1 <- rmvn(n=n1, p=2, mn=c(-2, -2), vc=vc1)
+vc2 <- matrix(c(1, -0.4, -0.4, 1)*2, ncol=2, byrow=TRUE)
+n2 <- 138
+c2 <- rmvn(n=n2, p=2, mn=c(2, 2), vc=vc2)
+df1 <- data.frame(x1=mulgar:::rescale01(c(c1[,1], c2[,1])), 
+                 x2=mulgar:::rescale01(c(c1[,2], c2[,2])), 
+                 cl = factor(c(rep("A", n1), 
+                               rep("B", n2))))
+library(geozoo)
+c1 <- sphere.hollow(p=2, n=n1)$points*3 + 
+  c(rnorm(n1, sd=0.3), rnorm(n1, sd=0.3))
+c2 <- sphere.solid.random(p=2, n=n2)$points
+df2 <- data.frame(x1=mulgar:::rescale01(c(c1[,1], c2[,1])), 
+                  x2=mulgar:::rescale01(c(c1[,2], c2[,2])), 
+                  cl = factor(c(rep("A", n1), 
+                               rep("B", n2))))
+```
+
+```{r}
+#| label: fig-svm-toy
+#| fig-cap: "SVM classifier fit overlaid on two simulated data examples: (a) groups with different variance-covariance, fitted using a linear kernel, (b) groups with non-linear separation, fitted using a radial kernel. The band of points shown as '+' mark the SVM boundary, and points marked by 'x' are the support vectors used to define the boundary. "
+#| code-fold: false
+#| fig-width: 8
+#| fig-height: 4
+library(classifly)
+library(e1071)
+df1_svm <- svm(cl~., data=df1, 
+                     probability=TRUE, 
+                     kernel="linear")
+#df1_svm <- ksvm(cl~., data=df1, 
+#                     probability=TRUE,
+#                     kernel="vanilladot")
+df1_svm_e <- explore(df1_svm, df1)
+
+s1 <- ggplot() + 
+  geom_point(data=df1, aes(x=x1, y=x2, colour=cl),
+             shape=20) +
+  scale_colour_viridis_d("", begin=0.3, end=0.8) +
+  geom_point(data=df1_svm_e[(!df1_svm_e$.BOUNDARY)&(df1_svm_e$.TYPE=="simulated"),], 
+             aes(x=x1, y=x2, colour=cl), shape=3) +
+  geom_point(data=df1[df1_svm$index,], 
+             aes(x=x1, y=x2, colour=cl), 
+             shape=4, size=4) +
+  theme_minimal() +
+  theme(aspect.ratio=1, legend.position = "none") +
+  ggtitle("(a)")
+
+df2_svm <- svm(cl~., data=df2,  
+                     probability=TRUE, 
+                     kernel="radial")
+df2_svm_e <- explore(df2_svm, df2)
+s2 <- ggplot() + 
+  geom_point(data=df2, aes(x=x1, y=x2, colour=cl), shape=20) +
+  scale_colour_viridis_d("", begin=0.3, end=0.8) +
+  geom_point(data=df2_svm_e[(!df2_svm_e$.BOUNDARY)&(df2_svm_e$.TYPE=="simulated"),], 
+             aes(x=x1, y=x2, colour=cl), 
+             shape=3) +
+  geom_point(data=df2[df2_svm$index,], 
+             aes(x=x1, y=x2, colour=cl), 
+             shape=4, size=4) +
+  theme_minimal() +
+  theme(aspect.ratio=1, legend.position = "none") +
+  ggtitle("(b)")
+
+library(patchwork)
+s1+s2
+```
+
+@fig-svm-toy shows the two data sets and the important aspects of the fitted SVM model for each. The observations are represented by dots, the separating hyper-plane (just a line for 2D) is represented by '+'. Where the two colours merge is the actual location of the boundary between classes. It can be seen that this is located right down the middle of the gap, for both data sets. Even though the boundary is circular for the second data set, in a transformed high-dimensional space it would be linear.
+
+SVMs use a subset of the observations to define the boundary, and these are called the support vectors. For each of the data sets these are marked with 'x'. For the linear boundary, there are nine support vectors, five in one group and four in the other. There is one interesting observation in the green group, which falls far from its group and on the other side of the boundary with the blue points. It is marked as a support vector, but its contribution to the fitted hyper-plane is limited by a control parameter in the model fitting process. <!--The equation of the fitted plane can be explicitly written when the boundary is linear. -->
+
+Observations `r df1_svm$index` are the support vectors. All but 15, 45 and 180 are actually bounded support vectors, which means their coefficients are bounded to magnitude 1. <!--The coefficients for the separating hyperplane can be computed with:
+
+```{r}
+#| code-fold: false
+df1[df1_svm$index,]
+df1_svm$coefs
+df1_svm$rho
+```
+
+
+```{r}
+#| code-fold: false
+coefs <- apply(((df1[df1_svm$index,-3]-df1_svm$x.scale$`scaled:center`)/df1_svm$x.scale$`scaled:scale`)*df1_svm$coefs, 2, sum)
+ggplot() + 
+  geom_point(data=df1, aes(x=x1, y=x2, colour=cl),
+             shape=20) +
+  scale_colour_viridis_d("", begin=0.3, end=0.8) +
+  geom_point(data=df1_svm_e[(!df1_svm_e$.BOUNDARY)&(df1_svm_e$.TYPE=="simulated"),], 
+             aes(x=x1, y=x2, colour=cl), shape=3) +
+  geom_abline(slope=-coefs[1]/coefs[2],
+              intercept=df1_svm$rho+0.5) +
+  theme_minimal() +
+  theme(aspect.ratio=1, legend.position = "none") 
+```
+-->
+
+## Example: penguins
+
+For higher dimensions, the procedures are similar, with the hyper-plane and support vectors being examined using a tour.
+
+```{r}
+#| code-fold: false
+library(dplyr)
+load("data/penguins_sub.rda")
+chinstrap <- penguins_sub %>%
+  filter(species == "Chinstrap") %>%
+  select(-species)
+chinstrap_svm <- svm(sex~., data=chinstrap, 
+                     kernel="linear",
+                     probability=TRUE)
+chinstrap_svm_e <- explore(chinstrap_svm, chinstrap)
+```
+
+```{r}
+#| eval: false
+# Tour raw data
+animate_xy(chinstrap[,1:4], col=chinstrap$sex)
+# Add all SVs, including bounded
+c_pch <- rep(20, nrow(chinstrap))
+c_pch[chinstrap_svm$index] <- 4
+# Only show the SVs with |coefs| < 1
+animate_xy(chinstrap[,1:4], col=chinstrap$sex, pch=c_pch)
+c_pch <- rep(20, nrow(chinstrap))
+c_pch[chinstrap_svm$index[abs(chinstrap_svm$coefs)<1]] <- 4
+animate_xy(chinstrap[,1:4], col=chinstrap$sex, pch=c_pch)
+render_gif(chinstrap[,1:4],
+           grand_tour(),
+           display_xy(col=chinstrap$sex, pch=c_pch),
+           gif_file="gifs/chinstrap_svs.gif",
+           frames=500)
+
+# Tour the separating hyper-plane also
+symbols <- c(3, 20)
+c_pch <- symbols[as.numeric(chinstrap_svm_e$.TYPE[!chinstrap_svm_e$.BOUNDARY])]
+animate_xy(chinstrap_svm_e[!chinstrap_svm_e$.BOUNDARY,1:4], 
+           col=chinstrap_svm_e$sex[!chinstrap_svm_e$.BOUNDARY],
+           pch=c_pch)
+render_gif(chinstrap_svm_e[!chinstrap_svm_e$.BOUNDARY,1:4],
+           grand_tour(),
+           display_xy(col=chinstrap_svm_e$sex[!chinstrap_svm_e$.BOUNDARY], pch=c_pch),
+           gif_file="gifs/chinstrap_svm.gif",
+           frames=500)
+```
+
+::: {#fig-p-svm layout-ncol=2}
+
+![Exploring which points are support vectors.](gifs/chinstrap_svs.gif){#fig-chinstrap_svs fig-alt="FIX ME" width=300}
+
+![Exploring SVM boundary.](gifs/chinstrap_svm.gif){#fig-chinstrap_svm fig-alt="FIX ME" width=300}
+
+SVM model for distinguishing the sexes of the Chinstrap penguins. The separating hyper-plane is 3D, and separates primarily on variables `bl` and `bd`, as seen because these two axes extend out from the plane when it is seen on its side, separating the two groups.
+:::
+
+<!-- We describe this method more fully than we did the other algorithms for two reasons: first, because of its apparent similarity to the graphical approach, and second, because it is difficult to find a simple explanation of the method in the literature.
 
 The algorithm takes an $n \times p$ data matrix, where each column is scaled to $[-1,1]$ and each row is labeled as one of two classes ($y_i=+1$ or $-1$), and finds a hyperplane that separates the two groups, if they are separable. Each row of the data matrix is a vector in $p$-dimensional space, denoted as
 
@@ -276,3 +450,6 @@ boundary appears in gray.  The LDA boundary (shown at left) slices too close to 
 
 The bottom row of plots examines the more difficult classification of the areas of the South, focusing on separating the South Apulian oils (in pink), which is the largest sample, from the oils of the other areas (all in orange). Perfect separation between the classes does not occur. Both plots are tour projections showing SVM boundaries, the left plot generated by a linear kernel and the right one by a radial
 kernel.  Recall that the radial kernel was selected automatically by the SVM software we used, whereas we actually chose to use a linear kernel.  These pictures illustrate that the linear basis yields a more reasonable boundary between the two groups. The shape of the clusters of the two groups is approximately the same, and there is only a small overlap of the two. The linear boundary fits this structure neatly. The radial kernel wraps around the South Apulian oils.
+-->
+
+<!-- include Distance-weighted discrimination, eg kerndwd -->
