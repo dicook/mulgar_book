@@ -575,32 +575,33 @@ Attaching package: 'dplyr'</code></pre>
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Tour raw data</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">animate_xy</span>(chinstrap[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], <span class="at">col=</span>chinstrap<span class="sc">$</span>sex)</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Add all SVs, including bounded</span></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>c_pch <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">20</span>, <span class="fu">nrow</span>(chinstrap))</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>c_pch[chinstrap_svm<span class="sc">$</span>index] <span class="ot">&lt;-</span> <span class="dv">4</span></span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Only show the SVs with |coefs| &lt; 1</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tourr)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">animate_xy</span>(chinstrap[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], <span class="at">col=</span>chinstrap<span class="sc">$</span>sex)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Add all SVs, including bounded</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>c_pch <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">20</span>, <span class="fu">nrow</span>(chinstrap))</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>c_pch[chinstrap_svm<span class="sc">$</span>index] <span class="ot">&lt;-</span> <span class="dv">4</span></span>
 <span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="fu">animate_xy</span>(chinstrap[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], <span class="at">col=</span>chinstrap<span class="sc">$</span>sex, <span class="at">pch=</span>c_pch)</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>c_pch <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">20</span>, <span class="fu">nrow</span>(chinstrap))</span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>c_pch[chinstrap_svm<span class="sc">$</span>index[<span class="fu">abs</span>(chinstrap_svm<span class="sc">$</span>coefs)<span class="sc">&lt;</span><span class="dv">1</span>]] <span class="ot">&lt;-</span> <span class="dv">4</span></span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="fu">animate_xy</span>(chinstrap[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], <span class="at">col=</span>chinstrap<span class="sc">$</span>sex, <span class="at">pch=</span>c_pch)</span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="fu">render_gif</span>(chinstrap[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>],</span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>           <span class="fu">grand_tour</span>(),</span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>           <span class="fu">display_xy</span>(<span class="at">col=</span>chinstrap<span class="sc">$</span>sex, <span class="at">pch=</span>c_pch),</span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>           <span class="at">gif_file=</span><span class="st">"gifs/chinstrap_svs.gif"</span>,</span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>           <span class="at">frames=</span><span class="dv">500</span>)</span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Tour the separating hyper-plane also</span></span>
-<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>symbols <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">20</span>)</span>
-<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>c_pch <span class="ot">&lt;-</span> symbols[<span class="fu">as.numeric</span>(chinstrap_svm_e<span class="sc">$</span>.TYPE[<span class="sc">!</span>chinstrap_svm_e<span class="sc">$</span>.BOUNDARY])]</span>
-<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a><span class="fu">animate_xy</span>(chinstrap_svm_e[<span class="sc">!</span>chinstrap_svm_e<span class="sc">$</span>.BOUNDARY,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], </span>
-<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>           <span class="at">col=</span>chinstrap_svm_e<span class="sc">$</span>sex[<span class="sc">!</span>chinstrap_svm_e<span class="sc">$</span>.BOUNDARY],</span>
-<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>           <span class="at">pch=</span>c_pch)</span>
-<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a><span class="fu">render_gif</span>(chinstrap_svm_e[<span class="sc">!</span>chinstrap_svm_e<span class="sc">$</span>.BOUNDARY,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>],</span>
-<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>           <span class="fu">grand_tour</span>(),</span>
-<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>           <span class="fu">display_xy</span>(<span class="at">col=</span>chinstrap_svm_e<span class="sc">$</span>sex[<span class="sc">!</span>chinstrap_svm_e<span class="sc">$</span>.BOUNDARY], <span class="at">pch=</span>c_pch),</span>
-<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>           <span class="at">gif_file=</span><span class="st">"gifs/chinstrap_svm.gif"</span>,</span>
-<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>           <span class="at">frames=</span><span class="dv">500</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Only show the SVs with |coefs| &lt; 1</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>c_pch <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">20</span>, <span class="fu">nrow</span>(chinstrap))</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>c_pch[chinstrap_svm<span class="sc">$</span>index[<span class="fu">abs</span>(chinstrap_svm<span class="sc">$</span>coefs)<span class="sc">&lt;</span><span class="dv">1</span>]] <span class="ot">&lt;-</span> <span class="dv">4</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="fu">animate_xy</span>(chinstrap[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], <span class="at">col=</span>chinstrap<span class="sc">$</span>sex, <span class="at">pch=</span>c_pch)</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="fu">render_gif</span>(chinstrap[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>],</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>           <span class="fu">grand_tour</span>(),</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>           <span class="fu">display_xy</span>(<span class="at">col=</span>chinstrap<span class="sc">$</span>sex, <span class="at">pch=</span>c_pch),</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>           <span class="at">gif_file=</span><span class="st">"gifs/chinstrap_svs.gif"</span>,</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>           <span class="at">frames=</span><span class="dv">500</span>)</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Tour the separating hyper-plane also</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>symbols <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">20</span>)</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>c_pch <span class="ot">&lt;-</span> symbols[<span class="fu">as.numeric</span>(chinstrap_svm_e<span class="sc">$</span>.TYPE[<span class="sc">!</span>chinstrap_svm_e<span class="sc">$</span>.BOUNDARY])]</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="fu">animate_xy</span>(chinstrap_svm_e[<span class="sc">!</span>chinstrap_svm_e<span class="sc">$</span>.BOUNDARY,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], </span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>           <span class="at">col=</span>chinstrap_svm_e<span class="sc">$</span>sex[<span class="sc">!</span>chinstrap_svm_e<span class="sc">$</span>.BOUNDARY],</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>           <span class="at">pch=</span>c_pch)</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a><span class="fu">render_gif</span>(chinstrap_svm_e[<span class="sc">!</span>chinstrap_svm_e<span class="sc">$</span>.BOUNDARY,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>],</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>           <span class="fu">grand_tour</span>(),</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>           <span class="fu">display_xy</span>(<span class="at">col=</span>chinstrap_svm_e<span class="sc">$</span>sex[<span class="sc">!</span>chinstrap_svm_e<span class="sc">$</span>.BOUNDARY], <span class="at">pch=</span>c_pch),</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>           <span class="at">gif_file=</span><span class="st">"gifs/chinstrap_svm.gif"</span>,</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>           <span class="at">frames=</span><span class="dv">500</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div id="fig-p-svm" class="quarto-layout-panel">
@@ -626,6 +627,7 @@ Attaching package: 'dplyr'</code></pre>
 <p></p><figcaption class="figure-caption">Figure&nbsp;14.2: SVM model for distinguishing the sexes of the Chinstrap penguins. The separating hyper-plane is 3D, and separates primarily on variables <code>bl</code> and <code>bd</code>, as seen because these two axes extend out from the plane when it is seen on its side, separating the two groups.</figcaption><p></p>
 </figure>
 </div>
+<p>This is a good place to show manual tour also, to find the separation.</p>
 
 <!-- We describe this method more fully than we did the other algorithms for two reasons: first, because of its apparent similarity to the graphical approach, and second, because it is difficult to find a simple explanation of the method in the literature.
 
