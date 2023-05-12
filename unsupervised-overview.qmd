@@ -4,41 +4,56 @@ Unsupervised classification, or cluster analysis, organizes observations into si
 
 Organizing objects into groups is a task that comes naturally to humans, even to small children. Perhaps this is why it is an appealing method of data analysis. However, cluster analysis is more complex than it initially appears. Many people imagine that it will produce neatly separated clusters like those in the top left plot of @fig-ideal-clusters, but it almost never does. Such ideal clusters are rarely encountered in real data, so we often need to modify our objective from *find the natural clusters in this data*. Instead, we need to organize the *cases into groups that are similar in some way*. Even though this may seem disappointing when compared with the ideal, it is still often an effective means of simplifying and understanding a dataset.
 
+::: info
+Knowing what shapes are in your data helps with clustering it.
+:::
+
 ```{r}
 #| label: fig-ideal-clusters
 #| echo: FALSE
 #| fig-width: 5
 #| fig-height: 5
 #| out-width: "100%"
-#| fig-cap: "Different structures in data and their impact on cluster analysis.  When there are well-separated groups (top left), it is simple to group similar observations. Even when there are not (top right), partitioning observations into groups may still be useful. There may be nuisance variables that do not contribute to the clustering (bottom left), and there may oddly shaped clusters (bottom right)."
-d.separated.clusters <- matrix(rnorm(99*2), ncol=2)
-d.separated.clusters[1:33,1] <-
-  d.separated.clusters[1:33,1]+8
-d.separated.clusters[34:66,2] <-
-  d.separated.clusters[34:66,2]+8
-d.separated.clusters[34:66,1] <-
-  d.separated.clusters[34:66,1]+4
-d.unseparated.clusters <- matrix(rnorm(99*2), ncol=2)
-vc <- matrix(c(1,0.6,0.6,1),ncol=2,byrow=T)
-d.unseparated.clusters <- d.unseparated.clusters%*%vc
-d.nuisance <- matrix(rnorm(99*2), ncol=2)
-d.nuisance[1:49,1] <- d.nuisance[1:49,1]+8
-d.odd.shapes <- matrix(rnorm(99*2),ncol=2)
-d.odd.shapes[1:66,2] <- (d.odd.shapes[1:66,1])^2-5 + rnorm(66)*0.6
-d.odd.shapes[1:66,1] <- d.odd.shapes[1:66,1]*3
+#| fig-cap: "Different structures in data impact cluster analysis.  When there are well-separated groups (a), it is simple to group similar observations. Even when there are not, partitioning observations into groups may still be useful. There may be nuisance observations or (b) nuisance variables (c) that affect the interpoint distance calculations and distract the clustering algorithm, and there may oddly shaped clusters (d) which are hard to numerically describe."
+#| message: false
+stdd <- function(x) (x-mean(x))/sd(x)
+set.seed(20230513)
+d_sep_cl <- matrix(rnorm(99*2), ncol=2)
+d_sep_cl[1:33,1] <-
+  d_sep_cl[1:33,1]+8
+d_sep_cl[34:66,2] <-
+  d_sep_cl[34:66,2]+8
+d_sep_cl[34:66,1] <-
+  d_sep_cl[34:66,1]+4
+d_sep_cl <- data.frame(x1=stdd(d_sep_cl[,1]), 
+                       x2=stdd(d_sep_cl[,2]))
 
-d.separated.clusters <-
-  data.frame(d.separated.clusters)
-d.unseparated.clusters <-
-  data.frame(d.unseparated.clusters)
-d.nuisance <-
-  data.frame(d.nuisance)
-d.odd.shapes <-
-  data.frame(d.odd.shapes)
+x <- (runif(20)-0.5)*4
+y <- x
+d_nuis_pts <- data.frame(x1 = stdd(c(rnorm(50, -3), 
+                            rnorm(50, 3), x)),
+                 x2 = stdd(c(rnorm(50, -3), 
+                            rnorm(50, 3), y)))
+
+d_nuis_vars <- matrix(rnorm(99*2), ncol=2)
+d_nuis_vars[1:49,1] <- d_nuis_vars[1:49,1]+8
+d_nuis_vars <-
+  data.frame(x1=stdd(d_nuis_vars[,1]),
+             x2=stdd(d_nuis_vars[,2]))
+
+d_odd_shapes <- matrix(rnorm(99*2),ncol=2)
+d_odd_shapes[1:66,2] <- (d_odd_shapes[1:66,1])^2-5 + rnorm(66)*0.6
+d_odd_shapes[1:66,1] <- d_odd_shapes[1:66,1]*3
+d_odd_shapes <-
+  data.frame(x1=stdd(d_odd_shapes[,1]),
+             x2=stdd(d_odd_shapes[,2]))
+
 library(ggplot2)
 library(patchwork)
-p1 <- ggplot(d.separated.clusters, aes(x=X1, y=X2)) + 
-  geom_point() + 
+p1 <- ggplot(d_sep_cl, aes(x=x1, y=x2)) + 
+  geom_point(colour="#3B99B1", alpha=0.7) + 
+  annotate("text", -2.5, 2.5, label="a") +
+  xlim(-2.8, 2.8) + ylim(-2.8, 2.8) +
   theme(aspect.ratio=1,
         axis.text = element_blank(),
         axis.title = element_blank(),
@@ -46,8 +61,10 @@ p1 <- ggplot(d.separated.clusters, aes(x=X1, y=X2)) +
         panel.background = element_rect("white"),
         panel.border = element_rect("black", fill=NA, 
              linewidth = 0.5))
-p2 <- ggplot(d.unseparated.clusters, aes(x=X1, y=X2)) + 
-  geom_point() + 
+p2 <- ggplot(d_nuis_pts, aes(x=x1, y=x2)) + 
+  geom_point(colour="#3B99B1", alpha=0.7) + 
+  annotate("text", -2.5, 2.5, label="b") +
+  xlim(-2.8, 2.8) + ylim(-2.8, 2.8) +
   theme(aspect.ratio=1,
         axis.text = element_blank(),
         axis.title = element_blank(),
@@ -55,8 +72,10 @@ p2 <- ggplot(d.unseparated.clusters, aes(x=X1, y=X2)) +
         panel.background = element_rect("white"),
         panel.border = element_rect("black", fill=NA, 
              linewidth = 0.5))
-p3 <- ggplot(d.nuisance, aes(x=X1, y=X2)) + 
-  geom_point() + 
+p3 <- ggplot(d_nuis_vars, aes(x=x1, y=x2)) + 
+  geom_point(colour="#3B99B1", alpha=0.7) + 
+  annotate("text", -2.5, 2.5, label="c") +
+  xlim(-2.8, 2.8) + ylim(-2.8, 2.8) +
   theme(aspect.ratio=1,
         axis.text = element_blank(),
         axis.title = element_blank(),
@@ -64,8 +83,10 @@ p3 <- ggplot(d.nuisance, aes(x=X1, y=X2)) +
         panel.background = element_rect("white"),
         panel.border = element_rect("black", fill=NA, 
              linewidth = 0.5))
-p4 <- ggplot(d.odd.shapes, aes(x=X1, y=X2)) + 
-  geom_point() + 
+p4 <- ggplot(d_odd_shapes, aes(x=x1, y=x2)) + 
+  geom_point(colour="#3B99B1", alpha=0.7) + 
+  annotate("text", -2.5, 2.5, label="d") +
+  xlim(-2.8, 2.8) + ylim(-2.8, 2.8) +
   theme(aspect.ratio=1,
         axis.text = element_blank(),
         axis.title = element_blank(),
@@ -153,6 +174,7 @@ a_1 \\ a_2 \\ a_3 \\
 
 ```{r}
 #| message: FALSE
+#| warning: false
 #| fig-width: 4
 #| fig-height: 4
 x <- tibble::tibble(V1 = c(7.3, 7.4, 4.1),
@@ -168,8 +190,8 @@ pscat <- ggpairs(x, columns=1:4,
                  diag=list(continuous="blankDiag"),
                  axisLabels="internal",
                  ggplot2::aes(colour=point)) +
-    scale_colour_discrete_qualitative(
-      palette = "Dark 3") +
+    scale_colour_discrete_divergingx(
+      palette = "Zissou 1", nmax=4) +
     theme(aspect.ratio=1)
 pscat
 ```
@@ -179,8 +201,8 @@ pscat
 ppar <- ggparcoord(x, columns=1:4, 
                    groupColumn = 5, 
                    scale = "globalminmax") +
-          scale_colour_discrete_qualitative(
-            palette = "Dark 3") +
+    scale_colour_discrete_divergingx(
+      palette = "Zissou 1", nmax=4) +
   xlab("") + ylab("") + 
   theme(axis.ticks.y = element_blank(),
         axis.text.y = element_blank(),
@@ -236,5 +258,9 @@ a_1 \\ a_2 \\ a_3 \\
 Note that these interpoint distances differ dramatically from those for Euclidean distance. As a consequence, the way the cases would be clustered is also be very different. Choosing the appropriate distance measure is an important part of a cluster analysis.
 
 After a distance metric has been chosen and a cluster analysis has been performed, the analyst must evaluate the results, and this is actually a difficult task. A cluster analysis does not generate $p$-values or other numerical criteria, and the process tends to produce hypotheses rather than testing them. Even the most determined attempts to produce the "best" results using modeling and validation techniques may result in clusters that, although seemingly significant, are useless for practical purposes. As a result, cluster analysis is best thought of as an exploratory technique, and it can be quite useful despite the lack of formal validation because of its power in data simplification.
+
+::: info
+Defining an appropriate distance metric to measure similarity between points is a vitally important decision.
+:::
 
 The context in which the data arises is the key to assessing the results. If the clusters can be characterized in a sensible manner, and they increase our knowledge of the data, then we are on the right track. To use an even more pragmatic criterion, if a company can gain an economic advantage by using a particular clustering method to carve up their customer database, then that is the method they should use.
