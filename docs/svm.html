@@ -547,61 +547,47 @@ ggplot() +
 <h2 data-number="13.2" class="anchored" data-anchor-id="example-penguins"><span class="header-section-number">13.2</span> Example: penguins</h2>
 <p>For higher dimensions, the procedures are similar, with the hyper-plane and support vectors being examined using a tour.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>
-Attaching package: 'dplyr'</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>The following objects are masked from 'package:stats':
-
-    filter, lag</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>The following objects are masked from 'package:base':
-
-    intersect, setdiff, setequal, union</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"data/penguins_sub.rda"</span>)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>chinstrap <span class="ot">&lt;-</span> penguins_sub <span class="sc">%&gt;%</span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(species <span class="sc">==</span> <span class="st">"Chinstrap"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>species)</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>chinstrap_svm <span class="ot">&lt;-</span> <span class="fu">svm</span>(sex<span class="sc">~</span>., <span class="at">data=</span>chinstrap, </span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>                     <span class="at">kernel=</span><span class="st">"linear"</span>,</span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>                     <span class="at">probability=</span><span class="cn">TRUE</span>)</span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>chinstrap_svm_e <span class="ot">&lt;-</span> <span class="fu">explore</span>(chinstrap_svm, chinstrap)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"data/penguins_sub.rda"</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>chinstrap <span class="ot">&lt;-</span> penguins_sub <span class="sc">%&gt;%</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(species <span class="sc">==</span> <span class="st">"Chinstrap"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>species)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>chinstrap_svm <span class="ot">&lt;-</span> <span class="fu">svm</span>(sex<span class="sc">~</span>., <span class="at">data=</span>chinstrap, </span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>                     <span class="at">kernel=</span><span class="st">"linear"</span>,</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>                     <span class="at">probability=</span><span class="cn">TRUE</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>chinstrap_svm_e <span class="ot">&lt;-</span> <span class="fu">explore</span>(chinstrap_svm, chinstrap)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Tour raw data</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tourr)</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">animate_xy</span>(chinstrap[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], <span class="at">col=</span>chinstrap<span class="sc">$</span>sex)</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Add all SVs, including bounded</span></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>c_pch <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">20</span>, <span class="fu">nrow</span>(chinstrap))</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>c_pch[chinstrap_svm<span class="sc">$</span>index] <span class="ot">&lt;-</span> <span class="dv">4</span></span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="fu">animate_xy</span>(chinstrap[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], <span class="at">col=</span>chinstrap<span class="sc">$</span>sex, <span class="at">pch=</span>c_pch)</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Only show the SVs with |coefs| &lt; 1</span></span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>c_pch <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">20</span>, <span class="fu">nrow</span>(chinstrap))</span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>c_pch[chinstrap_svm<span class="sc">$</span>index[<span class="fu">abs</span>(chinstrap_svm<span class="sc">$</span>coefs)<span class="sc">&lt;</span><span class="dv">1</span>]] <span class="ot">&lt;-</span> <span class="dv">4</span></span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="fu">animate_xy</span>(chinstrap[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], <span class="at">col=</span>chinstrap<span class="sc">$</span>sex, <span class="at">pch=</span>c_pch)</span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="fu">render_gif</span>(chinstrap[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>],</span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>           <span class="fu">grand_tour</span>(),</span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>           <span class="fu">display_xy</span>(<span class="at">col=</span>chinstrap<span class="sc">$</span>sex, <span class="at">pch=</span>c_pch),</span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>           <span class="at">gif_file=</span><span class="st">"gifs/chinstrap_svs.gif"</span>,</span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>           <span class="at">frames=</span><span class="dv">500</span>)</span>
-<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Tour the separating hyper-plane also</span></span>
-<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>symbols <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">20</span>)</span>
-<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>c_pch <span class="ot">&lt;-</span> symbols[<span class="fu">as.numeric</span>(chinstrap_svm_e<span class="sc">$</span>.TYPE[<span class="sc">!</span>chinstrap_svm_e<span class="sc">$</span>.BOUNDARY])]</span>
-<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="fu">animate_xy</span>(chinstrap_svm_e[<span class="sc">!</span>chinstrap_svm_e<span class="sc">$</span>.BOUNDARY,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], </span>
-<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>           <span class="at">col=</span>chinstrap_svm_e<span class="sc">$</span>sex[<span class="sc">!</span>chinstrap_svm_e<span class="sc">$</span>.BOUNDARY],</span>
-<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>           <span class="at">pch=</span>c_pch)</span>
-<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a><span class="fu">render_gif</span>(chinstrap_svm_e[<span class="sc">!</span>chinstrap_svm_e<span class="sc">$</span>.BOUNDARY,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>],</span>
-<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>           <span class="fu">grand_tour</span>(),</span>
-<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>           <span class="fu">display_xy</span>(<span class="at">col=</span>chinstrap_svm_e<span class="sc">$</span>sex[<span class="sc">!</span>chinstrap_svm_e<span class="sc">$</span>.BOUNDARY], <span class="at">pch=</span>c_pch),</span>
-<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>           <span class="at">gif_file=</span><span class="st">"gifs/chinstrap_svm.gif"</span>,</span>
-<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>           <span class="at">frames=</span><span class="dv">500</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Tour raw data</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tourr)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">animate_xy</span>(chinstrap[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], <span class="at">col=</span>chinstrap<span class="sc">$</span>sex)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Add all SVs, including bounded</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>c_pch <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">20</span>, <span class="fu">nrow</span>(chinstrap))</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>c_pch[chinstrap_svm<span class="sc">$</span>index] <span class="ot">&lt;-</span> <span class="dv">4</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="fu">animate_xy</span>(chinstrap[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], <span class="at">col=</span>chinstrap<span class="sc">$</span>sex, <span class="at">pch=</span>c_pch)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Only show the SVs with |coefs| &lt; 1</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>c_pch <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">20</span>, <span class="fu">nrow</span>(chinstrap))</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>c_pch[chinstrap_svm<span class="sc">$</span>index[<span class="fu">abs</span>(chinstrap_svm<span class="sc">$</span>coefs)<span class="sc">&lt;</span><span class="dv">1</span>]] <span class="ot">&lt;-</span> <span class="dv">4</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="fu">animate_xy</span>(chinstrap[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], <span class="at">col=</span>chinstrap<span class="sc">$</span>sex, <span class="at">pch=</span>c_pch)</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="fu">render_gif</span>(chinstrap[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>],</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>           <span class="fu">grand_tour</span>(),</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>           <span class="fu">display_xy</span>(<span class="at">col=</span>chinstrap<span class="sc">$</span>sex, <span class="at">pch=</span>c_pch),</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>           <span class="at">gif_file=</span><span class="st">"gifs/chinstrap_svs.gif"</span>,</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>           <span class="at">frames=</span><span class="dv">500</span>)</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Tour the separating hyper-plane also</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>symbols <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">20</span>)</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>c_pch <span class="ot">&lt;-</span> symbols[<span class="fu">as.numeric</span>(chinstrap_svm_e<span class="sc">$</span>.TYPE[<span class="sc">!</span>chinstrap_svm_e<span class="sc">$</span>.BOUNDARY])]</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="fu">animate_xy</span>(chinstrap_svm_e[<span class="sc">!</span>chinstrap_svm_e<span class="sc">$</span>.BOUNDARY,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], </span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>           <span class="at">col=</span>chinstrap_svm_e<span class="sc">$</span>sex[<span class="sc">!</span>chinstrap_svm_e<span class="sc">$</span>.BOUNDARY],</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>           <span class="at">pch=</span>c_pch)</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a><span class="fu">render_gif</span>(chinstrap_svm_e[<span class="sc">!</span>chinstrap_svm_e<span class="sc">$</span>.BOUNDARY,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>],</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>           <span class="fu">grand_tour</span>(),</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>           <span class="fu">display_xy</span>(<span class="at">col=</span>chinstrap_svm_e<span class="sc">$</span>sex[<span class="sc">!</span>chinstrap_svm_e<span class="sc">$</span>.BOUNDARY], <span class="at">pch=</span>c_pch),</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>           <span class="at">gif_file=</span><span class="st">"gifs/chinstrap_svm.gif"</span>,</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>           <span class="at">frames=</span><span class="dv">500</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div id="fig-p-svm" class="quarto-layout-panel">
