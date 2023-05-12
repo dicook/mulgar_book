@@ -7,10 +7,12 @@ The compiled book is located in `docs/`.
 
 ## Contributing
 
-Shield: [![CC BY-NC-SA 4.0][cc-by-nc-sa-shield]][cc-by-nc-sa]
+We welcome contributions. If you have a suggestion or a bug report please post this as an [issue](https://github.com/dicook/mulgar_book/issues) on GitHub.
 
-This work is licensed under a
+The online version is licensed under a
 [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License][cc-by-nc-sa].
+
+The work is written under a [contributor code of conduct](https://github.com/dicook/mulgar_book/CODE_OF_CONDUCT.md). By participating in this project you agree to abide by its terms and the terms of the license. Instructions for making contributions can be found in the [contributing.md](https://github.com/dicook/mulgar_book/contributing.md) file.
 
 [![CC BY-NC-SA 4.0][cc-by-nc-sa-image]][cc-by-nc-sa]
 
