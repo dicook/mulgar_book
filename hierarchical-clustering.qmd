@@ -8,6 +8,8 @@
 
 Hierarchical cluster algorithms sequentially fuse neighboring points to form ever-larger clusters, starting from a full interpoint distance matrix. @fig-hc-sim illustrates the hierarchical clustering approach for a simple simulated data set (a) with two well-separated clusters in 2D. The dendrogram (b) is a representation of the order that points are joined into clusters. The dendrogram strongly indicates two clusters because there are two branches branches representing the last join are much longer than all of the other branches. Although, the dendrogram is usually a good summary of the steps taken by the algorithm, it can be misleading. The dendrogram might strongly suggest a clustering but it might be a terrible solution. To check this we need to show the model with the data, as shown in plot (c). The segments show how the points and clusters are joined. Note that once points are joined into a cluster, the centroid of that cluster is used as the join location with other points or other clusters, and this is represented by a "+". We can see that the longest edge is the one stretching across the gap between the two clusters, which is the location where the dendrogram would be cut to produce the two-cluster solution. This two-cluster solution is shown in plot (d).
 
+\index{cluster analysis!dendrogram}
+
 ```{r}
 #| label: hc-libraries
 #| message: FALSE
@@ -19,7 +21,6 @@ library(patchwork)
 library(tourr)
 library(plotly)
 library(htmlwidgets)
-#library(RColorBrewer)
 library(colorspace)
 library(GGally)
 ```
@@ -27,6 +28,7 @@ library(GGally)
 ```{r}
 #| label: fig-hc-sim
 #| eval: true
+#| code-fold: false
 #| message: false
 #| warning: false
 #| fig-cap: "Hierarchical clustering on simulated data: (a) data, (b) dendrogram, (c) dendrogram on the data, and (d) two cluster solution. Nodes of the dendrogram indicated by `+` when it is drawn on the data."
@@ -337,6 +339,8 @@ load("data/penguins_sub.rda")
 
 ```{r}
 #| label: penguins-pairs
+#| message: false
+#| warning: false
 #| fig-cap: "Scatterplot matrix of the penguins data, assuming we don't know the species"
 ggscatmat(penguins_sub[,1:4]) 
 ```
@@ -373,6 +377,7 @@ render_gif(penguins_sub[,1:4],
 
 ```{r}
 #| label: penguins-hclust
+#| code-fold: false
 p_dist <- dist(penguins_sub[,1:4])
 p_hcw <- hclust(p_dist, method="ward.D2")
 p_hcs <- hclust(p_dist, method="single")
@@ -513,19 +518,6 @@ pw_anim <- render_anim(p_w_hfly$data,
                                p_w_hfly$data$cl))
 
 pw_gp <- ggplot() +
-     #geom_path(data=pw_anim$circle, 
-     #          aes(x=c1, y=c2,
-     #              frame=frame), linewidth=0.1) +
-     #geom_segment(data=pw_anim$axes, 
-     #             aes(x=x1, y=y1, 
-     #                 xend=x2, yend=y2, 
-     #                 frame=frame), 
-     #             linewidth=0.1) +
-     #geom_text(data=pw_anim$axes, 
-     #          aes(x=x2, y=y2, 
-     #              frame=frame, 
-     #              label=axis_labels), 
-     #          size=5) +
      geom_segment(data=pw_anim$edges, 
                     aes(x=x, xend=xend,
                         y=y, yend=yend,
@@ -564,19 +556,6 @@ ps_anim <- render_anim(p_s_hfly$data, vars=1:4,
                                p_s_hfly$data$cl))
 
 ps_gp <- ggplot() +
-     #geom_path(data=pw_anim$circle, 
-     #          aes(x=c1, y=c2,
-     #              frame=frame), linewidth=0.1) +
-     #geom_segment(data=pw_anim$axes, 
-     #             aes(x=x1, y=y1, 
-     #                 xend=x2, yend=y2, 
-     #                 frame=frame), 
-     #             linewidth=0.1) +
-     #geom_text(data=pw_anim$axes, 
-     #          aes(x=x2, y=y2, 
-     #              frame=frame, 
-     #              label=axis_labels), 
-     #          size=5) +
      geom_segment(data=ps_anim$edges, 
                     aes(x=x, xend=xend,
                         y=y, yend=yend,
@@ -618,68 +597,3 @@ Animation of dendrogram from Wards (top) and single (bottom) linkage clustering 
 :::
 
 
-````{=html}
-<!--
---THIS STUFF IS THE OLD MATERIAL--
-
-@fig-prim7-hier contains several plots that illustrate the results of the hierarchical clustering of the particle physics data; we used Euclidean interpoint distances and the average linkage method. This is computed by:
-
-```
-> library(rggobi)
-> d.prim7 <- read.csv("prim7.csv")
-> d.prim7.dist <- dist(d.prim7)
-> d.prim7.dend <- hclust(d.prim7.dist, method="average")
-> plot(d.prim7.dend)
-```
-
-\index{cluster analysis!dendrogram}
-
-\noindent The dendrogram at the top shows the result of the clustering process. Several large clusters were fused late in the process, with heights (indicated by the height of the horizontal segment connecting two
-clusters) well above those of the first joins; we will want to look at these.  Two points were fused with the rest at the very last stages, which indicates that they are outliers and have been assigned to
-singleton clusters.
-
-% Figure 5
-\begin{figure*}[htbp]
-\centerline{{\includegraphics[width=3.5in]{chap-clust/prim7-dendrogram.pdf}}}
-\smallskip
-\centerline{{\includegraphics[width=1.2in]{chap-clust/prim7-clust1.pdf}}
- {\includegraphics[width=1.2in]{chap-clust/prim7-clust2.pdf}}
- {\includegraphics[width=1.2in]{chap-clust/prim7-clust3.pdf}}}
-\smallskip
-\centerline{{\includegraphics[width=1.2in]{chap-clust/prim7-clust5.pdf}}
- {\includegraphics[width=1.2in]{chap-clust/prim7-clust6.pdf}}
- {\includegraphics[width=1.2in]{chap-clust/prim7-clust7.pdf}}}
-\caption[Hierarchical clustering of the particle physics
-data]{Hierarchical clustering of the particle physics data.  The
-dendrogram shows the results of clustering the data using average
-linkage.  Clusters 1, 2, and 3 carve up the base triangle of the data;
-clusters 5 and 6 divide one of the arms; and cluster 7 is a singleton.
-}
-\label{prim7-hier}
-\end{figure*}
-
-\index{outliers}
-\index{animation}
-\index{brushing!transient}
-We cut the dendrogram to produce nine clusters because we would expect to see seven clusters and a few outliers based on our observations from the spin and brush approach, and our choice looks reasonable given the structure of the dendrogram.  (In practice, we would usually explore the clusters corresponding to several different cuts of the dendrogram.) We assign each cluster an integer identifier, and in the following plots, you see the results of highlighting one cluster at a time and then running the grand tour to focus on the placement of that cluster within the data. This R code follows this sequence of actions:
-
-```
-> gd <- ggobi(d.prim7)[1]
-> clust9 <- cutree(d.prim7.dend, k=9)
-> glyph_color(gd)[clust9==1] <- 9 # highlight triangle
-> glyph_color(gd)[clust9==1] <- 1 # reset color
-> glyph_color(gd)[clust9==2] <- 9 # highlight cluster 2
-```
-
-The top three plots show, respectively, clusters 1, 2, and 3: These clusters roughly divide the main triangular section of the data into three. The bottom row of plots show clusters labeled 5, and 6, which
-lie along the linear pieces, and cluster 7, which is a singleton cluster corresponding to an outlier in the data.
-
-The results are reasonably easy to interpret. Recall that the basic geometry underlying this data is that there is a 2D triangle with two linear strands extending from each vertex.  The hierarchical average
-linkage clustering of the particle physics data using nine clusters essentially divides the data into three chunks in the neighborhood of each vertex (clusters 1, 2, and 3), three pieces at the ends of the six linear strands (4, 5, and 6), and three clusters containing
-outliers (7, 8, and 9).  This data provides a big challenge for any cluster algorithm - low-dimensional pieces embedded in high-dimensional space - and we are not surprised that no algorithm that we have tried will extract the structure we found using interactive tools.
-
-The particle physics dataset is ill-suited to hierarchical clustering, but this extreme failure is an example of a common problem.  When performing cluster analysis, we want to group the observations into clusters without knowing the distribution of the data.  How many clusters are appropriate? What do the clusters look like?  Could we just as confidently divide the data in several different ways and get
-very different but equally valid interpretations? Graphics can help us assess the results of a cluster analysis by helping us explore the distribution of the data and the characteristics of the clusters.
-
--->
-````
