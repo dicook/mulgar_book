@@ -266,3 +266,84 @@ Defining an appropriate distance metric is a vitally important decision.
 :::
 
 The context in which the data arises is the key to assessing the results. If the clusters can be characterized in a sensible manner, and they increase our knowledge of the data, then we are on the right track. To use an even more pragmatic criterion, if a company can gain an economic advantage by using a particular clustering method to carve up their customer database, then that is the method they should use.
+
+## Exercises
+
+Use the following data to answer these questions:
+
+```{r}
+#| echo: false
+library(mulgar)
+vc <- matrix(c(1,0.8,0.8,0.8,1,0.8,0.8,0.8,1), ncol=3, byrow=TRUE)
+set.seed(9044)
+x <- data.frame(matrix(0, 4, 3))
+x[1,] <- c(0.13, 0.21, 0.09)
+x[2,] <- c(0.91, 0.95, 0.85)
+x[3,] <- c(0.62, 0.73, 0.65)
+x[4,] <- c(0.21, 0.92, 0.43)
+rownames(x) <- paste0("a", 1:4)
+colnames(x) <- paste0("x", 1:3)
+x 
+```
+
+1. Compute the Euclidean distance between cases `a1`, `a2`, `a3`, `a4`.
+
+2. Compute the correlation distance (as defined above) between cases `a1`, `a2`, `a3`, `a4`.
+
+
+3. Which two points have the (a) biggest (b) smallest Mahalanobis (statistical) distance, assuming that the covariance matrix is:
+
+```{r}
+#| echo: false
+rownames(vc) <- paste0("x", 1:3)
+colnames(vc) <- paste0("x", 1:3)
+vc
+```
+
+(The function `mahalanobis` will calculate this in R. Technically this gives distance between each case and the mean vector.)
+
+4. Is the ordering of distance between cases the same if Manhattan distance is used instead of Euclidean?
+
+5. Compute the Chebychev distance between cases `a1`, `a2`, `a3`, `a4`.
+
+6. Compute Bray-Curtis distance between cases `a1`, `a2`, `a3`, `a4`.
+
+7. Make a plot of the data, and write a paragraph describing how the different distance metrics agree and disagree on how close or far the cases are from each other. 
+
+```{r}
+#| eval: false
+#| echo: false
+# Answers
+library(patchwork)
+# Euclidean
+dist(x)
+# Mahalanobis
+mahalanobis(x, center=FALSE, cov=vc)
+# manhattan
+dist(x, "manhattan")
+# Chebychev
+d_ch <- matrix(0, 4, 4)
+for (i in 1:4) {
+  for (j in 1:4) {
+    if (i != j)
+      d_ch[i,j] <- abdiv::chebyshev(x[i,], x[j,])
+  }}
+as.dist(d_ch)
+# Bray-Curtis
+vegdist(x, "bray")
+# Plot
+x <- data.frame(x)
+p1 <- ggplot(x) + geom_text(aes(x=x1, y=x2,
+                                label=rownames(x))) +
+  geom_abline(slope=1, intercept=0) +
+  theme(aspect.ratio=1)
+p2 <- ggplot(x) + geom_text(aes(x=x1, y=x3,
+                                label=rownames(x))) +
+  geom_abline(slope=1, intercept=0) +
+  theme(aspect.ratio=1)
+p3 <- ggplot(x) + geom_text(aes(x=x2, y=x3,
+                                label=rownames(x))) +
+  geom_abline(slope=1, intercept=0) +
+  theme(aspect.ratio=1)
+p1+p2+p3+plot_layout(ncol=3)
+```
