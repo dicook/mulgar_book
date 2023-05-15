@@ -1,12 +1,23 @@
 ## Principal component analysis 
 
-PCA is a statistical technique used to reduce the dimensionality of a large dataset while retaining as much information as possible. PCA identifies the underlying structure of the data by finding a new set of variables, known as principal components (PCs), that are linear combinations of the original variables. The PCs can be used as a new set of variables to represent the data in a lower-dimensional space.
+Reducing dimensionality using principal component analysis (PCA) dates back to @pearson-pca and @hotelling-pca, and @joliffe2016 provides a current overview. The goal is to find a smaller set of variables that contain as much information as the original as possible. The new set of variables, known as principal components (PCs), are linear combinations of the original variables. The PCs can be used to represent the data in a lower-dimensional space.
 
-PCA is conducted by finding the directions where the projected data has the highest variance, that is, are most spread. Because the goal is to find a smaller number of variables that contain the similar information, the amount of variance explained by the selected PCs is examined.
+The process is essentially an optimisation procedure, although PCA has an analytical solution. It solves the problem of 
 
-PCA summarises linear association, and the dimension reduction is achieved by using combinations of variables that are highly correlated. However, *high correlation can also occur when there are outliers, or clustering. PCA is commonly used to detect these patterns also.* PCA also is not very effective when the distribution of the variables is highly skewed, so it can be helpful to transform variables before computing the PCA.
+$$
+\max_{a_k} ~\text{Var} (Xa_k),
+$$
+where $X$ is the $n \times p$ data matrix, $a_k (k=1, ..., p)$ is a 1D projection vector, called an eigenvector, and the $\text{Var} (Xa_k)$ is called an eigenvalue. So PCA is a sequential process, that will find the direction in the high-dimensional space (as given by the first eigenvector) where the data is most varied, and then find the second most varied direction, and so on. The eigenvectors define the combination of the original variables, and the eigenvalues define the amount of variance explained by the reduced number of variables.
 
-## Introduction to PCA analysis
+PCA is very broadly useful for summarising linear association by using combinations of variables that are highly correlated. However, high correlation can also occur when there are outliers, or clustering. PCA is commonly used to detect these patterns also.
+
+::: info
+With visualisation we want to assess whether it is appropriate to use PCA to summarise any linear association by using combinations of variables that are highly correlated. It can help to detect other patterns that might affect the PCA results such as outliers, clustering or non-linear dependence. 
+:::
+
+PCA is not very effective when the distribution of the variables is highly skewed, so it can be helpful to transform variables to make them more symmetrically distributed before conducting PCA. It is also possible to summarise different types of structure by generalising the optimisation criteria to any function of projected data, $f(XA)$, which is called *projection pursuit* (PP). PP has a long history (@Kr64a, @FT74, @DF84, @JS87, @Hu85), and there are regularly new developments (e.g. @Lee2009, @perisic2009, @Lee2013, @loperfido, @bickel2018, @zhang2023). 
+
+## Determining how many dimensions
 
 We would start by examining the data using a grand tour. The goal is to check whether there might be potential issues for PCA, such as skewness, outliers or clustering, or even non-linear dependencies.
 
@@ -16,6 +27,7 @@ We'll start be showing PCA on the simulated from @sec-dimension-overview. The sc
 #| message: FALSE
 #| error: FALSE
 #| warning: FALSE
+#| code-fold: false
 library(dplyr)
 library(ggplot2)
 library(mulgar)
@@ -116,9 +128,78 @@ pn_pca$rotation[,1:4] %>%
              decimals = 2)
 ```
 
+### Example: pisa
+
+The `pisa` data contains simulated data from math, reading and science scores, totalling 30 variables. PCA is used here to examine the association. We might expect that it is 3D, but what we see suggests it is primarily 1D. This means that a student that scores well in math, will also score well in reading and science. 
+
+```{r}
+#| code-fold: false
+data(pisa)
+pisa_std <- pisa %>%
+  filter(CNT == "Australia") %>%
+  select(-CNT) %>%
+  mutate_all(mulgar:::scale2)
+pisa_pca <- prcomp(pisa_std)
+pisa_scree <- ggscree(pisa_pca)
+```
+
+The scree plot in @fig-pisa-scree shows a big drop from one to two PCs in the amount of variance explained. A grand tour on the 30 variables can be run using `animate_xy()`: 
+
+```{r}
+#| eval: FALSE
+#| code-fold: false
+animate_xy(pisa_std, half_range=1)
+```
+
+or rendered as an animated gif using `render_gif()`:
+
+```{r}
+#| eval: FALSE
+#| code-fold: false
+render_gif(pisa_std, 
+           grand_tour(), 
+           display_xy(half_range=0.9),
+           gif_file="gifs/pisa_gt.gif",
+           frames=500,
+           width=400,
+           height=400,
+           loop=FALSE)
+```
+
+and we can see that the data is elliptical in most projections, sometimes shrinking to be a small circle. This pattern strongly indicates that there is one primary direction of variation in the data, with only small variation in any direction away from it. Shrinking to the small circle is analogous to to how *a pencil or cigar or water bottle in 3D looks from some angles*.
+
+::: {#fig-pisa-pca  fig-align="center" layout-ncol=2}
+
+```{r}
+#| label: fig-pisa-scree
+#| eval: true
+#| message: false
+#| warning: false
+#| fig-cap: "Scree plot for the PCA on the pisa data suggests that the data is 1D."
+#| fig-width: 6
+#| fig-height: 4
+#| echo: false
+pisa_scree
+```
+
+![Grand tour of the pisa data.](gifs/pisa_gt.gif){#fig-pisa-gt fig-alt="Tour showing lots of linear projections of the pisa data. You can see strong linear dependence." fig.align="center"}
+
+Scree plot and tour of the pisa data, with 30 variables being the plausible scores for Australian students.
+:::
+
+The coefficients of the first PC (first eigenvector) are roughly equal in magnitude (as shown below), which tells us that all variables roughly contribute. Interestingly, they are all negative, which is not actually meaningful. With different software these could easily have been all positive. The sign of the coefficients can be reversed, as long as all are reversed, which is the same as an arrow pointing one way, changing and pointing the other way.   
+
+```{r}
+round(pisa_pca$rotation[,1], 2)
+```
+
+::: insight
+The 1D structure of the `pisa` data means that a student that scores well in math, tends to score well in reading and science too.
+:::
+
 ### Example: aflw
 
-We'll use the `aflw` data as the example. This data has player statistics for all the matches in the 2021 season. We would be interested to know which variables contain similar information, and thus might be combined into single variables. We would expect that many statistics to group into a few small sets, such as offensive and defensive skills. We might also expect that some of the statistics are skewed, most players have low values and just a handful of players are stellar. It is also possible that there are some extreme values. These are interesting features, but they will distract from the main purpose of grouping the statistics. Thus the tour is used to check for potential problems with the data prior to conducting PCA.
+This data has player statistics for all the matches in the 2021 season. We would be interested to know which variables contain similar information, and thus might be combined into single variables. We would expect that many statistics to group into a few small sets, such as offensive and defensive skills. We might also expect that some of the statistics are skewed, most players have low values and just a handful of players are stellar. It is also possible that there are some extreme values. These are interesting features, but they will distract from the main purpose of grouping the statistics. Thus the tour is used to check for potential problems with the data prior to conducting PCA.
 
 ```{r}
 #| label: pca-libraries
@@ -136,18 +217,12 @@ aflw_std <- aflw %>%
       sd(x, na.rm=TRUE))
 ```
 
-To look at all of the `r ncol(aflw_std[,7:35])` player statistics in a grand tour use the `animate_xy()` function as follows:
+To look at all of the `r ncol(aflw_std[,7:35])` player statistics in a grand tour.
 
 ```{r}
 #| label: aflw-gt
 #| eval: false
-#| code-fold: false
 animate_xy(aflw_std[,7:35], half_range=0.9)
-```
-
-```{r}
-#| label: aflw-gif
-#| eval: false
 render_gif(aflw_std[,7:35], 
            grand_tour(), 
            display_xy(half_range=0.9),
@@ -155,8 +230,6 @@ render_gif(aflw_std[,7:35],
            frames=500,
            loop=FALSE)
 ```
-
-The gif here is the saved version of the grand tour, made using the `render_gif()` function.
 
 ![Grand tour of the AFLW player statistics](gifs/aflw_gt.gif){#fig-aflw-gt fig-alt="Tour showing lots of linear projections of the aflw data. You can see linear dependence, and some outliers." fig.align="center"}
 
@@ -321,69 +394,29 @@ Another interesting frame for inspecting PC 2 is 59. PC 2 at one end has players
 
 PCA is useful for getting a sense of the variation in a high-dimensional data set. Interpreting the principal components is often useful, but it can be discombobulating. For the AFLW data it would be good to think about it as a guide to the main directions of variation and to follow with a more direct engineering of variables into interesting player characteristics. For example, calculate offensive skill as an equal combination of goals, accuracy, shots, behinds. A set of new variables specifically computed to measure particular skills would make explaining an analysis easier.
 
-### Example: pisa
-
-The PISA data contains simulated data from math, reading nd science scores. PCA is used here to examine the association between the 30 scores. We might expect that it is 3D, but the result suggests it is primarily 1D. This means that a student that scores well in math, will also score well in reading and science. 
-
-```{r}
-data(pisa)
-pisa_std <- pisa %>%
-  filter(CNT == "Australia") %>%
-  select(-CNT) %>%
-  mutate_all(mulgar:::scale2)
-pisa_pca <- prcomp(pisa_std)
-pisa_scree <- ggscree(pisa_pca)
-```
-
-```{r}
-#| eval: FALSE
-animate_xy(pisa_std, half_range=1)
-render_gif(pisa_std, 
-           grand_tour(), 
-           display_xy(half_range=0.9),
-           gif_file="gifs/pisa_gt.gif",
-           frames=500,
-           width=400,
-           height=400,
-           loop=FALSE)
-```
-
-::: {#fig-pisa-pca  fig-align="center" layout-ncol=2}
-
-```{r}
-#| label: fig-pisa-scree
-#| eval: true
-#| message: false
-#| warning: false
-#| fig-cap: "Scree plot for the PCA on the pisa data suggests that the data is 1D."
-#| fig-width: 5
-#| fig-height: 5
-#| echo: false
-pisa_scree
-```
-
-![Grand tour of the pisa data.](gifs/pisa_gt.gif){#fig-pisa-gt fig-alt="Tour showing lots of linear projections of the pisa data. You can see strong linear dependence." fig.align="center"}
-
-Scree plot and tour of the pisa data, with 30 variables being the plausible scores for Australian students.
+::: insight
+PCA on the aflw data leaves us slightly dizzy, but there are some useful insights. It detects and even ranks outstanding players high on different combinations of skills. Although players tend to have a combination of skills, there appears to be a dichotomy in skill sets for top goal scorers and top defensive players.
 :::
 
 ## Examining the PCA model in the data space
 
 When you choose a smaller number of PCs $(k)$ than the number of original variables, this is essentially producing a model for the data. The model is the lower dimensional space. It is analogous to a linear regression model, except that the residuals from the model are $(p-k)$-D. The model is $k$-D. It can be useful to examine this model using the tour. 
 
-We'll start with the simulated data examples used at the beginning of this chapter. The function `pca_model()` from the `mulgar` package can be used to represent the model as a $k$-D plane.
+We'll start with the simulated data examples used at the beginning of this chapter. The function `pca_model()` from the `mulgar` package can be used to represent the model as a $k$-D wireframe plane.
 
 ```{r}
 #| eval: false
+#| code-fold: false
 plane_pca <- prcomp(plane)
 plane_m <- pca_model(plane_pca)
 plane_m_d <- rbind(plane_m$points, plane)
-animate_xy(plane_m_d, edges=plane_m$edges, axes="bottomleft")
+animate_xy(plane_m_d, edges=plane_m$edges, axes="bottomleft",edges.col="#E7950F",edges.width=3)
 render_gif(plane_m_d, 
            grand_tour(), 
            display_xy(half_range=0.9,
                       edges=plane_m$edges, 
-                      edges.col="orange"),
+                      edges.col="#E7950F",
+                      edges.width=3),
            gif_file="gifs/plane_model.gif",
            frames=500,
            width=400,
@@ -392,12 +425,13 @@ render_gif(plane_m_d,
 box_pca <- prcomp(box)
 box_m <- pca_model(box_pca, d=3)
 box_m_d <- rbind(box_m$points, box)
-animate_xy(box_m_d, edges=box_m$edges, axes="bottomleft")
+animate_xy(box_m_d, edges=box_m$edges, axes="bottomleft", edges.col="#E7950F", edges.width=3)
 render_gif(box_m_d, 
            grand_tour(), 
            display_xy(half_range=0.9,
                       edges=box_m$edges, 
-                      edges.col="orange"),
+                      edges.col="#E7950F",
+                      edges.width=3),
            gif_file="gifs/box_model.gif",
            frames=500,
            width=400,
@@ -416,19 +450,21 @@ PCA model overlaid on the data for the 2D in 5D, and 3D in 5D simulated data.
 
 ### Example: pisa
 
+The model for the `pisa` data is a 1D vector, shown in @fig-pisa-model. 
+
 ```{r}
 #| eval: FALSE
-animate_xy(pisa_std, half_range=1)
-
+#| code-fold: false
 pisa_model <- pca_model(pisa_pca, d=1, s=2)
 
 pisa_all <- rbind(pisa_model$points, pisa_std)
-animate_xy(pisa_all, edges=pisa_model$edges, edges.col="orange")
+animate_xy(pisa_all, edges=pisa_model$edges, edges.col="#E7950F", edges.width=3)
 render_gif(pisa_all, 
            grand_tour(), 
            display_xy(half_range=0.9,
                       edges=pisa_model$edges, 
-                      edges.col="orange"),
+                      edges.col="#E7950F", 
+                      edges.width=3),
            gif_file="gifs/pisa_model.gif",
            frames=500,
            width=400,
@@ -436,13 +472,48 @@ render_gif(pisa_all,
            loop=FALSE)
 ```
 
-![PCA model of the PISA data](gifs/pisa_model.gif){#fig-pisa-model fig-alt="Something here" fig.align="center"}
+![PCA model of the pisa data](gifs/pisa_model.gif){#fig-pisa-model fig-alt="Something here" fig.align="center"}
 
 ### Example: aflw
+
+It is less useful to examine the PCA model for the aflw data, because the main patterns that were of interest were the exceptional players. However, we will do it anyway! @fig-aflw-model shows the 4D PCA model overlain on the data. Even though the distribution of points is not as symmetric and balanced as the other examples, we can see that the cube structure mirrors the variation. We can see that the relationships between variables are not strictly linear, because the spread extends unevenly away fro the box. 
+
+```{r}
+#| eval: FALSE
+#| code-fold: false
+aflw_model <- pca_model(aflw_pca, d=4, s=1)
+
+aflw_all <- rbind(aflw_model$points, aflw_std[,7:35])
+animate_xy(aflw_all, edges=aflw_model$edges,
+           edges.col="#E7950F", 
+           edges.width=3, 
+           half_range=0.8, 
+           axes="off")
+render_gif(aflw_all, 
+           grand_tour(), 
+           display_xy(half_range=0.8,
+                      edges=aflw_model$edges, 
+                      edges.col="#E7950F", 
+                      edges.width=3),
+           gif_file="gifs/aflw_model.gif",
+           frames=500,
+           width=400,
+           height=400,
+           loop=FALSE)
+```
+
+![PCA model of the aflw data](gifs/aflw_model.gif){#fig-aflw-model fig-alt="Something here" fig.align="center"}
+
+## When relationships are not linear 
+
+Add PCA on the outliers and non-linear structure from previous chapter
+
 ## Exercises
 
 1.  Make a scatterplot matrix of the first four PCs. Is the branch pattern visible in any pair?
 2.  Construct five new variables to measure these skills offense, defense, playing time, ball movement, errors. Using the tour, examine the relationship between these variables. Map out how a few players could be characterised based on these directions of skills.
+3. Symmetrise any aflw variables that have skewed distributions using a log or square root transformation. Then re-do the PCA. What do we learn that is different about associations between the skill variables?
+4. Examine the `bushfires` data using a grand tour on the numeric variables, ignoring the `cause` (class) variable. Would it be important to transform any variables to remove skewness? Do so, if necessary. How many principal components would be recommended? Examine the PCA model with the data.
 
 ```{r}
 #| label: aflw-pairs
@@ -454,72 +525,3 @@ library(GGally)
 ggscatmat(aflw_pca$x, columns=1:4)
 ```
 
-```{=html}
-<!--Follow with 
-
-- an explanation of first view PC1 v PC2 
-- then as PC3 is introduced, the three axes (generally good, offensive vs defensive?)
-- unusual players
-- why not show the original variables (too many)
-- using a sequence of still plots-->
-```
-```{=html}
-<!-- Select one country. We are interested in examining the association between the scores. Because the association might be different for each country, PCA should be conducted separately for each country. All the scores are measured in the same units, so for this data we'd recommend computing PCA on the original scale, that is, the variance-covariance matrix.
-
-Plan:
-
--   show data in a tour
--   compute PCs
--   explore proportion of variance
--   examine loadings
--   tour on top few PCs, using PCA tour
-
-### Take a look at the raw data
-
-There are 30 variables here. 30D space is huge so generally this is too many variables to watch in a tour. Here the structure is very simple so its easy to see. Trying to display the axes is a different matter, for most directions there is a small contribution from many of the 30 variables, resulting is small axis lines but over-crowded labels. -->
-```
-```{r}
-#| eval: FALSE
-#| echo: FALSE
-data(pisa)
-pisa_oz <- pisa %>% filter(CNT == "AUS")
-```
-
-```{r eval=FALSE}
-#| eval: FALSE
-#| echo: FALSE
-set.seed(44)
-pisa_oz_500 <- pisa_oz[sample(1:nrow(pisa_oz), 500),-1]
-# Run the tour in real time
-animate_xy(pisa_oz_500 , 
-           axes="bottomleft", half_range = 1.5)
-# Save a tour path, and select a few images to show
-pisa_t1 <- interpolate(save_history(pisa_oz_500, max = 20))
-pisa_tbl1 <- convert_proj_tibble(pisa_t1)
-# Try animation.hook = "gifski"
-```
-
-```{r eval=FALSE}
-#| eval: FALSE
-#| echo: FALSE
-# Show a set of 10 projections
-indx <- seq(1, 101, 10)
-d <- pisa_tbl1 %*% 
-  dplyr::filter(frame %in% indx)
-# Ok, stuck here - not filtering, and then have to work ou
-# how to transform to make data and plots for a selection # of frames
-```
-
-```{r}
-#| eval: FALSE
-#| echo: FALSE
-PISA_pca <- prcomp(pisa[,-1], scale = FALSE)
-screeplot(PISA_pca, type="l")
-```
-
-```{r eval=FALSE}
-#| eval: FALSE
-#| echo: FALSE
-options(digits=2)
-summary(PISA_pca) 
-```
