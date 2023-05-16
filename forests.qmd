@@ -45,7 +45,7 @@ rpart.plot(p_bl_bd_tree, box.palette="Grays")
 p_bl_bd_tree_boundaries <- explore(p_bl_bd_tree, penguins_sub)
 ggplot(p_bl_bd_tree_boundaries) +
   geom_point(aes(x=bl, y=bd, colour=species, shape=.TYPE)) + 
-  scale_color_discrete_qualitative("Dark 3") +
+  scale_color_discrete_divergingx("Zissou 1") +
   scale_shape_manual(values=c(46, 16)) +
   theme_minimal() +
   theme(aspect.ratio = 1, legend.position = "none")
@@ -60,7 +60,7 @@ The boundaries for the tree model on all four variables of the penguins data can
 
 ```{r}
 #| eval: false
-p_tree <- rpart(species~., data=penguins_sub)
+p_tree <- rpart(species~., data=penguins_sub[,1:5])
 rpart.plot(p_tree, box.palette="Grays")
 
 p_tree_boundaries <- explore(p_tree, penguins_sub)
@@ -106,7 +106,7 @@ The random forest fit is very good, with only a few misclassifications.
 library(randomForest)
 library(dplyr)
 penguins_rf <- randomForest(species~.,
-                             data=penguins_sub,
+                             data=penguins_sub[,1:5],
                              importance=TRUE)
 penguins_rf
 ```
@@ -149,7 +149,7 @@ p_ternary <- ggplot() +
             nudge_x=c(-0.06, 0.07, 0),
             nudge_y=c(0.05, 0.05, -0.05)) +
   geom_point(data=p_rf_v_p, aes(x=x1, y=x2, colour=species), size=2, alpha=0.5) +
-  scale_color_discrete_qualitative("Dark 3") +
+  scale_color_discrete_divergingx("Zissou 1") +
   theme_map() +
   theme(aspect.ratio=1, legend.position="none")
 ```
@@ -236,14 +236,14 @@ labels <- c("0" , "1", "2", "3", "4", "5", "6", "7", "8", "9",
 animate_xy(f_rf_v_p_s[,1:9], col = f_rf_v_p_s$branches, 
            axes = "off", half_range = 0.8,
            edges = as.matrix(simp$edges),
-           obs_labels = labels)
+           obs_labels = labels, palette = "Viridis")
 
 render_gif(f_rf_v_p_s[,1:9],
            grand_tour(),
            display_xy(col = f_rf_v_p_s$branches, 
            axes = "off", half_range = 0.8,
            edges = as.matrix(simp$edges),
-           obs_labels = labels),
+           obs_labels = labels, palette="Viridis"),
            gif_file="gifs/ft_votes.gif",
            frames=500) 
 ```
@@ -300,10 +300,10 @@ ft_pc <- ft_pc %>%
 
 ```{r}
 #| eval: false
-animate_xy(ft_pc[,c("PC1", "PC2", "PC4", "PC6")], col=ft_pc$cl1)
+animate_xy(ft_pc[,c("PC1", "PC2", "PC4", "PC6")], col=ft_pc$cl1, palette="Viridis")
 render_gif(ft_pc[,c("PC1", "PC2", "PC4", "PC6")],
            grand_tour(),
-           display_xy(col=ft_pc$cl1),
+           display_xy(col=ft_pc$cl1, palette="Viridis"),
            gif_file="gifs/ft_cl1.gif",
            frames=500)
 ```
@@ -311,7 +311,7 @@ render_gif(ft_pc[,c("PC1", "PC2", "PC4", "PC6")],
 ```{r}
 ft_pc_cl1 <- ggplot(ft_pc, aes(x=PC4, y=PC2, col=cl1)) +
   geom_point(alpha=0.7, size=1) +
-  scale_color_viridis_d("") +
+  scale_color_discrete_sequential(palette="Viridis", rev=FALSE) +
   theme_minimal() +
   theme(aspect.ratio = 1)
 ```
@@ -351,10 +351,10 @@ ft_pc <- ft_pc %>%
 
 ```{r}
 #| eval: false
-animate_xy(ft_pc[,c("PC1", "PC2", "PC4", "PC5", "PC6")], col=ft_pc$cl8)
+animate_xy(ft_pc[,c("PC1", "PC2", "PC4", "PC5", "PC6")], col=ft_pc$cl8, palette="Viridis")
 render_gif(ft_pc[,c("PC1", "PC2", "PC4", "PC5", "PC6")],
            grand_tour(),
-           display_xy(col=ft_pc$cl8),
+           display_xy(col=ft_pc$cl8, palette="Viridis"),
            gif_file="gifs/ft_cl8.gif",
            frames=500)
 ```
@@ -362,7 +362,7 @@ render_gif(ft_pc[,c("PC1", "PC2", "PC4", "PC5", "PC6")],
 ```{r}
 ft_pc_cl8 <- ggplot(ft_pc, aes(x=PC1, y=PC5, col=cl8)) +
   geom_point(alpha=0.7, size=1) +
-  scale_color_viridis_d("") +
+  scale_color_discrete_sequential(palette="Viridis", rev=FALSE) +
   theme_minimal() +
   theme(aspect.ratio = 1)
 ```
@@ -403,17 +403,21 @@ penguins_errors <- penguins_sub %>%
 
 ```{r}
 #| eval: false
-symbols <- c(20, 8)
+symbols <- c(1, 16)
 p_pch <- symbols[penguins_errors$err+1]
+p_cex <- rep(1, length(p_pch))
+p_cex[penguins_errors$err==1] <- 2
 animate_xy(penguins_errors[,1:4],
            col=penguins_errors$species,
-           pch=pch)
+           pch=p_pch, cex=p_cex)
 render_gif(penguins_errors[,1:4],
            grand_tour(),
            display_xy(col=penguins_errors$species,
-                      pch=p_pch),
+                      pch=p_pch, cex=p_cex),
            gif_file="gifs/p_rf_errors.gif",
-           frames=500)
+           frames=500,
+           width=400,
+           height=400)
 
 animate_xy(penguins_errors[,1:4],
            guided_tour(lda_pp(penguins_errors$species)),
@@ -423,9 +427,11 @@ animate_xy(penguins_errors[,1:4],
 render_gif(penguins_errors[,1:4],
            guided_tour(lda_pp(penguins_errors$species)),
            display_xy(col=penguins_errors$species,
-                      pch=p_pch),
+                      pch=p_pch, cex=p_cex),
            gif_file="gifs/p_rf_errors_guided.gif",
            frames=500,
+           width=400,
+           height=400,
            loop=FALSE)
 
 ```
