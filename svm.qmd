@@ -50,6 +50,7 @@ df2 <- data.frame(x1=mulgar:::rescale01(c(c1[,1], c2[,1])),
 #| fig-height: 4
 library(classifly)
 library(e1071)
+library(colorspace)
 df1_svm <- svm(cl~., data=df1, 
                      probability=TRUE, 
                      kernel="linear")
@@ -61,7 +62,7 @@ df1_svm_e <- explore(df1_svm, df1)
 s1 <- ggplot() + 
   geom_point(data=df1, aes(x=x1, y=x2, colour=cl),
              shape=20) +
-  scale_colour_viridis_d("", begin=0.3, end=0.8) +
+  scale_colour_discrete_divergingx(palette="Zissou 1") +
   geom_point(data=df1_svm_e[(!df1_svm_e$.BOUNDARY)&(df1_svm_e$.TYPE=="simulated"),], 
              aes(x=x1, y=x2, colour=cl), shape=3) +
   geom_point(data=df1[df1_svm$index,], 
@@ -77,7 +78,7 @@ df2_svm <- svm(cl~., data=df2,
 df2_svm_e <- explore(df2_svm, df2)
 s2 <- ggplot() + 
   geom_point(data=df2, aes(x=x1, y=x2, colour=cl), shape=20) +
-  scale_colour_viridis_d("", begin=0.3, end=0.8) +
+  scale_colour_discrete_divergingx(palette="Zissou 1") +
   geom_point(data=df2_svm_e[(!df2_svm_e$.BOUNDARY)&(df2_svm_e$.TYPE=="simulated"),], 
              aes(x=x1, y=x2, colour=cl), 
              shape=3) +
@@ -153,11 +154,16 @@ animate_xy(chinstrap[,1:4], col=chinstrap$sex, pch=c_pch)
 # Only show the SVs with |coefs| < 1
 c_pch <- rep(20, nrow(chinstrap))
 c_pch[chinstrap_svm$index[abs(chinstrap_svm$coefs)<1]] <- 4
-animate_xy(chinstrap[,1:4], col=chinstrap$sex, pch=c_pch)
+c_cex <- rep(1, nrow(chinstrap))
+c_cex[chinstrap_svm$index[abs(chinstrap_svm$coefs)<1]] <- 2
+animate_xy(chinstrap[,1:4], col=chinstrap$sex, 
+           pch=c_pch, cex=c_cex)
 render_gif(chinstrap[,1:4],
            grand_tour(),
-           display_xy(col=chinstrap$sex, pch=c_pch),
+           display_xy(col=chinstrap$sex, pch=c_pch, cex=c_cex),
            gif_file="gifs/chinstrap_svs.gif",
+           width=400,
+           height=400,
            frames=500)
 
 # Tour the separating hyper-plane also
@@ -170,6 +176,8 @@ render_gif(chinstrap_svm_e[!chinstrap_svm_e$.BOUNDARY,1:4],
            grand_tour(),
            display_xy(col=chinstrap_svm_e$sex[!chinstrap_svm_e$.BOUNDARY], pch=c_pch),
            gif_file="gifs/chinstrap_svm.gif",
+           width=400,
+           height=400,
            frames=500)
 ```
 
