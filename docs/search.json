@@ -25,7 +25,7 @@
     "href": "index.html#setting-up-your-workflow",
     "title": "Interactive and dynamic graphics for high-dimensional data using R",
     "section": "Setting up your workflow",
-    "text": "Setting up your workflow\nTo get started set up your computer with the current versions of R and Rstudio Desktop.\nIn addition, we have made an R package to share the data and functions used in this book, called mulgar.12\n\ninstall.packages(\"mulgar\")\n#| or the development version\ndevtools::install_github(\"dicook/mulgar\")"
+    "text": "Setting up your workflow\nTo get started set up your computer with the current versions of R and Rstudio Desktop.\nIn addition, we have made an R package to share the data and functions used in this book, called mulgar.12\n\ninstall.packages(\"mulgar\", dependencies=TRUE)\n#| or the development version\ndevtools::install_github(\"dicook/mulgar\")"
   },
   {
     "objectID": "intro.html#notation-conventions-and-r-objects",
@@ -389,7 +389,7 @@
     "href": "index.html#what-should-i-know-before-reading-this-book",
     "title": "Interactive and dynamic graphics for high-dimensional data using R",
     "section": "What should I know before reading this book?",
-    "text": "What should I know before reading this book?\nThe examples assume that you already use R, and have a working knowledge of base R and tidyverse way of thinking about data analysis. It also assumes that you have some knowledge of statistical methods, and some experience with machine learning methods.\nIf you feel like you need build up your skills in these areas in preparation for working through this book, these are our recommended resources:\n\nR for Data Science by Wickham and Grolemund for learning about tidyverse.\nIntroduction to Modern Statistics by Çetinkaya-Rundel and Hardin to learn about introductory statistics.\nHands-On Machine Learning with R by Boehmke and Greenwell to learn about machine learning."
+    "text": "What should I know before reading this book?\nThe examples assume that you already use R, and have a working knowledge of base R and tidyverse way of thinking about data analysis. It also assumes that you have some knowledge of statistical methods, and some experience with machine learning methods.\nIf you feel like you need build up your skills in these areas in preparation for working through this book, these are our recommended resources:\n\nR for Data Science by Wickham and Grolemund for learning about data wrangling and visualisation.\nIntroduction to Modern Statistics by Çetinkaya-Rundel and Hardin to learn about introductory statistics.\nHands-On Machine Learning with R by Boehmke and Greenwell to learn about machine learning."
   },
   {
     "objectID": "unsupervised-overview.html#what-are-clusters",
@@ -453,5 +453,12 @@
     "title": "8  Model-based clustering",
     "section": "8.3 Exercises",
     "text": "8.3 Exercises\n\nExamine the three cluster EVE, VVE and VEE models with the tour, and explain whether these are distinguishably different from the EEE three cluster model.\nFit model-based clustering to the the clusters. Does it suggest the data has three clusters? Using the tour examine the best model model. How well does this fit the data?\nFit model-based clustering to the the multicluster. Does it suggest the data has six clusters? Using the tour examine the best model model. How well does this fit the data?\nFit model-based clustering to the fake_trees data. Does it suggest that the data has 10 clusters? If not, why do you think this is? Using the tour examine the best model model. How well does this fit the branching structure?\nTry fitting model-based clustering to the aflw data? What is the best model? Is the solution related to offensive vs defensive vs mid-fielder skills?\nTODO: Provide some challenge data sets\n\n\n\n\n\nFraley, C., and A. E. Raftery. 2002. “Model-Based Clustering, Discriminant Analysis, Density Estimation.” Journal of the American Statistical Association 97: 611–31."
+  },
+  {
+    "objectID": "data.html#sketches",
+    "href": "data.html#sketches",
+    "title": "Appendix B — Data",
+    "section": "B.5 Sketches",
+    "text": "B.5 Sketches\n\nDescription\nThis data is a subset of images from https://quickdraw.withgoogle.com The subset was created using the quickdraw R package at https://huizezhang-sherry.github.io/quickdraw/. It has 6 different groups: banana, boomerang, cactus, flip flops, kangaroo. Each image is 28x28 pixels. The sketches_train data would be used to train a classification model, and the unlabelled sketches_test can be used for prediction.\n\n\nVariables\n\n\n\nName\nDescription\n\n\n\n\nV1-V784\ngrey scale 0-255\n\n\nword\nwhat the person was asked to draw, NA in the test data\n\n\nid\nunique id for each sketch\n\n\n\n\n\nPurpose\nPrimarily this data is useful as an example for supervised classification, and also dimension reduction.\n\n\nSource\nThe full data is available from https://quickdraw.withgoogle.com.\n\n\nPre-processing\nIt is typically useful to pre-process this data into principal components. This code can also be useful for plotting one of the sketches in a recognisable form:\n\nlibrary(mulgar)\nlibrary(ggplot2)\ndata(\"sketches_train\")\nset.seed(77)\nx <- sketches_train[sample(1:nrow(sketches_train), 1), ]\nxm <- data.frame(gry=t(as.matrix(x[,1:784])),\n        x=rep(1:28, 28),\n        y=rep(28:1, rep(28, 28)))\nggplot(xm, aes(x=x, y=y, fill=gry)) +\n  geom_tile() +\n  scale_fill_gradientn(colors = gray.colors(256, start = 0, end = 1, rev = TRUE )) +\n  ggtitle(x$word) +\n  theme_void() + \n    theme(legend.position=\"none\")\n\n\n\n\nFigure B.1: One of the sketches in the subset of training data."
   }
 ]

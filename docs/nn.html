@@ -62,7 +62,6 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 <link rel="stylesheet" href="style.css">
 </head>
@@ -121,7 +120,7 @@ ul.task-list li input[type="checkbox"] {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./pca.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Principal component analysis (PCA)</span></a>
+  <a href="./pca.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Principal component analysis</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -133,7 +132,7 @@ ul.task-list li input[type="checkbox"] {
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a href="./unsupervised.html" class="sidebar-item-text sidebar-link">Unsupervised learning</a>
+            <a href="./unsupervised.html" class="sidebar-item-text sidebar-link">Cluster analysis</a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -174,16 +173,11 @@ ul.task-list li input[type="checkbox"] {
   <a href="./unsupervised-summary.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Comparing methods</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./unsupervised-ex.html" class="sidebar-item-text sidebar-link">Exercises</a>
-  </div>
-</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a href="./supervised.html" class="sidebar-item-text sidebar-link">Supervised learning</a>
+            <a href="./supervised.html" class="sidebar-item-text sidebar-link">Classification</a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -213,7 +207,7 @@ ul.task-list li input[type="checkbox"] {
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a href="./temporal.html" class="sidebar-item-text sidebar-link">Time series</a>
+            <a href="./temporal.html" class="sidebar-item-text sidebar-link">Miscellaneous</a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -284,22 +278,208 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 <p></p>
-<p>Neural networks for classification can be thought of as additive models where explanatory variables are transformed, usually through a logistic function, added to other explanatory variables, transformed again, and added again to yield class predictions. Aside from the data mining literature, mentioned earlier, a good comprehensive and accessible description for statisticians can be found in . The model can be formulated as:</p>
-<p>[ = f(x) = (+<em>{h=1}^{s} w</em>{h}(<em>h+</em>{i=1}^{p} w_{ih}x_i)) ]</p>
-<p></p>
-<p>where <span class="math inline">\(x\)</span> is the vector of explanatory variable values, <span class="math inline">\(y\)</span> is the target value, <span class="math inline">\(p\)</span> is the number of variables, <span class="math inline">\(s\)</span> is the number of nodes in the single hidden layer, and <span class="math inline">\(\phi\)</span> is a fixed function, usually a linear or logistic function. This model has a single hidden layer and univariate output values. The model is fit by minimizing the sum of squared differences between observed values and fitted values, and the minimization does not always converge. A neural network is a black box that accepts inputs, computes, and spits out predictions. With graphics, some insight into the black box can be gained. We use the feed-forward neural network provided in the {} package of R to illustrate.</p>
-<p>We continue to work with , and we look at the performance of the neural network in classifying the oils in the four areas of the South, a difficult challenge. Because the software does not include a method for computing the predictive error, we break the data into training and test samples so we can better estimate the predictive error. (We could tweak the neural network to perfectly fit all the data, but then we could not estimate how well it would perform with new data.)</p>
-<p>% this may need a few more words</p>
-<p>After trying several values for <span class="math inline">\(s\)</span>, the number of nodes in the hidden layer, we chose <span class="math inline">\(s=4\)</span>; we also chose a linear <span class="math inline">\(\phi\)</span>, <span class="math inline">\(decay=0.005\)</span>, and <span class="math inline">\(range=0.06\)</span>. We fit the model using many different random starting values, rejecting the results until it eventually converged to a solution with a reasonably low error:</p>
-% Insert page break to avoid breaking the R output.
-<p>Below are the misclassification tables for the training and test samples.</p>
 
+<!--
+Neural networks for classification can be thought of as additive
+models where explanatory variables are transformed, usually through a
+logistic function, added to other explanatory variables, transformed
+again, and added again to yield class predictions. Aside from the data
+mining literature, mentioned earlier, a good comprehensive and
+accessible description for statisticians can be found in
+\citeasnoun{CT94}. The model can be formulated as:
 
-<p>The training error is <span class="math inline">\(9/246=0.037\)</span>, and the test error is <span class="math inline">\(12/77=0.156\)</span>. The overall errors, as in the random forest model, are not uniform across classes. This is particularly obvious in the test error table: The error in classifying North Apulian oils is close to a third, and it is even worse for Sicilian oils, which have an almost even chance of being misclassified.</p>
-<p>Our exploration of the misclassifications is shown in Fig.~<span class="math inline">\(\ref{olive-nn}\)</span>. (The troublesome Sicilian oils have been excluded from all plots in this figure.) Consider first the plots in the top row. The left-hand plot shows the misclassification table. Two samples of oils from North Apulia (orange <span class="math inline">\(+\)</span>) have been incorrectly classified as South Apulian (pink <span class="math inline">\(\times\)</span>), and these two points have been brushed as filled orange circles. Note where these points fall in the next two plots, which are linked 2D tour projections. One of the two misclassified points is on the edge of the cluster of North Apulian points, close to the Calabrian cluster. It is understandable that there might be some confusion about this case. The other sample is on the outer edge of the North Apulian cluster, but it is far from the Calabrian cluster <sub>—</sub> this should not have been confused.</p>
+\[
+\hat{y} = f(x) = \phi(\alpha+\sum_{h=1}^{s}
+w_{h}\phi(\alpha_h+\sum_{i=1}^{p} w_{ih}x_i))
+\]
+
+\index{R package!\RPackage{nnet}}
+
+\noindent where $x$ is the vector of explanatory variable values, $y$
+is the target value, $p$ is the number of variables, $s$ is the number
+of nodes in the single hidden layer, and $\phi$ is a fixed function,
+usually a linear or logistic function. This model has a single hidden
+layer and univariate output values.  The model is fit by minimizing
+the sum of squared differences between observed values and fitted
+values, and the minimization does not always converge. A neural
+network is a black box that accepts inputs, computes, and spits out
+predictions.  With graphics, some insight into the black box can be
+gained. We use the feed-forward neural network provided in the {\tt
+nnet} package of R \cite{VR02} to illustrate.
+
+We continue to work with \Data{Olive Oils}, and we look at the
+performance of the neural network in classifying the oils in the four
+areas of the South, a difficult challenge. Because the software
+does not include a method for computing the predictive error, we break
+the data into training and test samples so we can better estimate the
+predictive error.  (We could tweak the neural network to perfectly fit
+all the data, but then we could not estimate how well it would perform
+with new data.)
+
+\begin{verbatim}
+> indx.tst <- c(1,7,12,15,16,22,27,32,34,35,36,41,50,54,61,
+ 68,70,75,76,80,95,101,102,105,106,110,116,118,119,122,134,
+ 137,140,147,148,150,151,156,165,175,177,182,183,185,186,
+ 187,190,192,194,201,202,211,213,217,218,219,225,227,241,
+ 242,246,257,259,263,266,274,280,284,289,291,292,297,305,
+ 310,313,314,323,330,333,338,341,342,347,351,352,356,358,
+ 359,369,374,375,376,386,392,405,406,415,416,418,420,421,
+ 423,426,428,435,440,451,458,460,462,466,468,470,474,476,
+ 480,481,482,487,492,493,500,501,509,519,522,530,532,541,
+ 543,545,546,551,559,567,570)
+> d.olive.train <- d.olive[-indx.tst,]
+> d.olive.test <- d.olive[indx.tst,]
+> d.olive.sth.train <- subset(d.olive.train, region==1, 
+   select=area:eicosenoic)
+> d.olive.sth.test <- subset(d.olive.test, region==1, 
+   select=area:eicosenoic)
+\end{verbatim}
+
+% this may need a few more words
+
+After trying several values for $s$, the number of nodes in the hidden
+layer, we chose $s=4$; we also chose a linear $\phi$, $decay=0.005$,
+and $range=0.06$. We fit the model using many different random
+starting values, rejecting the results until it eventually converged
+to a solution with a reasonably low error:
+
+\begin{verbatim}
+> library(nnet)
+> olive.nn <- nnet(as.factor(area)~., d.olive.sth.train, 
+  size=4, linout=T, decay=0.005, range=0.06, maxit=1000)
+> targetr <- class.ind(d.olive.sth.train[,1])
+> targets <- class.ind(d.olive.sth.test[,1])
+> test.cl <- function(true, pred){
+    true <- max.col(true)
+    cres <- max.col(pred)
+    table(true, cres)
+  }
+> test.cl(targetr, predict(olive.nn, 
+  d.olive.sth.train[,-1]))
+    cres
+true   1   2   3   4
+   1  16   0   1   2
+   2   0  42   0   0
+   3   0   1 155   2
+   4   1   1   1  24
+\end{verbatim}
+\newpage  % Insert page break to avoid breaking the R output.
+\begin{verbatim}
+> test.cl(targets, predict(olive.nn, d.olive.sth.test[,-1]))
+    cres
+true  1  2  3  4
+   1  3  2  0  1
+   2  0 12  2  0
+   3  0  2 45  1
+   4  1  2  1  5
+> parea <- c(max.col(predict(olive.nn, 
+   d.olive.sth.train[,-1])),
+   max.col(predict(olive.nn, d.olive.sth.test[,-1])))
+> d.olive.nn <- cbind(rbind(d.olive.sth.train, 
+    d.olive.sth.test), parea)
+> gd <- ggobi(d.olive.nn)[1]
+> glyph_color(gd) <- c(6,3,2,9)[d.olive.nn$area]
+\end{verbatim}
+
+Below are the misclassification tables for the training and test
+samples.
+
+\bigskip
+\emph{Training:}
+\begin{center}
+\begin{tabular}{l@{\hspace{.3in}}r@{\hspace{1em}}r@{\hspace{1em}}r@{\hspace{1em}}r@{\hspace{1.5em}}r@{\hspace{2em}}r}
+\B & & \multicolumn{4}{c}{Predicted \Vbl{area}} & Error \\
+
+\T & & \multicolumn{1}{c}{North}  & \multicolumn{1}{c}{Calabria} & \multicolumn{1}{c}{South}  & \multicolumn{1}{c}{Sicily} &  \\
+\B & & \multicolumn{1}{c}{Apulia} &  & \multicolumn{1}{c}{Apulia} & & \\ \cline{3-7}
+
+\T         & North Apulia & 16 & 0 & {\bf 1} & {\bf 2} & 0.158\\
+\Vbl{area} & Calabria & 0 & 42 & 0 &  0 & 0.000\\
+           & South Apulia & 0 & {\bf 1} & 155 & {\bf 2} & 0.019\\
+\B         & Sicily & {\bf 1} & {\bf 1} & {\bf 1} & 24 & 0.111\\ \cline{3-7}
+\T         &        &         &         &         &    & 0.037
+\end{tabular}
+\end{center}
+
+\bigskip
+
+\emph{Test:}
+\begin{center}
+\begin{tabular}{l@{\hspace{.3in}}r@{\hspace{1em}}r@{\hspace{1em}}r@{\hspace{1em}}r@{\hspace{1.5em}}r@{\hspace{2em}}r}
+\B & & \multicolumn{4}{c}{Predicted \Vbl{area}} & Error \\
+
+\T & & \multicolumn{1}{c}{North}  & \multicolumn{1}{c}{Calabria} & \multicolumn{1}{c}{South}  & \multicolumn{1}{c}{Sicily} &  \\
+\B & & \multicolumn{1}{c}{Apulia} &  & \multicolumn{1}{c}{Apulia} & & \\  \cline{3-7}
+
+\T         & North Apulia & 3 & {\bf 2} & 0 & {\bf 1} & 0.333\\
+\Vbl{area} & Calabria & 0 & 12 & {\bf 2} &  0 & 0.143\\
+           & South Apulia & 0 & {\bf 2} & 45 & {\bf 1} & 0.063\\
+\B         & Sicily & {\bf 1} & {\bf 2} & {\bf 1} & 5 & 0.444\\  \cline{3-7}
+\T         &        &         &         &         &    & 0.156
+\end{tabular}
+\end{center}
+
+\bigskip
+
+\noindent The training error is $9/246=0.037$, and the test error is
+$12/77=0.156$.  The overall errors, as in the random forest model, are
+not uniform across classes.  This is particularly obvious in the test
+error table: The error in classifying North Apulian oils is close to a
+third, and it is even worse for Sicilian oils, which have an almost
+even chance of being misclassified.
+
+Our exploration of the misclassifications is shown in
+Fig.~\ref{olive-nn}.  (The troublesome Sicilian oils have been
+excluded from all plots in this figure.)  Consider first the plots in
+the top row.  The left-hand plot shows the misclassification table.
+Two samples of oils from North Apulia (orange $+$) have been
+incorrectly classified as South Apulian (pink $\times$), and these two
+points have been brushed as filled orange circles.  Note where these
+points fall in the next two plots, which are linked 2D tour
+projections. \index{brushing!linked}\index{tour!grand} One of the two
+misclassified points is on the edge of the cluster of North Apulian
+points, close to the Calabrian cluster. It is understandable that
+there might be some confusion about this case. The other sample is on
+the outer edge of the North Apulian cluster, but it is far from the
+Calabrian cluster ~---~ this should not have been confused.
+
 % Figure 13
-<p>In the bottom row of plots, we follow the same procedure to examine the single North Apulian sample misclassified as South Apulian. It is painted as a filled orange circle in the misclassification plot and viewed in a tour. This point is on the outer edge of the North Apulian cluster, but it is closer to the Calabrian cluster than the South Apulian cluster. It would be understandable for it to be misclassified as Calabrian, so it is puzzling that it is misclassified as South Apulian.</p>
-<p>In summary, a neural network is a black box method for tackling tough classification problems. It will generate different solutions each time the net is fit, some much better than others. When numerical measures suggest that a reasonable model has been found, graphics can be used to inspect the model in more detail.</p>
+\begin{figure*}[htbp]
+\centerline{
+ {\includegraphics[width=1.5in]{chap-class/olive-nn1.pdf}}
+ {\includegraphics[width=1.5in]{chap-class/olive-nn2.pdf}}
+ {\includegraphics[width=1.5in]{chap-class/olive-nn8.pdf}}}
+\smallskip
+\centerline{
+ {\includegraphics[width=1.5in]{chap-class/olive-nn3.pdf}}
+ {\includegraphics[width=1.5in]{chap-class/olive-nn4.pdf}}
+ {\includegraphics[width=1.5in]{chap-class/olive-nn6.pdf}}}
+\caption[Misclassifications of a feed-forward neural network
+classifying the oils from the South]{Misclassifications of a
+feed-forward neural network classifying the oils from the South by
+\Vbl{area}. A representation of the misclassification table {\bf (left
+column)} is linked to projections viewed in a 2D tour. Different
+misclassifications are examined in the top and bottom rows. (The
+Sicilian oils, which would have appeared in the top row of the
+misclassification tables, have been removed from all plots.)  }
+\label{olive-nn}
+\end{figure*}
+
+In the bottom row of plots, we follow the same procedure to examine
+the single North Apulian sample misclassified as South Apulian. It is
+painted as a filled orange circle in the misclassification plot and
+viewed in a \index{tour!grand} tour. This point is on the outer edge
+of the North Apulian cluster, but it is closer to the Calabrian cluster
+than the South Apulian cluster. It would be understandable for it to
+be misclassified as Calabrian, so it is puzzling that it is
+misclassified as South Apulian.
+
+In summary, a neural network is a black box method for tackling tough
+classification problems. It will generate different solutions each
+time the net is fit, some much better than others. When numerical
+measures suggest that a reasonable model has been found, graphics can
+be used to inspect the model in more detail.
+-->
 
 
 
@@ -445,7 +625,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   </div>
   <div class="nav-page nav-page-next">
       <a href="./temporal.html" class="pagination-link">
-        <span class="nav-page-text">Time series</span> <i class="bi bi-arrow-right-short"></i>
+        <span class="nav-page-text">Miscellaneous</span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
