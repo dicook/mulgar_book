@@ -761,25 +761,74 @@ bm 0.18 0.20 0.16 0.31</code></pre>
 <span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>p_bl_bd_lda_means <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(p_bl_bd_lda<span class="sc">$</span>means, <span class="at">species=</span><span class="fu">rownames</span>(p_bl_bd_lda<span class="sc">$</span>means))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>penguins_lda <span class="ot">&lt;-</span> <span class="fu">lda</span>(species <span class="sc">~</span> ., penguins_sub[,<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>], <span class="at">prior =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>, <span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>, <span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>))</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>p_lda_boundaries <span class="ot">&lt;-</span> <span class="fu">explore</span>(penguins_lda, penguins_sub)</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="fu">animate_slice</span>(p_lda_boundaries[p_lda_boundaries<span class="sc">$</span>.TYPE <span class="sc">==</span> <span class="st">"simulated"</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], <span class="at">col=</span>p_lda_boundaries[p_lda_boundaries<span class="sc">$</span>.TYPE <span class="sc">==</span> <span class="st">"simulated"</span>,<span class="dv">6</span>], <span class="at">v_rel=</span><span class="fl">0.02</span>, <span class="at">axes=</span><span class="st">"bottomleft"</span>)</span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="fu">render_gif</span>(p_lda_boundaries[p_lda_boundaries<span class="sc">$</span>.TYPE <span class="sc">==</span> <span class="st">"simulated"</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>],</span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>           <span class="fu">planned_tour</span>(pt1),</span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>           <span class="fu">display_slice</span>(<span class="at">v_rel=</span><span class="fl">0.02</span>, </span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>             <span class="at">col=</span>p_lda_boundaries[ p_lda_boundaries<span class="sc">$</span>.TYPE <span class="sc">==</span> <span class="st">"simulated"</span>,<span class="dv">6</span>], </span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>             <span class="at">axes=</span><span class="st">"bottomleft"</span>),                     <span class="at">gif_file=</span><span class="st">"gifs/penguins_lda_boundaries.gif"</span>,</span>
-<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>           <span class="at">frames=</span><span class="dv">500</span>,</span>
-<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>           <span class="at">loop=</span><span class="cn">FALSE</span></span>
-<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>           )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>p_lda <span class="ot">&lt;-</span> <span class="fu">lda</span>(species <span class="sc">~</span> ., penguins_sub[,<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>], <span class="at">prior =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>, <span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>, <span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>))</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>p_lda_boundaries <span class="ot">&lt;-</span> <span class="fu">explore</span>(p_lda, penguins_sub)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p><img src="gifs/penguins_lda_boundaries.gif" id="fig-lda-4D-boundaries" class="img-fluid" alt="Sliced tour to explore the boundaries produced by the LDA classifier on the penguins data." width="300"></p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Code to run the tour</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">animate_slice</span>(p_lda_boundaries[p_lda_boundaries<span class="sc">$</span>.TYPE <span class="sc">==</span> <span class="st">"simulated"</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], <span class="at">col=</span>p_lda_boundaries[p_lda_boundaries<span class="sc">$</span>.TYPE <span class="sc">==</span> <span class="st">"simulated"</span>,<span class="dv">6</span>], <span class="at">v_rel=</span><span class="fl">0.02</span>, <span class="at">axes=</span><span class="st">"bottomleft"</span>)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="fu">render_gif</span>(p_lda_boundaries[p_lda_boundaries<span class="sc">$</span>.TYPE <span class="sc">==</span> <span class="st">"simulated"</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>],</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>           <span class="fu">planned_tour</span>(pt1),</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>           <span class="fu">display_slice</span>(<span class="at">v_rel=</span><span class="fl">0.02</span>, </span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>             <span class="at">col=</span>p_lda_boundaries[ p_lda_boundaries<span class="sc">$</span>.TYPE <span class="sc">==</span> <span class="st">"simulated"</span>,<span class="dv">6</span>], </span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>             <span class="at">axes=</span><span class="st">"bottomleft"</span>),                     <span class="at">gif_file=</span><span class="st">"gifs/penguins_lda_boundaries.gif"</span>,</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>           <span class="at">frames=</span><span class="dv">500</span>,</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>           <span class="at">loop=</span><span class="cn">FALSE</span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>           )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Project the boundaries into the 2D discriminant space</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>p_lda_b_sub <span class="ot">&lt;-</span> p_lda_boundaries[</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  p_lda_boundaries<span class="sc">$</span>.TYPE <span class="sc">==</span> <span class="st">"simulated"</span>, </span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="dv">6</span>)]</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>p_lda_b_sub_ds <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="fu">as.matrix</span>(p_lda_b_sub[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>]) <span class="sc">%*%</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>  p_lda<span class="sc">$</span>scaling)</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>p_lda_b_sub_ds<span class="sc">$</span>species <span class="ot">&lt;-</span> p_lda_b_sub<span class="sc">$</span>species</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>p_lda_b_sub_ds_p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(p_lda_b_sub_ds, </span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>       <span class="fu">aes</span>(<span class="at">x=</span>LD1, <span class="at">y=</span>LD2, </span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>           <span class="at">colour=</span>species)) <span class="sc">+</span></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha=</span><span class="fl">0.2</span>) <span class="sc">+</span>  </span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_discrete_divergingx</span>(<span class="st">"Zissou 1"</span>) <span class="sc">+</span></span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">aspect.ratio =</span> <span class="dv">1</span>, <span class="at">legend.title =</span> <span class="fu">element_blank</span>()) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="fig-penguins-lda-boundaries" class="quarto-layout-panel">
+<figure class="figure">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-lda-4D-boundaries" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="gifs/penguins_lda_boundaries.gif" class="img-fluid figure-img" alt="Sliced tour to explore the boundaries produced by the LDA classifier on the penguins data." data-ref-parent="fig-penguins-lda-boundaries" width="300"></p>
+<p></p><figcaption class="figure-caption">(a) 4D</figcaption><p></p>
+</figure>
+</div>
+</div>
+<div class="cell quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div class="cell-output-display">
+<div id="fig--lda-2D-boundaries" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="LDA_files/figure-html/fig--lda-2D-boundaries-1.png" class="img-fluid figure-img" data-ref-parent="fig-penguins-lda-boundaries" width="480"></p>
+<p></p><figcaption class="figure-caption">(b) Discriminant space</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<p></p><figcaption class="figure-caption">Figure&nbsp;11.6: Examining the boundaries produced by the LDA model in the full 4D with a slice tour and in the discriminant space.</figcaption><p></p>
+</figure>
+</div>
 </section>
 <section id="exercises" class="level2 unnumbered">
 <h2 class="unnumbered anchored" data-anchor-id="exercises">Exercises</h2>
 <ol type="1">
-<li>Fit an LDA model to the <code>simple_clusters</code> data. Is the LDA model appropriate? Examine the boundaries produced by the model, in 2D.</li>
-<li>Fit an LDA model to the <code>simple_clusters</code> data. Is the LDA model appropriate? Examine the boundaries produced by the model, in 2D.</li>
+<li>For the <code>simple_clusters</code> compute the lda model, and make a plot of the data, with points coloured by the class. Overlay variance-covariance ellipses, and a <span class="math inline">\(+\)</span> indicating the sample mean for each class. Is it reasonable to assume that the two classes are sampled from populations with the same variance-covariance?</li>
+<li>Examine the clusters corresponding to the classes in the <code>clusters</code> data set, using a tour. Based on the shape of the data is the assumption of equal variance-coviance reasonable?</li>
+<li>Examine the pooled variance-covariance for the <code>clusters</code> data, overlaid on the data in a tour on the 5D. Does it fit the variance of each cluster nicely?</li>
+<li>Fit an LDA model to the <code>simple_clusters</code> data. Examine the boundaries produced by the model, in 2D.</li>
+<li>Fit an LDA model to the <code>clusters</code> data. Examine the boundaries produced by the model in 5D.</li>
 <li>Assess the LDA assumptions for the <code>multicluster</code> data. Is LDA an appropriate model?</li>
 </ol>
 
