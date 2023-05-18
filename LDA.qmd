@@ -253,10 +253,12 @@ As a further check, we could generate three ellipses corresponding to the pooled
 
 ```{r}
 #| message: false
-#| eval: false
 #| code-fold: false
 library(tourr)
+# Create an ellipse corresponding to pooled vc
 pool_ell <- gen_vc_ellipse(p_vc_pool, xm=rep(0, ncol(p_vc_pool)))
+
+# Add means to produce ellipses for each species
 p_lda_pool <- data.frame(rbind(pool_ell +
                                  matrix(rep(p_lda$means[1,],
                                             each=nrow(pool_ell)),
@@ -269,10 +271,56 @@ p_lda_pool <- data.frame(rbind(pool_ell +
                                  matrix(rep(p_lda$means[3,],
                                             each=nrow(pool_ell)),
                                         ncol=4)))
-p_lda_pool$species <- rep(unique(penguins_sub$species),
-                          rep(nrow(pool_ell), 3))
-animate_xy(p_lda_pool[,1:4], col=p_lda_pool$species)
+# Create one data set with means, data, ellipses
+p_lda_pool$species <- factor(rep(levels(penguins_sub$species),
+                          rep(nrow(pool_ell), 3)))
+p_lda_pool$type <- "ellipse"
+p_lda_means <- data.frame(p_lda$means,
+                          species=factor(rownames(p_lda$means)),
+                          type="mean")
+p_data <- data.frame(penguins_sub[,1:5], type="data")
+p_lda_all <- bind_rows(p_lda_means,
+                       p_data,
+                       p_lda_pool)
+p_lda_all$type <- factor(p_lda_all$type, 
+                         levels=c("mean", "data", "ellipse"))
+shapes <- c(3, 4, 20)
+p_pch <- shapes[p_lda_all$type]
 ```
+
+```{r}
+#| eval: false
+#| message: false
+# Code to run the tour
+animate_xy(p_lda_all[,1:4], col=p_lda_all$species, pch=p_pch)
+load("data/penguins_tour_path.rda")
+render_gif(p_lda_all[,1:4], 
+           planned_tour(pt1), 
+           display_xy(col=p_lda_all$species, pch=p_pch, 
+                      axes="off", half_range = 0.7),
+           gif_file="gifs/penguins_lda_pooled1.gif",
+           frames=500,
+           loop=FALSE)
+
+# Focus on one species
+render_gif(p_lda_all[p_lda_all$species == "Gentoo",1:4], 
+           planned_tour(pt1), 
+           display_xy(col="#F5191C", 
+                      pch=p_pch[p_lda_all$species == "Gentoo"], 
+                      axes="off", half_range = 0.7),
+           gif_file="gifs/penguins_lda_pooled2.gif",
+           frames=500,
+           loop=FALSE)
+```
+
+::: {#fig-penguins-lda-ellipses layout-ncol=2}
+
+![All species](gifs/penguins_lda_pooled1.gif){#fig-lda-pooled1 fig-alt="FIX ME" width=300}
+
+![Gentoo](gifs/penguins_lda_pooled2.gif){#fig-lda-pooled1 fig-alt="FIX ME" width=300}
+
+Tour of penguins data, pooled variance-covariance ellipse overlaid. We can see that the pooled variance-covariance is a reasonable estimate of the spread of the data. 
+:::
 
 ## Examining results
 
