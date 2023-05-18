@@ -6,7 +6,7 @@ Useful explanations can be found in @VR02 and @Ri96. A good general treatment of
 
 <!-- Algorithmic methods have overtaken parametric methods in the practice of supervised classification.  A parametric method such as linear discriminant analysis (LDA) yields a set of interpretable output parameters, so it leaves a clear trail helping us to understand what was done to produce the results.  An algorithmic method, on the other hand, is more or less a black box, with various input parameters that are adjusted to tune the algorithm.  The algorithm's input and output parameters do not always correspond in any obvious way to the interpretation of the results.  Because if it's simplicity, if the assumptions (approximately) hold, LDA can provide an elegant classification solution.-->
 
-## Definition
+## About the model and extracting the key elements
 
 Fisher's linear discriminant [@Fi36] computes a linear combination of the variables that separates two classes by comparing the differences between class means with the variance of values within each class. It makes no assumptions about the distribution of the data. 
 
@@ -77,11 +77,11 @@ to check the underlying assumptions on which it depends: (1) that the cluster st
 #| message: false
 #| fig-width: 8
 #| fig-height: 4
+#| code-fold: false
 library(dplyr)
 library(colorspace)
 library(ggplot2)
 library(mulgar)
-library(MASS)
 library(ggpubr)
 load("data/penguins_sub.rda")
 lda1 <- ggplot(penguins_sub, aes(x=bl, 
@@ -91,6 +91,7 @@ lda1 <- ggplot(penguins_sub, aes(x=bl,
   scale_color_discrete_divergingx("Zissou 1") +
   xlim(-2.5, 3) + ylim(-2.5, 2.5) +
   ggtitle("(a)") +
+  theme_minimal() +
   theme(aspect.ratio = 1) 
 p_ell <- NULL
 for (i in unique(penguins_sub$species)) {
@@ -106,6 +107,7 @@ lda2 <- ggplot(p_ell, aes(x=bl,
   scale_color_discrete_divergingx("Zissou 1") +
   xlim(-2.5, 3) + ylim(-2.5, 2.5) +
   ggtitle("(b)") +
+  theme_minimal() +
   theme(aspect.ratio = 1)
 ggarrange(lda1, lda2, ncol=2, 
           common.legend = TRUE, legend = "bottom")
@@ -126,6 +128,7 @@ lda3 <- ggplot(bushfires, aes(x=log_dist_cfa,
   scale_color_discrete_divergingx("Zissou 1") +
   xlim(6, 11) + ylim(-1, 10.5) +
   ggtitle("(a)") +
+  theme_minimal() +
   theme(aspect.ratio = 1)
 b_ell <- NULL
 for (i in unique(bushfires$cause)) {
@@ -141,20 +144,21 @@ lda4 <- ggplot(b_ell, aes(x=log_dist_cfa,
   scale_color_discrete_divergingx("Zissou 1") +
   xlim(6, 11) + ylim(-1, 10.5) +
   ggtitle("(b)") +
+  theme_minimal() +
   theme(aspect.ratio = 1)
 ggarrange(lda3, lda4, ncol=2, 
           common.legend = TRUE, legend = "bottom")
 
 ```
 
+This approach extends to any dimension. We would use the same projection sequence to view both the data and the variance-covariance ellipses, as in @fig-penguins-lda-ellipses. It can be seen that there is some difference in the shape and size of the ellipses in some projections, as there is with the spread of points in the projected data. However, 
+
 ```{r}
-#| label: fig-LDA-4D
-#| fig-cap: "Examining the 4D normality assumption"
 #| message: false
-#| fig-width: 8
-#| fig-height: 4
 #| eval: false
+#| code-fold: false
 library(tourr)
+library(mulgar)
 p_ell <- NULL
 for (i in unique(penguins_sub$species)) {
   x <- penguins_sub %>% dplyr::filter(species == i)
@@ -208,10 +212,12 @@ load("data/penguins_sub.rda")
 p_bl_bd_lda <- lda(species~bl+bd, data=penguins_sub, 
                                   prior = c(1/3, 1/3, 1/3))
 options(digits=2)
-p_bl_bd_lda
 ```
 
-The fitted model 
+The fitted model parameters are the means: 
+$\bar{x}_{Adelie} = ($ `r p_bl_bd_lda$means[1,1]`, `r p_bl_bd_lda$means[1,2]`$)^\top$, $\bar{x}_{Chinstrap} = ($ `r p_bl_bd_lda$means[2,1]`, `r p_bl_bd_lda$means[2,2]`$)^\top$, and $\bar{x}_{Gentoo} = ($ `r p_bl_bd_lda$means[3,1]`, `r p_bl_bd_lda$means[3,2]`$)^\top$. 
+
+The boundaries can be examined using the `explore()` function from the `classifly` package, which generates observations in the range of all values of`bl` and `bd` and predicts their class. We can overlay the sample means and an ellipse corresponding to the variance-covariance also, by extracting these from the model object.
 
 ```{r}
 #| message: false
@@ -221,12 +227,14 @@ The fitted model
 #| fig-height: 3
 #| code-fold: false
 p_bl_bd_lda_boundaries <- explore(p_bl_bd_lda, penguins_sub)
-ggplot(p_bl_bd_lda_boundaries) +
+p_bl_bd_lda_m1 <- ggplot(p_bl_bd_lda_boundaries) +
   geom_point(aes(x=bl, y=bd, colour=species, shape=.TYPE)) + 
   scale_color_discrete_divergingx("Zissou 1") +
   scale_shape_manual(values=c(46, 16)) +
   theme_minimal() +
   theme(aspect.ratio = 1, legend.position = "none")
+
+p_bl_bd_lda_means <- data.frame(p_bl_bd_lda$means, species=rownames(p_bl_bd_lda$means))
 
 ```
 
