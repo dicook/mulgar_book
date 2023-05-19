@@ -387,66 +387,6 @@ Focusing on class 8 in the fake_trees data, relative to nearby clusters 1 and 6.
 :::
 
 
-## Examining misclassifications {#sec-forest-errors}
-
-To examine misclassifications, we can create a separate variable that identifies the errors or not. Constructing this for each class, and exploring in small steps is helpful. Let's do this using the random forest model for the penguins fit. There are four Adelie penguins confused with Chinstrap, and similarly four Chinstrap confused with Adelie. There is one Gentoo penguin confused with a Chinstrap. This is interesting, because the Gentoo cluster is well separated from the clusters of the other two penguin species. 
-
-```{r}
-penguins_rf
-```
-
-```{r}
-#| code-fold: false
-penguins_errors <- penguins_sub %>%
-  mutate(err = ifelse(penguins_rf$predicted != penguins_rf$y, 1, 0))
-```
-
-```{r}
-#| eval: false
-symbols <- c(1, 16)
-p_pch <- symbols[penguins_errors$err+1]
-p_cex <- rep(1, length(p_pch))
-p_cex[penguins_errors$err==1] <- 2
-animate_xy(penguins_errors[,1:4],
-           col=penguins_errors$species,
-           pch=p_pch, cex=p_cex)
-render_gif(penguins_errors[,1:4],
-           grand_tour(),
-           display_xy(col=penguins_errors$species,
-                      pch=p_pch, cex=p_cex),
-           gif_file="gifs/p_rf_errors.gif",
-           frames=500,
-           width=400,
-           height=400)
-
-animate_xy(penguins_errors[,1:4],
-           guided_tour(lda_pp(penguins_errors$species)),
-           col=penguins_errors$species,
-           pch=pch)
-
-render_gif(penguins_errors[,1:4],
-           guided_tour(lda_pp(penguins_errors$species)),
-           display_xy(col=penguins_errors$species,
-                      pch=p_pch, cex=p_cex),
-           gif_file="gifs/p_rf_errors_guided.gif",
-           frames=500,
-           width=400,
-           height=400,
-           loop=FALSE)
-
-```
-
-@fig-p-errors shows a grand tour, and a guided tour, of the penguins data, where the misclassifications are marked by an asterisk. (If these gifs are too small to see the different glyphs, zoom in to make the figures larger.) It can be seen that the one Gentoo penguin that is mistaken for a Chinstrap by the forest model is always moving with its other Gentoo (yellow) family. It can occasionally be seen to be on the edge of the group, closer to the Chinstraps, in some projections in the grand tour. But in the final projection from the guided tour it is hiding well among the other Gentoos. This is an observation where a mistake has been made because of the inadequacies of the forest algorithm. Forests are only as good as the trees they are constructed from, and we have seen from @sec-trees that the splits only on single variables done by trees does not adequately utilise the covariance structure in each class. They make mistakes based on the boxy nature of the boundaries. This can carry through to the forests model. Even though many trees are combined to generate smoother boundaries, forests do not effectively utilise covariance in clusters either. The other mistakes, where Chinstrap are predicted to be Adelie, and vice versa, are more sensible. These mistaken observations can be seen to lie in the border region between the two clusters, and reflect genuine uncertainty about the classification of penguins in these two species.
-
-::: {#fig-p-errors layout-ncol=2}
-
-![Exploring misclassifications using a grand tour.](gifs/p_rf_errors.gif){#fig-rf-errors fig-alt="FIX ME" width=300}
-
-![Exploring misclassifications using a guided tour.](gifs/p_rf_errors_guided.gif){#fig-rf-errors-guided fig-alt="FIX ME" width=300}
-
-Examining the misclassified cases (marked as asterisks) from a random forest fit to the penguins data. The one Gentoo penguin mistaken for a Chinstrap is a mistake made because the forest method suffers from the same problems as trees - cutting on single variables rather than effectively using covariance structure. The mistakes between the Adelie and Chinstrap penguins are more sensible because all of these observations lie is the bordering regions between the two clusters.
-:::
-
 ## Exercises {-}
 
 1. Using a grand tour compare the boundaries from the random forest model on the penguins data to that of (a) a default tree model, (b) an LDA model. Is it less boxy than the tree model, but still more boxy than that of the LDA model?
@@ -454,8 +394,6 @@ Examining the misclassified cases (marked as asterisks) from a random forest fit
 3. Fit a random forest model to the `bushfires` data using the `cause` variable as the class. It is a highly imbalanced classification problem. What is the out-of-bag error rate for the forest? Are there some classes that have lower error rate than others? Examine the 4D votes matrix with a tour, and describe the confusion between classes. This is interesting because it is difficult to accurately classify the fire ignition cause, and only some groups are often confused with each other. You should be able to see this from the 3D votes matrix. 
 4. Explore the 5D votes matrix for a random forest on the sketches data. Why does it look star-shaped?
 5. Choose a cluster (or group of clusters) from the fake_trees data (2, 3, 4, 5, 7, 9) to explore in detail like done in @sec-forest-errors. Be sure to choose which PCs are the most useful using a tour, and follow-up by making a scatterplot showing the best distinction between your chosen cluster and the other observations. 
-6. Examine misclassifications for the fake_trees data between cluster 1 and 0, using the votes matrix instead of the principal components. Describe where these errors fall in the simplex.
-7. Examine the misclassifications for the sketches data, focusing on cactus sketches that were mistaken for bananas. Follow up by plotting the images of these errors, and describe whether the classifier is correct that these sketches are so poor their true cactus identity cannot be determined. 
 
 ```{r}
 #| eval: false
@@ -617,17 +555,3 @@ render_gif(s_rf_v_p_s[,1:5],
            gif_file="gifs/sketches_votes.gif",
            frames=500)  
 ```
-
-<!--
-1. For the \Data{Italian Olive Oils}:
-    a. Split the samples from North Italy into $2/3$ training and
-$1/3$ test samples for each area.
-    b. Build a tree model to classify the oils by `area` for the
-three areas of North Italy. Which are the most important
-variables? Make plots of these variables. What is the accuracy of the
-model for the training and test sets?
-    c. Build a random forest to classify oils into the three areas of
-North Italy. Compare the order of importance of variables with what
-you found from a single tree. Make a parallel coordinate plot in the
-order of variable importance.
--->
