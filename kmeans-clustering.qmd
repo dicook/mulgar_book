@@ -1,5 +1,6 @@
 # $k$-means clustering
 
+One of the simplest and efficient techniques for clustering data is the $k$-means algorithm. The algorithm begins with a choice for $k$, the number of clusters to divide the data into. It is seeded with $k$ initial means, and sequentially iterates through the observations, assigning them to the nearest mean, and re-calculating the $k$ means. It stops at a given number of iterations or when points no longer change clusters. The algorithm will tend to segment the data into roughly equal sized, or spherical clusters, and thus will work well if the clusters are separated and equally spherical in shape. 
 
 ::: info
 The key elements to examine in a k-means clustering algorithm result  are:
@@ -7,3 +8,107 @@ The key elements to examine in a k-means clustering algorithm result  are:
 - means 
 - boundaries 
 :::
+
+@fig-km-2D shows the results of $k$-means clustering on the 2D `simple_clusters` data and two variables of the penguins data. We can see that it works well when the clusters are spherical, but for the penguins data it fails because the shape of the clusters is elliptical. It actually makes a mistake that would not be made if we simply visually clustered: cluster 3 has grouped points across a gap, a divide that visually we would all agree should form a separation.
+
+
+```{r}
+#| label: fig-km-2D
+#| fig-cap: "Examining $k$-means clustering results for simple clusters (a) and two variables of the penguins data (b). The means are indicated by a $+$. The results are perfect for the simple clusters but not for the penguins data. The penguin clusters are elliptically shaped which is not captured by $k$-means. Cluster 3 has observations grouped across a gap in the data."
+#| fig-width: 8
+#| fig-height: 4
+#| code-fold: false
+#| message: false
+library(mulgar)
+library(ggplot2)
+library(dplyr)
+library(colorspace)
+library(patchwork)
+data("simple_clusters")
+load("data/penguins_sub.rda")
+
+set.seed(202305)
+sc_bl_bd_km <- kmeans(simple_clusters[,1:2], centers=2, 
+                     iter.max = 50, nstart = 5)
+sc_bl_bd_km_means <- data.frame(sc_bl_bd_km$centers) %>%
+  mutate(cl = factor(rownames(sc_bl_bd_km$centers)))
+sc_bl_bd_km_d <- simple_clusters[,1:2] %>% 
+  mutate(cl = factor(sc_bl_bd_km$cluster))
+
+sc_bl_bd_km_p <- ggplot() +
+  geom_point(data=sc_bl_bd_km_d, 
+             aes(x=x1, y=x2, colour=cl), 
+             shape=16) +
+  geom_point(data=sc_bl_bd_km_means, 
+             aes(x=x1, y=x2, colour=cl), 
+             shape=3, size=5) +
+    scale_color_discrete_divergingx("Zissou 1") +
+  ggtitle("(a)") +
+  theme_minimal() +
+  theme(aspect.ratio = 1, 
+        legend.position = "bottom",
+        legend.title = element_blank()) 
+
+p_bl_bd_km <- kmeans(penguins_sub[,1:2], centers=3, 
+                     iter.max = 50, nstart = 5)
+p_bl_bd_km_means <- data.frame(p_bl_bd_km$centers) %>%
+  mutate(cl = factor(rownames(p_bl_bd_km$centers)))
+p_bl_bd_km_d <- penguins_sub[,1:2] %>% 
+  mutate(cl = factor(p_bl_bd_km$cluster))
+
+p_bl_bd_km_p <- ggplot() +
+  geom_point(data=p_bl_bd_km_d, 
+             aes(x=bl, y=bd, colour=cl), shape=16) +
+  geom_point(data=p_bl_bd_km_means, 
+             aes(x=bl, y=bd, colour=cl), shape=3, size=5) +
+    scale_color_discrete_divergingx("Zissou 1") +
+  ggtitle("(b)") +
+  theme_minimal() +
+  theme(aspect.ratio = 1, 
+        legend.position = "bottom",
+        legend.title = element_blank()) 
+
+sc_bl_bd_km_p + p_bl_bd_km_p + plot_layout(ncol=2)
+```
+
+This approach extends to high-dimensions. One colours observations by the cluster label, and overlays the final cluster means. If we see gaps in points in a single cluster it would mean that $k$-means fails to see important cluster structure. This is what happens with the 4D penguins data as shown in @fig-p-km.
+
+```{r}
+#| code-fold: false
+p_km <- kmeans(penguins_sub[,1:4], centers=3, 
+                     iter.max = 50, nstart = 5)
+p_km_means <- data.frame(p_km$centers) %>%
+  mutate(cl = factor(rownames(p_km$centers)))
+p_km_d <- penguins_sub[,1:4] %>% 
+  mutate(cl = factor(p_km$cluster))
+```
+
+```{r}
+#| eval: false
+library(tourr)
+p_km_means <- p_km_means %>%
+  mutate(type = "mean")
+p_km_d <- p_km_d %>%
+  mutate(type = "data")
+p_km_all <- bind_rows(p_km_means, p_km_d)
+p_km_all$type <- factor(p_km_all$type, levels=c("mean", "data"))
+p_pch <- c(3, 20)[as.numeric(p_km_all$type)]
+p_cex <- c(3, 1)[as.numeric(p_km_all$type)]
+animate_xy(p_km_all[,1:4], col=p_km_all$cl, 
+           pch=p_pch, cex=p_cex, axes="bottomleft")
+render_gif(p_km_all[,1:4],
+           grand_tour(),
+           display_xy(col=p_km_all$cl, 
+                      pch=p_pch, 
+                      cex=p_cex, 
+                      axes="bottomleft"),
+           gif_file="gifs/p_km.gif",
+           width=400,
+           height=400,
+           frames=500)
+```
+![Exploring the k-means clustering result for the 4D penguins data.](gifs/p_km.gif){#fig-p-km fig-alt="FIX ME" width=300}
+
+Generally, there is no need to choose $k$ ahead of time. One would re-fit $k$-means with various choices of $k$, and compare the `tot.withinss` and examine the clusters visually, to decide on the optimal final value of $k$. 
+
+## Exercises {-}
