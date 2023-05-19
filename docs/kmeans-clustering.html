@@ -328,7 +328,9 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#exercises" id="toc-exercises" class="nav-link active" data-scroll-target="#exercises">Exercises</a></li>
+  <li><a href="#examining-results-in-2d" id="toc-examining-results-in-2d" class="nav-link active" data-scroll-target="#examining-results-in-2d"><span class="toc-section-number">7.1</span>  Examining results in 2D</a></li>
+  <li><a href="#in-high-dimensions" id="toc-in-high-dimensions" class="nav-link" data-scroll-target="#in-high-dimensions"><span class="toc-section-number">7.2</span>  In high dimensions</a></li>
+  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises">Exercises</a></li>
   </ul>
 </nav>
     </div>
@@ -360,6 +362,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li>boundaries</li>
 </ul>
 </div>
+<section id="examining-results-in-2d" class="level2" data-number="7.1">
+<h2 data-number="7.1" class="anchored" data-anchor-id="examining-results-in-2d"><span class="header-section-number">7.1</span> Examining results in 2D</h2>
 <p><a href="#fig-km-2D">Figure&nbsp;<span>7.1</span></a> shows the results of <span class="math inline">\(k\)</span>-means clustering on the 2D <code>simple_clusters</code> data and two variables of the penguins data. We can see that it works well when the clusters are spherical, but for the penguins data it fails because the shape of the clusters is elliptical. It actually makes a mistake that would not be made if we simply visually clustered: cluster 3 has grouped points across a gap, a divide that visually we would all agree should form a separation.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mulgar)</span>
@@ -381,7 +385,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>sc_bl_bd_km_p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>() <span class="sc">+</span></span>
 <span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data=</span>sc_bl_bd_km_d, </span>
 <span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>             <span class="fu">aes</span>(<span class="at">x=</span>x1, <span class="at">y=</span>x2, <span class="at">colour=</span>cl), </span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>             <span class="at">shape=</span><span class="dv">16</span>) <span class="sc">+</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>             <span class="at">shape=</span><span class="dv">16</span>, <span class="at">alpha=</span><span class="fl">0.4</span>) <span class="sc">+</span></span>
 <span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data=</span>sc_bl_bd_km_means, </span>
 <span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>             <span class="fu">aes</span>(<span class="at">x=</span>x1, <span class="at">y=</span>x2, <span class="at">colour=</span>cl), </span>
 <span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>             <span class="at">shape=</span><span class="dv">3</span>, <span class="at">size=</span><span class="dv">5</span>) <span class="sc">+</span></span>
@@ -401,26 +405,31 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>p_bl_bd_km_p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>() <span class="sc">+</span></span>
 <span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data=</span>p_bl_bd_km_d, </span>
-<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>             <span class="fu">aes</span>(<span class="at">x=</span>bl, <span class="at">y=</span>bd, <span class="at">colour=</span>cl), <span class="at">shape=</span><span class="dv">16</span>) <span class="sc">+</span></span>
-<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data=</span>p_bl_bd_km_means, </span>
-<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>             <span class="fu">aes</span>(<span class="at">x=</span>bl, <span class="at">y=</span>bd, <span class="at">colour=</span>cl), <span class="at">shape=</span><span class="dv">3</span>, <span class="at">size=</span><span class="dv">5</span>) <span class="sc">+</span></span>
-<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_discrete_divergingx</span>(<span class="st">"Zissou 1"</span>) <span class="sc">+</span></span>
-<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"(b)"</span>) <span class="sc">+</span></span>
-<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">aspect.ratio =</span> <span class="dv">1</span>, </span>
-<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.position =</span> <span class="st">"bottom"</span>,</span>
-<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.title =</span> <span class="fu">element_blank</span>()) </span>
-<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>sc_bl_bd_km_p <span class="sc">+</span> p_bl_bd_km_p <span class="sc">+</span> <span class="fu">plot_layout</span>(<span class="at">ncol=</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>             <span class="fu">aes</span>(<span class="at">x=</span>bl, <span class="at">y=</span>bd, <span class="at">colour=</span>cl), </span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>             <span class="at">shape=</span><span class="dv">16</span>, <span class="at">alpha=</span><span class="fl">0.4</span>) <span class="sc">+</span></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data=</span>p_bl_bd_km_means, </span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>             <span class="fu">aes</span>(<span class="at">x=</span>bl, <span class="at">y=</span>bd, <span class="at">colour=</span>cl), </span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>             <span class="at">shape=</span><span class="dv">3</span>, <span class="at">size=</span><span class="dv">5</span>) <span class="sc">+</span></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_discrete_divergingx</span>(<span class="st">"Zissou 1"</span>) <span class="sc">+</span></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"(b)"</span>) <span class="sc">+</span></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">aspect.ratio =</span> <span class="dv">1</span>, </span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.position =</span> <span class="st">"bottom"</span>,</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.title =</span> <span class="fu">element_blank</span>()) </span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>sc_bl_bd_km_p <span class="sc">+</span> p_bl_bd_km_p <span class="sc">+</span> <span class="fu">plot_layout</span>(<span class="at">ncol=</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div id="fig-km-2D" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="kmeans-clustering_files/figure-html/fig-km-2D-1.png" class="img-fluid figure-img" width="768"></p>
+<p><img src="kmeans-clustering_files/figure-html/fig-km-2D-1.png" class="img-fluid figure-img" width="576"></p>
 <p></p><figcaption class="figure-caption">Figure&nbsp;7.1: Examining <span class="math inline">\(k\)</span>-means clustering results for simple clusters (a) and two variables of the penguins data (b). The means are indicated by a <span class="math inline">\(+\)</span>. The results are perfect for the simple clusters but not for the penguins data. The penguin clusters are elliptically shaped which is not captured by <span class="math inline">\(k\)</span>-means. Cluster 3 has observations grouped across a gap in the data.</figcaption><p></p>
 </figure>
 </div>
 </div>
 </div>
+</section>
+<section id="in-high-dimensions" class="level2" data-number="7.2">
+<h2 data-number="7.2" class="anchored" data-anchor-id="in-high-dimensions"><span class="header-section-number">7.2</span> In high dimensions</h2>
 <p>This approach extends to high-dimensions. One colours observations by the cluster label, and overlays the final cluster means. If we see gaps in points in a single cluster it would mean that <span class="math inline">\(k\)</span>-means fails to see important cluster structure. This is what happens with the 4D penguins data as shown in <a href="#fig-p-km">Figure&nbsp;<span>7.2</span></a>.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>p_km <span class="ot">&lt;-</span> <span class="fu">kmeans</span>(penguins_sub[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], <span class="at">centers=</span><span class="dv">3</span>, </span>
@@ -458,13 +467,18 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <div id="fig-p-km" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="gifs/p_km.gif" class="img-fluid figure-img" alt="FIX ME" width="300"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;7.2: Exploring the k-means clustering result for the 4D penguins data.</figcaption><p></p>
+<p><img src="gifs/p_km.gif" class="img-fluid figure-img" alt="FIX ME" width="400"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;7.2: Exploring the k-means clustering result for the 4D penguins data. You can see cluster 2 clearly separated from the other observations. Cluster 3, like in the 2D example, is a mix of observations across a gap. Even the mean of the cluster is almost in the gap.</figcaption><p></p>
 </figure>
 </div>
-<p>Generally, there is no need to choose <span class="math inline">\(k\)</span> ahead of time. One would re-fit <span class="math inline">\(k\)</span>-means with various choices of <span class="math inline">\(k\)</span>, and compare the <code>tot.withinss</code> and examine the clusters visually, to decide on the optimal final value of <span class="math inline">\(k\)</span>.</p>
+<p>Generally, there is no need to choose <span class="math inline">\(k\)</span> ahead of time. One would re-fit <span class="math inline">\(k\)</span>-means with various choices of <span class="math inline">\(k\)</span>, and compare the <code>tot.withinss</code> and examine the clusters visually, to decide on the optimal final value of <span class="math inline">\(k\)</span>. This can be assessed in a similar way to the scree plot for PCA.</p>
+</section>
 <section id="exercises" class="level2 unnumbered">
 <h2 class="unnumbered anchored" data-anchor-id="exercises">Exercises</h2>
+<ol type="1">
+<li>Compute a <span class="math inline">\(k\)</span>-means clustering for the <code>fake_trees</code> data, varying <span class="math inline">\(k\)</span> to about 20. Choose your best <span class="math inline">\(k\)</span>, and examine the solution using the first 10 PCs on the data. It should capture the data quite nicely, although it will break up each branch into multiple clusters.</li>
+<li>Compute a <span class="math inline">\(k\)</span>-means clustering of the first four PCs on the <code>aflw</code> data. Examine the best solution (you choose which <span class="math inline">\(k\)</span>), and describe how it divides the data. By examining the means, can you tell if it extracts clusters of offensive vs defensive vs midfield players? Or does it break the data into high skills vs low skills?</li>
+</ol>
 
 
 </section>
