@@ -45,7 +45,7 @@ rpart.plot(p_bl_bd_tree, box.palette="Grays")
 p_bl_bd_tree_boundaries <- explore(p_bl_bd_tree, penguins_sub)
 ggplot(p_bl_bd_tree_boundaries) +
   geom_point(aes(x=bl, y=bd, colour=species, shape=.TYPE)) + 
-  scale_color_discrete_divergingx("Zissou 1") +
+  scale_color_discrete_divergingx(palette="Zissou 1") +
   scale_shape_manual(values=c(46, 16)) +
   theme_minimal() +
   theme(aspect.ratio = 1, legend.position = "none")
@@ -98,7 +98,7 @@ A random forest is a computationally intensive method, a "black box" classifier,
 
 Here we show how to use the `randomForest` [@Li06] votes matrix for the penguins data to investigate confusion between classes, and observations which are problematic to classify. With only three classes the votes matrix is only a 2D object, and thus easy to examine. With four or more classes the votes matrix needs to be examined in a tour. 
 
-The random forest fit is very good, with only a few misclassifications. 
+
 
 ```{r}
 #| message: false
@@ -149,7 +149,7 @@ p_ternary <- ggplot() +
             nudge_x=c(-0.06, 0.07, 0),
             nudge_y=c(0.05, 0.05, -0.05)) +
   geom_point(data=p_rf_v_p, aes(x=x1, y=x2, colour=species), size=2, alpha=0.5) +
-  scale_color_discrete_divergingx("Zissou 1") +
+  scale_color_discrete_divergingx(palette="Zissou 1") +
   theme_map() +
   theme(aspect.ratio=1, legend.position="none")
 ```
@@ -265,7 +265,7 @@ This pattern is what can be inferred from the confusion matrix, but we can't det
 
 \index{R package!\RPackage{randomForest}}
 
-### Using variable importance
+### Using variable importance {#sec-forest-var-imp}
 
 The variable importance score across all classes, and for each class is useful for choosing variables to enter into a tour, to explore class differences. This is particularly so when there are many variables, as in the fake_trees data. We would also expect that this data will have a difference between importance for some classes.
 
@@ -393,7 +393,7 @@ Focusing on class 8 in the fake_trees data, relative to nearby clusters 1 and 6.
 2. Tinker with the parameters of the tree model to force it to fit a tree more closely to the data. Compare the boundaries from this with the default tree, and with the forest model. Is it less boxy than the default tree, but more boxy than the forest model?
 3. Fit a random forest model to the `bushfires` data using the `cause` variable as the class. It is a highly imbalanced classification problem. What is the out-of-bag error rate for the forest? Are there some classes that have lower error rate than others? Examine the 4D votes matrix with a tour, and describe the confusion between classes. This is interesting because it is difficult to accurately classify the fire ignition cause, and only some groups are often confused with each other. You should be able to see this from the 3D votes matrix. 
 4. Explore the 5D votes matrix for a random forest on the sketches data. Why does it look star-shaped?
-5. Choose a cluster (or group of clusters) from the fake_trees data (2, 3, 4, 5, 7, 9) to explore in detail like done in @sec-forest-errors. Be sure to choose which PCs are the most useful using a tour, and follow-up by making a scatterplot showing the best distinction between your chosen cluster and the other observations. 
+5. Choose a cluster (or group of clusters) from the fake_trees data (2, 3, 4, 5, 7, 9) to explore in detail like done in @sec-forest-var-imp. Be sure to choose which PCs are the most useful using a tour, and follow-up by making a scatterplot showing the best distinction between your chosen cluster and the other observations. 
 
 ```{r}
 #| eval: false
