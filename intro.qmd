@@ -69,8 +69,7 @@ render_gif(simple_clusters[,1:2],
            apf = 1/100,
            frames = 1000,
            width = 400, 
-           height = 300,
-           loop = FALSE)
+           height = 300)
 ```
 
 ::: {#fig-explain-1D layout="[[40, 60]]"}
@@ -415,13 +414,100 @@ ggplot(proj_points, aes(x, y)) +
 
 ## What can you learn?
 
+There are two ways of detecting structure in tours:
+
+- patterns in a single low-dimensional projection
+- movement patterns
+
+with the latter being especially useful when displaying the projected data as a scatterplot. @fig-example-structure shows examples of patterns we typically look for when making a scatterplot of data. These include clustering, linear and non-linear association, outliers, barriers where there is a sharp edge beyond which no observations are seen. Not shown, but it also might be possible to observe multiple modes, or density of observations, L-shapes, discreteness or uneven spread of points. The tour is especially useful if these patterns are only visible in combinations of variables. 
+
 ```{r}
+#| label: fig-example-structure
+#| fig-width: 10
+#| fig-height: 2.5
+#| out-width: 100%
+#| fig-cap: "Example structures that might be visible in a 2D projection that imply presence of structure in high dimensions. These include clusters, linear and non-linear association, outliers and barriers."
+#| echo: false
+library(mulgar)
+library(ggplot2)
+library(patchwork)
+library(geozoo)
+library(dplyr)
+data("clusters")
+data("plane")
+data("plane_nonlin")
+
+plane_outliers <- plane
+plane_outliers[101,] <- c(2, 2, -2, 0, 0)
+plane_outliers[102,] <- c(0, 0, 0,-2, -2)
+
+barrier <- data.frame(x1=runif(176)) %>%
+  mutate(x2=runif(176, min=0, max=1-x1))
+
+set.seed(314)
+e1 <- ggplot(clusters[sample(1:300, 156),], aes(x=x3, y=x2)) +
+  geom_point(colour="#EC5C00", size=3, alpha=0.8) +
+  ggtitle("(a) gaps or clusters") +
+  theme_void() +
+  theme(aspect.ratio = 1,
+        panel.border = element_rect(fill=NA,
+                                    colour="black"),
+        plot.margin = margin(0, 5, 0, 5))
+e2 <- ggplot(plane_nonlin, aes(x=x1, y=x2)) +
+  geom_point(colour="#EC5C00", size=3, alpha=0.8) +
+  ggtitle("(b) non-linear association") +
+  theme_void() +
+  theme(aspect.ratio = 1,
+        panel.border = element_rect(fill=NA,
+                                    colour="black"),
+        plot.margin = margin(0, 5, 0, 5))
+
+e3 <- ggplot(plane_outliers, aes(x=x1, y=x2)) +
+  geom_point(colour="#EC5C00", size=3, alpha=0.8) +
+  ggtitle("(c) association + outlier") +
+  theme_void() +
+  theme(aspect.ratio = 1,
+        panel.border = element_rect(fill=NA,
+                                    colour="black"),
+        plot.margin = margin(0, 5, 0, 5))
+
+e4 <- ggplot(barrier, aes(x=x1, y=x2)) +
+  geom_point(colour="#EC5C00", size=3, alpha=0.8) +
+  ggtitle("(d) barrier") +
+  theme_void() +
+  theme(aspect.ratio = 1,
+        panel.border = element_rect(fill=NA,
+                                    colour="black"),
+        plot.margin = margin(0, 5, 0, 5))
+
+e1 + e2 + e3 + e4 + plot_layout(ncol=4)
 ```
 
-- individual projections: clusters, gaps, outliers, linear/non-linear dependence, barriers, 
-- movement of points
+```{r}
+#| echo: false
+#| eval: false
+library(tourr)
 
-- analytical tasks
+render_gif(clusters[,1:5], 
+           grand_tour(), 
+           display_trails(),
+           gif_file = "gifs/trails-clusters.gif",
+           apf = 1/100,
+           frames = 1000,
+           width = 400, 
+           height = 300,
+           loop = FALSE)
+```
+
+Next show some trails static plots, along with animated gifs for clusters and outliers.
+
+This type of visualisation is useful for 
+
+- exploring high-dimensional data
+- checking assumptions required for multivariate models to be applicable
+- check for potential problems in modeling such as multicollinearity among predictors
+- checking assumptions required for probabilties calculated for statistical hypothesis testing to be valid
+- diagnosing the fit of multivariate models
 
 <!-- 
 Description and explanation of primary methods used throughout the book. Mostly focusing on tour methods.
