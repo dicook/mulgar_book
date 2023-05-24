@@ -167,22 +167,6 @@ How a tour can be used to explore high-dimensional data illustrated using a tour
 
 @fig-explain-2D illustrates a tour for 3D data using 2D projections. The data are points on the surface of a donut shape. By showing the projections using a scatterplot the donut looks transparent and we can see through the data. The donut shape can be inferred from watching many 2D projections but some are more revealing that others. The projection shown in (b) is where the hole in the donut is clearly visible.
 
-<!-- 
-Description and explanation of primary methods used throughout the book. Mostly focusing on tour methods.
-
-We need a really nice friendly introduction to tour methods:
-
-- 2D to 1D projections as basic explanation
-- maybe 3D to 2D, or even 4D to 2D illustration
--->
-
-## What can you learn?
-
-
-<!-- Show examples of what can be gained from looking at combinations as opposed to pairs plots, for example. Clusters is a good situation, but also collinearity and outliers
--->
-
-
 
 ## What's different about space beyond 2D?
 
@@ -374,7 +358,85 @@ Interestingly, the struggle with imagining high-dimensions this way is described
 
 [^4]: Thanks to Barret Schloerke for directing me (Cook) to this history when he was an undergraduate student and we were starting the [geozoo](http://schloerke.com/geozoo/) project.
 
+When we look at high-dimensional spaces from a low-dimensional space, we meet the "curse of dimensionality", a term introduced by @BellmanRichard1961 to express the difficulty of doing optimization in high dimensions because of the exponential growth in space as dimension increases. A way to imagine this is look at the cubes in @fig-dimension-cubes: As you go from 1D to 2D, 2D to 3D, the space expands a lot, and imagine how vast space might get as more dimensions are added[^5]. The volume of the space grows exponentially with dimension, which makes it infeasible to sample enough points -- any sample will be less densely covering the space as dimension increases. The effect is that most points will be far from the sample mean, on the edge of the sample space.
+
+[^5]: "Space is big. Really big. You might think it's a long way to the pharmacy, but that’s peanuts to space." from Douglas Adams' [Hitchhiker's Guide to the Galaxy](https://en.wikipedia.org/wiki/The_Hitchhiker%27s_Guide_to_the_Galaxy#Stage_shows) always springs to mind when thinking about high dimensions!
+
+For visualisation, the curse manifests in an opposite manner. Projecting from high to low dimensions creates a crowding or piling of points near the center of the distribution. This was noted by @diaconis1984. @fig-density illustrates this phenomenon. As dimension increases, the points crowd the centre, even with as few as ten dimensions. This is something that we may need to correct for when exploring high dimensions with low-dimensional projections.
+
+```{r}
+#| label: fig-density
+#| fig-cap: "Illustration of data crowding in the low-dimensional projection as dimension increases, here from 3, 10, 100. Colour shows the number of points in each hexagon bin (pink is large, navy is small). As dimension increases the points concentrate near the centre."
+#| out-width: 95%
+#| fig-width: 6
+#| fig-height: 2
+#| fig-align: center
+#| message: false
+#| warning: false
+#| echo: false
+library(colorspace)
+set.seed(212)
+n <- 10000
+
+# sample points, only keep first two components for 2D projection
+p3 <- geozoo::sphere.solid.random(3, n)$points[, c(1,2)]
+p10 <- geozoo::sphere.solid.random(10, n)$points[, c(1,2)]
+p100 <- geozoo::sphere.solid.random(100, n)$points[, c(1,2)]
+colnames(p3) <- c("x", "y")
+colnames(p10) <- c("x", "y")
+colnames(p100) <- c("x", "y")
+
+proj_points <- as_tibble(rbind(p3, p10, p100)) %>%
+  mutate(p = factor(c(rep("p = 3", n), rep("p = 10", n), rep("p = 100", n)), levels = c("p = 3", "p = 10", "p = 100")))
+
+
+ggplot(proj_points, aes(x, y)) +
+  geom_hex(bins = 20, aes(fill=log(..count..))) +
+  scale_fill_continuous_sequential("Batlow", rev=FALSE) +
+  facet_wrap(~p, scales = "free") +
+  guides(fill = FALSE) +
+  theme_bw() +
+  theme(axis.title.x=element_blank(), 
+        axis.title.y=element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.text = element_blank(),
+        aspect.ratio = 1)
+
+
+
+```
+
+
+<!--
 -   A lot of Ursula's work like the figures in the burning sage paper could be useful here
+-->
+
+
+## What can you learn?
+
+```{r}
+```
+
+- individual projections: clusters, gaps, outliers, linear/non-linear dependence, barriers, 
+- movement of points
+
+- analytical tasks
+
+<!-- 
+Description and explanation of primary methods used throughout the book. Mostly focusing on tour methods.
+
+We need a really nice friendly introduction to tour methods:
+
+- 2D to 1D projections as basic explanation
+- maybe 3D to 2D, or even 4D to 2D illustration
+-->
+
+<!-- Show examples of what can be gained from looking at combinations as opposed to pairs plots, for example. Clusters is a good situation, but also collinearity and outliers
+-->
+
+
+
 
 ## A little history
 
