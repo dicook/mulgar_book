@@ -431,17 +431,32 @@ div.csl-indent {
 </section>
 <section id="the-importance-of-scale" class="level3" data-number="A.1.4">
 <h3 data-number="A.1.4" class="anchored" data-anchor-id="the-importance-of-scale"><span class="header-section-number">A.1.4</span> The importance of scale</h3>
+<p>Scaling of multivariate data is really important in many ways. It affects most model fitting, and can affect the perception of patterns when data is visualised. Here we describe a few scaling issues to take control of when using tours.</p>
+<section id="pre-processing-data" class="level4" data-number="A.1.4.1">
+<h4 data-number="A.1.4.1" class="anchored" data-anchor-id="pre-processing-data"><span class="header-section-number">A.1.4.1</span> Pre-processing data</h4>
+<p>It is generally useful to standardise your data to have mean 0 and variance-covariance equal to the identity matrix before using the tour. We use the tour to discover associations between variables. Characteristics of single variables should be examined and understood before embarking on looking for high-dimensional structure.</p>
+<p>The <code>rescale</code> parameter in the <code>animate()</code> function will scale all variables to range between 0 and 1, prior to starting the tour. This will force all to have the same range. It is the default, and without this data with different ranges across variable may have some strange patterns. If you have already scaled the data yourself, even if using a different scaling such as using standardised variables you should set <code>rescale=FALSE</code>.</p>
+<p>A more severe transformation that can be useful prior to starting a tour is to <strong>sphere</strong> the data. This is also an option in the <code>animate()</code> function, but is <code>FALSE</code> by default. Sphering is the same as conducting a principal component analysis, and using the principal components as the variables. It removes all linear association between variables! This can be especially useful if you want to focus on finding non-linear associations, including clusters, and outliers.</p>
+</section>
+<section id="scaling-to-fit-into-plot-region" class="level4" data-number="A.1.4.2">
+<h4 data-number="A.1.4.2" class="anchored" data-anchor-id="scaling-to-fit-into-plot-region"><span class="header-section-number">A.1.4.2</span> Scaling to fit into plot region</h4>
+<p>The <code>half_range</code> parameter in most of the display types sets the range used to scale the data into the plot. It is estimated when a tour is started, but you may need to change it if you find that the data keeps escaping the plot window or is not fully using the space. Space expands exponentially as dimension increases, and the estimation takes this into account. However, different distributions of data points lead to different variance of observations in high-dimensional space. A skewed distribution will be more varied than a normal distribution. It is hard to estimate precisely how the data should be scaled so that it fits nicely into the plot space for all projections viewed.</p>
+<p>The <code>center</code> parameter is used to centre each projection by setting the mean to be at the middle of the plot space. With different distributions the mean of the data can vary around the plot region, and this can be distracting. Fixing the mean of each projection to always be at the center of the plot space makes it easier to focus on other patterns.</p>
+</section>
 </section>
 <section id="saving-your-tour" class="level3" data-number="A.1.5">
 <h3 data-number="A.1.5" class="anchored" data-anchor-id="saving-your-tour"><span class="header-section-number">A.1.5</span> Saving your tour</h3>
-<p>Working with many dimensions, how to adapt</p>
-<p>Grand tour, and show paths on the space, starting with 1D. How more time gives more coverage of the sphere. Then the torus and paths on torus.</p>
-<p>Different types of tours, and when to use them.</p>
-<p>And finally how to save tours, and make plot of single projection</p>
-<p>Need to include - half_range - standardizing variables</p>
+<p>The functions <code>save_history()</code> and <code>planned_tour()</code> allow the tour path to be pre-computed, and re-played in your chosen way. The tour path is saved as a list of projection vectors, which can also be passed to external software for displaying tours easily. Only a minimal set of projections is saved, by default, and a full interpolation path of projections can always be generated from it using the <code>interpolate()</code> function.</p>
+<p>Versions and elements of tours can be saved for publication using a variety of functions:</p>
+<ul>
+<li><code>render_gif()</code>: Save a tour as an animated gif, using the <code>gifski</code> package.</li>
+<li><code>render_proj()</code>: Save an object that can be used to produce a polished rendering of a single projection, possibly with <code>ggplot</code>.</li>
+<li><code>render_anim()</code>: Creates an object containing a sequence of projections that can be used with <code>plotly()</code> to produce an HTML animation, with interactive control.</li>
+</ul>
 </section>
 <section id="understanding-your-tour-path" class="level3" data-number="A.1.6">
 <h3 data-number="A.1.6" class="anchored" data-anchor-id="understanding-your-tour-path"><span class="header-section-number">A.1.6</span> Understanding your tour path</h3>
+<p>Grand tour, and show paths on the space, starting with 1D. How more time gives more coverage of the sphere. Then the torus and paths on torus.</p>
 </section>
 </section>
 <section id="what-not-to-do" class="level2" data-number="A.2">

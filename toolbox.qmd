@@ -57,23 +57,36 @@ There are two main components of the tour algorithm:
 
 ### The importance of scale
 
+Scaling of multivariate data is really important in many ways. It affects most model fitting, and can affect the perception of patterns when data is visualised. Here we describe a few scaling issues to take control of when using tours.
 
+
+#### Pre-processing data
+
+It is generally useful to standardise your data to have mean 0 and variance-covariance equal to the identity matrix before using the tour. We use the tour to discover associations between variables. Characteristics of single variables should be examined and understood before embarking on looking for high-dimensional structure. 
+
+The `rescale` parameter in the `animate()` function will scale all variables to range between 0 and 1, prior to starting the tour. This will force all to have the same range. It is the default, and without this data with different ranges across variable may have some strange patterns. If you have already scaled the data yourself, even if using a different scaling such as using standardised variables you should set `rescale=FALSE`.
+
+A more severe transformation that can be useful prior to starting a tour is to **sphere** the data. This is also an option in the `animate()` function, but is `FALSE` by default. Sphering is the same as conducting a principal component analysis, and using the principal components as the variables. It removes all linear association between variables! This can be especially useful if you want to focus on finding non-linear associations, including clusters, and outliers. 
+
+#### Scaling to fit into plot region
+
+The `half_range` parameter in most of the display types sets the range used to scale the data into the plot. It is estimated when a tour is started, but you may need to change it if you find that the data keeps escaping the plot window or is not fully using the space. Space expands exponentially as dimension increases, and the estimation takes this into account. However, different distributions of data points lead to different variance of observations in high-dimensional space. A skewed distribution will be more varied than a normal distribution. It is hard to estimate precisely how the data should be scaled so that it fits nicely into the plot space for all projections viewed. 
+
+The `center` parameter is used to centre each projection by setting the mean to be at the middle of the plot space. With different distributions the mean of the data can vary around the plot region, and this can be distracting. Fixing the mean of each projection to always be at the center of the plot space makes it easier to focus on other patterns.
 
 ### Saving your tour
 
-Working with many dimensions, how to adapt 
+The functions `save_history()` and `planned_tour()` allow the tour path to be pre-computed, and re-played in your chosen way. The tour path is saved as a list of projection vectors, which can also be passed to external software for displaying tours easily. Only a minimal set of projections is saved, by default, and a full interpolation path of projections can always be generated from it using the `interpolate()` function.
 
-Grand tour, and show paths on the space, starting with 1D. How more time gives more coverage of the sphere. Then the torus and paths on torus.
+Versions and elements of tours can be saved for publication using a variety of functions:
 
-Different types of tours, and when to use them.
-
-And finally how to save tours, and make plot of single projection
-
-Need to include
-- half_range
-- standardizing variables
+- `render_gif()`: Save a tour as an animated gif, using the `gifski` package.
+- `render_proj()`: Save an object that can be used to produce a polished rendering of a single projection, possibly with `ggplot`.
+- `render_anim()`: Creates an object containing a sequence of projections that can be used with `plotly()` to produce an HTML animation, with interactive control.
 
 ### Understanding your tour path
+
+Grand tour, and show paths on the space, starting with 1D. How more time gives more coverage of the sphere. Then the torus and paths on torus.
 
 ## What not to do
 
