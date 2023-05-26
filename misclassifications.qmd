@@ -1,0 +1,81 @@
+# Exploring misclassifications
+
+To examine misclassifications, we can create a separate variable that identifies the errors or not. Constructing this for each class, and exploring in small steps is helpful. Let's do this using the random forest model for the penguins fit. The random forest fit has only a few misclassifications. There are four Adelie penguins confused with Chinstrap, and similarly four Chinstrap confused with Adelie. There is one Gentoo penguin confused with a Chinstrap. This is interesting, because the Gentoo cluster is well separated from the clusters of the other two penguin species. 
+
+```{r}
+#| message: false
+library(randomForest)
+library(dplyr)
+load("data/penguins_sub.rda")
+
+penguins_rf <- randomForest(species~.,
+                             data=penguins_sub[,1:5],
+                             importance=TRUE)
+```
+
+```{r}
+penguins_rf
+```
+
+```{r}
+#| code-fold: false
+penguins_errors <- penguins_sub %>%
+  mutate(err = ifelse(penguins_rf$predicted != penguins_rf$y, 1, 0))
+```
+
+```{r}
+#| eval: false
+library(tourr)
+symbols <- c(1, 16)
+p_pch <- symbols[penguins_errors$err+1]
+p_cex <- rep(1, length(p_pch))
+p_cex[penguins_errors$err==1] <- 2
+animate_xy(penguins_errors[,1:4],
+           col=penguins_errors$species,
+           pch=p_pch, cex=p_cex)
+render_gif(penguins_errors[,1:4],
+           grand_tour(),
+           display_xy(col=penguins_errors$species,
+                      pch=p_pch, cex=p_cex),
+           gif_file="gifs/p_rf_errors.gif",
+           frames=500,
+           width=400,
+           height=400)
+
+animate_xy(penguins_errors[,1:4],
+           guided_tour(lda_pp(penguins_errors$species)),
+           col=penguins_errors$species,
+           pch=pch)
+
+render_gif(penguins_errors[,1:4],
+           guided_tour(lda_pp(penguins_errors$species)),
+           display_xy(col=penguins_errors$species,
+                      pch=p_pch, cex=p_cex),
+           gif_file="gifs/p_rf_errors_guided.gif",
+           frames=500,
+           width=400,
+           height=400,
+           loop=FALSE)
+
+```
+
+
+
+@fig-p-errors shows a grand tour, and a guided tour, of the penguins data, where the misclassifications are marked by an asterisk. (If these gifs are too small to see the different glyphs, zoom in to make the figures larger.) It can be seen that the one Gentoo penguin that is mistaken for a Chinstrap by the forest model is always moving with its other Gentoo (yellow) family. It can occasionally be seen to be on the edge of the group, closer to the Chinstraps, in some projections in the grand tour. But in the final projection from the guided tour it is hiding well among the other Gentoos. This is an observation where a mistake has been made because of the inadequacies of the forest algorithm. Forests are only as good as the trees they are constructed from, and we have seen from @sec-trees that the splits only on single variables done by trees does not adequately utilise the covariance structure in each class. They make mistakes based on the boxy nature of the boundaries. This can carry through to the forests model. Even though many trees are combined to generate smoother boundaries, forests do not effectively utilise covariance in clusters either. The other mistakes, where Chinstrap are predicted to be Adelie, and vice versa, are more sensible. These mistaken observations can be seen to lie in the border region between the two clusters, and reflect genuine uncertainty about the classification of penguins in these two species.
+
+::: {#fig-p-errors layout-ncol=2}
+
+![Exploring misclassifications using a grand tour.](gifs/p_rf_errors.gif){#fig-rf-errors fig-alt="FIX ME" width=300}
+
+
+![Exploring misclassifications using a guided tour.](gifs/p_rf_errors_guided.gif){#fig-rf-errors-guided fig-alt="FIX ME" width=300}
+
+
+
+Examining the misclassified cases (marked as asterisks) from a random forest fit to the penguins data. The one Gentoo penguin mistaken for a Chinstrap is a mistake made because the forest method suffers from the same problems as trees - cutting on single variables rather than effectively using covariance structure. The mistakes between the Adelie and Chinstrap penguins are more sensible because all of these observations lie is the bordering regions between the two clusters.
+:::
+
+## Exercises {-}
+
+1. Examine misclassifications for the fake_trees data between cluster 1 and 0, using the votes matrix instead of the principal components. Describe where these errors fall in the simplex.
+2. Examine the misclassifications for the sketches data, focusing on cactus sketches that were mistaken for bananas. Follow up by plotting the images of these errors, and describe whether the classifier is correct that these sketches are so poor their true cactus identity cannot be determined. 
