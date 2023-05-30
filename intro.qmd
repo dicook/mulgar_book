@@ -2,7 +2,16 @@
 
 High-dimensional data means that we have a large number of numeric features or variables, which can be considered as dimensions in a mathematical space. The variables can be different types, such as categorical or temporal, but the handling of these variables involves different techniques. 
 
-![Viewing high dimensions using low-dimensional displays is like playing shadow puppets, looking at the shadows to guess what the shape is.](images/shadow-puppets.png){#fig-shadow-puppets}
+::: {#fig-shadow-puppets layout-ncol=3}
+
+![](images/shadow-puppets2.png){width=190}
+
+![](images/shadow-puppets3.png){width=190}
+
+![](images/shadow-puppets4.png){width=190}
+
+Viewing high dimensions using low-dimensional displays is like playing shadow puppets, looking at the shadows to guess what the shape is.
+:::
 
 ## Getting familiar with tours
 
@@ -435,7 +444,7 @@ with the latter being especially useful when displaying the projected data as a 
 ```{r}
 #| label: fig-example-structure
 #| fig-width: 10
-#| fig-height: 2.5
+#| fig-height: 3
 #| out-width: 100%
 #| fig-cap: "Example structures that might be visible in a 2D projection that imply presence of structure in high dimensions. These include clusters, linear and non-linear association, outliers and barriers."
 #| echo: false
@@ -452,10 +461,10 @@ plane_outliers <- plane
 plane_outliers[101,] <- c(2, 2, -2, 0, 0)
 plane_outliers[102,] <- c(0, 0, 0,-2, -2)
 
+set.seed(314)
 barrier <- data.frame(x1=runif(176)) %>%
   mutate(x2=runif(176, min=0, max=1-x1))
 
-set.seed(314)
 e1 <- ggplot(clusters[sample(1:300, 156),], aes(x=x3, y=x2)) +
   geom_point(colour="#EC5C00", size=2, alpha=0.8) +
   ggtitle("(a) gaps or clusters") +
@@ -463,7 +472,7 @@ e1 <- ggplot(clusters[sample(1:300, 156),], aes(x=x3, y=x2)) +
   theme(aspect.ratio = 1,
         panel.border = element_rect(fill=NA,
                                     colour="black"),
-        plot.margin = margin(0, 5, 0, 5))
+        plot.margin = margin(2, 5, 0, 5))
 e2 <- ggplot(plane_nonlin, aes(x=x1, y=x2)) +
   geom_point(colour="#EC5C00", size=2, alpha=0.8) +
   ggtitle("(b) non-linear association") +
@@ -507,7 +516,9 @@ render_gif(clusters[,1:5],
                           cex=5,
                           half_range=0.8),
            gif_file = "gifs/trails-clusters.gif",
-           frames=200)
+           frames=200,
+           width=250,
+           height=250, res = 144)
 render_gif(clusters[,1:5], 
            grand_tour(), 
            display_xy(col="#EC5C00", 
