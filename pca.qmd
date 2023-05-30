@@ -40,9 +40,10 @@ cube5d <- data.frame(apply(cube5d, 2, function(x) (x-mean(x))/sd(x)))
 p_pca <- prcomp(plane)
 b_pca <- prcomp(box)
 c_pca <- prcomp(cube5d)
-p_scree <- ggscree(p_pca)
-b_scree <- ggscree(b_pca)
-c_scree <- ggscree(c_pca)
+p_scree <- ggscree(p_pca) + theme_minimal()
+
+b_scree <- ggscree(b_pca) + theme_minimal()
+c_scree <- ggscree(c_pca) + theme_minimal()
 ```
 
 ::: {#fig-2D-pca  fig-align="center" layout-ncol=3}
@@ -117,7 +118,7 @@ plane_noise$x7 <- rnorm(100)
 plane_noise <- data.frame(apply(plane_noise, 2, function(x) (x-mean(x))/sd(x)))
 
 pn_pca <- prcomp(plane_noise)
-ggscree(pn_pca)
+ggscree(pn_pca) + theme_minimal()
 ```
 
 ```{r}
@@ -142,7 +143,7 @@ pisa_std <- pisa %>%
   select(-CNT) %>%
   mutate_all(mulgar:::scale2)
 pisa_pca <- prcomp(pisa_std)
-pisa_scree <- ggscree(pisa_pca)
+pisa_scree <- ggscree(pisa_pca) + theme_minimal()
 ```
 
 The scree plot in @fig-pisa-scree shows a big drop from one to two PCs in the amount of variance explained. A grand tour on the 30 variables can be run using `animate_xy()`: 
@@ -251,7 +252,7 @@ aflw_pca <- prcomp(aflw_std[,7:35],
                scale = FALSE, 
                retx=TRUE)
 
-ggscree(aflw_pca)
+ggscree(aflw_pca) + theme_minimal()
 ```
 
 From the scree plot in @fig-aflw-pca, we see a sharp drop from one to two, two to three and then smaller drops. After four PCs the variance drops again at six PCs and then gradually decays. We will choose four PCs to examine more closely. This explains `r round(summary(aflw_pca)$importance[3,4]*100,1)`% of the variance.
@@ -537,7 +538,7 @@ plane_noise_outliers[102,] <- c(0, 0, 0,-2, -2, 0, 0)
 #| fig-height: 4
 #| out-width: 80%
 plane_n_o_pca <- prcomp(plane_noise_outliers)
-ggscree(plane_n_o_pca)
+ggscree(plane_n_o_pca) + theme_minimal()
 ```
 
 ```{r}
@@ -589,7 +590,7 @@ Examining the handling of outliers in the PCA of the planar data with noise vari
 #| warning: false
 #| fig-cap: "From the scatterplot matrix we can see that the outliers are present in PC5, PC6 and PC7. That means by reducing the dimensionality to the first four PCs the model has missed some important characteristics in the data."
 library(GGally)
-ggscatmat(plane_n_o_pca$x)
+ggscatmat(plane_n_o_pca$x) + theme_minimal()
 ```
 
 ### Example: Non-linear associations
@@ -605,7 +606,7 @@ ggscatmat(plane_n_o_pca$x)
 #| out-width: 80%
 data(plane_nonlin)
 plane_nonlin_pca <- prcomp(plane_nonlin)
-ggscree(plane_nonlin_pca)
+ggscree(plane_nonlin_pca) + theme_minimal()
 ```
 
 
