@@ -95,3 +95,32 @@ The seemingly magical number `0.707` used above and to create the projection in 
 
 <!-- Most data arrives with a mix of numerical and categorical, and temporal or spatial variables. In this book we are primarily focused on methods to visualise multiple numerical variables. -->
 
+## Exercises {-}
+
+1. Generate a matrix `m` with 5 rows and 2 columns, where each value is randomly drawn from a standard normal distribution. Extract the element at row 3 and column 1.
+2. We will interpret `m` as a projection matrix and therefore it needs to be orthonormalised. Use the function `tourr::orthonormalise` to do this, and explicitly check that each column is normalised and that the two columns are orthogonal now. Which dimensions contribute most to the projection for your `m`?
+3. Use matrix multiplication to calculate the projection of the `mulgar::clusters` data onto the 2D plane defined by `m`. Make a scatterplot of the projected data. Can you identify clustering in this view?
+
+ 
+```{r}
+#| eval: false
+#| echo: false
+library(tourr)
+library(mulgar)
+library(ggplot2)
+set.seed(110)
+m <- matrix(rnorm(10), ncol = 2)
+m <- orthonormalise(m)
+# with this seed components 2 and 4 contribute most to direction 1
+# and components 3 and 4 contribute most to direction 2
+sum(m[,1]^2) # = 1 if properly normalised
+sum(m[,2]^2) # = 1 if properly normalised
+sum(m[,1]*m[,2]) # = 0 if orthogonal
+clusters_proj <- as.matrix(clusters[,1:5]) %*% m # calculate projection
+colnames(clusters_proj) <- c("p1", "p2")
+clusters_proj <- as.data.frame(clusters_proj)
+ggplot(clusters_proj, aes(p1, p2, color = clusters$cl)) +
+  geom_point()
+# with this projection we can distinguish one cluster from the other two
+```
+

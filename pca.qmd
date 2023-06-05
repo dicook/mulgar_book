@@ -661,3 +661,30 @@ library(GGally)
 ggscatmat(aflw_pca$x, columns=1:4)
 ```
 
+## Project {-}
+
+Linear dimension reduction can optimise for other criteria, and here we will explore one example: the algorithm implemented in the `dobin` package finds a basis in which the first few directions are optimized for the detection of outliers in the data. We will test if it performs well for the `plane_noise_outliers` data (the example where outliers were hidden in the first four principal components.)
+
+1. Start by looking up the documentation of `dobin::dobin`. How many parameters does the method depend on?
+2. We first apply the function to the `plane_noise_outliers` data using default values for all parameters.
+3. Recall that the outliers were added in rows 101 and 102 of the data. Make a scatter plots showing the projection onto the first, second and third component, using color to highlight the outliers. Are they visible as outliers with three components?
+4. Adjust the `frac` parameter of the `dobin` function to `frac = 0.99` and repeat the graphical evaluation from point 3. How does it compare to the previous solution?
+5. XXXX show the tour of the full data with the model (first three components from dobin)
+
+```{r}
+#| eval: false
+#| echo: false
+#| message: false
+#| warning: false
+library(dobin)
+library(GGally)
+dobin_pno_1 <- as.data.frame(dobin(plane_noise_outliers)$coords)
+dobin_pno_1$outlier <- c(rep("no", 100), rep("yes", 2))
+ggscatmat(dobin_pno_1, columns = 1:3, color = "outlier")
+# outliers not visible in V1 vs V2
+# with V3 we can identify one of the two outliers
+dobin_pno_2 <- as.data.frame(dobin(plane_noise_outliers, frac = 0.99)$coords)
+dobin_pno_2$outlier <- c(rep("no", 100), rep("yes", 2))
+ggscatmat(dobin_pno_2, columns = 1:3, color = "outlier")
+# with three dimensions we captureboth outliers in our graph
+```

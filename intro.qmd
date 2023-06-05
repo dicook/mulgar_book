@@ -604,3 +604,48 @@ This book is an evolution from @CS07. One of the difficulties in working on inte
 
 Although attempts were made with these ancestor systems to connect the data plots to a statistical analysis system, these were always limited. With the emergence of R, having graphics in the data analysis workflow has been much easier, albeit at the cost of the interactivity with graphics that matches the old systems. We are mostly using the R package, `tourr` [@tourr] for examples in this book. It provides the machinery for running a tour, and has the flexibility that it can be ported, modified, and used as a regular element of data analysis.
 
+## Exercises {-}
+
+1. Randomly generate data points that are uniformly distributed in a (hyper-)cube in 3, 5 and 10 dimensions, with 500 points in each sample. Visualize each set in a grand tour. What differences do we expect and how do they appear in the display?
+2. Use the `geozoo` package to generate samples from different distributions and use them to get a better understanding of how shapes appear in a grand tour. You can start with exploring the conic spiral in 3D, a torus in 4D and points along the wire frame of a cube in 5D.
+3. Sample points that are following a multivariate normal distribution with correlation (for example using the `mvtnorm` package). We will look at a distribution in 5D. Experiment with different correlation patterns and try to identify them in a tour display of the data.
+4. XXX viz challenge-like example, animate each distribution and try to identify structure (outliers, clusters, non-linear relation)
+
+ 
+```{r}
+#| eval: false
+#| echo: false
+# Answer to Q1
+library(tourr)
+library(geozoo)
+set.seed(1234)
+cube3 <- cube.solid.random(3, 500)$points
+cube5 <- cube.solid.random(5, 500)$points
+cube10 <- cube.solid.random(5, 500)$points
+
+animate(cube3)
+animate(cube5)
+animate(cube10)
+```
+
+```{r}
+#| eval: false
+#| echo: false
+# Answer to Q3
+library(tourr)
+library(mvtnorm)
+
+s1 <- diag(5)
+s2 <- diag(5)
+s2[3,4] <- 0.7
+s2[4,3] <- 0.7
+s3 <- s2
+s3[1,2] <- 0.7
+s3[2,1] <- 0.7
+
+set.seed(1234)
+d1 <- as.data.frame(rmvnorm(500, sigma = s1))
+d2 <- as.data.frame(rmvnorm(500, sigma = s2))
+d3 <- as.data.frame(rmvnorm(500, sigma = s3))
+
+```
