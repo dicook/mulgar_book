@@ -358,7 +358,20 @@ div.csl-indent {
 </nav>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#background" id="toc-background" class="nav-link active" data-scroll-target="#background"><span class="toc-section-number">5.0.1</span>  Background</a></li>
+  <li><a href="#linking-nldr-representation-with-tour-view" id="toc-linking-nldr-representation-with-tour-view" class="nav-link" data-scroll-target="#linking-nldr-representation-with-tour-view"><span class="toc-section-number">5.1</span>  Linking NLDR representation with tour view</a>
+  <ul class="collapse">
+  <li><a href="#using-liminal" id="toc-using-liminal" class="nav-link" data-scroll-target="#using-liminal"><span class="toc-section-number">5.1.1</span>  Using <code>liminal</code></a></li>
+  <li><a href="#using-detourr" id="toc-using-detourr" class="nav-link" data-scroll-target="#using-detourr"><span class="toc-section-number">5.1.2</span>  Using <code>detourr</code></a></li>
+  </ul></li>
+  <li><a href="#example-fake_trees" id="toc-example-fake_trees" class="nav-link" data-scroll-target="#example-fake_trees"><span class="toc-section-number">5.2</span>  Example: <code>fake_trees</code></a></li>
+  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises">Exercises</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -380,56 +393,188 @@ div.csl-indent {
 
 </header>
 
-<p>Non-linear dimension reduction aims to find a low-dimensional representation of the high-dimensional data that shows the main features of the data. In statistics, it dates back to <span class="citation" data-cites="Kr64a">Kruskal (<a href="references.html#ref-Kr64a" role="doc-biblioref">1964a</a>)</span>’s work on multidimensional scaling. Some techniques only require an interpoint similarity or distance matrix as the main ingredient, rather than the full data.</p>
-<p>Show a small simple example here.</p>
-<p>Discuss contemporary methods (t-SNE, UMAP, PHATE, trimap, pacmap), and references to MDS literature.</p>
-<p><span class="citation" data-cites="BG05">Borg and Groenen (<a href="references.html#ref-BG05" role="doc-biblioref">2005</a>)</span></p>
+<section id="background" class="level3" data-number="5.0.1">
+<h3 data-number="5.0.1" class="anchored" data-anchor-id="background"><span class="header-section-number">5.0.1</span> Background</h3>
+<p>Non-linear dimension reduction (NLDR) aims to find a low-dimensional representation of the high-dimensional data that shows the main features of the data. In statistics, it dates back to <span class="citation" data-cites="Kr64a">Kruskal (<a href="references.html#ref-Kr64a" role="doc-biblioref">1964a</a>)</span>’s work on multidimensional scaling (MDS). Some techniques only require an interpoint similarity or distance matrix as the main ingredient, rather than the full data. We’ll focus on when the full data is available here, so we can also compare structure perceived using the tour on the high-dimensional space, relative to structure revealed in the low-dimensional embedding.</p>
+<p>There are many methods available for generating non-linear low dimensional representations of the data. MDS is a classical technique that minimises the difference between two interpoint distance matrices, the distance between points in the high-dimensions, and in the low-dimensional representations. A good resource for learning about MDS is <span class="citation" data-cites="BG05">Borg and Groenen (<a href="references.html#ref-BG05" role="doc-biblioref">2005</a>)</span>.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(liminal)</span>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mulgar)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(Rtsne)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(fake_trees)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2020</span>)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>tsne <span class="ot">&lt;-</span> Rtsne<span class="sc">::</span><span class="fu">Rtsne</span>(dplyr<span class="sc">::</span><span class="fu">select</span>(fake_trees, dplyr<span class="sc">::</span><span class="fu">starts_with</span>(<span class="st">"dim"</span>)))</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>tsne_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">tsneX =</span> tsne<span class="sc">$</span>Y[, <span class="dv">1</span>],</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>                      <span class="at">tsneY =</span> tsne<span class="sc">$</span>Y[, <span class="dv">2</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(uwot)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(patchwork)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>cnl_tsne <span class="ot">&lt;-</span> <span class="fu">Rtsne</span>(clusters_nonlin)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>cnl_umap <span class="ot">&lt;-</span> <span class="fu">umap</span>(clusters_nonlin)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>n1 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="fu">as.data.frame</span>(cnl_tsne<span class="sc">$</span>Y), <span class="fu">aes</span>(<span class="at">x=</span>V1, <span class="at">y=</span>V2)) <span class="sc">+</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span> </span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"(a) t-SNE"</span>) <span class="sc">+</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span> </span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">aspect.ratio=</span><span class="dv">1</span>)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>n2 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="fu">as.data.frame</span>(cnl_umap), <span class="fu">aes</span>(<span class="at">x=</span>V1, <span class="at">y=</span>V2)) <span class="sc">+</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span> </span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"(b) UMAP"</span>) <span class="sc">+</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span> </span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">aspect.ratio=</span><span class="dv">1</span>)</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>n1 <span class="sc">+</span> n2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-nldr-clusters" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="nldr_files/figure-html/fig-nldr-clusters-1.png" class="img-fluid figure-img" width="768"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;5.1: Two non-linear embeddings of the nonlinear clusters data: (a) t-SNE, (b) UMAP. Both suggest four clusters, with two being non-linear in some form.</figcaption><p></p>
+</figure>
 </div>
+</div>
+</div>
+<p><a href="#fig-nldr-clusters">Figure&nbsp;<span>5.1</span></a> show two NLDR views of the <code>clusters_nonlin</code> data set from the <code>mulgar</code> package. Both suggest that there are four clusters, and that some clusters are non-linearly shaped. They disagree on the type of non-linear pattern, where t-SNE represents one cluster as a wavy-shape and UMAP both have a simple parabolic shape. Popular methods in current use include t-SNE <span class="citation" data-cites="Maaten2008">(<a href="references.html#ref-Maaten2008" role="doc-biblioref">Maaten and Hinton 2008</a>)</span>, UMAP <span class="citation" data-cites="McInnes2018">(<a href="references.html#ref-McInnes2018" role="doc-biblioref">McInnes, Healy, and Melville 2018</a>)</span> and PHATE <span class="citation" data-cites="Moon2019">(<a href="references.html#ref-Moon2019" role="doc-biblioref">Moon et al. 2019</a>)</span>.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">limn_tour_link</span>(</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  tsne_df,</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  fake_trees,</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">cols =</span> dim1<span class="sc">:</span>dim10,</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">color =</span> branches</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tourr)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">render_gif</span>(clusters_nonlin, </span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>           <span class="fu">grand_tour</span>(),</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>           <span class="fu">display_xy</span>(),</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>           <span class="at">gif_file =</span> <span class="st">"gifs/clusters_nonlin.gif"</span>,</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>           <span class="at">frames =</span> <span class="dv">500</span>,</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>           <span class="at">width =</span> <span class="dv">300</span>, </span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>           <span class="at">height =</span> <span class="dv">300</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div id="fig-clusters-nonlin" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="gifs/clusters_nonlin.gif" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;5.2: Grand tour of the nonlinear clusters data set, shows four clusters. Two are very small and spherical in shape. One is large, and has a sine wave shape, and the other is fairly small with a bent rod shape.</figcaption><p></p>
+</figure>
+</div>
+<p>The full 4D data is shown with a grand tour in <a href="#fig-clusters-nonlin">Figure&nbsp;<span>5.2</span></a>. The four clusters suggested by the NLDR methods can be seen. We also get a better sense of the relative size and proximity of the clusters. There are two small spherical clusters, one quite close to the end of the large sine wave cluster. The fourth cluster is relatively small, and has a slight curve, like a bent rod. The t-SNE representation is slightly more accurate than the UMAP representation. We would expect that the wavy cluster is the sine wave seen in the tour.</p>
+<p>NLDR can produce useful low-dimensional summaries of structure in high-dimensional data, like those shown in <a href="#fig-nldr-clusters">Figure&nbsp;<span>5.1</span></a>. However, there are numerous pitfalls. The fitting procedure can produce very different representations depending on the parameter choices, and even the random number seeding the fit. (You can check this by changing the <code>set.seed</code> in the code above, and by changing from the default parameters.) Also, it may not be possible to represent the high-dimensional structures faithfully low dimensions. For these reasons, one needs to connect the NLDR view with a tour of the data, to help assess its usefulness and accuracy. For example, with this data, we would want to know which of the two curved clusters in the UMAP representation correspond to the sine wave cluster.</p>
+<div class="info">
+<p>NLDR can provide useful low-dimensional summaries of high-dimensional structure but you need to check whether it is a sensible and accurate representation by comparing with what is perceivd from a tour.</p>
+</div>
+</section>
+<section id="linking-nldr-representation-with-tour-view" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="linking-nldr-representation-with-tour-view"><span class="header-section-number">5.1</span> Linking NLDR representation with tour view</h2>
+<section id="using-liminal" class="level3" data-number="5.1.1">
+<h3 data-number="5.1.1" class="anchored" data-anchor-id="using-liminal"><span class="header-section-number">5.1.1</span> Using <code>liminal</code></h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(liminal)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>umap_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">umapX =</span> cnl_umap[, <span class="dv">1</span>],</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>                      <span class="at">umapY =</span> cnl_umap[, <span class="dv">2</span>])</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">limn_tour_link</span>(</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  umap_df,</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  clusters_nonlin,</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">cols =</span> x1<span class="sc">:</span>x4</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="fig-liminal-clusters-nonlin" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<div id="fig-smile" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="images/liminal-clusters-nonlin1.png" class="img-fluid figure-img" data-ref-parent="fig-liminal-clusters-nonlin"></p>
+<p></p><figcaption class="figure-caption">(a) Smile matches bent rod.</figcaption><p></p>
+</figure>
+</div>
+<div id="fig-unibrow" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="images/liminal-clusters-nonlin2.png" class="img-fluid figure-img" data-ref-parent="fig-liminal-clusters-nonlin"></p>
+<p></p><figcaption class="figure-caption">(b) Unibrow matches sine wave.</figcaption><p></p>
+</figure>
+</div>
+<p></p><figcaption class="figure-caption">Figure&nbsp;5.3: Two screenshots from liminal showing which clusters match between the UMAP representation and the tour animation. The smile corresponds to the small bent rod cluster. The unibrow matches to the sine wave cluster.</figcaption><p></p>
+</figure>
+</div>
+</section>
+<section id="using-detourr" class="level3" data-number="5.1.2">
+<h3 data-number="5.1.2" class="anchored" data-anchor-id="using-detourr"><span class="header-section-number">5.1.2</span> Using <code>detourr</code></h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(detourr)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(crosstalk)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(plotly)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>umap_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">umapX =</span> cnl_umap[, <span class="dv">1</span>],</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>                      <span class="at">umapY =</span> cnl_umap[, <span class="dv">2</span>])</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>cnl_df <span class="ot">&lt;-</span> <span class="fu">bind_cols</span>(clusters_nonlin, umap_df)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>shared_cnl <span class="ot">&lt;-</span> SharedData<span class="sc">$</span><span class="fu">new</span>(cnl_df)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>detour_plot <span class="ot">&lt;-</span> <span class="fu">detour</span>(shared_cnl, <span class="fu">tour_aes</span>(</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">projection =</span> <span class="fu">starts_with</span>(<span class="st">"x"</span>))) <span class="sc">|&gt;</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tour_path</span>(<span class="fu">grand_tour</span>(<span class="dv">2</span>), </span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>                    <span class="at">max_bases=</span><span class="dv">50</span>, <span class="at">fps =</span> <span class="dv">60</span>) <span class="sc">|&gt;</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>       <span class="fu">show_scatter</span>(<span class="at">alpha =</span> <span class="fl">0.7</span>, <span class="at">axes =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>                    <span class="at">width =</span> <span class="st">"100%"</span>, <span class="at">height =</span> <span class="st">"450px"</span>)</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>umap_plot <span class="ot">&lt;-</span> <span class="fu">plot_ly</span>(shared_cnl,</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>                    <span class="at">x =</span> <span class="sc">~</span>umapX, </span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>                    <span class="at">y =</span> <span class="sc">~</span>umapY,</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>                    <span class="at">color =</span> <span class="fu">I</span>(<span class="st">"black"</span>),</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>                    <span class="at">height =</span> <span class="dv">450</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">highlight</span>(<span class="at">on =</span> <span class="st">"plotly_selected"</span>, </span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>              <span class="at">off =</span> <span class="st">"plotly_doubleclick"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">add_trace</span>(<span class="at">type =</span> <span class="st">"scatter"</span>, </span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>              <span class="at">mode =</span> <span class="st">"markers"</span>)</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a><span class="fu">bscols</span>(</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>     detour_plot, umap_plot,</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>     <span class="at">widths =</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">6</span>)</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a> )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="fig-detourr-clusters-nonlin" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="images/detourr-clusters-nonlin.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;5.4: Screenshot from detourr showing which clusters match between the UMAP representation and the tour animation. The smile corresponds to the small bent rod cluster.</figcaption><p></p>
+</figure>
+</div>
+</section>
+</section>
+<section id="example-fake_trees" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="example-fake_trees"><span class="header-section-number">5.2</span> Example: <code>fake_trees</code></h2>
+<p><a href="#fig-trees1">Figure&nbsp;<span>5.5</span></a> shows a more complex example, using the <code>fake_trees</code> data.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(liminal)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(Rtsne)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(fake_trees)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2020</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>tsne <span class="ot">&lt;-</span> Rtsne<span class="sc">::</span><span class="fu">Rtsne</span>(dplyr<span class="sc">::</span><span class="fu">select</span>(fake_trees, dplyr<span class="sc">::</span><span class="fu">starts_with</span>(<span class="st">"dim"</span>)))</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>tsne_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">tsneX =</span> tsne<span class="sc">$</span>Y[, <span class="dv">1</span>],</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>                      <span class="at">tsneY =</span> tsne<span class="sc">$</span>Y[, <span class="dv">2</span>])</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="fu">limn_tour_link</span>(</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  tsne_df,</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  fake_trees,</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">cols =</span> dim1<span class="sc">:</span>dim10,</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">color =</span> branches</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div>
 <div id="fig-trees1" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="images/fake_trees1.png" class="img-fluid figure-img"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;5.1: Linked views of t-SNE dimension reduction with a tour of the fake trees data. The t-SNE view clearly shows ten 1D non-linear clusters, while the tour of the full 100 variables suggests a lot more variation in the data, and less difference between clusters.</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;5.5: Linked views of t-SNE dimension reduction with a tour of the fake trees data. The t-SNE view clearly shows ten 1D non-linear clusters, while the tour of the full 100 variables suggests a lot more variation in the data, and less difference between clusters.</figcaption><p></p>
 </figure>
 </div>
 <p><img src="images/fake_trees2.png" id="fig-trees2" class="img-fluid" alt="Focus on the green cluster which is split by t-SNE. The shape as viewed in many linear projections shown by the tour shows that it is a single curved cluster. The split is an artifact of the t-SNE mapping."> <img src="images/fake_trees3.png" id="fig-trees3" class="img-fluid" alt="Focus on the purple cluster which splits the green cluster in the t-SNE view. The tour shows that these two clusters are distinct, but are close in one neighbourhood of the 100D space. The close proximity in the t-SNE view is reasonable."></p>
-<div id="fig-penguins-tsne" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure">
-<p><img src="images/penguins-tsne.png" class="img-fluid figure-img"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;5.2: The t-SNE mapping of the penguins data inaccurately splits one of the clusters. The three clusters are clearly distinct when viewed with the tour.</figcaption><p></p>
-</figure>
+<div class="insights">
+<p>The t-SNE representation clearly shows the linear structures of the data, but it makes some inaccurate breaks of some of them.</p>
 </div>
+</section>
+<section id="exercises" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="exercises">Exercises</h2>
+<ol type="1">
+<li>Using the <code>penguins_sub</code> data generate a 2D representation using t-SNE. Plot the points mapping the colour to species. What is most surprising? (Hint: Are the three species represented by three distinct clusters?)</li>
+<li>Re-do the t-SNE representation with different parameter choices. Are the results different each time, or could they be considered to be equivalent?</li>
+<li>Use <code>liminal</code> to link the t-SNE representation to a tour of the penguins. Highlight the points that have been placed in an awkward position by t-SNE from others in their species. Watch them relative to the others in their species in the tour view, and think about whether there is any rationale for the awkward placement.</li>
+<li>Use UMAP to make the 2D representation, and use liminal to link with a tour to explore the result.</li>
+</ol>
 <div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"data/penguins_sub.rda"</span>)</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2022</span>)</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>p_tsne <span class="ot">&lt;-</span> Rtsne<span class="sc">::</span><span class="fu">Rtsne</span>(penguins_sub[,<span class="dv">2</span><span class="sc">:</span><span class="dv">5</span>])</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>p_tsne_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">tsneX =</span> p_tsne<span class="sc">$</span>Y[, <span class="dv">1</span>], <span class="at">tsneY =</span> p_tsne<span class="sc">$</span>Y[, <span class="dv">2</span>])</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="fu">limn_tour_link</span>(</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  p_tsne_df,</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  penguins_sub,</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">cols =</span> bl<span class="sc">:</span>bm,</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">color =</span> species</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
+
 </div>
+<!--
+![The t-SNE mapping of the penguins data inaccurately splits one of the clusters. The three clusters are clearly distinct when viewed with the tour.](images/penguins-tsne.png){#fig-penguins-tsne}
+-->
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" role="doc-bibliography" style="display: none">
@@ -710,10 +855,10 @@ Gower, J. C., and D. J. Hand. 1996. <em>Biplots</em>. London: Chapman; Hall.
 Hansen, Charles, and Chris R. Johnson. 2004. <em>Visualization Handbook</em>. Orlando, FL: Academic Press.
 </div>
 <div id="ref-R-langevitour" class="csl-entry" role="doc-biblioentry">
-Harrison, Paul. 2023. <em>Langevitour: Langevin Tour</em>. <a href="https://logarithmic.net/langevitour/">https://logarithmic.net/langevitour/</a>.
+Harrison, Paul. 2022. <em>Langevitour: Langevin Tour</em>. <a href="https://logarithmic.net/langevitour/">https://logarithmic.net/langevitour/</a>.
 </div>
 <div id="ref-R-detourr" class="csl-entry" role="doc-biblioentry">
-Hart, Casper, and Earo Wang. 2023. <em>Detourr: Portable and Performant Tour Animations</em>. <a href="https://casperhart.github.io/detourr/">https://casperhart.github.io/detourr/</a>.
+Hart, Casper, and Earo Wang. 2022. <em>Detourr: Portable and Performant Tour Animations</em>. <a href="https://casperhart.github.io/detourr/">https://casperhart.github.io/detourr/</a>.
 </div>
 <div id="ref-HK81" class="csl-entry" role="doc-biblioentry">
 Hartigan, J. A., and B. Kleiner. 1981. <span>“Mosaics for <span>C</span>ontingency <span>T</span>ables.”</span> In <em>Computer Science and Statistics: Proceedings of the 13th Symposium on the Interface</em>, 268–73. Fairfax Station, VA: Interface Foundation of North America, Inc.
@@ -752,7 +897,7 @@ Huber, P. J. 1985. <span>“<span>P</span>rojection <span>P</span>ursuit (with D
 Hurley, Catherine. 1987. <span>“The Data Viewer: An Interactive Program for Data Analysis.”</span> PhD thesis, Seattle: University of Washington.
 </div>
 <div id="ref-R-gt" class="csl-entry" role="doc-biblioentry">
-Iannone, Richard, Joe Cheng, Barret Schloerke, Ellis Hughes, and JooYoung Seo. 2022. <em>Gt: Easily Create Presentation-Ready Display Tables</em>. <a href="https://CRAN.R-project.org/package=gt">https://CRAN.R-project.org/package=gt</a>.
+Iannone, Richard, Joe Cheng, Barret Schloerke, Ellis Hughes, Alexandra Lauer, and JooYoung Seo. 2023. <em>Gt: Easily Create Presentation-Ready Display Tables</em>. <a href="https://CRAN.R-project.org/package=gt">https://CRAN.R-project.org/package=gt</a>.
 </div>
 <div id="ref-R1996" class="csl-entry" role="doc-biblioentry">
 Ihaka, Ross, and Robert Gentleman. 1996. <span>“R: <span>A</span> <span>L</span>anguage for <span>D</span>ata <span>A</span>nalysis and <span>G</span>raphics.”</span> <em>Journal of Computational and Graphical Statistics</em> 5: 299–314.
@@ -850,6 +995,9 @@ Longley, P. A., D. J. Maguire, M. F. Goodchild, and D. W Rhind. 2005. <em>Geogra
 <div id="ref-loperfido" class="csl-entry" role="doc-biblioentry">
 Loperfido, Nicola. 2018. <span>“Skewness-Based Projection Pursuit: A Computational Approach.”</span> <em>Computational Statistics &amp; Data Analysis</em> 120: 42–57. https://doi.org/<a href="https://doi.org/10.1016/j.csda.2017.11.001">https://doi.org/10.1016/j.csda.2017.11.001</a>.
 </div>
+<div id="ref-Maaten2008" class="csl-entry" role="doc-biblioentry">
+Maaten, Laurens van der, and Geoffrey Hinton. 2008. <span>“Visualizing Data Using <span class="nocase">t-SNE</span>.”</span> <em>J. Mach. Learn. Res.</em> 9 (Nov): 2579–2605. <a href="http://www.jmlr.org/papers/v9/vandermaaten08a.html">http://www.jmlr.org/papers/v9/vandermaaten08a.html</a>.
+</div>
 <div id="ref-MacQueen1967" class="csl-entry" role="doc-biblioentry">
 MacQueen, J. B. 1967. <span>“Some Methods for Classification and Analysis of Multivariate Observations.”</span> In <em>Proc. Of the Fifth Berkeley Symposium on Mathematical Statistics and Probability</em>, edited by L. M. Le Cam and J. Neyman, 1:281–97. University of California Press.
 </div>
@@ -861,6 +1009,9 @@ Martin, Eric. 1965. <span>“Flatland.”</span> http://www.der.org/films/flatla
 </div>
 <div id="ref-MY94" class="csl-entry" role="doc-biblioentry">
 McFarlane, M., and F. W. Young. 1994. <span>“Graphical <span>S</span>ensitivity <span>A</span>nalysis for <span>M</span>ultidimensional <span>S</span>caling.”</span> <em>Journal of Computational and Graphical Statistics</em> 3: 23–33.
+</div>
+<div id="ref-McInnes2018" class="csl-entry" role="doc-biblioentry">
+McInnes, Leland, John Healy, and James Melville. 2018. <span>“<span>UMAP</span>: Uniform Manifold Approximation and Projection for Dimension Reduction.”</span> <a href="http://arxiv.org/abs/1802.03426">http://arxiv.org/abs/1802.03426</a>.
 </div>
 <div id="ref-Mc77" class="csl-entry" role="doc-biblioentry">
 McNeil, D. 1977. <em>Interactive <span>D</span>ata <span>A</span>nalysis</em>. New York: John Wiley &amp; Sons.
@@ -876,6 +1027,9 @@ Milborrow, Stephen. 2022. <em>Rpart.plot: Plot Rpart Models: An Enhanced Version
 </div>
 <div id="ref-R-gtExtras" class="csl-entry" role="doc-biblioentry">
 Mock, Thomas. 2022. <em>gtExtras: Extending Gt for Beautiful HTML Tables</em>. <a href="https://CRAN.R-project.org/package=gtExtras">https://CRAN.R-project.org/package=gtExtras</a>.
+</div>
+<div id="ref-Moon2019" class="csl-entry" role="doc-biblioentry">
+Moon, Kevin R, David van Dijk, Zheng Wang, Scott Gigante, Daniel B Burkhardt, William S Chen, Kristina Yim, et al. 2019. <span>“Visualizing Structure and Transitions for Biological Data Exploration.”</span> <em>Nature Biotechnology</em> 37: 1482–92. <a href="https://doi.org/10.1038/s41587-019-0336-3">https://doi.org/10.1038/s41587-019-0336-3</a>.
 </div>
 <div id="ref-Murrell2005" class="csl-entry" role="doc-biblioentry">
 Murrell, Paul. 2005. <em>R Graphics</em>. Boca Raton, FL: Chapman &amp; Hall/CRC.
@@ -941,7 +1095,7 @@ Shepard, R. N. 1962. <span>“The <span>A</span>nalysis of <span>P</span>roximit
 Sievert, Carson. 2020. <em>Interactive Web-Based Data Visualization with r, Plotly, and Shiny</em>. Chapman; Hall/CRC. <a href="https://plotly-r.com">https://plotly-r.com</a>.
 </div>
 <div id="ref-R-plotly" class="csl-entry" role="doc-biblioentry">
-Sievert, Carson, Chris Parmer, Toby Hocking, Scott Chamberlain, Karthik Ram, Marianne Corvellec, and Pedro Despouy. 2023. <em>Plotly: Create Interactive Web Graphics via Plotly.js</em>.
+Sievert, Carson, Chris Parmer, Toby Hocking, Scott Chamberlain, Karthik Ram, Marianne Corvellec, and Pedro Despouy. 2022. <em>Plotly: Create Interactive Web Graphics via Plotly.js</em>. <a href="https://CRAN.R-project.org/package=plotly">https://CRAN.R-project.org/package=plotly</a>.
 </div>
 <div id="ref-R-gtsummary" class="csl-entry" role="doc-biblioentry">
 Sjoberg, Daniel D., Joseph Larmarange, Michael Curry, Jessica Lavery, Karissa Whiting, and Emily C. Zabor. 2023. <em>Gtsummary: Presentation-Ready Data Summary and Analytic Result Tables</em>. <a href="https://CRAN.R-project.org/package=gtsummary">https://CRAN.R-project.org/package=gtsummary</a>.
@@ -1148,6 +1302,7 @@ Zhang, Chunming, Jimin Ye, and Xiaomei Wang. 2023. <span>“A Computational Pers
 Zhu, Hao. 2021. <em>kableExtra: Construct Complex Table with Kable and Pipe Syntax</em>. <a href="https://CRAN.R-project.org/package=kableExtra">https://CRAN.R-project.org/package=kableExtra</a>.
 </div>
 </div>
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
