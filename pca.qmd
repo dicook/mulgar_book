@@ -407,14 +407,46 @@ PCA on the aflw data leaves us slightly dizzy, but there are some useful insight
 
 ## Examining the PCA model in the data space
 
-When you choose a smaller number of PCs $(k)$ than the number of original variables, this is essentially producing a model for the data. The model is the lower dimensional space. It is analogous to a linear regression model, except that the residuals from the model are $(p-k)$-D. The model is $k$-D. It can be useful to examine this model using the tour. 
+When you choose a smaller number of PCs $(k)$ than the number of original variables, this is essentially producing a model for the data. The model is the lower dimensional $k$-D space. It is analogous to a linear regression model, except that the residuals from the model are $(p-k)$-D. 
 
-We'll start with the simulated data examples used at the beginning of this chapter. The function `pca_model()` from the `mulgar` package can be used to represent the model as a $k$-D wireframe plane.
+It is common to show the model, that is the data projected into the $k$-D model space. When $k=2$ this is called a "biplot". For the `plane` and `plane_noise` data the biplots are shown in @fig-plane-biplot. This is useful for checking which variables contribute most to the new principal component variables, and also to check for any problems that might have affected the fit, such as outliers, clusters or non-linearity. Interestingly, biplots are typically only made in 2D, even if the data should be summarised by more than two PCs. Occasionally you will see the biplot made for PC $j$ vs PC $k$ also. With the `pca_tour()` function in the `tourr` package you can view a $k$-D biplot. This will display the $k$ PCs with the axes displaying the original variables, and thus see their contribution to the PCs. 
+
+
+```{r}
+#| label: fig-plane-biplot
+#| fig-cap: "Biplots of the plane (a) and plane + noise (b) data. All five variables contribute strongly to the two principal components in (a): PC1 is primarily `x1`, `x2` and `x3` and PC2 is primarily `x4` and `x5`. In (b) the same four variables contribute in almost the same way, with variables `x6` and `x7` contributing very little. The data was constructed this way, that these two dimensions were purely noise."
+#| code-fold: false
+#| fig-width: 8
+#| fig-height: 4
+library(ggfortify)
+library(patchwork)
+plane_pca <- prcomp(plane)
+pl1 <- autoplot(plane_pca, loadings = TRUE, 
+         loadings.label = TRUE) + 
+  ggtitle("(a)") +
+  theme_minimal() + 
+  theme(aspect.ratio=1)
+plane_noise_pca <- prcomp(plane_noise)
+pl2 <- autoplot(plane_noise_pca, loadings = TRUE, 
+         loadings.label = TRUE) + 
+  ggtitle("(b)") +
+  theme_minimal() + 
+  theme(aspect.ratio=1)
+pl1 + pl2
+```
+
+
+It can be useful to examine this model using the tour. THe model is simply a plane in high dimensions. This would be considered to be the model in the data space. The reason to do this is to check how well the model fits the data. The plane corresponding to the model should be oriented along the main direction of the points, and the spread of points around the plane should be small. We should also be able to see if there has been any strong non-linear relationship missed by the model, or outliers and clusters.
+
+The function `pca_model()` from the `mulgar` package can be used to represent the model as a $k$-D wireframe plane. @fig-plane-box-model shows the models for the `plane` and `box` data, 2D and 3D respectively.
+
+::: info
+The pirpose of looking at the model in the data space is to check how well the model fits the data.
+:::
 
 ```{r}
 #| eval: false
 #| code-fold: false
-plane_pca <- prcomp(plane)
 plane_m <- pca_model(plane_pca)
 plane_m_d <- rbind(plane_m$points, plane)
 animate_xy(plane_m_d, edges=plane_m$edges,
@@ -640,7 +672,7 @@ ggscatmat(plane_nonlin_pca$x)
 ```
 
 ::: info
-One of the dangers of PCA is that interesting and curious details of the data only emerge in the lowest PCs, that are usually discarded. The tour, and examining the smaller PCs can help to discover them.
+One of the dangers of PCA is that interesting and curious details of the data only emerge in the lowest PCs, that are usually discarded. The tour, and examining the smaller PCs, can help to discover them.
 :::
 
 ## Exercises {-}
@@ -649,7 +681,7 @@ One of the dangers of PCA is that interesting and curious details of the data on
 2.  Construct five new variables to measure these skills offense, defense, playing time, ball movement, errors. Using the tour, examine the relationship between these variables. Map out how a few players could be characterised based on these directions of skills.
 3. Symmetrise any `aflw` variables that have skewed distributions using a log or square root transformation. Then re-do the PCA. What do we learn that is different about associations between the skill variables?
 4. Examine the `bushfires` data using a grand tour on the numeric variables, ignoring the `cause` (class) variable. Would it be important to transform any variables to remove skewness? Do so, if necessary. How many principal components would be recommended? Examine the PCA model with the data.
-
+5. Use the `pca_tour` to examine the three PCs. How do all of the variables contribute to this reduced space?
 
 ```{r}
 #| label: aflw-pairs
