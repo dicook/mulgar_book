@@ -15,6 +15,17 @@ The spin and brush approach is simply:
 
 It can help to be able to remove a cluster, to de-clutter the display, in order to find more clusters.
 
+### Using `plotly`
+
+@fig-penguins-brush-and-spin shows a fixed length grand tour produced using `plotly`, with a brush tool made available to colour points. The code is messy, but follows that of [animation-tour-basic.R](https://github.com/plotly/plotly.R/blob/master/demo/animation-tour-basic.R) from @plotly2020. There are key pieces in the code:
+
+1. Create the sequence of tour projections, and the data object containing data projections and projection coordinates. Include an observation id in the data object.
+2. Specify that the `id` variable is to be used to mark observations across animation frames using `highlight_key`.
+3. Draw them using `plotly`, with a `frame` parameter which specifies the animation sequence. 
+4. Add a brush colour palette and specific brushing control using `highlight` to the plotly plot.
+
+The result is an HTML object which can be saved for sharing. The drawback of this approach is that the results of the user actions cannot be saved, so you cannot recover the clusters corresponding to the colours.
+
 ```{r}
 #| eval: false
 #| message: false
@@ -73,7 +84,8 @@ clrs <- grDevices::hcl.colors(6, palette="Zissou 1")
 options(digits = 2)
 
 p_b_s <- proj_data %>%
-  plot_ly(x = ~x, y = ~y, frame = ~step, color = I("gray80"),
+  plot_ly(x = ~x, y = ~y, frame = ~step, 
+          color = I("gray80"),
           width=600, height=600) %>%
   config(displaylogo = FALSE, 
          modeBarButtonsToRemove = c("sendDataToCloud", "editInChartStudio", "zoom2d", "zoomIn2d", "zoomOut2d", "pan2d", "drawclosedpath", "drawopenpath", "autoScale2d", "hoverClosestCartesian", "hoverCompareCartesian", "resetScale2d")) %>%
@@ -102,23 +114,65 @@ htmlwidgets::saveWidget(p_b_s,
 Controls to brush and spin to discover the three clusters in the penguins data. Use the lasso brush to colour points persistently when you see a cluster. Spin and colour again as necessary to identify all the clusters.
 :::
 
-::: {#fig-penguins-bs-static fig-align="center" layout-ncol=3}
+::: {#fig-penguins-bs-static fig-align="center" layout-ncol=2}
 
-![](images/penguins-bs1.png){#fig-penguins-bs1 fig-alt="FIX ME" fig.align="center" width=180} ![](images/penguins-bs2.png){#fig-penguins-bs2 fig-alt="FIX ME" fig.align="center" width=180}
-![](images/penguins-bs3.png){#fig-penguins-bs3 fig-alt="FIX ME" fig.align="center" width=180}
+![](images/penguins-bs4.png){#fig-penguins-bs1 fig-alt="FIX ME" fig.align="center" width=300}
+![](images/penguins-bs5.png){#fig-penguins-bs2 fig-alt="FIX ME" fig.align="center" width=300}
 
-Three still shots of the spin and brush approach being used on the penguins data.
+Screenshots of the spin and brush approach being used on the penguins data.
 :::
 
-```{r}
-#| eval: FALSE
-#| echo: false
-library(detourr)
-detour(penguins_sub, 
-       tour_aes(projection = -species)) |>
-       tour_path(grand_tour(2), fps = 60) |>
-       show_scatter(alpha = 0.7, axes = FALSE)
+### Using `detourr`
 
+Spin-and-brush can also be achieved using the `detourr` package, and the results can be saved for further analysis. The code is very easy, and then all the controls are interactive.
+
+
+```{r}
+#| eval: false
+#| code-fold: false
+library(detourr)
+grDevices::hcl.colors(3, palette="Zissou 1")
+detour(penguins_sub[,1:4], 
+       tour_aes(projection = bl:bm)) |>
+       tour_path(grand_tour(2), fps = 60, 
+                 max_bases=20) |>
+       show_scatter(alpha = 0.7, 
+                    axes = FALSE)
+```
+
+- `tour_aes(projection = bl:bm))` is `ggplot`-style syntax for specifying the variables `bl:bm` to include in the tour. 
+- `tour_path(grand_tour(2), fps = 60, 
+                 max_bases=20)` specifies 2D grand tour path, with a longer than default path set by `max_bases=20` and the `fps` argument sets the smoothness.
+- Brush interaction is set by choosing the square icon (4th from top), so when the cursor is moved over the window points are selected.
+- You can choose specific colours to brush, from the colour palette by using hexcolours to match your favourite palette. Here we've used colours from the Zissou palette.
+- The paintbrush icon sets the selected points to the current colour.
+- Save the final colour labels using the download icon. 
+
+::: {#fig-penguins-bs-detourr fig-align="center" layout-ncol=2}
+
+![First cluster cluster](images/penguins-bs6.png){#fig-penguins-bs3 fig-alt="FIX ME" fig.align="center" width=300}
+
+![Second cluster](images/penguins-bs7.png){#fig-penguins-bs4 fig-alt="FIX ME" fig.align="center" width=300}
+
+Screenshots of the spin and brush approach using `detourr` on the penguins data. 
+:::
+
+@fig-penguins-bs-detourr shows the stages of spin and brush on the penguins data using detourr. The final results can be examined and used for later analysis. Because this data came with a class variable, the penguin species, it is interesting to see how close the spin-and-brush clustering approach came to recovering these: 
+
+```{r}
+#| message: false
+library(readr)
+load("data/penguins_sub.rda")
+detourr_penguins <- read_csv("data/detourr_penguins.csv")
+table(penguins_sub$species, detourr_penguins$colour)
+```
+
+It's quite close! All but two of the 119 Gentoo penguins were identified as a cluster (labelled as "3e9eb6" from the chosen light blue hex colour), and all but three of the 146 Adelie penguins were identified as a cluster, (labelled as "000000" which is the unbrushed black group). 
+
+
+```{r}
+#| eval: false
+#| echo: false
 # remotes::install_github("pfh/langevitour")
 # remotes::install_github("plotly/plotly.R")
 library(langevitour)
@@ -135,7 +189,7 @@ library(liminal)
 limn_tour(fake_trees, dim1:dim10)
 ```
 
-RE-DO with detourr. 
+
 
 ## Exercises {-}
 
