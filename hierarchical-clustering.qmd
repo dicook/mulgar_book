@@ -6,13 +6,26 @@
 
 ## Overview
 
-Hierarchical cluster algorithms sequentially fuse neighboring points to form ever-larger clusters, starting from a full interpoint distance matrix. @fig-hc-sim illustrates the hierarchical clustering approach for a simple simulated data set (a) with two well-separated clusters in 2D. The dendrogram (b) is a representation of the order that points are joined into clusters. The dendrogram strongly indicates two clusters because there are two branches branches representing the last join are much longer than all of the other branches. Although, the dendrogram is usually a good summary of the steps taken by the algorithm, it can be misleading. The dendrogram might strongly suggest a clustering but it might be a terrible solution. To check this we need to show the model with the data, as shown in plot (c). The segments show how the points and clusters are joined. Note that once points are joined into a cluster, the centroid of that cluster is used as the join location with other points or other clusters, and this is represented by a "+". We can see that the longest edge is the one stretching across the gap between the two clusters, which is the location where the dendrogram would be cut to produce the two-cluster solution. This two-cluster solution is shown in plot (d).
+Hierarchical cluster algorithms sequentially fuse neighboring points to form ever-larger clusters, starting from a full interpoint distance matrix. *Distance between clusters* is described by a "linkage method", of which there are many. For example, single linkage measures the distance between clusters by the smallest interpoint distance between the members of the two clusters clusters, complete linkage uses the maximum interpoint distance, and average linkage uses the average of the interpoint distances. Wards linkage, which usually produces the best clustering solutions, defines the distance as the reduction in the within-group variance. A good discussion on cluster analysis and linkage can be found in @HOML, on [Wikipedia](https://en.wikipedia.org/wiki/Cluster_analysis) or any multivariate textbook.
+
+::: info
+Hierarchical clustering is summarised by a dendrogram, which sequentially shows points being joined to form a cluster, with the corresponding distances.
+:::
+
+Here we will take a look at hierarchical clustering, using Wards linkage, on the `simple_clusters` data. The steps taken are to:
+
+1. Plot the data to check for presence of clusters and their shape.
+2. Compute the hierarchical clustering.
+3. Plot the dendrogram to help decide on an appropriate number of clusters, using the `dendro_data` function from the `ggdendro` package.
+4. Show the dendrogram overlaid on the data, calculated by the `hierfly` function in `mulgar`.
+5. Plot the clustering result, by colouring points in the plot of the data.
 
 \index{cluster analysis!dendrogram}
 
 ```{r}
 #| label: hc-libraries
 #| message: FALSE
+#| code-summary: "Load libraries"
 library(ggplot2)
 library(mulgar)
 library(ggdendro)
@@ -26,27 +39,49 @@ library(GGally)
 ```
 
 ```{r}
-#| label: fig-hc-sim
 #| eval: true
 #| code-fold: false
 #| message: false
 #| warning: false
-#| fig-cap: "Hierarchical clustering on simulated data: (a) data, (b) dendrogram, (c) dendrogram on the data, and (d) two cluster solution. Nodes of the dendrogram indicated by `+` when it is drawn on the data."
+data(simple_clusters)
+
+# Compute hierarchical clustering with Ward's linkage
+cl_hw <- hclust(dist(simple_clusters[,1:2]),
+                method="ward.D2")
+cl_ggd <- dendro_data(cl_hw, type = "triangle")
+
+# Compute dendrogram in the data
+cl_hfly <- hierfly(simple_clusters, cl_hw, scale=FALSE)
+
+# Show result
+simple_clusters <- simple_clusters %>%
+  mutate(clw = factor(cutree(cl_hw, 2)))
+```
+
+@fig-hc-sim illustrates the hierarchical clustering approach for a simple simulated data set (a) with two well-separated clusters in 2D. The dendrogram (b) is a representation of the order that points are joined into clusters. The dendrogram strongly indicates two clusters because there are two branches branches representing the last join are much longer than all of the other branches. 
+
+Although, the dendrogram is usually a good summary of the steps taken by the algorithm, it can be misleading. The dendrogram might indicate a clear clustering (big differences in heights of branches) but the result may be awful. You need to check this by examining the result on the data, called model-in-the-data space by @wickham2015. 
+
+Plot (c) shows the dendrogram in 2D, overlaid on the data. The segments show how the points are joined to make clusters. In order to represent the dendrogram this way, new points (represented by a "+" here) need to be added corresponding to the centroid of groups of points that have been joined. These are used to draw the segments between other points and other clusters. We can see that the longest (two) edges stretches across the gap between the two clusters. This corresponds to the top of the dendrogram, the two long branches where we would cut it to make the two-cluster solution. This two-cluster solution is shown in plot (d).
+
+```{r}
+#| label: fig-hc-sim
+#| eval: true
+#| code-summary: "Code to make the four plots"
+#| message: false
+#| warning: false
+#| fig-cap: "Hierarchical clustering on simulated data: (a) data, (b) dendrogram, (c) dendrogram on the data, and (d) two cluster solution. The extra points corresponding to nodes of the dendrogram are indicated by + in (c)."
 #| fig-width: 7
 #| fig-height: 7
 #| out-width: 100%
-data(simple_clusters)
-# Data has two well-separated clusters
+# Plot the data
 pd <- ggplot(simple_clusters, aes(x=x1, y=x2)) +
   geom_point(colour="#3B99B1", size=2, alpha=0.8) +
   ggtitle("(a)") + 
   theme_minimal() +
   theme(aspect.ratio=1) 
 
-# Compute hierarchical clustering with Ward's linkage
-cl_hw <- hclust(dist(simple_clusters[,1:2]),
-                method="ward.D2")
-cl_ggd <- dendro_data(cl_hw, type = "triangle")
+# Plot the dendrogram
 ph <- ggplot() +
   geom_segment(data=cl_ggd$segments, 
                aes(x = x, y = y, 
@@ -57,9 +92,7 @@ ph <- ggplot() +
   theme_minimal() +
   theme_dendro()
 
-# Compute dendrogram in data
-cl_hfly <- hierfly(simple_clusters, cl_hw, scale=FALSE)
-
+# Plot the dendrogram on the data
 pdh <- ggplot() +
   geom_segment(data=cl_hfly$segments, 
                 aes(x=x, xend=xend,
@@ -69,6 +102,7 @@ pdh <- ggplot() +
                  shape=factor(node),
                  colour=factor(node),
                  size=1-node), alpha=0.8) +
+  xlab("x1") + ylab("x2") +
   scale_shape_manual(values = c(16, 3)) +
   scale_colour_manual(values = c("#3B99B1", "black")) +
   scale_size(limits=c(0,17)) +
@@ -76,9 +110,7 @@ pdh <- ggplot() +
   theme_minimal() +
   theme(aspect.ratio=1, legend.position="none")
 
-# Show result
-simple_clusters <- simple_clusters %>%
-  mutate(clw = factor(cutree(cl_hw, 2)))
+# Plot the resulting clusters
 pc <- ggplot(simple_clusters) +
   geom_point(aes(x=x1, y=x2, colour=clw), 
              size=2, alpha=0.8) +
@@ -91,15 +123,11 @@ pc <- ggplot(simple_clusters) +
 pd + ph + pdh + pc + plot_layout(ncol=2)
 ```
 
-Clustering algorithms are all prone to being confused by different problems occurring in data. For hierarchical clustering, plotting the dendrogram on the data provides another way to assess the solution. For hierarchical clustering additional the complications arise from a range of choices for defining distance once points have been joined into clusters.
-
-*Distance between clusters* is described by a "linkage method", of which there are many. For example, single linkage measures the distance between clusters by the smallest interpoint distance between the members of the two clusters clusters, complete linkage uses the maximum interpoint distance, and average linkage uses the average of the interpoint distances. Wards linkage, which usually produces the best clustering solutions, defines the distance as the reduction in the within-group variance. A good discussion on cluster analysis and linkage can be found in @HOML, on [Wikipedia](https://en.wikipedia.org/wiki/Cluster_analysis) or any multivariate textbook.
-
 ::: info
-Hierarchical clustering is summarised by a dendrogram, which sequentially shows points being joined to form a cluster, with the corresponding distances.
+Clustering algorithms are all prone to being confused by different patterns occurring in data. For hierarchical clustering the choice for defining distance once points have been joined into clusters can produce starkly different results. Plotting the dendrogram on the data provides a good way to assess the solution. 
 :::
 
-## Why you should look at the dendrogram on the data
+## Common patterns which confuse clustering algorithms
 
 @fig-problems shows two examples of structure in data that will confuse hierarchical clustering: nuisance variables and nuisance cases. We usually do not know that these problems exist prior to clustering the data. Discovering these iteratively as you conduct a clustering analysis is important for generating useful results. 
 
@@ -112,6 +140,7 @@ Hierarchical clustering is summarised by a dendrogram, which sequentially shows 
 #| fig-cap: "Two examples of data structure that causes problems for hierarchical clustering. Nuisance observations can cause problems because the close observations between the two clusters can cause some chaining in the hierarchical joining of observations.  Nuisance variables can cause problems because observations across the gap can seem closer than observations at the end of each cluster."
 #| fig-width: 8
 #| fig-height: 4
+#| code-summary: "Code to make plots"
 # Nuisance observations
 set.seed(20190514)
 x <- (runif(20)-0.5)*4
@@ -148,16 +177,17 @@ pd2 <- ggplot(data=d2, aes(x=x1, y=x2)) +
 pd1 + pd2 + plot_layout(ncol=2)
 ```
 
-If an outlier is a point that is extreme relative to other observations, an "inlier" is a point that is extreme relative to a cluster, but iside the domain of all of the observations. Nuisance observations are inliers, cases that occur between larger groups of points. If they were excluded there might be a gap between clusters. These can cause problems for clustering when distances between clusters are measured, and can be very problematic when single linkage hierarchical clustering is used. @fig-d1-s shows how nuisance observations affect single linkage but not Wards linkage hierarchical clustering.
+If an outlier is a point that is extreme relative to other observations, an "inlier" is a point that is extreme relative to a cluster, but inside the domain of all of the observations. Nuisance observations are inliers, cases that occur between larger groups of points. If they were excluded there might be a gap between clusters. These can cause problems for clustering when distances between clusters are measured, and can be very problematic when single linkage hierarchical clustering is used. @fig-d1-s shows how nuisance observations affect single linkage but not Wards linkage hierarchical clustering.
 
 ```{r}
 #| label: fig-d1-s
 #| eval: true
 #| message: false
 #| warning: false
-#| fig-cap: "Single linkage clustering on nuisance cases in comparison to Ward's linkage."
+#| fig-cap: "The effect of nuisance observations on single linkage (a, b, c) and Ward's linkage hierarchical clustering (d, e, f). Single linkage clustering gets so distracted by the nuisance cases that the two cluster result is one big cluster, and a singleton cluster. Conversely, Ward's clusters this data nicely into two useful groups."
 #| fig-width: 9
 #| fig-height: 6
+#| code-summary: "Code to make plots"
 # Compute single linkage
 d1_hs <- hclust(dist(d1[,1:2]),
                 method="single")
@@ -364,7 +394,7 @@ Two dendrograms might look very similar but the resulting clustering can be very
 
 ## Dendrograms in high-dimensions
 
-The first step with any clustering is to check the data. You typically don't know whether there are clusters, or what shape they might be, or if there are nuisance observations or variables. A pairs plot like in @fig-penguins-pairs is a nice complement to using the tour for this. Here it looks like you can see three elliptical clusters, with one is further from the others.
+The first step with any clustering with high dimensional data is also to check the data. You typically don't know whether there are clusters, or what shape they might be, or if there are nuisance observations or variables. A pairs plot like in @fig-penguins-pairs is a nice complement to using the tour (@fig-penguins-gt) for this. Here you can see three elliptical clusters, with one is further from the others.
 
 ```{r}
 #| label: fig-penguins-pairs
@@ -373,6 +403,7 @@ The first step with any clustering is to check the data. You typically don't kno
 #| fig-cap: "Make a scatterplot matrix to check for the presence of clustering, shape of clusters and presence of nuisance observations and variables. In the penguins it appears that there might be three elliptically shaped clusters, with some nuisance observations."
 #| fig-width: 8
 #| fig-height: 8
+#| code-summary: "Code for scatterplot matrix"
 load("data/penguins_sub.rda")
 ggscatmat(penguins_sub[,1:4]) + 
   theme_minimal() +
@@ -380,9 +411,8 @@ ggscatmat(penguins_sub[,1:4]) +
 ```
 
 ```{r}
-#| label: penguins-gt
 #| eval: false
-#| code-fold: false
+#| code-summary: "Code to create tour"
 set.seed(20230329)
 b <- basis_random(4,2)
 pt1 <- save_history(penguins_sub[,1:4], 
@@ -393,11 +423,7 @@ animate_xy(penguins_sub[,1:4],
            tour_path = planned_tour(pt1), 
            axes="off", rescale=FALSE, 
            half_range = 3.5)
-```
 
-```{r}
-#| label: penguins-gif
-#| eval: false
 load("data/penguins_tour_path.rda")
 render_gif(penguins_sub[,1:4], 
            planned_tour(pt1), 
@@ -407,7 +433,9 @@ render_gif(penguins_sub[,1:4],
            loop=FALSE)
 ```
 
-![Grand tour of the penguins data](gifs/penguins_gt.gif){#fig-penguins-gt fig-alt="Tour of many linear projections of the penguins data. You can see three elliptical clusters, one further apart from the other two." fig.align="center"}
+![Use a grand tour of your data to check for clusters, the shape of clusters and for nuisance observations and variables. Here the penguins data looks like it has possibly three elliptical clusters, one more separated than the other two, with some nuisance observations.](gifs/penguins_gt.gif){#fig-penguins-gt fig-alt="Tour of many linear projections of the penguins data. You can see three elliptical clusters, one further apart from the other two." fig.align="center"}
+
+The process is the same as for the simpler example. We compute and draw the dendrogram in 2D, compute it in $p$-D and view with a tour. Here we have also chosen to examine the three cluster solution for single linkage and wards linkage clustering.
 
 ```{r}
 #| label: penguins-hclust
@@ -426,6 +454,7 @@ p_s_hfly <- hierfly(p_cls, p_hcs, scale=FALSE)
 ```
 
 ```{r}
+#| code-summary: "Code to draw dendrograms"
 # Generate the dendrograms in 2D
 p_hcw_dd <- dendro_data(p_hcw)
 pw_dd <- ggplot() +
@@ -449,6 +478,7 @@ ps_dd <- ggplot() +
 ```{r}
 #| label: penguins-hfly
 #| eval: FALSE
+#| code-summary: "Code to create tours of dendrogram in data"
 load("data/penguins_tour_path.rda")
 glyphs <- c(16, 46)
 pchw <- glyphs[p_w_hfly$data$node+1]
@@ -511,6 +541,12 @@ render_gif(p_s_hfly$data[p_w_hfly$data$node == 0,1:4],
            loop=FALSE)
 ```
 
+@fig-penguins-hfly shows results for single linkage and wards linkage clustering of the penguins data. Plots (a) and (b) show the 2D dendrograms. The 2D dendrograms are very different. Wards linkage produces a clearer indication of clusters, with a suggestion of three, or possibly four or five clusters. The dendrogram for single linkage suggests two clusters, and has the classical waterfall appearance that is often seen with this type of linkage. (If you look carefully, though, you will see it is actually a three cluster solution. At the very top of the dendrogram there is another branch connecting one observation to the other two clusters.)
+
+Plots (c) and (d) show the dendrograms in 4D overlaid on the data. The two are starkly different. The single linkage clustering is like pins pointing to (three) centres, with some long extra edges.
+
+Plots (e) and (f) show the three cluster solutions, with Wards linkage almost recovering the clusters of the three species. Single linkage has two big clusters, and the singleton cluster. Although the Wards linkage produces the best result, single linkage does provide some interesting and useful information about the data. That singleton cluster is an outlier, an unusually-sized penguin. We can see it as an outlier just from the tour in @fig-penguins-gt but single linkage emphasizes it, bringing it more strongly to our attention. 
+
 ::: {#fig-penguins-hfly layout-ncol=2}
 
 ```{r}
@@ -538,9 +574,16 @@ ps_dd
 Dendrograms for Wards and single linkage of the penguins data, shown in 2D (top) and in 4D (middle), and the three-cluster solution of each.
 :::
 
+::: insight
+Single linkage on the penguins has a very different joining pattern to Wards! While Wards provides the better result, single linkage provides useful information about the data, such as emphasizing the outlier.
+:::
+
+@fig-penguins-hfly-plotly provides HTML objects of the dendrograms, so that they can be directly compared. The same tour path is used, so the sliders allow setting the view to the same projection in each plot.
+
 ```{r}
 #| label: penguins-hfly-plotly
 #| eval: FALSE
+#| code-summary: "Code to make html objects of the dendrogram in 4D"
 load("data/penguins_tour_path.rda")
 # Create a smaller one, for space concerns
 pt1i <- interpolate(pt1[,,1:5], 0.1)
@@ -628,10 +671,6 @@ htmlwidgets::saveWidget(psg,
 <iframe width="500" height="500"  src="html/penguins_cl_single.html" title="Animation of dendrogram from single linkage clustering of the penguins data."></iframe>
 
 Animation of dendrogram from Wards (top) and single (bottom) linkage clustering of the penguins data.
-:::
-
-::: insight
-Single linkage on the penguins has a very different joining pattern to Wards!
 :::
 
 ::: info

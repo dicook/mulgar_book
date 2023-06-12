@@ -363,7 +363,7 @@ div.csl-indent {
    
   <ul>
   <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview"><span class="toc-section-number">8.1</span>  Overview</a></li>
-  <li><a href="#why-you-should-look-at-the-dendrogram-on-the-data" id="toc-why-you-should-look-at-the-dendrogram-on-the-data" class="nav-link" data-scroll-target="#why-you-should-look-at-the-dendrogram-on-the-data"><span class="toc-section-number">8.2</span>  Why you should look at the dendrogram on the data</a></li>
+  <li><a href="#common-patterns-which-confuse-clustering-algorithms" id="toc-common-patterns-which-confuse-clustering-algorithms" class="nav-link" data-scroll-target="#common-patterns-which-confuse-clustering-algorithms"><span class="toc-section-number">8.2</span>  Common patterns which confuse clustering algorithms</a></li>
   <li><a href="#dendrograms-in-high-dimensions" id="toc-dendrograms-in-high-dimensions" class="nav-link" data-scroll-target="#dendrograms-in-high-dimensions"><span class="toc-section-number">8.3</span>  Dendrograms in high-dimensions</a></li>
   </ul>
 </nav>
@@ -392,11 +392,22 @@ div.csl-indent {
 <p> </p>
 <section id="overview" class="level2" data-number="8.1">
 <h2 data-number="8.1" class="anchored" data-anchor-id="overview"><span class="header-section-number">8.1</span> Overview</h2>
-<p>Hierarchical cluster algorithms sequentially fuse neighboring points to form ever-larger clusters, starting from a full interpoint distance matrix. <a href="#fig-hc-sim">Figure&nbsp;<span>8.1</span></a> illustrates the hierarchical clustering approach for a simple simulated data set (a) with two well-separated clusters in 2D. The dendrogram (b) is a representation of the order that points are joined into clusters. The dendrogram strongly indicates two clusters because there are two branches branches representing the last join are much longer than all of the other branches. Although, the dendrogram is usually a good summary of the steps taken by the algorithm, it can be misleading. The dendrogram might strongly suggest a clustering but it might be a terrible solution. To check this we need to show the model with the data, as shown in plot (c). The segments show how the points and clusters are joined. Note that once points are joined into a cluster, the centroid of that cluster is used as the join location with other points or other clusters, and this is represented by a “+”. We can see that the longest edge is the one stretching across the gap between the two clusters, which is the location where the dendrogram would be cut to produce the two-cluster solution. This two-cluster solution is shown in plot (d).</p>
+<p>Hierarchical cluster algorithms sequentially fuse neighboring points to form ever-larger clusters, starting from a full interpoint distance matrix. <em>Distance between clusters</em> is described by a “linkage method”, of which there are many. For example, single linkage measures the distance between clusters by the smallest interpoint distance between the members of the two clusters clusters, complete linkage uses the maximum interpoint distance, and average linkage uses the average of the interpoint distances. Wards linkage, which usually produces the best clustering solutions, defines the distance as the reduction in the within-group variance. A good discussion on cluster analysis and linkage can be found in <span class="citation" data-cites="HOML">Boehmke &amp; Greenwell (<a href="references.html#ref-HOML" role="doc-biblioref">2019</a>)</span>, on <a href="https://en.wikipedia.org/wiki/Cluster_analysis">Wikipedia</a> or any multivariate textbook.</p>
+<div class="info">
+<p>Hierarchical clustering is summarised by a dendrogram, which sequentially shows points being joined to form a cluster, with the corresponding distances.</p>
+</div>
+<p>Here we will take a look at hierarchical clustering, using Wards linkage, on the <code>simple_clusters</code> data. The steps taken are to:</p>
+<ol type="1">
+<li>Plot the data to check for presence of clusters and their shape.</li>
+<li>Compute the hierarchical clustering.</li>
+<li>Plot the dendrogram to help decide on an appropriate number of clusters, using the <code>dendro_data</code> function from the <code>ggdendro</code> package.</li>
+<li>Show the dendrogram overlaid on the data, calculated by the <code>hierfly</code> function in <code>mulgar</code>.</li>
+<li>Plot the clustering result, by colouring points in the plot of the data.</li>
+</ol>
 <p></p>
 <div class="cell">
 <details>
-<summary>Code</summary>
+<summary>Load libraries</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mulgar)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggdendro)</span>
@@ -411,114 +422,126 @@ div.csl-indent {
 </div>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(simple_clusters)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Data has two well-separated clusters</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>pd <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(simple_clusters, <span class="fu">aes</span>(<span class="at">x=</span>x1, <span class="at">y=</span>x2)) <span class="sc">+</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">colour=</span><span class="st">"#3B99B1"</span>, <span class="at">size=</span><span class="dv">2</span>, <span class="at">alpha=</span><span class="fl">0.8</span>) <span class="sc">+</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"(a)"</span>) <span class="sc">+</span> </span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">aspect.ratio=</span><span class="dv">1</span>) </span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute hierarchical clustering with Ward's linkage</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>cl_hw <span class="ot">&lt;-</span> <span class="fu">hclust</span>(<span class="fu">dist</span>(simple_clusters[,<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>]),</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>                <span class="at">method=</span><span class="st">"ward.D2"</span>)</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>cl_ggd <span class="ot">&lt;-</span> <span class="fu">dendro_data</span>(cl_hw, <span class="at">type =</span> <span class="st">"triangle"</span>)</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>ph <span class="ot">&lt;-</span> <span class="fu">ggplot</span>() <span class="sc">+</span></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="at">data=</span>cl_ggd<span class="sc">$</span>segments, </span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>               <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, </span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>                   <span class="at">xend =</span> xend, <span class="at">yend =</span> yend)) <span class="sc">+</span> </span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data=</span>cl_ggd<span class="sc">$</span>labels, <span class="fu">aes</span>(<span class="at">x=</span>x, <span class="at">y=</span>y),</span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>             <span class="at">colour=</span><span class="st">"#3B99B1"</span>, <span class="at">alpha=</span><span class="fl">0.8</span>) <span class="sc">+</span></span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"(b)"</span>) <span class="sc">+</span> </span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_dendro</span>()</span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute dendrogram in data</span></span>
-<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>cl_hfly <span class="ot">&lt;-</span> <span class="fu">hierfly</span>(simple_clusters, cl_hw, <span class="at">scale=</span><span class="cn">FALSE</span>)</span>
-<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>pdh <span class="ot">&lt;-</span> <span class="fu">ggplot</span>() <span class="sc">+</span></span>
-<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="at">data=</span>cl_hfly<span class="sc">$</span>segments, </span>
-<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>                <span class="fu">aes</span>(<span class="at">x=</span>x, <span class="at">xend=</span>xend,</span>
-<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>                    <span class="at">y=</span>y, <span class="at">yend=</span>yend)) <span class="sc">+</span></span>
-<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data=</span>cl_hfly<span class="sc">$</span>data, </span>
-<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>             <span class="fu">aes</span>(<span class="at">x=</span>x1, <span class="at">y=</span>x2,</span>
-<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>                 <span class="at">shape=</span><span class="fu">factor</span>(node),</span>
-<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>                 <span class="at">colour=</span><span class="fu">factor</span>(node),</span>
-<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>                 <span class="at">size=</span><span class="dv">1</span><span class="sc">-</span>node), <span class="at">alpha=</span><span class="fl">0.8</span>) <span class="sc">+</span></span>
-<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_shape_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="dv">16</span>, <span class="dv">3</span>)) <span class="sc">+</span></span>
-<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_colour_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"#3B99B1"</span>, <span class="st">"black"</span>)) <span class="sc">+</span></span>
-<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_size</span>(<span class="at">limits=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">17</span>)) <span class="sc">+</span></span>
-<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"(c)"</span>) <span class="sc">+</span> </span>
-<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">aspect.ratio=</span><span class="dv">1</span>, <span class="at">legend.position=</span><span class="st">"none"</span>)</span>
-<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a><span class="co"># Show result</span></span>
-<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>simple_clusters <span class="ot">&lt;-</span> simple_clusters <span class="sc">%&gt;%</span></span>
-<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">clw =</span> <span class="fu">factor</span>(<span class="fu">cutree</span>(cl_hw, <span class="dv">2</span>)))</span>
-<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>pc <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(simple_clusters) <span class="sc">+</span></span>
-<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x=</span>x1, <span class="at">y=</span>x2, <span class="at">colour=</span>clw), </span>
-<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>             <span class="at">size=</span><span class="dv">2</span>, <span class="at">alpha=</span><span class="fl">0.8</span>) <span class="sc">+</span></span>
-<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_colour_discrete_divergingx</span>(<span class="at">palette =</span> <span class="st">"Zissou 1"</span>,</span>
-<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">nmax=</span><span class="dv">5</span>, <span class="at">rev=</span><span class="cn">TRUE</span>) <span class="sc">+</span></span>
-<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"(d)"</span>) <span class="sc">+</span> </span>
-<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">aspect.ratio=</span><span class="dv">1</span>, <span class="at">legend.position=</span><span class="st">"none"</span>)</span>
-<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a>pd <span class="sc">+</span> ph <span class="sc">+</span> pdh <span class="sc">+</span> pc <span class="sc">+</span> <span class="fu">plot_layout</span>(<span class="at">ncol=</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute hierarchical clustering with Ward's linkage</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>cl_hw <span class="ot">&lt;-</span> <span class="fu">hclust</span>(<span class="fu">dist</span>(simple_clusters[,<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>]),</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>                <span class="at">method=</span><span class="st">"ward.D2"</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>cl_ggd <span class="ot">&lt;-</span> <span class="fu">dendro_data</span>(cl_hw, <span class="at">type =</span> <span class="st">"triangle"</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute dendrogram in the data</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>cl_hfly <span class="ot">&lt;-</span> <span class="fu">hierfly</span>(simple_clusters, cl_hw, <span class="at">scale=</span><span class="cn">FALSE</span>)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Show result</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>simple_clusters <span class="ot">&lt;-</span> simple_clusters <span class="sc">%&gt;%</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">clw =</span> <span class="fu">factor</span>(<span class="fu">cutree</span>(cl_hw, <span class="dv">2</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><a href="#fig-hc-sim">Figure&nbsp;<span>8.1</span></a> illustrates the hierarchical clustering approach for a simple simulated data set (a) with two well-separated clusters in 2D. The dendrogram (b) is a representation of the order that points are joined into clusters. The dendrogram strongly indicates two clusters because there are two branches branches representing the last join are much longer than all of the other branches.</p>
+<p>Although, the dendrogram is usually a good summary of the steps taken by the algorithm, it can be misleading. The dendrogram might indicate a clear clustering (big differences in heights of branches) but the result may be awful. You need to check this by examining the result on the data, called model-in-the-data space by <span class="citation" data-cites="wickham2015">Wickham et al. (<a href="references.html#ref-wickham2015" role="doc-biblioref">2015</a>)</span>.</p>
+<p>Plot (c) shows the dendrogram in 2D, overlaid on the data. The segments show how the points are joined to make clusters. In order to represent the dendrogram this way, new points (represented by a “+” here) need to be added corresponding to the centroid of groups of points that have been joined. These are used to draw the segments between other points and other clusters. We can see that the longest (two) edges stretches across the gap between the two clusters. This corresponds to the top of the dendrogram, the two long branches where we would cut it to make the two-cluster solution. This two-cluster solution is shown in plot (d).</p>
+<div class="cell">
+<details>
+<summary>Code to make the four plots</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the data</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>pd <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(simple_clusters, <span class="fu">aes</span>(<span class="at">x=</span>x1, <span class="at">y=</span>x2)) <span class="sc">+</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">colour=</span><span class="st">"#3B99B1"</span>, <span class="at">size=</span><span class="dv">2</span>, <span class="at">alpha=</span><span class="fl">0.8</span>) <span class="sc">+</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"(a)"</span>) <span class="sc">+</span> </span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">aspect.ratio=</span><span class="dv">1</span>) </span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the dendrogram</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>ph <span class="ot">&lt;-</span> <span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="at">data=</span>cl_ggd<span class="sc">$</span>segments, </span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>               <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, </span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>                   <span class="at">xend =</span> xend, <span class="at">yend =</span> yend)) <span class="sc">+</span> </span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data=</span>cl_ggd<span class="sc">$</span>labels, <span class="fu">aes</span>(<span class="at">x=</span>x, <span class="at">y=</span>y),</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>             <span class="at">colour=</span><span class="st">"#3B99B1"</span>, <span class="at">alpha=</span><span class="fl">0.8</span>) <span class="sc">+</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"(b)"</span>) <span class="sc">+</span> </span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_dendro</span>()</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the dendrogram on the data</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>pdh <span class="ot">&lt;-</span> <span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="at">data=</span>cl_hfly<span class="sc">$</span>segments, </span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>                <span class="fu">aes</span>(<span class="at">x=</span>x, <span class="at">xend=</span>xend,</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>                    <span class="at">y=</span>y, <span class="at">yend=</span>yend)) <span class="sc">+</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data=</span>cl_hfly<span class="sc">$</span>data, </span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>             <span class="fu">aes</span>(<span class="at">x=</span>x1, <span class="at">y=</span>x2,</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>                 <span class="at">shape=</span><span class="fu">factor</span>(node),</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>                 <span class="at">colour=</span><span class="fu">factor</span>(node),</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>                 <span class="at">size=</span><span class="dv">1</span><span class="sc">-</span>node), <span class="at">alpha=</span><span class="fl">0.8</span>) <span class="sc">+</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"x1"</span>) <span class="sc">+</span> <span class="fu">ylab</span>(<span class="st">"x2"</span>) <span class="sc">+</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_shape_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="dv">16</span>, <span class="dv">3</span>)) <span class="sc">+</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_colour_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"#3B99B1"</span>, <span class="st">"black"</span>)) <span class="sc">+</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_size</span>(<span class="at">limits=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">17</span>)) <span class="sc">+</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"(c)"</span>) <span class="sc">+</span> </span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">aspect.ratio=</span><span class="dv">1</span>, <span class="at">legend.position=</span><span class="st">"none"</span>)</span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the resulting clusters</span></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>pc <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(simple_clusters) <span class="sc">+</span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x=</span>x1, <span class="at">y=</span>x2, <span class="at">colour=</span>clw), </span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>             <span class="at">size=</span><span class="dv">2</span>, <span class="at">alpha=</span><span class="fl">0.8</span>) <span class="sc">+</span></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_colour_discrete_divergingx</span>(<span class="at">palette =</span> <span class="st">"Zissou 1"</span>,</span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">nmax=</span><span class="dv">5</span>, <span class="at">rev=</span><span class="cn">TRUE</span>) <span class="sc">+</span></span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"(d)"</span>) <span class="sc">+</span> </span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">aspect.ratio=</span><span class="dv">1</span>, <span class="at">legend.position=</span><span class="st">"none"</span>)</span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a>pd <span class="sc">+</span> ph <span class="sc">+</span> pdh <span class="sc">+</span> pc <span class="sc">+</span> <span class="fu">plot_layout</span>(<span class="at">ncol=</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display">
 <div id="fig-hc-sim" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="hierarchical-clustering_files/figure-html/fig-hc-sim-1.png" class="img-fluid figure-img" style="width:100.0%"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;8.1: Hierarchical clustering on simulated data: (a) data, (b) dendrogram, (c) dendrogram on the data, and (d) two cluster solution. Nodes of the dendrogram indicated by <code>+</code> when it is drawn on the data.</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;8.1: Hierarchical clustering on simulated data: (a) data, (b) dendrogram, (c) dendrogram on the data, and (d) two cluster solution. The extra points corresponding to nodes of the dendrogram are indicated by + in (c).</figcaption><p></p>
 </figure>
 </div>
 </div>
 </div>
-<p>Clustering algorithms are all prone to being confused by different problems occurring in data. For hierarchical clustering, plotting the dendrogram on the data provides another way to assess the solution. For hierarchical clustering additional the complications arise from a range of choices for defining distance once points have been joined into clusters.</p>
-<p><em>Distance between clusters</em> is described by a “linkage method”, of which there are many. For example, single linkage measures the distance between clusters by the smallest interpoint distance between the members of the two clusters clusters, complete linkage uses the maximum interpoint distance, and average linkage uses the average of the interpoint distances. Wards linkage, which usually produces the best clustering solutions, defines the distance as the reduction in the within-group variance. A good discussion on cluster analysis and linkage can be found in <span class="citation" data-cites="HOML">Boehmke &amp; Greenwell (<a href="references.html#ref-HOML" role="doc-biblioref">2019</a>)</span>, on <a href="https://en.wikipedia.org/wiki/Cluster_analysis">Wikipedia</a> or any multivariate textbook.</p>
 <div class="info">
-<p>Hierarchical clustering is summarised by a dendrogram, which sequentially shows points being joined to form a cluster, with the corresponding distances.</p>
+<p>Clustering algorithms are all prone to being confused by different patterns occurring in data. For hierarchical clustering the choice for defining distance once points have been joined into clusters can produce starkly different results. Plotting the dendrogram on the data provides a good way to assess the solution.</p>
 </div>
 </section>
-<section id="why-you-should-look-at-the-dendrogram-on-the-data" class="level2" data-number="8.2">
-<h2 data-number="8.2" class="anchored" data-anchor-id="why-you-should-look-at-the-dendrogram-on-the-data"><span class="header-section-number">8.2</span> Why you should look at the dendrogram on the data</h2>
+<section id="common-patterns-which-confuse-clustering-algorithms" class="level2" data-number="8.2">
+<h2 data-number="8.2" class="anchored" data-anchor-id="common-patterns-which-confuse-clustering-algorithms"><span class="header-section-number">8.2</span> Common patterns which confuse clustering algorithms</h2>
 <p><a href="#fig-problems">Figure&nbsp;<span>8.2</span></a> shows two examples of structure in data that will confuse hierarchical clustering: nuisance variables and nuisance cases. We usually do not know that these problems exist prior to clustering the data. Discovering these iteratively as you conduct a clustering analysis is important for generating useful results.</p>
 <div class="cell">
 <details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Nuisance observations</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">20190514</span>)</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> (<span class="fu">runif</span>(<span class="dv">20</span>)<span class="sc">-</span><span class="fl">0.5</span>)<span class="sc">*</span><span class="dv">4</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> x</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>d1 <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x1 =</span> <span class="fu">c</span>(<span class="fu">rnorm</span>(<span class="dv">50</span>, <span class="sc">-</span><span class="dv">3</span>), </span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>                            <span class="fu">rnorm</span>(<span class="dv">50</span>, <span class="dv">3</span>), x),</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>                 <span class="at">x2 =</span> <span class="fu">c</span>(<span class="fu">rnorm</span>(<span class="dv">50</span>, <span class="sc">-</span><span class="dv">3</span>), </span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>                            <span class="fu">rnorm</span>(<span class="dv">50</span>, <span class="dv">3</span>), y),</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>                 <span class="at">cl =</span> <span class="fu">factor</span>(<span class="fu">c</span>(<span class="fu">rep</span>(<span class="st">"A"</span>, <span class="dv">50</span>), </span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>                             <span class="fu">rep</span>(<span class="st">"B"</span>, <span class="dv">70</span>))))</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>d1 <span class="ot">&lt;-</span> d1 <span class="sc">%&gt;%</span> </span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate_if</span>(is.numeric, <span class="cf">function</span>(x) (x<span class="sc">-</span><span class="fu">mean</span>(x))<span class="sc">/</span><span class="fu">sd</span>(x))</span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>pd1 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data=</span>d1, <span class="fu">aes</span>(<span class="at">x=</span>x1, <span class="at">y=</span>x2)) <span class="sc">+</span> </span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggtitle</span>(<span class="st">"Nuisance observations"</span>) <span class="sc">+</span> </span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">aspect.ratio=</span><span class="dv">1</span>) </span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Nuisance variables</span></span>
-<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">20190512</span>)</span>
-<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>d2 <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x1=</span><span class="fu">c</span>(<span class="fu">rnorm</span>(<span class="dv">50</span>, <span class="sc">-</span><span class="dv">4</span>), </span>
-<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>                            <span class="fu">rnorm</span>(<span class="dv">50</span>, <span class="dv">4</span>)),</span>
-<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>                 <span class="at">x2=</span><span class="fu">c</span>(<span class="fu">rnorm</span>(<span class="dv">100</span>)),</span>
-<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>                 <span class="at">cl =</span> <span class="fu">factor</span>(<span class="fu">c</span>(<span class="fu">rep</span>(<span class="st">"A"</span>, <span class="dv">50</span>), </span>
-<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>                             <span class="fu">rep</span>(<span class="st">"B"</span>, <span class="dv">50</span>))))</span>
-<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>d2 <span class="ot">&lt;-</span> d2 <span class="sc">%&gt;%</span> </span>
-<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate_if</span>(is.numeric, <span class="cf">function</span>(x) (x<span class="sc">-</span><span class="fu">mean</span>(x))<span class="sc">/</span><span class="fu">sd</span>(x))</span>
-<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>pd2 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data=</span>d2, <span class="fu">aes</span>(<span class="at">x=</span>x1, <span class="at">y=</span>x2)) <span class="sc">+</span> </span>
-<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
-<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggtitle</span>(<span class="st">"Nuisance variables"</span>) <span class="sc">+</span> </span>
-<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">aspect.ratio=</span><span class="dv">1</span>)</span>
-<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>pd1 <span class="sc">+</span> pd2 <span class="sc">+</span> <span class="fu">plot_layout</span>(<span class="at">ncol=</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<summary>Code to make plots</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Nuisance observations</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">20190514</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> (<span class="fu">runif</span>(<span class="dv">20</span>)<span class="sc">-</span><span class="fl">0.5</span>)<span class="sc">*</span><span class="dv">4</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> x</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>d1 <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x1 =</span> <span class="fu">c</span>(<span class="fu">rnorm</span>(<span class="dv">50</span>, <span class="sc">-</span><span class="dv">3</span>), </span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>                            <span class="fu">rnorm</span>(<span class="dv">50</span>, <span class="dv">3</span>), x),</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>                 <span class="at">x2 =</span> <span class="fu">c</span>(<span class="fu">rnorm</span>(<span class="dv">50</span>, <span class="sc">-</span><span class="dv">3</span>), </span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>                            <span class="fu">rnorm</span>(<span class="dv">50</span>, <span class="dv">3</span>), y),</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>                 <span class="at">cl =</span> <span class="fu">factor</span>(<span class="fu">c</span>(<span class="fu">rep</span>(<span class="st">"A"</span>, <span class="dv">50</span>), </span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>                             <span class="fu">rep</span>(<span class="st">"B"</span>, <span class="dv">70</span>))))</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>d1 <span class="ot">&lt;-</span> d1 <span class="sc">%&gt;%</span> </span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate_if</span>(is.numeric, <span class="cf">function</span>(x) (x<span class="sc">-</span><span class="fu">mean</span>(x))<span class="sc">/</span><span class="fu">sd</span>(x))</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>pd1 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data=</span>d1, <span class="fu">aes</span>(<span class="at">x=</span>x1, <span class="at">y=</span>x2)) <span class="sc">+</span> </span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggtitle</span>(<span class="st">"Nuisance observations"</span>) <span class="sc">+</span> </span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">aspect.ratio=</span><span class="dv">1</span>) </span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Nuisance variables</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">20190512</span>)</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>d2 <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x1=</span><span class="fu">c</span>(<span class="fu">rnorm</span>(<span class="dv">50</span>, <span class="sc">-</span><span class="dv">4</span>), </span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>                            <span class="fu">rnorm</span>(<span class="dv">50</span>, <span class="dv">4</span>)),</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>                 <span class="at">x2=</span><span class="fu">c</span>(<span class="fu">rnorm</span>(<span class="dv">100</span>)),</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>                 <span class="at">cl =</span> <span class="fu">factor</span>(<span class="fu">c</span>(<span class="fu">rep</span>(<span class="st">"A"</span>, <span class="dv">50</span>), </span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>                             <span class="fu">rep</span>(<span class="st">"B"</span>, <span class="dv">50</span>))))</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>d2 <span class="ot">&lt;-</span> d2 <span class="sc">%&gt;%</span> </span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate_if</span>(is.numeric, <span class="cf">function</span>(x) (x<span class="sc">-</span><span class="fu">mean</span>(x))<span class="sc">/</span><span class="fu">sd</span>(x))</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>pd2 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data=</span>d2, <span class="fu">aes</span>(<span class="at">x=</span>x1, <span class="at">y=</span>x2)) <span class="sc">+</span> </span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggtitle</span>(<span class="st">"Nuisance variables"</span>) <span class="sc">+</span> </span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">aspect.ratio=</span><span class="dv">1</span>)</span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>pd1 <span class="sc">+</span> pd2 <span class="sc">+</span> <span class="fu">plot_layout</span>(<span class="at">ncol=</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div id="fig-problems" class="quarto-figure quarto-figure-center anchored">
@@ -529,139 +552,32 @@ div.csl-indent {
 </div>
 </div>
 </div>
-<p>If an outlier is a point that is extreme relative to other observations, an “inlier” is a point that is extreme relative to a cluster, but iside the domain of all of the observations. Nuisance observations are inliers, cases that occur between larger groups of points. If they were excluded there might be a gap between clusters. These can cause problems for clustering when distances between clusters are measured, and can be very problematic when single linkage hierarchical clustering is used. <a href="#fig-d1-s">Figure&nbsp;<span>8.3</span></a> shows how nuisance observations affect single linkage but not Wards linkage hierarchical clustering.</p>
+<p>If an outlier is a point that is extreme relative to other observations, an “inlier” is a point that is extreme relative to a cluster, but inside the domain of all of the observations. Nuisance observations are inliers, cases that occur between larger groups of points. If they were excluded there might be a gap between clusters. These can cause problems for clustering when distances between clusters are measured, and can be very problematic when single linkage hierarchical clustering is used. <a href="#fig-d1-s">Figure&nbsp;<span>8.3</span></a> shows how nuisance observations affect single linkage but not Wards linkage hierarchical clustering.</p>
 <div class="cell">
 <details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute single linkage</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>d1_hs <span class="ot">&lt;-</span> <span class="fu">hclust</span>(<span class="fu">dist</span>(d1[,<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>]),</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>                <span class="at">method=</span><span class="st">"single"</span>)</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>d1_ggds <span class="ot">&lt;-</span> <span class="fu">dendro_data</span>(d1_hs, <span class="at">type =</span> <span class="st">"triangle"</span>)</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>pd1s <span class="ot">&lt;-</span> <span class="fu">ggplot</span>() <span class="sc">+</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="at">data=</span>d1_ggds<span class="sc">$</span>segments, </span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>               <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, </span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>                   <span class="at">xend =</span> xend, <span class="at">yend =</span> yend)) <span class="sc">+</span> </span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data=</span>d1_ggds<span class="sc">$</span>labels, <span class="fu">aes</span>(<span class="at">x=</span>x, <span class="at">y=</span>y),</span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>             <span class="at">colour=</span><span class="st">"#3B99B1"</span>, <span class="at">alpha=</span><span class="fl">0.8</span>) <span class="sc">+</span></span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"(a) Single linkage dendrogram"</span>) <span class="sc">+</span></span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_dendro</span>()</span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute dendrogram in data</span></span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>d1_hflys <span class="ot">&lt;-</span> <span class="fu">hierfly</span>(d1, d1_hs, <span class="at">scale=</span><span class="cn">FALSE</span>)</span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>pd1hs <span class="ot">&lt;-</span> <span class="fu">ggplot</span>() <span class="sc">+</span></span>
-<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="at">data=</span>d1_hflys<span class="sc">$</span>segments, </span>
-<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>                <span class="fu">aes</span>(<span class="at">x=</span>x, <span class="at">xend=</span>xend,</span>
-<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>                    <span class="at">y=</span>y, <span class="at">yend=</span>yend)) <span class="sc">+</span></span>
-<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data=</span>d1_hflys<span class="sc">$</span>data, </span>
-<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>             <span class="fu">aes</span>(<span class="at">x=</span>x1, <span class="at">y=</span>x2,</span>
-<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>                 <span class="at">shape=</span><span class="fu">factor</span>(node),</span>
-<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>                 <span class="at">colour=</span><span class="fu">factor</span>(node),</span>
-<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>                 <span class="at">size=</span><span class="dv">1</span><span class="sc">-</span>node), <span class="at">alpha=</span><span class="fl">0.8</span>) <span class="sc">+</span></span>
-<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_shape_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="dv">16</span>, <span class="dv">3</span>)) <span class="sc">+</span></span>
-<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_colour_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"#3B99B1"</span>, <span class="st">"black"</span>)) <span class="sc">+</span></span>
-<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_size</span>(<span class="at">limits=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">17</span>)) <span class="sc">+</span></span>
-<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"(b) Dendrogram in data"</span>) <span class="sc">+</span> </span>
-<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">aspect.ratio=</span><span class="dv">1</span>, <span class="at">legend.position=</span><span class="st">"none"</span>)</span>
-<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a><span class="co"># Show result</span></span>
-<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>d1 <span class="ot">&lt;-</span> d1 <span class="sc">%&gt;%</span></span>
-<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">cls =</span> <span class="fu">factor</span>(<span class="fu">cutree</span>(d1_hs, <span class="dv">2</span>)))</span>
-<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>pc_d1s <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(d1) <span class="sc">+</span></span>
-<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x=</span>x1, <span class="at">y=</span>x2, <span class="at">colour=</span>cls), </span>
-<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>             <span class="at">size=</span><span class="dv">2</span>, <span class="at">alpha=</span><span class="fl">0.8</span>) <span class="sc">+</span></span>
-<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_colour_discrete_divergingx</span>(<span class="at">palette =</span> <span class="st">"Zissou 1"</span>,</span>
-<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">nmax=</span><span class="dv">4</span>, <span class="at">rev=</span><span class="cn">TRUE</span>) <span class="sc">+</span></span>
-<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"(c) Two-cluster solution"</span>) <span class="sc">+</span> </span>
-<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">aspect.ratio=</span><span class="dv">1</span>, <span class="at">legend.position=</span><span class="st">"none"</span>)</span>
-<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute Wards linkage</span></span>
-<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>d1_hw <span class="ot">&lt;-</span> <span class="fu">hclust</span>(<span class="fu">dist</span>(d1[,<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>]),</span>
-<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>                <span class="at">method=</span><span class="st">"ward.D2"</span>)</span>
-<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>d1_ggdw <span class="ot">&lt;-</span> <span class="fu">dendro_data</span>(d1_hw, <span class="at">type =</span> <span class="st">"triangle"</span>)</span>
-<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a>pd1w <span class="ot">&lt;-</span> <span class="fu">ggplot</span>() <span class="sc">+</span></span>
-<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="at">data=</span>d1_ggdw<span class="sc">$</span>segments, </span>
-<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>               <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, </span>
-<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>                   <span class="at">xend =</span> xend, <span class="at">yend =</span> yend)) <span class="sc">+</span> </span>
-<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data=</span>d1_ggdw<span class="sc">$</span>labels, <span class="fu">aes</span>(<span class="at">x=</span>x, <span class="at">y=</span>y),</span>
-<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a>             <span class="at">colour=</span><span class="st">"#3B99B1"</span>, <span class="at">alpha=</span><span class="fl">0.8</span>) <span class="sc">+</span></span>
-<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"(d) Ward's linkage dendrogram"</span>) <span class="sc">+</span></span>
-<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_dendro</span>()</span>
-<span id="cb4-59"><a href="#cb4-59" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-60"><a href="#cb4-60" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute dendrogram in data</span></span>
-<span id="cb4-61"><a href="#cb4-61" aria-hidden="true" tabindex="-1"></a>d1_hflyw <span class="ot">&lt;-</span> <span class="fu">hierfly</span>(d1, d1_hw, <span class="at">scale=</span><span class="cn">FALSE</span>)</span>
-<span id="cb4-62"><a href="#cb4-62" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-63"><a href="#cb4-63" aria-hidden="true" tabindex="-1"></a>pd1hw <span class="ot">&lt;-</span> <span class="fu">ggplot</span>() <span class="sc">+</span></span>
-<span id="cb4-64"><a href="#cb4-64" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="at">data=</span>d1_hflyw<span class="sc">$</span>segments, </span>
-<span id="cb4-65"><a href="#cb4-65" aria-hidden="true" tabindex="-1"></a>                <span class="fu">aes</span>(<span class="at">x=</span>x, <span class="at">xend=</span>xend,</span>
-<span id="cb4-66"><a href="#cb4-66" aria-hidden="true" tabindex="-1"></a>                    <span class="at">y=</span>y, <span class="at">yend=</span>yend)) <span class="sc">+</span></span>
-<span id="cb4-67"><a href="#cb4-67" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data=</span>d1_hflyw<span class="sc">$</span>data, </span>
-<span id="cb4-68"><a href="#cb4-68" aria-hidden="true" tabindex="-1"></a>             <span class="fu">aes</span>(<span class="at">x=</span>x1, <span class="at">y=</span>x2,</span>
-<span id="cb4-69"><a href="#cb4-69" aria-hidden="true" tabindex="-1"></a>                 <span class="at">shape=</span><span class="fu">factor</span>(node),</span>
-<span id="cb4-70"><a href="#cb4-70" aria-hidden="true" tabindex="-1"></a>                 <span class="at">colour=</span><span class="fu">factor</span>(node),</span>
-<span id="cb4-71"><a href="#cb4-71" aria-hidden="true" tabindex="-1"></a>                 <span class="at">size=</span><span class="dv">1</span><span class="sc">-</span>node), <span class="at">alpha=</span><span class="fl">0.8</span>) <span class="sc">+</span></span>
-<span id="cb4-72"><a href="#cb4-72" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_shape_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="dv">16</span>, <span class="dv">3</span>)) <span class="sc">+</span></span>
-<span id="cb4-73"><a href="#cb4-73" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_colour_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"#3B99B1"</span>, <span class="st">"black"</span>)) <span class="sc">+</span></span>
-<span id="cb4-74"><a href="#cb4-74" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_size</span>(<span class="at">limits=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">17</span>)) <span class="sc">+</span></span>
-<span id="cb4-75"><a href="#cb4-75" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"(e) Dendrogram in data"</span>) <span class="sc">+</span> </span>
-<span id="cb4-76"><a href="#cb4-76" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb4-77"><a href="#cb4-77" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">aspect.ratio=</span><span class="dv">1</span>, <span class="at">legend.position=</span><span class="st">"none"</span>)</span>
-<span id="cb4-78"><a href="#cb4-78" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-79"><a href="#cb4-79" aria-hidden="true" tabindex="-1"></a><span class="co"># Show result</span></span>
-<span id="cb4-80"><a href="#cb4-80" aria-hidden="true" tabindex="-1"></a>d1 <span class="ot">&lt;-</span> d1 <span class="sc">%&gt;%</span></span>
-<span id="cb4-81"><a href="#cb4-81" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">clw =</span> <span class="fu">factor</span>(<span class="fu">cutree</span>(d1_hw, <span class="dv">2</span>)))</span>
-<span id="cb4-82"><a href="#cb4-82" aria-hidden="true" tabindex="-1"></a>pc_d1w <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(d1) <span class="sc">+</span></span>
-<span id="cb4-83"><a href="#cb4-83" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x=</span>x1, <span class="at">y=</span>x2, <span class="at">colour=</span>clw), </span>
-<span id="cb4-84"><a href="#cb4-84" aria-hidden="true" tabindex="-1"></a>             <span class="at">size=</span><span class="dv">2</span>, <span class="at">alpha=</span><span class="fl">0.8</span>) <span class="sc">+</span></span>
-<span id="cb4-85"><a href="#cb4-85" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_colour_discrete_divergingx</span>(<span class="at">palette =</span> <span class="st">"Zissou 1"</span>,</span>
-<span id="cb4-86"><a href="#cb4-86" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">nmax=</span><span class="dv">4</span>, <span class="at">rev=</span><span class="cn">TRUE</span>) <span class="sc">+</span></span>
-<span id="cb4-87"><a href="#cb4-87" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"(f) Two-cluster solution"</span>) <span class="sc">+</span> </span>
-<span id="cb4-88"><a href="#cb4-88" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb4-89"><a href="#cb4-89" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">aspect.ratio=</span><span class="dv">1</span>, <span class="at">legend.position=</span><span class="st">"none"</span>)</span>
-<span id="cb4-90"><a href="#cb4-90" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-91"><a href="#cb4-91" aria-hidden="true" tabindex="-1"></a>pd1s <span class="sc">+</span> pd1hs <span class="sc">+</span> pc_d1s <span class="sc">+</span> </span>
-<span id="cb4-92"><a href="#cb4-92" aria-hidden="true" tabindex="-1"></a>  pd1w <span class="sc">+</span> pd1hw <span class="sc">+</span> pc_d1w <span class="sc">+</span></span>
-<span id="cb4-93"><a href="#cb4-93" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_layout</span>(<span class="at">ncol=</span><span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output-display">
-<div id="fig-d1-s" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure">
-<p><img src="hierarchical-clustering_files/figure-html/fig-d1-s-1.png" class="img-fluid figure-img" width="864"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;8.3: Single linkage clustering on nuisance cases in comparison to Ward’s linkage.</figcaption><p></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Nuisance variables are ones that do not contribute to the clustering, such as <code>x2</code> here. When we look at this data we see a gap between two elliptically shape clusters, with the gap being only in the horizontal direction, <code>x1</code>. When we compute the distances between points, in order to start clustering, without knowing that <code>x2</code> is a nuisance variable, points across the gap might be considered to be closer than points within the same cluster. <a href="#fig-d2-c">Figure&nbsp;<span>8.4</span></a> shows how nuisance variables affects complete linkage but not Wards linkage hierarchical clustering. (Wards linkage can be affected but it isn’t for this data.) Interestingly, the dendrogram for complete linkage looks ideal, that it suggests two clusters. It is not until you examine the resulting clusters in the data that you can see the error, that it has clustered across the gap.</p>
-<div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute complete linkage</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>d2_hc <span class="ot">&lt;-</span> <span class="fu">hclust</span>(<span class="fu">dist</span>(d2[,<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>]),</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>                <span class="at">method=</span><span class="st">"complete"</span>)</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>d2_ggdc <span class="ot">&lt;-</span> <span class="fu">dendro_data</span>(d2_hc, <span class="at">type =</span> <span class="st">"triangle"</span>)</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>pd2c <span class="ot">&lt;-</span> <span class="fu">ggplot</span>() <span class="sc">+</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="at">data=</span>d2_ggdc<span class="sc">$</span>segments, </span>
+<summary>Code to make plots</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute single linkage</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>d1_hs <span class="ot">&lt;-</span> <span class="fu">hclust</span>(<span class="fu">dist</span>(d1[,<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>]),</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>                <span class="at">method=</span><span class="st">"single"</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>d1_ggds <span class="ot">&lt;-</span> <span class="fu">dendro_data</span>(d1_hs, <span class="at">type =</span> <span class="st">"triangle"</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>pd1s <span class="ot">&lt;-</span> <span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="at">data=</span>d1_ggds<span class="sc">$</span>segments, </span>
 <span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>               <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, </span>
 <span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>                   <span class="at">xend =</span> xend, <span class="at">yend =</span> yend)) <span class="sc">+</span> </span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data=</span>d2_ggdc<span class="sc">$</span>labels, <span class="fu">aes</span>(<span class="at">x=</span>x, <span class="at">y=</span>y),</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data=</span>d1_ggds<span class="sc">$</span>labels, <span class="fu">aes</span>(<span class="at">x=</span>x, <span class="at">y=</span>y),</span>
 <span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>             <span class="at">colour=</span><span class="st">"#3B99B1"</span>, <span class="at">alpha=</span><span class="fl">0.8</span>) <span class="sc">+</span></span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"(a) Complete linkage dendrogram"</span>) <span class="sc">+</span></span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"(a) Single linkage dendrogram"</span>) <span class="sc">+</span></span>
 <span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_dendro</span>()</span>
 <span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute dendrogram in data</span></span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>d2_hflyc <span class="ot">&lt;-</span> <span class="fu">hierfly</span>(d2, d2_hc, <span class="at">scale=</span><span class="cn">FALSE</span>)</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>d1_hflys <span class="ot">&lt;-</span> <span class="fu">hierfly</span>(d1, d1_hs, <span class="at">scale=</span><span class="cn">FALSE</span>)</span>
 <span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>pd2hc <span class="ot">&lt;-</span> <span class="fu">ggplot</span>() <span class="sc">+</span></span>
-<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="at">data=</span>d2_hflyc<span class="sc">$</span>segments, </span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>pd1hs <span class="ot">&lt;-</span> <span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="at">data=</span>d1_hflys<span class="sc">$</span>segments, </span>
 <span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>                <span class="fu">aes</span>(<span class="at">x=</span>x, <span class="at">xend=</span>xend,</span>
 <span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>                    <span class="at">y=</span>y, <span class="at">yend=</span>yend)) <span class="sc">+</span></span>
-<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data=</span>d2_hflyc<span class="sc">$</span>data, </span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data=</span>d1_hflys<span class="sc">$</span>data, </span>
 <span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>             <span class="fu">aes</span>(<span class="at">x=</span>x1, <span class="at">y=</span>x2,</span>
 <span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>                 <span class="at">shape=</span><span class="fu">factor</span>(node),</span>
 <span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>                 <span class="at">colour=</span><span class="fu">factor</span>(node),</span>
@@ -674,10 +590,10 @@ div.csl-indent {
 <span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">aspect.ratio=</span><span class="dv">1</span>, <span class="at">legend.position=</span><span class="st">"none"</span>)</span>
 <span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a><span class="co"># Show result</span></span>
-<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>d2 <span class="ot">&lt;-</span> d2 <span class="sc">%&gt;%</span></span>
-<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">clc =</span> <span class="fu">factor</span>(<span class="fu">cutree</span>(d2_hc, <span class="dv">2</span>)))</span>
-<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>pc_d2c <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(d2) <span class="sc">+</span></span>
-<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x=</span>x1, <span class="at">y=</span>x2, <span class="at">colour=</span>clc), </span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>d1 <span class="ot">&lt;-</span> d1 <span class="sc">%&gt;%</span></span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">cls =</span> <span class="fu">factor</span>(<span class="fu">cutree</span>(d1_hs, <span class="dv">2</span>)))</span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>pc_d1s <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(d1) <span class="sc">+</span></span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x=</span>x1, <span class="at">y=</span>x2, <span class="at">colour=</span>cls), </span>
 <span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>             <span class="at">size=</span><span class="dv">2</span>, <span class="at">alpha=</span><span class="fl">0.8</span>) <span class="sc">+</span></span>
 <span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_colour_discrete_divergingx</span>(<span class="at">palette =</span> <span class="st">"Zissou 1"</span>,</span>
 <span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">nmax=</span><span class="dv">4</span>, <span class="at">rev=</span><span class="cn">TRUE</span>) <span class="sc">+</span></span>
@@ -686,27 +602,27 @@ div.csl-indent {
 <span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">aspect.ratio=</span><span class="dv">1</span>, <span class="at">legend.position=</span><span class="st">"none"</span>)</span>
 <span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute Wards linkage</span></span>
-<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a>d2_hw <span class="ot">&lt;-</span> <span class="fu">hclust</span>(<span class="fu">dist</span>(d2[,<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>]),</span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a>d1_hw <span class="ot">&lt;-</span> <span class="fu">hclust</span>(<span class="fu">dist</span>(d1[,<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>]),</span>
 <span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a>                <span class="at">method=</span><span class="st">"ward.D2"</span>)</span>
-<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a>d2_ggdw <span class="ot">&lt;-</span> <span class="fu">dendro_data</span>(d2_hw, <span class="at">type =</span> <span class="st">"triangle"</span>)</span>
-<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a>pd2w <span class="ot">&lt;-</span> <span class="fu">ggplot</span>() <span class="sc">+</span></span>
-<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="at">data=</span>d2_ggdw<span class="sc">$</span>segments, </span>
+<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a>d1_ggdw <span class="ot">&lt;-</span> <span class="fu">dendro_data</span>(d1_hw, <span class="at">type =</span> <span class="st">"triangle"</span>)</span>
+<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a>pd1w <span class="ot">&lt;-</span> <span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="at">data=</span>d1_ggdw<span class="sc">$</span>segments, </span>
 <span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a>               <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, </span>
 <span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a>                   <span class="at">xend =</span> xend, <span class="at">yend =</span> yend)) <span class="sc">+</span> </span>
-<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data=</span>d2_ggdw<span class="sc">$</span>labels, <span class="fu">aes</span>(<span class="at">x=</span>x, <span class="at">y=</span>y),</span>
+<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data=</span>d1_ggdw<span class="sc">$</span>labels, <span class="fu">aes</span>(<span class="at">x=</span>x, <span class="at">y=</span>y),</span>
 <span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a>             <span class="at">colour=</span><span class="st">"#3B99B1"</span>, <span class="at">alpha=</span><span class="fl">0.8</span>) <span class="sc">+</span></span>
 <span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"(d) Ward's linkage dendrogram"</span>) <span class="sc">+</span></span>
 <span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
 <span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_dendro</span>()</span>
 <span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute dendrogram in data</span></span>
-<span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a>d2_hflyw <span class="ot">&lt;-</span> <span class="fu">hierfly</span>(d2, d2_hw, <span class="at">scale=</span><span class="cn">FALSE</span>)</span>
+<span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a>d1_hflyw <span class="ot">&lt;-</span> <span class="fu">hierfly</span>(d1, d1_hw, <span class="at">scale=</span><span class="cn">FALSE</span>)</span>
 <span id="cb5-62"><a href="#cb5-62" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-63"><a href="#cb5-63" aria-hidden="true" tabindex="-1"></a>pd2hw <span class="ot">&lt;-</span> <span class="fu">ggplot</span>() <span class="sc">+</span></span>
-<span id="cb5-64"><a href="#cb5-64" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="at">data=</span>d2_hflyw<span class="sc">$</span>segments, </span>
+<span id="cb5-63"><a href="#cb5-63" aria-hidden="true" tabindex="-1"></a>pd1hw <span class="ot">&lt;-</span> <span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb5-64"><a href="#cb5-64" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="at">data=</span>d1_hflyw<span class="sc">$</span>segments, </span>
 <span id="cb5-65"><a href="#cb5-65" aria-hidden="true" tabindex="-1"></a>                <span class="fu">aes</span>(<span class="at">x=</span>x, <span class="at">xend=</span>xend,</span>
 <span id="cb5-66"><a href="#cb5-66" aria-hidden="true" tabindex="-1"></a>                    <span class="at">y=</span>y, <span class="at">yend=</span>yend)) <span class="sc">+</span></span>
-<span id="cb5-67"><a href="#cb5-67" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data=</span>d2_hflyw<span class="sc">$</span>data, </span>
+<span id="cb5-67"><a href="#cb5-67" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data=</span>d1_hflyw<span class="sc">$</span>data, </span>
 <span id="cb5-68"><a href="#cb5-68" aria-hidden="true" tabindex="-1"></a>             <span class="fu">aes</span>(<span class="at">x=</span>x1, <span class="at">y=</span>x2,</span>
 <span id="cb5-69"><a href="#cb5-69" aria-hidden="true" tabindex="-1"></a>                 <span class="at">shape=</span><span class="fu">factor</span>(node),</span>
 <span id="cb5-70"><a href="#cb5-70" aria-hidden="true" tabindex="-1"></a>                 <span class="at">colour=</span><span class="fu">factor</span>(node),</span>
@@ -719,9 +635,9 @@ div.csl-indent {
 <span id="cb5-77"><a href="#cb5-77" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">aspect.ratio=</span><span class="dv">1</span>, <span class="at">legend.position=</span><span class="st">"none"</span>)</span>
 <span id="cb5-78"><a href="#cb5-78" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-79"><a href="#cb5-79" aria-hidden="true" tabindex="-1"></a><span class="co"># Show result</span></span>
-<span id="cb5-80"><a href="#cb5-80" aria-hidden="true" tabindex="-1"></a>d2 <span class="ot">&lt;-</span> d2 <span class="sc">%&gt;%</span></span>
-<span id="cb5-81"><a href="#cb5-81" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">clw =</span> <span class="fu">factor</span>(<span class="fu">cutree</span>(d2_hw, <span class="dv">2</span>)))</span>
-<span id="cb5-82"><a href="#cb5-82" aria-hidden="true" tabindex="-1"></a>pc_d2w <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(d2) <span class="sc">+</span></span>
+<span id="cb5-80"><a href="#cb5-80" aria-hidden="true" tabindex="-1"></a>d1 <span class="ot">&lt;-</span> d1 <span class="sc">%&gt;%</span></span>
+<span id="cb5-81"><a href="#cb5-81" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">clw =</span> <span class="fu">factor</span>(<span class="fu">cutree</span>(d1_hw, <span class="dv">2</span>)))</span>
+<span id="cb5-82"><a href="#cb5-82" aria-hidden="true" tabindex="-1"></a>pc_d1w <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(d1) <span class="sc">+</span></span>
 <span id="cb5-83"><a href="#cb5-83" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x=</span>x1, <span class="at">y=</span>x2, <span class="at">colour=</span>clw), </span>
 <span id="cb5-84"><a href="#cb5-84" aria-hidden="true" tabindex="-1"></a>             <span class="at">size=</span><span class="dv">2</span>, <span class="at">alpha=</span><span class="fl">0.8</span>) <span class="sc">+</span></span>
 <span id="cb5-85"><a href="#cb5-85" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_colour_discrete_divergingx</span>(<span class="at">palette =</span> <span class="st">"Zissou 1"</span>,</span>
@@ -730,9 +646,116 @@ div.csl-indent {
 <span id="cb5-88"><a href="#cb5-88" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
 <span id="cb5-89"><a href="#cb5-89" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">aspect.ratio=</span><span class="dv">1</span>, <span class="at">legend.position=</span><span class="st">"none"</span>)</span>
 <span id="cb5-90"><a href="#cb5-90" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-91"><a href="#cb5-91" aria-hidden="true" tabindex="-1"></a>pd2c <span class="sc">+</span> pd2hc <span class="sc">+</span> pc_d2c <span class="sc">+</span> </span>
-<span id="cb5-92"><a href="#cb5-92" aria-hidden="true" tabindex="-1"></a>  pd2w <span class="sc">+</span> pd2hw <span class="sc">+</span> pc_d2w <span class="sc">+</span></span>
+<span id="cb5-91"><a href="#cb5-91" aria-hidden="true" tabindex="-1"></a>pd1s <span class="sc">+</span> pd1hs <span class="sc">+</span> pc_d1s <span class="sc">+</span> </span>
+<span id="cb5-92"><a href="#cb5-92" aria-hidden="true" tabindex="-1"></a>  pd1w <span class="sc">+</span> pd1hw <span class="sc">+</span> pc_d1w <span class="sc">+</span></span>
 <span id="cb5-93"><a href="#cb5-93" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_layout</span>(<span class="at">ncol=</span><span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-d1-s" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="hierarchical-clustering_files/figure-html/fig-d1-s-1.png" class="img-fluid figure-img" width="864"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;8.3: The effect of nuisance observations on single linkage (a, b, c) and Ward’s linkage hierarchical clustering (d, e, f). Single linkage clustering gets so distracted by the nuisance cases that the two cluster result is one big cluster, and a singleton cluster. Conversely, Ward’s clusters this data nicely into two useful groups.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Nuisance variables are ones that do not contribute to the clustering, such as <code>x2</code> here. When we look at this data we see a gap between two elliptically shape clusters, with the gap being only in the horizontal direction, <code>x1</code>. When we compute the distances between points, in order to start clustering, without knowing that <code>x2</code> is a nuisance variable, points across the gap might be considered to be closer than points within the same cluster. <a href="#fig-d2-c">Figure&nbsp;<span>8.4</span></a> shows how nuisance variables affects complete linkage but not Wards linkage hierarchical clustering. (Wards linkage can be affected but it isn’t for this data.) Interestingly, the dendrogram for complete linkage looks ideal, that it suggests two clusters. It is not until you examine the resulting clusters in the data that you can see the error, that it has clustered across the gap.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute complete linkage</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>d2_hc <span class="ot">&lt;-</span> <span class="fu">hclust</span>(<span class="fu">dist</span>(d2[,<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>]),</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>                <span class="at">method=</span><span class="st">"complete"</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>d2_ggdc <span class="ot">&lt;-</span> <span class="fu">dendro_data</span>(d2_hc, <span class="at">type =</span> <span class="st">"triangle"</span>)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>pd2c <span class="ot">&lt;-</span> <span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="at">data=</span>d2_ggdc<span class="sc">$</span>segments, </span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>               <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, </span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>                   <span class="at">xend =</span> xend, <span class="at">yend =</span> yend)) <span class="sc">+</span> </span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data=</span>d2_ggdc<span class="sc">$</span>labels, <span class="fu">aes</span>(<span class="at">x=</span>x, <span class="at">y=</span>y),</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>             <span class="at">colour=</span><span class="st">"#3B99B1"</span>, <span class="at">alpha=</span><span class="fl">0.8</span>) <span class="sc">+</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"(a) Complete linkage dendrogram"</span>) <span class="sc">+</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_dendro</span>()</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute dendrogram in data</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>d2_hflyc <span class="ot">&lt;-</span> <span class="fu">hierfly</span>(d2, d2_hc, <span class="at">scale=</span><span class="cn">FALSE</span>)</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>pd2hc <span class="ot">&lt;-</span> <span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="at">data=</span>d2_hflyc<span class="sc">$</span>segments, </span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>                <span class="fu">aes</span>(<span class="at">x=</span>x, <span class="at">xend=</span>xend,</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>                    <span class="at">y=</span>y, <span class="at">yend=</span>yend)) <span class="sc">+</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data=</span>d2_hflyc<span class="sc">$</span>data, </span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>             <span class="fu">aes</span>(<span class="at">x=</span>x1, <span class="at">y=</span>x2,</span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>                 <span class="at">shape=</span><span class="fu">factor</span>(node),</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>                 <span class="at">colour=</span><span class="fu">factor</span>(node),</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>                 <span class="at">size=</span><span class="dv">1</span><span class="sc">-</span>node), <span class="at">alpha=</span><span class="fl">0.8</span>) <span class="sc">+</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_shape_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="dv">16</span>, <span class="dv">3</span>)) <span class="sc">+</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_colour_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"#3B99B1"</span>, <span class="st">"black"</span>)) <span class="sc">+</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_size</span>(<span class="at">limits=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">17</span>)) <span class="sc">+</span></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"(b) Dendrogram in data"</span>) <span class="sc">+</span> </span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">aspect.ratio=</span><span class="dv">1</span>, <span class="at">legend.position=</span><span class="st">"none"</span>)</span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a><span class="co"># Show result</span></span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>d2 <span class="ot">&lt;-</span> d2 <span class="sc">%&gt;%</span></span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">clc =</span> <span class="fu">factor</span>(<span class="fu">cutree</span>(d2_hc, <span class="dv">2</span>)))</span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>pc_d2c <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(d2) <span class="sc">+</span></span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x=</span>x1, <span class="at">y=</span>x2, <span class="at">colour=</span>clc), </span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>             <span class="at">size=</span><span class="dv">2</span>, <span class="at">alpha=</span><span class="fl">0.8</span>) <span class="sc">+</span></span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_colour_discrete_divergingx</span>(<span class="at">palette =</span> <span class="st">"Zissou 1"</span>,</span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">nmax=</span><span class="dv">4</span>, <span class="at">rev=</span><span class="cn">TRUE</span>) <span class="sc">+</span></span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"(c) Two-cluster solution"</span>) <span class="sc">+</span> </span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">aspect.ratio=</span><span class="dv">1</span>, <span class="at">legend.position=</span><span class="st">"none"</span>)</span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute Wards linkage</span></span>
+<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a>d2_hw <span class="ot">&lt;-</span> <span class="fu">hclust</span>(<span class="fu">dist</span>(d2[,<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>]),</span>
+<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a>                <span class="at">method=</span><span class="st">"ward.D2"</span>)</span>
+<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a>d2_ggdw <span class="ot">&lt;-</span> <span class="fu">dendro_data</span>(d2_hw, <span class="at">type =</span> <span class="st">"triangle"</span>)</span>
+<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a>pd2w <span class="ot">&lt;-</span> <span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="at">data=</span>d2_ggdw<span class="sc">$</span>segments, </span>
+<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a>               <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, </span>
+<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a>                   <span class="at">xend =</span> xend, <span class="at">yend =</span> yend)) <span class="sc">+</span> </span>
+<span id="cb6-54"><a href="#cb6-54" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data=</span>d2_ggdw<span class="sc">$</span>labels, <span class="fu">aes</span>(<span class="at">x=</span>x, <span class="at">y=</span>y),</span>
+<span id="cb6-55"><a href="#cb6-55" aria-hidden="true" tabindex="-1"></a>             <span class="at">colour=</span><span class="st">"#3B99B1"</span>, <span class="at">alpha=</span><span class="fl">0.8</span>) <span class="sc">+</span></span>
+<span id="cb6-56"><a href="#cb6-56" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"(d) Ward's linkage dendrogram"</span>) <span class="sc">+</span></span>
+<span id="cb6-57"><a href="#cb6-57" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb6-58"><a href="#cb6-58" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_dendro</span>()</span>
+<span id="cb6-59"><a href="#cb6-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-60"><a href="#cb6-60" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute dendrogram in data</span></span>
+<span id="cb6-61"><a href="#cb6-61" aria-hidden="true" tabindex="-1"></a>d2_hflyw <span class="ot">&lt;-</span> <span class="fu">hierfly</span>(d2, d2_hw, <span class="at">scale=</span><span class="cn">FALSE</span>)</span>
+<span id="cb6-62"><a href="#cb6-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-63"><a href="#cb6-63" aria-hidden="true" tabindex="-1"></a>pd2hw <span class="ot">&lt;-</span> <span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb6-64"><a href="#cb6-64" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="at">data=</span>d2_hflyw<span class="sc">$</span>segments, </span>
+<span id="cb6-65"><a href="#cb6-65" aria-hidden="true" tabindex="-1"></a>                <span class="fu">aes</span>(<span class="at">x=</span>x, <span class="at">xend=</span>xend,</span>
+<span id="cb6-66"><a href="#cb6-66" aria-hidden="true" tabindex="-1"></a>                    <span class="at">y=</span>y, <span class="at">yend=</span>yend)) <span class="sc">+</span></span>
+<span id="cb6-67"><a href="#cb6-67" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data=</span>d2_hflyw<span class="sc">$</span>data, </span>
+<span id="cb6-68"><a href="#cb6-68" aria-hidden="true" tabindex="-1"></a>             <span class="fu">aes</span>(<span class="at">x=</span>x1, <span class="at">y=</span>x2,</span>
+<span id="cb6-69"><a href="#cb6-69" aria-hidden="true" tabindex="-1"></a>                 <span class="at">shape=</span><span class="fu">factor</span>(node),</span>
+<span id="cb6-70"><a href="#cb6-70" aria-hidden="true" tabindex="-1"></a>                 <span class="at">colour=</span><span class="fu">factor</span>(node),</span>
+<span id="cb6-71"><a href="#cb6-71" aria-hidden="true" tabindex="-1"></a>                 <span class="at">size=</span><span class="dv">1</span><span class="sc">-</span>node), <span class="at">alpha=</span><span class="fl">0.8</span>) <span class="sc">+</span></span>
+<span id="cb6-72"><a href="#cb6-72" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_shape_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="dv">16</span>, <span class="dv">3</span>)) <span class="sc">+</span></span>
+<span id="cb6-73"><a href="#cb6-73" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_colour_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"#3B99B1"</span>, <span class="st">"black"</span>)) <span class="sc">+</span></span>
+<span id="cb6-74"><a href="#cb6-74" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_size</span>(<span class="at">limits=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">17</span>)) <span class="sc">+</span></span>
+<span id="cb6-75"><a href="#cb6-75" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"(e) Dendrogram in data"</span>) <span class="sc">+</span> </span>
+<span id="cb6-76"><a href="#cb6-76" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb6-77"><a href="#cb6-77" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">aspect.ratio=</span><span class="dv">1</span>, <span class="at">legend.position=</span><span class="st">"none"</span>)</span>
+<span id="cb6-78"><a href="#cb6-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-79"><a href="#cb6-79" aria-hidden="true" tabindex="-1"></a><span class="co"># Show result</span></span>
+<span id="cb6-80"><a href="#cb6-80" aria-hidden="true" tabindex="-1"></a>d2 <span class="ot">&lt;-</span> d2 <span class="sc">%&gt;%</span></span>
+<span id="cb6-81"><a href="#cb6-81" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">clw =</span> <span class="fu">factor</span>(<span class="fu">cutree</span>(d2_hw, <span class="dv">2</span>)))</span>
+<span id="cb6-82"><a href="#cb6-82" aria-hidden="true" tabindex="-1"></a>pc_d2w <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(d2) <span class="sc">+</span></span>
+<span id="cb6-83"><a href="#cb6-83" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x=</span>x1, <span class="at">y=</span>x2, <span class="at">colour=</span>clw), </span>
+<span id="cb6-84"><a href="#cb6-84" aria-hidden="true" tabindex="-1"></a>             <span class="at">size=</span><span class="dv">2</span>, <span class="at">alpha=</span><span class="fl">0.8</span>) <span class="sc">+</span></span>
+<span id="cb6-85"><a href="#cb6-85" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_colour_discrete_divergingx</span>(<span class="at">palette =</span> <span class="st">"Zissou 1"</span>,</span>
+<span id="cb6-86"><a href="#cb6-86" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">nmax=</span><span class="dv">4</span>, <span class="at">rev=</span><span class="cn">TRUE</span>) <span class="sc">+</span></span>
+<span id="cb6-87"><a href="#cb6-87" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"(f) Two-cluster solution"</span>) <span class="sc">+</span> </span>
+<span id="cb6-88"><a href="#cb6-88" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb6-89"><a href="#cb6-89" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">aspect.ratio=</span><span class="dv">1</span>, <span class="at">legend.position=</span><span class="st">"none"</span>)</span>
+<span id="cb6-90"><a href="#cb6-90" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-91"><a href="#cb6-91" aria-hidden="true" tabindex="-1"></a>pd2c <span class="sc">+</span> pd2hc <span class="sc">+</span> pc_d2c <span class="sc">+</span> </span>
+<span id="cb6-92"><a href="#cb6-92" aria-hidden="true" tabindex="-1"></a>  pd2w <span class="sc">+</span> pd2hw <span class="sc">+</span> pc_d2w <span class="sc">+</span></span>
+<span id="cb6-93"><a href="#cb6-93" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_layout</span>(<span class="at">ncol=</span><span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div id="fig-d2-c" class="quarto-figure quarto-figure-center anchored">
@@ -749,14 +772,14 @@ div.csl-indent {
 </section>
 <section id="dendrograms-in-high-dimensions" class="level2" data-number="8.3">
 <h2 data-number="8.3" class="anchored" data-anchor-id="dendrograms-in-high-dimensions"><span class="header-section-number">8.3</span> Dendrograms in high-dimensions</h2>
-<p>The first step with any clustering is to check the data. You typically don’t know whether there are clusters, or what shape they might be, or if there are nuisance observations or variables. A pairs plot like in <a href="#fig-penguins-pairs">Figure&nbsp;<span>8.5</span></a> is a nice complement to using the tour for this. Here it looks like you can see three elliptical clusters, with one is further from the others.</p>
+<p>The first step with any clustering with high dimensional data is also to check the data. You typically don’t know whether there are clusters, or what shape they might be, or if there are nuisance observations or variables. A pairs plot like in <a href="#fig-penguins-pairs">Figure&nbsp;<span>8.5</span></a> is a nice complement to using the tour (<a href="#fig-penguins-gt">Figure&nbsp;<span>8.6</span></a>) for this. Here you can see three elliptical clusters, with one is further from the others.</p>
 <div class="cell">
 <details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"data/penguins_sub.rda"</span>)</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggscatmat</span>(penguins_sub[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>]) <span class="sc">+</span> </span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">""</span>) <span class="sc">+</span> <span class="fu">ylab</span>(<span class="st">""</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<summary>Code for scatterplot matrix</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"data/penguins_sub.rda"</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggscatmat</span>(penguins_sub[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>]) <span class="sc">+</span> </span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">""</span>) <span class="sc">+</span> <span class="fu">ylab</span>(<span class="st">""</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div id="fig-penguins-pairs" class="quarto-figure quarto-figure-center anchored">
@@ -768,35 +791,35 @@ div.csl-indent {
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">20230329</span>)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">basis_random</span>(<span class="dv">4</span>,<span class="dv">2</span>)</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>pt1 <span class="ot">&lt;-</span> <span class="fu">save_history</span>(penguins_sub[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], </span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>                    <span class="at">max_bases =</span> <span class="dv">500</span>, </span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>                    <span class="at">start =</span> b)</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="fu">save</span>(pt1, <span class="at">file=</span><span class="st">"data/penguins_tour_path.rda"</span>)</span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="fu">animate_xy</span>(penguins_sub[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], </span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>           <span class="at">tour_path =</span> <span class="fu">planned_tour</span>(pt1), </span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>           <span class="at">axes=</span><span class="st">"off"</span>, <span class="at">rescale=</span><span class="cn">FALSE</span>, </span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>           <span class="at">half_range =</span> <span class="fl">3.5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div class="cell">
 <details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"data/penguins_tour_path.rda"</span>)</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">render_gif</span>(penguins_sub[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], </span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>           <span class="fu">planned_tour</span>(pt1), </span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>           <span class="fu">display_xy</span>(<span class="at">half_range=</span><span class="fl">0.9</span>, <span class="at">axes=</span><span class="st">"off"</span>),</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>           <span class="at">gif_file=</span><span class="st">"gifs/penguins_gt.gif"</span>,</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>           <span class="at">frames=</span><span class="dv">500</span>,</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>           <span class="at">loop=</span><span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<summary>Code to create tour</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">20230329</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">basis_random</span>(<span class="dv">4</span>,<span class="dv">2</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>pt1 <span class="ot">&lt;-</span> <span class="fu">save_history</span>(penguins_sub[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], </span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>                    <span class="at">max_bases =</span> <span class="dv">500</span>, </span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>                    <span class="at">start =</span> b)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="fu">save</span>(pt1, <span class="at">file=</span><span class="st">"data/penguins_tour_path.rda"</span>)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="fu">animate_xy</span>(penguins_sub[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], </span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>           <span class="at">tour_path =</span> <span class="fu">planned_tour</span>(pt1), </span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>           <span class="at">axes=</span><span class="st">"off"</span>, <span class="at">rescale=</span><span class="cn">FALSE</span>, </span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>           <span class="at">half_range =</span> <span class="fl">3.5</span>)</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"data/penguins_tour_path.rda"</span>)</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="fu">render_gif</span>(penguins_sub[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], </span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>           <span class="fu">planned_tour</span>(pt1), </span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>           <span class="fu">display_xy</span>(<span class="at">half_range=</span><span class="fl">0.9</span>, <span class="at">axes=</span><span class="st">"off"</span>),</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>           <span class="at">gif_file=</span><span class="st">"gifs/penguins_gt.gif"</span>,</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>           <span class="at">frames=</span><span class="dv">500</span>,</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>           <span class="at">loop=</span><span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div id="fig-penguins-gt" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="gifs/penguins_gt.gif" class="img-fluid figure-img" data-fig.align="center" alt="Tour of many linear projections of the penguins data. You can see three elliptical clusters, one further apart from the other two."></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;8.6: Grand tour of the penguins data</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;8.6: Use a grand tour of your data to check for clusters, the shape of clusters and for nuisance observations and variables. Here the penguins data looks like it has possibly three elliptical clusters, one more separated than the other two, with some nuisance observations.</figcaption><p></p>
 </figure>
 </div>
+<p>The process is the same as for the simpler example. We compute and draw the dendrogram in 2D, compute it in <span class="math inline">\(p\)</span>-D and view with a tour. Here we have also chosen to examine the three cluster solution for single linkage and wards linkage clustering.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>p_dist <span class="ot">&lt;-</span> <span class="fu">dist</span>(penguins_sub[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>])</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>p_hcw <span class="ot">&lt;-</span> <span class="fu">hclust</span>(p_dist, <span class="at">method=</span><span class="st">"ward.D2"</span>)</span>
@@ -812,7 +835,7 @@ div.csl-indent {
 </div>
 <div class="cell">
 <details>
-<summary>Code</summary>
+<summary>Code to draw dendrograms</summary>
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate the dendrograms in 2D</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>p_hcw_dd <span class="ot">&lt;-</span> <span class="fu">dendro_data</span>(p_hcw)</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>pw_dd <span class="ot">&lt;-</span> <span class="fu">ggplot</span>() <span class="sc">+</span></span>
@@ -835,7 +858,7 @@ div.csl-indent {
 </div>
 <div class="cell">
 <details>
-<summary>Code</summary>
+<summary>Code to create tours of dendrogram in data</summary>
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"data/penguins_tour_path.rda"</span>)</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>glyphs <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">16</span>, <span class="dv">46</span>)</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>pchw <span class="ot">&lt;-</span> glyphs[p_w_hfly<span class="sc">$</span>data<span class="sc">$</span>node<span class="sc">+</span><span class="dv">1</span>]</span>
@@ -898,6 +921,9 @@ div.csl-indent {
 <span id="cb11-60"><a href="#cb11-60" aria-hidden="true" tabindex="-1"></a>           <span class="at">loop=</span><span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
+<p><a href="#fig-penguins-hfly">Figure&nbsp;<span>8.7</span></a> shows results for single linkage and wards linkage clustering of the penguins data. Plots (a) and (b) show the 2D dendrograms. The 2D dendrograms are very different. Wards linkage produces a clearer indication of clusters, with a suggestion of three, or possibly four or five clusters. The dendrogram for single linkage suggests two clusters, and has the classical waterfall appearance that is often seen with this type of linkage. (If you look carefully, though, you will see it is actually a three cluster solution. At the very top of the dendrogram there is another branch connecting one observation to the other two clusters.)</p>
+<p>Plots (c) and (d) show the dendrograms in 4D overlaid on the data. The two are starkly different. The single linkage clustering is like pins pointing to (three) centres, with some long extra edges.</p>
+<p>Plots (e) and (f) show the three cluster solutions, with Wards linkage almost recovering the clusters of the three species. Single linkage has two big clusters, and the singleton cluster. Although the Wards linkage produces the best result, single linkage does provide some interesting and useful information about the data. That singleton cluster is an outlier, an unusually-sized penguin. We can see it as an outlier just from the tour in <a href="#fig-penguins-gt">Figure&nbsp;<span>8.6</span></a> but single linkage emphasizes it, bringing it more strongly to our attention.</p>
 <div id="fig-penguins-hfly" class="quarto-layout-panel">
 <figure class="figure">
 <div class="quarto-layout-row quarto-layout-valign-top">
@@ -961,9 +987,13 @@ div.csl-indent {
 <p></p><figcaption class="figure-caption">Figure&nbsp;8.7: Dendrograms for Wards and single linkage of the penguins data, shown in 2D (top) and in 4D (middle), and the three-cluster solution of each.</figcaption><p></p>
 </figure>
 </div>
+<div class="insight">
+<p>Single linkage on the penguins has a very different joining pattern to Wards! While Wards provides the better result, single linkage provides useful information about the data, such as emphasizing the outlier.</p>
+</div>
+<p><a href="#fig-penguins-hfly-plotly">Figure&nbsp;<span>8.8</span></a> provides HTML objects of the dendrograms, so that they can be directly compared. The same tour path is used, so the sliders allow setting the view to the same projection in each plot.</p>
 <div class="cell">
 <details>
-<summary>Code</summary>
+<summary>Code to make html objects of the dendrogram in 4D</summary>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"data/penguins_tour_path.rda"</span>)</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a smaller one, for space concerns</span></span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>pt1i <span class="ot">&lt;-</span> <span class="fu">interpolate</span>(pt1[,,<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>], <span class="fl">0.1</span>)</span>
@@ -1052,9 +1082,6 @@ div.csl-indent {
 </iframe>
 <p></p><figcaption class="figure-caption">Figure&nbsp;8.8: Animation of dendrogram from Wards (top) and single (bottom) linkage clustering of the penguins data.</figcaption><p></p>
 </figure>
-</div>
-<div class="insight">
-<p>Single linkage on the penguins has a very different joining pattern to Wards!</p>
 </div>
 <div class="info">
 <p>Viewing the dendrograms in high-dimensions provides insight into how they have joined points to clusters. It helps to make sense of the result, and whether it is a useful result or not.</p>
@@ -1745,6 +1772,9 @@ Wickham, H., Chang, W., Henry, L., Pedersen, T. L., Takahashi, K., Wilke, C., Wo
 </div>
 <div id="ref-R-tourr" class="csl-entry" role="doc-biblioentry">
 Wickham, H., &amp; Cook, D. (2023). <em>Tourr: Tour methods for multivariate data visualisation</em>. <a href="https://github.com/ggobi/tourr">https://github.com/ggobi/tourr</a>
+</div>
+<div id="ref-wickham2015" class="csl-entry" role="doc-biblioentry">
+Wickham, H., Cook, D., &amp; Hofmann, H. (2015). Visualizing statistical models: Removing the blindfold. <em>Statistical Analysis and Data Mining: The ASA Data Science Journal</em>, <em>8</em>(4), 203–225. <a href="https://doi.org/10.1002/sam.11271">https://doi.org/10.1002/sam.11271</a>
 </div>
 <div id="ref-tourr" class="csl-entry" role="doc-biblioentry">
 Wickham, H., Cook, D., Hofmann, H., &amp; Buja, A. (2011a). Tourr: <span>An</span> <span>R</span> <span>Package</span> for <span>Exploring</span> <span>Multivariate</span> <span>Data</span> with <span>Projections</span>. <em>Journal of Statistical Software</em>, <em>40</em>(2). <a href="https://doi.org/10.18637/jss.v040.i02">https://doi.org/10.18637/jss.v040.i02</a>
