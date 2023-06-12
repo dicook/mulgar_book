@@ -32,8 +32,9 @@ library(GGally)
 #| message: false
 #| warning: false
 #| fig-cap: "Hierarchical clustering on simulated data: (a) data, (b) dendrogram, (c) dendrogram on the data, and (d) two cluster solution. Nodes of the dendrogram indicated by `+` when it is drawn on the data."
-#| fig-width: 5
-#| fig-height: 5
+#| fig-width: 7
+#| fig-height: 7
+#| out-width: 100%
 data(simple_clusters)
 # Data has two well-separated clusters
 pd <- ggplot(simple_clusters, aes(x=x1, y=x2)) +
@@ -100,11 +101,8 @@ Hierarchical clustering is summarised by a dendrogram, which sequentially shows 
 
 ## Why you should look at the dendrogram on the data
 
-@fig-problems shows two examples of structure in data that will confuse hierarchical clustering: nuisance variables and nuisance cases. We usually do not know that these problems exist prior to clustering the data. Discovering these iteratively as you conduct a clustering analysis is important for generating useful results.
+@fig-problems shows two examples of structure in data that will confuse hierarchical clustering: nuisance variables and nuisance cases. We usually do not know that these problems exist prior to clustering the data. Discovering these iteratively as you conduct a clustering analysis is important for generating useful results. 
 
-Nuisance variables are ones that do not contribute to the clustering, such as `x2` here. When we look at this data we see a gap between two elliptically shape clusters, with the gap being only in the horizontal direction, `x1`. When we compute the distances between points, in order to start clustering, without knowing that `x2` is a nuisance variable, points across the gap might be considered to be closer than points within the same cluster. 
-
-Nuisance cases 
 
 ```{r}
 #| label: fig-problems
@@ -149,6 +147,8 @@ pd2 <- ggplot(data=d2, aes(x=x1, y=x2)) +
 
 pd1 + pd2 + plot_layout(ncol=2)
 ```
+
+If an outlier is a point that is extreme relative to other observations, an "inlier" is a point that is extreme relative to a cluster, but iside the domain of all of the observations. Nuisance observations are inliers, cases that occur between larger groups of points. If they were excluded there might be a gap between clusters. These can cause problems for clustering when distances between clusters are measured, and can be very problematic when single linkage hierarchical clustering is used. @fig-d1-s shows how nuisance observations affect single linkage but not Wards linkage hierarchical clustering.
 
 ```{r}
 #| label: fig-d1-s
@@ -252,6 +252,8 @@ pd1s + pd1hs + pc_d1s +
   pd1w + pd1hw + pc_d1w +
   plot_layout(ncol=3)
 ```
+
+Nuisance variables are ones that do not contribute to the clustering, such as `x2` here. When we look at this data we see a gap between two elliptically shape clusters, with the gap being only in the horizontal direction, `x1`. When we compute the distances between points, in order to start clustering, without knowing that `x2` is a nuisance variable, points across the gap might be considered to be closer than points within the same cluster. @fig-d2-c shows how nuisance variables affects complete linkage but not Wards linkage hierarchical clustering. (Wards linkage can be affected but it isn't for this data.) Interestingly, the dendrogram for complete linkage looks ideal, that it suggests two clusters. It is not until you examine the resulting clusters in the data that you can see the error, that it has clustered across the gap.
 
 ```{r}
 #| label: fig-d2-c
@@ -361,6 +363,7 @@ Two dendrograms might look very similar but the resulting clustering can be very
 :::
 
 ## Dendrograms in high-dimensions
+
 
 Check the data: pretend we don't know the clusters. Think you can see three elliptical clusters. One is further from the others.
 
