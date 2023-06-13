@@ -1,11 +1,81 @@
-## Summarising and comparing results {#sec-clust-compare}
+# Summarising and comparing results {#sec-clust-compare}
 
 \index{cluster analysis!confusion table}
-\index{datasets!\Data{Music}}
 
+<!--
 - Adding cluster summary, eg means
 - Linking between confusion matrix and tour
 - Using same tour path to examine cluster colour
+-->
+
+## Summarising results
+
+
+
+## Comparing two clusterings
+
+Each cluster analysis will result in a vector of class labels for the data. To compare two results we would tabulate and plot the pair of integer variables. The labels given to each cluster will likely differ. If the two methods agree, there will be just a few cells with large counts among mostly empty cells. 
+
+Below is a comparison between the three cluster results of Wards linkage hierarchical clustering (rows) and model-based clustering (columns). The two methods mostly agree, as seen from the three cells with large counts, and most cells with zeros. They disagree only on eight penguins. These eight penguins would be considered to be part of cluster 1 by Wards, but model-based considers them to be members of cluster 2.
+
+The two methods label them clusters differently: what Wards labels as cluster 3, model-based labels as cluster 2. The labels given by any algorithm are arbitrary, and can easily be changed to coordinate between methods. 
+
+```{r}
+#| message: false
+#| code-summary: "Code to make Wards and model-based clusterings"
+library(mclust) 
+library(tidyr)
+library(dplyr)
+load("data/penguins_sub.rda")
+p_dist <- dist(penguins_sub[,1:4])
+p_hcw <- hclust(p_dist, method="ward.D2")
+
+p_cl <- data.frame(cl_w = factor(cutree(p_hcw, 3),
+                                 levels=3:1))
+
+penguins_mc <- Mclust(penguins_sub[,1:4], 
+                      G=3, 
+                      modelNames = "EEE")
+p_cl <- p_cl %>% 
+  mutate(cl_mc = factor(penguins_mc$classification,
+                      levels=3:1))
+p_cl %>% 
+  count(cl_w, cl_mc) %>% 
+  pivot_wider(names_from = cl_mc, 
+              values_from = n, 
+              values_fill = 0)
+```
+
+We can examine the disagreement by linking a plot of the table, with a tour plot. Here is how to do this with `liminal`. @fig-compare-clusters1 and @fig-compare-clusters2 show screenshots of the exploration of the eight penguins on which the methods disagree. It makes sense that there is some confusion. These penguins are part of the large clump of observations that don't separate cleanly into two clusters. The eight penguins are in the middle of this clump. Realistically, both methods result in a plausible clustering, and it is not clear how these penguins should be grouped.  
+
+```{r}
+#| eval: false
+#| message: false
+#| code-summary: Code to do linked brushing with liminal
+library(liminal)
+p_cl <- p_cl %>% 
+  mutate(cl_w_j = jitter(cl_w),
+         cl_mc_j = jitter(cl_mc),)
+
+penguins_cl <- penguins_sub %>%
+  mutate(cl_w = p_cl$cl_w,
+         cl_mc = p_cl$cl_mc)
+  
+limn_tour_link(
+  p_cl[,3:4],
+  penguins_cl,
+  cols = bl:bm,
+  color = cl_w
+)
+```
+
+![Linking the confusion table with a tour using liminal. Points are coloured according to Wards linkage. The disagreement on eight penguins is with cluster 1 from Wards and cluster 2 from model-based.](images/compare-clusters1.png){#fig-compare-clusters1}
+
+![Highlighting the penguins where the methods disagree so we can see where these observations are located relative to the two clusters.](images/compare-clusters2.png){#fig-compare-clusters2}
+
+## Exercises {-}
+
+1. Compare the results of the four cluster model-based clustering with that of the four cluster Wards linkage clustering of the penguins data.
 
 <!--
 To compare the results of two methods we commonly compute a confusion table. For example, @tab-confusion is the confusion table for five-cluster solutions for the \Data{Music} data from $k$-means and
