@@ -54,6 +54,18 @@ psub <- penguins_cl %>%
   select(bl, bd, species, cl_w) %>%
   filter(!dup) %>%
   mutate(cl_w = as.numeric(as.character(cl_w)))
+phull <- cxhull(as.matrix(psub[,1:2]))$edges
+phull <- as.data.frame(phull)
+colnames(phull) <- c("from", "to") 
+phull_segs <- data.frame(x = psub$bl[phull$from],
+                         y = psub$bd[phull$from],
+                         xend = psub$bl[phull$to],
+                         yend = psub$bd[phull$to])
+ggplot() +
+  geom_point(data=psub, aes(x=bl, y=bd, 
+                            colour=factor(cl_w, levels=3:1))) +
+  geom_segment(data=phull_segs, aes(x=x, xend=xend,
+                                    y=y, yend=yend))
 
 ncl <- psub %>%
   count(cl_w) %>%
