@@ -10,7 +10,85 @@
 
 ## Summarising results
 
+```{r}
+#| message: false
+#| code-summary: "Code to make Wards and model-based clusterings"
+library(mclust) 
+library(tidyr)
+library(dplyr)
+library(gt)
+load("data/penguins_sub.rda")
+p_dist <- dist(penguins_sub[,1:4])
+p_hcw <- hclust(p_dist, method="ward.D2")
 
+p_cl <- data.frame(cl_w = cutree(p_hcw, 3))
+
+penguins_mc <- Mclust(penguins_sub[,1:4], 
+                      G=3, 
+                      modelNames = "EEE")
+p_cl <- p_cl %>% 
+  mutate(cl_mc = penguins_mc$classification)
+
+p_cl <- p_cl %>% 
+  mutate(cl_w_j = jitter(cl_w),
+         cl_mc_j = jitter(cl_mc),
+         cl_w = factor(cl_w, levels=3:1),
+         cl_mc = factor(cl_mc,
+                      levels=3:1))
+
+penguins_cl <- penguins_sub %>%
+  mutate(cl_w = p_cl$cl_w,
+         cl_mc = p_cl$cl_mc)
+```
+
+```{r}
+#| eval: false
+library(cxhull)
+library(ggplot2)
+
+# Check with penguins
+psub <- penguins_cl %>%
+  select(bl, bd) 
+dup <- duplicated(psub)
+psub <- penguins_cl %>%
+  select(bl, bd, species, cl_w) %>%
+  filter(!dup) %>%
+  mutate(cl_w = as.numeric(as.character(cl_w)))
+
+ncl <- psub %>%
+  count(cl_w) %>%
+  arrange(cl_w) 
+phull <- NULL
+for (i in unique(psub$cl_w)) {
+  x <- psub %>%
+    dplyr::filter(cl_w == i) %>%
+    select(bl, bd) 
+  ph <- cxhull(as.matrix(x))$edges
+  if (i > 1) {
+    ph <- ph + sum(ncl$n[1:(i-1)])
+  }
+  ph <- cbind(ph, rep(i, nrow(ph)))
+  phull <- rbind(phull, ph)
+}
+phull <- as.data.frame(phull)
+colnames(phull) <- c("from", "to") 
+phull$cl_w <- factor(phull$cl_w, levels=3:1)
+phull_segs <- data.frame(x = psub$bl[phull$from],
+                         y = psub$bd[phull$from],
+                         xend = psub$bl[phull$to],
+                         yend = psub$bd[phull$to],
+                         cl_w = phull$cl_w)
+ggplot() +
+  geom_point(data=psub, aes(x=bl, y=bd, 
+                            colour=factor(cl_w, levels=3:1))) +
+  geom_segment(data=phull_segs, aes(x=x, xend=xend,
+                                    y=y, yend=yend,
+                                    colour=cl_w))
+  
+
+animate_xy(phull[,1:4], col=phull$species,
+           edges=phull$edges)
+```
 
 ## Comparing two clusterings
 
@@ -21,29 +99,15 @@ Below is a comparison between the three cluster results of Wards linkage hierarc
 The two methods label them clusters differently: what Wards labels as cluster 3, model-based labels as cluster 2. The labels given by any algorithm are arbitrary, and can easily be changed to coordinate between methods. 
 
 ```{r}
-#| message: false
-#| code-summary: "Code to make Wards and model-based clusterings"
-library(mclust) 
-library(tidyr)
-library(dplyr)
-load("data/penguins_sub.rda")
-p_dist <- dist(penguins_sub[,1:4])
-p_hcw <- hclust(p_dist, method="ward.D2")
-
-p_cl <- data.frame(cl_w = factor(cutree(p_hcw, 3),
-                                 levels=3:1))
-
-penguins_mc <- Mclust(penguins_sub[,1:4], 
-                      G=3, 
-                      modelNames = "EEE")
-p_cl <- p_cl %>% 
-  mutate(cl_mc = factor(penguins_mc$classification,
-                      levels=3:1))
+#| code-summary: "Code for confusion table"
 p_cl %>% 
   count(cl_w, cl_mc) %>% 
   pivot_wider(names_from = cl_mc, 
               values_from = n, 
-              values_fill = 0)
+              values_fill = 0) %>%
+  gt() %>%
+  tab_spanner(label = "cl_mc", columns=c(`2`, `3`, `1`)) %>%
+  cols_width(everything() ~ px(60))
 ```
 
 We can examine the disagreement by linking a plot of the table, with a tour plot. Here is how to do this with `liminal`. @fig-compare-clusters1 and @fig-compare-clusters2 show screenshots of the exploration of the eight penguins on which the methods disagree. It makes sense that there is some confusion. These penguins are part of the large clump of observations that don't separate cleanly into two clusters. The eight penguins are in the middle of this clump. Realistically, both methods result in a plausible clustering, and it is not clear how these penguins should be grouped.  
@@ -53,14 +117,6 @@ We can examine the disagreement by linking a plot of the table, with a tour plot
 #| message: false
 #| code-summary: Code to do linked brushing with liminal
 library(liminal)
-p_cl <- p_cl %>% 
-  mutate(cl_w_j = jitter(cl_w),
-         cl_mc_j = jitter(cl_mc),)
-
-penguins_cl <- penguins_sub %>%
-  mutate(cl_w = p_cl$cl_w,
-         cl_mc = p_cl$cl_mc)
-  
 limn_tour_link(
   p_cl[,3:4],
   penguins_cl,
