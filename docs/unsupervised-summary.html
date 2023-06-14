@@ -396,86 +396,161 @@ div.csl-indent {
 -->
 <section id="summarising-results" class="level2" data-number="12.1">
 <h2 data-number="12.1" class="anchored" data-anchor-id="summarising-results"><span class="header-section-number">12.1</span> Summarising results</h2>
+<p>The key elements for summarising cluster results are the centres of the clusters and the within-cluster variability of the observations. Adding cluster means to any plot, including tour plots, is easy. You add the additional rows, or a new data set, and set the point shape to be distinct.</p>
+<p>Summarising the variability is difficult. For model-based clustering, the shape of the clusters is assumed to be elliptical, so <span class="math inline">\(p\)</span>-dimensional ellipses can be used to show the solution, as done in <a href="model-based-clustering.html"><span>Chapter&nbsp;10</span></a>. Generally, it is common to plot a convex hull of the clusters, as in <a href="#fig-penguin-hull-2D">Figure&nbsp;<span>12.1 (a)</span></a>. This can also be done in high-dimensions, using the R package <code>cxhull</code> to compute the <span class="math inline">\(p\)</span>-D convex hull.</p>
 <div class="cell">
 <details>
-<summary>Code to make Wards and model-based clusterings</summary>
+<summary>Load libraries</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mclust) </span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gt)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"data/penguins_sub.rda"</span>)</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>p_dist <span class="ot">&lt;-</span> <span class="fu">dist</span>(penguins_sub[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>])</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>p_hcw <span class="ot">&lt;-</span> <span class="fu">hclust</span>(p_dist, <span class="at">method=</span><span class="st">"ward.D2"</span>)</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>p_cl <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">cl_w =</span> <span class="fu">cutree</span>(p_hcw, <span class="dv">3</span>))</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>penguins_mc <span class="ot">&lt;-</span> <span class="fu">Mclust</span>(penguins_sub[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], </span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>                      <span class="at">G=</span><span class="dv">3</span>, </span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>                      <span class="at">modelNames =</span> <span class="st">"EEE"</span>)</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>p_cl <span class="ot">&lt;-</span> p_cl <span class="sc">%&gt;%</span> </span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">cl_mc =</span> penguins_mc<span class="sc">$</span>classification)</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>p_cl <span class="ot">&lt;-</span> p_cl <span class="sc">%&gt;%</span> </span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">cl_w_j =</span> <span class="fu">jitter</span>(cl_w),</span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>         <span class="at">cl_mc_j =</span> <span class="fu">jitter</span>(cl_mc),</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>         <span class="at">cl_w =</span> <span class="fu">factor</span>(cl_w, <span class="at">levels=</span><span class="dv">3</span><span class="sc">:</span><span class="dv">1</span>),</span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>         <span class="at">cl_mc =</span> <span class="fu">factor</span>(cl_mc,</span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>                      <span class="at">levels=</span><span class="dv">3</span><span class="sc">:</span><span class="dv">1</span>))</span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>penguins_cl <span class="ot">&lt;-</span> penguins_sub <span class="sc">%&gt;%</span></span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">cl_w =</span> p_cl<span class="sc">$</span>cl_w,</span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>         <span class="at">cl_mc =</span> p_cl<span class="sc">$</span>cl_mc)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(cxhull)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(colorspace)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell">
 <details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(cxhull)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Check with penguins</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>psub <span class="ot">&lt;-</span> penguins_cl <span class="sc">%&gt;%</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(bl, bd) </span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>dup <span class="ot">&lt;-</span> <span class="fu">duplicated</span>(psub)</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>psub <span class="ot">&lt;-</span> penguins_cl <span class="sc">%&gt;%</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(bl, bd, species, cl_w) <span class="sc">%&gt;%</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span>dup) <span class="sc">%&gt;%</span></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">cl_w =</span> <span class="fu">as.numeric</span>(<span class="fu">as.character</span>(cl_w)))</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>ncl <span class="ot">&lt;-</span> psub <span class="sc">%&gt;%</span></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(cl_w) <span class="sc">%&gt;%</span></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(cl_w) </span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>phull <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">unique</span>(psub<span class="sc">$</span>cl_w)) {</span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  x <span class="ot">&lt;-</span> psub <span class="sc">%&gt;%</span></span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">filter</span>(cl_w <span class="sc">==</span> i) <span class="sc">%&gt;%</span></span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(bl, bd) </span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  ph <span class="ot">&lt;-</span> <span class="fu">cxhull</span>(<span class="fu">as.matrix</span>(x))<span class="sc">$</span>edges</span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (i <span class="sc">&gt;</span> <span class="dv">1</span>) {</span>
-<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    ph <span class="ot">&lt;-</span> ph <span class="sc">+</span> <span class="fu">sum</span>(ncl<span class="sc">$</span>n[<span class="dv">1</span><span class="sc">:</span>(i<span class="dv">-1</span>)])</span>
-<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>  ph <span class="ot">&lt;-</span> <span class="fu">cbind</span>(ph, <span class="fu">rep</span>(i, <span class="fu">nrow</span>(ph)))</span>
-<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>  phull <span class="ot">&lt;-</span> <span class="fu">rbind</span>(phull, ph)</span>
-<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>phull <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(phull)</span>
-<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(phull) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"from"</span>, <span class="st">"to"</span>) </span>
-<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>phull<span class="sc">$</span>cl_w <span class="ot">&lt;-</span> <span class="fu">factor</span>(phull<span class="sc">$</span>cl_w, <span class="at">levels=</span><span class="dv">3</span><span class="sc">:</span><span class="dv">1</span>)</span>
-<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>phull_segs <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x =</span> psub<span class="sc">$</span>bl[phull<span class="sc">$</span>from],</span>
-<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>                         <span class="at">y =</span> psub<span class="sc">$</span>bd[phull<span class="sc">$</span>from],</span>
-<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>                         <span class="at">xend =</span> psub<span class="sc">$</span>bl[phull<span class="sc">$</span>to],</span>
-<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>                         <span class="at">yend =</span> psub<span class="sc">$</span>bd[phull<span class="sc">$</span>to],</span>
-<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>                         <span class="at">cl_w =</span> phull<span class="sc">$</span>cl_w)</span>
-<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span></span>
-<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data=</span>psub, <span class="fu">aes</span>(<span class="at">x=</span>bl, <span class="at">y=</span>bd, </span>
-<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>                            <span class="at">colour=</span><span class="fu">factor</span>(cl_w, <span class="at">levels=</span><span class="dv">3</span><span class="sc">:</span><span class="dv">1</span>))) <span class="sc">+</span></span>
-<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="at">data=</span>phull_segs, <span class="fu">aes</span>(<span class="at">x=</span>x, <span class="at">xend=</span>xend,</span>
-<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>                                    <span class="at">y=</span>y, <span class="at">yend=</span>yend,</span>
-<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>                                    <span class="at">colour=</span>cl_w))</span>
-<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a><span class="fu">animate_xy</span>(phull[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], <span class="at">col=</span>phull<span class="sc">$</span>species,</span>
-<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>           <span class="at">edges=</span>phull<span class="sc">$</span>edges)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<summary>Code to do clustering</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mclust) </span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gt)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(cxhull)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(colorspace)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"data/penguins_sub.rda"</span>)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>p_dist <span class="ot">&lt;-</span> <span class="fu">dist</span>(penguins_sub[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>])</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>p_hcw <span class="ot">&lt;-</span> <span class="fu">hclust</span>(p_dist, <span class="at">method=</span><span class="st">"ward.D2"</span>)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>p_cl <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">cl_w =</span> <span class="fu">cutree</span>(p_hcw, <span class="dv">3</span>))</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>penguins_mc <span class="ot">&lt;-</span> <span class="fu">Mclust</span>(penguins_sub[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], </span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>                      <span class="at">G=</span><span class="dv">3</span>, </span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>                      <span class="at">modelNames =</span> <span class="st">"EEE"</span>)</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>p_cl <span class="ot">&lt;-</span> p_cl <span class="sc">%&gt;%</span> </span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">cl_mc =</span> penguins_mc<span class="sc">$</span>classification)</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>p_cl <span class="ot">&lt;-</span> p_cl <span class="sc">%&gt;%</span> </span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">cl_w_j =</span> <span class="fu">jitter</span>(cl_w),</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>         <span class="at">cl_mc_j =</span> <span class="fu">jitter</span>(cl_mc))</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Arranging by cluster id is important to define edges </span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>penguins_cl <span class="ot">&lt;-</span> penguins_sub <span class="sc">%&gt;%</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">cl_w =</span> p_cl<span class="sc">$</span>cl_w,</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>         <span class="at">cl_mc =</span> p_cl<span class="sc">$</span>cl_mc) <span class="sc">%&gt;%</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(cl_w)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
+</div>
+<div class="cell">
+<details>
+<summary>Code for convex hulls in 2D</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Penguins in 2D</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Duplicate observations need to be removed fo convex hull calculation</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>psub <span class="ot">&lt;-</span> penguins_cl <span class="sc">%&gt;%</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(bl, bd) </span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>dup <span class="ot">&lt;-</span> <span class="fu">duplicated</span>(psub)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>psub <span class="ot">&lt;-</span> penguins_cl <span class="sc">%&gt;%</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(bl, bd, cl_w) <span class="sc">%&gt;%</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span>dup) <span class="sc">%&gt;%</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(cl_w)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>ncl <span class="ot">&lt;-</span> psub <span class="sc">%&gt;%</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(cl_w) <span class="sc">%&gt;%</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(cl_w) <span class="sc">%&gt;%</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">cumn =</span> <span class="fu">cumsum</span>(n))</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>phull <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">unique</span>(psub<span class="sc">$</span>cl_w)) {</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>  x <span class="ot">&lt;-</span> psub <span class="sc">%&gt;%</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">filter</span>(cl_w <span class="sc">==</span> i) <span class="sc">%&gt;%</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(bl, bd) </span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>  ph <span class="ot">&lt;-</span> <span class="fu">cxhull</span>(<span class="fu">as.matrix</span>(x))<span class="sc">$</span>edges</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (i <span class="sc">&gt;</span> <span class="dv">1</span>) {</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>    ph <span class="ot">&lt;-</span> ph <span class="sc">+</span> ncl<span class="sc">$</span>cumn[i<span class="dv">-1</span>]</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>  ph <span class="ot">&lt;-</span> <span class="fu">cbind</span>(ph, <span class="fu">rep</span>(i, <span class="fu">nrow</span>(ph)))</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>  phull <span class="ot">&lt;-</span> <span class="fu">rbind</span>(phull, ph)</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>phull <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(phull)</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(phull) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"from"</span>, <span class="st">"to"</span>, <span class="st">"cl_w"</span>) </span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>phull_segs <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x =</span> psub<span class="sc">$</span>bl[phull<span class="sc">$</span>from],</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>                         <span class="at">y =</span> psub<span class="sc">$</span>bd[phull<span class="sc">$</span>from],</span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>                         <span class="at">xend =</span> psub<span class="sc">$</span>bl[phull<span class="sc">$</span>to],</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>                         <span class="at">yend =</span> psub<span class="sc">$</span>bd[phull<span class="sc">$</span>to],</span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>                         <span class="at">cl_w =</span> phull<span class="sc">$</span>cl_w)</span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>phull_segs<span class="sc">$</span>cl_w <span class="ot">&lt;-</span> <span class="fu">factor</span>(phull<span class="sc">$</span>cl_w) </span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>psub<span class="sc">$</span>cl_w <span class="ot">&lt;-</span> <span class="fu">factor</span>(psub<span class="sc">$</span>cl_w)</span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>p_chull2D <span class="ot">&lt;-</span> <span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data=</span>psub, <span class="fu">aes</span>(<span class="at">x=</span>bl, <span class="at">y=</span>bd, </span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>                            <span class="at">colour=</span>cl_w)) <span class="sc">+</span> </span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="at">data=</span>phull_segs, <span class="fu">aes</span>(<span class="at">x=</span>x, <span class="at">xend=</span>xend,</span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>                                    <span class="at">y=</span>y, <span class="at">yend=</span>yend,</span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>                                    <span class="at">colour=</span>cl_w)) <span class="sc">+</span></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_colour_discrete_divergingx</span>(<span class="at">palette =</span> <span class="st">"Zissou 1"</span>) <span class="sc">+</span></span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">aspect.ratio =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details>
+<summary>Code to generate pD convex hull and view in tour</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>ncl <span class="ot">&lt;-</span> penguins_cl <span class="sc">%&gt;%</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(cl_w) <span class="sc">%&gt;%</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(cl_w) <span class="sc">%&gt;%</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">cumn =</span> <span class="fu">cumsum</span>(n))</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>phull <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">unique</span>(penguins_cl<span class="sc">$</span>cl_w)) {</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  x <span class="ot">&lt;-</span> penguins_cl <span class="sc">%&gt;%</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">filter</span>(cl_w <span class="sc">==</span> i) </span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  ph <span class="ot">&lt;-</span> <span class="fu">cxhull</span>(<span class="fu">as.matrix</span>(x[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>]))<span class="sc">$</span>edges</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (i <span class="sc">&gt;</span> <span class="dv">1</span>) {</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    ph <span class="ot">&lt;-</span> ph <span class="sc">+</span> ncl<span class="sc">$</span>cumn[i<span class="dv">-1</span>]</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>  ph <span class="ot">&lt;-</span> <span class="fu">cbind</span>(ph, <span class="fu">rep</span>(i, <span class="fu">nrow</span>(ph)))</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>  phull <span class="ot">&lt;-</span> <span class="fu">rbind</span>(phull, ph)</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>phull <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(phull)</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(phull) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"from"</span>, <span class="st">"to"</span>, <span class="st">"cl_w"</span>) </span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>phull<span class="sc">$</span>cl_w <span class="ot">&lt;-</span> <span class="fu">factor</span>(phull<span class="sc">$</span>cl_w)</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>penguins_cl<span class="sc">$</span>cl_w <span class="ot">&lt;-</span> <span class="fu">factor</span>(penguins_cl<span class="sc">$</span>cl_w)</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="fu">animate_xy</span>(penguins_cl[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], <span class="at">col=</span>penguins_cl<span class="sc">$</span>cl_w,</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>           <span class="at">edges=</span><span class="fu">as.matrix</span>(phull[,<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>]), <span class="at">edges.col=</span>phull<span class="sc">$</span>cl_w)</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="fu">render_gif</span>(penguins_cl[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], </span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>           <span class="at">tour_path =</span> <span class="fu">grand_tour</span>(),</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>           <span class="at">display =</span> <span class="fu">display_xy</span>(<span class="at">col=</span>penguins_cl<span class="sc">$</span>cl_w,</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>                                <span class="at">edges=</span><span class="fu">as.matrix</span>(phull[,<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>]),</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>                                <span class="at">edges.col=</span>phull<span class="sc">$</span>cl_w),</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>           <span class="at">gif_file =</span> <span class="st">"gifs/penguins_chull.gif"</span>,</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>           <span class="at">frames =</span> <span class="dv">500</span>, </span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>           <span class="at">width =</span> <span class="dv">400</span>,</span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>           <span class="at">height =</span> <span class="dv">400</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+
+</div>
+<div id="fig-penguins-chull" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-penguin-hull-2D" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="unsupervised-summary_files/figure-html/fig-penguin-hull-2D-1.png" class="img-fluid figure-img" data-ref-parent="fig-penguins-chull" width="384"></p>
+<p></p><figcaption class="figure-caption">(a) 2D</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="fig-penguins-chull-pD" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="gifs/penguins_chull.gif" class="img-fluid figure-img" data-ref-parent="fig-penguins-chull"></p>
+<p></p><figcaption class="figure-caption">(b) 4D</figcaption><p></p>
+</figure>
+</div>
+<p></p><figcaption class="figure-caption">Figure&nbsp;12.1: Convex hulls summarising the extent of Wards linkage clustering in 2D and 4D.</figcaption><p></p>
+</figure>
 </div>
 </section>
 <section id="comparing-two-clusterings" class="level2" data-number="12.2">
@@ -486,23 +561,23 @@ div.csl-indent {
 <div class="cell">
 <details>
 <summary>Code for confusion table</summary>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>p_cl <span class="sc">%&gt;%</span> </span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(cl_w, cl_mc) <span class="sc">%&gt;%</span> </span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> cl_mc, </span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>              <span class="at">values_from =</span> n, </span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>              <span class="at">values_fill =</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gt</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tab_spanner</span>(<span class="at">label =</span> <span class="st">"cl_mc"</span>, <span class="at">columns=</span><span class="fu">c</span>(<span class="st">`</span><span class="at">2</span><span class="st">`</span>, <span class="st">`</span><span class="at">3</span><span class="st">`</span>, <span class="st">`</span><span class="at">1</span><span class="st">`</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cols_width</span>(<span class="fu">everything</span>() <span class="sc">~</span> <span class="fu">px</span>(<span class="dv">60</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>p_cl <span class="sc">%&gt;%</span> </span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(cl_w, cl_mc) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> cl_mc, </span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>              <span class="at">values_from =</span> n, </span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>              <span class="at">values_fill =</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gt</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tab_spanner</span>(<span class="at">label =</span> <span class="st">"cl_mc"</span>, <span class="at">columns=</span><span class="fu">c</span>(<span class="st">`</span><span class="at">2</span><span class="st">`</span>, <span class="st">`</span><span class="at">3</span><span class="st">`</span>, <span class="st">`</span><span class="at">1</span><span class="st">`</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cols_width</span>(<span class="fu">everything</span>() <span class="sc">~</span> <span class="fu">px</span>(<span class="dv">60</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 
-<div id="tlmqqbysuy" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<div id="cgujvnidrm" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>html {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
 }
 
-#tlmqqbysuy .gt_table {
+#cgujvnidrm .gt_table {
   display: table;
   border-collapse: collapse;
   margin-left: auto;
@@ -527,7 +602,7 @@ div.csl-indent {
   border-left-color: #D3D3D3;
 }
 
-#tlmqqbysuy .gt_heading {
+#cgujvnidrm .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -539,12 +614,12 @@ div.csl-indent {
   border-right-color: #D3D3D3;
 }
 
-#tlmqqbysuy .gt_caption {
+#cgujvnidrm .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#tlmqqbysuy .gt_title {
+#cgujvnidrm .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -556,7 +631,7 @@ div.csl-indent {
   border-bottom-width: 0;
 }
 
-#tlmqqbysuy .gt_subtitle {
+#cgujvnidrm .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -568,13 +643,13 @@ div.csl-indent {
   border-top-width: 0;
 }
 
-#tlmqqbysuy .gt_bottom_border {
+#cgujvnidrm .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#tlmqqbysuy .gt_col_headings {
+#cgujvnidrm .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -589,7 +664,7 @@ div.csl-indent {
   border-right-color: #D3D3D3;
 }
 
-#tlmqqbysuy .gt_col_heading {
+#cgujvnidrm .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -609,7 +684,7 @@ div.csl-indent {
   overflow-x: hidden;
 }
 
-#tlmqqbysuy .gt_column_spanner_outer {
+#cgujvnidrm .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -621,15 +696,15 @@ div.csl-indent {
   padding-right: 4px;
 }
 
-#tlmqqbysuy .gt_column_spanner_outer:first-child {
+#cgujvnidrm .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#tlmqqbysuy .gt_column_spanner_outer:last-child {
+#cgujvnidrm .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#tlmqqbysuy .gt_column_spanner {
+#cgujvnidrm .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -641,7 +716,7 @@ div.csl-indent {
   width: 100%;
 }
 
-#tlmqqbysuy .gt_group_heading {
+#cgujvnidrm .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -667,7 +742,7 @@ div.csl-indent {
   text-align: left;
 }
 
-#tlmqqbysuy .gt_empty_group_heading {
+#cgujvnidrm .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -682,15 +757,15 @@ div.csl-indent {
   vertical-align: middle;
 }
 
-#tlmqqbysuy .gt_from_md > :first-child {
+#cgujvnidrm .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#tlmqqbysuy .gt_from_md > :last-child {
+#cgujvnidrm .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#tlmqqbysuy .gt_row {
+#cgujvnidrm .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -709,7 +784,7 @@ div.csl-indent {
   overflow-x: hidden;
 }
 
-#tlmqqbysuy .gt_stub {
+#cgujvnidrm .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -722,7 +797,7 @@ div.csl-indent {
   padding-right: 5px;
 }
 
-#tlmqqbysuy .gt_stub_row_group {
+#cgujvnidrm .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -736,11 +811,11 @@ div.csl-indent {
   vertical-align: top;
 }
 
-#tlmqqbysuy .gt_row_group_first td {
+#cgujvnidrm .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#tlmqqbysuy .gt_summary_row {
+#cgujvnidrm .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -750,16 +825,16 @@ div.csl-indent {
   padding-right: 5px;
 }
 
-#tlmqqbysuy .gt_first_summary_row {
+#cgujvnidrm .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#tlmqqbysuy .gt_first_summary_row.thick {
+#cgujvnidrm .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#tlmqqbysuy .gt_last_summary_row {
+#cgujvnidrm .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -769,7 +844,7 @@ div.csl-indent {
   border-bottom-color: #D3D3D3;
 }
 
-#tlmqqbysuy .gt_grand_summary_row {
+#cgujvnidrm .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -779,7 +854,7 @@ div.csl-indent {
   padding-right: 5px;
 }
 
-#tlmqqbysuy .gt_first_grand_summary_row {
+#cgujvnidrm .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -789,11 +864,11 @@ div.csl-indent {
   border-top-color: #D3D3D3;
 }
 
-#tlmqqbysuy .gt_striped {
+#cgujvnidrm .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#tlmqqbysuy .gt_table_body {
+#cgujvnidrm .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -802,7 +877,7 @@ div.csl-indent {
   border-bottom-color: #D3D3D3;
 }
 
-#tlmqqbysuy .gt_footnotes {
+#cgujvnidrm .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -816,7 +891,7 @@ div.csl-indent {
   border-right-color: #D3D3D3;
 }
 
-#tlmqqbysuy .gt_footnote {
+#cgujvnidrm .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-left: 4px;
@@ -825,7 +900,7 @@ div.csl-indent {
   padding-right: 5px;
 }
 
-#tlmqqbysuy .gt_sourcenotes {
+#cgujvnidrm .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -839,7 +914,7 @@ div.csl-indent {
   border-right-color: #D3D3D3;
 }
 
-#tlmqqbysuy .gt_sourcenote {
+#cgujvnidrm .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -847,64 +922,64 @@ div.csl-indent {
   padding-right: 5px;
 }
 
-#tlmqqbysuy .gt_left {
+#cgujvnidrm .gt_left {
   text-align: left;
 }
 
-#tlmqqbysuy .gt_center {
+#cgujvnidrm .gt_center {
   text-align: center;
 }
 
-#tlmqqbysuy .gt_right {
+#cgujvnidrm .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#tlmqqbysuy .gt_font_normal {
+#cgujvnidrm .gt_font_normal {
   font-weight: normal;
 }
 
-#tlmqqbysuy .gt_font_bold {
+#cgujvnidrm .gt_font_bold {
   font-weight: bold;
 }
 
-#tlmqqbysuy .gt_font_italic {
+#cgujvnidrm .gt_font_italic {
   font-style: italic;
 }
 
-#tlmqqbysuy .gt_super {
+#cgujvnidrm .gt_super {
   font-size: 65%;
 }
 
-#tlmqqbysuy .gt_footnote_marks {
+#cgujvnidrm .gt_footnote_marks {
   font-style: italic;
   font-weight: normal;
   font-size: 75%;
   vertical-align: 0.4em;
 }
 
-#tlmqqbysuy .gt_asterisk {
+#cgujvnidrm .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#tlmqqbysuy .gt_indent_1 {
+#cgujvnidrm .gt_indent_1 {
   text-indent: 5px;
 }
 
-#tlmqqbysuy .gt_indent_2 {
+#cgujvnidrm .gt_indent_2 {
   text-indent: 10px;
 }
 
-#tlmqqbysuy .gt_indent_3 {
+#cgujvnidrm .gt_indent_3 {
   text-indent: 15px;
 }
 
-#tlmqqbysuy .gt_indent_4 {
+#cgujvnidrm .gt_indent_4 {
   text-indent: 20px;
 }
 
-#tlmqqbysuy .gt_indent_5 {
+#cgujvnidrm .gt_indent_5 {
   text-indent: 25px;
 }
 </style>
@@ -918,7 +993,7 @@ div.csl-indent {
   
   <thead class="gt_col_headings">
     <tr>
-      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="2" colspan="1" scope="col" id="cl_w">cl_w</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="2" colspan="1" scope="col" id="cl_w">cl_w</th>
       <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="3" scope="colgroup" id="cl_mc">
         <span class="gt_column_spanner">cl_mc</span>
       </th>
@@ -930,18 +1005,18 @@ div.csl-indent {
     </tr>
   </thead>
   <tbody class="gt_table_body">
-    <tr><td headers="cl_w" class="gt_row gt_center">3</td>
-<td headers="2" class="gt_row gt_right">57</td>
-<td headers="3" class="gt_row gt_right">0</td>
-<td headers="1" class="gt_row gt_right">0</td></tr>
-    <tr><td headers="cl_w" class="gt_row gt_center">2</td>
-<td headers="2" class="gt_row gt_right">0</td>
-<td headers="3" class="gt_row gt_right">119</td>
-<td headers="1" class="gt_row gt_right">0</td></tr>
-    <tr><td headers="cl_w" class="gt_row gt_center">1</td>
+    <tr><td headers="cl_w" class="gt_row gt_right">1</td>
 <td headers="2" class="gt_row gt_right">8</td>
 <td headers="3" class="gt_row gt_right">0</td>
 <td headers="1" class="gt_row gt_right">149</td></tr>
+    <tr><td headers="cl_w" class="gt_row gt_right">2</td>
+<td headers="2" class="gt_row gt_right">0</td>
+<td headers="3" class="gt_row gt_right">119</td>
+<td headers="1" class="gt_row gt_right">0</td></tr>
+    <tr><td headers="cl_w" class="gt_row gt_right">3</td>
+<td headers="2" class="gt_row gt_right">57</td>
+<td headers="3" class="gt_row gt_right">0</td>
+<td headers="1" class="gt_row gt_right">0</td></tr>
   </tbody>
   
   
@@ -949,29 +1024,29 @@ div.csl-indent {
 </div>
 </div>
 </div>
-<p>We can examine the disagreement by linking a plot of the table, with a tour plot. Here is how to do this with <code>liminal</code>. <a href="#fig-compare-clusters1">Figure&nbsp;<span>12.1</span></a> and <a href="#fig-compare-clusters2">Figure&nbsp;<span>12.2</span></a> show screenshots of the exploration of the eight penguins on which the methods disagree. It makes sense that there is some confusion. These penguins are part of the large clump of observations that don’t separate cleanly into two clusters. The eight penguins are in the middle of this clump. Realistically, both methods result in a plausible clustering, and it is not clear how these penguins should be grouped.</p>
+<p>We can examine the disagreement by linking a plot of the table, with a tour plot. Here is how to do this with <code>liminal</code>. <a href="#fig-compare-clusters1">Figure&nbsp;<span>12.2</span></a> and <a href="#fig-compare-clusters2">Figure&nbsp;<span>12.3</span></a> show screenshots of the exploration of the eight penguins on which the methods disagree. It makes sense that there is some confusion. These penguins are part of the large clump of observations that don’t separate cleanly into two clusters. The eight penguins are in the middle of this clump. Realistically, both methods result in a plausible clustering, and it is not clear how these penguins should be grouped.</p>
 <div class="cell">
 <details>
 <summary>Code to do linked brushing with liminal</summary>
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(liminal)</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">limn_tour_link</span>(</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  p_cl[,<span class="dv">3</span><span class="sc">:</span><span class="dv">4</span>],</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  penguins_cl,</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">cols =</span> bl<span class="sc">:</span>bm,</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">color =</span> cl_w</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(liminal)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">limn_tour_link</span>(</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  p_cl[,<span class="dv">3</span><span class="sc">:</span><span class="dv">4</span>],</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  penguins_cl,</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">cols =</span> bl<span class="sc">:</span>bm,</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">color =</span> cl_w</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div id="fig-compare-clusters1" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="images/compare-clusters1.png" class="img-fluid figure-img"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;12.1: Linking the confusion table with a tour using liminal. Points are coloured according to Wards linkage. The disagreement on eight penguins is with cluster 1 from Wards and cluster 2 from model-based.</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;12.2: Linking the confusion table with a tour using liminal. Points are coloured according to Wards linkage. The disagreement on eight penguins is with cluster 1 from Wards and cluster 2 from model-based.</figcaption><p></p>
 </figure>
 </div>
 <div id="fig-compare-clusters2" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="images/compare-clusters2.png" class="img-fluid figure-img"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;12.2: Highlighting the penguins where the methods disagree so we can see where these observations are located relative to the two clusters.</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;12.3: Highlighting the penguins where the methods disagree so we can see where these observations are located relative to the two clusters.</figcaption><p></p>
 </figure>
 </div>
 </section>
