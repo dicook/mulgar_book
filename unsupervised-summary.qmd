@@ -229,6 +229,114 @@ limn_tour_link(
 
 1. Compare the results of the four cluster model-based clustering with that of the four cluster Wards linkage clustering of the penguins data.
 
+## Project {-}
+
+Most of the time your data will not neatly separate into clusters, but partitioning it into groups of similar observations can still be useful. In this case our toolbox will be useful in comparing and contrasting different methods, understanding to what extend a cluster mean can describe the observations in the cluster, and also how the boundaries between clusters have been drawn. To explore this we will use survey data that examines the risk taking behavior of tourists. The data was collected in Australia in 2015 [@risk-survey] and includes six types of risks (recreational, health, career, financial, safety and social) with responses on a scale from 1 (never) to 5 (very often). You can download the data from XXX
+
+1. We first examine the data in a grand tour. Do you notice that each variable was measured on a discrete scale?
+2. Next we explore different solutions from hierarchical clustering of the data. For comparison we will keep the number of clusters fixed to 6 and we will perform the hierarchical clustering with different combinations of distance functions (Manhattan distance and Euclidean distance) and linkage (single, complete and Ward linkage). Which combinations make sense based on what we know about the method and the data?
+3. For each of the hierarchical clustering solutions draw the dendrogram in 2D and also in the data space. You can also map the grouping into 6 clusters to different colors. How would you describe the different solutions?
+4. Using the method introduced in this chapter, compare the solution using Manhattan distance and complete linkage to one using Euclidean distance and Ward linkage. What do you notice?
+5. Selecting your preferred solution from hierarchical clustering, we will now compare it to what is found using $k$-means clustering with $k=6$. Use a tour to show the cluster means together with the data points. What can you say about the variation within the clusters? Can you identify clear boundaries?
+6. Use a projection pursuit guided tour to best separate the clusters identified with $k$-means clustering. How are the clusters related to the different types of risk?
+7. Use the approaches from this chapter to summarize and compare the $k$-means solution to one of the hierarchical clustering results. Draw the convex hulls for the two solutions in a tour and compare the shapes.
+8. XXX SOM here
+
+```{r}
+#| eval: false
+#| echo: false
+#| message: false
+#| warning: false
+# install.packages("https://homepage.boku.ac.at/leisch/MSA/packages/MSA_0.3-1.tar.gz", repos = NULL, type = "source")
+library(MSA)
+library(tidyverse)
+data("risk", package = "MSA")
+# looking at the data
+library(tourr)
+animate_xy(risk)
+# hierarchical clustering solutions
+risk_h_mc <- hclust(dist(risk, method = "manhattan"),
+                  method = "complete")
+risk_h_ms <- hclust(dist(risk, method = "manhattan"),
+                  method = "single")
+risk_h_ew <- hclust(dist(risk, method = "euclidean"),
+                  method = "ward.D2")
+# adding the clustering information to the data
+risk_clw <- risk %>% 
+  as_tibble() %>%
+  mutate(cl_h_mc = factor(cutree(risk_h_mc, 6))) %>%
+  mutate(cl_h_ms = factor(cutree(risk_h_ms, 6))) %>%
+  mutate(cl_h_ew = factor(cutree(risk_h_ew, 6)))
+# drawing 2D dendrograms
+library(ggdendro)
+ggplot() +
+  geom_segment(data=dendro_data(risk_h_mc)$segments, 
+               aes(x = x, y = y, 
+                   xend = xend, yend = yend)) + 
+  theme_dendro()
+ggplot() +
+  geom_segment(data=dendro_data(risk_h_ms)$segments, 
+               aes(x = x, y = y, 
+                   xend = xend, yend = yend)) + 
+  theme_dendro()
+ggplot() +
+  geom_segment(data=dendro_data(risk_h_ew)$segments, 
+               aes(x = x, y = y, 
+                   xend = xend, yend = yend)) + 
+  theme_dendro()
+# dendrogram in the data space
+library(mulgar)
+risk_hfly_mc <- hierfly(risk_clw, risk_h_mc, scale=FALSE)
+risk_hfly_ms <- hierfly(risk_clw, risk_h_ms, scale=FALSE)
+risk_hfly_ew <- hierfly(risk_clw, risk_h_ew, scale=FALSE)
+glyphs <- c(16, 46)
+pchw_mc <- glyphs[risk_hfly_mc$data$node+1]
+pchw_ms <- glyphs[risk_hfly_ms$data$node+1]
+pchw_ew <- glyphs[risk_hfly_ew$data$node+1]
+# manhattan + complete
+# we can see hierarchical structure, small groups at the
+# edges that get connected first and then combined into
+# larger cluster, looks like some of the clusters are
+# really spread out across the data space
+animate_xy(risk_hfly_mc$data[,1:6], 
+           col=risk_clw$cl_h_mc, 
+           tour_path = grand_tour(),
+           pch = pchw_mc,
+           edges=risk_hfly_mc$edges, 
+           axes="bottomleft",
+           rescale=FALSE)
+# manhattan + single
+# pretty much all the edges point in towards the center!
+animate_xy(risk_hfly_ms$data[,1:6], 
+           col=risk_clw$cl_h_ms, 
+           tour_path = grand_tour(),
+           pch = pchw_ms,
+           edges=risk_hfly_ms$edges, 
+           axes="bottomleft",
+           rescale=FALSE)
+# euclidean + ward
+# at this stage looks mostly similar to mc case
+animate_xy(risk_hfly_ew$data[,1:6], 
+           col=risk_clw$cl_h_ew, 
+           tour_path = grand_tour(),
+           pch = pchw_ew,
+           edges=risk_hfly_ew$edges, 
+           axes="bottomleft",
+           rescale=FALSE)
+# comparison with liminal
+
+# k-means + tour with cluster means
+
+# guided tour + interpretation in terms of variables
+
+# comparison k-means vs hierarchical clustering solution
+# using convex hull in the data space
+
+# SOM
+
+```
+
+
 <!--
 To compare the results of two methods we commonly compute a confusion table. For example, @tab-confusion is the confusion table for five-cluster solutions for the \Data{Music} data from $k$-means and
 Ward's linkage hierarchical clustering, generated by:
