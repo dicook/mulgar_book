@@ -419,12 +419,14 @@ pt1 <- save_history(penguins_sub[,1:4],
                     max_bases = 500, 
                     start = b)
 save(pt1, file="data/penguins_tour_path.rda")
+
+# To re-create the gifs
+load("data/penguins_tour_path.rda")
 animate_xy(penguins_sub[,1:4], 
            tour_path = planned_tour(pt1), 
            axes="off", rescale=FALSE, 
            half_range = 3.5)
 
-load("data/penguins_tour_path.rda")
 render_gif(penguins_sub[,1:4], 
            planned_tour(pt1), 
            display_xy(half_range=0.9, axes="off"),
@@ -448,9 +450,11 @@ p_hcw <- hclust(p_dist, method="ward.D2")
 p_hcs <- hclust(p_dist, method="single")
 
 p_clw <- penguins_sub %>% 
-  mutate(cl = factor(cutree(p_hcw, 3)))
+  mutate(cl = factor(cutree(p_hcw, 3))) %>%
+  as.data.frame()
 p_cls <- penguins_sub %>% 
-  mutate(cl = factor(cutree(p_hcs, 3)))
+  mutate(cl = factor(cutree(p_hcs, 3))) %>%
+  as.data.frame()
 
 p_w_hfly <- hierfly(p_clw, p_hcw, scale=FALSE)
 p_s_hfly <- hierfly(p_cls, p_hcs, scale=FALSE)
