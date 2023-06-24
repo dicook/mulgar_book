@@ -70,7 +70,7 @@ Plot (c) shows the dendrogram in 2D, overlaid on the data. The segments show how
 #| code-summary: "Code to make the four plots"
 #| message: false
 #| warning: false
-#| fig-cap: "Hierarchical clustering on simulated data: (a) data, (b) dendrogram, (c) dendrogram on the data, and (d) two cluster solution. The extra points corresponding to nodes of the dendrogram are indicated by + in (c)."
+#| fig-cap: "Hierarchical clustering on simulated data: (a) data, (b) dendrogram, (c) dendrogram on the data, and (d) two cluster solution. The extra points corresponding to nodes of the dendrogram are indicated by + in (c). The last join in the dendrogram (b), can be seen to correspond to the edges connecting the gap, when displayed with the data (c). The other joins can be seen to be pulling together points within each clump."
 #| fig-width: 7
 #| fig-height: 7
 #| out-width: 100%
@@ -124,7 +124,7 @@ pd + ph + pdh + pc + plot_layout(ncol=2)
 ```
 
 ::: info
-Clustering algorithms are all prone to being confused by different patterns occurring in data. For hierarchical clustering the choice for defining distance once points have been joined into clusters can produce starkly different results. Plotting the dendrogram on the data provides a good way to assess the solution. 
+Plotting the dendrogram in the data space can help you understand how the hierarchical clustering has collected the points together into clusters. You can learn if the algorithm has been confused by nuisance patterns in the data, and how different choices of linkage method affects the result. 
 :::
 
 ## Common patterns which confuse clustering algorithms
@@ -184,7 +184,7 @@ If an outlier is a point that is extreme relative to other observations, an "inl
 #| eval: true
 #| message: false
 #| warning: false
-#| fig-cap: "The effect of nuisance observations on single linkage (a, b, c) and Ward's linkage hierarchical clustering (d, e, f). Single linkage clustering gets so distracted by the nuisance cases that the two cluster result is one big cluster, and a singleton cluster. Conversely, Ward's clusters this data nicely into two useful groups."
+#| fig-cap: "The effect of nuisance observations on single linkage (a, b, c) and Ward's linkage hierarchical clustering (d, e, f). The single linkage dendrogram is very different to the Wards linkage dendrogram. When plotted with the data (b) we can see a pin cushion or asterisk pattern, where points are joined to others through a place in the middle of the line of nuisance observations. This results in the bad two cluster solution of a singleton cluster, and all the rest. Conversely, Ward's dendrogram (d) strongly suggests two clusters, although the final join corresponds to just a small gap when shown on the data (e) but results in two sensible clusters."
 #| fig-width: 9
 #| fig-height: 6
 #| code-summary: "Code to make plots"
@@ -217,7 +217,7 @@ pd1hs <- ggplot() +
   scale_shape_manual(values = c(16, 3)) +
   scale_colour_manual(values = c("#3B99B1", "black")) +
   scale_size(limits=c(0,17)) +
-  ggtitle("(b) Dendrogram in data") + 
+  ggtitle("(b) Dendrogram in data space") + 
   theme_minimal() +
   theme(aspect.ratio=1, legend.position="none")
 
@@ -262,7 +262,7 @@ pd1hw <- ggplot() +
   scale_shape_manual(values = c(16, 3)) +
   scale_colour_manual(values = c("#3B99B1", "black")) +
   scale_size(limits=c(0,17)) +
-  ggtitle("(e) Dendrogram in data") + 
+  ggtitle("(e) Dendrogram in data space") + 
   theme_minimal() +
   theme(aspect.ratio=1, legend.position="none")
 
@@ -290,7 +290,7 @@ Nuisance variables are ones that do not contribute to the clustering, such as `x
 #| eval: true
 #| message: false
 #| warning: false
-#| fig-cap: "Complete linkage clustering on nuisance variables in comparison to Ward's linkage. The complete linkage dendrogram looks quite reasonably suggesting a two-cluster solution, but when it is plotted amongst the data that it is clearly not a good two-cluster solution."
+#| fig-cap: "Complete linkage clustering (a, b, c) on nuisance variables in comparison to Ward's linkage (d, e, f). The two dendrograms (a, d) look similar but when plotted on the data we see they are very different solutions. The complete linkage result breaks the data into clusters across the gap (c), which is a bad solution. It has been distract by the nuisance variables. Conversely, the Wards linkage two-cluster solution does as hoped, divided the data into two clusters separated by the gap (f)."
 #| fig-width: 9
 #| fig-height: 6
 # Compute complete linkage
@@ -322,7 +322,7 @@ pd2hc <- ggplot() +
   scale_shape_manual(values = c(16, 3)) +
   scale_colour_manual(values = c("#3B99B1", "black")) +
   scale_size(limits=c(0,17)) +
-  ggtitle("(b) Dendrogram in data") + 
+  ggtitle("(b) Dendrogram in data space") + 
   theme_minimal() +
   theme(aspect.ratio=1, legend.position="none")
 
@@ -367,7 +367,7 @@ pd2hw <- ggplot() +
   scale_shape_manual(values = c(16, 3)) +
   scale_colour_manual(values = c("#3B99B1", "black")) +
   scale_size(limits=c(0,17)) +
-  ggtitle("(e) Dendrogram in data") + 
+  ggtitle("(e) Dendrogram in data space") + 
   theme_minimal() +
   theme(aspect.ratio=1, legend.position="none")
 
@@ -389,7 +389,7 @@ pd2c + pd2hc + pc_d2c +
 ```
 
 ::: info
-Two dendrograms might look very similar but the resulting clustering can be very different.
+Two dendrograms might look similar but the resulting clustering can be very different. They can also look very different but correspond to veyr similar clusterings. Plotting the dendrogram in the data space is important for understanding how the algorithm operated when grouping observations, even more so for high dimensions.
 :::
 
 ## Dendrograms in high-dimensions
