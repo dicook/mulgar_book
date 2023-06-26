@@ -7,7 +7,7 @@ Unsupervised classification, or cluster analysis, organizes observations into si
 Organizing objects into groups is a common task to help make sense of the world around us. Perhaps this is why it is an appealing method of data analysis. However, cluster analysis is more complex than it initially appears. Many people imagine that it will produce neatly separated clusters like those in @fig-ideal-clusters(a), but it almost never does. Such ideal clusters are rarely encountered in real data, so we often need to modify our objective from *find the natural clusters in this data*. Instead, we need to organize the *cases into groups that are similar in some way*. Even though this may seem disappointing when compared with the ideal, it is still often an effective means of simplifying and understanding a dataset.
 
 ::: info
-Knowing what shapes are in your data helps with clustering it.
+Knowing what shapes are in your data helps to decide on the best method and to diagnose the result.
 :::
 
 ```{r}
@@ -158,6 +158,16 @@ d_{\rm Euc}(a_1,a_2) &= \sqrt{(7.3-7.4)^2+(7.6-7.2)^2+ (7.7-7.3)^2+(8.0-7.2)^2} 
 
 \noindent For the three cases, the interpoint Euclidean distance matrix is
 
+<!-- \begin{align*}
+d_{\rm Euc} = \begin{bmatrix}
+& {\color{grey} a_1} & {\color{grey} a_2} & {\color{grey} a_3} } \\\hline
+{\color{grey} a_1} | & 0.0 & 1.0 & 6.3\\
+{\color{grey} a_2} | & 1.0 & 0.0 & 5.5\\
+{\color{grey} a_3} | & 6.3 & 5.5 & 0.0
+\end{bmatrix}
+\end{align*}
+-->
+
 \begin{align*}
 d_{\rm Euc} =
 \left[ \begin{array}{ccc}
@@ -167,7 +177,8 @@ d_{\rm Euc} =
 \end{array} \right]
 \begin{array}{r}
 a_1 \\ a_2 \\ a_3 \\
-\end{array}
+\end{array} 
+
 \end{align*}
 
 ::: {#fig-similarity1 layout-ncol=2}
@@ -220,28 +231,27 @@ The scatterplot matrix (left) shows that cases $a_1$ and $a_2$ have similar valu
 
 \noindent Cases $a_1$ and $a_2$ are more similar to each other than they are to case $a_3$, because the Euclidean distance between cases $a_1$ and $a_2$ is much smaller than the distance between cases $a_1$ and $a_3$ and between cases $a_2$ and $a_3$.
 
-There are many different ways to calculate similarity. Similarity measures based on correlation distance have become common. Correlation distance is typically used where similarity of structure is more important than similarity in magnitude.
+There are many different ways to calculate similarity. Similarity measures based on correlation distance can be useful. It is typically used where similarity of structure or shape is more important than similarity in magnitude.
 
 \index{parallel coordinate plot}
 
 As an example, see the parallel coordinate plot of the sample data at the right of @fig-similarity1. Cases $a_1$ and $a_3$ are widely separated, but their shapes are similar (low, medium, medium, high). Case $a_2$, although
-overlapping with Case $a_1$, has a very different shape (high, medium, medium, low). The correlation between two cases is defined as
+overlapping with case $a_1$, has a very different shape (high, medium, medium, low). The Pearson correlation between two cases, $\rho(a_i,a_j)$, is defined as
 
 \begin{align*}
-\rho(a_i,a_j) = \frac{(a_i-c_i)\T(a_j-c_j)}
-{\sqrt{(a_i-c_i)\T(a_i-c_i)} \sqrt{(a_j-c_j)\T(a_j-c_j)}}
+\rho(a_i,a_j) = \frac{(a_i-c_i)^\top(a_j-c_j)}
+{\sqrt(a_i-c_i)^\top(a_i-c_i) \sqrt(a_j-c_j)^\top(a_j-c_j)}
 \label{corc}
 \end{align*}
 
-\noindent When $c_i, c_j$ are the sample means $\bar{a}_i,\bar{a}_j$, then $\rho$ is the Pearson correlation coefficient. If, indeed, they are
-set at 0, as is commonly done, $\rho$ is a generalized correlation that describes the angle between the two data vectors. The correlation is then converted to a distance metric; one equation for doing so is as follows:
+\noindent Typically, $c_i, c_j$ are the sample means of each case, $\bar{a}_i,\bar{a}_j$. For these three observations, $c_1=\bar{a}_1=7.650, c_2=\bar{a}_2=7.275, c_3=\bar{a}_3=4.525$. An interesting geometric fact, is that if $c_i, c_j$ are set to be 0, as is commonly done, $\rho$ is a generalized correlation that describes the angle between the two data vectors. The correlation is then converted to a distance metric, with one possibility being as follows:
 
 
 \begin{align*}
 d_{\rm Cor}(a_i,a_j) = \sqrt{2(1-\rho(a_i,a_j))}
 \end{align*}
 
-The above distance metric will treat cases that are strongly negatively correlated as the most distant.
+This distance metric will treat cases that are strongly negatively correlated as the most distant. If you want to consider strong negative correlation as close, then you could take the absolute value of $\rho(a_i,a_j)$ in the above equation, and remove the multiplication by 2.
 
 The interpoint distance matrix for the sample data using $d_{\rm Cor}$ and the Pearson correlation coefficient is
 
@@ -264,7 +274,7 @@ Note that these interpoint distances differ dramatically from those for Euclidea
 After a distance metric has been chosen and a cluster analysis has been performed, the analyst must evaluate the results, and this is actually a difficult task. A cluster analysis does not generate $p$-values or other numerical criteria, and the process tends to produce hypotheses rather than testing them. Even the most determined attempts to produce the "best" results using modeling and validation techniques may result in clusters that, although seemingly significant, are useless for practical purposes. As a result, cluster analysis is best thought of as an exploratory technique, and it can be quite useful despite the lack of formal validation because of its power in data simplification.
 
 ::: info
-Defining an appropriate distance metric is a vitally important decision.
+Defining an appropriate distance metric is a most important decision.
 :::
 
 The context in which the data arises is the key to assessing the results. If the clusters can be characterized in a sensible manner, and they increase our knowledge of the data, then we are on the right track. To use an even more pragmatic criterion, if a company can gain an economic advantage by using a particular clustering method to carve up their customer database, then that is the method they should use.
