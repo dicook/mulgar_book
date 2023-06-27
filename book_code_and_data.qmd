@@ -19,9 +19,13 @@ library(gt)
 library(gtExtras)
 library(gtsummary)
 library(readr)
+library(purrr)
 book_data <- read_csv("misc/book_data.csv") 
-book_data %>% gt() %>% cols_width(Name~px(200), 
-                                 Link~px(400))
+book_data %>% 
+  mutate(Link = map(Link, gt::html)) %>% 
+  gt() %>% 
+  cols_width(Chapter~px(100), Name~px(200), Link~px(400)) %>%
+  cols_align( align = c("left"), columns = everything())
 ```
 
 ## Code files
@@ -30,7 +34,10 @@ book_data %>% gt() %>% cols_width(Name~px(200),
 #| message: false
 #| echo: false
 book_code <- read_csv("misc/book_code.csv") 
-book_code %>% gt() %>% cols_width(Chapter~px(300), 
-                                 Link~px(300))
+book_code %>% 
+  mutate(Link = map(Link, gt::html)) %>% 
+  gt() %>% 
+  cols_width(Chapter~px(300), Link~px(300)) %>%
+  cols_align( align = c("left"), columns = everything())
 ```
 
