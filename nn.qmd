@@ -2,6 +2,46 @@
 
 \index{classification methods!neural network}
 
+```{r}
+#| eval: false
+# Following https://parsnip.tidymodels.org/articles/Examples.html
+library(nnet)
+library(mulgar)
+library(tidymodels)
+tidymodels_prefer()
+
+data(sketches_train)
+sketches_sub <- sketches_train %>%
+  #filter(word %in% c("crab", "flip flops")) %>%
+  #mutate(word = factor(word)) %>% 
+  select(-id)
+
+sketches_split <- initial_split(sketches_sub)
+sk_tr <- training(sketches_split)
+sk_ts <- testing(sketches_split)
+
+mlp_cls_spec <- 
+    mlp(hidden_units = 12, 
+        penalty = 0, 
+        epochs = 1000) %>% 
+    set_mode("classification") %>% 
+    set_engine("nnet", MaxNWts = 10000)
+set.seed(423)
+mlp_cls_fit <- mlp_cls_spec %>% 
+    fit(word ~ ., data = sk_tr)
+#mlp_cls_fit
+sk_pred <- bind_cols(sk_ts,
+    predict(mlp_cls_fit, sk_ts),
+    predict(mlp_cls_fit, sk_ts, type = "prob")
+  )
+bal_accuracy(sk_pred, word, .pred_class)
+
+sk_pred %>% count(word, .pred_class) %>%
+  pivot_wider(names_from = `.pred_class`, values_from = n)
+
+
+```
+
 <!--
 Neural networks for classification can be thought of as additive
 models where explanatory variables are transformed, usually through a
