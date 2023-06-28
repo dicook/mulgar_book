@@ -136,7 +136,6 @@
 \newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{#1}\break}
 \newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
 
-\usepackage{amsmath}
 \usepackage{booktabs}
 \usepackage{caption}
 \usepackage{longtable}
@@ -222,12 +221,12 @@
 
 \title{Interactively exploring high-dimensional data and models in R}
 \author{Dianne Cook and Ursula Laa}
-\date{7/1/23}
+\date{8/1/23}
 
 \begin{document}
 \frontmatter
 \maketitle
-\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[interior hidden, frame hidden, borderline west={3pt}{0pt}{shadecolor}, boxrule=0pt, breakable, enhanced, sharp corners]}{\end{tcolorbox}}\fi
+\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[enhanced, sharp corners, interior hidden, borderline west={3pt}{0pt}{shadecolor}, boxrule=0pt, frame hidden, breakable]}{\end{tcolorbox}}\fi
 
 \renewcommand*\contentsname{Table of contents}
 {
@@ -324,7 +323,7 @@ High-dimensional data arises in many fields such as biology, social
 sciences, finance, and more. Anyone who is doing exploratory data
 analysis and model fitting for more than two variables will benefit from
 learning how to effectively visualise high-dimensions. This book will be
-useful for students and teachers of mulitvariate data analysis and
+useful for students and teachers of multivariate data analysis and
 machine learning, and researchers, data analysts, and industry
 professionals who work in these areas.
 
@@ -335,10 +334,11 @@ professionals who work in these areas.
 \markright{How to use the book?}
 
 The book is written with explanations followed by examples with R code.
-The toolbox chapter provides an overview of the primary high-dimensional
-visualisation methods. The remaining chapters focus on different
-application areas and how to use the high-dimensional visualisation to
-complement commonly used analytical methods.
+The chapters are organised by types of analysis and focus on how to use
+the high-dimensional visualisation to complement the commonly used
+analytical methods. The toolbox chapter in the Appendix provides an
+overview of the primary high-dimensional visualisation methods discussed
+in the book and how to get started.
 
 \hypertarget{what-should-i-know-before-reading-this-book}{%
 \section*{What should I know before reading this
@@ -372,6 +372,9 @@ resources:
   learning.
 \end{itemize}
 
+We will assume you know how to plot your data and models in 2D. Our
+material starts from 2D and beyond.
+
 \hypertarget{setting-up-your-workflow}{%
 \section*{Setting up your workflow}\label{setting-up-your-workflow}}
 \addcontentsline{toc}{section}{Setting up your workflow}
@@ -379,7 +382,7 @@ resources:
 \markright{Setting up your workflow}
 
 To get started set up your computer with the current versions of
-\href{https://cran.r-project.org}{R} and
+\href{https://cran.r-project.org}{R} and ideally also with
 \href{https://posit.co/download/rstudio-desktop/}{Rstudio Desktop}.
 
 In addition, we have made an R package to share the data and functions
@@ -394,10 +397,22 @@ used in this book, called
 \begin{Shaded}
 \begin{Highlighting}[]
 \FunctionTok{install.packages}\NormalTok{(}\StringTok{"mulgar"}\NormalTok{, }\AttributeTok{dependencies=}\ConstantTok{TRUE}\NormalTok{)}
-\CommentTok{\#| or the development version}
+\CommentTok{\# or the development version}
 \NormalTok{devtools}\SpecialCharTok{::}\FunctionTok{install\_github}\NormalTok{(}\StringTok{"dicook/mulgar"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
+
+To get a copy of the code and data used and an RStudio project to get
+started, you can download with this code:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{usethis}\SpecialCharTok{::}\FunctionTok{use\_zip}\NormalTok{(}\AttributeTok{url=}\StringTok{"https://dicook.github.io/mulgar\_book/code\_and\_data.zip"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+You will be able to click on the \texttt{mulgar\_book.Rproj} to get
+started with the code.
 
 \hypertarget{how-do-i-report-an-error}{%
 \section*{How do I report an error?}\label{how-do-i-report-an-error}}
@@ -890,7 +905,7 @@ element of data analysis.
   in a grand tour. You can start with exploring the conic spiral in 3D,
   a torus in 4D and points along the wire frame of a cube in 5D.
 \item
-  For each of the challenge data sets, \texttt{c1}, \ldots, \texttt{c12}
+  For each of the challenge data sets, \texttt{c1}, \ldots, \texttt{c7}
   from the \texttt{mulgar} package, use the grand tour to view and try
   to identify structure (outliers, clusters, non-linear relationships).
 \end{enumerate}
@@ -939,8 +954,9 @@ A_{p1} & A_{p2} & \dots & A_{pd} \end{array} \right]_{p\times d}
 
 \(A\) should be an orthonormal matrix, which means that the
 \(\sum_{j=1}^p A_{jk}^2=1, k=1, \dots, d\) (columns represent vectors of
-length 1) and \(\sum_{j=1}^p A_{jk}A_{jl}=0, k,l=1, \dots, d\) (columns
-represent vectors that are orthogonal to each other).
+length 1) and \(\sum_{j=1}^p A_{jk}A_{jl}=0, k,l=1, \dots, d; k\neq l\)
+(columns represent vectors that are orthogonal to each other). In matrix
+notation, this can be written as \(A^{\top}A = I_d\).
 
 Then the projected data is written as:
 
@@ -1791,11 +1807,11 @@ x5 & $-0.29$ & $-0.62$ \\
 \toprule
 Variable & PC1 & PC2 & PC3 \\ 
 \midrule
-x1 & $-0.51$ & $0.46$ & $-0.11$ \\ 
+x1 & $-0.51$ & $0.46$ & $0.11$ \\ 
 x2 & $0.51$ & $0.46$ & $0.00$ \\ 
-x3 & $-0.65$ & $-0.09$ & $-0.23$ \\ 
-x4 & $-0.22$ & $0.36$ & $0.87$ \\ 
-x5 & $0.02$ & $0.66$ & $-0.43$ \\ 
+x3 & $-0.65$ & $-0.09$ & $0.23$ \\ 
+x4 & $-0.22$ & $0.36$ & $-0.87$ \\ 
+x5 & $0.02$ & $0.66$ & $0.43$ \\ 
 \bottomrule
 \end{longtable}
 
@@ -1850,13 +1866,13 @@ the data to 4D.}
 \toprule
 Variable & PC1 & PC2 & PC3 & PC4 \\ 
 \midrule
-x1 & $0.58$ & $0.04$ & $-0.01$ & $0.00$ \\ 
-x2 & $-0.55$ & $-0.18$ & $0.03$ & $0.07$ \\ 
-x3 & $0.47$ & $0.37$ & $-0.05$ & $-0.20$ \\ 
-x4 & $0.24$ & $-0.62$ & $0.06$ & $0.17$ \\ 
-x5 & $-0.28$ & $0.60$ & $-0.07$ & $-0.14$ \\ 
-x6 & $0.05$ & $0.29$ & $0.58$ & $0.76$ \\ 
-x7 & $-0.02$ & $-0.08$ & $0.81$ & $-0.58$ \\ 
+x1 & $0.58$ & $0.04$ & $0.01$ & $0.00$ \\ 
+x2 & $-0.55$ & $-0.18$ & $-0.03$ & $0.07$ \\ 
+x3 & $0.47$ & $0.37$ & $0.05$ & $-0.20$ \\ 
+x4 & $0.24$ & $-0.62$ & $-0.06$ & $0.17$ \\ 
+x5 & $-0.28$ & $0.60$ & $0.07$ & $-0.14$ \\ 
+x6 & $0.05$ & $0.29$ & $-0.58$ & $0.76$ \\ 
+x7 & $-0.02$ & $-0.08$ & $-0.81$ & $-0.58$ \\ 
 \bottomrule
 \end{longtable}
 
@@ -3074,7 +3090,8 @@ natural clusters in this data}. Instead, we need to organize the
 may seem disappointing when compared with the ideal, it is still often
 an effective means of simplifying and understanding a dataset.
 
-Knowing what shapes are in your data helps with clustering it.
+Knowing what shapes are in your data helps to decide on the best method
+and to diagnose the result.
 
 \begin{figure}
 
@@ -3086,7 +3103,7 @@ Knowing what shapes are in your data helps with clustering it.
 cluster analysis. When there are well-separated groups (a), it is simple
 to group similar observations. Even when there are not, partitioning
 observations into groups may still be useful. There may be nuisance
-observations or (b) nuisance variables (c) that affect the interpoint
+observations (b) or nuisance variables (c) that affect the interpoint
 distance calculations and distract the clustering algorithm, and there
 may oddly shaped clusters (d) which are hard to numerically describe.}
 
@@ -3199,15 +3216,12 @@ d_{\rm Euc}(a_1,a_2) &= \sqrt{(7.3-7.4)^2+(7.6-7.2)^2+ (7.7-7.3)^2+(8.0-7.2)^2} 
 is
 
 \begin{align*}
-d_{\rm Euc} =
-\left[ \begin{array}{ccc}
- 0.0  ~&     &   \\ 
- 1.0 ~&  0.0 ~  &  \\
- 6.3 ~& 5.5 ~&  0.0 ~ \\
-\end{array} \right]
-\begin{array}{r}
-a_1 \\ a_2 \\ a_3 \\
-\end{array}
+d_{\rm Euc} = \begin{bmatrix}
+& {\color{grey} a_1} & {\color{grey} a_2} & {\color{grey} a_3} \\\hline
+{\color{grey} a_1} | & 0.0 & 1.0 & 6.3 \\
+{\color{grey} a_2} | & 1.0 & 0.0 & 5.5 \\
+{\color{grey} a_3} | & 6.3 & 5.5 & 0.0
+\end{bmatrix}
 \end{align*}
 
 \begin{figure}
@@ -3218,7 +3232,7 @@ a_1 \\ a_2 \\ a_3 \\
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{x }\OtherTok{\textless{}{-}}\NormalTok{ tibble}\SpecialCharTok{::}\FunctionTok{tibble}\NormalTok{(}\AttributeTok{V1 =} \FunctionTok{c}\NormalTok{(}\FloatTok{7.3}\NormalTok{, }\FloatTok{7.4}\NormalTok{, }\FloatTok{4.1}\NormalTok{),}
+\NormalTok{x }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\AttributeTok{V1 =} \FunctionTok{c}\NormalTok{(}\FloatTok{7.3}\NormalTok{, }\FloatTok{7.4}\NormalTok{, }\FloatTok{4.1}\NormalTok{),}
                     \AttributeTok{V2 =} \FunctionTok{c}\NormalTok{(}\FloatTok{7.6}\NormalTok{, }\FloatTok{7.2}\NormalTok{, }\FloatTok{4.6}\NormalTok{),}
                     \AttributeTok{V3 =} \FunctionTok{c}\NormalTok{(}\FloatTok{7.7}\NormalTok{, }\FloatTok{7.3}\NormalTok{, }\FloatTok{4.6}\NormalTok{),}
                     \AttributeTok{V4 =} \FunctionTok{c}\NormalTok{(}\FloatTok{8.0}\NormalTok{, }\FloatTok{7.2}\NormalTok{, }\FloatTok{4.8}\NormalTok{),}
@@ -3297,52 +3311,53 @@ they are to case \(a_3\), because the Euclidean distance between cases
 \(a_1\) and \(a_3\) and between cases \(a_2\) and \(a_3\).
 
 There are many different ways to calculate similarity. Similarity
-measures based on correlation distance have become common. Correlation
-distance is typically used where similarity of structure is more
-important than similarity in magnitude.
+measures based on correlation distance can be useful. It is typically
+used where similarity of structure or shape is more important than
+similarity in magnitude.
 
 \index{parallel coordinate plot}
 
 As an example, see the parallel coordinate plot of the sample data at
 the right of Figure~\ref{fig-similarity1}. Cases \(a_1\) and \(a_3\) are
 widely separated, but their shapes are similar (low, medium, medium,
-high). Case \(a_2\), although overlapping with Case \(a_1\), has a very
-different shape (high, medium, medium, low). The correlation between two
-cases is defined as
+high). Case \(a_2\), although overlapping with case \(a_1\), has a very
+different shape (high, medium, medium, low). The Pearson correlation
+between two cases, \(\rho(a_i,a_j)\), is defined as
 
 \begin{align*}
-\rho(a_i,a_j) = \frac{(a_i-c_i)'(a_j-c_j)}
-{\sqrt{(a_i-c_i)'(a_i-c_i)} \sqrt{(a_j-c_j)'(a_j-c_j)}}
+\rho(a_i,a_j) = \frac{(a_i-c_i)^\top(a_j-c_j)}
+{\sqrt(a_i-c_i)^\top(a_i-c_i) \sqrt(a_j-c_j)^\top(a_j-c_j)}
 \label{corc}
 \end{align*}
 
-\noindent When \(c_i, c_j\) are the sample means
-\(\bar{a}_i,\bar{a}_j\), then \(\rho\) is the Pearson correlation
-coefficient. If, indeed, they are set at 0, as is commonly done,
-\(\rho\) is a generalized correlation that describes the angle between
-the two data vectors. The correlation is then converted to a distance
-metric; one equation for doing so is as follows:
+\noindent Typically, \(c_i, c_j\) are the sample means of each case,
+\(\bar{a}_i,\bar{a}_j\). For these three observations,
+\(c_1=\bar{a}_1=7.650, c_2=\bar{a}_2=7.275, c_3=\bar{a}_3=4.525\). An
+interesting geometric fact, is that if \(c_i, c_j\) are set to be 0, as
+is commonly done, \(\rho\) is a generalized correlation that describes
+the angle between the two data vectors. The correlation is then
+converted to a distance metric, with one possibility being as follows:
 
 \begin{align*}
 d_{\rm Cor}(a_i,a_j) = \sqrt{2(1-\rho(a_i,a_j))}
 \end{align*}
 
-The above distance metric will treat cases that are strongly negatively
-correlated as the most distant.
+This distance metric will treat cases that are strongly negatively
+correlated as the most distant. If you want to consider strong negative
+correlation as close, then you could take the absolute value of
+\(\rho(a_i,a_j)\) in the above equation, and remove the multiplication
+by 2.
 
 The interpoint distance matrix for the sample data using \(d_{\rm Cor}\)
 and the Pearson correlation coefficient is
 
 \begin{align*}
-d_{\rm Cor} = 
-\left[ \begin{array}{rrrrrrrrr}
- 0.0  ~&     &  \\
- 3.6 ~ & 0.0 ~ &  \\
- 0.1 ~ & 3.8 ~ &  0.0 ~\\
-\end{array} \right]
-\begin{array}{r}
-a_1 \\ a_2 \\ a_3 \\
-\end{array}
+d_{\rm Cor} = \begin{bmatrix}
+& {\color{grey} a_1} & {\color{grey} a_2} & {\color{grey} a_3} \\\hline
+{\color{grey} a_1} | & 0.0 & 3.6 & 0.1 \\
+{\color{grey} a_2} | & 3.6 & 0.0 & 3.8 \\
+{\color{grey} a_3} | & 0.1 & 3.8 & 0.0
+\end{bmatrix}
 \end{align*}
 
 \noindent By this metric, cases \(a_1\) and \(a_3\) are the most
@@ -3352,7 +3367,7 @@ cases than the other pairs of cases.
 
 Note that these interpoint distances differ dramatically from those for
 Euclidean distance. As a consequence, the way the cases would be
-clustered is also be very different. Choosing the appropriate distance
+clustered is also very different. Choosing the appropriate distance
 measure is an important part of a cluster analysis.
 
 After a distance metric has been chosen and a cluster analysis has been
@@ -3366,7 +3381,8 @@ practical purposes. As a result, cluster analysis is best thought of as
 an exploratory technique, and it can be quite useful despite the lack of
 formal validation because of its power in data simplification.
 
-Defining an appropriate distance metric is a vitally important decision.
+Defining an appropriate distance metric from the context of the problem
+is a most important decision.
 
 The context in which the data arises is the key to assessing the
 results. If the clusters can be characterized in a sensible manner, and
@@ -3844,9 +3860,9 @@ form ever-larger clusters, starting from a full interpoint distance
 matrix. \emph{Distance between clusters} is described by a ``linkage
 method'', of which there are many. For example, single linkage measures
 the distance between clusters by the smallest interpoint distance
-between the members of the two clusters clusters, complete linkage uses
-the maximum interpoint distance, and average linkage uses the average of
-the interpoint distances. Wards linkage, which usually produces the best
+between the members of the two clusters, complete linkage uses the
+maximum interpoint distance, and average linkage uses the average of the
+interpoint distances. Wards linkage, which usually produces the best
 clustering solutions, defines the distance as the reduction in the
 within-group variance. A good discussion on cluster analysis and linkage
 can be found in Boehmke \& Greenwell (2019), on
@@ -3918,8 +3934,8 @@ Figure~\ref{fig-hc-sim} illustrates the hierarchical clustering approach
 for a simple simulated data set (a) with two well-separated clusters in
 2D. The dendrogram (b) is a representation of the order that points are
 joined into clusters. The dendrogram strongly indicates two clusters
-because there are two branches branches representing the last join are
-much longer than all of the other branches.
+because the two branches representing the last join are much longer than
+all of the other branches.
 
 Although, the dendrogram is usually a good summary of the steps taken by
 the algorithm, it can be misleading. The dendrogram might indicate a
@@ -3998,15 +4014,18 @@ two-cluster solution. This two-cluster solution is shown in plot (d).
 \caption{\label{fig-hc-sim}Hierarchical clustering on simulated data:
 (a) data, (b) dendrogram, (c) dendrogram on the data, and (d) two
 cluster solution. The extra points corresponding to nodes of the
-dendrogram are indicated by + in (c).}
+dendrogram are indicated by + in (c). The last join in the dendrogram
+(b), can be seen to correspond to the edges connecting the gap, when
+displayed with the data (c). The other joins can be seen to be pulling
+together points within each clump.}
 
 \end{figure}
 
-Clustering algorithms are all prone to being confused by different
-patterns occurring in data. For hierarchical clustering the choice for
-defining distance once points have been joined into clusters can produce
-starkly different results. Plotting the dendrogram on the data provides
-a good way to assess the solution.
+Plotting the dendrogram in the data space can help you understand how
+the hierarchical clustering has collected the points together into
+clusters. You can learn if the algorithm has been confused by nuisance
+patterns in the data, and how different choices of linkage method
+affects the result.
 
 \hypertarget{common-patterns-which-confuse-clustering-algorithms}{%
 \section{Common patterns which confuse clustering
@@ -4113,7 +4132,7 @@ linkage but not Wards linkage hierarchical clustering.
   \FunctionTok{scale\_shape\_manual}\NormalTok{(}\AttributeTok{values =} \FunctionTok{c}\NormalTok{(}\DecValTok{16}\NormalTok{, }\DecValTok{3}\NormalTok{)) }\SpecialCharTok{+}
   \FunctionTok{scale\_colour\_manual}\NormalTok{(}\AttributeTok{values =} \FunctionTok{c}\NormalTok{(}\StringTok{"\#3B99B1"}\NormalTok{, }\StringTok{"black"}\NormalTok{)) }\SpecialCharTok{+}
   \FunctionTok{scale\_size}\NormalTok{(}\AttributeTok{limits=}\FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{17}\NormalTok{)) }\SpecialCharTok{+}
-  \FunctionTok{ggtitle}\NormalTok{(}\StringTok{"(b) Dendrogram in data"}\NormalTok{) }\SpecialCharTok{+} 
+  \FunctionTok{ggtitle}\NormalTok{(}\StringTok{"(b) Dendrogram in data space"}\NormalTok{) }\SpecialCharTok{+} 
   \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
   \FunctionTok{theme}\NormalTok{(}\AttributeTok{aspect.ratio=}\DecValTok{1}\NormalTok{, }\AttributeTok{legend.position=}\StringTok{"none"}\NormalTok{)}
 
@@ -4158,7 +4177,7 @@ linkage but not Wards linkage hierarchical clustering.
   \FunctionTok{scale\_shape\_manual}\NormalTok{(}\AttributeTok{values =} \FunctionTok{c}\NormalTok{(}\DecValTok{16}\NormalTok{, }\DecValTok{3}\NormalTok{)) }\SpecialCharTok{+}
   \FunctionTok{scale\_colour\_manual}\NormalTok{(}\AttributeTok{values =} \FunctionTok{c}\NormalTok{(}\StringTok{"\#3B99B1"}\NormalTok{, }\StringTok{"black"}\NormalTok{)) }\SpecialCharTok{+}
   \FunctionTok{scale\_size}\NormalTok{(}\AttributeTok{limits=}\FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{17}\NormalTok{)) }\SpecialCharTok{+}
-  \FunctionTok{ggtitle}\NormalTok{(}\StringTok{"(e) Dendrogram in data"}\NormalTok{) }\SpecialCharTok{+} 
+  \FunctionTok{ggtitle}\NormalTok{(}\StringTok{"(e) Dendrogram in data space"}\NormalTok{) }\SpecialCharTok{+} 
   \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
   \FunctionTok{theme}\NormalTok{(}\AttributeTok{aspect.ratio=}\DecValTok{1}\NormalTok{, }\AttributeTok{legend.position=}\StringTok{"none"}\NormalTok{)}
 
@@ -4188,9 +4207,14 @@ linkage but not Wards linkage hierarchical clustering.
 
 \caption{\label{fig-d1-s}The effect of nuisance observations on single
 linkage (a, b, c) and Ward's linkage hierarchical clustering (d, e, f).
-Single linkage clustering gets so distracted by the nuisance cases that
-the two cluster result is one big cluster, and a singleton cluster.
-Conversely, Ward's clusters this data nicely into two useful groups.}
+The single linkage dendrogram is very different to the Wards linkage
+dendrogram. When plotted with the data (b) we can see a pin cushion or
+asterisk pattern, where points are joined to others through a place in
+the middle of the line of nuisance observations. This results in the bad
+two cluster solution of a singleton cluster, and all the rest.
+Conversely, Ward's dendrogram (d) strongly suggests two clusters,
+although the final join corresponds to just a small gap when shown on
+the data (e) but results in two sensible clusters.}
 
 \end{figure}
 
@@ -4239,7 +4263,7 @@ clustered across the gap.
   \FunctionTok{scale\_shape\_manual}\NormalTok{(}\AttributeTok{values =} \FunctionTok{c}\NormalTok{(}\DecValTok{16}\NormalTok{, }\DecValTok{3}\NormalTok{)) }\SpecialCharTok{+}
   \FunctionTok{scale\_colour\_manual}\NormalTok{(}\AttributeTok{values =} \FunctionTok{c}\NormalTok{(}\StringTok{"\#3B99B1"}\NormalTok{, }\StringTok{"black"}\NormalTok{)) }\SpecialCharTok{+}
   \FunctionTok{scale\_size}\NormalTok{(}\AttributeTok{limits=}\FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{17}\NormalTok{)) }\SpecialCharTok{+}
-  \FunctionTok{ggtitle}\NormalTok{(}\StringTok{"(b) Dendrogram in data"}\NormalTok{) }\SpecialCharTok{+} 
+  \FunctionTok{ggtitle}\NormalTok{(}\StringTok{"(b) Dendrogram in data space"}\NormalTok{) }\SpecialCharTok{+} 
   \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
   \FunctionTok{theme}\NormalTok{(}\AttributeTok{aspect.ratio=}\DecValTok{1}\NormalTok{, }\AttributeTok{legend.position=}\StringTok{"none"}\NormalTok{)}
 
@@ -4284,7 +4308,7 @@ clustered across the gap.
   \FunctionTok{scale\_shape\_manual}\NormalTok{(}\AttributeTok{values =} \FunctionTok{c}\NormalTok{(}\DecValTok{16}\NormalTok{, }\DecValTok{3}\NormalTok{)) }\SpecialCharTok{+}
   \FunctionTok{scale\_colour\_manual}\NormalTok{(}\AttributeTok{values =} \FunctionTok{c}\NormalTok{(}\StringTok{"\#3B99B1"}\NormalTok{, }\StringTok{"black"}\NormalTok{)) }\SpecialCharTok{+}
   \FunctionTok{scale\_size}\NormalTok{(}\AttributeTok{limits=}\FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{17}\NormalTok{)) }\SpecialCharTok{+}
-  \FunctionTok{ggtitle}\NormalTok{(}\StringTok{"(e) Dendrogram in data"}\NormalTok{) }\SpecialCharTok{+} 
+  \FunctionTok{ggtitle}\NormalTok{(}\StringTok{"(e) Dendrogram in data space"}\NormalTok{) }\SpecialCharTok{+} 
   \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
   \FunctionTok{theme}\NormalTok{(}\AttributeTok{aspect.ratio=}\DecValTok{1}\NormalTok{, }\AttributeTok{legend.position=}\StringTok{"none"}\NormalTok{)}
 
@@ -4312,16 +4336,22 @@ clustered across the gap.
 
 }
 
-\caption{\label{fig-d2-c}Complete linkage clustering on nuisance
-variables in comparison to Ward's linkage. The complete linkage
-dendrogram looks quite reasonably suggesting a two-cluster solution, but
-when it is plotted amongst the data that it is clearly not a good
-two-cluster solution.}
+\caption{\label{fig-d2-c}Complete linkage clustering (a, b, c) on
+nuisance variables in comparison to Ward's linkage (d, e, f). The two
+dendrograms (a, d) look similar but when plotted on the data (b, e) we
+can see they are very different solutions. The complete linkage result
+breaks the data into clusters across the gap (c), which is a bad
+solution. It has been distract by the nuisance variables. Conversely,
+the Wards linkage two-cluster solution does as hoped, divided the data
+into two clusters separated by the gap (f).}
 
 \end{figure}
 
-Two dendrograms might look very similar but the resulting clustering can
-be very different.
+Two dendrograms might look similar but the resulting clustering can be
+very different. They can also look very different but correspond to veyr
+similar clusterings. Plotting the dendrogram in the data space is
+important for understanding how the algorithm operated when grouping
+observations, even more so for high dimensions.
 
 \hypertarget{dendrograms-in-high-dimensions}{%
 \section{Dendrograms in
@@ -4366,12 +4396,14 @@ observations.}
                     \AttributeTok{max\_bases =} \DecValTok{500}\NormalTok{, }
                     \AttributeTok{start =}\NormalTok{ b)}
 \FunctionTok{save}\NormalTok{(pt1, }\AttributeTok{file=}\StringTok{"data/penguins\_tour\_path.rda"}\NormalTok{)}
+
+\CommentTok{\# To re{-}create the gifs}
+\FunctionTok{load}\NormalTok{(}\StringTok{"data/penguins\_tour\_path.rda"}\NormalTok{)}
 \FunctionTok{animate\_xy}\NormalTok{(penguins\_sub[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{], }
            \AttributeTok{tour\_path =} \FunctionTok{planned\_tour}\NormalTok{(pt1), }
            \AttributeTok{axes=}\StringTok{"off"}\NormalTok{, }\AttributeTok{rescale=}\ConstantTok{FALSE}\NormalTok{, }
            \AttributeTok{half\_range =} \FloatTok{3.5}\NormalTok{)}
 
-\FunctionTok{load}\NormalTok{(}\StringTok{"data/penguins\_tour\_path.rda"}\NormalTok{)}
 \FunctionTok{render\_gif}\NormalTok{(penguins\_sub[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{], }
            \FunctionTok{planned\_tour}\NormalTok{(pt1), }
            \FunctionTok{display\_xy}\NormalTok{(}\AttributeTok{half\_range=}\FloatTok{0.9}\NormalTok{, }\AttributeTok{axes=}\StringTok{"off"}\NormalTok{),}
@@ -4393,9 +4425,11 @@ linkage and wards linkage clustering.
 \NormalTok{p\_hcs }\OtherTok{\textless{}{-}} \FunctionTok{hclust}\NormalTok{(p\_dist, }\AttributeTok{method=}\StringTok{"single"}\NormalTok{)}
 
 \NormalTok{p\_clw }\OtherTok{\textless{}{-}}\NormalTok{ penguins\_sub }\SpecialCharTok{\%\textgreater{}\%} 
-  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{cl =} \FunctionTok{factor}\NormalTok{(}\FunctionTok{cutree}\NormalTok{(p\_hcw, }\DecValTok{3}\NormalTok{)))}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{cl =} \FunctionTok{factor}\NormalTok{(}\FunctionTok{cutree}\NormalTok{(p\_hcw, }\DecValTok{3}\NormalTok{))) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{as.data.frame}\NormalTok{()}
 \NormalTok{p\_cls }\OtherTok{\textless{}{-}}\NormalTok{ penguins\_sub }\SpecialCharTok{\%\textgreater{}\%} 
-  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{cl =} \FunctionTok{factor}\NormalTok{(}\FunctionTok{cutree}\NormalTok{(p\_hcs, }\DecValTok{3}\NormalTok{)))}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{cl =} \FunctionTok{factor}\NormalTok{(}\FunctionTok{cutree}\NormalTok{(p\_hcs, }\DecValTok{3}\NormalTok{))) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{as.data.frame}\NormalTok{()}
 
 \NormalTok{p\_w\_hfly }\OtherTok{\textless{}{-}} \FunctionTok{hierfly}\NormalTok{(p\_clw, p\_hcw, }\AttributeTok{scale=}\ConstantTok{FALSE}\NormalTok{)}
 \NormalTok{p\_s\_hfly }\OtherTok{\textless{}{-}} \FunctionTok{hierfly}\NormalTok{(p\_cls, p\_hcs, }\AttributeTok{scale=}\ConstantTok{FALSE}\NormalTok{)}
@@ -4871,7 +4905,7 @@ the mixing proportion. The variance-covariance matrix is re-parametrized
 using an eigen-decomposition
 
 \[
-\Sigma_k = \lambda_kD_kA_kD_k', ~~~k=1, \dots, g ~~\mbox{(number of clusters)}
+\Sigma_k = \lambda_kD_kA_kD_k^\top, ~~~k=1, \dots, g ~~\mbox{(number of clusters)}
 \]
 
 \noindent resulting in several model choices, ranging from simple to
@@ -4911,21 +4945,21 @@ EVI & \$\$\textbackslash{}lambda A\_k\$\$ & Diagonal & Equal & Variable & Coordi
 \hline
 VVI & \$\$\textbackslash{}lambda\_k A\_k\$\$ & Diagonal & Variable & Variable & Coordinate axes\\
 \hline
-EEE & \$\$\textbackslash{}lambda DAD\textasciicircum{}T\$\$ & Diagonal & Equal & Equal & Equal\\
+EEE & \$\$\textbackslash{}lambda DAD\textasciicircum{}\textbackslash{}top\$\$ & Diagonal & Equal & Equal & Equal\\
 \hline
-EVE & \$\$\textbackslash{}lambda DA\_kD\textasciicircum{}T\$\$ & Ellipsoidal & Equal & Variable & Equal\\
+EVE & \$\$\textbackslash{}lambda DA\_kD\textasciicircum{}\textbackslash{}top\$\$ & Ellipsoidal & Equal & Variable & Equal\\
 \hline
-VEE & \$\$\textbackslash{}lambda\_k DAD\textasciicircum{}T\$\$ & Ellipsoidal & Variable & Equal & Equal\\
+VEE & \$\$\textbackslash{}lambda\_k DAD\textasciicircum{}\textbackslash{}top\$\$ & Ellipsoidal & Variable & Equal & Equal\\
 \hline
-VVE & \$\$\textbackslash{}lambda\_k DA\_kD\textasciicircum{}T\$\$ & Ellipsoidal & Variable & Equal & Equal\\
+VVE & \$\$\textbackslash{}lambda\_k DA\_kD\textasciicircum{}\textbackslash{}top\$\$ & Ellipsoidal & Variable & Equal & Equal\\
 \hline
-EEV & \$\$\textbackslash{}lambda D\_kAD\_k\textasciicircum{}T\$\$ & Ellipsoidal & Equal & Variable & Variable\\
+EEV & \$\$\textbackslash{}lambda D\_kAD\_k\textasciicircum{}\textbackslash{}top\$\$ & Ellipsoidal & Equal & Variable & Variable\\
 \hline
-VEV & \$\$\textbackslash{}lambda\_k D\_kAD\_k\textasciicircum{}T\$\$ & Ellipsoidal & Variable & Variable & Variable\\
+VEV & \$\$\textbackslash{}lambda\_k D\_kAD\_k\textasciicircum{}\textbackslash{}top\$\$ & Ellipsoidal & Variable & Variable & Variable\\
 \hline
-EVV & \$\$\textbackslash{}lambda D\_kA\_kD\_k\textasciicircum{}T\$\$ & Ellipsoidal & Equal & Variable & Variable\\
+EVV & \$\$\textbackslash{}lambda D\_kA\_kD\_k\textasciicircum{}\textbackslash{}top\$\$ & Ellipsoidal & Equal & Variable & Variable\\
 \hline
-VVV & \$\$\textbackslash{}lambda\_k D\_kA\_kD\_k\textasciicircum{}T\$\$ & Ellipsoidal & Variable & Variable & Variable\\
+VVV & \$\$\textbackslash{}lambda\_k D\_kA\_kD\_k\textasciicircum{}\textbackslash{}top\$\$ & Ellipsoidal & Variable & Variable & Variable\\
 \hline
 \end{tabular}
 \end{table}
@@ -5693,7 +5727,85 @@ relative to the two clusters.}
   data.
 \end{enumerate}
 
+\hypertarget{project-1}{%
+\section*{Project}\label{project-1}}
+\addcontentsline{toc}{section}{Project}
+
+\markright{Project}
+
+Most of the time your data will not neatly separate into clusters, but
+partitioning it into groups of similar observations can still be useful.
+In this case our toolbox will be useful in comparing and contrasting
+different methods, understanding to what extend a cluster mean can
+describe the observations in the cluster, and also how the boundaries
+between clusters have been drawn. To explore this we will use survey
+data that examines the risk taking behavior of tourists. The data was
+collected in Australia in 2015 (Hajibaba et al., 2016) and includes six
+types of risks (recreational, health, career, financial, safety and
+social) with responses on a scale from 1 (never) to 5 (very often). You
+can download the data from XXX
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  We first examine the data in a grand tour. Do you notice that each
+  variable was measured on a discrete scale?
+\item
+  Next we explore different solutions from hierarchical clustering of
+  the data. For comparison we will keep the number of clusters fixed to
+  6 and we will perform the hierarchical clustering with different
+  combinations of distance functions (Manhattan distance and Euclidean
+  distance) and linkage (single, complete and Ward linkage). Which
+  combinations make sense based on what we know about the method and the
+  data?
+\item
+  For each of the hierarchical clustering solutions draw the dendrogram
+  in 2D and also in the data space. You can also map the grouping into 6
+  clusters to different colors. How would you describe the different
+  solutions?
+\item
+  Using the method introduced in this chapter, compare the solution
+  using Manhattan distance and complete linkage to one using Euclidean
+  distance and Ward linkage. What do you notice?
+\item
+  Selecting your preferred solution from hierarchical clustering, we
+  will now compare it to what is found using \(k\)-means clustering with
+  \(k=6\). Use a tour to show the cluster means together with the data
+  points. What can you say about the variation within the clusters? Can
+  you identify clear boundaries?
+\item
+  Use a projection pursuit guided tour to best separate the clusters
+  identified with \(k\)-means clustering. How are the clusters related
+  to the different types of risk?
+\item
+  Use the approaches from this chapter to summarize and compare the
+  \(k\)-means solution to one of the hierarchical clustering results.
+  Draw the convex hulls for the two solutions in a tour and compare the
+  shapes.
+\item
+  XXX SOM here
+\end{enumerate}
+
 \part{Supervised classification}
+
+\hypertarget{overview-2}{%
+\chapter{Overview}\label{overview-2}}
+
+\begin{itemize}
+\tightlist
+\item
+  overview of supervised classification, model structure
+\item
+  refer to the ISLR language
+\item
+  basics of training/testing for model building
+\item
+  model components needed from all
+\item
+  common tasks: checking clusters relative to class labels, looking at
+  boundaries
+\end{itemize}
 
 \hypertarget{linear-discriminant-analysis}{%
 \chapter{Linear discriminant
@@ -5796,10 +5908,10 @@ Gentoo     0.65 -1.10  1.16  1.10
 
 Coefficients of linear discriminants:
      LD1   LD2
-bl  0.24 -2.31
-bd -2.04  0.19
-fl  1.20  0.08
-bm  1.22  1.24
+bl -0.24 -2.31
+bd  2.04  0.19
+fl -1.20  0.08
+bm -1.22  1.24
 
 Proportion of trace:
  LD1  LD2 
@@ -5833,10 +5945,10 @@ is the eigenvectors of \(W^{-1}B\) are:
 
 \begin{verbatim}
      LD1   LD2
-bl  0.24 -2.31
-bd -2.04  0.19
-fl  1.20  0.08
-bm  1.22  1.24
+bl -0.24 -2.31
+bd  2.04  0.19
+fl -1.20  0.08
+bm -1.22  1.24
 \end{verbatim}
 
 and the predicted values, which include class predictions, and
@@ -5885,6 +5997,15 @@ which can be shown to match the original data projected using the
           \AttributeTok{common.legend =} \ConstantTok{TRUE}\NormalTok{, }\AttributeTok{legend =} \StringTok{"bottom"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
+
+\begin{verbatim}
+Warning: Removed 20 rows containing missing values (`geom_point()`).
+Removed 20 rows containing missing values (`geom_point()`).
+\end{verbatim}
+
+\begin{verbatim}
+Warning: Removed 17 rows containing missing values (`geom_point()`).
+\end{verbatim}
 
 \begin{figure}[H]
 
@@ -6542,7 +6663,7 @@ No. of variables tried at each split: 2
         OOB estimate of  error rate: 2.4%
 Confusion matrix:
           Adelie Chinstrap Gentoo class.error
-Adelie       143         2      1 0.020547945
+Adelie       143         3      0 0.020547945
 Chinstrap      4        64      0 0.058823529
 Gentoo         0         1    118 0.008403361
 \end{verbatim}
@@ -6734,19 +6855,19 @@ Call:
                      Number of trees: 500
 No. of variables tried at each split: 3
 
-        OOB estimate of  error rate: 4.2%
+        OOB estimate of  error rate: 4.33%
 Confusion matrix:
     0   1   2   3   4   5   6   7   8   9 class.error
-0 265   5   3   3   3   3   6   3   6   3  0.11666667
+0 266   6   2   2   3   5   4   2   6   4  0.11333333
 1  13 287   0   0   0   0   0   0   0   0  0.04333333
-2   8   0 289   0   3   0   0   0   0   0  0.03666667
-3   5   0   0 290   0   0   0   3   0   2  0.03333333
-4  12   0   0   0 288   0   0   0   0   0  0.04000000
-5  11   0   0   0   0 289   0   0   0   0  0.03666667
-6   9   0   0   0   0   0 290   0   1   0  0.03333333
-7   5   0   0   5   0   0   0 290   0   0  0.03333333
-8   8   0   0   0   0   0   0   0 292   0  0.02666667
-9   6   0   0   0   0   0   0   0   0 294  0.02000000
+2  10   0 289   0   1   0   0   0   0   0  0.03666667
+3   6   0   0 289   0   0   0   3   0   2  0.03666667
+4  14   0   0   0 286   0   0   0   0   0  0.04666667
+5  12   0   0   0   0 288   0   0   0   0  0.04000000
+6  12   0   0   0   0   0 287   0   1   0  0.04333333
+7   6   0   0   4   0   0   0 290   0   0  0.03333333
+8   7   0   0   0   0   0   0   0 293   0  0.02333333
+9   5   0   0   0   0   0   0   0   0 295  0.01666667
 \end{verbatim}
 
 \begin{Shaded}
@@ -6874,16 +6995,16 @@ difference between importance for some classes.
 \toprule
 Variable & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & Accuracy & Gini \\ 
 \midrule
-PC1 & $0.10$ & $0.36$ & $0.44$ & $0.26$ & $0.19$ & $0.46$ & $0.40$ & $0.17$ & $0.30$ & $0.30$ & $0.30$ & $472$ \\ 
-PC2 & $0.13$ & $0.24$ & $0.22$ & $0.52$ & $0.31$ & $0.31$ & $0.18$ & $0.40$ & $0.24$ & $0.29$ & $0.28$ & $379$ \\ 
-PC3 & $0.09$ & $0.05$ & $0.11$ & $0.14$ & $0.54$ & $0.15$ & $0.09$ & $0.14$ & $0.19$ & $0.17$ & $0.17$ & $318$ \\ 
-PC4 & $0.09$ & $0.45$ & $0.06$ & $0.04$ & $0.10$ & $0.04$ & $0.36$ & $0.14$ & $0.09$ & $0.09$ & $0.14$ & $344$ \\ 
-PC5 & $0.14$ & $0.12$ & $0.36$ & $0.07$ & $0.16$ & $0.24$ & $0.10$ & $0.11$ & $0.29$ & $0.22$ & $0.18$ & $333$ \\ 
-PC6 & $0.10$ & $0.25$ & $0.24$ & $0.16$ & $0.04$ & $0.12$ & $0.04$ & $0.26$ & $0.14$ & $0.16$ & $0.15$ & $276$ \\ 
-PC7 & $0.07$ & $0.03$ & $0.15$ & $0.05$ & $0.04$ & $0.07$ & $0.11$ & $0.36$ & $0.12$ & $0.15$ & $0.11$ & $261$ \\ 
-PC8 & $0.05$ & $0.07$ & $0.01$ & $0.25$ & $0.06$ & $0.08$ & $0.02$ & $0.04$ & $0.08$ & $0.27$ & $0.09$ & $217$ \\ 
-PC9 & $0.07$ & $0.01$ & $0.01$ & $0.01$ & $0.01$ & $0.01$ & $0.01$ & $0.04$ & $0.05$ & $0.02$ & $0.02$ & $56$ \\ 
-PC10 & $0.03$ & $0.01$ & $0.01$ & $0.00$ & $0.01$ & $0.02$ & $0.01$ & $0.01$ & $0.01$ & $0.02$ & $0.01$ & $44$ \\ 
+PC1 & $0.11$ & $0.36$ & $0.44$ & $0.28$ & $0.20$ & $0.47$ & $0.40$ & $0.18$ & $0.32$ & $0.31$ & $0.31$ & $477$ \\ 
+PC2 & $0.13$ & $0.23$ & $0.22$ & $0.54$ & $0.28$ & $0.30$ & $0.15$ & $0.39$ & $0.23$ & $0.27$ & $0.28$ & $379$ \\ 
+PC3 & $0.09$ & $0.06$ & $0.11$ & $0.15$ & $0.53$ & $0.14$ & $0.08$ & $0.14$ & $0.19$ & $0.16$ & $0.16$ & $313$ \\ 
+PC4 & $0.08$ & $0.46$ & $0.05$ & $0.04$ & $0.10$ & $0.03$ & $0.37$ & $0.16$ & $0.08$ & $0.09$ & $0.15$ & $343$ \\ 
+PC5 & $0.13$ & $0.12$ & $0.36$ & $0.08$ & $0.17$ & $0.25$ & $0.10$ & $0.11$ & $0.29$ & $0.23$ & $0.18$ & $344$ \\ 
+PC6 & $0.10$ & $0.24$ & $0.23$ & $0.17$ & $0.04$ & $0.12$ & $0.04$ & $0.27$ & $0.14$ & $0.17$ & $0.15$ & $280$ \\ 
+PC7 & $0.07$ & $0.03$ & $0.15$ & $0.04$ & $0.04$ & $0.06$ & $0.11$ & $0.33$ & $0.12$ & $0.15$ & $0.11$ & $243$ \\ 
+PC8 & $0.05$ & $0.08$ & $0.02$ & $0.23$ & $0.05$ & $0.08$ & $0.02$ & $0.03$ & $0.08$ & $0.26$ & $0.09$ & $217$ \\ 
+PC9 & $0.07$ & $0.01$ & $0.01$ & $0.02$ & $0.01$ & $0.01$ & $0.00$ & $0.03$ & $0.05$ & $0.02$ & $0.02$ & $59$ \\ 
+PC10 & $0.04$ & $0.01$ & $0.01$ & $0.01$ & $0.01$ & $0.01$ & $0.01$ & $0.00$ & $0.01$ & $0.02$ & $0.01$ & $44$ \\ 
 \bottomrule
 \end{longtable}
 
@@ -7549,6 +7670,45 @@ learning}\label{neural-networks-and-deep-learning}}
 
 \index{classification methods!neural network}
 
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Following https://parsnip.tidymodels.org/articles/Examples.html}
+\FunctionTok{library}\NormalTok{(nnet)}
+\FunctionTok{library}\NormalTok{(mulgar)}
+\FunctionTok{library}\NormalTok{(tidymodels)}
+\FunctionTok{tidymodels\_prefer}\NormalTok{()}
+
+\FunctionTok{data}\NormalTok{(sketches\_train)}
+\NormalTok{sketches\_sub }\OtherTok{\textless{}{-}}\NormalTok{ sketches\_train }\SpecialCharTok{\%\textgreater{}\%}
+  \CommentTok{\#filter(word \%in\% c("crab", "flip flops")) \%\textgreater{}\%}
+  \CommentTok{\#mutate(word = factor(word)) \%\textgreater{}\% }
+  \FunctionTok{select}\NormalTok{(}\SpecialCharTok{{-}}\NormalTok{id)}
+
+\NormalTok{sketches\_split }\OtherTok{\textless{}{-}} \FunctionTok{initial\_split}\NormalTok{(sketches\_sub)}
+\NormalTok{sk\_tr }\OtherTok{\textless{}{-}} \FunctionTok{training}\NormalTok{(sketches\_split)}
+\NormalTok{sk\_ts }\OtherTok{\textless{}{-}} \FunctionTok{testing}\NormalTok{(sketches\_split)}
+
+\NormalTok{mlp\_cls\_spec }\OtherTok{\textless{}{-}} 
+    \FunctionTok{mlp}\NormalTok{(}\AttributeTok{hidden\_units =} \DecValTok{12}\NormalTok{, }
+        \AttributeTok{penalty =} \DecValTok{0}\NormalTok{, }
+        \AttributeTok{epochs =} \DecValTok{1000}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} 
+    \FunctionTok{set\_mode}\NormalTok{(}\StringTok{"classification"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} 
+    \FunctionTok{set\_engine}\NormalTok{(}\StringTok{"nnet"}\NormalTok{, }\AttributeTok{MaxNWts =} \DecValTok{10000}\NormalTok{)}
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{423}\NormalTok{)}
+\NormalTok{mlp\_cls\_fit }\OtherTok{\textless{}{-}}\NormalTok{ mlp\_cls\_spec }\SpecialCharTok{\%\textgreater{}\%} 
+    \FunctionTok{fit}\NormalTok{(word }\SpecialCharTok{\textasciitilde{}}\NormalTok{ ., }\AttributeTok{data =}\NormalTok{ sk\_tr)}
+\CommentTok{\#mlp\_cls\_fit}
+\NormalTok{sk\_pred }\OtherTok{\textless{}{-}} \FunctionTok{bind\_cols}\NormalTok{(sk\_ts,}
+    \FunctionTok{predict}\NormalTok{(mlp\_cls\_fit, sk\_ts),}
+    \FunctionTok{predict}\NormalTok{(mlp\_cls\_fit, sk\_ts, }\AttributeTok{type =} \StringTok{"prob"}\NormalTok{)}
+\NormalTok{  )}
+\FunctionTok{bal\_accuracy}\NormalTok{(sk\_pred, word, .pred\_class)}
+
+\NormalTok{sk\_pred }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{count}\NormalTok{(word, .pred\_class) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{pivot\_wider}\NormalTok{(}\AttributeTok{names\_from =} \StringTok{\textasciigrave{}}\AttributeTok{.pred\_class}\StringTok{\textasciigrave{}}\NormalTok{, }\AttributeTok{values\_from =}\NormalTok{ n)}
+\end{Highlighting}
+\end{Shaded}
+
 \hypertarget{exploring-misclassifications}{%
 \chapter{Exploring
 misclassifications}\label{exploring-misclassifications}}
@@ -7817,11 +7977,6 @@ Bishop, C. M. (2006). \emph{Pattern {R}ecognition and {M}achine
 Boehmke, B., \& Greenwell, B. M. (2019). \emph{Hands-on machine learning
 with r (1st ed.)}. Chapman; Hall/CRC.
 \url{https://doi.org/10.1201/9780367816377}
-
-\leavevmode\vadjust pre{\hypertarget{ref-R-aweSOM}{}}%
-Boelaert, J., Ollion, E., \& Sodoge, J. (2022). \emph{aweSOM:
-Interactive self-organizing maps}.
-\url{https://CRAN.R-project.org/package=aweSOM}
 
 \leavevmode\vadjust pre{\hypertarget{ref-Bonneau2006}{}}%
 Bonneau, G.-P., Ertl, T., \& Nielson, G. M. (Eds.). (2006).
@@ -8165,17 +8320,14 @@ Good, P. (2005). \emph{Permutation, {P}arametric, and {B}ootstrap
 \leavevmode\vadjust pre{\hypertarget{ref-GH96}{}}%
 Gower, J. C., \& Hand, D. J. (1996). \emph{Biplots}. Chapman; Hall.
 
+\leavevmode\vadjust pre{\hypertarget{ref-risk-survey}{}}%
+Hajibaba, H., Karlsson, L., \& Dolnicar, S. (2016). Residents open their
+homes to tourists when disaster strikes. \emph{Journal of Travel
+Research}, \emph{56}(8), 1065--1078.
+
 \leavevmode\vadjust pre{\hypertarget{ref-Hansen2004}{}}%
 Hansen, C., \& Johnson, C. R. (2004). \emph{Visualization handbook}.
 Academic Press.
-
-\leavevmode\vadjust pre{\hypertarget{ref-R-langevitour}{}}%
-Harrison, P. (2023). \emph{Langevitour: Langevin tour}.
-\url{https://logarithmic.net/langevitour/}
-
-\leavevmode\vadjust pre{\hypertarget{ref-R-detourr}{}}%
-Hart, C., \& Wang, E. (2023). \emph{Detourr: Portable and performant
-tour animations}. \url{https://casperhart.github.io/detourr/}
 
 \leavevmode\vadjust pre{\hypertarget{ref-HK81}{}}%
 Hartigan, J. A., \& Kleiner, B. (1981). Mosaics for {C}ontingency
@@ -8233,8 +8385,8 @@ Hurley, C. (1987). \emph{The data viewer: An interactive program for
 data analysis} {[}PhD thesis{]}. University of Washington.
 
 \leavevmode\vadjust pre{\hypertarget{ref-R-gt}{}}%
-Iannone, R., Cheng, J., Schloerke, B., Hughes, E., \& Seo, J. (2022).
-\emph{Gt: Easily create presentation-ready display tables}.
+Iannone, R., Cheng, J., Schloerke, B., Hughes, E., Lauer, A., \& Seo, J.
+(2023). \emph{Gt: Easily create presentation-ready display tables}.
 \url{https://CRAN.R-project.org/package=gt}
 
 \leavevmode\vadjust pre{\hypertarget{ref-R1996}{}}%
@@ -8278,10 +8430,6 @@ Series A}, \emph{150}, 1--36.
 Kassambara, A. (2017). \emph{Practical guide to cluster analysis in r:
 Unsupervised machine learning}. STHDA.
 
-\leavevmode\vadjust pre{\hypertarget{ref-R-ggpubr}{}}%
-Kassambara, A. (2023). \emph{Ggpubr: ggplot2 based publication ready
-plots}. \url{https://rpkgs.datanovia.com/ggpubr/}
-
 \leavevmode\vadjust pre{\hypertarget{ref-Ko01}{}}%
 Kohonen, T. (2001). \emph{Self-{O}rganizing {M}aps (3rd ed)}. Springer.
 
@@ -8290,11 +8438,6 @@ Koschat, M. A., \& Swayne, D. F. (1996). Interactive {G}raphical
 {M}ethods in the {A}nalysis of {C}ustomer {P}anel {D}ata (with
 discussion). \emph{Journal of Business and Economic Statistics},
 \emph{14}(1), 113--132.
-
-\leavevmode\vadjust pre{\hypertarget{ref-R-Rtsne}{}}%
-Krijthe, J. (2022). \emph{Rtsne: T-distributed stochastic neighbor
-embedding using a barnes-hut implementation}.
-\url{https://github.com/jkrijthe/Rtsne}
 
 \leavevmode\vadjust pre{\hypertarget{ref-Kr64a}{}}%
 Kruskal, J. B. (1964a). Multidimensional {S}caling by {O}ptimizing
@@ -8555,6 +8698,7 @@ r, plotly, and shiny}. Chapman; Hall/CRC. \url{https://plotly-r.com}
 Sievert, C., Parmer, C., Hocking, T., Chamberlain, S., Ram, K.,
 Corvellec, M., \& Despouy, P. (2023). \emph{Plotly: Create interactive
 web graphics via plotly.js}.
+\url{https://CRAN.R-project.org/package=plotly}
 
 \leavevmode\vadjust pre{\hypertarget{ref-R-gtsummary}{}}%
 Sjoberg, D. D., Larmarange, J., Curry, M., Lavery, J., Whiting, K., \&
@@ -8736,16 +8880,6 @@ Vaidyanathan, R., Xie, Y., Allaire, J., Cheng, J., Sievert, C., \&
 Russell, K. (2023). \emph{Htmlwidgets: HTML widgets for r}.
 \url{https://github.com/ramnathv/htmlwidgets}
 
-\leavevmode\vadjust pre{\hypertarget{ref-Rtsne2014}{}}%
-van der Maaten, L. J. P. (2014). Accelerating t-SNE using tree-based
-algorithms. \emph{Journal of Machine Learning Research}, \emph{15},
-3221--3245.
-
-\leavevmode\vadjust pre{\hypertarget{ref-Rtsne2008}{}}%
-van der Maaten, L. J. P., \& Hinton, G. E. (2008). Visualizing
-high-dimensional data using t-SNE. \emph{Journal of Machine Learning
-Research}, \emph{9}, 2579--2605.
-
 \leavevmode\vadjust pre{\hypertarget{ref-Va99}{}}%
 Vapnik, V. N. (1999). \emph{The {N}ature of {S}tatistical {L}earning
 {T}heory}. Springer.
@@ -8818,17 +8952,13 @@ in {kohonen} 3.0. \emph{Journal of Statistical Software}, \emph{87}(7),
 1--18. \url{https://doi.org/10.18637/jss.v087.i07}
 
 \leavevmode\vadjust pre{\hypertarget{ref-R-kohonen}{}}%
-Wehrens, R., \& Kruisselbrink, J. (2022). \emph{Kohonen: Supervised and
+Wehrens, R., \& Kruisselbrink, J. (2023). \emph{Kohonen: Supervised and
 unsupervised self-organising maps}.
 \url{https://CRAN.R-project.org/package=kohonen}
 
 \leavevmode\vadjust pre{\hypertarget{ref-ggplot22016}{}}%
 Wickham, H. (2016). \emph{ggplot2: Elegant graphics for data analysis}.
 Springer-Verlag New York. \url{https://ggplot2.tidyverse.org}
-
-\leavevmode\vadjust pre{\hypertarget{ref-R-classifly}{}}%
-Wickham, H. (2022). \emph{Classifly: Explore classification models in
-high dimensions}. \url{http://had.co.nz/classifly}
 
 \leavevmode\vadjust pre{\hypertarget{ref-R-ggplot2}{}}%
 Wickham, H., Chang, W., Henry, L., Pedersen, T. L., Takahashi, K.,
@@ -9696,6 +9826,66 @@ sketches in a recognisable form:
 training data.}
 
 \end{figure}
+
+\hypertarget{links-to-additional-data-used-in-the-book}{%
+\section{Links to additional data used in the
+book}\label{links-to-additional-data-used-in-the-book}}
+
+\begin{longtable}{rll}
+\toprule
+Chapter & Name & Link \\ 
+\midrule
+4 & aflw tour path & <a href='https://dicook.github.io/mulgar\_book/data/aflw\_pct.rda'> aflw\_pct.rda </a> \\ 
+7 & detourr saved clusters & <a href='https://dicook.github.io/mulgar\_book/data/detourr\_penguins.csv'> detourr\_penguins.csv </a> \\ 
+7 & detourr saved clusters & <a href='https://dicook.github.io/mulgar\_book/data/fake\_trees\_sb.csv'> fake\_trees\_sb.csv </a> \\ 
+1 & 2001 election & <a href='https://dicook.github.io/mulgar\_book/data/oz\_election\_2001.rda'> oz\_election\_2001.rda </a> \\ 
+1 & 2016 election & <a href='https://dicook.github.io/mulgar\_book/data/oz\_election\_2016.rda'> oz\_election\_2016.rda </a> \\ 
+5, 7, 8, 9, 10, 11, 12, 13, 14, 15 & Penguins re-organsed & <a href='https://dicook.github.io/mulgar\_book/data/penguins\_sub.rda'> penguins\_sub.rda </a> \\ 
+8, 10, 13, 14 & 2D tour path for penguins & <a href='https://dicook.github.io/mulgar\_book/data/penguins\_tour\_path.rda'> penguins\_tour\_path.rda </a> \\ 
+\bottomrule
+\end{longtable}
+
+\hypertarget{book-data}{%
+\chapter{Links to Book Code and Additional Data}\label{book-data}}
+
+The code and data and an RStudio project can be downloaded with
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{usethis}\SpecialCharTok{::}\FunctionTok{use\_zip}\NormalTok{(}\AttributeTok{url=}\StringTok{"https://dicook.github.io/mulgar\_book/code\_and\_data.zip"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+Alternatively, individual files can be downloaded from the links below.
+
+\hypertarget{additional-data}{%
+\section{Additional data}\label{additional-data}}
+
+\begin{longtable}{lll}
+\toprule
+Chapter & Name & Link \\ 
+\midrule
+4 & aflw tour path & <a href='https://dicook.github.io/mulgar_book/data/aflw_pct.rda'> aflw_pct.rda </a> \\ 
+7 & detourr saved clusters & <a href='https://dicook.github.io/mulgar_book/data/detourr_penguins.csv'> detourr_penguins.csv </a> \\ 
+7 & detourr saved clusters & <a href='https://dicook.github.io/mulgar_book/data/fake_trees_sb.csv'> fake_trees_sb.csv </a> \\ 
+1 & 2001 election & <a href='https://dicook.github.io/mulgar_book/data/oz_election_2001.rda'> oz_election_2001.rda </a> \\ 
+1 & 2016 election & <a href='https://dicook.github.io/mulgar_book/data/oz_election_2016.rda'> oz_election_2016.rda </a> \\ 
+5, 7, 8, 9, 10, 11, 12, 13, 14, 15 & Penguins re-organsed & <a href='https://dicook.github.io/mulgar_book/data/penguins_sub.rda'> penguins_sub.rda </a> \\ 
+8, 10, 13, 14 & 2D tour path for penguins & <a href='https://dicook.github.io/mulgar_book/data/penguins_tour_path.rda'> penguins_tour_path.rda </a> \\ 
+\bottomrule
+\end{longtable}
+
+\hypertarget{code-files}{%
+\section{Code files}\label{code-files}}
+
+\begin{longtable}{ll}
+\toprule
+Chapter & Link \\ 
+\midrule
+1 Picturing high dimensions & <a href='https://dicook.github.io/mulgar_book/code/intro.r'> intro.r </a> \\ 
+2 Notation conventions and R objects & <a href='https://dicook.github.io/mulgar_book/code/notation.r'> notation.r </a> \\ 
+\bottomrule
+\end{longtable}
 
 \hypertarget{glossary}{%
 \chapter{Glossary}\label{glossary}}

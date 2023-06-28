@@ -508,23 +508,15 @@ e1 + e2 + e3 + e4 + plot_layout(ncol=4)
 ## animate_xy(c1)
 ## # four small clusters, two big clusters
 ## animate_xy(c2)
-## # spherical cluster, curved cluster, noise points
-## animate_xy(c3)
 ## # Six spherical clusters
-## animate_xy(c4) # almost same as c2
-## animate_xy(c5)
+## animate_xy(c3)
 ## # tetrahedron with lots of smaller triangles
-## animate_xy(c6)
+## animate_xy(c4)
 ## # Two planes, and noise points
-## animate_xy(c7)
+## animate_xy(c5)
 ## # Four connected curvilinear clusters
-## animate_xy(c8)
-## # parabola with extra points in vertex
-## animate_xy(c9)
-## # spiral
-## animate_xy(c10) # almost same as c2
-## animate_xy(c11)
+## animate_xy(c6)
 ## # Two curved clusters
-## animate_xy(c12)
-## # Criss-crossed clusters
+## animate_xy(c7)
+## # spiral
 
