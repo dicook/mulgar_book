@@ -333,7 +333,30 @@ animate_xy(risk_hfly_ew$data[,1:6],
 # using convex hull in the data space
 
 # SOM
-
+library(kohonen)
+library(aweSOM)
+set.seed(947)
+p_grid <- somgrid(xdim = 5, ydim = 5,
+                           topo = 'rectangular')
+p_init <- somInit(risk, 5, 5)
+p_som <- som(risk, 
+             rlen=500,
+             grid = p_grid,
+             init = p_init)
+p_som_df_net <- som_model(p_som)
+p_som_map <- p_som_df_net$net %>%
+  mutate(type="net")
+p_som_data <- mutate(as.tibble(risk), type = "data")
+p_som_map_data <- bind_rows(p_som_map, p_som_data)
+p_som_map_data$type <- factor(p_som_map_data$type,
+  levels=c("net", "data"))
+animate_xy(p_som_map_data[,1:6],
+           edges=as.matrix(p_som_df_net$edges),
+           pch = 46,
+           edges.col = "black",
+           axes="bottomleft")
+# what do we learn from this?
+# might be good to look at display of the cluster means
 ```
 
 
