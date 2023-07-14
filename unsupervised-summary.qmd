@@ -237,7 +237,7 @@ Most of the time your data will not neatly separate into clusters, but partition
 2. Next we explore different solutions from hierarchical clustering of the data. For comparison we will keep the number of clusters fixed to 6 and we will perform the hierarchical clustering with different combinations of distance functions (Manhattan distance and Euclidean distance) and linkage (single, complete and Ward linkage). Which combinations make sense based on what we know about the method and the data?
 3. For each of the hierarchical clustering solutions draw the dendrogram in 2D and also in the data space. You can also map the grouping into 6 clusters to different colors. How would you describe the different solutions?
 4. Using the method introduced in this chapter, compare the solution using Manhattan distance and complete linkage to one using Euclidean distance and Ward linkage. What do you notice?
-5. Selecting your preferred solution from hierarchical clustering, we will now compare it to what is found using $k$-means clustering with $k=6$. Use a tour to show the cluster means together with the data points. What can you say about the variation within the clusters? Can you identify clear boundaries?
+5. Selecting your preferred solution from hierarchical clustering, we will now compare it to what is found using $k$-means clustering with $k=6$. Use a tour to show the cluster means together with the data points (make sure to pick an appropriate symbol for the data points to avoid too much overplotting). What can you say about the variation within the clusters? Can you identify clear boundaries?
 6. Use a projection pursuit guided tour to best separate the clusters identified with $k$-means clustering. How are the clusters related to the different types of risk?
 7. Use the approaches from this chapter to summarize and compare the $k$-means solution to one of the hierarchical clustering results. Draw the convex hulls for the two solutions in a tour and compare the shapes.
 8. XXX SOM here
@@ -326,32 +326,61 @@ animate_xy(risk_hfly_ew$data[,1:6],
 # comparison with liminal
 
 # k-means + tour with cluster means
+r_km <- kmeans(risk, centers=6, 
+                     iter.max = 500, nstart = 5)
+r_km_means <- data.frame(r_km$centers) %>%
+  mutate(cl = factor(rownames(r_km$centers)))
+r_km_d <- as.tibble(risk) %>% 
+  mutate(cl = factor(r_km$cluster))
+r_km_means <- r_km_means %>%
+  mutate(type = "mean")
+r_km_d <- r_km_d %>%
+  mutate(type = "data")
+r_km_all <- bind_rows(r_km_means, r_km_d)
+r_km_all$type <- factor(r_km_all$type, levels=c("mean", "data"))
+r_pch <- c(3, 46)[as.numeric(r_km_all$type)]
+r_cex <- c(3, 1)[as.numeric(r_km_all$type)]
+animate_xy(r_km_all[,1:6], col=r_km_all$cl, 
+           pch=r_pch, cex=r_cex, axes="bottomleft")
 
 # guided tour + interpretation in terms of variables
+set.seed(543)
+animate_xy(r_km_all[,1:6],
+           tour_path = guided_tour(lda_pp(r_km_all$cl)) ,
+           col=r_km_all$cl, 
+           pch=r_pch, cex=r_cex, axes="bottomleft")
+# from this solution it seems there is an overall
+# risk behavior captured in the clustering, i.e. most
+# variable contribute to separating the clusters along the
+# x direction
+# health risks seem to be a bit different, with one cluster
+# containing average risk scores apart from high risk 
+# scores for the health variable
 
 # comparison k-means vs hierarchical clustering solution
 # using convex hull in the data space
+# is this a good idea? can we have facets to compare?
 
 # SOM
 library(kohonen)
 library(aweSOM)
 set.seed(947)
-p_grid <- somgrid(xdim = 5, ydim = 5,
+r_grid <- somgrid(xdim = 5, ydim = 5,
                            topo = 'rectangular')
-p_init <- somInit(risk, 5, 5)
-p_som <- som(risk, 
+r_init <- somInit(risk, 5, 5)
+r_som <- som(risk, 
              rlen=500,
-             grid = p_grid,
-             init = p_init)
-p_som_df_net <- som_model(p_som)
-p_som_map <- p_som_df_net$net %>%
+             grid = r_grid,
+             init = r_init)
+r_som_df_net <- som_model(r_som)
+r_som_map <- r_som_df_net$net %>%
   mutate(type="net")
-p_som_data <- mutate(as.tibble(risk), type = "data")
-p_som_map_data <- bind_rows(p_som_map, p_som_data)
-p_som_map_data$type <- factor(p_som_map_data$type,
+r_som_data <- mutate(as.tibble(risk), type = "data")
+r_som_map_data <- bind_rows(r_som_map, r_som_data)
+r_som_map_data$type <- factor(r_som_map_data$type,
   levels=c("net", "data"))
-animate_xy(p_som_map_data[,1:6],
-           edges=as.matrix(p_som_df_net$edges),
+animate_xy(r_som_map_data[,1:6],
+           edges=as.matrix(r_som_df_net$edges),
            pch = 46,
            edges.col = "black",
            axes="bottomleft")
