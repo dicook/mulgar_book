@@ -11,7 +11,7 @@ You can install the released version of `tourr` from [CRAN](https://CRAN.R-proje
 install.packages("tourr")
 ```
 
-and the development version from github with:
+and the development version from the [GitHub repo](https://github.com/ggobi/tourr) with:
 
 ``` r
 # install.packages("remotes")
@@ -20,22 +20,19 @@ remotes::install_github("ggobi/tourr")
 
 ### Getting started
 
-To run a tour in R, use one of the animate functions. This code will show a 2D tour displayed as a scatterplot on a 6D data set with three labelled classes. 
+To run a tour in R, use one of the animate functions. The following code will show a 2D tour displayed as a scatterplot on a 6D data set with three labelled classes. 
 
 ``` r
 animate_xy(flea[,-7], col=flea$species)
 ```
 
-@tourr remains a good reference for learning more about this package.
+@tourr remains a good reference for learning more about this package. The package [website](http://ggobi.github.io/tourr/) has a list of current functionality. 
 
 ### Different tours
 
-There are two main components of the tour algorithm:
+The two main components of the tour algorithm are the projection dimension which affects the choice of display to use, and the algorithm that delivers the projection sequence. The primary functions for these two parts are 
 
-1. The dimension of the projection, which will impact the type of display to use.
-2. The algorithm that delivers the projections to show. 
-
-#### Dimension of projection and display
+1. For display of different projection dimensions:
 
 - `display_dist()`: choice of density, histogram or average shifted histogram (ash) display of the 1D projections.
 - `display_xy()`, `display_density2d()`, `display_groupxy()`, `display_pca()`, `display_sage()`, `display_slice()`, `display_trails()`: choices in display of 2D projections.
@@ -45,7 +42,7 @@ There are two main components of the tour algorithm:
 - `dependence_tour()`: displaying two groups of variables as in multiple regression, or multivariate regression or canonical correlation analysis, as two independent 1D projections.
 - `display_andrews()`: 1D projections as Andrews curves.
 
-#### Algorithms for projection delivery
+2. To change the way projections are delivered:
 
 - `grand_tour()`: Smooth sequence of random projections to view all possible projections as quickly as possible. Good for getting an overview of the high-dimensional data, especially when you don't know what you are looking for. 
 - `guided_tour()`: Follow a projection pursuit optimisation to find projections that have particular patterns. This is used when you want to learn if the data has particular patterns, such as clustering or outliers. Use the `holes()` index to find projections with gaps that allow one to see clusters, or `lda_pp()` or `pda_pp()` when class labels are known and you want to find the projections where the clusters are separated. 
@@ -60,7 +57,7 @@ There are two main components of the tour algorithm:
 Scaling of multivariate data is really important in many ways. It affects most model fitting, and can affect the perception of patterns when data is visualised. Here we describe a few scaling issues to take control of when using tours.
 
 
-#### Pre-processing data
+**Pre-processing data**
 
 It is generally useful to standardise your data to have mean 0 and variance-covariance equal to the identity matrix before using the tour. We use the tour to discover associations between variables. Characteristics of single variables should be examined and understood before embarking on looking for high-dimensional structure. 
 
@@ -68,7 +65,7 @@ The `rescale` parameter in the `animate()` function will scale all variables to 
 
 A more severe transformation that can be useful prior to starting a tour is to **sphere** the data. This is also an option in the `animate()` function, but is `FALSE` by default. Sphering is the same as conducting a principal component analysis, and using the principal components as the variables. It removes all linear association between variables! This can be especially useful if you want to focus on finding non-linear associations, including clusters, and outliers. 
 
-#### Scaling to fit into plot region
+**Scaling to fit into plot region**
 
 The `half_range` parameter in most of the display types sets the range used to scale the data into the plot. It is estimated when a tour is started, but you may need to change it if you find that the data keeps escaping the plot window or is not fully using the space. Space expands exponentially as dimension increases, and the estimation takes this into account. However, different distributions of data points lead to different variance of observations in high-dimensional space. A skewed distribution will be more varied than a normal distribution. It is hard to estimate precisely how the data should be scaled so that it fits nicely into the plot space for all projections viewed. 
 
@@ -86,11 +83,158 @@ Versions and elements of tours can be saved for publication using a variety of f
 
 ### Understanding your tour path
 
-Grand tour, and show paths on the space, starting with 1D. How more time gives more coverage of the sphere. Then the torus and paths on torus.
+@fig-tour-paths shows tour paths on 3D data spaces. For 1D projections the space of all possible projections is a $p$-dimensional sphere [@fig-tourpaths1d]. For 2D projections the space of all possible projections is a $p\times 2$-dimensional torus [@fig-tourpaths2d]! The geometry is elegant. 
+
+In these figures, the space is represented by the light colour, and is constructed by simulating a large number of random projections. The two darker colours indicate paths generated by a grand tour and a guided tour. The grand tour will cover the full space of all possible projections if allowed to run for some time. The guided tour will quickly converge to an optimal projection, so will cover only a small part of the overall space. 
+```{r}
+#| code-summary: "Load libraries"
+library(ferrn)
+library(tourr)
+library(geozoo)
+library(dplyr)
+library(purrr)
+```
+
+```{r}
+#| echo: false
+#| eval: false
+flea_std <- apply(flea[,1:6], 2, function(x) (x-mean(x))/sd(x))
+
+# 1D paths
+set.seed(1101)
+gt1 <- save_history(flea_std[,c(1,4,5)], 
+                    tour_path = grand_tour(1), 
+                    max_bases=30)
+pp1 <- save_history(flea_std[,c(1,4,5)], 
+  tour_path = guided_tour(holes(), d=1))
+gt1i <- interpolate(gt1)
+pp1i <- interpolate(pp1)
+
+#s1 <- sphere.hollow(3, 5000)$points
+s1 <- map(1:5000, ~basis_random(n = 3,  d=1)) %>%
+  purrr::flatten_dbl() %>% matrix(ncol = 3, byrow = TRUE) 
+gt1_m <- apply(gt1i, 1, c)
+pp1_m <- apply(pp1i, 1, c)
+s1 <- bind_cols(s1, rep("sphere", 5000))
+gt1_m <- bind_cols(gt1_m, rep("grand", nrow(gt1_m)))
+pp1_m <- bind_cols(pp1_m, rep("guided", nrow(pp1_m)))
+p1 <- rbind(s1, gt1_m, pp1_m)
+colnames(p1) <- c(paste0("V", 1:3), "type")
+p1$type <- factor(p1$type, levels=c("grand", "sphere", "guided"))
+animate_xy(p1[,1:3], col=p1$type, palette="Teal-Rose", 
+           cex=c(rep(0.5, 5000), rep(1, nrow(p1)-5000)),
+                 axes="off")
+render_gif(p1[,1:3],           
+           grand_tour(),
+           display_xy(col=p1$type, palette="Teal-Rose", 
+           cex=c(rep(0.5, 5000), rep(1, nrow(p1)-5000)),
+                 axes="off"),
+           gif_file = "gifs/tour_paths1d.gif",
+           frames = 500,
+           width = 300, 
+           height = 300)
+
+# 2D paths
+set.seed(1209)
+gt2 <- save_history(flea_std[,c(1, 4, 5)], 
+                    tour_path = grand_tour(), 
+                    max_bases=30)
+pp2 <- save_history(flea_std[,c(1, 4, 5)], 
+  tour_path = guided_tour(holes()))
+gt2i <- interpolate(gt2)
+pp2i <- interpolate(pp2)
+
+s2 <- map(1:5000, ~basis_random(n=3,  d=2)) %>%
+  purrr::flatten_dbl() %>% matrix(ncol = 6, byrow = TRUE) 
+gt2_m1 <- apply(gt2i[,1,], 1, c)
+gt2_m2 <- apply(gt2i[,2,], 1, c)
+gt2_m <- bind_cols(gt2_m1, gt2_m2)
+pp2_m1 <- apply(pp2i[,1,], 1, c)
+pp2_m2 <- apply(pp2i[,2,], 1, c)
+pp2_m <- bind_cols(pp2_m1, pp2_m2)
+s2 <- bind_cols(s2, rep("torus", 5000))
+gt2_m <- bind_cols(gt2_m, rep("grand", nrow(gt2_m)))
+pp2_m <- bind_cols(pp2_m, rep("guided", nrow(pp2_m)))
+p2 <- rbind(s2, gt2_m, pp2_m)
+colnames(p2) <- c(paste0("V", 1:6), "type")
+p2$type <- factor(p2$type, levels=c("grand", "torus", "guided"))
+animate_xy(p2[,1:6], col=p2$type, palette="Teal-Rose", 
+           cex=c(rep(0.5, 5000), rep(1, nrow(p2)-5000)),
+                 axes="off")
+render_gif(p2[,1:6],           
+           grand_tour(),
+           display_xy(col=p2$type, palette="Teal-Rose", 
+           cex=c(rep(0.5, 5000), rep(1, nrow(p2)-5000)),
+                 axes="off"),
+           gif_file = "gifs/tour_paths2d.gif",
+           frames = 500,
+           width = 300, 
+           height = 300)
+```
+
+::: {#fig-tour-paths layout-ncol=2}
+
+::: {.content-hidden when-format="pdf"} 
+
+![1D tour paths](gifs/tour_paths1d.gif){#fig-tourpaths1d}
+
+![2D tour paths](gifs/tour_paths2d.gif){#fig-tourpaths2d}
+
+:::
+
+Grand and guided tour paths of 1D and 2D projections of 3D data. The light points represent the space of all 1D and 2D projections respectively. You can see the grand tour is more comprehensively covering the space, as expected, whereas the guided tour is more focused, and quickly moves to the best projection. 
+:::
 
 ## What not to do
 
-- Categorical data, or discrete data
+Tour methods are for numerical data, particularly real-valued measurements. If your data is numerical, but discrete the data can look artifically clustered. Here's an example:
+
+```{r}
+#| eval: false
+#| code-summary: "Discrete data code"
+set.seed(430)
+df <- data.frame(x1 = sample(1:6, 107, replace=TRUE)) %>% 
+          mutate(x2 = x1 + sample(1:2, 107, replace=TRUE),
+                 x3 = x1 - sample(1:2, 107, replace=TRUE),
+                 x4 = sample(1:3, 107, replace=TRUE))
+animate_xy(df)
+render_gif(df,           
+           grand_tour(),
+           display_xy(),
+           gif_file = "gifs/discrete_data.gif",
+           frames = 100,
+           width = 300, 
+           height = 300)
+
+dfj <- df %>%
+  mutate(x1 = jitter(x1, 2), 
+         x2 = jitter(x2, 2),
+         x3 = jitter(x3, 2),
+         x4 = jitter(x4, 2))
+animate_xy(dfj)
+render_gif(dfj,           
+           grand_tour(),
+           display_xy(),
+           gif_file = "gifs/jittered_data.gif",
+           frames = 100,
+           width = 300, 
+           height = 300)
+```
+
+::: {#fig-tour-paths layout-ncol=2}
+
+::: {.content-hidden when-format="pdf"} 
+
+![Discrete data](gifs/discrete_data.gif){#fig-discrete}
+
+![Jittered data](gifs/jittered_data.gif){#fig-jittered}
+
+:::
+
+Discrete data can look like clusters, which is misleading. Adding a small amount of jitter (random number) can help. The noise is not meaningful but it could allow the viewer to focus on linear or non-linear association between variables without being distracted by artificial clustering. 
+:::
+
+- Missing values
 - When time or space is a variable
 
 ## Tours in other software
