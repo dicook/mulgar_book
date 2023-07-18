@@ -689,3 +689,59 @@ Animation of dendrogram from Wards (top) and single (bottom) linkage clustering 
 ::: info
 Viewing the dendrograms in high-dimensions provides insight into how they have joined points to clusters. It helps to make sense of the result, and whether it is a useful result or not.
 :::
+
+## Exercises {-}
+
+1. Use hierarchical clustering with Euclidean distance and Wards linkage to split the `clusters_nonlin` data into four clusters. Look at the dendrogram in 2D and 4D. In 4D you can also include the cluster assignment as color. Does this look like a good solution?
+2. Repeat the same exercise using single linkage instead of Wards linkage. How does this solution compare to what we have found with Wards linkage? Does the solution match how you would cluster the data in a spin-and-brush approach?
+3. XXX something with real data?
+
+```{r}
+#| eval: false
+#| echo: false
+#| message: false
+#| warning: false
+nl_wl <- hclust(dist(clusters_nonlin,
+                     method = "euclidean"),
+                  method = "ward.D2")
+nl_sl <- hclust(dist(clusters_nonlin,
+                         method = "euclidean"),
+                  method = "single")
+# assume 4 clusters
+nl_clw <- clusters_nonlin %>% 
+  as_tibble() %>%
+  mutate(cl_wl = factor(cutree(nl_wl, 4))) %>%
+  mutate(cl_sl = factor(cutree(nl_sl, 4))) 
+library(ggdendro)
+ggplot() +
+  geom_segment(data=dendro_data(nl_wl)$segments, 
+               aes(x = x, y = y, 
+                   xend = xend, yend = yend)) + 
+  theme_dendro()
+ggplot() +
+  geom_segment(data=dendro_data(nl_sl)$segments, 
+               aes(x = x, y = y, 
+                   xend = xend, yend = yend)) + 
+  theme_dendro()
+
+nl_hfly_wl <- hierfly(nl_clw, nl_wl, scale=FALSE)
+nl_hfly_sl <- hierfly(nl_clw, nl_sl, scale=FALSE)
+glyphs <- c(16, 46)
+pchw_wl <- glyphs[nl_hfly_wl$data$node+1]
+pchw_sl <- glyphs[nl_hfly_sl$data$node+1]
+animate_xy(nl_hfly_wl$data[,1:4], 
+           col=nl_clw$cl_wl, 
+           tour_path = grand_tour(),
+           pch = pchw_wl,
+           edges=nl_hfly_wl$edges, 
+           axes="bottomleft",
+           rescale=FALSE)
+animate_xy(nl_hfly_sl$data[,1:4], 
+           col=nl_clw$cl_sl, 
+           tour_path = grand_tour(),
+           pch = pchw_sl,
+           edges=nl_hfly_sl$edges, 
+           axes="bottomleft",
+           rescale=FALSE)
+
+```
