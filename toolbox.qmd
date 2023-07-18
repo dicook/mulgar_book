@@ -236,6 +236,39 @@ Discrete data can look like clusters, which is misleading. Adding a small amount
 
 :::
 
+```{r}
+#| eval: false
+#| echo: false
+library(naniar)
+library(ggplot2)
+library(colorspace)
+data("oceanbuoys")
+oceanbuoys %>%
+  filter(year == 1993) %>%
+  ggplot(aes(x = air_temp_c,
+           y = humidity)) +
+     geom_miss_point() +
+  scale_color_discrete_divergingx(palette="Zissou 1") +
+  theme_minimal() + 
+  theme(aspect.ratio=1)
+ob_nomiss <- oceanbuoys %>%
+  filter(year == 1993) %>%
+  impute_below_if(.predicate = is.numeric) %>%
+  rename(st = sea_temp_c,
+         at = air_temp_c,
+         hu = humidity) %>%
+  select(st, at, hu)
+  select()
+ob_nomiss %>%
+  ggplot(aes(x = at,
+           y = hu)) +
+     geom_point() +
+  scale_color_discrete_divergingx(palette="Zissou 1") +
+  theme_minimal() + 
+  theme(aspect.ratio=1)
+animate_xy(ob_nomiss)
+```
+
 - Missing values
 - When time or space is a variable
 
