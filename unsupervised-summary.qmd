@@ -236,8 +236,8 @@ Most of the time your data will not neatly separate into clusters, but partition
 1. We first examine the data in a grand tour. Do you notice that each variable was measured on a discrete scale?
 2. Next we explore different solutions from hierarchical clustering of the data. For comparison we will keep the number of clusters fixed to 6 and we will perform the hierarchical clustering with different combinations of distance functions (Manhattan distance and Euclidean distance) and linkage (single, complete and Ward linkage). Which combinations make sense based on what we know about the method and the data?
 3. For each of the hierarchical clustering solutions draw the dendrogram in 2D and also in the data space. You can also map the grouping into 6 clusters to different colors. How would you describe the different solutions?
-4. Using the method introduced in this chapter, compare the solution using Manhattan distance and complete linkage to one using Euclidean distance and Ward linkage. What do you notice?
-5. Selecting your preferred solution from hierarchical clustering, we will now compare it to what is found using $k$-means clustering with $k=6$. Use a tour to show the cluster means together with the data points (make sure to pick an appropriate symbol for the data points to avoid too much overplotting). What can you say about the variation within the clusters? Can you identify clear boundaries?
+4. Using the method introduced in this chapter, compare the solution using Manhattan distance and complete linkage to one using Euclidean distance and Ward linkage. First compute a confusion table and then use `liminal` to explore some of the differences.
+5. Selecting your preferred solution from hierarchical clustering, we will now compare it to what is found using $k$-means clustering with $k=6$. Use a tour to show the cluster means together with the data points (make sure to pick an appropriate symbol for the data points to avoid too much overplotting). What can you say about the variation within the clusters? Can you match some of the clusters with the most relevant variables from following the movement of the cluster means during the tour?
 6. Use a projection pursuit guided tour to best separate the clusters identified with $k$-means clustering. How are the clusters related to the different types of risk?
 7. Use the approaches from this chapter to summarize and compare the $k$-means solution to one of the hierarchical clustering results. Draw the convex hulls for the two solutions in a tour and compare the shapes.
 8. XXX also model based?
@@ -324,7 +324,25 @@ animate_xy(risk_hfly_ew$data[,1:6],
            edges=risk_hfly_ew$edges, 
            axes="bottomleft",
            rescale=FALSE)
-# comparison with liminal
+
+# comparison of two solutions
+# confusion table shows quite some disagreements
+risk_clw %>% 
+  count(cl_h_mc, cl_h_ew) %>% 
+  pivot_wider(names_from = cl_h_mc, 
+              values_from = n, 
+              values_fill = 0)
+# explore with liminal
+liminal::limn_tour_link(
+  tibble::as.tibble(cbind(jitter(as.numeric(risk_clw$cl_h_ew)),
+                          jitter(as.numeric(risk_clw$cl_h_mc)))),
+  risk_clw,
+  cols = 1:6,
+  color = cl_h_ew)
+# for example we can see cluster 2 for mc solution is very large,
+# in the ew solution this is split up into 3 larger clusters,
+# and in the tour we see how the smaller clusters 5 and 6 are different
+# and less compact than the largest cluster 2 for the ew solution
 
 # k-means + tour with cluster means
 r_km <- kmeans(risk, centers=6, 
@@ -361,6 +379,35 @@ animate_xy(r_km_all[,1:6],
 # comparison k-means vs hierarchical clustering solution
 # using convex hull in the data space
 # is this a good idea? can we have facets to compare?
+# I think probably remove this, it gets too messy, not sure the
+# convex hull is right, especially when using the grouped display..
+library(cxhull)
+dup <- duplicated(risk_clw[,1:6])
+risk_clw <- risk_clw[!dup,]
+risk_clw$cl_h_ew <- as.numeric(risk_clw$cl_h_ew)
+ncl_h <- risk_clw %>%
+  count(cl_h_ew) %>%
+  arrange(cl_h_ew) %>%
+  mutate(cumn = cumsum(n))
+phull <- NULL
+for (i in unique(risk_clw$cl_h_ew)) {
+  x <- risk_clw %>%
+    dplyr::filter(cl_h_ew == i) 
+  ph <- cxhull(as.matrix(x[,1:6]))$edges
+  if (i > 1) {
+    ph <- ph + ncl_h$cumn[i-1]
+  }
+  ph <- cbind(ph, rep(i, nrow(ph)))
+  phull <- rbind(phull, ph)
+}
+phull <- as.data.frame(phull)
+colnames(phull) <- c("from", "to", "cl_h_ew") 
+phull$cl_h_ew <- factor(phull$cl_h_ew)
+risk_clw$cl_h_ew <- factor(risk_clw$cl_h_ew)
+animate_groupxy(risk_clw[,1:6], col=risk_clw$cl_h_ew, pch=".",
+           edges=as.matrix(phull[,1:2]), edges.col=phull$cl_h_ew,
+           group_by=risk_clw$cl_h_ew)
+
 
 # SOM
 library(kohonen)
