@@ -383,7 +383,7 @@ animate_xy(r_km_all[,1:6],
 # convex hull is right, especially when using the grouped display..
 library(cxhull)
 dup <- duplicated(risk_clw[,1:6])
-risk_clw <- risk_clw[!dup,]
+#risk_clw <- risk_clw[!dup,]
 risk_clw$cl_h_ew <- as.numeric(risk_clw$cl_h_ew)
 ncl_h <- risk_clw %>%
   count(cl_h_ew) %>%
@@ -407,6 +407,18 @@ risk_clw$cl_h_ew <- factor(risk_clw$cl_h_ew)
 animate_groupxy(risk_clw[,1:6], col=risk_clw$cl_h_ew, pch=".",
            edges=as.matrix(phull[,1:2]), edges.col=phull$cl_h_ew,
            group_by=risk_clw$cl_h_ew)
+
+## what if we use groupxy to compare only the cluster assignments?
+risk_compare <- risk_clw %>%
+  dplyr::select(-cl_h_mc, -cl_h_ms) %>%
+  dplyr::rename(cl_h = cl_h_ew) %>%
+  add_column(cl_k = r_km_d$cl) %>%
+  pivot_longer(7:8, names_to = "clustering", names_prefix = "cl_",
+               values_to = "cl")
+# using different color schemes for the two solutions does not
+# work in current setting since it does not allow too many colors
+animate_groupxy(risk_compare[,1:6], col=risk_compare$cl,
+           group_by=risk_compare$clustering, plot_xgp = FALSE)
 
 
 # SOM
