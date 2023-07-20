@@ -39,7 +39,6 @@ The two main components of the tour algorithm are the projection dimension which
 - `display_depth()`, `display_stereo()`: choices to display 3D projections. 
 - `display_pcp()`, `display_scatmat()`, `display_stars()`, `display_faces()`: choices for displaying three or more variables.
 - `display_image()`: to use with multispectral images, where different combinations of spectral bands are displayed. See @WPS98 and @Symanzik2002NewAO for applications.
-- `dependence_tour()`: displaying two groups of variables as in multiple regression, or multivariate regression or canonical correlation analysis, as two independent 1D projections.
 - `display_andrews()`: 1D projections as Andrews curves.
 
 2. To change the way projections are delivered:
@@ -49,7 +48,7 @@ The two main components of the tour algorithm are the projection dimension which
 - `little_tour()`: Smoothly interpolate between pairs of variables, to show all the marginal views of the data.
 - `local_tour()`: Makes small movements around a chosen projections to explore a small neighbourhood. Very useful to learn if small distances away from a projection change the pattern substantially or not.
 - `radial_tour()`: Interpolates a chosen variable out of the projection, and then back into the projection. This is useful for assessing importance of variables to pattern in a projection. If the pattern changes a lot when the variable is rotated out, then the variable is important for producing it.
-- `dependendence_tour()`: Delivers two sequences of 1D grand tours, to examine associations between two sets of variables.
+- `dependendence_tour()`: Delivers two sequences of 1D grand tours, to examine associations between two sets of variables. This is useful for displaying two groups of variables as in multiple regression, or multivariate regression or canonical correlation analysis, as two independent 1D projections.
 - `frozen_tour()`: This is an interesting one! it allows the coefficient for some variables to be fixed, and others to vary.
 
 ### The importance of scale
@@ -189,6 +188,8 @@ Grand and guided tour paths of 1D and 2D projections of 3D data. The light point
 
 ## What not to do
 
+### Discrete and categorical data
+
 Tour methods are for numerical data, particularly real-valued measurements. If your data is numerical, but discrete the data can look artificially clustered. @fig-discrete-data shows an example. The data is numeric but discrete, so it is ok to examine it in a tour. In this example, there will be overplotting of observations and the artificial clustering (plot a). It can be helpful to jitter observations, by adding a small amount of noise (plot b). This helps to remove the artificial clustering, but preserve the main pattern which is the strong linear association. Generally, jittering is a useful tool for working with discrete data, so that you can focus on examining the multivariate association. If the data is categorical, with no natural ordering of categories, the tour is not advised.
 
 ```{r}
@@ -223,27 +224,29 @@ render_gif(dfj,
            height = 300)
 ```
 
-::: {.content-hidden when-format="pdf"} 
 
 ::: {#fig-discrete-data layout-ncol=2}
 
+::: {.content-hidden when-format="pdf"} 
 ![Discrete data](gifs/discrete_data.gif){#fig-discrete width=40%}
+:::
 
+::: {.content-hidden when-format="pdf"} 
 ![Jittered data](gifs/jittered_data.gif){#fig-jittered width=40%}
+:::
 
 Discrete data can look like clusters, which is misleading. Adding a small amount of jitter (random number) can help. The noise is not meaningful but it could allow the viewer to focus on linear or non-linear association between variables without being distracted by artificial clustering. 
 :::
 
-:::
+### Missing values
 
 ```{r}
-#| eval: false
-#| echo: false
+#| code-summary: "Code to handle missing values"
 library(naniar)
 library(ggplot2)
 library(colorspace)
 data("oceanbuoys")
-oceanbuoys %>%
+ob_p <- oceanbuoys %>%
   filter(year == 1993) %>%
   ggplot(aes(x = air_temp_c,
            y = humidity)) +
@@ -251,34 +254,109 @@ oceanbuoys %>%
   scale_color_discrete_divergingx(palette="Zissou 1") +
   theme_minimal() + 
   theme(aspect.ratio=1)
-ob_nomiss <- oceanbuoys %>%
+ob_nomiss_below <- oceanbuoys %>%
   filter(year == 1993) %>%
-  impute_below_if(.predicate = is.numeric) %>%
   rename(st = sea_temp_c,
          at = air_temp_c,
          hu = humidity) %>%
-  select(st, at, hu)
-  select()
-ob_nomiss %>%
-  ggplot(aes(x = at,
-           y = hu)) +
-     geom_point() +
+  select(st, at, hu) %>%
+  rowwise() %>%
+  mutate(anymiss = factor(ifelse(naniar:::any_na(c(st, at, hu)), TRUE, FALSE))) %>%
+  add_shadow(st, at, hu) %>%
+  impute_below_if(.predicate = is.numeric) 
+ob_nomiss_mean <- oceanbuoys %>%
+  filter(year == 1993) %>%
+  rename(st = sea_temp_c,
+         at = air_temp_c,
+         hu = humidity) %>%
+  select(st, at, hu) %>%
+  rowwise() %>%
+  mutate(anymiss = factor(ifelse(naniar:::any_na(c(st, at, hu)), TRUE, FALSE))) %>%
+  add_shadow(st, at, hu) %>%
+  impute_mean_if(.predicate = is.numeric) 
+ob_p_below <- ob_nomiss_below %>%
+  ggplot(aes(x=st, y=hu, colour=anymiss)) +
+  geom_point() +
   scale_color_discrete_divergingx(palette="Zissou 1") +
   theme_minimal() + 
-  theme(aspect.ratio=1)
-animate_xy(ob_nomiss)
+  theme(aspect.ratio=1, legend.position = "None")
+ob_p_mean <- ob_nomiss_mean %>%
+  ggplot(aes(x=st, y=hu, colour=anymiss)) +
+  geom_point() +
+  scale_color_discrete_divergingx(palette="Zissou 1") +
+  theme_minimal() + 
+  theme(aspect.ratio=1, legend.position = "None")
 ```
 
-- Missing values
-- When time or space is a variable
+```{r}
+#| eval: false
+#| code-summary: "Code to make animation"
+animate_xy(ob_nomiss_below[,1:3], col=ob_nomiss$anymiss)
+render_gif(ob_nomiss_below[,1:3],
+           grand_tour(),
+           display_xy(col=ob_nomiss_below$anymiss), 
+           gif_file = "gifs/missing_values1.gif",
+           frames = 100,
+           width = 300, 
+           height = 300)
+render_gif(ob_nomiss_mean[,1:3],
+           grand_tour(),
+           display_xy(col=ob_nomiss_mean$anymiss), 
+           gif_file = "gifs/missing_values2.gif",
+           frames = 100,
+           width = 300, 
+           height = 300)
+```
+
+Missing values can also pose a problem for high-dimensional visualisation, but they shouldn't just be ignored or removed. Methods used in 2D to display missings as done in the `naniar` package [@naniar] like placing them below the complete data don't translate well to high dimensions. @fig-missings illustrates this. It leads to artificial clustering of observations [@fig-below-highD]. It is better to impute the values, and mark them with colour when plotting. The cases are then included in the visualisation so we can assess the multivariate relationships, and also obtain some sense of how these cases should be handled, or imputed. In the example in @fig-imputed-highD we imputed the values simply, using the mean of the complete cases. We can see this is not an ideal approach for imputation for this data because some of the imputed values are outside the domain of the complete cases. 
+
+::: {#fig-missings layout-ncol=2}
+
+```{r}
+#| echo: false
+#| label: fig-missings-below-2D
+#| fig-cap: "Missings below in 2D"
+#| fig-width: 3
+#| fig-height: 3
+ob_p_below
+```
+
+::: {.content-hidden when-format="pdf"} 
+![Missings below in high-D](gifs/missing_values1.gif){#fig-below-highD width=40%}
+:::
+
+```{r}
+#| echo: false
+#| label: fig-missings-mean-2D
+#| fig-cap: "Missings imputed in 2D"
+#| fig-width: 3
+#| fig-height: 3
+ob_p_mean
+```
+
+::: {.content-hidden when-format="pdf"} 
+![Missings imputed in high-D](gifs/missing_values2.gif){#fig-imputed-highD width=40%}
+:::
+
+Ways to visualise missings for 2D don't transfer to higher dimensions. When the missings are set at 10% below the complete cases it appears to be clustered data when viewed in a tour (b). It is better to impute the value, and use colour to indicate that it is originally a missing value (d).
+:::
+
+### Context such as time and space
+
+We occasionally hear statements like "time is the fourth dimension" or "space is the fifth dimension". This is not a useful way to think about dimensionality. 
+
+If you have data with spatial or temporal context, we recommend avoiding using the time index or the spatial coordinates along with the multiple variables in the tour. Time and space are different types of variables, and should not be combined with the multivariate measurements. 
+
+For multivariate temporal data, we recommend using a dependence tour, where one axis is reserved for the time index, and the other axis is used to tour on the multiple variables. For spatial data, we recommend using an image tour, where horizontal and vertical axes are used for spatial coordinates and colour of a tile is used for the tour of multiple variables.
 
 ## Tours in other software
 
-Also include other software now available
+There are tours available in various software packages. For most examples we use the `tourr` package, but the same purpose could be achieved by using other software. We also use some of the software this book, when the `tourr` package is not up for the task. For information about these packages, their websites are the best places to start
 
-- detourr
-- langevitour
-- woylier
-- spinifex
-- ferrn
+- [liminal](https://sa-lee.github.io/liminal/):to combine tours with (non-linear) dimension reduction algorithms.
+- [detourr](https://casperhart.github.io/detourr/): animations for {tourr} using `htmlwidgets` for performance and portability.
+- [langevitour](https://logarithmic.net/langevitour/): HTML widget that randomly tours projections of a high-dimensional dataset with an animated scatterplot.
+- [woylier](https://numbats.github.io/woylier/): alternative method for generating a tour path by interpolating between d-D frames in p-D space rather than d-D planes.
+- [spinifex](https://nspyrison.github.io/spinifex/): manual control of dynamic projections of numeric multivariate data.
+- [ferrn](https://huizezhang-sherry.github.io/ferrn/): extracts key components in the data object collected by the guided tour optimisation, and produces diagnostic plots.
 
