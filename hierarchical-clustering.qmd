@@ -9,7 +9,7 @@
 Hierarchical cluster algorithms sequentially fuse neighboring points to form ever-larger clusters, starting from a full interpoint distance matrix. *Distance between clusters* is described by a "linkage method", of which there are many. For example, single linkage measures the distance between clusters by the smallest interpoint distance between the members of the two clusters, complete linkage uses the maximum interpoint distance, and average linkage uses the average of the interpoint distances. Wards linkage, which usually produces the best clustering solutions, defines the distance as the reduction in the within-group variance. A good discussion on cluster analysis and linkage can be found in @HOML, on [Wikipedia](https://en.wikipedia.org/wiki/Cluster_analysis) or any multivariate textbook.
 
 ::: info
-Hierarchical clustering is summarised by a dendrogram, which sequentially shows points being joined to form a cluster, with the corresponding distances.
+Hierarchical clustering is summarised by a dendrogram, which sequentially shows points being joined to form a cluster, with the corresponding distances. Breaking the data into clusters is done by cutting the dendrogram at the long edges.  
 :::
 
 Here we will take a look at hierarchical clustering, using Wards linkage, on the `simple_clusters` data. The steps taken are to:
@@ -696,17 +696,18 @@ htmlwidgets::saveWidget(psg,
 Animation of dendrogram from Wards (top) and single (bottom) linkage clustering of the penguins data.
 :::
 
-:::
-
 ::: info
-Viewing the dendrograms in high-dimensions provides insight into how they have joined points to clusters. It helps to make sense of the result, and whether it is a useful result or not.
+Viewing the dendrograms in high-dimensions provides insight into how the observations have joined points to clusters. For example, single linkage often has edges leading to a single focal point, which might not be yield a useful clustering but might help to identify outliers. If the edges point to multiple focal points, with long edges bridging gaps in the data, the result is more likely yielding a useful clustering.
 :::
 
 ## Exercises {-}
 
-1. Use hierarchical clustering with Euclidean distance and Wards linkage to split the `clusters_nonlin` data into four clusters. Look at the dendrogram in 2D and 4D. In 4D you can also include the cluster assignment as color. Does this look like a good solution?
-2. Repeat the same exercise using single linkage instead of Wards linkage. How does this solution compare to what we have found with Wards linkage? Does the solution match how you would cluster the data in a spin-and-brush approach?
-3. XXX something with real data?
+1. Compute complete linkage clustering for the **nuisance observations** data set. Does it perform more similarly to single linkage or Wards linkage?
+2. Compute single linkage clustering for the **nuisance variables** data. Does it perform more similarly to complete linkage or Wards linkage?
+3. Use hierarchical clustering with Euclidean distance and Wards linkage to split the `clusters_nonlin` data into four clusters. Look at the dendrogram in 2D and 4D. In 4D you can also include the cluster assignment as color. Does this look like a good solution?
+4. Repeat the same exercise using single linkage instead of Wards linkage. How does this solution compare to what we have found with Wards linkage? Does the solution match how you would cluster the data in a spin-and-brush approach?
+5. Argue why single linkage might not perform well for the `fake_trees` data. Which method do you think will work best with this data? Conduct hierarchical clustering with your choice of linkage method. Does the 2D dendrogram suggest 10 clusters for the 10 branches?  Take a look at the high-dimensional representation of the dendrogram. Has your chosen method captured the branches well, or not, explaining what you think worked well or poorly?
+6. What would a useful clustering of the `aflw` data be? What linkage method would you expect works best to cluster it this way? Conduct the clustering. Examine the 2D dendrogram and decide on how many clusters should be used. Examine the cluster solution using a tour with points coloured by cluster.  
 
 ```{r}
 #| eval: false
