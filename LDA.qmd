@@ -76,11 +76,12 @@ The best separation between classes can be viewed from this object, which can be
 
 ```{r}
 #| label: fig-p-lda
+#| warning: false
 #| fig-cap: "Penguins projected into the 2D discriminant space, done two ways: (a) using the predicted values, (b) directly projecting using the model component. The scale is not quite the same but the projected data is identical in shape."
 #| message: false
 #| fig-width: 8
 #| fig-height: 4
-#| code-fold: false
+#| code-summary: "Code to generate LDA plots"
 library(colorspace)
 library(ggplot2)
 library(ggpubr)
@@ -141,7 +142,7 @@ to check the underlying assumptions on which it depends: (1) that the cluster st
 #| message: false
 #| fig-width: 8
 #| fig-height: 4
-#| code-fold: false
+#| code-summary: "Code for penguins data and ellipse plots"
 lda1 <- ggplot(penguins_sub, aes(x=bl, 
                          y=bd, 
                          colour=species)) +
@@ -177,6 +178,7 @@ ggarrange(lda1, lda2, ncol=2,
 #| message: false
 #| fig-width: 8
 #| fig-height: 4
+#| code-summary: "Code for bushfires data and ellipse plots"
 # Now repeat for a data set that violates assumptions
 data(bushfires)
 lda3 <- ggplot(bushfires, aes(x=log_dist_cfa, 
@@ -214,7 +216,7 @@ This approach extends to any dimension. We would use the same projection sequenc
 ```{r}
 #| message: false
 #| eval: false
-#| code-fold: false
+#| code-summary: "Code for making animated gifs"
 library(tourr)
 p_ell <- NULL
 for (i in unique(penguins_sub$species)) {
@@ -257,7 +259,7 @@ As a further check, we could generate three ellipses corresponding to the pooled
 
 ```{r}
 #| message: false
-#| code-fold: false
+#| code-summary: "Code for adding ellipses to data"
 library(tourr)
 # Create an ellipse corresponding to pooled vc
 pool_ell <- gen_vc_ellipse(p_vc_pool, xm=rep(0, ncol(p_vc_pool)))
@@ -327,14 +329,14 @@ render_gif(p_lda_all[p_lda_all$species == "Gentoo",1:4],
 
 Tour of penguins data, pooled variance-covariance ellipse overlaid. We can see that the pooled variance-covariance is a reasonable estimate of the spread of the data. 
 
+:::
+
+:::
+
 ::: info
 To visually confirm that we can assume equal variance-covariance matrices for all groups we can can simulate points on the ellipses derived from the pooled estimate and compare them to the data distributions. If there are clear differences the LDA model cannot capture the structure in the data and should not be used.
 :::
 
-
-:::
-
-:::
 
 
 ## Examining results
@@ -389,6 +391,7 @@ p_lda_boundaries <- explore(p_lda, penguins_sub)
 
 ```{r}
 #| eval: false
+#| code-summary: "Code for generating slice tour"
 # Code to run the tour
 p_lda_boundaries$species
 animate_slice(p_lda_boundaries[p_lda_boundaries$.TYPE == "simulated",1:4], col=p_lda_boundaries$species[p_lda_boundaries$.TYPE == "simulated"], v_rel=0.02, axes="bottomleft")
@@ -403,7 +406,7 @@ render_gif(p_lda_boundaries[p_lda_boundaries$.TYPE == "simulated",1:4],
 ```
 
 ```{r}
-#| code-fold: false
+#| code-summary: "Code for projecting into LDA space"
 # Project the boundaries into the 2D discriminant space
 p_lda_b_sub <- p_lda_boundaries[
   p_lda_boundaries$.TYPE == "simulated", 
