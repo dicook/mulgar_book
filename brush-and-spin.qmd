@@ -1,12 +1,12 @@
-## Spin and brush approach {#sec-clust-graphics}
+## Spin-and-brush approach {#sec-clust-graphics}
 
 \index{brushing!persistent} \index{tour}
-\index{cluster analysis!spin and brush}
+\index{cluster analysis!spin-and-brush}
 
-When the data to be clustered is purely numeric, and if the clusters are well-separated, a purely graphical spin and brush approach to cluster analysis works well. This is true even when there are nuisance variables and/or cases, marked differences in variance structures between groups or when groups have non-linear boundaries. It does not work very well when there are clusters that overlap, or when there are no distinct clusters but rather
-we simply wish to partition the data. In these situations it may be better to begin with a numerical solution and to use visual tools to evaluate it, perhaps making refinements subsequently. Several examples of the spin and brush approach are documented in the literature, such as @CBCH95 and @WWS99.
+When the data to be clustered is purely numeric, and if the clusters are well-separated, a purely graphical spin-and-brush approach to cluster analysis works well. This is true even when there are nuisance variables and/or cases, marked differences in variance structures between groups or when groups have non-linear boundaries. It does not work very well when there are clusters that overlap, or when there are no distinct clusters but rather
+we simply wish to partition the data. In these situations it may be better to begin with a numerical solution and to use visual tools to evaluate it, perhaps making refinements subsequently. Several examples of the spin-and-brush approach are documented in the literature, such as @CBCH95 and @WWS99.
 
-The spin and brush approach is simply:
+The spin-and-brush approach is:
 
 1. Run the (grand) tour.
 2. Stop when you see a separated cluster of points.
@@ -15,6 +15,7 @@ The spin and brush approach is simply:
 
 It can help to be able to remove a cluster, to de-clutter the display, in order to find more clusters.
 
+<!--
 ## Using `plotly`
 
 @fig-penguins-brush-and-spin shows a fixed length grand tour produced using `plotly`, with a brush tool made available to colour points. The code is messy, but follows that of [animation-tour-basic.R](https://github.com/plotly/plotly.R/blob/master/demo/animation-tour-basic.R) from @plotly2020. There are key pieces in the code:
@@ -125,12 +126,13 @@ Controls to brush and spin to discover the three clusters in the penguins data. 
 
 ![](images/penguins-bs5.png){#fig-penguins-bs2 fig-alt="FIX ME" fig.align="center"}
 
-Screenshots of the spin and brush approach being used on the penguins data.
+Screenshots of the spin-and-brush approach being used on the penguins data.
 :::
 
 ## Using `detourr`
+-->
 
-Spin-and-brush can also be achieved using the `detourr` package, and the results can be saved for further analysis. The code is very easy, and then all the controls are interactive.
+Spin-and-brush is best achieved using a fully interactive graphics system like in the `detourr` package, where the results can be saved for further analysis. The code is very easy, and then all the controls are interactive.
 
 
 ```{r}
@@ -157,15 +159,15 @@ detour(penguins_sub[,1:4],
 ::: {#fig-penguins-bs-detourr fig-align="center" layout-ncol=2}
 
 
-![First cluster cluster](images/penguins-bs6.png){#fig-penguins-bs3 fig-alt="FIX ME" fig.align="center" width=300}
+![One cluster painted](images/penguins-bs6.png){#fig-penguins-bs3 fig-alt="FIX ME" fig.align="center" width=300}
 
-![Second cluster](images/penguins-bs7.png){#fig-penguins-bs4 fig-alt="FIX ME" fig.align="center" width=300}
+![Another cluster painted](images/penguins-bs7.png){#fig-penguins-bs4 fig-alt="FIX ME" fig.align="center" width=300}
 
 
-Screenshots of the spin and brush approach using `detourr` on the penguins data. 
+Screenshots of the spin-and-brush approach using `detourr` on the penguins data. 
 :::
 
-@fig-penguins-bs-detourr shows the stages of spin and brush on the penguins data using detourr. The final results can be examined and used for later analysis. Because this data came with a class variable, the penguin species, it is interesting to see how close the spin-and-brush clustering approach came to recovering these: 
+@fig-penguins-bs-detourr shows the stages of spin-and-brush on the penguins data using detourr. The final results can be examined and used for later analysis. Because this data came with a class variable, the penguin species, it is interesting to see how close the spin-and-brush clustering approach came to recovering these: 
 
 ```{r}
 #| message: false
@@ -201,8 +203,8 @@ limn_tour(fake_trees, dim1:dim10)
 
 ## Exercises {-}
 
-1. Use the spin and brush approach to identify the  three clusters in the `mulgar::clusters` data set.
-2. Use the spin and brush approach to identify the six clusters in the `mulgar::multicluster` data set. (The code below using detourr could be useful.)
+1. Use the spin-and-brush approach to identify the three clusters in the `mulgar::clusters` data set.
+2. Use the spin-and-brush approach to identify the six clusters in the `mulgar::multicluster` data set. (The code below using detourr could be useful.)
 
 ```{r}
 #| eval: false
@@ -218,9 +220,9 @@ detour(multicluster,
 
 ```
 
-3. Use the spin and brush technique to identify the branches of the `fake_trees` data available in the `liminal` package (originally from [PHATE](https://phate.readthedocs.io/en/stable/)). The result should look something like this:
+3. Use the spin-and-brush technique to identify the branches of the `fake_trees` data available in the `liminal` package (originally from [PHATE](https://phate.readthedocs.io/en/stable/)). The result should look something like this:
 
-![Example solution after spin and brush on fake_trees data.](images/fake_trees_sb.png){#fig-fake-trees-sb}
+![Example solution after spin-and-brush on fake_trees data.](images/fake_trees_sb.png){#fig-fake-trees-sb}
 
 You can use the download button to save the data with the colours. Tabulate the `branches` id variable in the original data with the `colour` groups created from brushing, to see how closely you have recovered the original classes.
 
@@ -243,143 +245,3 @@ detour(as.data.frame(ft_pca$x[,1:10]),
 ft_sb <- read_csv("data/fake_trees_sb.csv")
 table(fake_trees$branches, ft_sb$colour)
 ```
-
-<!--
-\index{datasets!\Data{PRIM7}}
-
-This description of the spin and brush approach on \Data{PRIM7}, a
-particle physics dataset, follows that in \citeasnoun{CBCH95}. The data
-contains seven variables. We have no labels for the data, so when we
-begin, all the points have the same color and glyph. Watch the data in a
-tour for a few minutes and you will see that there are no natural
-clusters, but there is clearly structure.
-
-\index{projection pursuit!indexes}
-\index{projection pursuit!indexes!holes}
-\index{projection pursuit!indexes!central mass}
-\index{principal component analysis}
-
-We will use the projection pursuit guided tour to help us find that
-structure. We will tour on the principal components, rather than the raw
-variables, because that improves the performance of the projection
-pursuit indexes. Two indexes are useful for detecting clusters: holes
-and central mass. The holes index is sensitive to projections where
-there are few points (i.e., a hole) in the center. The central mass
-index is the opposite: It is sensitive to projections that have too many
-points in the center. These indexes are explained in @chap-toolbox.
-
-The holes index is usually the most useful for clustering, but not for
-the particle physics data, because it does not have a \`\`hole'' at the
-center. The central mass index is the most appropriate here. Alternate
-between optimization (a guided tour) and the unguided grand tour to find
-local maxima, each of which is a projection that is potentially useful
-for revealing clusters. The process is illustrated in @fig-prim7-tour.
-
-The top left plot shows the initial default projection, the second
-principal component plotted against the first. The plot next to it shows
-the projected data corresponding to the first local maximum found by the
-guided tour. It has three strands of points stretching out from the
-central clump and several outliers. We brush the points along each
-strand, in red, blue, and orange, and we paint the outliers with open
-circles. (See the next two plots.) We continue by choosing a new random
-start for the guided tour, and then waiting until new territory in the
-data is discovered. \index{brushing!persistent}
-
-The optimization settles on a projection where there are three strands
-visible, as observed in the leftmost plot in the second row. Two strands
-have been previously brushed, but a new one has appeared; this is
-painted yellow.
-
-We also notice that there is another new strand hidden below the red
-strand. It is barely distinguishable from the red strand in this
-projection, but the two strands separate widely in other projections. It
-is tricky to brush it, because it is not well separated in this
-projection. We use a trick: Hide the red points, brush the new strand
-green, and \`\`unhide'' the red points again (middle plot in the second
-row).
-
-Five clusters have been easily identified, and now finding new clusters
-in this data is increasingly difficult. After several more alternations
-between the grand tour and the guided tour, we find something new (shown
-in the rightmost plot in the second row): One more strand has emerged,
-and we paint it pink.
-
-% Figure 3
-\begin{figure}[htp]
-\centerline{{\includegraphics[width=1.5in]{chap-clust/prim7-pp1.pdf}}
- {\includegraphics[width=1.5in]{chap-clust/prim7-pp2.pdf}}
- {\includegraphics[width=1.5in]{chap-clust/prim7-pp5.pdf}}}
-\smallskip
-\centerline{{\includegraphics[width=1.5in]{chap-clust/prim7-pp7.pdf}}
- {\includegraphics[width=1.5in]{chap-clust/prim7-pp8.pdf}}
- {\includegraphics[width=1.5in]{chap-clust/prim7-pp9.pdf}}}
-\centerline{{\includegraphics[width=1.5in]{chap-clust/prim7-pp10.pdf}}
-  {\includegraphics[width=1.5in]{chap-clust/prim7-pp11.pdf}}
-  {\includegraphics[width=1.5in]{chap-clust/prim7-pp13.pdf}}}
-\caption[Stages of ``spin and brush'' on \Data{PRIM7}]{Stages of spin
-and brush on \Data{PRIM7}.  The high-dimensional geometry emerges as
-the clusters are painted.}
-\label{prim7-tour}
-\end{figure}
-
-The results at this stage are summarized by the bottom row of plots.
-There is a very visible triangular component (in gray) revealed when all
-of the colored points are hidden. We check the shape of this cluster by
-drawing lines between outer points to contain the inner ones. Touring
-after the lines are drawn helps to check how well they match the shape
-of the clusters. The colored groups pair up at each vertex, and we draw
-in the shape of these too --- a single line matches the structures
-reasonably well.
-
-The final step of the spin and brush clustering is to clean up this
-solution, touching up the color groups by continuing to tour, and
-repainting a point here and there. When we finish, we have found seven
-clusters in this data that form a very strong geometric object in the
-data space: a two-dimensional (2D) triangle, with two one-dimensional
-(1D) strands extending in different directions from each vertex. The
-lines confirm our understanding of this object's shape, because the
-points stay close to the lines in all of the projections observed in a
-tour.
-
-% Figure 4
-\begin{figure}
-\centerline{
-   \includegraphics[width=1.5in]{chap-clust/prim7-pp13-model.pdf}
-   \includegraphics[width=3in]{chap-clust/prim7-par.pdf}
-}
-\caption[The \Data{PRIM7} model summarized]{The \Data{PRIM7} model
-summarized.  The model summary {\bf (left)} was formed by adding line
-segments manually.  In the parallel coordinate plot, the profiles
-highlighted in dark gray correspond to the points in the 2D triangle
-at the center of the model.  }
-\label{prim7-model}
-\end{figure}
-
-The next stage of cluster analysis is to characterize the nature of the
-clusters. To do that, we would calculate summary statistics for each
-cluster, and plot the clusters (@fig-prim7-model). When we plot the
-clusters of the particle physics data, we find that the 2D triangle
-exists primarily in the plane defined by X3 and X5. If you do the same,
-notice that the variance in measurements for the gray group is large in
-variables X3 and X5, but negligible in the other variables. The linear
-pieces can also be characterized by their distributions on each of the
-variables. With this example, we have shown that it is possible to
-uncover very unusual clusters in data without any domain knowledge.
-
-Here are several tips about the spin and brush approach.
-
--   Save the dataset frequently during the exploration of a complex
-    dataset, being sure to save your colors and glyphs, because it may
-    take several sessions to arrive at a final clustering.\
--   Manual controls are useful for refining the optimal projection
-    because another projection in the neighborhood may be more
-    revealing.\
--   The holes index is usually the most successful projection pursuit
-    index for finding clusters.
--   Principal component coordinates may provide a better starting point
-    than the raw variables.
-
-Finally, the spin and brush method will not work well if there are no
-clear separations in the data, and the clusters are high-dimensional,
-unlike the low-dimensional clusters found in this example.
--->
