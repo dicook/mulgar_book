@@ -15,6 +15,7 @@ Let's start with some 2D examples. You need at least two variables to be able to
 [^5]: It is generally better to use *associated*  than *correlated*. Correlated is a statistical quantity, measuring linear association. The term *associated* can be prefaced with the type of association, such as *linear* or *non-linear*. 
 
 ```{r}
+#| code-summary: "Code to produce 2D data examples"
 library(ggplot2)
 library(tibble)
 set.seed(6045)
@@ -61,7 +62,7 @@ dp3 <- ggplot(df) +
 #| echo: false
 #| fig-width: 3
 #| fig-height: 3
-#| fig-cap: Two variables with strong linear association. Both variables contribute to the association, as indicated by their axes extending out from the "collapsed" direction of the points.
+#| fig-cap: Reduced dimension
 dp1
 ```
 
@@ -70,7 +71,7 @@ dp1
 #| echo: false
 #| fig-width: 3
 #| fig-height: 3
-#| fig-cap: Two variables with no linear association. But x3 has less variation, so points collapse in this direction.
+#| fig-cap: Reduced variance
 dp2
 ```
 
@@ -81,17 +82,18 @@ dp2
 #| fig-height: 3
 #| message: false
 #| warning: false
-#| fig-cap: The situation in plot (b) does not arise in a tour because all variables are (usually) scaled.
+#| fig-cap: No reduced dimension
 dp3
 ```
 
-Explanation of how dimension reduction is perceived in 2D, relative to variables. When an axes extends out of a direction where the points are collapsed, it means that this variable is partially responsible for the reduced dimension.
+Explanation of how dimension reduction is perceived in 2D, relative to variables: (a) Two variables with strong linear association. Both variables contribute to the association, as indicated by their axes extending out from the "collapsed" direction of the points; (b) Two variables with no linear association. But x3 has less variation, so points collapse in this direction; (c) The situation in plot (b) does not arise in a tour because all variables are (usually) scaled.  When an axes extends out of a direction where the points are collapsed, it means that this variable is partially responsible for the reduced dimension.
 :::
 
 Now let's think about what this looks like with five variables. @fig-dimension shows a grand tour on five variables, with (a) showing data that is primarily 2D, (b) has data that is primarily 3D and (c) is fully 5D.  You can see that both (a) and (b) the spread of points collapse in some projections, with it happening more in (a). In (c) the data is always spread out in the square, although it does seem to concentrate or pile in the centre. This piling is typical when projecting from high dimensions to low dimensions. The sage tour [@sagetour] makes a correction for this. 
 
 ```{r}
 #| eval: false
+#| code-summary: "Code to make animated gifs"
 library(mulgar)
 data(plane)
 data(box)
@@ -123,19 +125,25 @@ render_gif(cube5d,
            height=200)
 ```
 
-::: {.content-hidden when-format="pdf"}
 
 ::: {#fig-dimension fig-align="center" layout-ncol=3}
 
+::: {.content-hidden when-format="pdf"}
+
 ![2D plane in 5D](gifs/plane.gif){width=180}
-
-![3D plane in 5D](gifs/box.gif){width=180}
-
-![5D plane in 5D](gifs/cube5d.gif){width=180}
-
-Different dimensional planes - 2D, 3D, 5D - displayed in a grand tour projecting into 2D. Notice that the 5D in 5D always fills out the box (although it does concentrate some in the middle which is typical when projecting from high to low dimensions). Also you can see that the 2D in 5D, concentrates into a line more than the 3D in 5D. This suggests that it is lower dimensional. 
 :::
 
+::: {.content-hidden when-format="pdf"}
+
+![3D plane in 5D](gifs/box.gif){width=180}
+:::
+
+::: {.content-hidden when-format="pdf"}
+
+![5D plane in 5D](gifs/cube5d.gif){width=180}
+:::
+
+Different dimensional planes - 2D, 3D, 5D - displayed in a grand tour projecting into 2D. Notice that the 5D in 5D always fills out the box (although it does concentrate some in the middle which is typical when projecting from high to low dimensions). Also you can see that the 2D in 5D, concentrates into a line more than the 3D in 5D. This suggests that it is lower dimensional. 
 :::
 
 The next step is to determine which variables contribute. In the examples just provided, all variables are linearly associated in the 2D and 2D data. You can check this by making a scatterplot matrix.
@@ -145,6 +153,7 @@ The next step is to determine which variables contribute. In the examples just p
 #| fig-cap: Scatterplot matrix of plane data. You can see that x1-x3 are strongly linearly associated, and also x4 and x5. When you watch the tour of this data, any time the data collapses into a line you should see only (x1, x2, x3) or (x4, x5). When combinations of x1 and x4 or x5 show, the data should be spread out. 
 #| message: false
 #| warning: false
+#| code-summary: Code for scatterplot matrix
 library(GGally)
 library(mulgar)
 data(plane)
@@ -177,6 +186,7 @@ We can still see the concentration of points along a line in some dimensions, wh
 #| label: plane-plotly
 #| eval: false
 #| code-fold: true
+#| code-summary: "Code to generate animation"
 library(ggplot2)
 library(plotly)
 library(htmlwidgets)
@@ -238,7 +248,7 @@ Grand tour of the plane with two additional dimensions of pure noise. The collap
 :::
 
 ::: info
-To determine which variables are responsible for the reduced dimension look for the axes that extend out of the point cloud.
+To determine which variables are responsible for the reduced dimension look for the axes that extend out of the point cloud. These contribute to smaller variation in the observations, and thus indicate dimension reduction.
 :::
 
 The simulated data here is very simple, and what we have learned from the tour could also be learned from principal component analysis. However, if there are small complications, such as outliers or nonlinear relationships, that might not be visible from principal component analysis, the tour can help you to see them.
@@ -250,6 +260,7 @@ The simulated data here is very simple, and what we have learned from the tour c
 #| fig-cap: Outliers added to the plane with noise data. 
 #| fig-height: 4
 #| fig-width: 8
+#| code-summary: "Code for scatterplot matrix"
 # Add several outliers to the plane_noise data
 plane_noise_outliers <- plane_noise
 plane_noise_outliers[101,] <- c(2, 2, -2, 0, 0, 0, 0)
@@ -261,6 +272,7 @@ ggscatmat(plane_noise_outliers, columns = 1:5) +
 
 ```{r}
 #| eval: false
+#| code-summary: "Code to generate animated gif"
 render_gif(plane_noise_outliers,          
            grand_tour(), 
            display_xy(),
@@ -279,17 +291,19 @@ render_gif(plane_nonlin,
            height=200)
 ```
 
-::: {.content-hidden when-format="pdf"}
-
 ::: {#fig-outlier-nonlin fig-align="center" layout-ncol=2}
 
-![Outliers in addition to 2D plane.](gifs/pn_outliers.gif){#fig-outlier width=180}
+::: {.content-hidden when-format="pdf"}
 
-![Non-linear relationship between several variables, primarily x3.](gifs/plane_nonlin.gif){#fig-nonlinear width=180}
-
-Examples of different types of dimensionality issues: outliers and nonlinearity. In the left plot, you can see two points far from the others in some projections. Also the two can be seen with different movement patterns, moving faster that other points during the tour. Outliers will affect detection of reduced dimension, but it is easy to ignore with the tour. Non-linear relationships may not be captured by other techniques but are visible with the tour.
+![Outliers](gifs/pn_outliers.gif){#fig-outlier width=180}
 :::
 
+::: {.content-hidden when-format="pdf"}
+
+![Non-linear relationship](gifs/plane_nonlin.gif){#fig-nonlinear width=180}
+:::
+
+Examples of different types of dimensionality issues: outliers (a) and non-linearity (b). In (a) you can see two points far from the others in some projections. Also the two can be seen with different movement patterns, moving faster that other points during the tour. Outliers will affect detection of reduced dimension, but it is easy to ignore with the tour. In (b) there is a non-linear relationship between several variables, primarily with x3. Non-linear relationships may not be captured by other techniques but are visible with the tour.
 :::
 
 ```{r}

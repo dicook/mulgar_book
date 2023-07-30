@@ -392,7 +392,7 @@ div.csl-indent {
 <p>Let’s start with some 2D examples. You need at least two variables to be able to talk about association between variables. <a href="#fig-2D">Figure&nbsp;<span>3.1</span></a> shows three plots of two variables. Plot (a) shows two variables that are strongly linearly associated<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>, because when <code>x1</code> is low, <code>x2</code> is low also, and conversely when <code>x1</code> is high, <code>x2</code> is also high. This can also be seen by the reducton in spread of points (or “collapse”) in one direction making the data fill less than the full square of the plot. <em>So from this we can conclude that the data is not fully 2D.</em> The second step is to infer which variables contribute to this reduction in dimension. The axes for <code>x1</code> and <code>x2</code> are drawn extending from <span class="math inline">\((0,0)\)</span> and because they both extend out of the cloud of points, in the direction away from the collapse of points we can say that they are jointly responsible for the dimension reduction.</p>
 <p><a href="#fig-2D-2">Figure&nbsp;<span>3.1 (b)</span></a> shows a pair of variables that are <strong>not</strong> linearly associated. Variable <code>x1</code> is more varied than <code>x3</code> but knowing the value on <code>x1</code> tells us nothing about possible values on <code>x3</code>. Before running a tour all variables are typically scaled to have equal spread. The purpose of the tour is to capture association and relationships between the variables, so any univariate differences should be removed ahead of time. <a href="#fig-2D-3">Figure&nbsp;<span>3.1 (c)</span></a> shows what this would look like when <code>x3</code> is scaled - the points are fully spread in the full square of the plot.</p>
 <div class="cell">
-<details><summary>Code</summary><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></span>
+<details><summary>Code to produce 2D data examples</summary><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tibble.tidyverse.org/">tibble</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">6045</span><span class="op">)</span></span>
 <span><span class="va">x1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html">runif</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
@@ -437,7 +437,7 @@ div.csl-indent {
 <div class="cell-output-display">
 <div id="fig-2D-1" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure"><p><img src="dimension-overview_files/figure-html/fig-2D-1-1.png" class="img-fluid figure-img" data-ref-parent="fig-2D" width="288"></p>
-<figcaption class="figure-caption">(a) Two variables with strong linear association. Both variables contribute to the association, as indicated by their axes extending out from the “collapsed” direction of the points.</figcaption></figure>
+<figcaption class="figure-caption">(a) Reduced dimension</figcaption></figure>
 </div>
 </div>
 </div>
@@ -445,7 +445,7 @@ div.csl-indent {
 <div class="cell-output-display">
 <div id="fig-2D-2" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure"><p><img src="dimension-overview_files/figure-html/fig-2D-2-1.png" class="img-fluid figure-img" data-ref-parent="fig-2D" width="288"></p>
-<figcaption class="figure-caption">(b) Two variables with no linear association. But x3 has less variation, so points collapse in this direction.</figcaption></figure>
+<figcaption class="figure-caption">(b) Reduced variance</figcaption></figure>
 </div>
 </div>
 </div>
@@ -453,17 +453,17 @@ div.csl-indent {
 <div class="cell-output-display">
 <div id="fig-2D-3" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure"><p><img src="dimension-overview_files/figure-html/fig-2D-3-1.png" class="img-fluid figure-img" data-ref-parent="fig-2D" width="288"></p>
-<figcaption class="figure-caption">(c) The situation in plot (b) does not arise in a tour because all variables are (usually) scaled.</figcaption></figure>
+<figcaption class="figure-caption">(c) No reduced dimension</figcaption></figure>
 </div>
 </div>
 </div>
 </div>
-<p></p><figcaption class="figure-caption">Figure&nbsp;3.1: Explanation of how dimension reduction is perceived in 2D, relative to variables. When an axes extends out of a direction where the points are collapsed, it means that this variable is partially responsible for the reduced dimension.</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;3.1: Explanation of how dimension reduction is perceived in 2D, relative to variables: (a) Two variables with strong linear association. Both variables contribute to the association, as indicated by their axes extending out from the “collapsed” direction of the points; (b) Two variables with no linear association. But x3 has less variation, so points collapse in this direction; (c) The situation in plot (b) does not arise in a tour because all variables are (usually) scaled. When an axes extends out of a direction where the points are collapsed, it means that this variable is partially responsible for the reduced dimension.</figcaption><p></p>
 </figure>
 </div>
 <p>Now let’s think about what this looks like with five variables. <a href="#fig-dimension">Figure&nbsp;<span>3.2</span></a> shows a grand tour on five variables, with (a) showing data that is primarily 2D, (b) has data that is primarily 3D and (c) is fully 5D. You can see that both (a) and (b) the spread of points collapse in some projections, with it happening more in (a). In (c) the data is always spread out in the square, although it does seem to concentrate or pile in the centre. This piling is typical when projecting from high dimensions to low dimensions. The sage tour <span class="citation" data-cites="sagetour">(<a href="references.html#ref-sagetour" role="doc-biblioref">Laa et al., 2020a</a>)</span> makes a correction for this.</p>
 <div class="cell">
-<details><summary>Code</summary><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dicook.github.io/mulgar/">mulgar</a></span><span class="op">)</span></span>
+<details><summary>Code to make animated gifs</summary><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dicook.github.io/mulgar/">mulgar</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="va">plane</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="va">box</span><span class="op">)</span></span>
 <span><span class="fu">render_gif</span><span class="op">(</span><span class="va">plane</span>,</span>
@@ -520,7 +520,7 @@ div.csl-indent {
 </div>
 <p>The next step is to determine which variables contribute. In the examples just provided, all variables are linearly associated in the 2D and 2D data. You can check this by making a scatterplot matrix.</p>
 <div class="cell">
-<details><summary>Code</summary><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggobi.github.io/ggally/">GGally</a></span><span class="op">)</span></span>
+<details><summary>Code for scatterplot matrix</summary><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggobi.github.io/ggally/">GGally</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dicook.github.io/mulgar/">mulgar</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="va">plane</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://ggobi.github.io/ggally/reference/ggscatmat.html">ggscatmat</a></span><span class="op">(</span><span class="va">plane</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -551,7 +551,7 @@ div.csl-indent {
 <p>Now we have 2D structure in 7D, but only five of the variables contribute to the 2D structure, that is, five of the variables are linearly related with each other. The other two variables (x6, x7) are not linearly related to any of the others.</p>
 <p>We can still see the concentration of points along a line in some dimensions, which tells us that the data is not fully 7D. Then if you look closely at the variable axes you will see that the collapsing to a line only occurs when any of x1-x5 contribute strongly in the direction orthogonal to this. This does not happen when x6 or x7 contribute strongly to a projection - the data is always expanded to fill much of the space. That tells us that x6 and x7 don’t substantially contribute to the dimension reduction, that is, they are not linearly related to the other variables.</p>
 <div class="cell">
-<details><summary>Code</summary><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></span>
+<details><summary>Code to generate animation</summary><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://plotly-r.com">plotly</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/ramnathv/htmlwidgets">htmlwidgets</a></span><span class="op">)</span></span>
 <span></span>
@@ -610,12 +610,12 @@ div.csl-indent {
 <figcaption class="figure-caption">Figure&nbsp;3.5: Grand tour of the plane with two additional dimensions of pure noise. The collapsing of the points indicates that this is not fully 7D. This only happens when any of x1-x5 are contributing strongly (frame 49 x4, x5; frame 79 x1; frame 115 x2, x3). If x6 or x7 are contributing strongly the data is spread out fully. This tells us that x6 and x7 are not linearly associated, but other variables are.</figcaption></figure>
 </div>
 <div class="info">
-<p>To determine which variables are responsible for the reduced dimension look for the axes that extend out of the point cloud.</p>
+<p>To determine which variables are responsible for the reduced dimension look for the axes that extend out of the point cloud. These contribute to smaller variation in the observations, and thus indicate dimension reduction.</p>
 </div>
 <p>The simulated data here is very simple, and what we have learned from the tour could also be learned from principal component analysis. However, if there are small complications, such as outliers or nonlinear relationships, that might not be visible from principal component analysis, the tour can help you to see them.</p>
 <p><a href="#fig-plane-noise-outlier">Figure&nbsp;<span>3.6</span></a> and <a href="#fig-outlier">Figure&nbsp;<span>3.7 (a)</span></a> show example data with an outlier and <a href="#fig-nonlinear">Figure&nbsp;<span>3.7 (b)</span></a> shows data with non-linear relationships.</p>
 <div class="cell">
-<details><summary>Code</summary><div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Add several outliers to the plane_noise data</span></span>
+<details><summary>Code for scatterplot matrix</summary><div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Add several outliers to the plane_noise data</span></span>
 <span><span class="va">plane_noise_outliers</span> <span class="op">&lt;-</span> <span class="va">plane_noise</span></span>
 <span><span class="va">plane_noise_outliers</span><span class="op">[</span><span class="fl">101</span>,<span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">2</span>, <span class="op">-</span><span class="fl">2</span>, <span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">0</span><span class="op">)</span></span>
 <span><span class="va">plane_noise_outliers</span><span class="op">[</span><span class="fl">102</span>,<span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">0</span>,<span class="op">-</span><span class="fl">2</span>, <span class="op">-</span><span class="fl">2</span>, <span class="fl">0</span>, <span class="fl">0</span><span class="op">)</span></span>
@@ -630,7 +630,7 @@ div.csl-indent {
 </div>
 </div>
 <div class="cell">
-<details><summary>Code</summary><div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">render_gif</span><span class="op">(</span><span class="va">plane_noise_outliers</span>,          </span>
+<details><summary>Code to generate animated gif</summary><div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">render_gif</span><span class="op">(</span><span class="va">plane_noise_outliers</span>,          </span>
 <span>           <span class="fu">grand_tour</span><span class="op">(</span><span class="op">)</span>, </span>
 <span>           <span class="fu">display_xy</span><span class="op">(</span><span class="op">)</span>,</span>
 <span>           gif_file<span class="op">=</span><span class="st">"gifs/pn_outliers.gif"</span>,</span>
@@ -650,20 +650,20 @@ div.csl-indent {
 </div>
 <div id="fig-outlier-nonlin" class="quarto-layout-panel" data-fig-align="center">
 <figure class="figure"><div class="quarto-layout-row quarto-layout-valign-top">
-<div class="quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
 <div id="fig-outlier" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure"><p><img src="gifs/pn_outliers.gif" class="img-fluid figure-img" data-ref-parent="fig-outlier-nonlin" width="180"></p>
-<figcaption class="figure-caption">(a) Outliers in addition to 2D plane.</figcaption></figure>
+<figcaption class="figure-caption">(a) Outliers</figcaption></figure>
 </div>
 </div>
-<div class="quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
 <div id="fig-nonlinear" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure"><p><img src="gifs/plane_nonlin.gif" class="img-fluid figure-img" data-ref-parent="fig-outlier-nonlin" width="180"></p>
-<figcaption class="figure-caption">(b) Non-linear relationship between several variables, primarily x3.</figcaption></figure>
+<figcaption class="figure-caption">(b) Non-linear relationship</figcaption></figure>
 </div>
 </div>
 </div>
-<p></p><figcaption class="figure-caption">Figure&nbsp;3.7: Examples of different types of dimensionality issues: outliers and nonlinearity. In the left plot, you can see two points far from the others in some projections. Also the two can be seen with different movement patterns, moving faster that other points during the tour. Outliers will affect detection of reduced dimension, but it is easy to ignore with the tour. Non-linear relationships may not be captured by other techniques but are visible with the tour.</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;3.7: Examples of different types of dimensionality issues: outliers (a) and non-linearity (b). In (a) you can see two points far from the others in some projections. Also the two can be seen with different movement patterns, moving faster that other points during the tour. Outliers will affect detection of reduced dimension, but it is easy to ignore with the tour. In (b) there is a non-linear relationship between several variables, primarily with x3. Non-linear relationships may not be captured by other techniques but are visible with the tour.</figcaption><p></p>
 </figure>
 </div>
 <section id="exercises" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="exercises">Exercises</h2>
