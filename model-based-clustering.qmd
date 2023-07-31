@@ -13,6 +13,7 @@ $$
 ```{r}
 #| label: mc-libraries
 #| message: FALSE
+#| code-summary: "Load libraries"
 library(dplyr)
 library(kableExtra)
 library(ggplot2)
@@ -48,6 +49,7 @@ We start with two of the four real-valued variables (`bl`, `fl`) and the three `
 #| fig-cap: "Scatterplot of flipper length by bill length of the penguins data."
 #| fig-width: 5
 #| fig-height: 5
+#| code-summary: "Code to make plot"
 load("data/penguins_sub.rda")
 ggplot(penguins_sub, aes(x=bl, 
                          y=fl)) + #, 
@@ -114,7 +116,6 @@ ggmc
 ```
 
 ```{r}
-#| eval: FALSE
 #| label: best-mclust
 #| code-fold: false
 penguins_mc <- Mclust(penguins_sub[,1:4], 
@@ -131,13 +132,17 @@ penguins_mc_data <- penguins_cl %>%
                       type=rep("ellipse",
                                nrow(penguins_mce$ell)))) %>%
   mutate(type = factor(type))
+```
 
+```{r}
+#| eval: FALSE
+#| label: simpler-mclust
+#| code-summary: "Code to make animated gifs"
 animate_xy(penguins_mc_data[,1:4],
            col=penguins_mc_data$cl,
            pch=c(4, 20 )[as.numeric(penguins_mc_data$type)], 
            axes="off")
 
-# 
 load("data/penguins_tour_path.rda")
 render_gif(penguins_mc_data[,1:4], 
            planned_tour(pt1), 
@@ -149,11 +154,7 @@ render_gif(penguins_mc_data[,1:4],
            gif_file="gifs/penguins_best_mc.gif",
            frames=500,
            loop=FALSE)
-```
 
-```{r}
-#| eval: FALSE
-#| label: simpler-mclust
 penguins_mc <- Mclust(penguins_sub[,1:4], 
                       G=3, 
                       modelNames = "EEE")
@@ -202,7 +203,7 @@ Examining the model-based clustering results for the penguins data: (a) best mod
 :::
 
 ::: info
-Visualising the final choices of models with similarly high BIC values helps to choose which best fits the data. It may not be the one with the highest value. 
+Using the tour to visualise the final choices of models with similarly high BIC values helps to choose which best fits the data. It may not be the one with the highest BIC value. 
 :::
 
 ```{r}
@@ -226,4 +227,4 @@ penguins_cl %>%
 3. Fit model-based clustering to the the `multicluster`. Does it suggest the data has six clusters? Using the tour examine the best model model. How well does this fit the data?
 4. Fit model-based clustering to the `fake_trees` data. Does it suggest that the data has 10 clusters? If not, why do you think this is?  Using the tour examine the best model model. How well does this fit the branching structure?
 5. Try fitting model-based clustering to the `aflw` data? What is the best model? Is the solution related to offensive vs defensive vs mid-fielder skills?
-6. TODO: Provide some challenge data sets
+6. Use model-based clustering on the challenge data sets, `c1`-`c7` from the `mulgar` package. Explain why or why not the best model fits the cluster structure or not.
