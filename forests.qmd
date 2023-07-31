@@ -34,6 +34,7 @@ rpart.plot(p_bl_bd_tree, box.palette="Grays")
 #| fig-cap: Boundaries of tree fit
 #| fig-width: 3
 #| fig-height: 3
+#| code-summary: "Code to draw tree and model fit"
 p_bl_bd_tree_boundaries <- explore(p_bl_bd_tree, penguins_sub)
 ggplot(p_bl_bd_tree_boundaries) +
   geom_point(aes(x=bl, y=bd, colour=species, shape=.TYPE)) + 
@@ -56,6 +57,7 @@ The boundaries for the tree model on all four variables of the penguins data can
 
 ```{r}
 #| eval: false
+#| code-summary: "Code to make animated gifs of slice tour of boundaries"
 p_tree <- rpart(species~., data=penguins_sub[,1:5])
 rpart.plot(p_tree, box.palette="Grays")
 
@@ -72,19 +74,20 @@ render_gif(p_tree_boundaries[p_tree_boundaries$.TYPE == "simulated",1:4],
            )
 ```
 
-::: {.content-hidden when-format="pdf"}
-
 ::: {#fig-penguins-lda-tree layout-ncol=2}
 
+::: {.content-hidden when-format="pdf"}
+
 ![Boundaries produced by the LDA model.](gifs/penguins_lda_boundaries.gif){#fig-lda-boundary fig-alt="FIX ME" width=300}
+:::
+
+::: {.content-hidden when-format="pdf"}
 
 ![Boundaries produced by the tree model.](gifs/penguins_tree_boundaries.gif){#fig-tree-boundary fig-alt="FIX ME" width=300}
+:::
 
 Comparison of the boundaries produced by the LDA model and the tree models.
 :::
-
-:::
-
 
 \index{classification methods!random forest}
 
@@ -115,6 +118,7 @@ penguins_rf
 To examine the votes matrix, we extract the `votes` element from the random forest model object. This will have three columns corresponding to the three species, but because each row is a set of proportions it is only a 2D object, as seen in @fig-p-votes-tour. To reduce the dimension from 3D to the 2D we use a Helmert matrix [@helmert]. Helmert matrices are orthogonal matrices, where the first row is all 1's, and then subsequent rows sequentially replace one element with a 0. The rows are usually normalised to have length 1. They are used to create contrasts to test combinations of factor levels for post-testing after Analysis of Variance (ANOVA). For compositional data, like the votes matrix, when the first row is removed a Helmert matrix can be used to reduce the dimension appropriately. For three classes, this will generate the common 2D ternary diagram, but for higher dimensions it will reduce to a $(g-1)$-dimensional simplex. For the penguins data, the Helmert matrix for 3D is 
 
 ```{r}
+#| code-summary: "Code to compute Helmert matrix"
 geozoo::f_helmert(3)
 ``` 
 
@@ -156,6 +160,7 @@ p_ternary <- ggplot() +
 
 ```{r}
 #| eval: false
+#| code-summary: "Code to generate animated gifs"
 # Look at the votes matrix, in its 3D space
 animate_xy(penguins_rf$votes, col=penguins_sub$species)
 
@@ -171,11 +176,12 @@ render_gif(penguins_rf$votes,
 )
 ```
 
-::: {.content-hidden when-format="pdf"}
-
 ::: {#fig-penguins-votes layout-ncol=2}
 
+::: {.content-hidden when-format="pdf"}
+
 ![Votes matrix in a tour.](gifs/penguins_rf_votes.gif){#fig-p-votes-tour fig-alt="FIX ME" width=300}
+:::
 
 ```{r}
 #| echo: false
@@ -187,8 +193,6 @@ p_ternary
 ```
 
 Examining the votes matrix from a random forest fit to the penguins.
-:::
-
 :::
 
 The votes matrix reports the proportion of trees each observation is classified as each class. From the tour of the votes matrix, it can be seen to be 2D in 3D space. This is due to the constraint that the three proportions for each observation sum to 1. Using a Helmert matrix, this data can be projected into the 2D space, or more generally the $(g-1)$-dimensional space where it resides. In 2D this is called a ternary diagram, and in higher dimensions the bounding shapes might be considered to be a simplex. The vertices of this shape correspond to $(1,0,0), (0,1,0), (0,0,1)$ (and analogously for higher dimensions), which represent perfect confidence, that an observation is classified into that group all the time.
@@ -216,7 +220,6 @@ ft_rf
 
 ```{r}
 #| code-fold: false
-#| eval: false
 ft_rf_votes <- ft_rf$votes %>%
   as_tibble() %>%
   mutate(branches = fake_trees$branches)
@@ -236,6 +239,11 @@ f_rf_v_p_s <- bind_rows(sp, f_rf_v_p) %>%
   mutate(branches = factor(branches))
 labels <- c("0" , "1", "2", "3", "4", "5", "6", "7", "8", "9",
                 rep("", 3000))
+```
+
+```{r}
+#| eval: false
+#| code-summary: "Code to make animated gifs"
 animate_xy(f_rf_v_p_s[,1:9], col = f_rf_v_p_s$branches, 
            axes = "off", half_range = 0.8,
            edges = as.matrix(simp$edges),
@@ -252,17 +260,16 @@ render_gif(f_rf_v_p_s[,1:9],
 ```
 
 
-::: {.content-hidden when-format="pdf"}
-
 ::: {#fig-ft-votes layout-ncol=2}
 
+::: {.content-hidden when-format="pdf"}
+
 ![The 9D votes matrix for the 10 class fake_trees data in a tour.](gifs/ft_votes.gif){#fig-ft-votes-tour fig-alt="FIX ME" width=300}
+:::
 
 ![Several static views from the tour revealing how clusters connect.](images/ft-votes.png){#fig-ft-votes-prj fig-alt="FIX ME" width=300}
 
 The votes matrix for the fake_trees data has a very striking geometric shape. The branching nature of the clusters is very clear. Most classes are distinct except for a connection with class 0.
-:::
-
 :::
 
 The votes matrix is 9D, but the structure of it is easy to read, and very interesting. The observations are coloured by class. There is one vertex (0) which has connections to all other vertexes. That is, there are points stretching without big breaks from this vertex to every other. It means that some observations in every other class can be confused with class 0, and class 0 observations can be confused with every other class. All of the other vertexes have a string of points almost entirely along one edge, the edge leading to vertex 0. This shows the lack of confusion with any other class, except 0. Cluster 0 could be considered the trunk of the tree, from which the other clusters grow. 
@@ -310,6 +317,7 @@ ft_pc <- ft_pc %>%
 
 ```{r}
 #| eval: false
+#| code-summary: "Code to make animated gifs"
 animate_xy(ft_pc[,c("PC1", "PC2", "PC4", "PC6")], col=ft_pc$cl1, palette="Viridis")
 render_gif(ft_pc[,c("PC1", "PC2", "PC4", "PC6")],
            grand_tour(),
@@ -319,6 +327,7 @@ render_gif(ft_pc[,c("PC1", "PC2", "PC4", "PC6")],
 ```
 
 ```{r}
+#| code-summary: "Code to make plot"
 ft_pc_cl1 <- ggplot(ft_pc, aes(x=PC4, y=PC2, col=cl1)) +
   geom_point(alpha=0.7, size=1) +
   scale_color_discrete_sequential(palette="Viridis", rev=FALSE) +
@@ -328,11 +337,12 @@ ft_pc_cl1 <- ggplot(ft_pc, aes(x=PC4, y=PC2, col=cl1)) +
 
 From @fig-ft-cl we can see how cluster 1 is distinct from all of the other observations, albeit with a close connection to the trunk of the tree (cluster 0). The distinction is visible in PC1, PC2, PC4, PC6, but can be seen clearly with just two of these.
 
-::: {.content-hidden when-format="pdf"}
-
 ::: {#fig-ft-cl layout-ncol=2}
 
+::: {.content-hidden when-format="pdf"}
+
 ![Tour of most important variables for class 1.](gifs/ft_cl1.gif){#fig-ft-cl1 fig-alt="FIX ME" width=300}
+:::
 
 ```{r}
 #| echo: false
@@ -345,8 +355,6 @@ ft_pc_cl1
 ```
 
 Focusing on class 1 in the fake_trees data. The most important variables were PC1, PC2, PC4, PC6. A combination of PC2 and PC4 reveals the difference between cluster 1 and all the other clusters.
-:::
-
 :::
 
 For a problem with this many classes it can be useful to focus on several groups together. We've chosen cluster 8, because it appears to have less of a connection with cluster 0. See the light green cluster in bottom right static plot of @fig-ft-votes-prj is connected more to a different vertex, which is cluster 6 when carefully viewed. This is also suggested by the confusion matrix, where there is one observation from cluster 8 confused with cluster 6, although somewhat contradictory information, most are confused with cluster 0. We have also added cluster 1 to the investigation because it is closely connected to 6 and 8.
@@ -365,6 +373,7 @@ ft_pc <- ft_pc %>%
 
 ```{r}
 #| eval: false
+#| code-summary: "Code to make animated gif"
 animate_xy(ft_pc[,c("PC1", "PC2", "PC4", "PC5", "PC6")], col=ft_pc$cl8, palette="Viridis")
 render_gif(ft_pc[,c("PC1", "PC2", "PC4", "PC5", "PC6")],
            grand_tour(),
@@ -374,6 +383,7 @@ render_gif(ft_pc[,c("PC1", "PC2", "PC4", "PC5", "PC6")],
 ```
 
 ```{r}
+#| code-summary: "Code to make plot"
 ft_pc_cl8 <- ggplot(ft_pc, aes(x=PC1, y=PC5, col=cl8)) +
   geom_point(alpha=0.7, size=1) +
   scale_color_discrete_sequential(palette="Viridis", rev=FALSE) +
@@ -383,11 +393,12 @@ ft_pc_cl8 <- ggplot(ft_pc, aes(x=PC1, y=PC5, col=cl8)) +
 
 From @fig-ft-cl2 we can see that clusters 1, 6, and 8 share one end of the trunk (cluster 0). Cluster 8 is almost more closely connected with cluster 6, though, than cluster 0. PC1 and PC5 mostly show the distinction between cluster 8 and the rest of the points, but it is clearer if more variables are used.
 
-::: {.content-hidden when-format="pdf"}
-
 ::: {#fig-ft-cl2 layout-ncol=2}
 
+::: {.content-hidden when-format="pdf"}
+
 ![Tour of most important variables for class 1.](gifs/ft_cl8.gif){#fig-ft-cl8 fig-alt="FIX ME" width=300}
+:::
 
 ```{r}
 #| echo: false
@@ -405,9 +416,6 @@ Focusing on class 8 in the fake_trees data, relative to nearby clusters 1 and 6.
 ::: info
 Variable importance can be used in feature selection. Looking at class-wise variable importance we can select a subspace that can separate a selected class and with a tour we can understand how this separation in multiple variables looks like. This works best when focusing on a small subset of classes.
 :::
-
-:::
-
 
 ## Exercises {-}
 
