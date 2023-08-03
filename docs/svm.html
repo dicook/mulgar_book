@@ -368,6 +368,7 @@ div.csl-indent {
   <ul>
 <li><a href="#components-of-the-svm-model" id="toc-components-of-the-svm-model" class="nav-link active" data-scroll-target="#components-of-the-svm-model"><span class="header-section-number">16.1</span> Components of the SVM model</a></li>
   <li><a href="#examining-the-model-components-in-high-dimensions" id="toc-examining-the-model-components-in-high-dimensions" class="nav-link" data-scroll-target="#examining-the-model-components-in-high-dimensions"><span class="header-section-number">16.2</span> Examining the model components in high-dimensions</a></li>
+  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises">Exercises</a></li>
   </ul><div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/dicook/mulgar_book/edit/master/svm.qmd" class="toc-action">Edit this page</a></p><p><a href="https://github.com/dicook/mulgar_book/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
     </div>
 <!-- main -->
@@ -535,6 +536,9 @@ x2 -1.356237</code></pre>
 <span>                 slope<span class="op">=</span><span class="op">-</span><span class="va">w</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">/</span><span class="va">w</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p><strong>Note that</strong> care in scaling of data is important to get the intercept calculated exactly. We have standardised the data, and set the <code>scale=FALSE</code> parameter in the <code>svm</code> function. The slope calculation is quite robust to the data scaling.</p>
+<div class="info">
+<p>An SVM model is fully determined by the support vectors that fix the position of the hyperplane. To construct the plane we also need the model coefficients and these are constrained for observations on the wrong side of the margin. For a linear SVM we can easily extract these components and write down the equation for the hyperplane.</p>
+</div>
 </section><section id="examining-the-model-components-in-high-dimensions" class="level2" data-number="16.2"><h2 data-number="16.2" class="anchored" data-anchor-id="examining-the-model-components-in-high-dimensions">
 <span class="header-section-number">16.2</span> Examining the model components in high-dimensions</h2>
 <p>For higher dimensions, the procedures are similar, with the hyperplane and support vectors being examined using a tour. Here we examine the model for differentiating male and female Chinstrap penguins. The Chinstrap penguins have a noticeable difference in size of the sexes, unlike the other two species. Working with a two-class problem is easier for explaining SVM, but multi-class calculations can also follow this approach.</p>
@@ -606,7 +610,7 @@ x2 -1.356237</code></pre>
 <p></p><figcaption class="figure-caption">Figure&nbsp;16.2: SVM model for distinguishing the sexes of the Chinstrap penguins. The separating hyperplane is 3D, and separates primarily on variables <code>bl</code> and <code>bd</code>, as seen because these two axes extend out from the plane when it is seen on its side, separating the two groups.</figcaption><p></p>
 </figure>
 </div>
-<p>We can check this interpretation using the radial tour. Using the components from the model, the coefficients of the hyperplane are:</p>
+<p>Examining the hyperplane in a grand tour display indicates that two of the variables, <code>bl</code> and <code>bd</code>, are important for separating the two classes. We can check this interpretation using the radial tour. Using the components from the model, the coefficients of the hyperplane are:</p>
 <div class="cell">
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">chinstrap_svm</span><span class="op">$</span><span class="va">SV</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">chinstrap_svm</span><span class="op">$</span><span class="va">coefs</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -703,7 +707,18 @@ bm -0.1834035 -0.36038216</code></pre>
 <p></p><figcaption class="figure-caption">Figure&nbsp;16.3: Exploring the importance of the four variables to the separating hyperplane using a radial tour where the contribution of each variable is reduced to 0, and then increased to it’s original value. You can see that <code>bl</code> and <code>bd</code> contribute most to the plane, because when they are removed the plane is no longer on it side marking the boundary. Variables <code>fl</code> and <code>bm</code> contribute a small amount to the separating hyperplane, but it is possible that these two could be removed without affecting the strength of the separation between the sexes.</figcaption><p></p>
 </figure>
 </div>
+<div class="insight">
+<p>We use the radial tour to examine if a variable is important when separating the two classes: when we can see the plane turning over as we change how the variable is contributing to the projection. It means that depending on the observed value in this variable, observations can move from one to the other side of the separating hyperplane.</p>
+</div>
 <!-- include Distance-weighted discrimination, eg kerndwd -->
+</section><section id="exercises" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="exercises">Exercises</h2>
+<ol type="1">
+<li>Generate a small subset from the <code>bushfire</code> data: we keep the variables <code>log_dist_cfa</code>, <code>log_dist_road</code> and <code>cause</code>, and we select only observations where <code>cause</code> is either lightning or arson. Fit both an LDA and a linear SVM model to separate the two classes and show the two decision boundaries together with the data. What can you say about the model assumptions for LDA for this data? What differences in decision boundaries are there? Can they be understood in terms of the model definitions?</li>
+<li>We extend this into a multivariate setting by also including <code>amaxt90</code>, <code>amaxt180</code> and <code>amaxt720</code> as predictors. Fit a linear SVM model and calculate the hyperplane to judge which of these variables are important.</li>
+<li>Calculate the decision boundary and look at it with a radial tour to see the effect from including individual predictors in a projection. Also explore what happens when rotating out multiple variables together. What can you learn from this? XXXX boundary not filled in in this setting, what is happening here?</li>
+<li>XX nonlinear when separating two types of sketches (banana vs cactus?) - PCA + radial SVM + slice tour of the predicted classes to see shape of decision boundary</li>
+<li>Repeat but with third class?</li>
+</ol>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" data-line-spacing="2" role="list" style="display: none">
