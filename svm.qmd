@@ -314,3 +314,87 @@ We use the radial tour to examine if a variable is important when separating the
 
 
 <!-- include Distance-weighted discrimination, eg kerndwd -->
+
+
+## Exercises {-}
+
+1. Generate a small subset from the `bushfire` data: we keep the variables `log_dist_cfa`, `log_dist_road` and `cause`, and we select only observations where `cause` is either lightning or arson. Fit both an LDA and a linear SVM model to separate the two classes and show the two decision boundaries together with the data. What can you say about the model assumptions for LDA for this data? What differences in decision boundaries are there? Can they be understood in terms of the model definitions?
+2. We extend this into a multivariate setting by also including `amaxt90`, `amaxt180` and `amaxt720` as predictors. Fit a linear SVM model and calculate the hyperplane to judge which of these variables are important.
+3. Calculate the decision boundary and look at it with a radial tour to see the effect from including individual predictors in a projection. Also explore what happens when rotating out multiple variables together. What can you learn from this?
+XXXX boundary not filled in in this setting, what is happening here?
+4. XX nonlinear when separating two types of sketches (banana vs cactus?) - PCA + radial SVM + slice tour of the predicted classes to see shape of decision boundary
+5. Repeat but with third class?
+
+
+```{r}
+#| eval: false
+#| echo: false
+library(mulgar)
+library(tourr)
+library(tidyverse)
+library(MASS)
+library(e1071)
+data(bushfires)
+
+bushfires_sub <- dplyr::select(bushfires, log_dist_cfa,
+                               log_dist_road,
+                               cause) %>%
+  filter(cause %in% c("lightning", "arson")) %>%
+  mutate(cause = as.factor(cause))
+
+ggplot(bushfires_sub, aes(log_dist_cfa, log_dist_road, color = cause)) +
+  geom_point()
+
+bf_lda <- lda(cause ~ ., bushfires_sub)#, prior = c(0.5, 0.5))
+bf_lda_b <- as.data.frame(explore(bf_lda, bushfires_sub))
+ggplot(filter(bf_lda_b, .BOUNDARY != TRUE)) +
+  geom_point(aes(x=log_dist_cfa, y=log_dist_road, colour=cause, shape=.TYPE)) + 
+  #scale_color_discrete_divergingx("Zissou 1") +
+  scale_shape_manual(values=c(46, 16)) +
+  theme_minimal() +
+  theme(aspect.ratio = 1, legend.position = "none")
+
+bf_svm <- svm(cause ~ ., bushfires_sub, kernel = "linear",
+              probability = TRUE)
+bf_svm_b <- as.data.frame(explore(bf_svm, bushfires_sub))
+ggplot(filter(bf_svm_b, .BOUNDARY != TRUE)) +
+  geom_point(aes(x=log_dist_cfa, y=log_dist_road, colour=cause, shape=.TYPE)) + 
+  #scale_color_discrete_divergingx("Zissou 1") +
+  scale_shape_manual(values=c(46, 16)) +
+  theme_minimal() +
+  theme(aspect.ratio = 1, legend.position = "none")
+
+bushfires_sub_2 <- dplyr::select(bushfires,
+                                 amaxt90, amaxt180, amaxt720,
+                                 log_dist_cfa, log_dist_road,
+                                 cause) %>%
+  filter(cause %in% c("lightning", "arson")) %>%
+  mutate(cause = as.factor(cause))
+
+bf_2_svm <- svm(cause ~ ., data = bushfires_sub_2,
+                kernel = "linear", probability = TRUE)
+
+b1_1 <- t(bf_2_svm$SV) %*% bf_2_svm$coefs
+# it seems most variables are important, maybe amaxt180
+# followed by amaxt90 are less important
+
+bf_2_svm_e <- explore(bf_2_svm, bushfires_sub_2)
+
+symbols <- c(46, 20)
+c_pch <- symbols[as.numeric(bf_2_svm_e$.TYPE[!bf_2_svm_e$.BOUNDARY])]
+animate_xy(bf_2_svm_e[!bf_2_svm_e$.BOUNDARY,1:5], 
+           col=bf_2_svm_e$cause[!bf_2_svm_e$.BOUNDARY],
+           pch=c_pch)
+
+set.seed(383)
+b_start <- orthonormalise(cbind(b1_1, basis_random(5,1)))
+animate_xy(bf_2_svm_e[!bf_2_svm_e$.BOUNDARY,1:5], 
+           tour_path = radial_tour(start = b_start,
+                                   mvar = c(3,4,5)),
+           col=bf_2_svm_e$cause[!bf_2_svm_e$.BOUNDARY],
+           pch=c_pch)
+# because we use a combination of variables we do not see
+# plane turning when rotating out only one of the variables,
+# but we can see that combination of the last three is what is
+# important
+```
