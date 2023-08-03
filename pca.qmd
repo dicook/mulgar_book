@@ -75,7 +75,7 @@ b_scree
 c_scree
 ```
 
-Scree plots for the three simulated data sets. The 2D in 5D is clearly recognised by PCA to be 2D because the variance drops substantially between 2-3 principal components. The 3D in 5D is possibly 3D because the variance drops from 3-4 principal components. The fully 5D data has no drop in variance, and all values are close to the typical value one would observe if the data was fully 5D.
+Scree plots for the three simulated data sets shown in @fig-dimension. The 2D in 5D is clearly recognised by PCA to be 2D because the variance drops substantially between 2-3 principal components. The 3D in 5D is possibly 3D because the variance drops from 3-4 principal components. The fully 5D data has no drop in variance, and all values are close to the typical value one would observe if the data was fully 5D.
 :::
 
 
@@ -204,7 +204,7 @@ round(pisa_pca$rotation[,1], 2)
 ```
 
 ::: insight
-The 1D structure of the `pisa` data indicates that a student that scores well in math, tends to score well in reading and science, too. More interestingly, the regular shape of the data strongly indicates that it is "synthetic", simulated rather than observed.
+The tour verifies that the `pisa` data is primarily 1D, indicating that a student who scores well in math, probably scores well in reading and science, too. More interestingly, the regular shape of the data strongly indicates that it is "synthetic", simulated rather than observed.
 :::
 
 ### Example: aflw
@@ -387,8 +387,9 @@ From @fig-aflw-pcatour the shape of the four PCs is similar to that of all the v
 #| warning: false
 #| fig-cap: "Frame 18 replotted so that players can be identified on mouseover."
 #| fig-width: 5
-#| fig-height: 5
-#| #| code-summary: "Code to generate interactive plot of frame 18"
+#| fig-height: 4
+#| out-width: 80%
+#| code-summary: "Code to generate interactive plot of frame 18"
 library(plotly)
 load("data/aflw_pct.rda")
 aflw_pcti <- interpolate(aflw_pct, 0.1)
@@ -409,7 +410,7 @@ pg18 <- ggplot() +
     axis.title=element_blank(),
     axis.ticks=element_blank(),
     panel.grid=element_blank())
-ggplotly(pg18, width=650, height=650)
+ggplotly(pg18, width=500, height=500)
 ```
 
 For any particular frame, like 18 re-plotted in @fig-aflw-pcaplots, we can investigate further. Here there is a branching pattern, where the branch points in the direction of PC 1. Mouseover the players at the tip of this branch and we find players like Alyce Parker, Brittany Bonnici, Dana Hooker, Kiara Bowers. If you look up the bios of these players you'll find they all have generally good player descriptions like "elite disposals", "powerful left foot", "hard-running midfielder", "best and fairest".
@@ -421,7 +422,7 @@ Another interesting frame for inspecting PC 2 is 59. PC 2 at one end has players
 PCA is useful for getting a sense of the variation in a high-dimensional data set. Interpreting the principal components is often useful, but it can be discombobulating. For the AFLW data it would be good to think about it as a guide to the main directions of variation and to follow with a more direct engineering of variables into interesting player characteristics. For example, calculate offensive skill as an equal combination of goals, accuracy, shots, behinds. A set of new variables specifically computed to measure particular skills would make explaining an analysis easier.
 
 ::: insight
-PCA on the `aflw` data is complicated but provides useful insights. It detected outstanding players, and indicated the different skills sets of top goal scorers and top defensive players.
+The tour verifies that PCA on the `aflw` data is complicated and doesn't capture all of the variation. However, it does provide useful insights. It detected outstanding players, and indicated the different skills sets of top goal scorers and top defensive players.
 :::
 
 ## Examining the PCA model in the data space
@@ -460,7 +461,7 @@ It can be useful to examine this model using the tour. THe model is simply a pla
 The function `pca_model()` from the `mulgar` package can be used to represent the model as a $k$-D wireframe plane. @fig-plane-box-model shows the models for the `plane` and `box` data, 2D and 3D respectively.
 
 ::: info
-We look at the model in the data space to check how well the model fits the data. If it fits well, the points will cluster tightly around the model representation.
+We look at the model in the data space to check how well the model fits the data. If it fits well, the points will cluster tightly around the model representation, with little spread in other directions.
 :::
 
 ```{r}
@@ -548,6 +549,10 @@ render_gif(pisa_all,
 PCA model of the pisa data. The 1D model captures the primary variation in the data and there is a small amount of spread in all directions away from the model. 
 :::
 
+::: insight
+The `pisa` data fits fairly closely to the 1D PCA model. The variance of points away from the model is symmetric and relatively small. These suggest the 1D model is a reasonably summary of the test scores.
+:::
+
 ### Example: aflw
 
 It is less useful to examine the PCA model for the aflw data, because the main patterns that were of interest were the exceptional players. However, we will do it anyway! @fig-aflw-model shows the 4D PCA model overlain on the data. Even though the distribution of points is not as symmetric and balanced as the other examples, we can see that the cube structure mirrors the variation. We can see that the relationships between variables are not strictly linear, because the spread extends unevenly away fro the box. 
@@ -584,6 +589,10 @@ render_gif(aflw_all,
 :::
 
 PCA model of the aflw data. The linear model is not ideal for this data, which has other patterns like outliers, and some branching. However, the model roughly captures the linear associations, and leaves unequal variation in different directions.
+:::
+
+::: insight
+From the tour we see that the 4D model leaves substantial variation unexplained. It is also not symmetric, and there is some larger variation away from the model in some combinations of variables than others. 
 :::
 
 ## When relationships are not linear 

@@ -76,11 +76,12 @@ The best separation between classes can be viewed from this object, which can be
 
 ```{r}
 #| label: fig-p-lda
+#| warning: false
 #| fig-cap: "Penguins projected into the 2D discriminant space, done two ways: (a) using the predicted values, (b) directly projecting using the model component. The scale is not quite the same but the projected data is identical in shape."
 #| message: false
 #| fig-width: 8
 #| fig-height: 4
-#| code-fold: false
+#| code-summary: "Code to generate LDA plots"
 library(colorspace)
 library(ggplot2)
 library(ggpubr)
@@ -141,7 +142,7 @@ to check the underlying assumptions on which it depends: (1) that the cluster st
 #| message: false
 #| fig-width: 8
 #| fig-height: 4
-#| code-fold: false
+#| code-summary: "Code for penguins data and ellipse plots"
 lda1 <- ggplot(penguins_sub, aes(x=bl, 
                          y=bd, 
                          colour=species)) +
@@ -177,6 +178,7 @@ ggarrange(lda1, lda2, ncol=2,
 #| message: false
 #| fig-width: 8
 #| fig-height: 4
+#| code-summary: "Code for bushfires data and ellipse plots"
 # Now repeat for a data set that violates assumptions
 data(bushfires)
 lda3 <- ggplot(bushfires, aes(x=log_dist_cfa, 
@@ -211,10 +213,14 @@ ggarrange(lda3, lda4, ncol=2,
 
 This approach extends to any dimension. We would use the same projection sequence to view both the data and the variance-covariance ellipses, as in @fig-penguins-lda-ellipses. It can be seen that there is some difference in the shape and size of the ellipses in some projections, as there is with the spread of points in the projected data. However, 
 
+::: info
+To visually confirm that we can assume equal variance-covariance matrices for all groups we can can simulate points on the ellipses derived from the pooled estimate and compare them to the data distributions. If there are clear differences the LDA model cannot capture the structure in the data and should not be used.
+:::
+
 ```{r}
 #| message: false
 #| eval: false
-#| code-fold: false
+#| code-summary: "Code for making animated gifs"
 library(tourr)
 p_ell <- NULL
 for (i in unique(penguins_sub$species)) {
@@ -240,24 +246,26 @@ render_gif(p_ell[,1:4],
            loop=FALSE)
 ```
 
-::: {.content-hidden when-format="pdf"}
-
 ::: {#fig-penguins-lda-ellipses layout-ncol=2}
 
+::: {.content-hidden when-format="pdf"}
+
 ![Data](gifs/penguins_lda1.gif){#fig-lda-4D-assumptions1 fig-alt="Tour of penguins data, with colour indicating species" width=300}
-
-![Variance-covariance ellipses](gifs/penguins_lda2.gif){#fig-lda-4D-assumptions2 fig-alt="Tour of ellipses corresponding to variance-covariance matrices for each species" width=300}
-
-Checking the assumption of equal variance-covariance matrices for the 4D penguins data. 
 :::
 
+::: {.content-hidden when-format="pdf"}
+
+![Variance-covariance ellipses](gifs/penguins_lda2.gif){#fig-lda-4D-assumptions2 fig-alt="Tour of ellipses corresponding to variance-covariance matrices for each species" width=300}
+:::
+
+Checking the assumption of equal variance-covariance matrices for the 4D penguins data. 
 :::
 
 As a further check, we could generate three ellipses corresponding to the pooled variance-covariance matrix, as would be used in the model, centered at each of the means. Overlay this with the data. Now you will compare the spread of the observations in the data, with the elliptical shape of the pooled variance-covariance. If it matches reasonably we can safely use LDA. This can also be done group by group when multiple groups make it difficult to view all together. 
 
 ```{r}
 #| message: false
-#| code-fold: false
+#| code-summary: "Code for adding ellipses to data"
 library(tourr)
 # Create an ellipse corresponding to pooled vc
 pool_ell <- gen_vc_ellipse(p_vc_pool, xm=rep(0, ncol(p_vc_pool)))
@@ -295,6 +303,7 @@ p_pch <- shapes[p_lda_all$type]
 ```{r}
 #| eval: false
 #| message: false
+#| code-summary: "Code to generate animated gifs"
 # Code to run the tour
 animate_xy(p_lda_all[,1:4], col=p_lda_all$species, pch=p_pch)
 load("data/penguins_tour_path.rda")
@@ -317,23 +326,24 @@ render_gif(p_lda_all[p_lda_all$species == "Gentoo",1:4],
            loop=FALSE)
 ```
 
-::: {.content-hidden when-format="pdf"}
-
 ::: {#fig-penguins-lda-ellipses layout-ncol=2}
 
+::: {.content-hidden when-format="pdf"}
+
 ![All species](gifs/penguins_lda_pooled1.gif){#fig-lda-pooled1 fig-alt="FIX ME" width=300}
+:::
+
+::: {.content-hidden when-format="pdf"}
 
 ![Gentoo](gifs/penguins_lda_pooled2.gif){#fig-lda-pooled1 fig-alt="FIX ME" width=300}
+:::
 
 Tour of penguins data, pooled variance-covariance ellipse overlaid. We can see that the pooled variance-covariance is a reasonable estimate of the spread of the data. 
-
-::: info
-To visually confirm that we can assume equal variance-covariance matrices for all groups we can can simulate points on the ellipses derived from the pooled estimate and compare them to the data distributions. If there are clear differences the LDA model cannot capture the structure in the data and should not be used.
 :::
 
 
-:::
-
+::: insight
+From the tour, we can see that the assumption of equal elliptical variance-covariance is a reasonable assumption for the penguins data. In all projections the ellipse is reasonably matching the spread of the observations.
 :::
 
 
@@ -389,6 +399,7 @@ p_lda_boundaries <- explore(p_lda, penguins_sub)
 
 ```{r}
 #| eval: false
+#| code-summary: "Code for generating slice tour"
 # Code to run the tour
 p_lda_boundaries$species
 animate_slice(p_lda_boundaries[p_lda_boundaries$.TYPE == "simulated",1:4], col=p_lda_boundaries$species[p_lda_boundaries$.TYPE == "simulated"], v_rel=0.02, axes="bottomleft")
@@ -403,7 +414,7 @@ render_gif(p_lda_boundaries[p_lda_boundaries$.TYPE == "simulated",1:4],
 ```
 
 ```{r}
-#| code-fold: false
+#| code-summary: "Code for projecting into LDA space"
 # Project the boundaries into the 2D discriminant space
 p_lda_b_sub <- p_lda_boundaries[
   p_lda_boundaries$.TYPE == "simulated", 
@@ -424,11 +435,12 @@ p_lda_b_sub_ds_p <- ggplot(p_lda_b_sub_ds,
   
 ```
 
-::: {.content-hidden when-format="pdf"}
-
 ::: {#fig-penguins-lda-boundaries layout-ncol=2}
 
+::: {.content-hidden when-format="pdf"}
+
 ![4D](gifs/penguins_lda_boundaries.gif){#fig-lda-4D-boundaries fig-alt="Sliced tour to explore the boundaries produced by the LDA classifier on the penguins data." width=300}
+:::
 
 ```{r}
 #| label: fig-lda-2D-boundaries
@@ -442,11 +454,8 @@ p_lda_b_sub_ds_p
 Examining the boundaries produced by the LDA model in the full 4D with a slice tour and in the discriminant space. 
 :::
 
-:::
-
-
 ::: insight
-The LDA boundaries divide the classes in the discriminant space, and the remaining directions are irrelevant.
+From the tour, we can see that the LDA boundaries divide the classes only in the discriminant space. LDA is not using any of the two orthogonal directions in it's model fit.
 :::
 
 

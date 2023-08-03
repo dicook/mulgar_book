@@ -17,10 +17,6 @@ The key elements to examine in a k-means clustering algorithm result  are:
 
 
 ```{r}
-#| label: fig-km-2D
-#| fig-cap: "Examining $k$-means clustering results for simple clusters (a) and two variables of the penguins data (b). The means are indicated by a $+$. The results are perfect for the simple clusters but not for the penguins data. The penguin clusters are elliptically shaped which is not captured by $k$-means. Cluster 3 has observations grouped across a gap in the data."
-#| fig-width: 6
-#| fig-height: 4
 #| code-fold: false
 #| message: false
 library(mulgar)
@@ -38,7 +34,14 @@ sc_bl_bd_km_means <- data.frame(sc_bl_bd_km$centers) %>%
   mutate(cl = factor(rownames(sc_bl_bd_km$centers)))
 sc_bl_bd_km_d <- simple_clusters[,1:2] %>% 
   mutate(cl = factor(sc_bl_bd_km$cluster))
+```
 
+```{r}
+#| label: fig-km-2D
+#| fig-cap: "Examining $k$-means clustering results for simple clusters (a) and two variables of the penguins data (b). The means are indicated by a $+$. The results are perfect for the simple clusters but not for the penguins data. The penguin clusters are elliptically shaped which is not captured by $k$-means. Cluster 3 has observations grouped across a gap in the data."
+#| fig-width: 6
+#| fig-height: 4
+#| code-summary: "Code to make plots"
 sc_bl_bd_km_p <- ggplot() +
   geom_point(data=sc_bl_bd_km_d, 
              aes(x=x1, y=x2, colour=cl), 
@@ -93,6 +96,7 @@ p_km_d <- penguins_sub[,1:4] %>%
 
 ```{r}
 #| eval: false
+#| code-summary: "Code to make animated gifs"
 library(tourr)
 p_km_means <- p_km_means %>%
   mutate(type = "mean")
@@ -127,3 +131,4 @@ Generally, there is no need to choose $k$ ahead of time. One would re-fit $k$-me
 
 1. Compute a $k$-means clustering for the `fake_trees` data, varying $k$ to about 20. Choose your best $k$, and examine the solution using the first 10 PCs on the data. It should capture the data quite nicely, although it will break up each branch into multiple clusters.
 2. Compute a $k$-means clustering of the first four PCs of the `aflw` data. Examine the best solution (you choose which $k$), and describe how it divides the data. By examining the means, can you tell if it extracts clusters of offensive vs defensive vs midfield players? Or does it break the data into high skills vs low skills?
+3. Use $k$-means clustering on the challenge data sets, `c1`-`c7` from the `mulgar` package. Explain what choice of $k$ is best for each data set, and why or why not the cluster structure, as you have described it from earlier chapters, is detected or not.
