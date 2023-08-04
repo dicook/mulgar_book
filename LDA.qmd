@@ -461,10 +461,54 @@ From the tour, we can see that the LDA boundaries divide the classes only in the
 
 ## Exercises {-}
 
-1. For the `simple_clusters` compute the lda model, and make a plot of the data, with points coloured by the class. Overlay variance-covariance ellipses, and a $+$ indicating the sample mean for each class. Is it reasonable to assume that the two classes are sampled from populations with the same variance-covariance?
+1. For the `simple_clusters` compute the LDA model, and make a plot of the data, with points coloured by the class. Overlay variance-covariance ellipses, and a $+$ indicating the sample mean for each class. Is it reasonable to assume that the two classes are sampled from populations with the same variance-covariance?
 2. Examine the clusters corresponding to the classes in the `clusters` data set, using a tour. Based on the shape of the data is the assumption of equal variance-covariance reasonable?
 3. Examine the pooled variance-covariance for the `clusters` data, overlaid on the data in a tour on the 5D. Does it fit the variance of each cluster nicely?
 4. Fit an LDA model to the `simple_clusters` data. Examine the boundaries produced by the model, in 2D. 
 5. Fit an LDA model to the `clusters` data. Examine the boundaries produced by the model in 5D.
 6. Assess the LDA assumptions for the `multicluster` data. Is LDA an appropriate model?
+7. Compute the first 12 PCs of the `sketches` data. Check the assumption of equal, elliptical variance-covariance of the 6 groups. Regardless of whether you decide that the assumption is satisfied or not, fit an LDA to the 12 PCs. Extract the discriminant space (the `x` component of the `predict` object), and examine the separation (or not) of the 6 groups in this 5D space. Is LDA providing a good classification model for this data?
+8. Even though the bushfires data does not satisfy the assumptions for LDA, fit LDA to the first five PCs. Examine the class differences in the 3D discriminant space. 
+9. Compute the boundary between classes, for the LDA model where the prior probability reflects the sample size, and the LDA model where the priors are equal for all groups. How does the boundary between lightning caused fires and the other groups change?
+
+```{r}
+#| eval: false
+#| echo: false
+library(mulgar)
+library(dplyr)
+library(tourr)
+library(MASS)
+data("sketches_train")
+sketches_pca <- prcomp(sketches_train[,1:784])
+ggscree(sketches_pca, q=25, guide=FALSE)
+sketches_pc <- as.data.frame(sketches_pca$x[,1:12])
+sketches_pc$word <- sketches_train$word
+
+animate_xy(sketches_pc[,1:12], col=sketches_pc$word)
+
+sketches_lda <- lda(word~., data=sketches_pc)
+sketches_pred <- predict(sketches_lda, sketches_pc)
+sketches_ds <- data.frame(sketches_pred$x) %>%
+  mutate(word = sketches_pc$word)
+
+animate_xy(sketches_ds[,1:5], col=sketches_ds$word)
+
+# bushfires
+data(bushfires)
+bushfires_std <- bushfires %>%
+  dplyr::select(`rf`:`log_dist_road`) %>%
+  mutate_if(is.numeric, function(x) (x-
+      mean(x, na.rm=TRUE))/
+      sd(x, na.rm=TRUE))
+bushfires_pca <- prcomp(bushfires_std)
+bushfires_pc <- data.frame(bushfires_pca$x[,1:5]) %>%
+  mutate(cause = bushfires$cause)
+
+bushfires_lda <- lda(cause~., data=bushfires_pc)
+bushfires_pred <- predict(bushfires_lda, bushfires_pc)
+bushfires_ds <- data.frame(bushfires_pred$x) %>%
+  mutate(cause = factor(bushfires$cause))
+animate_xy(bushfires_ds[,1:3], col=bushfires_ds$cause)
+
+```
 
