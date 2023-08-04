@@ -397,6 +397,8 @@ div.csl-indent {
 <li>separating hyperplane.</li>
 </ul>
 </div>
+<p>SVM is widely used for it’s ability to fit non-linear classification models in a simple fashion using kernels in the boundary equation. We are focusing on linear methods here because it makes for a useful comparison with how the models differ from those provided by SVM. SVM tends to place the boundary between groups in a gap, if it exists. This is nice from a visual perspective because when we look at differences between classes using a tour, we naturally focus on the gaps. SVM better fits this perception than LDA.</p>
+<p>Non-linear SVM models are interesting to examine also. Mostly one would examine the boundaries between classes which can be done in the same way that is documented in the <a href="LDA.html"><span>Chapter&nbsp;14</span></a> and <a href="forests.html"><span>Chapter&nbsp;15</span></a>.</p>
 <section id="components-of-the-svm-model" class="level2" data-number="16.1"><h2 data-number="16.1" class="anchored" data-anchor-id="components-of-the-svm-model">
 <span class="header-section-number">16.1</span> Components of the SVM model</h2>
 <p>To illustrate the approach, we use two simple simulated data examples. Both have only two variables, and two classes. Explaining SVM is easier when there are just two groups. In the first data set the two classes have different covariances matrices, which will cause trouble for LDA, but SVM should see the gap between the two clusters and place the separating hyperplane in the middle of the gap. In the second data set the two groups are concentric circles, with the inner one solid. A non-linear SVM should be fitted to this data, which should see circular gap between the two classes.</p>
@@ -537,7 +539,7 @@ x2 -1.356237</code></pre>
 </div>
 <p><strong>Note that</strong> care in scaling of data is important to get the intercept calculated exactly. We have standardised the data, and set the <code>scale=FALSE</code> parameter in the <code>svm</code> function. The slope calculation is quite robust to the data scaling.</p>
 <div class="info">
-<p>An SVM model is fully determined by the support vectors that fix the position of the hyperplane. To construct the plane we also need the model coefficients and these are constrained for observations on the wrong side of the margin. For a linear SVM we can easily extract these components and write down the equation for the hyperplane.</p>
+<p>An SVM model is fully determined by the support vectors that fix the position of the hyperplane. To construct the plane we also need the model coefficients and these are constrained for observations on the wrong side of the margin. For a linear SVM we can extract these components and write down the equation for the hyperplane.</p>
 </div>
 </section><section id="examining-the-model-components-in-high-dimensions" class="level2" data-number="16.2"><h2 data-number="16.2" class="anchored" data-anchor-id="examining-the-model-components-in-high-dimensions">
 <span class="header-section-number">16.2</span> Examining the model components in high-dimensions</h2>
@@ -624,7 +626,8 @@ bm -0.2846370</code></pre>
 <p>This supports the observation that <code>bl</code> and <code>bd</code> are most important, because they have the largest magnitudes. We can use this vector to set the starting point for radial tour. It needs to be normalised. A randomly generated second vector orthonormal to this one can be added to make a 2D projection from which to see the boundary.</p>
 <div class="cell">
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">1022</span><span class="op">)</span></span>
-<span><span class="va">prj1</span> <span class="op">&lt;-</span> <span class="fu">mulgar</span><span class="fu">::</span><span class="fu"><a href="https://dicook.github.io/mulgar/reference/norm_vec.html">norm_vec</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">chinstrap_svm</span><span class="op">$</span><span class="va">SV</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">chinstrap_svm</span><span class="op">$</span><span class="va">coefs</span><span class="op">)</span></span>
+<span><span class="va">prj1</span> <span class="op">&lt;-</span> <span class="fu">mulgar</span><span class="fu">::</span><span class="fu"><a href="https://dicook.github.io/mulgar/reference/norm_vec.html">norm_vec</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">chinstrap_svm</span><span class="op">$</span><span class="va">SV</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span></span>
+<span>                           <span class="va">chinstrap_svm</span><span class="op">$</span><span class="va">coefs</span><span class="op">)</span></span>
 <span><span class="va">prj2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/tourr/man/basis_random.html">basis_random</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">prj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/tourr/man/orthonormalise.html">orthonormalise</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span><span class="op">(</span><span class="va">prj1</span>, <span class="va">prj2</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">prj</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -708,7 +711,7 @@ bm -0.1834035 -0.36038216</code></pre>
 </figure>
 </div>
 <div class="insight">
-<p>We use the radial tour to examine if a variable is important when separating the two classes: when we can see the plane turning over as we change how the variable is contributing to the projection. It means that depending on the observed value in this variable, observations can move from one to the other side of the separating hyperplane.</p>
+<p>When we use the radial tour to examine how the different variables contribute to the separating hyperplane between the sexes, we learn that <code>bl</code> and <code>bd</code> are the most important variables. Very little contribution comes from <code>fl</code> and <code>bm</code>.</p>
 </div>
 <!-- include Distance-weighted discrimination, eg kerndwd -->
 </section><section id="exercises" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="exercises">Exercises</h2>
