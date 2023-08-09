@@ -324,12 +324,10 @@ When we use the radial tour to examine how the different variables contribute to
 ## Exercises {-}
 
 1. Generate a small subset from the `bushfire` data: we keep the variables `log_dist_cfa`, `log_dist_road` and `cause`, and we select only observations where `cause` is either lightning or arson. Fit a linear SVM model to separate the two classes and show the decision boundary together with the data. Compare to the boundary obtained by LDA and argue how the two models place the separating hyperplane in different ways.
-2. We extend this into a multivariate setting by also including `amaxt90`, `amaxt180` and `amaxt720` as predictors. Fit a linear SVM model and calculate the hyperplane to judge which of these variables are important.
+2. We extend this into a multivariate setting by also including `amaxt180` and `amaxt720` as predictors. Fit a linear SVM model and calculate the hyperplane to judge which of these variables are important.
 3. Calculate the decision boundary and look at it with a radial tour to see the effect from including individual predictors in a projection. Also explore what happens when rotating out multiple variables together. What can you learn from this?
-XXXX boundary not filled in in this setting, what is happening here?
-4. From the `sketches_train` data select all observations of class banana or cactus. For this subset use PCA to find the first 9 PCs. Fit two SVM models: once with linear kernel and once with radial kernel and default value for the gamma parameter. Compare the number of missclassified observations in the training data for the two models.
+4. From the `sketches_train` data select all observations of class banana or boomerang For this subset use PCA to find the first 5 PCs. Fit two SVM models: once with linear kernel and once with radial kernel and default value for the gamma parameter. Compare the number of missclassified observations in the training data for the two models.
 5. Compute the model predictions and compare the decision boundaries between the linear and radial SVM using a slice tour. Does the shape match what you expect given the respective kernel function?
-XXX somehow using tour with the explore function does not behave as I expect, needs to be checked
 6. SVM models are defined for separating two classes, but and ensemble of such models can be used when we want to distinguish more than two classes. Look up the documentation of the `svm` function to learn how this works, then fit an SVM model to separate the three penguin species. In this case we primarily use the model predictions to investigate the decision boundaries, you can use `explore` together with the slice tour to do this. You can use different kernels and compare the resulting decision boundaries.
 
 
@@ -372,8 +370,8 @@ ggplot(filter(bf_svm_b, .BOUNDARY != TRUE)) +
   theme_minimal() +
   theme(aspect.ratio = 1, legend.position = "none")
 
-bushfires_sub_2 <- dplyr::select(bushfires,
-                                 amaxt90, amaxt180, amaxt720,
+bushfires_sub_2 <- dplyr::select(bushfires, #amaxt90,
+                                 amaxt180, amaxt720,
                                  log_dist_cfa, log_dist_road,
                                  cause) %>%
   filter(cause %in% c("lightning", "arson")) %>%
@@ -384,53 +382,67 @@ bf_2_svm <- svm(cause ~ ., data = bushfires_sub_2,
 
 b1_1 <- t(bf_2_svm$SV) %*% bf_2_svm$coefs
 # it seems most variables are important, maybe amaxt180
-# followed by amaxt90 are less important
 
-bf_2_svm_e <- explore(bf_2_svm, bushfires_sub_2, n = 100000)
+bf_2_svm_e <- explore(bf_2_svm, bushfires_sub_2, n = 50000)
 
 symbols <- c(46, 20)
 c_pch <- symbols[as.numeric(bf_2_svm_e$.TYPE[!bf_2_svm_e$.BOUNDARY])]
-animate_xy(bf_2_svm_e[!bf_2_svm_e$.BOUNDARY,1:5], 
-           col=bf_2_svm_e$cause[!bf_2_svm_e$.BOUNDARY],
-           pch=c_pch)
-
+animate_xy(bf_2_svm_e[!bf_2_svm_e$.BOUNDARY,1:4], 
+           col=as.factor(bf_2_svm_e$cause[!bf_2_svm_e$.BOUNDARY]),
+           pch = c_pch)
+# we see that the hyperplane is > 2D and that amaxt180 is less important
+# we also see that main feature in the data is distribution for one group (lightning)
+# and it is difficult to separate the groups because they fall along similar direction
+# now let's check with radial tour
 set.seed(383)
-b_start <- orthonormalise(cbind(b1_1, basis_random(5,1)))
-animate_xy(bf_2_svm_e[!bf_2_svm_e$.BOUNDARY,1:5], 
+b_start <- orthonormalise(cbind(b1_1, basis_random(4,1)))
+animate_xy(bf_2_svm_e[!bf_2_svm_e$.BOUNDARY,1:4], 
            tour_path = radial_tour(start = b_start,
-                                   mvar = c(3,4,5)),
+                                   mvar = c(3,4)),
            col=bf_2_svm_e$cause[!bf_2_svm_e$.BOUNDARY],
            pch=c_pch)
 # because we use a combination of variables we do not see
 # plane turning when rotating out only one of the variables,
-# but we can see that combination of the last three is what is
+# but we can see that combinations of the last three is what is
 # important
 
 data("sketches_train")
-banana_v_cactus <- filter(sketches_train,
-                          word %in% c("banana", "cactus"))
-bvc_pca <- prcomp(banana_v_cactus[,1:784])
-ggscree(bvc_pca, q=25, guide=FALSE) # keeping first 9
-bvc_pc <- as.data.frame(bvc_pca$x[,1:9]) 
-bvc_pc$word <- droplevels(banana_v_cactus$word)
+banana_v_boomerang <- filter(sketches_train,
+                          word %in% c("banana", "boomerang"))
+bvb_pca <- prcomp(banana_v_boomerang[,1:784])
+ggscree(bvb_pca, q=25, guide=FALSE) # keeping first 5
+# keeping first 9 seems like a good idea, but would require very large n
+bvb_pc <- as.data.frame(bvb_pca$x[,1:5]) 
+bvb_pc$word <- droplevels(banana_v_boomerang$word)
 
-bvc_pc <- mutate_if(bvc_pc, is.numeric, mulgar:::scale2)
+bvb_pc <- mutate_if(bvb_pc, is.numeric, mulgar:::scale2)
 
-animate_xy(bvc_pc[,1:9], col=bvc_pc$word)
+animate_xy(bvb_pc[,1:5], col=bvb_pc$word)
 
 
 
-bvc_svm_l <- svm(word ~ ., data = bvc_pc,
+bvb_svm_l <- svm(word ~ ., data = bvb_pc,
                 kernel = "linear", probability = TRUE)
-sum(predict(bvc_svm_l) != bvc_pc$word)
-bvc_svm_r <- svm(word ~ ., data = bvc_pc,
+sum(predict(bvb_svm_l) != bvb_pc$word) # compare accuracy as well
+bvb_svm_r <- svm(word ~ ., data = bvb_pc,
                 kernel = "radial", probability = TRUE)
-sum(predict(bvc_svm_r) != bvc_pc$word)
+sum(predict(bvb_svm_r) != bvb_pc$word)
 
-bvc_svm_l_e <- explore(bvc_svm_l, bvc_pc)
+bvb_svm_l_e <- explore(bvb_svm_l, bvb_pc, n = 20000)
 
 symbols <- c(46, 20)
-c_pch <- symbols[as.numeric(bvc_svm_l_e$.TYPE[!bvc_svm_l_e$.BOUNDARY])]
-animate_slice(bvc_svm_l_e[bvc_svm_l_e$.BOUNDARY,1:9], 
-           col=bvc_svm_l_e$word[bvc_svm_l_e$.BOUNDARY])
+c_pch <- symbols[as.numeric(bvb_svm_l_e$.TYPE[!bvb_svm_l_e$.BOUNDARY])]
+animate_xy(bvb_svm_l_e[!bvb_svm_l_e$.BOUNDARY,1:5], 
+           col=bvb_svm_l_e$word[!bvb_svm_l_e$.BOUNDARY],
+           pch = c_pch)
+# for linear SVM we can use projections to understand the shape
+
+bvb_svm_r_e <- explore(bvb_svm_r, bvb_pc, n = 20000)
+animate_slice(bvb_svm_r_e[bvb_svm_r_e$.TYPE=="simulated" &
+                            !bvb_svm_r_e$.BOUNDARY,1:5],
+              col=bvb_svm_r_e$word[bvb_svm_r_e$.TYPE=="simulated" &
+                                     !bvb_svm_r_e$.BOUNDARY], v_rel = 10)
+# for radial kernel better use slice tour to see shape of the decision boundary
+# here we only look at simulated points on the boundary, clear that this is not linear
+
 ```
