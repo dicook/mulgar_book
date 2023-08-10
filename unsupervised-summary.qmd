@@ -239,12 +239,12 @@ Most of the time your data will not neatly separate into clusters, but partition
 1. We first examine the data in a grand tour. Do you notice that each variable was measured on a discrete scale?
 2. Next we explore different solutions from hierarchical clustering of the data. For comparison we will keep the number of clusters fixed to 6 and we will perform the hierarchical clustering with different combinations of distance functions (Manhattan distance and Euclidean distance) and linkage (single, complete and Ward linkage). Which combinations make sense based on what we know about the method and the data?
 3. For each of the hierarchical clustering solutions draw the dendrogram in 2D and also in the data space. You can also map the grouping into 6 clusters to different colors. How would you describe the different solutions?
-4. Using the method introduced in this chapter, compare the solution using Manhattan distance and complete linkage to one using Euclidean distance and Ward linkage. First compute a confusion table and then use `liminal` to explore some of the differences.
+4. Using the method introduced in this chapter, compare the solution using Manhattan distance and complete linkage to one using Euclidean distance and Ward linkage. First compute a confusion table and then use `liminal` to explore some of the differences. For example, you should be able to see how small subsets where the two clustering solutions disagree can be outlying and are grouped differently depending on the choices we make.
 5. Selecting your preferred solution from hierarchical clustering, we will now compare it to what is found using $k$-means clustering with $k=6$. Use a tour to show the cluster means together with the data points (make sure to pick an appropriate symbol for the data points to avoid too much overplotting). What can you say about the variation within the clusters? Can you match some of the clusters with the most relevant variables from following the movement of the cluster means during the tour?
 6. Use a projection pursuit guided tour to best separate the clusters identified with $k$-means clustering. How are the clusters related to the different types of risk?
-7. Use the approaches from this chapter to summarize and compare the $k$-means solution to one of the hierarchical clustering results. Draw the convex hulls for the two solutions in a tour and compare the shapes.
-8. Some other possible activities include examining how model-based methods would cluster the data. We expect it should be similar to Wards hierarchical or $k$-means, that it will partition into roughly equal chunks with an EII variance-covariance model being optimal. Also examining an SOM fit. SOM is not ideal for this data because the data fills the space. If the SOM model is fitted properly it should be a tangled net where the nodes (cluster means) are fairly evenly spread out. Thus the result should again be similar to Wards hierarchical or $k$-means. A common problem with fitting an SOM is that optimisation stops early, before fully capturing the data set. This is the reasons to use the tour for SOM. If the net is bunched  in one part of the data space, it means that the optimisation wasn't successful. <!-- XXX also model based?
-9. XXX SOM here-->
+7. Use the approaches from this chapter to summarize and compare the $k$-means solution to your selected hierarchical clustering results. Are the groupings mostly similar?
+You can also use convex hulls to better compare what part of the space is occupied. Either look at subsets (selected from the liminal display) or you could facet the display using `tourr::animate_groupxy`.
+8. Some other possible activities include examining how model-based methods would cluster the data. We expect it should be similar to Wards hierarchical or $k$-means, that it will partition into roughly equal chunks with an EII variance-covariance model being optimal. Also examining an SOM fit. SOM is not ideal for this data because the data fills the space. If the SOM model is fitted properly it should be a tangled net where the nodes (cluster means) are fairly evenly spread out. Thus the result should again be similar to Wards hierarchical or $k$-means. A common problem with fitting an SOM is that optimisation stops early, before fully capturing the data set. This is the reasons to use the tour for SOM. If the net is bunched  in one part of the data space, it means that the optimisation wasn't successful.
 
 
 ```{r}
@@ -380,11 +380,19 @@ animate_xy(r_km_all[,1:6],
 # containing average risk scores apart from high risk 
 # scores for the health variable
 
+# comparison k-means vs hierarchical clustering solution with liminal
+# we can see that the k-means grouping is very different
+liminal::limn_tour_link(
+  tibble::as.tibble(cbind(jitter(as.numeric(r_km_d$cl)),
+                          jitter(as.numeric(risk_clw$cl_h_mc)))),
+  r_km_d,
+  cols = 1:6,
+  color = cl)
+
 # comparison k-means vs hierarchical clustering solution
 # using convex hull in the data space
-# is this a good idea? can we have facets to compare?
-# I think probably remove this, it gets too messy, not sure the
-# convex hull is right, especially when using the grouped display..
+# need to do one at a time since there is too much going on
+# starting with hierarchical clustering solution
 library(cxhull)
 dup <- duplicated(risk_clw[,1:6])
 risk_clw <- risk_clw[!dup,]
@@ -394,6 +402,8 @@ ncl_h <- risk_clw %>%
   arrange(cl_h_ew) %>%
   mutate(cumn = cumsum(n))
 phull <- NULL
+risk_clw <- arrange(risk_clw, cl_h_ew) # this is important since this is
+# the sorting assumed when collecting the edges!
 for (i in unique(risk_clw$cl_h_ew)) {
   x <- risk_clw %>%
     dplyr::filter(cl_h_ew == i) 
@@ -412,18 +422,36 @@ animate_groupxy(risk_clw[,1:6], col=risk_clw$cl_h_ew, pch=".",
            edges=as.matrix(phull[,1:2]), edges.col=phull$cl_h_ew,
            group_by=risk_clw$cl_h_ew)
 
-## what if we use groupxy to compare only the cluster assignments?
-risk_compare <- risk_clw %>%
-  dplyr::select(-cl_h_mc, -cl_h_ms) %>%
-  dplyr::rename(cl_h = cl_h_ew) %>%
-  add_column(cl_k = r_km_d$cl) %>%
-  pivot_longer(7:8, names_to = "clustering", names_prefix = "cl_",
-               values_to = "cl")
-# using different color schemes for the two solutions does not
-# work in current setting since it does not allow too many colors
-animate_groupxy(risk_compare[,1:6], col=risk_compare$cl,
-           group_by=risk_compare$clustering, plot_xgp = FALSE)
-
+# repeat for kmeans
+dup <- duplicated(r_km_d[,1:6])
+r_km_d <- r_km_d[!dup,]
+r_km_d$cl <- as.numeric(r_km_d$cl)
+ncl_h <- r_km_d %>%
+  count(cl) %>%
+  arrange(cl) %>%
+  mutate(cumn = cumsum(n))
+phull <- NULL
+r_km_d <- arrange(r_km_d, cl) # this is important since this is
+# the sorting assumed when collecting the edges!
+for (i in unique(r_km_d$cl)) {
+  x <- r_km_d %>%
+    dplyr::filter(cl == i) 
+  ph <- cxhull(as.matrix(x[,1:6]))$edges
+  if (i > 1) {
+    ph <- ph + ncl_h$cumn[i-1]
+  }
+  ph <- cbind(ph, rep(i, nrow(ph)))
+  phull <- rbind(phull, ph)
+}
+phull <- as.data.frame(phull)
+colnames(phull) <- c("from", "to", "cl") 
+phull$cl <- factor(phull$cl)
+r_km_d$cl <- factor(r_km_d$cl)
+animate_groupxy(r_km_d[,1:6], col=r_km_d$cl, pch=".",
+           edges=as.matrix(phull[,1:2]), edges.col=phull$cl,
+           group_by=r_km_d$cl)
+# comparing the chull makes it easier to see what part of the space is
+# occupied by each of the clusters
 
 # SOM
 library(kohonen)
@@ -448,7 +476,6 @@ animate_xy(r_som_map_data[,1:6],
            pch = 46,
            edges.col = "black",
            axes="bottomleft")
-# what do we learn from this?
 # We wouldn't expect SOM to work well for this data because it's
 # pretty fully spread in the 6D. So the net is fairly tangled 
 # filling out the space. Each node is where a cluster mean is
@@ -457,9 +484,6 @@ animate_xy(r_som_map_data[,1:6],
 # properly. Probably the best use is to check that the model was fit
 # well, and the final results should look similar to k-means
 # because there is no benefit from having the net structure here.
-# compare with
-plot(r_som, main = "")
-# can we link this with the tour somehow?
 ```
 
 
