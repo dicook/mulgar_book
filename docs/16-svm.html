@@ -4,9 +4,7 @@
 <meta charset="utf-8">
 <meta name="generator" content="quarto-1.3.433">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<meta name="author" content="Dianne Cook and Ursula Laa">
-<meta name="dcterms.date" content="2023-08-14">
-<title>Interactively exploring high-dimensional data and models in R</title>
+<title>Interactively exploring high-dimensional data and models in R - 16&nbsp; Support vector machines</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -81,7 +79,8 @@ div.csl-indent {
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./1-intro.html" rel="next">
+<link href="./17-nn.html" rel="next">
+<link href="./15-forests.html" rel="prev">
 <link href="./cover.png" rel="icon" type="image/png">
 <script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
@@ -119,7 +118,7 @@ div.csl-indent {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./index.html">Preface</a></li></ol></nav>
+      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./13-intro-class.html">Supervised classification</a></li><li class="breadcrumb-item"><a href="./16-svm.html"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Support vector machines</span></a></li></ol></nav>
       <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
       </a>
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
@@ -145,7 +144,7 @@ div.csl-indent {
     <ul class="list-unstyled mt-1">
 <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./index.html" class="sidebar-item-text sidebar-link active">
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Preface</span></a>
   </div>
 </li>
@@ -283,7 +282,7 @@ div.csl-indent {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./16-svm.html" class="sidebar-item-text sidebar-link">
+  <a href="./16-svm.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Support vector machines</span></span></a>
   </div>
 </li>
@@ -367,113 +366,363 @@ div.csl-indent {
         <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Table of contents</h2>
    
   <ul>
-<li>
-<a href="#preface" id="toc-preface" class="nav-link active" data-scroll-target="#preface">Preface</a>
-  <ul class="collapse">
-<li><a href="#whats-in-this-book" id="toc-whats-in-this-book" class="nav-link" data-scroll-target="#whats-in-this-book">What’s in this book?</a></li>
-  <li><a href="#audience" id="toc-audience" class="nav-link" data-scroll-target="#audience">Audience</a></li>
-  <li><a href="#how-to-use-the-book" id="toc-how-to-use-the-book" class="nav-link" data-scroll-target="#how-to-use-the-book">How to use the book?</a></li>
-  <li><a href="#what-should-i-know-before-reading-this-book" id="toc-what-should-i-know-before-reading-this-book" class="nav-link" data-scroll-target="#what-should-i-know-before-reading-this-book">What should I know before reading this book?</a></li>
-  <li><a href="#setting-up-your-workflow" id="toc-setting-up-your-workflow" class="nav-link" data-scroll-target="#setting-up-your-workflow">Setting up your workflow</a></li>
-  <li><a href="#suggestion-feedback-or-error" id="toc-suggestion-feedback-or-error" class="nav-link" data-scroll-target="#suggestion-feedback-or-error">Suggestion, feedback or error?</a></li>
-  <li><a href="#license" id="toc-license" class="nav-link" data-scroll-target="#license">License</a></li>
-  </ul>
-</li>
-  </ul><div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/dicook/mulgar_book/edit/master/index.qmd" class="toc-action">Edit this page</a></p><p><a href="https://github.com/dicook/mulgar_book/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
+<li><a href="#components-of-the-svm-model" id="toc-components-of-the-svm-model" class="nav-link active" data-scroll-target="#components-of-the-svm-model"><span class="header-section-number">16.1</span> Components of the SVM model</a></li>
+  <li><a href="#examining-the-model-components-in-high-dimensions" id="toc-examining-the-model-components-in-high-dimensions" class="nav-link" data-scroll-target="#examining-the-model-components-in-high-dimensions"><span class="header-section-number">16.2</span> Examining the model components in high-dimensions</a></li>
+  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises">Exercises</a></li>
+  </ul><div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/dicook/mulgar_book/edit/master/16-svm.qmd" class="toc-action">Edit this page</a></p><p><a href="https://github.com/dicook/mulgar_book/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
-<h1 class="title">Interactively exploring high-dimensional data and models in R</h1>
+<h1 class="title">
+<span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Support vector machines</span>
+</h1>
 </div>
 
 
 
 <div class="quarto-title-meta">
 
-    <div>
-    <div class="quarto-title-meta-heading">Author</div>
-    <div class="quarto-title-meta-contents">
-             <p>Dianne Cook and Ursula Laa </p>
-          </div>
-  </div>
     
-    <div>
-    <div class="quarto-title-meta-heading">Published</div>
-    <div class="quarto-title-meta-contents">
-      <p class="date">August 14, 2023</p>
-    </div>
-  </div>
   
     
   </div>
   
 
-</header>
-<section id="preface" class="level1 unnumbered"><h1 class="unnumbered">Preface</h1><p><img src="cover.png" title="Interactively exploring high-dimensional data and models in R" class="quarto-cover-image img-fluid"></p>
-<!-- Why write this book
-
--   an introduction to modern statistical methods through the lens of visualisation
--   focus on data analysis and computing over mathematics
--   intuit high dimensional data through dynamic graphics
--   use R + graphics as tool for augmenting understanding of data, models and inferences(?)
--->
-<p>It is important to visualise your data because you might discover things that you could never have anticipated. Although there are many resources available for data visualisation, there are few comprehensive resources on high-dimensional data visualisation. High-dimensional (or multivariate) data arises when many different things are measured for each observation. While we can learn many things from plotting with 1D and 2D or 3D methods there are likely more structures hidden in the higher dimensions. This book provides guidance on visualising high-dimensional data and models using linear projections, with R.</p>
-<p>High-dimensional data spaces are fascinating places. You may think that there’s a lot of ways to plot one or two variables, and a lot of types of patterns that can be found. You might use a density plot and see skewness or a dot plot to find outliers. A scatterplot of two variables might reveal a non-linear relationship or a barrier beyond which no observations exist. We don’t as yet have so many different choices of plot types for high-dimensions, but these types of patterns are also what we seek in scatterplots of high-dimensional data. The additional dimensions can clarify these patterns, that clusters are likely to be more distinct. Observations that did not appear to be very different can be seen to be lonely anomalies in high-dimensions, that no other observations have quite the same combination of values.</p>
-<section id="whats-in-this-book" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="whats-in-this-book">What’s in this book?</h2>
-<p>The book is divided into these parts:</p>
+</header><p></p>
+<p>A support vector machine (SVM) <span class="citation" data-cites="Va99">(<a href="references.html#ref-Va99" role="doc-biblioref">Vapnik, 1999</a>)</span> looks for gaps between clusters in the data, based on the extreme observations in each class. In this sense it mirrors the graphical approach described <a href="7-spin-and-brush.html"><span>Chapter&nbsp;7</span></a>, in which we searched for gaps between groups. It can be viewed as similar to LDA, in that the boundary between classes is a hyperplane. The difference between LDA and SVM is the placement of the boundary. LDA uses the means and covariance matrices of the classes to place the boundary, but SVM uses extreme observations.</p>
+<div class="info">
+<p>The key elements of the SVM model to examine are:</p>
 <ul>
-<li>
-<strong>Introduction</strong>: Here we introduce you to high-dimensional spaces, how they can be visualised, and notation that is useful for describing methods in later chapters.<br>
-</li>
-<li>
-<strong>Dimension reduction</strong>: This part covers linear and non-linear dimension reduction. It includes ways to help decide on the number of dimensions needed to summarise the high dimensional data, whether linear dimension reduction is appropriate, detecting problems that might affect the dimension reduction, and examining how well or badly a non-linear dimension reduction is representing the data.</li>
-<li>
-<strong>Cluster analysis</strong>: This part described methods for finding groups in data. Although it includes an explanation of a purely graphical approach, it is mostly on using graphics in association with numerical clustering algorithms. There are explanations of assessing the suitability of different numerical techniques for extracting clusters, based on the data shapes, evaluating the clustering result, and showing the solutions in high dimensions.</li>
-<li>
-<strong>Classification</strong>: This part describes methods for exploring known groups in the data. You’ll learn how to check model assumptions, to help decide if a method is suited to the data, examine classification boundaries and explore where errors arise.</li>
-<li>
-<strong>Miscellaneous</strong>: The material in this part focuses on examining data from different contexts. This includes multiple time series, longitudinal data. A key pre-processing step is to convert the data into Euclidean space.</li>
+<li>support vectors</li>
+<li>separating hyperplane.</li>
 </ul>
-<p>In each of these parts an emphasis is also showing your model with your data in the high dimensional space.</p>
-<p>Our hopes are that you will come away with understanding the importance of plotting your high dimensional data as a regular step in your statistical or machine learning analyses. There are many examples of what you might miss if you don’t plot the data. Effective use of graphics goes hand-in-hand with analytical techniques. With high dimensions visualisation is a challenge but it is fascinating, and leads to many surprising moments.</p>
-</section><section id="audience" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="audience">Audience</h2>
-<p>High-dimensional data arises in many fields such as biology, social sciences, finance, and more. Anyone who is doing exploratory data analysis and model fitting for more than two variables will benefit from learning how to effectively visualise high-dimensions. This book will be useful for students and teachers of multivariate data analysis and machine learning, and researchers, data analysts, and industry professionals who work in these areas.</p>
-</section><section id="how-to-use-the-book" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="how-to-use-the-book">How to use the book?</h2>
-<p>The book is written with explanations accompanied by examples with R code. The chapters are organised by types of analysis and focus on how to use the high-dimensional visualisation to complement the commonly used analytical methods. The toolbox chapter in the Appendix provides an overview of the primary high-dimensional visualisation methods discussed in the book and how to get started.</p>
-</section><section id="what-should-i-know-before-reading-this-book" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="what-should-i-know-before-reading-this-book">What should I know before reading this book?</h2>
-<p>The examples assume that you already use R, and have a working knowledge of base R and tidyverse way of thinking about data analysis. It also assumes that you have some knowledge of statistical methods, and some experience with machine learning methods.</p>
-<p>If you feel like you need build up your skills in these areas in preparation for working through this book, these are our recommended resources:</p>
-<ul>
-<li>
-<a href="https://r4ds.had.co.nz">R for Data Science</a> by Wickham and Grolemund for learning about data wrangling and visualisation.</li>
-<li>
-<a href="https://openintro-ims.netlify.app">Introduction to Modern Statistics</a> by Çetinkaya-Rundel and Hardin to learn about introductory statistics.</li>
-<li>
-<a href="https://bradleyboehmke.github.io/HOML/">Hands-On Machine Learning with R</a> by Boehmke and Greenwell to learn about machine learning.</li>
-</ul>
-<p>We will assume you know how to plot your data and models in 2D. Our material starts from 2D and beyond.</p>
-</section><section id="setting-up-your-workflow" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="setting-up-your-workflow">Setting up your workflow</h2>
-<p>To get started set up your computer with the current versions of <a href="https://cran.r-project.org">R</a> and ideally also with <a href="https://posit.co/download/rstudio-desktop/">Rstudio Desktop</a>.</p>
-<p>In addition, we have made an R package to share the data and functions used in this book, called <a href="http://dicook.github.io/mulgar"><code>mulgar</code></a>.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a><a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></p>
-<div class="cell">
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span><span class="op">(</span><span class="st">"mulgar"</span>, dependencies<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="co"># or the development version</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html">install_github</a></span><span class="op">(</span><span class="st">"dicook/mulgar"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>To get a copy of the code and data used and an RStudio project to get started, you can download with this code:</p>
+<p>SVM is widely used for it’s ability to fit non-linear classification models in a simple fashion using kernels in the boundary equation. We are focusing on linear methods here because it makes for a useful comparison with how the models differ from those provided by SVM. SVM tends to place the boundary between groups in a gap, if it exists. This is nice from a visual perspective because when we look at differences between classes using a tour, we naturally focus on the gaps. SVM better fits this perception than LDA.</p>
+<p>Non-linear SVM models are interesting to examine also. Mostly one would examine the boundaries between classes which can be done in the same way that is documented in the <a href="14-lda.html"><span>Chapter&nbsp;14</span></a> and <a href="15-forests.html"><span>Chapter&nbsp;15</span></a>.</p>
+<section id="components-of-the-svm-model" class="level2" data-number="16.1"><h2 data-number="16.1" class="anchored" data-anchor-id="components-of-the-svm-model">
+<span class="header-section-number">16.1</span> Components of the SVM model</h2>
+<p>To illustrate the approach, we use two simple simulated data examples. Both have only two variables, and two classes. Explaining SVM is easier when there are just two groups. In the first data set the two classes have different covariances matrices, which will cause trouble for LDA, but SVM should see the gap between the two clusters and place the separating hyperplane in the middle of the gap. In the second data set the two groups are concentric circles, with the inner one solid. A non-linear SVM should be fitted to this data, which should see circular gap between the two classes.</p>
+<p>Note that the <code>svm</code> function in the <code>e1071</code> package will automatically scale observations into the range <span class="math inline">\([0,1]\)</span>. To make it easier to examine the fitted model, it is best to scale your data first, and then fit the model.</p>
 <div class="cell">
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">usethis</span><span class="fu">::</span><span class="fu"><a href="https://usethis.r-lib.org/reference/zip-utils.html">use_zip</a></span><span class="op">(</span>url<span class="op">=</span><span class="st">"https://dicook.github.io/mulgar_book/code_and_data.zip"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details><summary>Code to simulate data examples</summary><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Toy examples</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dicook.github.io/mulgar/">mulgar</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://schloerke.github.io/geozoo/">geozoo</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/ggobi/tourr">tourr</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">1071</span><span class="op">)</span></span>
+<span><span class="va">n1</span> <span class="op">&lt;-</span> <span class="fl">162</span></span>
+<span><span class="va">vc1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="op">-</span><span class="fl">0.7</span>, <span class="op">-</span><span class="fl">0.7</span>, <span class="fl">1</span><span class="op">)</span>, ncol<span class="op">=</span><span class="fl">2</span>, byrow<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">c1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dicook.github.io/mulgar/reference/rmvn.html">rmvn</a></span><span class="op">(</span>n<span class="op">=</span><span class="va">n1</span>, p<span class="op">=</span><span class="fl">2</span>, mn<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">2</span>, <span class="op">-</span><span class="fl">2</span><span class="op">)</span>, vc<span class="op">=</span><span class="va">vc1</span><span class="op">)</span></span>
+<span><span class="va">vc2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="op">-</span><span class="fl">0.4</span>, <span class="op">-</span><span class="fl">0.4</span>, <span class="fl">1</span><span class="op">)</span><span class="op">*</span><span class="fl">2</span>, ncol<span class="op">=</span><span class="fl">2</span>, byrow<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">n2</span> <span class="op">&lt;-</span> <span class="fl">138</span></span>
+<span><span class="va">c2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dicook.github.io/mulgar/reference/rmvn.html">rmvn</a></span><span class="op">(</span>n<span class="op">=</span><span class="va">n2</span>, p<span class="op">=</span><span class="fl">2</span>, mn<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span>, vc<span class="op">=</span><span class="va">vc2</span><span class="op">)</span></span>
+<span><span class="va">df1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>x1<span class="op">=</span><span class="fu">mulgar</span><span class="fu">:::</span><span class="fu">scale2</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">c1</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span>, <span class="va">c2</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span><span class="op">)</span><span class="op">)</span>, </span>
+<span>                 x2<span class="op">=</span><span class="fu">mulgar</span><span class="fu">:::</span><span class="fu">scale2</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">c1</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span>, <span class="va">c2</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span><span class="op">)</span><span class="op">)</span>, </span>
+<span>                 cl <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="va">n1</span><span class="op">)</span>, </span>
+<span>                               <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="st">"B"</span>, <span class="va">n2</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">c1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/geozoo/man/sphere.hollow.html">sphere.hollow</a></span><span class="op">(</span>p<span class="op">=</span><span class="fl">2</span>, n<span class="op">=</span><span class="va">n1</span><span class="op">)</span><span class="op">$</span><span class="va">points</span><span class="op">*</span><span class="fl">3</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span><span class="op">(</span><span class="va">n1</span>, sd<span class="op">=</span><span class="fl">0.3</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span><span class="op">(</span><span class="va">n1</span>, sd<span class="op">=</span><span class="fl">0.3</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">c2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/geozoo/man/sphere.solid.random.html">sphere.solid.random</a></span><span class="op">(</span>p<span class="op">=</span><span class="fl">2</span>, n<span class="op">=</span><span class="va">n2</span><span class="op">)</span><span class="op">$</span><span class="va">points</span></span>
+<span><span class="va">df2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>x1<span class="op">=</span><span class="fu">mulgar</span><span class="fu">:::</span><span class="fu">scale2</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">c1</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span>, <span class="va">c2</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span><span class="op">)</span><span class="op">)</span>, </span>
+<span>                  x2<span class="op">=</span><span class="fu">mulgar</span><span class="fu">:::</span><span class="fu">scale2</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">c1</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span>, <span class="va">c2</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span><span class="op">)</span><span class="op">)</span>, </span>
+<span>                  cl <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="va">n1</span><span class="op">)</span>, </span>
+<span>                               <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="st">"B"</span>, <span class="va">n2</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div>
-<p>You will be able to click on the <code>mulgar_book.Rproj</code> to get started with the code.</p>
-</section><section id="suggestion-feedback-or-error" class="level2"><h2 class="anchored" data-anchor-id="suggestion-feedback-or-error">Suggestion, feedback or error?</h2>
-<p>We welcome suggestions, feedback or details of errors. You can report them as an issue at the <a href="https://github.com/dicook/mulgar_book">Github repo for this book</a>.</p>
-<p>Please make a small <a href="https://reprex.tidyverse.org">reproducible example</a> and report the error encountered. Reproducible examples have these components:</p>
-<ul>
-<li>a small amount of data</li>
-<li>small amount of code that generates the error</li>
-<li>copy of the error message that was generated</li>
-</ul></section><section id="license" class="level2"><h2 class="anchored" data-anchor-id="license">License</h2>
-<p><a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png"></a><br>The online version of this book is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.</p>
+<div class="cell">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://had.co.nz/classifly">classifly</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">e1071</span><span class="op">)</span></span>
+<span><span class="va">df1_svm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/e1071/man/svm.html">svm</a></span><span class="op">(</span><span class="va">cl</span><span class="op">~</span><span class="va">.</span>, data<span class="op">=</span><span class="va">df1</span>, </span>
+<span>                     probability<span class="op">=</span><span class="cn">TRUE</span>, </span>
+<span>                     kernel<span class="op">=</span><span class="st">"linear"</span>, </span>
+<span>               scale<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="va">df1_svm_e</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/classifly/man/explore.html">explore</a></span><span class="op">(</span><span class="va">df1_svm</span>, <span class="va">df1</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">df2_svm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/e1071/man/svm.html">svm</a></span><span class="op">(</span><span class="va">cl</span><span class="op">~</span><span class="va">.</span>, data<span class="op">=</span><span class="va">df2</span>,  </span>
+<span>                     probability<span class="op">=</span><span class="cn">TRUE</span>, </span>
+<span>                     kernel<span class="op">=</span><span class="st">"radial"</span><span class="op">)</span></span>
+<span><span class="va">df2_svm_e</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/classifly/man/explore.html">explore</a></span><span class="op">(</span><span class="va">df2_svm</span>, <span class="va">df2</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<details><summary>Code to make plots</summary><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://patchwork.data-imaginist.com">patchwork</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://colorspace.R-Forge.R-project.org/">colorspace</a></span><span class="op">)</span></span>
+<span><span class="va">s1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">df1</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">x1</span>, y<span class="op">=</span><span class="va">x2</span>, colour<span class="op">=</span><span class="va">cl</span><span class="op">)</span>,</span>
+<span>             shape<span class="op">=</span><span class="fl">20</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://colorspace.R-Forge.R-project.org/reference/scale_colour_discrete_divergingx.html">scale_colour_discrete_divergingx</a></span><span class="op">(</span>palette<span class="op">=</span><span class="st">"Zissou 1"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">df1_svm_e</span><span class="op">[</span><span class="op">(</span><span class="op">!</span><span class="va">df1_svm_e</span><span class="op">$</span><span class="va">.BOUNDARY</span><span class="op">)</span><span class="op">&amp;</span><span class="op">(</span><span class="va">df1_svm_e</span><span class="op">$</span><span class="va">.TYPE</span><span class="op">==</span><span class="st">"simulated"</span><span class="op">)</span>,<span class="op">]</span>, </span>
+<span>             <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">x1</span>, y<span class="op">=</span><span class="va">x2</span>, colour<span class="op">=</span><span class="va">cl</span><span class="op">)</span>, shape<span class="op">=</span><span class="fl">3</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">df1</span><span class="op">[</span><span class="va">df1_svm</span><span class="op">$</span><span class="va">index</span>,<span class="op">]</span>, </span>
+<span>             <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">x1</span>, y<span class="op">=</span><span class="va">x2</span>, colour<span class="op">=</span><span class="va">cl</span><span class="op">)</span>, </span>
+<span>             shape<span class="op">=</span><span class="fl">4</span>, size<span class="op">=</span><span class="fl">4</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>aspect.ratio<span class="op">=</span><span class="fl">1</span>, legend.position <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ggtitle</a></span><span class="op">(</span><span class="st">"(a)"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">s2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">df2</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">x1</span>, y<span class="op">=</span><span class="va">x2</span>, colour<span class="op">=</span><span class="va">cl</span><span class="op">)</span>, shape<span class="op">=</span><span class="fl">20</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://colorspace.R-Forge.R-project.org/reference/scale_colour_discrete_divergingx.html">scale_colour_discrete_divergingx</a></span><span class="op">(</span>palette<span class="op">=</span><span class="st">"Zissou 1"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">df2_svm_e</span><span class="op">[</span><span class="op">(</span><span class="op">!</span><span class="va">df2_svm_e</span><span class="op">$</span><span class="va">.BOUNDARY</span><span class="op">)</span><span class="op">&amp;</span><span class="op">(</span><span class="va">df2_svm_e</span><span class="op">$</span><span class="va">.TYPE</span><span class="op">==</span><span class="st">"simulated"</span><span class="op">)</span>,<span class="op">]</span>, </span>
+<span>             <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">x1</span>, y<span class="op">=</span><span class="va">x2</span>, colour<span class="op">=</span><span class="va">cl</span><span class="op">)</span>, </span>
+<span>             shape<span class="op">=</span><span class="fl">3</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">df2</span><span class="op">[</span><span class="va">df2_svm</span><span class="op">$</span><span class="va">index</span>,<span class="op">]</span>, </span>
+<span>             <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">x1</span>, y<span class="op">=</span><span class="va">x2</span>, colour<span class="op">=</span><span class="va">cl</span><span class="op">)</span>, </span>
+<span>             shape<span class="op">=</span><span class="fl">4</span>, size<span class="op">=</span><span class="fl">4</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>aspect.ratio<span class="op">=</span><span class="fl">1</span>, legend.position <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ggtitle</a></span><span class="op">(</span><span class="st">"(b)"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">s1</span><span class="op">+</span><span class="va">s2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div id="fig-svm-toy" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure"><p><img src="16-svm_files/figure-html/fig-svm-toy-1.png" class="img-fluid figure-img" width="768"></p>
+<figcaption class="figure-caption">Figure&nbsp;16.1: SVM classifier fit overlaid on two simulated data examples: (a) groups with different variance-covariance, fitted using a linear kernel, (b) groups with non-linear separation, fitted using a radial kernel. The band of points shown as ‘+’ mark the SVM boundary, and points marked by ‘x’ are the support vectors used to define the boundary.</figcaption></figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-svm-toy">Figure&nbsp;<span>16.1</span></a> shows the two data sets and the important aspects of the fitted SVM model for each. The observations are represented by dots, the separating hyperplane (just a line for 2D) is represented by ‘+’. Where the two colours merge is the actual location of the boundary between classes. It can be seen that this is located right down the middle of the gap, for both data sets. Even though the boundary is circular for the second data set, in a transformed high-dimensional space it would be linear.</p>
+<p>SVMs use a subset of the observations to define the boundary, and these are called the support vectors. For each of the data sets these are marked with ‘x’. For the linear boundary, there are nine support vectors, five in one group and four in the other. There is one interesting observation in the red group, which falls on the other side of the boundary. It is marked as a support vector, but its contribution to the fitted hyperplane is limited by a control parameter in the model fitting process.</p>
+<p>Linear SVMs can be assessed similarly to regression models. The components of the model are:</p>
+<ol type="1">
+<li>The points that are the support vectors:</li>
+</ol>
+<div class="cell">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">df1_svm</span><span class="op">$</span><span class="va">index</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1]  15  45 123 135 155 180 202 239 292</code></pre>
+</div>
+</div>
+<ol start="2" type="1">
+<li>Their coefficients:</li>
+</ol>
+<div class="cell">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">df1_svm</span><span class="op">$</span><span class="va">coefs</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>            [,1]
+ [1,]  0.3771240
+ [2,]  0.1487726
+ [3,]  1.0000000
+ [4,]  1.0000000
+ [5,]  1.0000000
+ [6,] -0.5258966
+ [7,] -1.0000000
+ [8,] -1.0000000
+ [9,] -1.0000000</code></pre>
+</div>
+</div>
+<p>which indicate that all but 15, 45 and 180 are actually bounded support vectors (their coefficients are bounded to magnitude 1).</p>
+<ol start="3" type="1">
+<li>that when used with the intercept:</li>
+</ol>
+<div class="cell">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">df1_svm</span><span class="op">$</span><span class="va">rho</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.3520001</code></pre>
+</div>
+</div>
+<p>can be used to compute the equation of the fitted hyperplane.</p>
+<div class="cell">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">w</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">df1_svm</span><span class="op">$</span><span class="va">SV</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">df1_svm</span><span class="op">$</span><span class="va">coefs</span></span>
+<span><span class="va">w</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        [,1]
+x1 -1.501086
+x2 -1.356237</code></pre>
+</div>
+</div>
+<p>Giving the equation to be -1.5 <span class="math inline">\(x_1 +\)</span> -1.36 <span class="math inline">\(x_2 +\)</span> -0.35 <span class="math inline">\(=0\)</span>, or alternatively, <span class="math inline">\(x_2 =\)</span> -1.11 <span class="math inline">\(x_1 +\)</span> -0.26.</p>
+<p>which can be used to generate a line to show the boundary with the data.</p>
+<div class="cell">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">s1</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html">geom_abline</a></span><span class="op">(</span>intercept<span class="op">=</span><span class="va">df1_svm</span><span class="op">$</span><span class="va">rho</span><span class="op">/</span><span class="va">w</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>,</span>
+<span>                 slope<span class="op">=</span><span class="op">-</span><span class="va">w</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">/</span><span class="va">w</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>Note that</strong> care in scaling of data is important to get the intercept calculated exactly. We have standardised the data, and set the <code>scale=FALSE</code> parameter in the <code>svm</code> function. The slope calculation is quite robust to the data scaling.</p>
+<div class="info">
+<p>An SVM model is fully determined by the support vectors that fix the position of the hyperplane. To construct the plane we also need the model coefficients and these are constrained for observations on the wrong side of the margin. For a linear SVM we can extract these components and write down the equation for the hyperplane.</p>
+</div>
+</section><section id="examining-the-model-components-in-high-dimensions" class="level2" data-number="16.2"><h2 data-number="16.2" class="anchored" data-anchor-id="examining-the-model-components-in-high-dimensions">
+<span class="header-section-number">16.2</span> Examining the model components in high-dimensions</h2>
+<p>For higher dimensions, the procedures are similar, with the hyperplane and support vectors being examined using a tour. Here we examine the model for differentiating male and female Chinstrap penguins. The Chinstrap penguins have a noticeable difference in size of the sexes, unlike the other two species. Working with a two-class problem is easier for explaining SVM, but multi-class calculations can also follow this approach.</p>
+<div class="cell">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"data/penguins_sub.rda"</span><span class="op">)</span></span>
+<span><span class="va">chinstrap</span> <span class="op">&lt;-</span> <span class="va">penguins_sub</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">species</span> <span class="op">==</span> <span class="st">"Chinstrap"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">species</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate_all.html">mutate_if</a></span><span class="op">(</span><span class="va">is.numeric</span>, <span class="fu">mulgar</span><span class="fu">:::</span><span class="va">scale2</span><span class="op">)</span></span>
+<span><span class="va">chinstrap_svm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/e1071/man/svm.html">svm</a></span><span class="op">(</span><span class="va">sex</span><span class="op">~</span><span class="va">.</span>, data<span class="op">=</span><span class="va">chinstrap</span>, </span>
+<span>                     kernel<span class="op">=</span><span class="st">"linear"</span>,</span>
+<span>                     probability<span class="op">=</span><span class="cn">TRUE</span>, </span>
+<span>                     scale<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="va">chinstrap_svm_e</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/classifly/man/explore.html">explore</a></span><span class="op">(</span><span class="va">chinstrap_svm</span>, <span class="va">chinstrap</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<details><summary>Code to make the tours</summary><div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Tour raw data</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/tourr/man/display_xy.html">animate_xy</a></span><span class="op">(</span><span class="va">chinstrap</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, col<span class="op">=</span><span class="va">chinstrap</span><span class="op">$</span><span class="va">sex</span><span class="op">)</span></span>
+<span><span class="co"># Add all SVs, including bounded</span></span>
+<span><span class="va">c_pch</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">chinstrap</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">c_pch</span><span class="op">[</span><span class="va">chinstrap_svm</span><span class="op">$</span><span class="va">index</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fl">4</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/tourr/man/display_xy.html">animate_xy</a></span><span class="op">(</span><span class="va">chinstrap</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, col<span class="op">=</span><span class="va">chinstrap</span><span class="op">$</span><span class="va">sex</span>, pch<span class="op">=</span><span class="va">c_pch</span><span class="op">)</span></span>
+<span><span class="co"># Only show the SVs with |coefs| &lt; 1</span></span>
+<span><span class="va">c_pch</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">chinstrap</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">c_pch</span><span class="op">[</span><span class="va">chinstrap_svm</span><span class="op">$</span><span class="va">index</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">abs</a></span><span class="op">(</span><span class="va">chinstrap_svm</span><span class="op">$</span><span class="va">coefs</span><span class="op">)</span><span class="op">&lt;</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fl">4</span></span>
+<span><span class="va">c_cex</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">chinstrap</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">c_cex</span><span class="op">[</span><span class="va">chinstrap_svm</span><span class="op">$</span><span class="va">index</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">abs</a></span><span class="op">(</span><span class="va">chinstrap_svm</span><span class="op">$</span><span class="va">coefs</span><span class="op">)</span><span class="op">&lt;</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fl">2</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/tourr/man/display_xy.html">animate_xy</a></span><span class="op">(</span><span class="va">chinstrap</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, col<span class="op">=</span><span class="va">chinstrap</span><span class="op">$</span><span class="va">sex</span>, </span>
+<span>           pch<span class="op">=</span><span class="va">c_pch</span>, cex<span class="op">=</span><span class="va">c_cex</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/tourr/man/render_gif.html">render_gif</a></span><span class="op">(</span><span class="va">chinstrap</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,</span>
+<span>           <span class="fu"><a href="https://rdrr.io/pkg/tourr/man/grand_tour.html">grand_tour</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>           <span class="fu"><a href="https://rdrr.io/pkg/tourr/man/display_xy.html">display_xy</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">chinstrap</span><span class="op">$</span><span class="va">sex</span>, pch<span class="op">=</span><span class="va">c_pch</span>, cex<span class="op">=</span><span class="va">c_cex</span><span class="op">)</span>,</span>
+<span>           gif_file<span class="op">=</span><span class="st">"gifs/chinstrap_svs.gif"</span>,</span>
+<span>           width<span class="op">=</span><span class="fl">400</span>,</span>
+<span>           height<span class="op">=</span><span class="fl">400</span>,</span>
+<span>           frames<span class="op">=</span><span class="fl">500</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Tour the separating hyperplane also</span></span>
+<span><span class="va">symbols</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">20</span><span class="op">)</span></span>
+<span><span class="va">c_pch</span> <span class="op">&lt;-</span> <span class="va">symbols</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="va">chinstrap_svm_e</span><span class="op">$</span><span class="va">.TYPE</span><span class="op">[</span><span class="op">!</span><span class="va">chinstrap_svm_e</span><span class="op">$</span><span class="va">.BOUNDARY</span><span class="op">]</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/tourr/man/display_xy.html">animate_xy</a></span><span class="op">(</span><span class="va">chinstrap_svm_e</span><span class="op">[</span><span class="op">!</span><span class="va">chinstrap_svm_e</span><span class="op">$</span><span class="va">.BOUNDARY</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, </span>
+<span>           col<span class="op">=</span><span class="va">chinstrap_svm_e</span><span class="op">$</span><span class="va">sex</span><span class="op">[</span><span class="op">!</span><span class="va">chinstrap_svm_e</span><span class="op">$</span><span class="va">.BOUNDARY</span><span class="op">]</span>,</span>
+<span>           pch<span class="op">=</span><span class="va">c_pch</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/tourr/man/render_gif.html">render_gif</a></span><span class="op">(</span><span class="va">chinstrap_svm_e</span><span class="op">[</span><span class="op">!</span><span class="va">chinstrap_svm_e</span><span class="op">$</span><span class="va">.BOUNDARY</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,</span>
+<span>           <span class="fu"><a href="https://rdrr.io/pkg/tourr/man/grand_tour.html">grand_tour</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>           <span class="fu"><a href="https://rdrr.io/pkg/tourr/man/display_xy.html">display_xy</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">chinstrap_svm_e</span><span class="op">$</span><span class="va">sex</span><span class="op">[</span><span class="op">!</span><span class="va">chinstrap_svm_e</span><span class="op">$</span><span class="va">.BOUNDARY</span><span class="op">]</span>, pch<span class="op">=</span><span class="va">c_pch</span><span class="op">)</span>,</span>
+<span>           gif_file<span class="op">=</span><span class="st">"gifs/chinstrap_svm.gif"</span>,</span>
+<span>           width<span class="op">=</span><span class="fl">400</span>,</span>
+<span>           height<span class="op">=</span><span class="fl">400</span>,</span>
+<span>           frames<span class="op">=</span><span class="fl">500</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div id="fig-p-svm" class="quarto-layout-panel">
+<figure class="figure"><div class="quarto-layout-row quarto-layout-valign-top">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-chinstrap_svs" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure"><p><img src="gifs/chinstrap_svs.gif" class="img-fluid figure-img" alt="FIX ME" data-ref-parent="fig-p-svm" width="300"></p>
+<figcaption class="figure-caption">(a) Exploring which points are support vectors.</figcaption></figure>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-chinstrap_svm" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure"><p><img src="gifs/chinstrap_svm.gif" class="img-fluid figure-img" alt="FIX ME" data-ref-parent="fig-p-svm" width="300"></p>
+<figcaption class="figure-caption">(b) Exploring SVM boundary.</figcaption></figure>
+</div>
+</div>
+</div>
+<p></p><figcaption class="figure-caption">Figure&nbsp;16.2: SVM model for distinguishing the sexes of the Chinstrap penguins. The separating hyperplane is 3D, and separates primarily on variables <code>bl</code> and <code>bd</code>, as seen because these two axes extend out from the plane when it is seen on its side, separating the two groups.</figcaption><p></p>
+</figure>
+</div>
+<p>Examining the hyperplane in a grand tour display indicates that two of the variables, <code>bl</code> and <code>bd</code>, are important for separating the two classes. We can check this interpretation using the radial tour. Using the components from the model, the coefficients of the hyperplane are:</p>
+<div class="cell">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">chinstrap_svm</span><span class="op">$</span><span class="va">SV</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">chinstrap_svm</span><span class="op">$</span><span class="va">coefs</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         [,1]
+bl -0.9102439
+bd -1.1073475
+fl -0.5223364
+bm -0.2846370</code></pre>
+</div>
+</div>
+<p>This supports the observation that <code>bl</code> and <code>bd</code> are most important, because they have the largest magnitudes. We can use this vector to set the starting point for radial tour. It needs to be normalised. A randomly generated second vector orthonormal to this one can be added to make a 2D projection from which to see the boundary.</p>
+<div class="cell">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">1022</span><span class="op">)</span></span>
+<span><span class="va">prj1</span> <span class="op">&lt;-</span> <span class="fu">mulgar</span><span class="fu">::</span><span class="fu"><a href="https://dicook.github.io/mulgar/reference/norm_vec.html">norm_vec</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">chinstrap_svm</span><span class="op">$</span><span class="va">SV</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span></span>
+<span>                           <span class="va">chinstrap_svm</span><span class="op">$</span><span class="va">coefs</span><span class="op">)</span></span>
+<span><span class="va">prj2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/tourr/man/basis_random.html">basis_random</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">prj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/tourr/man/orthonormalise.html">orthonormalise</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span><span class="op">(</span><span class="va">prj1</span>, <span class="va">prj2</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">prj</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         [,1]        [,2]
+bl -0.5865081 -0.06412875
+bd -0.7135101  0.51192498
+fl -0.3365631 -0.77713899
+bm -0.1834035 -0.36038216</code></pre>
+</div>
+</div>
+<div class="cell">
+<details><summary>Code to conduct the radial tours</summary><div class="sourceCode" id="cb19"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/tourr/man/display_xy.html">animate_xy</a></span><span class="op">(</span><span class="va">chinstrap_svm_e</span><span class="op">[</span><span class="op">!</span><span class="va">chinstrap_svm_e</span><span class="op">$</span><span class="va">.BOUNDARY</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, </span>
+<span>           tour_path <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/tourr/man/radial_tour.html">radial_tour</a></span><span class="op">(</span>start<span class="op">=</span><span class="va">prj</span>, mvar <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>,</span>
+<span>           col<span class="op">=</span><span class="va">chinstrap_svm_e</span><span class="op">$</span><span class="va">sex</span><span class="op">[</span><span class="op">!</span><span class="va">chinstrap_svm_e</span><span class="op">$</span><span class="va">.BOUNDARY</span><span class="op">]</span>,</span>
+<span>           pch<span class="op">=</span><span class="va">c_pch</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/tourr/man/render_gif.html">render_gif</a></span><span class="op">(</span><span class="va">chinstrap_svm_e</span><span class="op">[</span><span class="op">!</span><span class="va">chinstrap_svm_e</span><span class="op">$</span><span class="va">.BOUNDARY</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,</span>
+<span>           <span class="fu"><a href="https://rdrr.io/pkg/tourr/man/radial_tour.html">radial_tour</a></span><span class="op">(</span>start<span class="op">=</span><span class="va">prj</span>, mvar <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>,</span>
+<span>           <span class="fu"><a href="https://rdrr.io/pkg/tourr/man/display_xy.html">display_xy</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">chinstrap_svm_e</span><span class="op">$</span><span class="va">sex</span><span class="op">[</span><span class="op">!</span><span class="va">chinstrap_svm_e</span><span class="op">$</span><span class="va">.BOUNDARY</span><span class="op">]</span>, pch<span class="op">=</span><span class="va">c_pch</span><span class="op">)</span>,</span>
+<span>           gif_file<span class="op">=</span><span class="st">"gifs/chinstrap_rad_bd.gif"</span>,</span>
+<span>           apf <span class="op">=</span> <span class="fl">1</span><span class="op">/</span><span class="fl">30</span>,</span>
+<span>           width<span class="op">=</span><span class="fl">400</span>,</span>
+<span>           height<span class="op">=</span><span class="fl">400</span>,</span>
+<span>           frames<span class="op">=</span><span class="fl">500</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/tourr/man/render_gif.html">render_gif</a></span><span class="op">(</span><span class="va">chinstrap_svm_e</span><span class="op">[</span><span class="op">!</span><span class="va">chinstrap_svm_e</span><span class="op">$</span><span class="va">.BOUNDARY</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,</span>
+<span>           <span class="fu"><a href="https://rdrr.io/pkg/tourr/man/radial_tour.html">radial_tour</a></span><span class="op">(</span>start<span class="op">=</span><span class="va">prj</span>, mvar <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>,</span>
+<span>           <span class="fu"><a href="https://rdrr.io/pkg/tourr/man/display_xy.html">display_xy</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">chinstrap_svm_e</span><span class="op">$</span><span class="va">sex</span><span class="op">[</span><span class="op">!</span><span class="va">chinstrap_svm_e</span><span class="op">$</span><span class="va">.BOUNDARY</span><span class="op">]</span>, pch<span class="op">=</span><span class="va">c_pch</span><span class="op">)</span>,</span>
+<span>           gif_file<span class="op">=</span><span class="st">"gifs/chinstrap_rad_bl.gif"</span>,</span>
+<span>           apf <span class="op">=</span> <span class="fl">1</span><span class="op">/</span><span class="fl">30</span>,</span>
+<span>           width<span class="op">=</span><span class="fl">400</span>,</span>
+<span>           height<span class="op">=</span><span class="fl">400</span>,</span>
+<span>           frames<span class="op">=</span><span class="fl">500</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/tourr/man/render_gif.html">render_gif</a></span><span class="op">(</span><span class="va">chinstrap_svm_e</span><span class="op">[</span><span class="op">!</span><span class="va">chinstrap_svm_e</span><span class="op">$</span><span class="va">.BOUNDARY</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,</span>
+<span>           <span class="fu"><a href="https://rdrr.io/pkg/tourr/man/radial_tour.html">radial_tour</a></span><span class="op">(</span>start<span class="op">=</span><span class="va">prj</span>, mvar <span class="op">=</span> <span class="fl">3</span><span class="op">)</span>,</span>
+<span>           <span class="fu"><a href="https://rdrr.io/pkg/tourr/man/display_xy.html">display_xy</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">chinstrap_svm_e</span><span class="op">$</span><span class="va">sex</span><span class="op">[</span><span class="op">!</span><span class="va">chinstrap_svm_e</span><span class="op">$</span><span class="va">.BOUNDARY</span><span class="op">]</span>, pch<span class="op">=</span><span class="va">c_pch</span><span class="op">)</span>,</span>
+<span>           gif_file<span class="op">=</span><span class="st">"gifs/chinstrap_rad_fl.gif"</span>,</span>
+<span>           apf <span class="op">=</span> <span class="fl">1</span><span class="op">/</span><span class="fl">30</span>,</span>
+<span>           width<span class="op">=</span><span class="fl">400</span>,</span>
+<span>           height<span class="op">=</span><span class="fl">400</span>,</span>
+<span>           frames<span class="op">=</span><span class="fl">500</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/tourr/man/render_gif.html">render_gif</a></span><span class="op">(</span><span class="va">chinstrap_svm_e</span><span class="op">[</span><span class="op">!</span><span class="va">chinstrap_svm_e</span><span class="op">$</span><span class="va">.BOUNDARY</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,</span>
+<span>           <span class="fu"><a href="https://rdrr.io/pkg/tourr/man/radial_tour.html">radial_tour</a></span><span class="op">(</span>start<span class="op">=</span><span class="va">prj</span>, mvar <span class="op">=</span> <span class="fl">4</span><span class="op">)</span>,</span>
+<span>           <span class="fu"><a href="https://rdrr.io/pkg/tourr/man/display_xy.html">display_xy</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">chinstrap_svm_e</span><span class="op">$</span><span class="va">sex</span><span class="op">[</span><span class="op">!</span><span class="va">chinstrap_svm_e</span><span class="op">$</span><span class="va">.BOUNDARY</span><span class="op">]</span>, pch<span class="op">=</span><span class="va">c_pch</span><span class="op">)</span>,</span>
+<span>           gif_file<span class="op">=</span><span class="st">"gifs/chinstrap_rad_bm.gif"</span>,</span>
+<span>           apf <span class="op">=</span> <span class="fl">1</span><span class="op">/</span><span class="fl">30</span>,</span>
+<span>           width<span class="op">=</span><span class="fl">400</span>,</span>
+<span>           height<span class="op">=</span><span class="fl">400</span>,</span>
+<span>           frames<span class="op">=</span><span class="fl">500</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div id="fig-chinstrap-radial" class="quarto-layout-panel">
+<figure class="figure"><div class="quarto-layout-row quarto-layout-valign-top">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-chinstrap-radial-bl" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure"><p><img src="gifs/chinstrap_rad_bl.gif" class="img-fluid figure-img" data-ref-parent="fig-chinstrap-radial"></p>
+<figcaption class="figure-caption">(a) bl</figcaption></figure>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-chinstrap-radial-bd" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure"><p><img src="gifs/chinstrap_rad_bd.gif" class="img-fluid figure-img" data-ref-parent="fig-chinstrap-radial"></p>
+<figcaption class="figure-caption">(b) bd</figcaption></figure>
+</div>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-chinstrap-radial-fl" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure"><p><img src="gifs/chinstrap_rad_fl.gif" class="img-fluid figure-img" data-ref-parent="fig-chinstrap-radial"></p>
+<figcaption class="figure-caption">(c) fl</figcaption></figure>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-chinstrap-radial-bm" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure"><p><img src="gifs/chinstrap_rad_bm.gif" class="img-fluid figure-img" data-ref-parent="fig-chinstrap-radial"></p>
+<figcaption class="figure-caption">(d) bm</figcaption></figure>
+</div>
+</div>
+</div>
+<p></p><figcaption class="figure-caption">Figure&nbsp;16.3: Exploring the importance of the four variables to the separating hyperplane using a radial tour where the contribution of each variable is reduced to 0, and then increased to it’s original value. You can see that <code>bl</code> and <code>bd</code> contribute most to the plane, because when they are removed the plane is no longer on it side marking the boundary. Variables <code>fl</code> and <code>bm</code> contribute a small amount to the separating hyperplane, but it is possible that these two could be removed without affecting the strength of the separation between the sexes.</figcaption><p></p>
+</figure>
+</div>
+<div class="insight">
+<p>When we use the radial tour to examine how the different variables contribute to the separating hyperplane between the sexes, we learn that <code>bl</code> and <code>bd</code> are the most important variables. Very little contribution comes from <code>fl</code> and <code>bm</code>.</p>
+</div>
+<!-- include Distance-weighted discrimination, eg kerndwd -->
+</section><section id="exercises" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="exercises">Exercises</h2>
+<ol type="1">
+<li>Generate a small subset from the <code>bushfire</code> data: we keep the variables <code>log_dist_cfa</code>, <code>log_dist_road</code> and <code>cause</code>, and we select only observations where <code>cause</code> is either lightning or arson. Fit a linear SVM model to separate the two classes and show the decision boundary together with the data. Compare to the boundary obtained by LDA and argue how the two models place the separating hyperplane in different ways.</li>
+<li>We extend this into a multivariate setting by also including <code>amaxt180</code> and <code>amaxt720</code> as predictors. Fit a linear SVM model and calculate the hyperplane to judge which of these variables are important.</li>
+<li>Calculate the decision boundary and look at it with a radial tour to see the effect from including individual predictors in a projection. Also explore what happens when rotating out multiple variables together. What can you learn from this?</li>
+<li>From the <code>sketches_train</code> data select all observations of class banana or boomerang For this subset use PCA to find the first 5 PCs. Fit two SVM models: once with linear kernel and once with radial kernel and default value for the gamma parameter. Compare the number of missclassified observations in the training data for the two models.</li>
+<li>Compute the model predictions and compare the decision boundaries between the linear and radial SVM using a slice tour. Does the shape match what you expect given the respective kernel function?</li>
+<li>SVM models are defined for separating two classes, but and ensemble of such models can be used when we want to distinguish more than two classes. Look up the documentation of the <code>svm</code> function to learn how this works, then fit an SVM model to separate the three penguin species. In this case we primarily use the model predictions to investigate the decision boundaries, you can use <code>explore</code> together with the slice tour to do this. You can use different kernels and compare the resulting decision boundaries.</li>
+</ol>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" data-line-spacing="2" role="list" style="display: none">
@@ -1249,11 +1498,7 @@ Zhang, H. S., Cook, D., Laa, U., Langrené, N., &amp; Menéndez, P. (2022). <em>
 Zhu, H. (2021). <em>kableExtra: Construct complex table with kable and pipe syntax</em>. <a href="https://CRAN.R-project.org/package=kableExtra">https://CRAN.R-project.org/package=kableExtra</a>
 </div>
 </div>
-</section></section><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><hr>
-<ol>
-<li id="fn1"><p>Mulga is a type of Australian habitat composed of woodland or open forest dominated by the mulga tree. Massive clearing of mulga led to the vast wheat fields of Western Australia. Here <strong>mulgar</strong> is an acronym for <strong>MUL</strong>tivariate <strong>G</strong>raphical <strong>A</strong>nalysis with <strong>R</strong>.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn2"><p>Photo of mulga tree taken by L. G. Cook.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-</ol></section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+</section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
     const mode = bsSheetEl.getAttribute("data-mode");
@@ -1486,10 +1731,13 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
 });
 </script><nav class="page-navigation"><div class="nav-page nav-page-previous">
+      <a href="./15-forests.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Trees and forests</span></span>
+      </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./1-intro.html" class="pagination-link">
-        <span class="nav-page-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Picturing high dimensions</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./17-nn.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Neural networks and deep learning</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

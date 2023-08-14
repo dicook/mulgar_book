@@ -4,9 +4,7 @@
 <meta charset="utf-8">
 <meta name="generator" content="quarto-1.3.433">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<meta name="author" content="Dianne Cook and Ursula Laa">
-<meta name="dcterms.date" content="2023-08-14">
-<title>Interactively exploring high-dimensional data and models in R</title>
+<title>Interactively exploring high-dimensional data and models in R - 11&nbsp; Self-organizing maps</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -81,7 +79,8 @@ div.csl-indent {
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./1-intro.html" rel="next">
+<link href="./12-summary-clust.html" rel="next">
+<link href="./10-model-based.html" rel="prev">
 <link href="./cover.png" rel="icon" type="image/png">
 <script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
@@ -119,7 +118,7 @@ div.csl-indent {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./index.html">Preface</a></li></ol></nav>
+      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./6-intro-clust.html">Cluster analysis</a></li><li class="breadcrumb-item"><a href="./11-som.html"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Self-organizing maps</span></a></li></ol></nav>
       <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
       </a>
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
@@ -145,7 +144,7 @@ div.csl-indent {
     <ul class="list-unstyled mt-1">
 <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./index.html" class="sidebar-item-text sidebar-link active">
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Preface</span></a>
   </div>
 </li>
@@ -242,7 +241,7 @@ div.csl-indent {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./11-som.html" class="sidebar-item-text sidebar-link">
+  <a href="./11-som.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Self-organizing maps</span></span></a>
   </div>
 </li>
@@ -367,113 +366,128 @@ div.csl-indent {
         <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Table of contents</h2>
    
   <ul>
-<li>
-<a href="#preface" id="toc-preface" class="nav-link active" data-scroll-target="#preface">Preface</a>
-  <ul class="collapse">
-<li><a href="#whats-in-this-book" id="toc-whats-in-this-book" class="nav-link" data-scroll-target="#whats-in-this-book">What’s in this book?</a></li>
-  <li><a href="#audience" id="toc-audience" class="nav-link" data-scroll-target="#audience">Audience</a></li>
-  <li><a href="#how-to-use-the-book" id="toc-how-to-use-the-book" class="nav-link" data-scroll-target="#how-to-use-the-book">How to use the book?</a></li>
-  <li><a href="#what-should-i-know-before-reading-this-book" id="toc-what-should-i-know-before-reading-this-book" class="nav-link" data-scroll-target="#what-should-i-know-before-reading-this-book">What should I know before reading this book?</a></li>
-  <li><a href="#setting-up-your-workflow" id="toc-setting-up-your-workflow" class="nav-link" data-scroll-target="#setting-up-your-workflow">Setting up your workflow</a></li>
-  <li><a href="#suggestion-feedback-or-error" id="toc-suggestion-feedback-or-error" class="nav-link" data-scroll-target="#suggestion-feedback-or-error">Suggestion, feedback or error?</a></li>
-  <li><a href="#license" id="toc-license" class="nav-link" data-scroll-target="#license">License</a></li>
-  </ul>
-</li>
-  </ul><div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/dicook/mulgar_book/edit/master/index.qmd" class="toc-action">Edit this page</a></p><p><a href="https://github.com/dicook/mulgar_book/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
+<li><a href="#exercises" id="toc-exercises" class="nav-link active" data-scroll-target="#exercises">Exercises</a></li>
+  </ul><div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/dicook/mulgar_book/edit/master/11-som.qmd" class="toc-action">Edit this page</a></p><p><a href="https://github.com/dicook/mulgar_book/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
-<h1 class="title">Interactively exploring high-dimensional data and models in R</h1>
+<h1 class="title"><span id="sec-som" class="quarto-section-identifier"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Self-organizing maps</span></span></h1>
 </div>
 
 
 
 <div class="quarto-title-meta">
 
-    <div>
-    <div class="quarto-title-meta-heading">Author</div>
-    <div class="quarto-title-meta-contents">
-             <p>Dianne Cook and Ursula Laa </p>
-          </div>
-  </div>
     
-    <div>
-    <div class="quarto-title-meta-heading">Published</div>
-    <div class="quarto-title-meta-contents">
-      <p class="date">August 14, 2023</p>
-    </div>
-  </div>
   
     
   </div>
   
 
-</header>
-<section id="preface" class="level1 unnumbered"><h1 class="unnumbered">Preface</h1><p><img src="cover.png" title="Interactively exploring high-dimensional data and models in R" class="quarto-cover-image img-fluid"></p>
-<!-- Why write this book
-
--   an introduction to modern statistical methods through the lens of visualisation
--   focus on data analysis and computing over mathematics
--   intuit high dimensional data through dynamic graphics
--   use R + graphics as tool for augmenting understanding of data, models and inferences(?)
--->
-<p>It is important to visualise your data because you might discover things that you could never have anticipated. Although there are many resources available for data visualisation, there are few comprehensive resources on high-dimensional data visualisation. High-dimensional (or multivariate) data arises when many different things are measured for each observation. While we can learn many things from plotting with 1D and 2D or 3D methods there are likely more structures hidden in the higher dimensions. This book provides guidance on visualising high-dimensional data and models using linear projections, with R.</p>
-<p>High-dimensional data spaces are fascinating places. You may think that there’s a lot of ways to plot one or two variables, and a lot of types of patterns that can be found. You might use a density plot and see skewness or a dot plot to find outliers. A scatterplot of two variables might reveal a non-linear relationship or a barrier beyond which no observations exist. We don’t as yet have so many different choices of plot types for high-dimensions, but these types of patterns are also what we seek in scatterplots of high-dimensional data. The additional dimensions can clarify these patterns, that clusters are likely to be more distinct. Observations that did not appear to be very different can be seen to be lonely anomalies in high-dimensions, that no other observations have quite the same combination of values.</p>
-<section id="whats-in-this-book" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="whats-in-this-book">What’s in this book?</h2>
-<p>The book is divided into these parts:</p>
+</header><p></p>
+<p>A self-organizing map (SOM) <span class="citation" data-cites="Ko01">Kohonen (<a href="references.html#ref-Ko01" role="doc-biblioref">2001</a>)</span> is constructed using a constrained <span class="math inline">\(k\)</span>-means algorithm. A 1D or 2D net is stretched through the data. The knots, in the net, form the cluster means, and the points closest to the knot are considered to belong to that cluster. The similarity of nodes (and their corresponding clusters) is defined as proportional to their distance from one another on the net. Unlike <span class="math inline">\(k\)</span>-means one would normally choose a largish net, with more nodes than expected clusters. A well-separated cluster in the data would likely be split across multiple nodes in the net. Examining the net where nodes are empty of points we would interpret this as a gap in the original data.</p>
+<div class="info">
+<p>A self-organising map is like a fisherwoman’s net, as the net is pulled in it catches the fish near knots in the net. We would examine the net in</p>
 <ul>
-<li>
-<strong>Introduction</strong>: Here we introduce you to high-dimensional spaces, how they can be visualised, and notation that is useful for describing methods in later chapters.<br>
-</li>
-<li>
-<strong>Dimension reduction</strong>: This part covers linear and non-linear dimension reduction. It includes ways to help decide on the number of dimensions needed to summarise the high dimensional data, whether linear dimension reduction is appropriate, detecting problems that might affect the dimension reduction, and examining how well or badly a non-linear dimension reduction is representing the data.</li>
-<li>
-<strong>Cluster analysis</strong>: This part described methods for finding groups in data. Although it includes an explanation of a purely graphical approach, it is mostly on using graphics in association with numerical clustering algorithms. There are explanations of assessing the suitability of different numerical techniques for extracting clusters, based on the data shapes, evaluating the clustering result, and showing the solutions in high dimensions.</li>
-<li>
-<strong>Classification</strong>: This part describes methods for exploring known groups in the data. You’ll learn how to check model assumptions, to help decide if a method is suited to the data, examine classification boundaries and explore where errors arise.</li>
-<li>
-<strong>Miscellaneous</strong>: The material in this part focuses on examining data from different contexts. This includes multiple time series, longitudinal data. A key pre-processing step is to convert the data into Euclidean space.</li>
+<li>2D to extract the fish.</li>
+<li>high-dimensions to see how it was woven through the space to catch fish.</li>
 </ul>
-<p>In each of these parts an emphasis is also showing your model with your data in the high dimensional space.</p>
-<p>Our hopes are that you will come away with understanding the importance of plotting your high dimensional data as a regular step in your statistical or machine learning analyses. There are many examples of what you might miss if you don’t plot the data. Effective use of graphics goes hand-in-hand with analytical techniques. With high dimensions visualisation is a challenge but it is fascinating, and leads to many surprising moments.</p>
-</section><section id="audience" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="audience">Audience</h2>
-<p>High-dimensional data arises in many fields such as biology, social sciences, finance, and more. Anyone who is doing exploratory data analysis and model fitting for more than two variables will benefit from learning how to effectively visualise high-dimensions. This book will be useful for students and teachers of multivariate data analysis and machine learning, and researchers, data analysts, and industry professionals who work in these areas.</p>
-</section><section id="how-to-use-the-book" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="how-to-use-the-book">How to use the book?</h2>
-<p>The book is written with explanations accompanied by examples with R code. The chapters are organised by types of analysis and focus on how to use the high-dimensional visualisation to complement the commonly used analytical methods. The toolbox chapter in the Appendix provides an overview of the primary high-dimensional visualisation methods discussed in the book and how to get started.</p>
-</section><section id="what-should-i-know-before-reading-this-book" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="what-should-i-know-before-reading-this-book">What should I know before reading this book?</h2>
-<p>The examples assume that you already use R, and have a working knowledge of base R and tidyverse way of thinking about data analysis. It also assumes that you have some knowledge of statistical methods, and some experience with machine learning methods.</p>
-<p>If you feel like you need build up your skills in these areas in preparation for working through this book, these are our recommended resources:</p>
-<ul>
-<li>
-<a href="https://r4ds.had.co.nz">R for Data Science</a> by Wickham and Grolemund for learning about data wrangling and visualisation.</li>
-<li>
-<a href="https://openintro-ims.netlify.app">Introduction to Modern Statistics</a> by Çetinkaya-Rundel and Hardin to learn about introductory statistics.</li>
-<li>
-<a href="https://bradleyboehmke.github.io/HOML/">Hands-On Machine Learning with R</a> by Boehmke and Greenwell to learn about machine learning.</li>
-</ul>
-<p>We will assume you know how to plot your data and models in 2D. Our material starts from 2D and beyond.</p>
-</section><section id="setting-up-your-workflow" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="setting-up-your-workflow">Setting up your workflow</h2>
-<p>To get started set up your computer with the current versions of <a href="https://cran.r-project.org">R</a> and ideally also with <a href="https://posit.co/download/rstudio-desktop/">Rstudio Desktop</a>.</p>
-<p>In addition, we have made an R package to share the data and functions used in this book, called <a href="http://dicook.github.io/mulgar"><code>mulgar</code></a>.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a><a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></p>
-<div class="cell">
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span><span class="op">(</span><span class="st">"mulgar"</span>, dependencies<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="co"># or the development version</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html">install_github</a></span><span class="op">(</span><span class="st">"dicook/mulgar"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>To get a copy of the code and data used and an RStudio project to get started, you can download with this code:</p>
+<p><a href="#fig-penguins-som">Figure&nbsp;<span>11.1</span></a> illustrates how the SOM fits the penguins data. SOM is not ideal for clustered data where there are gaps. It is better suited for data that lies on a non-linear low-dimensional manifold. To model data like the penguins the first step is to set up a net that will cover more than the three clusters. Here we have chosen to use a <span class="math inline">\(5\times 5\)</span> rectangular grid. (The option allows for a hexagonal grid, which would make for a better tiled 2D map, but this is not useful for viewing the model in high dimensions.) Like <span class="math inline">\(k\)</span>-means clustering the fitted model can change substantially depending on the initialisation, so setting a seed will ensure a consistent result. We have also initialised the positions of the knots using PCA, which stretches the net in the main two directions of variance of the data, generally giving better results.</p>
 <div class="cell">
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">usethis</span><span class="fu">::</span><span class="fu"><a href="https://usethis.r-lib.org/reference/zip-utils.html">use_zip</a></span><span class="op">(</span>url<span class="op">=</span><span class="st">"https://dicook.github.io/mulgar_book/code_and_data.zip"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">kohonen</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">aweSOM</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dicook.github.io/mulgar/">mulgar</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://colorspace.R-Forge.R-project.org/">colorspace</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"data/penguins_sub.rda"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">947</span><span class="op">)</span></span>
+<span><span class="va">p_grid</span> <span class="op">&lt;-</span> <span class="fu">kohonen</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/kohonen/man/unit.distances.html">somgrid</a></span><span class="op">(</span>xdim <span class="op">=</span> <span class="fl">5</span>, ydim <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>                           topo <span class="op">=</span> <span class="st">'rectangular'</span><span class="op">)</span></span>
+<span><span class="va">p_init</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/aweSOM/man/somInit.html">somInit</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">penguins_sub</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span>, <span class="fl">5</span>, <span class="fl">5</span><span class="op">)</span></span>
+<span><span class="va">p_som</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/kohonen/man/supersom.html">som</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">penguins_sub</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span>, </span>
+<span>             rlen<span class="op">=</span><span class="fl">2000</span>,</span>
+<span>             grid <span class="op">=</span> <span class="va">p_grid</span>,</span>
+<span>             init <span class="op">=</span> <span class="va">p_init</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>You will be able to click on the <code>mulgar_book.Rproj</code> to get started with the code.</p>
-</section><section id="suggestion-feedback-or-error" class="level2"><h2 class="anchored" data-anchor-id="suggestion-feedback-or-error">Suggestion, feedback or error?</h2>
-<p>We welcome suggestions, feedback or details of errors. You can report them as an issue at the <a href="https://github.com/dicook/mulgar_book">Github repo for this book</a>.</p>
-<p>Please make a small <a href="https://reprex.tidyverse.org">reproducible example</a> and report the error encountered. Reproducible examples have these components:</p>
-<ul>
-<li>a small amount of data</li>
-<li>small amount of code that generates the error</li>
-<li>copy of the error message that was generated</li>
-</ul></section><section id="license" class="level2"><h2 class="anchored" data-anchor-id="license">License</h2>
-<p><a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png"></a><br>The online version of this book is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.</p>
+<p>The resulting model object is used to construct an object containing the original data, the 2D map, the map in <span class="math inline">\(p\)</span>-D, with edges, and segments to connect points to represent the next using the <code><a href="https://dicook.github.io/mulgar/reference/som_model.html">som_model()</a></code> function from <code>mulgar</code>. The 2D map shows a configuration of the data in 2D which best displays the clusters, much like how a PCA or LDA plot would eb used.</p>
+<div class="cell">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_som_df_net</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dicook.github.io/mulgar/reference/som_model.html">som_model</a></span><span class="op">(</span><span class="va">p_som</span><span class="op">)</span></span>
+<span><span class="va">p_som_data</span> <span class="op">&lt;-</span> <span class="va">p_som_df_net</span><span class="op">$</span><span class="va">data</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>species <span class="op">=</span> <span class="va">penguins_sub</span><span class="op">$</span><span class="va">species</span><span class="op">)</span></span>
+<span><span class="va">p_som_map_p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_segment.html">geom_segment</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">p_som_df_net</span><span class="op">$</span><span class="va">edges_s</span>, </span>
+<span>               <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">x</span>, xend<span class="op">=</span><span class="va">xend</span>, y<span class="op">=</span><span class="va">y</span>, </span>
+<span>                   yend<span class="op">=</span><span class="va">yend</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">p_som_data</span>, </span>
+<span>             <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">map1</span>, y<span class="op">=</span><span class="va">map2</span>, </span>
+<span>                 colour<span class="op">=</span><span class="va">species</span><span class="op">)</span>, </span>
+<span>             size<span class="op">=</span><span class="fl">3</span>, alpha<span class="op">=</span><span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">xlab</a></span><span class="op">(</span><span class="st">"map 1"</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ylab</a></span><span class="op">(</span><span class="st">"map 2"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://colorspace.R-Forge.R-project.org/reference/scale_colour_discrete_divergingx.html">scale_color_discrete_divergingx</a></span><span class="op">(</span></span>
+<span>    palette<span class="op">=</span><span class="st">"Zissou 1"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>aspect.ratio <span class="op">=</span> <span class="fl">1</span>, </span>
+<span>        legend.position <span class="op">=</span> <span class="st">"bottom"</span>,</span>
+<span>        legend.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_blank</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>        axis.text <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_blank</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The object can also be modified into the pieces needed to show the net in <span class="math inline">\(p\)</span>-D. You need the data, points marking the net, and edges indicating which points to connect to draw the net.</p>
+<div class="cell">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/ggobi/tourr">tourr</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Set up data</span></span>
+<span><span class="va">p_som_map</span> <span class="op">&lt;-</span> <span class="va">p_som_df_net</span><span class="op">$</span><span class="va">net</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>species <span class="op">=</span> <span class="st">"0"</span>, type<span class="op">=</span><span class="st">"net"</span><span class="op">)</span></span>
+<span><span class="va">p_som_data</span> <span class="op">&lt;-</span> <span class="va">p_som_data</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">bl</span><span class="op">:</span><span class="va">bm</span>, <span class="va">species</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>type<span class="op">=</span><span class="st">"data"</span>, </span>
+<span>         species <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">species</span><span class="op">)</span><span class="op">)</span> </span>
+<span><span class="va">p_som_map_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html">bind_rows</a></span><span class="op">(</span><span class="va">p_som_map</span>, <span class="va">p_som_data</span><span class="op">)</span></span>
+<span><span class="va">p_som_map_data</span><span class="op">$</span><span class="va">type</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">p_som_map_data</span><span class="op">$</span><span class="va">type</span>,</span>
+<span>  levels<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"net"</span>, <span class="st">"data"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">p_som_map_data</span><span class="op">$</span><span class="va">species</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">p_som_map_data</span><span class="op">$</span><span class="va">species</span>,</span>
+<span>  levels<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"0"</span>,<span class="st">"Adelie"</span>,<span class="st">"Chinstrap"</span>,<span class="st">"Gentoo"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">p_pch</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">46</span>, <span class="fl">16</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="va">p_som_map_data</span><span class="op">$</span><span class="va">type</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="va">p_col</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"black"</span>, <span class="fu"><a href="https://rdrr.io/r/grDevices/palettes.html">hcl.colors</a></span><span class="op">(</span><span class="fl">3</span>, <span class="st">"Zissou 1"</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="va">p_som_map_data</span><span class="op">$</span><span class="va">species</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/tourr/man/display_xy.html">animate_xy</a></span><span class="op">(</span><span class="va">p_som_map_data</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,</span>
+<span>           col<span class="op">=</span><span class="va">p_col</span>, </span>
+<span>           pch<span class="op">=</span><span class="va">p_pch</span>,</span>
+<span>           edges<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">p_som_df_net</span><span class="op">$</span><span class="va">edges</span><span class="op">)</span>, </span>
+<span>           edges.col <span class="op">=</span> <span class="st">"black"</span>,</span>
+<span>           axes<span class="op">=</span><span class="st">"bottomleft"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="fig-penguins-som" class="quarto-layout-panel">
+<figure class="figure"><div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div class="cell-output-display">
+<div id="fig-p-som2" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure"><p><img src="11-som_files/figure-html/fig-p-som2-1.png" class="img-fluid figure-img" data-ref-parent="fig-penguins-som" width="672"></p>
+<figcaption class="figure-caption">(a) 2D map</figcaption></figure>
+</div>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-p-som1" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure"><p><img src="gifs/p_som.gif" class="img-fluid figure-img" alt="" data-ref-parent="fig-penguins-som"></p>
+<figcaption class="figure-caption">(b) Map in 4D</figcaption></figure>
+</div>
+</div>
+</div>
+<p></p><figcaption class="figure-caption">Figure&nbsp;11.1: Examining the SOM map views in 2D and with the data in 4D. Points are coloured by species, which was not used for the modeling. The 2D map shows that the <code>map 2</code> direction is primarily distinguishing the Gentoo from the others, and <code>map 1</code> is imperfectly distinguishing the Chinstrap from Adelie. The map in the data space shows how it is woven into the shape of the data.</figcaption><p></p>
+</figure>
+</div>
+<p>The SOM fit, with a <span class="math inline">\(5\times 5\)</span> grid, for the penguins has the data clustered into 25 groups. This doesn’t work as a clustering technique on its own, if we remember that the data has three clusters corresponding to three species of penguins. Using species to colour the points helps to see what SOM has done. It has used about seven nodes to capture the separated Gentoo group. These are mostly in the <code>map 2</code> direction, which means that this direction (like a direction in PCA) is useful for distinguishing the Gentoo penguins from the others. The other two species are mixed on the map, but roughly spread out on the direction of <code>map 1</code>.</p>
+<section id="exercises" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="exercises">Exercises</h2>
+<ol type="1">
+<li>Fit an SOM to the first four PCs of the <code>aflw</code> data. Examine the best solution (you choose the size of the net), and describe how the map lays out the data. Does it show offensive vs defensive vs midfield players? Or does it tend to show high skills vs low skills?</li>
+<li>Fit an SOM to the first 10 PCs of the <code>fake_trees</code> data, using your choice of net size. How well does the map show the branching structure?</li>
+<li>Examine a range of SOM nets fitted to the first 10 PCs of the <code>fake_trees</code> data in the 10D space using a tour. Set the values of <code>rlen</code> to be 5, 50, 500. How does the net change on this parameter?</li>
+<li>Plot the distances output for the SOM fit to the penguins data. Mark the observations that have the 5 biggest distances, and show these in a tour. These are the observations where the net has fitted least well, and may be outliers.</li>
+<li>Use SOM on the challenge data sets, <code>c1</code>-<code>c7</code> from the <code>mulgar</code> package. What is the best choice of number of knots for each? Explain why or why not the model fits the cluster structure of each or not.</li>
+</ol>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" data-line-spacing="2" role="list" style="display: none">
@@ -1249,11 +1263,7 @@ Zhang, H. S., Cook, D., Laa, U., Langrené, N., &amp; Menéndez, P. (2022). <em>
 Zhu, H. (2021). <em>kableExtra: Construct complex table with kable and pipe syntax</em>. <a href="https://CRAN.R-project.org/package=kableExtra">https://CRAN.R-project.org/package=kableExtra</a>
 </div>
 </div>
-</section></section><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><hr>
-<ol>
-<li id="fn1"><p>Mulga is a type of Australian habitat composed of woodland or open forest dominated by the mulga tree. Massive clearing of mulga led to the vast wheat fields of Western Australia. Here <strong>mulgar</strong> is an acronym for <strong>MUL</strong>tivariate <strong>G</strong>raphical <strong>A</strong>nalysis with <strong>R</strong>.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn2"><p>Photo of mulga tree taken by L. G. Cook.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-</ol></section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+</section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
     const mode = bsSheetEl.getAttribute("data-mode");
@@ -1486,10 +1496,13 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
 });
 </script><nav class="page-navigation"><div class="nav-page nav-page-previous">
+      <a href="./10-model-based.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Model-based clustering</span></span>
+      </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./1-intro.html" class="pagination-link">
-        <span class="nav-page-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Picturing high dimensions</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./12-summary-clust.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Summarising and comparing results</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

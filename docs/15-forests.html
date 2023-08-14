@@ -4,9 +4,7 @@
 <meta charset="utf-8">
 <meta name="generator" content="quarto-1.3.433">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<meta name="author" content="Dianne Cook and Ursula Laa">
-<meta name="dcterms.date" content="2023-08-14">
-<title>Interactively exploring high-dimensional data and models in R</title>
+<title>Interactively exploring high-dimensional data and models in R - 15&nbsp; Trees and forests</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -81,7 +79,8 @@ div.csl-indent {
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./1-intro.html" rel="next">
+<link href="./16-svm.html" rel="next">
+<link href="./14-lda.html" rel="prev">
 <link href="./cover.png" rel="icon" type="image/png">
 <script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
@@ -119,7 +118,7 @@ div.csl-indent {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./index.html">Preface</a></li></ol></nav>
+      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./13-intro-class.html">Supervised classification</a></li><li class="breadcrumb-item"><a href="./15-forests.html"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Trees and forests</span></a></li></ol></nav>
       <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
       </a>
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
@@ -145,7 +144,7 @@ div.csl-indent {
     <ul class="list-unstyled mt-1">
 <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./index.html" class="sidebar-item-text sidebar-link active">
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Preface</span></a>
   </div>
 </li>
@@ -277,7 +276,7 @@ div.csl-indent {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./15-forests.html" class="sidebar-item-text sidebar-link">
+  <a href="./15-forests.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Trees and forests</span></span></a>
   </div>
 </li>
@@ -367,113 +366,1061 @@ div.csl-indent {
         <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Table of contents</h2>
    
   <ul>
-<li>
-<a href="#preface" id="toc-preface" class="nav-link active" data-scroll-target="#preface">Preface</a>
+<li><a href="#sec-trees" id="toc-sec-trees" class="nav-link active" data-scroll-target="#sec-trees"><span class="header-section-number">15.1</span> Trees</a></li>
+  <li>
+<a href="#random-forests" id="toc-random-forests" class="nav-link" data-scroll-target="#random-forests"><span class="header-section-number">15.2</span> Random forests</a>
   <ul class="collapse">
-<li><a href="#whats-in-this-book" id="toc-whats-in-this-book" class="nav-link" data-scroll-target="#whats-in-this-book">What’s in this book?</a></li>
-  <li><a href="#audience" id="toc-audience" class="nav-link" data-scroll-target="#audience">Audience</a></li>
-  <li><a href="#how-to-use-the-book" id="toc-how-to-use-the-book" class="nav-link" data-scroll-target="#how-to-use-the-book">How to use the book?</a></li>
-  <li><a href="#what-should-i-know-before-reading-this-book" id="toc-what-should-i-know-before-reading-this-book" class="nav-link" data-scroll-target="#what-should-i-know-before-reading-this-book">What should I know before reading this book?</a></li>
-  <li><a href="#setting-up-your-workflow" id="toc-setting-up-your-workflow" class="nav-link" data-scroll-target="#setting-up-your-workflow">Setting up your workflow</a></li>
-  <li><a href="#suggestion-feedback-or-error" id="toc-suggestion-feedback-or-error" class="nav-link" data-scroll-target="#suggestion-feedback-or-error">Suggestion, feedback or error?</a></li>
-  <li><a href="#license" id="toc-license" class="nav-link" data-scroll-target="#license">License</a></li>
+<li><a href="#examining-the-votes-matrix" id="toc-examining-the-votes-matrix" class="nav-link" data-scroll-target="#examining-the-votes-matrix"><span class="header-section-number">15.2.1</span> Examining the votes matrix</a></li>
+  <li><a href="#sec-forest-var-imp" id="toc-sec-forest-var-imp" class="nav-link" data-scroll-target="#sec-forest-var-imp"><span class="header-section-number">15.2.2</span> Using variable importance</a></li>
   </ul>
 </li>
-  </ul><div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/dicook/mulgar_book/edit/master/index.qmd" class="toc-action">Edit this page</a></p><p><a href="https://github.com/dicook/mulgar_book/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
+  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises">Exercises</a></li>
+  </ul><div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/dicook/mulgar_book/edit/master/15-forests.qmd" class="toc-action">Edit this page</a></p><p><a href="https://github.com/dicook/mulgar_book/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
-<h1 class="title">Interactively exploring high-dimensional data and models in R</h1>
+<h1 class="title"><span id="sec-trees-forests" class="quarto-section-identifier"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Trees and forests</span></span></h1>
 </div>
 
 
 
 <div class="quarto-title-meta">
 
-    <div>
-    <div class="quarto-title-meta-heading">Author</div>
-    <div class="quarto-title-meta-contents">
-             <p>Dianne Cook and Ursula Laa </p>
-          </div>
-  </div>
     
-    <div>
-    <div class="quarto-title-meta-heading">Published</div>
-    <div class="quarto-title-meta-contents">
-      <p class="date">August 14, 2023</p>
-    </div>
-  </div>
   
     
   </div>
   
 
-</header>
-<section id="preface" class="level1 unnumbered"><h1 class="unnumbered">Preface</h1><p><img src="cover.png" title="Interactively exploring high-dimensional data and models in R" class="quarto-cover-image img-fluid"></p>
-<!-- Why write this book
+</header><section id="sec-trees" class="level2" data-number="15.1"><h2 data-number="15.1" class="anchored" data-anchor-id="sec-trees">
+<span class="header-section-number">15.1</span> Trees</h2>
+<p>The tree algorithm <span class="citation" data-cites="BFOS84">Breiman et al. (<a href="references.html#ref-BFOS84" role="doc-biblioref">1984</a>)</span> is a simple and versatile algorithmic method for supervised classification. The basic tree algorithm generates a classification rule by sequentially splitting the data into two buckets. Splits are made between sorted data values of individual variables, with the goal of obtaining pure classes on each side of the split. The inputs for a simple tree classifier commonly include (1) an impurity measure, an indication of the relative diversity among the cases in the terminal nodes; (2) a parameter that sets the minimum number of cases in a node, or the minimum number of observations in a terminal node of the tree; and (3) a complexity measure that controls the growth of a tree, balancing the use of a simple generalizable tree against a more accurate tree tailored to the sample. When applying tree methods, exploring the effects of the input parameters on the tree is instructive; for example, it helps us to assess the stability of the tree model.</p>
+<p>Although algorithmic models do not depend on distributional assumptions, that does not mean that every algorithm is suitable for all data. For example, the tree model works best when all variables are independent within each class, because it does not take such dependencies into account. Visualization can help us to determine whether a particular model should be applied. In classification problems, it is useful to explore the cluster structure, comparing the clusters with the classes and looking for evidence of correlation within each class. The plots in <a href="14-lda.html#fig-lda-assumptions1">Figure&nbsp;<span>14.2</span></a> and <a href="14-lda.html#fig-penguins-lda-ellipses">Figure&nbsp;<span>14.5</span></a> shows a strong correlation between the variables within each species, which indicates that the tree model may not give good results for the penguins data. We’ll show how this is the case with two variables initially, and then extend to the four variables.</p>
+<div id="fig-p-bl-bd-tree" class="quarto-layout-panel">
+<figure class="figure"><div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<details><summary>Code</summary><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dicook.github.io/mulgar/">mulgar</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/bethatkinson/rpart">rpart</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://www.milbo.org/rpart-plot/index.html">rpart.plot</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://colorspace.R-Forge.R-project.org/">colorspace</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://had.co.nz/classifly">classifly</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"data/penguins_sub.rda"</span><span class="op">)</span></span>
+<span><span class="va">p_bl_bd_tree</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/rpart/man/rpart.html">rpart</a></span><span class="op">(</span><span class="va">species</span><span class="op">~</span><span class="va">bl</span><span class="op">+</span><span class="va">bd</span>, data<span class="op">=</span><span class="va">penguins_sub</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/rpart.plot/man/rpart.plot.html">rpart.plot</a></span><span class="op">(</span><span class="va">p_bl_bd_tree</span>, box.palette<span class="op">=</span><span class="st">"Grays"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div id="fig-p-bl-bd-tree1" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure"><p><img src="15-forests_files/figure-html/fig-p-bl-bd-tree1-1.png" class="img-fluid figure-img" data-ref-parent="fig-p-bl-bd-tree" width="288"></p>
+<figcaption class="figure-caption">(a) Default tree fit</figcaption></figure>
+</div>
+</div>
+</div>
+<div class="cell quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<details><summary>Code to draw tree and model fit</summary><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_bl_bd_tree_boundaries</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/classifly/man/explore.html">explore</a></span><span class="op">(</span><span class="va">p_bl_bd_tree</span>, <span class="va">penguins_sub</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">p_bl_bd_tree_boundaries</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">bl</span>, y<span class="op">=</span><span class="va">bd</span>, colour<span class="op">=</span><span class="va">species</span>, shape<span class="op">=</span><span class="va">.TYPE</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://colorspace.R-Forge.R-project.org/reference/scale_colour_discrete_divergingx.html">scale_color_discrete_divergingx</a></span><span class="op">(</span>palette<span class="op">=</span><span class="st">"Zissou 1"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html">scale_shape_manual</a></span><span class="op">(</span>values<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">46</span>, <span class="fl">16</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>aspect.ratio <span class="op">=</span> <span class="fl">1</span>, legend.position <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div id="fig-p-bl-bd-tree2" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure"><p><img src="15-forests_files/figure-html/fig-p-bl-bd-tree2-1.png" class="img-fluid figure-img" data-ref-parent="fig-p-bl-bd-tree" width="288"></p>
+<figcaption class="figure-caption">(b) Boundaries of tree fit</figcaption></figure>
+</div>
+</div>
+</div>
+</div>
+<p></p><figcaption class="figure-caption">Figure&nbsp;15.1: The correlation between variables causes problems for using a tree model on the penguins data.</figcaption><p></p>
+</figure>
+</div>
+<p>The plots in <a href="#fig-p-bl-bd-tree">Figure&nbsp;<span>15.1</span></a> show the inadequacies of the tree fit. The background color indicates the class predictions, and thus boundaries produced by the tree fit. They can be seen to be boxy, and missing the elliptical nature of the penguin clusters. This produces errors in the classification of observations which are indefensible. One could always force the tree to fit the data more closely by adjusting the parameters, but the main problem persists: that one is trying to fit elliptical data using boxes.</p>
+<div class="info">
+<p>For a non-parametric model we do not need to check assumptions. However, it is still important to understand the model and the data to make sure they work well together. For example, a tree model may not be a good choice in case of correlated variables, since all interactions need to be described via alternating splits on the variables.</p>
+</div>
+<p>The boundaries for the tree model on all four variables of the penguins data can be viewed similarly using the tour. The default fitted tree is delightfully simple, with just six splits of the data.</p>
+<div class="cell">
+<details><summary>Code to make animated gifs of slice tour of boundaries</summary><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_tree</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/rpart/man/rpart.html">rpart</a></span><span class="op">(</span><span class="va">species</span><span class="op">~</span><span class="va">.</span>, data<span class="op">=</span><span class="va">penguins_sub</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/rpart.plot/man/rpart.plot.html">rpart.plot</a></span><span class="op">(</span><span class="va">p_tree</span>, box.palette<span class="op">=</span><span class="st">"Grays"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">p_tree_boundaries</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/classifly/man/explore.html">explore</a></span><span class="op">(</span><span class="va">p_tree</span>, <span class="va">penguins_sub</span><span class="op">)</span></span>
+<span><span class="fu">animate_slice</span><span class="op">(</span><span class="va">p_tree_boundaries</span><span class="op">[</span><span class="va">p_tree_boundaries</span><span class="op">$</span><span class="va">.TYPE</span> <span class="op">==</span> <span class="st">"simulated"</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, col<span class="op">=</span><span class="va">p_tree_boundaries</span><span class="op">[</span><span class="va">p_tree_boundaries</span><span class="op">$</span><span class="va">.TYPE</span> <span class="op">==</span> <span class="st">"simulated"</span>,<span class="fl">6</span><span class="op">]</span>, v_rel<span class="op">=</span><span class="fl">0.02</span>, axes<span class="op">=</span><span class="st">"bottomleft"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"data/penguins_tour_path.rda"</span><span class="op">)</span></span>
+<span><span class="fu">render_gif</span><span class="op">(</span><span class="va">p_tree_boundaries</span><span class="op">[</span><span class="va">p_tree_boundaries</span><span class="op">$</span><span class="va">.TYPE</span> <span class="op">==</span> <span class="st">"simulated"</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,</span>
+<span>           <span class="fu">planned_tour</span><span class="op">(</span><span class="va">pt1</span><span class="op">)</span>,</span>
+<span>           <span class="fu">display_slice</span><span class="op">(</span>v_rel<span class="op">=</span><span class="fl">0.02</span>, </span>
+<span>             col<span class="op">=</span><span class="va">p_tree_boundaries</span><span class="op">[</span><span class="va">p_tree_boundaries</span><span class="op">$</span><span class="va">.TYPE</span> <span class="op">==</span> <span class="st">"simulated"</span>,<span class="fl">6</span><span class="op">]</span>, </span>
+<span>             axes<span class="op">=</span><span class="st">"bottomleft"</span><span class="op">)</span>,                     gif_file<span class="op">=</span><span class="st">"gifs/penguins_tree_boundaries.gif"</span>,</span>
+<span>           frames<span class="op">=</span><span class="fl">500</span>,</span>
+<span>           loop<span class="op">=</span><span class="cn">FALSE</span></span>
+<span>           <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div id="fig-penguins-lda-tree" class="quarto-layout-panel">
+<figure class="figure"><div class="quarto-layout-row quarto-layout-valign-top">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-lda-boundary" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure"><p><img src="gifs/penguins_lda_boundaries.gif" class="img-fluid figure-img" alt="FIX ME" data-ref-parent="fig-penguins-lda-tree" width="300"></p>
+<figcaption class="figure-caption">(a) Boundaries produced by the LDA model.</figcaption></figure>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-tree-boundary" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure"><p><img src="gifs/penguins_tree_boundaries.gif" class="img-fluid figure-img" alt="FIX ME" data-ref-parent="fig-penguins-lda-tree" width="300"></p>
+<figcaption class="figure-caption">(b) Boundaries produced by the tree model.</figcaption></figure>
+</div>
+</div>
+</div>
+<p></p><figcaption class="figure-caption">Figure&nbsp;15.2: Comparison of the boundaries produced by the LDA model and the tree models.</figcaption><p></p>
+</figure>
+</div>
+<p></p>
+</section><section id="random-forests" class="level2" data-number="15.2"><h2 data-number="15.2" class="anchored" data-anchor-id="random-forests">
+<span class="header-section-number">15.2</span> Random forests</h2>
+<p>A random forest <span class="citation" data-cites="Br01">Breiman &amp; Cutler (<a href="references.html#ref-Cu04" role="doc-biblioref">2004</a>)</span> is a classifier that is built from multiple trees generated by randomly sampling the cases and the variables. The random sampling (with replacement) of cases has the fortunate effect of creating a training (“in-bag”) and a test (“out-of-bag”) sample for each tree computed. The class of each case in the out-of-bag sample for each tree is predicted, and the predictions for all trees are combined into a vote for the class identity.</p>
+<p>A random forest is a computationally intensive method, a “black box” classifier, but it produces several diagnostics that make the outcome less mysterious. Some diagnostics that help us to assess the model are the votes, the measure of variable importance, and the proximity matrix.</p>
+<section id="examining-the-votes-matrix" class="level3" data-number="15.2.1"><h3 data-number="15.2.1" class="anchored" data-anchor-id="examining-the-votes-matrix">
+<span class="header-section-number">15.2.1</span> Examining the votes matrix</h3>
+<p>Here we show how to use the <code>randomForest</code> <span class="citation" data-cites="randomForest2002">(<a href="references.html#ref-randomForest2002" role="doc-biblioref">Liaw &amp; Wiener, 2002</a>)</span> votes matrix for the penguins data to investigate confusion between classes, and observations which are problematic to classify. With only three classes the votes matrix is only a 2D object, and thus easy to examine. With four or more classes the votes matrix needs to be examined in a tour.</p>
+<div class="cell">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://www.stat.berkeley.edu/~breiman/RandomForests/">randomForest</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span></span>
+<span><span class="va">penguins_rf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/randomForest/man/randomForest.html">randomForest</a></span><span class="op">(</span><span class="va">species</span><span class="op">~</span><span class="va">.</span>,</span>
+<span>                             data<span class="op">=</span><span class="va">penguins_sub</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>,</span>
+<span>                             importance<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">penguins_rf</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+ randomForest(formula = species ~ ., data = penguins_sub[, 1:5],      importance = TRUE) 
+               Type of random forest: classification
+                     Number of trees: 500
+No. of variables tried at each split: 2
 
--   an introduction to modern statistical methods through the lens of visualisation
--   focus on data analysis and computing over mathematics
--   intuit high dimensional data through dynamic graphics
--   use R + graphics as tool for augmenting understanding of data, models and inferences(?)
--->
-<p>It is important to visualise your data because you might discover things that you could never have anticipated. Although there are many resources available for data visualisation, there are few comprehensive resources on high-dimensional data visualisation. High-dimensional (or multivariate) data arises when many different things are measured for each observation. While we can learn many things from plotting with 1D and 2D or 3D methods there are likely more structures hidden in the higher dimensions. This book provides guidance on visualising high-dimensional data and models using linear projections, with R.</p>
-<p>High-dimensional data spaces are fascinating places. You may think that there’s a lot of ways to plot one or two variables, and a lot of types of patterns that can be found. You might use a density plot and see skewness or a dot plot to find outliers. A scatterplot of two variables might reveal a non-linear relationship or a barrier beyond which no observations exist. We don’t as yet have so many different choices of plot types for high-dimensions, but these types of patterns are also what we seek in scatterplots of high-dimensional data. The additional dimensions can clarify these patterns, that clusters are likely to be more distinct. Observations that did not appear to be very different can be seen to be lonely anomalies in high-dimensions, that no other observations have quite the same combination of values.</p>
-<section id="whats-in-this-book" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="whats-in-this-book">What’s in this book?</h2>
-<p>The book is divided into these parts:</p>
-<ul>
-<li>
-<strong>Introduction</strong>: Here we introduce you to high-dimensional spaces, how they can be visualised, and notation that is useful for describing methods in later chapters.<br>
-</li>
-<li>
-<strong>Dimension reduction</strong>: This part covers linear and non-linear dimension reduction. It includes ways to help decide on the number of dimensions needed to summarise the high dimensional data, whether linear dimension reduction is appropriate, detecting problems that might affect the dimension reduction, and examining how well or badly a non-linear dimension reduction is representing the data.</li>
-<li>
-<strong>Cluster analysis</strong>: This part described methods for finding groups in data. Although it includes an explanation of a purely graphical approach, it is mostly on using graphics in association with numerical clustering algorithms. There are explanations of assessing the suitability of different numerical techniques for extracting clusters, based on the data shapes, evaluating the clustering result, and showing the solutions in high dimensions.</li>
-<li>
-<strong>Classification</strong>: This part describes methods for exploring known groups in the data. You’ll learn how to check model assumptions, to help decide if a method is suited to the data, examine classification boundaries and explore where errors arise.</li>
-<li>
-<strong>Miscellaneous</strong>: The material in this part focuses on examining data from different contexts. This includes multiple time series, longitudinal data. A key pre-processing step is to convert the data into Euclidean space.</li>
-</ul>
-<p>In each of these parts an emphasis is also showing your model with your data in the high dimensional space.</p>
-<p>Our hopes are that you will come away with understanding the importance of plotting your high dimensional data as a regular step in your statistical or machine learning analyses. There are many examples of what you might miss if you don’t plot the data. Effective use of graphics goes hand-in-hand with analytical techniques. With high dimensions visualisation is a challenge but it is fascinating, and leads to many surprising moments.</p>
-</section><section id="audience" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="audience">Audience</h2>
-<p>High-dimensional data arises in many fields such as biology, social sciences, finance, and more. Anyone who is doing exploratory data analysis and model fitting for more than two variables will benefit from learning how to effectively visualise high-dimensions. This book will be useful for students and teachers of multivariate data analysis and machine learning, and researchers, data analysts, and industry professionals who work in these areas.</p>
-</section><section id="how-to-use-the-book" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="how-to-use-the-book">How to use the book?</h2>
-<p>The book is written with explanations accompanied by examples with R code. The chapters are organised by types of analysis and focus on how to use the high-dimensional visualisation to complement the commonly used analytical methods. The toolbox chapter in the Appendix provides an overview of the primary high-dimensional visualisation methods discussed in the book and how to get started.</p>
-</section><section id="what-should-i-know-before-reading-this-book" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="what-should-i-know-before-reading-this-book">What should I know before reading this book?</h2>
-<p>The examples assume that you already use R, and have a working knowledge of base R and tidyverse way of thinking about data analysis. It also assumes that you have some knowledge of statistical methods, and some experience with machine learning methods.</p>
-<p>If you feel like you need build up your skills in these areas in preparation for working through this book, these are our recommended resources:</p>
-<ul>
-<li>
-<a href="https://r4ds.had.co.nz">R for Data Science</a> by Wickham and Grolemund for learning about data wrangling and visualisation.</li>
-<li>
-<a href="https://openintro-ims.netlify.app">Introduction to Modern Statistics</a> by Çetinkaya-Rundel and Hardin to learn about introductory statistics.</li>
-<li>
-<a href="https://bradleyboehmke.github.io/HOML/">Hands-On Machine Learning with R</a> by Boehmke and Greenwell to learn about machine learning.</li>
-</ul>
-<p>We will assume you know how to plot your data and models in 2D. Our material starts from 2D and beyond.</p>
-</section><section id="setting-up-your-workflow" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="setting-up-your-workflow">Setting up your workflow</h2>
-<p>To get started set up your computer with the current versions of <a href="https://cran.r-project.org">R</a> and ideally also with <a href="https://posit.co/download/rstudio-desktop/">Rstudio Desktop</a>.</p>
-<p>In addition, we have made an R package to share the data and functions used in this book, called <a href="http://dicook.github.io/mulgar"><code>mulgar</code></a>.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a><a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></p>
-<div class="cell">
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span><span class="op">(</span><span class="st">"mulgar"</span>, dependencies<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="co"># or the development version</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html">install_github</a></span><span class="op">(</span><span class="st">"dicook/mulgar"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+        OOB estimate of  error rate: 2.7%
+Confusion matrix:
+          Adelie Chinstrap Gentoo class.error
+Adelie       142         3      1 0.027397260
+Chinstrap      4        64      0 0.058823529
+Gentoo         0         1    118 0.008403361</code></pre>
 </div>
-<p>To get a copy of the code and data used and an RStudio project to get started, you can download with this code:</p>
-<div class="cell">
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">usethis</span><span class="fu">::</span><span class="fu"><a href="https://usethis.r-lib.org/reference/zip-utils.html">use_zip</a></span><span class="op">(</span>url<span class="op">=</span><span class="st">"https://dicook.github.io/mulgar_book/code_and_data.zip"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>You will be able to click on the <code>mulgar_book.Rproj</code> to get started with the code.</p>
-</section><section id="suggestion-feedback-or-error" class="level2"><h2 class="anchored" data-anchor-id="suggestion-feedback-or-error">Suggestion, feedback or error?</h2>
-<p>We welcome suggestions, feedback or details of errors. You can report them as an issue at the <a href="https://github.com/dicook/mulgar_book">Github repo for this book</a>.</p>
-<p>Please make a small <a href="https://reprex.tidyverse.org">reproducible example</a> and report the error encountered. Reproducible examples have these components:</p>
-<ul>
-<li>a small amount of data</li>
-<li>small amount of code that generates the error</li>
-<li>copy of the error message that was generated</li>
-</ul></section><section id="license" class="level2"><h2 class="anchored" data-anchor-id="license">License</h2>
-<p><a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png"></a><br>The online version of this book is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.</p>
+<p>To examine the votes matrix, we extract the <code>votes</code> element from the random forest model object. This will have three columns corresponding to the three species, but because each row is a set of proportions it is only a 2D object, as seen in <a href="#fig-p-votes-tour">Figure&nbsp;<span>15.3 (a)</span></a>. To reduce the dimension from 3D to the 2D we use a Helmert matrix <span class="citation" data-cites="helmert">(<a href="references.html#ref-helmert" role="doc-biblioref">Lancaster, 1965</a>)</span>. A Helmert matrix has a first row of all 1’s. The remaining components of the matrix are 1’s in the lower triangle, and 0’s in the upper triangle and the diagonal elements are the negative row sum. The rows are usually normalised to have length 1. They are used to create contrasts to test combinations of factor levels for post-testing after Analysis of Variance (ANOVA). For compositional data, like the votes matrix, when the first row is removed a Helmert matrix can be used to reduce the dimension appropriately. For three classes, this will generate the common 2D ternary diagram, but for higher dimensions it will reduce to a <span class="math inline">\((g-1)\)</span>-dimensional simplex. For the penguins data, the Helmert matrix for 3D is</p>
+<div class="cell">
+<details><summary>Code to compute Helmert matrix</summary><div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">geozoo</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/geozoo/man/f_helmert.html">f_helmert</a></span><span class="op">(</span><span class="fl">3</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>             [,1]       [,2]       [,3]
+helmert 0.5773503  0.5773503  0.5773503
+x       0.7071068 -0.7071068  0.0000000
+x       0.4082483  0.4082483 -0.8164966</code></pre>
+</div>
+</div>
+<p>We drop the first row, transpose it, and use matrix multiplication with the votes matrix to get the ternary diagram.</p>
+<div class="cell">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Project 4D into 3D</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://schloerke.github.io/geozoo/">geozoo</a></span><span class="op">)</span></span>
+<span><span class="va">proj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="fu">geozoo</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/geozoo/man/f_helmert.html">f_helmert</a></span><span class="op">(</span><span class="fl">3</span><span class="op">)</span><span class="op">[</span><span class="op">-</span><span class="fl">1</span>,<span class="op">]</span><span class="op">)</span></span>
+<span><span class="va">p_rf_v_p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">penguins_rf</span><span class="op">$</span><span class="va">votes</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">proj</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">p_rf_v_p</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"x1"</span>, <span class="st">"x2"</span><span class="op">)</span></span>
+<span><span class="va">p_rf_v_p</span> <span class="op">&lt;-</span> <span class="va">p_rf_v_p</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>species <span class="op">=</span> <span class="va">penguins_sub</span><span class="op">$</span><span class="va">species</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We can use the <code>geozoo</code> package to generate the surrounding simplex, which is a triangle for 2D.</p>
+<div class="cell">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Add simplex</span></span>
+<span><span class="va">simp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/geozoo/man/simplex.html">simplex</a></span><span class="op">(</span>p<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span>
+<span><span class="va">sp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span><span class="op">(</span><span class="va">simp</span><span class="op">$</span><span class="va">points</span><span class="op">)</span>, <span class="va">simp</span><span class="op">$</span><span class="va">points</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>,<span class="fl">3</span>,<span class="fl">1</span><span class="op">)</span>,<span class="op">]</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">sp</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>, <span class="st">"x4"</span><span class="op">)</span></span>
+<span><span class="va">sp</span><span class="op">$</span><span class="va">species</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sort.html">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span><span class="op">(</span><span class="va">penguins_sub</span><span class="op">$</span><span class="va">species</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jrnold/ggthemes">ggthemes</a></span><span class="op">)</span></span>
+<span><span class="va">p_ternary</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_segment.html">geom_segment</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">sp</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">x1</span>, y<span class="op">=</span><span class="va">x2</span>, xend<span class="op">=</span><span class="va">x3</span>, yend<span class="op">=</span><span class="va">x4</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_text.html">geom_text</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">sp</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">x1</span>, y<span class="op">=</span><span class="va">x2</span>, label<span class="op">=</span><span class="va">species</span><span class="op">)</span>,</span>
+<span>            nudge_x<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">0.06</span>, <span class="fl">0.07</span>, <span class="fl">0</span><span class="op">)</span>,</span>
+<span>            nudge_y<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.05</span>, <span class="op">-</span><span class="fl">0.05</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">p_rf_v_p</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">x1</span>, y<span class="op">=</span><span class="va">x2</span>, colour<span class="op">=</span><span class="va">species</span><span class="op">)</span>, size<span class="op">=</span><span class="fl">2</span>, alpha<span class="op">=</span><span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://colorspace.R-Forge.R-project.org/reference/scale_colour_discrete_divergingx.html">scale_color_discrete_divergingx</a></span><span class="op">(</span>palette<span class="op">=</span><span class="st">"Zissou 1"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/ggthemes/man/theme_map.html">theme_map</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>aspect.ratio<span class="op">=</span><span class="fl">1</span>, legend.position<span class="op">=</span><span class="st">"none"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<details><summary>Code to generate animated gifs</summary><div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Look at the votes matrix, in its 3D space</span></span>
+<span><span class="fu">animate_xy</span><span class="op">(</span><span class="va">penguins_rf</span><span class="op">$</span><span class="va">votes</span>, col<span class="op">=</span><span class="va">penguins_sub</span><span class="op">$</span><span class="va">species</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Save an animated gif</span></span>
+<span><span class="fu">render_gif</span><span class="op">(</span><span class="va">penguins_rf</span><span class="op">$</span><span class="va">votes</span>,</span>
+<span>           <span class="fu">grand_tour</span><span class="op">(</span><span class="op">)</span>,</span>
+<span>           <span class="fu">display_xy</span><span class="op">(</span>v_rel<span class="op">=</span><span class="fl">0.02</span>, </span>
+<span>             col<span class="op">=</span><span class="va">penguins_sub</span><span class="op">$</span><span class="va">species</span>, </span>
+<span>             axes<span class="op">=</span><span class="st">"bottomleft"</span><span class="op">)</span>, </span>
+<span>           gif_file<span class="op">=</span><span class="st">"gifs/penguins_rf_votes.gif"</span>,</span>
+<span>           frames<span class="op">=</span><span class="fl">500</span>,</span>
+<span>           loop<span class="op">=</span><span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div id="fig-penguins-votes" class="quarto-layout-panel">
+<figure class="figure"><div class="quarto-layout-row quarto-layout-valign-top">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-p-votes-tour" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure"><p><img src="gifs/penguins_rf_votes.gif" class="img-fluid figure-img" alt="FIX ME" data-ref-parent="fig-penguins-votes" width="300"></p>
+<figcaption class="figure-caption">(a) Votes matrix in a tour.</figcaption></figure>
+</div>
+</div>
+<div class="cell quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div class="cell-output-display">
+<div id="fig-p-votes-ggplot" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure"><p><img src="15-forests_files/figure-html/fig-p-votes-ggplot-1.png" class="img-fluid figure-img" data-ref-parent="fig-penguins-votes" width="384"></p>
+<figcaption class="figure-caption">(b) Votes matrix in its 2D space, a ternary diagram.</figcaption></figure>
+</div>
+</div>
+</div>
+</div>
+<p></p><figcaption class="figure-caption">Figure&nbsp;15.3: Examining the votes matrix from a random forest fit to the penguins.</figcaption><p></p>
+</figure>
+</div>
+<p>The votes matrix reports the proportion of trees each observation is classified as each class. From the tour of the votes matrix, it can be seen to be 2D in 3D space. This is due to the constraint that the three proportions for each observation sum to 1. Using a Helmert matrix, this data can be projected into the 2D space, or more generally the <span class="math inline">\((g-1)\)</span>-dimensional space where it resides. In 2D this is called a ternary diagram, and in higher dimensions the bounding shapes might be considered to be a simplex. The vertices of this shape correspond to <span class="math inline">\((1,0,0), (0,1,0), (0,0,1)\)</span> (and analogously for higher dimensions), which represent perfect confidence, that an observation is classified into that group all the time.</p>
+<p>What we can see here is a concentration of points in the corners of the triangle indicates that most of the penguins are confidently classified into their correct class. Then there is more separation between the Gentoo and the others, than between Chinstrap and Adelie. That means that as a group Gentoo are more distinguishable. Only one of the Gentoo penguins has substantial confusion, mostly confused as a Chinstrap, but occasionally confused as an Adelie – if it was only ever confused as a Chinstrap it would fall on the edge between Gentoo and Chinstrap. There are quite a few Chinstrap and Adelie penguins confused as each other, with a couple of each more confidently predicted to be the other class. This can be seen because there are points of the wrong colour close to those vertices.</p>
+<p>The votes matrix is useful for investigating the fit, but one should remember that there are some structural elements of this data that don’t lend themselves to tree models. Although a forest has the capacity to generate non-linear boundaries by combining predictions from multiple trees, it is still based on the boxy boundaries of trees. This makes it less suitable for the penguins data with elliptical classes. You could use the techniques from the previous section to explore the boundaries produced by the forest, and you will find that the are more boxy than the LDA models.</p>
+<p>To examine a vote matrix for a problem with more classes, we will examine the 10 class fake_trees data example. The full data has 100 variables, and we have seen from <a href="7-spin-and-brush.html"><span>Chapter&nbsp;7</span></a> that reducing to 10 principal components allows the linear branching structure in the data to be seen. Given that the branches correspond to the classes, it will be interesting to see how well the random forest model performs.</p>
+<div class="cell">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dicook.github.io/mulgar/">mulgar</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sa-lee/liminal/">liminal</a></span><span class="op">)</span></span>
+<span><span class="va">ft_pca</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/prcomp.html">prcomp</a></span><span class="op">(</span><span class="va">fake_trees</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">100</span><span class="op">]</span>, </span>
+<span>                 scale<span class="op">=</span><span class="cn">TRUE</span>, retx<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">ft_pc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="va">ft_pca</span><span class="op">$</span><span class="va">x</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="va">ft_pc</span><span class="op">$</span><span class="va">branches</span> <span class="op">&lt;-</span> <span class="va">fake_trees</span><span class="op">$</span><span class="va">branches</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://www.stat.berkeley.edu/~breiman/RandomForests/">randomForest</a></span><span class="op">)</span></span>
+<span><span class="va">ft_rf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/randomForest/man/randomForest.html">randomForest</a></span><span class="op">(</span><span class="va">branches</span><span class="op">~</span><span class="va">.</span>, data<span class="op">=</span><span class="va">ft_pc</span>, </span>
+<span>                            importance<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">ft_rf</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+ randomForest(formula = branches ~ ., data = ft_pc, importance = TRUE) 
+               Type of random forest: classification
+                     Number of trees: 500
+No. of variables tried at each split: 3
+
+        OOB estimate of  error rate: 4.27%
+Confusion matrix:
+    0   1   2   3   4   5   6   7   8   9 class.error
+0 266   7   2   2   3   4   3   4   6   3  0.11333333
+1  12 288   0   0   0   0   0   0   0   0  0.04000000
+2   9   0 290   0   1   0   0   0   0   0  0.03333333
+3   5   0   0 289   0   0   0   4   0   2  0.03666667
+4  13   0   0   0 287   0   0   0   0   0  0.04333333
+5  12   0   0   0   0 288   0   0   0   0  0.04000000
+6  12   0   0   0   0   0 287   0   1   0  0.04333333
+7   4   0   0   5   0   0   0 290   0   1  0.03333333
+8   8   0   0   0   0   0   0   0 292   0  0.02666667
+9   5   0   0   0   0   0   0   0   0 295  0.01666667</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">ft_rf_votes</span> <span class="op">&lt;-</span> <span class="va">ft_rf</span><span class="op">$</span><span class="va">votes</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html">as_tibble</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>branches <span class="op">=</span> <span class="va">fake_trees</span><span class="op">$</span><span class="va">branches</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">proj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="fu">geozoo</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/geozoo/man/f_helmert.html">f_helmert</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span><span class="op">[</span><span class="op">-</span><span class="fl">1</span>,<span class="op">]</span><span class="op">)</span></span>
+<span><span class="va">f_rf_v_p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">ft_rf_votes</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">proj</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">f_rf_v_p</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>, <span class="st">"x4"</span>, <span class="st">"x5"</span>, <span class="st">"x6"</span>, <span class="st">"x7"</span>, <span class="st">"x8"</span>, <span class="st">"x9"</span><span class="op">)</span></span>
+<span><span class="va">f_rf_v_p</span> <span class="op">&lt;-</span> <span class="va">f_rf_v_p</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>branches <span class="op">=</span> <span class="va">fake_trees</span><span class="op">$</span><span class="va">branches</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">simp</span> <span class="op">&lt;-</span> <span class="fu">geozoo</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/geozoo/man/simplex.html">simplex</a></span><span class="op">(</span>p<span class="op">=</span><span class="fl">9</span><span class="op">)</span></span>
+<span><span class="va">sp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span><span class="va">simp</span><span class="op">$</span><span class="va">points</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">sp</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>, <span class="st">"x4"</span>, <span class="st">"x5"</span>, <span class="st">"x6"</span>, <span class="st">"x7"</span>, <span class="st">"x8"</span>, <span class="st">"x9"</span><span class="op">)</span></span>
+<span><span class="va">sp</span><span class="op">$</span><span class="va">branches</span> <span class="op">=</span> <span class="st">""</span></span>
+<span><span class="va">f_rf_v_p_s</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html">bind_rows</a></span><span class="op">(</span><span class="va">sp</span>, <span class="va">f_rf_v_p</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>branches <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">branches</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">labels</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"0"</span> , <span class="st">"1"</span>, <span class="st">"2"</span>, <span class="st">"3"</span>, <span class="st">"4"</span>, <span class="st">"5"</span>, <span class="st">"6"</span>, <span class="st">"7"</span>, <span class="st">"8"</span>, <span class="st">"9"</span>,</span>
+<span>                <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="st">""</span>, <span class="fl">3000</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<details><summary>Code to make animated gifs</summary><div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">animate_xy</span><span class="op">(</span><span class="va">f_rf_v_p_s</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">9</span><span class="op">]</span>, col <span class="op">=</span> <span class="va">f_rf_v_p_s</span><span class="op">$</span><span class="va">branches</span>, </span>
+<span>           axes <span class="op">=</span> <span class="st">"off"</span>, half_range <span class="op">=</span> <span class="fl">0.8</span>,</span>
+<span>           edges <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">simp</span><span class="op">$</span><span class="va">edges</span><span class="op">)</span>,</span>
+<span>           obs_labels <span class="op">=</span> <span class="va">labels</span>, palette <span class="op">=</span> <span class="st">"Viridis"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">render_gif</span><span class="op">(</span><span class="va">f_rf_v_p_s</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">9</span><span class="op">]</span>,</span>
+<span>           <span class="fu">grand_tour</span><span class="op">(</span><span class="op">)</span>,</span>
+<span>           <span class="fu">display_xy</span><span class="op">(</span>col <span class="op">=</span> <span class="va">f_rf_v_p_s</span><span class="op">$</span><span class="va">branches</span>, </span>
+<span>           axes <span class="op">=</span> <span class="st">"off"</span>, half_range <span class="op">=</span> <span class="fl">0.8</span>,</span>
+<span>           edges <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">simp</span><span class="op">$</span><span class="va">edges</span><span class="op">)</span>,</span>
+<span>           obs_labels <span class="op">=</span> <span class="va">labels</span>, palette<span class="op">=</span><span class="st">"Viridis"</span><span class="op">)</span>,</span>
+<span>           gif_file<span class="op">=</span><span class="st">"gifs/ft_votes.gif"</span>,</span>
+<span>           frames<span class="op">=</span><span class="fl">500</span><span class="op">)</span> </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div id="fig-ft-votes" class="quarto-layout-panel">
+<figure class="figure"><div class="quarto-layout-row quarto-layout-valign-top">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-ft-votes-tour" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure"><p><img src="gifs/ft_votes.gif" class="img-fluid figure-img" alt="FIX ME" data-ref-parent="fig-ft-votes" width="300"></p>
+<figcaption class="figure-caption">(a) The 9D votes matrix for the 10 class fake_trees data in a tour.</figcaption></figure>
+</div>
+</div>
+<div class="quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-ft-votes-prj" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure"><p><img src="images/ft-votes.png" class="img-fluid figure-img" alt="FIX ME" data-ref-parent="fig-ft-votes" width="300"></p>
+<figcaption class="figure-caption">(b) Several static views from the tour revealing how clusters connect.</figcaption></figure>
+</div>
+</div>
+</div>
+<p></p><figcaption class="figure-caption">Figure&nbsp;15.4: The votes matrix for the fake_trees data has a very striking geometric shape. The branching nature of the clusters is very clear. Most classes are distinct except for a connection with class 0.</figcaption><p></p>
+</figure>
+</div>
+<p>The votes matrix is 9D, but the structure of it is easy to read, and very interesting. The observations are coloured by class. There is one vertex (0) which has connections to all other vertexes. That is, there are points stretching without big breaks from this vertex to every other. It means that some observations in every other class can be confused with class 0, and class 0 observations can be confused with every other class. All of the other vertexes have a string of points almost entirely along one edge, the edge leading to vertex 0. This shows the lack of confusion with any other class, except 0. Cluster 0 could be considered the trunk of the tree, from which the other clusters grow.</p>
+<p>This pattern is what can be inferred from the confusion matrix, but we can’t determine whether the clusters are mostly separated except for a few observations, or some other clustering shape. The visual pattern in the votes matrix is so striking, and gives additional information about the clustering distribution, and shapes of clusters. It reinforces the clusters are linear extending into different dimensions in the 100D space, but really only into about 8D (as we’ll see from the variable importance explanation below). We also see that 9 of the clusters are all connected to one cluster.</p>
+<div class="info">
+<p>By visualizing the votes matrix we can understand which observations are harder to classify, which of the classes are more easily confused with each other and if there are groups with similar patterns in the data.</p>
+</div>
+<p></p>
+</section><section id="sec-forest-var-imp" class="level3" data-number="15.2.2"><h3 data-number="15.2.2" class="anchored" data-anchor-id="sec-forest-var-imp">
+<span class="header-section-number">15.2.2</span> Using variable importance</h3>
+<p>The variable importance score across all classes, and for each class is useful for choosing variables to enter into a tour, to explore class differences. This is particularly so when there are many variables, as in the fake_trees data. We would also expect that this data will have a difference between importance for some classes.</p>
+<div class="cell">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://gt.rstudio.com/">gt</a></span><span class="op">)</span></span>
+<span><span class="va">ft_rf</span><span class="op">$</span><span class="va">importance</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html">as_tibble</a></span><span class="op">(</span>rownames<span class="op">=</span><span class="st">"Variable"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html">rename</a></span><span class="op">(</span>Accuracy<span class="op">=</span><span class="va">MeanDecreaseAccuracy</span>,</span>
+<span>         Gini<span class="op">=</span><span class="va">MeanDecreaseGini</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="co">#arrange(desc(Gini)) %&gt;%</span></span>
+<span>  <span class="fu"><a href="https://gt.rstudio.com/reference/gt.html">gt</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://gt.rstudio.com/reference/fmt_number.html">fmt_number</a></span><span class="op">(</span>columns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">`0`</span>,<span class="va">`1`</span>,<span class="va">`2`</span>,<span class="va">`3`</span>,<span class="va">`4`</span>,<span class="va">`5`</span>,<span class="va">`6`</span>,<span class="va">`7`</span>,<span class="va">`8`</span>,<span class="va">`9`</span>, <span class="va">Accuracy</span><span class="op">)</span>,</span>
+<span>             decimals <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://gt.rstudio.com/reference/fmt_number.html">fmt_number</a></span><span class="op">(</span>columns <span class="op">=</span> <span class="va">Gini</span>,</span>
+<span>             decimals <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div id="tbl-ft-importance" class="anchored">
+
+<div id="nkzelflaek" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#nkzelflaek table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#nkzelflaek thead, #nkzelflaek tbody, #nkzelflaek tfoot, #nkzelflaek tr, #nkzelflaek td, #nkzelflaek th {
+  border-style: none;
+}
+
+#nkzelflaek p {
+  margin: 0;
+  padding: 0;
+}
+
+#nkzelflaek .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#nkzelflaek .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#nkzelflaek .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#nkzelflaek .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#nkzelflaek .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#nkzelflaek .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#nkzelflaek .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#nkzelflaek .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#nkzelflaek .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#nkzelflaek .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#nkzelflaek .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#nkzelflaek .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#nkzelflaek .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#nkzelflaek .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#nkzelflaek .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#nkzelflaek .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#nkzelflaek .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#nkzelflaek .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#nkzelflaek .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#nkzelflaek .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#nkzelflaek .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#nkzelflaek .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#nkzelflaek .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#nkzelflaek .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#nkzelflaek .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#nkzelflaek .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#nkzelflaek .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#nkzelflaek .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#nkzelflaek .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#nkzelflaek .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#nkzelflaek .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#nkzelflaek .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#nkzelflaek .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#nkzelflaek .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#nkzelflaek .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#nkzelflaek .gt_left {
+  text-align: left;
+}
+
+#nkzelflaek .gt_center {
+  text-align: center;
+}
+
+#nkzelflaek .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#nkzelflaek .gt_font_normal {
+  font-weight: normal;
+}
+
+#nkzelflaek .gt_font_bold {
+  font-weight: bold;
+}
+
+#nkzelflaek .gt_font_italic {
+  font-style: italic;
+}
+
+#nkzelflaek .gt_super {
+  font-size: 65%;
+}
+
+#nkzelflaek .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#nkzelflaek .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#nkzelflaek .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#nkzelflaek .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#nkzelflaek .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#nkzelflaek .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#nkzelflaek .gt_indent_5 {
+  text-indent: 25px;
+}
+</style>
+<table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+<caption>Table&nbsp;15.1:  <p>Variable importance from the random forest fit to the fake_trees
+data.</p> </caption>
+  <thead><tr class="gt_col_headings">
+<th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="Variable">Variable</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="0">0</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="1">1</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="2">2</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="3">3</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="4">4</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="5">5</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="6">6</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="7">7</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="8">8</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="9">9</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="Accuracy">Accuracy</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="Gini">Gini</th>
+    </tr></thead>
+<tbody class="gt_table_body">
+<tr>
+<td headers="Variable" class="gt_row gt_left">PC1</td>
+<td headers="0" class="gt_row gt_right">0.11</td>
+<td headers="1" class="gt_row gt_right">0.34</td>
+<td headers="2" class="gt_row gt_right">0.45</td>
+<td headers="3" class="gt_row gt_right">0.30</td>
+<td headers="4" class="gt_row gt_right">0.22</td>
+<td headers="5" class="gt_row gt_right">0.49</td>
+<td headers="6" class="gt_row gt_right">0.38</td>
+<td headers="7" class="gt_row gt_right">0.19</td>
+<td headers="8" class="gt_row gt_right">0.31</td>
+<td headers="9" class="gt_row gt_right">0.31</td>
+<td headers="Accuracy" class="gt_row gt_right">0.31</td>
+<td headers="Gini" class="gt_row gt_right">497</td>
+</tr>
+<tr>
+<td headers="Variable" class="gt_row gt_left">PC2</td>
+<td headers="0" class="gt_row gt_right">0.13</td>
+<td headers="1" class="gt_row gt_right">0.23</td>
+<td headers="2" class="gt_row gt_right">0.22</td>
+<td headers="3" class="gt_row gt_right">0.50</td>
+<td headers="4" class="gt_row gt_right">0.27</td>
+<td headers="5" class="gt_row gt_right">0.29</td>
+<td headers="6" class="gt_row gt_right">0.17</td>
+<td headers="7" class="gt_row gt_right">0.40</td>
+<td headers="8" class="gt_row gt_right">0.23</td>
+<td headers="9" class="gt_row gt_right">0.29</td>
+<td headers="Accuracy" class="gt_row gt_right">0.27</td>
+<td headers="Gini" class="gt_row gt_right">370</td>
+</tr>
+<tr>
+<td headers="Variable" class="gt_row gt_left">PC3</td>
+<td headers="0" class="gt_row gt_right">0.10</td>
+<td headers="1" class="gt_row gt_right">0.06</td>
+<td headers="2" class="gt_row gt_right">0.10</td>
+<td headers="3" class="gt_row gt_right">0.13</td>
+<td headers="4" class="gt_row gt_right">0.53</td>
+<td headers="5" class="gt_row gt_right">0.14</td>
+<td headers="6" class="gt_row gt_right">0.08</td>
+<td headers="7" class="gt_row gt_right">0.14</td>
+<td headers="8" class="gt_row gt_right">0.19</td>
+<td headers="9" class="gt_row gt_right">0.16</td>
+<td headers="Accuracy" class="gt_row gt_right">0.16</td>
+<td headers="Gini" class="gt_row gt_right">309</td>
+</tr>
+<tr>
+<td headers="Variable" class="gt_row gt_left">PC4</td>
+<td headers="0" class="gt_row gt_right">0.09</td>
+<td headers="1" class="gt_row gt_right">0.46</td>
+<td headers="2" class="gt_row gt_right">0.06</td>
+<td headers="3" class="gt_row gt_right">0.04</td>
+<td headers="4" class="gt_row gt_right">0.09</td>
+<td headers="5" class="gt_row gt_right">0.03</td>
+<td headers="6" class="gt_row gt_right">0.36</td>
+<td headers="7" class="gt_row gt_right">0.16</td>
+<td headers="8" class="gt_row gt_right">0.08</td>
+<td headers="9" class="gt_row gt_right">0.09</td>
+<td headers="Accuracy" class="gt_row gt_right">0.15</td>
+<td headers="Gini" class="gt_row gt_right">342</td>
+</tr>
+<tr>
+<td headers="Variable" class="gt_row gt_left">PC5</td>
+<td headers="0" class="gt_row gt_right">0.13</td>
+<td headers="1" class="gt_row gt_right">0.11</td>
+<td headers="2" class="gt_row gt_right">0.35</td>
+<td headers="3" class="gt_row gt_right">0.07</td>
+<td headers="4" class="gt_row gt_right">0.16</td>
+<td headers="5" class="gt_row gt_right">0.24</td>
+<td headers="6" class="gt_row gt_right">0.09</td>
+<td headers="7" class="gt_row gt_right">0.11</td>
+<td headers="8" class="gt_row gt_right">0.28</td>
+<td headers="9" class="gt_row gt_right">0.22</td>
+<td headers="Accuracy" class="gt_row gt_right">0.18</td>
+<td headers="Gini" class="gt_row gt_right">329</td>
+</tr>
+<tr>
+<td headers="Variable" class="gt_row gt_left">PC6</td>
+<td headers="0" class="gt_row gt_right">0.11</td>
+<td headers="1" class="gt_row gt_right">0.24</td>
+<td headers="2" class="gt_row gt_right">0.24</td>
+<td headers="3" class="gt_row gt_right">0.17</td>
+<td headers="4" class="gt_row gt_right">0.04</td>
+<td headers="5" class="gt_row gt_right">0.14</td>
+<td headers="6" class="gt_row gt_right">0.04</td>
+<td headers="7" class="gt_row gt_right">0.28</td>
+<td headers="8" class="gt_row gt_right">0.14</td>
+<td headers="9" class="gt_row gt_right">0.19</td>
+<td headers="Accuracy" class="gt_row gt_right">0.16</td>
+<td headers="Gini" class="gt_row gt_right">290</td>
+</tr>
+<tr>
+<td headers="Variable" class="gt_row gt_left">PC7</td>
+<td headers="0" class="gt_row gt_right">0.07</td>
+<td headers="1" class="gt_row gt_right">0.03</td>
+<td headers="2" class="gt_row gt_right">0.14</td>
+<td headers="3" class="gt_row gt_right">0.04</td>
+<td headers="4" class="gt_row gt_right">0.04</td>
+<td headers="5" class="gt_row gt_right">0.06</td>
+<td headers="6" class="gt_row gt_right">0.12</td>
+<td headers="7" class="gt_row gt_right">0.31</td>
+<td headers="8" class="gt_row gt_right">0.12</td>
+<td headers="9" class="gt_row gt_right">0.14</td>
+<td headers="Accuracy" class="gt_row gt_right">0.11</td>
+<td headers="Gini" class="gt_row gt_right">233</td>
+</tr>
+<tr>
+<td headers="Variable" class="gt_row gt_left">PC8</td>
+<td headers="0" class="gt_row gt_right">0.05</td>
+<td headers="1" class="gt_row gt_right">0.07</td>
+<td headers="2" class="gt_row gt_right">0.02</td>
+<td headers="3" class="gt_row gt_right">0.24</td>
+<td headers="4" class="gt_row gt_right">0.06</td>
+<td headers="5" class="gt_row gt_right">0.08</td>
+<td headers="6" class="gt_row gt_right">0.02</td>
+<td headers="7" class="gt_row gt_right">0.04</td>
+<td headers="8" class="gt_row gt_right">0.08</td>
+<td headers="9" class="gt_row gt_right">0.26</td>
+<td headers="Accuracy" class="gt_row gt_right">0.09</td>
+<td headers="Gini" class="gt_row gt_right">226</td>
+</tr>
+<tr>
+<td headers="Variable" class="gt_row gt_left">PC9</td>
+<td headers="0" class="gt_row gt_right">0.08</td>
+<td headers="1" class="gt_row gt_right">0.01</td>
+<td headers="2" class="gt_row gt_right">0.01</td>
+<td headers="3" class="gt_row gt_right">0.02</td>
+<td headers="4" class="gt_row gt_right">0.01</td>
+<td headers="5" class="gt_row gt_right">0.01</td>
+<td headers="6" class="gt_row gt_right">0.01</td>
+<td headers="7" class="gt_row gt_right">0.03</td>
+<td headers="8" class="gt_row gt_right">0.05</td>
+<td headers="9" class="gt_row gt_right">0.02</td>
+<td headers="Accuracy" class="gt_row gt_right">0.02</td>
+<td headers="Gini" class="gt_row gt_right">58</td>
+</tr>
+<tr>
+<td headers="Variable" class="gt_row gt_left">PC10</td>
+<td headers="0" class="gt_row gt_right">0.04</td>
+<td headers="1" class="gt_row gt_right">0.01</td>
+<td headers="2" class="gt_row gt_right">0.01</td>
+<td headers="3" class="gt_row gt_right">0.00</td>
+<td headers="4" class="gt_row gt_right">0.01</td>
+<td headers="5" class="gt_row gt_right">0.02</td>
+<td headers="6" class="gt_row gt_right">0.01</td>
+<td headers="7" class="gt_row gt_right">0.01</td>
+<td headers="8" class="gt_row gt_right">0.01</td>
+<td headers="9" class="gt_row gt_right">0.02</td>
+<td headers="Accuracy" class="gt_row gt_right">0.01</td>
+<td headers="Gini" class="gt_row gt_right">46</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<p>From the variable importance, we can see that PC9 and PC10 do not substantially contribute. That means the 100D data can be reduced to 8 PCs while maintaining the information about the clustering. PC1 is most important overall, but each cluster has a different set of variables that are important. For example, the variables important for distinguishing cluster 1 are PC1, PC2, PC4 and PC6, and for cluster 7 they are PC2, PC6, PC7. We can use this information to choose variables to provide to the tour. It can be helpful to reduce the class variable to focus on a particular class, by creating a new class variable, as follows.</p>
+<div class="cell">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">ft_pc</span> <span class="op">&lt;-</span> <span class="va">ft_pc</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>cl1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/case_when.html">case_when</a></span><span class="op">(</span></span>
+<span>                 <span class="va">branches</span> <span class="op">==</span> <span class="st">"0"</span> <span class="op">~</span> <span class="st">"0"</span>,</span>
+<span>                 <span class="va">branches</span> <span class="op">==</span> <span class="st">"1"</span> <span class="op">~</span> <span class="st">"1"</span>,</span>
+<span>                 .default <span class="op">=</span> <span class="st">"other"</span></span>
+<span>  <span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<details><summary>Code to make animated gifs</summary><div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">animate_xy</span><span class="op">(</span><span class="va">ft_pc</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"PC1"</span>, <span class="st">"PC2"</span>, <span class="st">"PC4"</span>, <span class="st">"PC6"</span><span class="op">)</span><span class="op">]</span>, col<span class="op">=</span><span class="va">ft_pc</span><span class="op">$</span><span class="va">cl1</span>, palette<span class="op">=</span><span class="st">"Viridis"</span><span class="op">)</span></span>
+<span><span class="fu">render_gif</span><span class="op">(</span><span class="va">ft_pc</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"PC1"</span>, <span class="st">"PC2"</span>, <span class="st">"PC4"</span>, <span class="st">"PC6"</span><span class="op">)</span><span class="op">]</span>,</span>
+<span>           <span class="fu">grand_tour</span><span class="op">(</span><span class="op">)</span>,</span>
+<span>           <span class="fu">display_xy</span><span class="op">(</span>col<span class="op">=</span><span class="va">ft_pc</span><span class="op">$</span><span class="va">cl1</span>, palette<span class="op">=</span><span class="st">"Viridis"</span><span class="op">)</span>,</span>
+<span>           gif_file<span class="op">=</span><span class="st">"gifs/ft_cl1.gif"</span>,</span>
+<span>           frames<span class="op">=</span><span class="fl">500</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details><summary>Code to make plot</summary><div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">ft_pc_cl1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">ft_pc</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">PC4</span>, y<span class="op">=</span><span class="va">PC2</span>, col<span class="op">=</span><span class="va">cl1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span>alpha<span class="op">=</span><span class="fl">0.7</span>, size<span class="op">=</span><span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://colorspace.R-Forge.R-project.org/reference/scale_colour_discrete_sequential.html">scale_color_discrete_sequential</a></span><span class="op">(</span>palette<span class="op">=</span><span class="st">"Viridis"</span>, rev<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>aspect.ratio <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>From <a href="#fig-ft-cl">Figure&nbsp;<span>15.5</span></a> we can see how cluster 1 is distinct from all of the other observations, albeit with a close connection to the trunk of the tree (cluster 0). The distinction is visible in PC1, PC2, PC4, PC6, but can be seen clearly with just two of these.</p>
+<div id="fig-ft-cl" class="quarto-layout-panel">
+<figure class="figure"><div class="quarto-layout-row quarto-layout-valign-top">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-ft-cl1" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure"><p><img src="gifs/ft_cl1.gif" class="img-fluid figure-img" alt="FIX ME" data-ref-parent="fig-ft-cl" width="300"></p>
+<figcaption class="figure-caption">(a) Tour of most important variables for class 1.</figcaption></figure>
+</div>
+</div>
+<div class="cell quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div class="cell-output-display">
+<div id="fig-ft-cl1-pc" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure"><p><img src="15-forests_files/figure-html/fig-ft-cl1-pc-1.png" class="img-fluid figure-img" style="width:100.0%" data-ref-parent="fig-ft-cl"></p>
+<figcaption class="figure-caption">(b) PC2 and PC4 together reveal cluster 1.</figcaption></figure>
+</div>
+</div>
+</div>
+</div>
+<p></p><figcaption class="figure-caption">Figure&nbsp;15.5: Focusing on class 1 in the fake_trees data. The most important variables were PC1, PC2, PC4, PC6. A combination of PC2 and PC4 reveals the difference between cluster 1 and all the other clusters.</figcaption><p></p>
+</figure>
+</div>
+<p>For a problem with this many classes it can be useful to focus on several groups together. We’ve chosen cluster 8, because it appears to have less of a connection with cluster 0. See the light green cluster in bottom right static plot of <a href="#fig-ft-votes-prj">Figure&nbsp;<span>15.4 (b)</span></a> is connected more to a different vertex, which is cluster 6 when carefully viewed. This is also suggested by the confusion matrix, where there is one observation from cluster 8 confused with cluster 6, although somewhat contradictory information, most are confused with cluster 0. We have also added cluster 1 to the investigation because it is closely connected to 6 and 8.</p>
+<div class="cell">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">ft_pc</span> <span class="op">&lt;-</span> <span class="va">ft_pc</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>cl8 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/case_when.html">case_when</a></span><span class="op">(</span></span>
+<span>                 <span class="va">branches</span> <span class="op">==</span> <span class="st">"0"</span> <span class="op">~</span> <span class="st">"0"</span>,</span>
+<span>                 <span class="va">branches</span> <span class="op">==</span> <span class="st">"6"</span> <span class="op">~</span> <span class="st">"6"</span>,</span>
+<span>                 <span class="va">branches</span> <span class="op">==</span> <span class="st">"1"</span> <span class="op">~</span> <span class="st">"1"</span>,</span>
+<span>                 <span class="va">branches</span> <span class="op">==</span> <span class="st">"8"</span> <span class="op">~</span> <span class="st">"8"</span>,</span>
+<span>                 .default <span class="op">=</span> <span class="st">"other"</span></span>
+<span>  <span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<details><summary>Code to make animated gif</summary><div class="sourceCode" id="cb20"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">animate_xy</span><span class="op">(</span><span class="va">ft_pc</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"PC1"</span>, <span class="st">"PC2"</span>, <span class="st">"PC4"</span>, <span class="st">"PC5"</span>, <span class="st">"PC6"</span><span class="op">)</span><span class="op">]</span>, col<span class="op">=</span><span class="va">ft_pc</span><span class="op">$</span><span class="va">cl8</span>, palette<span class="op">=</span><span class="st">"Viridis"</span><span class="op">)</span></span>
+<span><span class="fu">render_gif</span><span class="op">(</span><span class="va">ft_pc</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"PC1"</span>, <span class="st">"PC2"</span>, <span class="st">"PC4"</span>, <span class="st">"PC5"</span>, <span class="st">"PC6"</span><span class="op">)</span><span class="op">]</span>,</span>
+<span>           <span class="fu">grand_tour</span><span class="op">(</span><span class="op">)</span>,</span>
+<span>           <span class="fu">display_xy</span><span class="op">(</span>col<span class="op">=</span><span class="va">ft_pc</span><span class="op">$</span><span class="va">cl8</span>, palette<span class="op">=</span><span class="st">"Viridis"</span><span class="op">)</span>,</span>
+<span>           gif_file<span class="op">=</span><span class="st">"gifs/ft_cl8.gif"</span>,</span>
+<span>           frames<span class="op">=</span><span class="fl">500</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details><summary>Code to make plot</summary><div class="sourceCode" id="cb21"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">ft_pc_cl8</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">ft_pc</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">PC1</span>, y<span class="op">=</span><span class="va">PC5</span>, col<span class="op">=</span><span class="va">cl8</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span>alpha<span class="op">=</span><span class="fl">0.7</span>, size<span class="op">=</span><span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://colorspace.R-Forge.R-project.org/reference/scale_colour_discrete_sequential.html">scale_color_discrete_sequential</a></span><span class="op">(</span>palette<span class="op">=</span><span class="st">"Viridis"</span>, rev<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>aspect.ratio <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>From <a href="#fig-ft-cl2">Figure&nbsp;<span>15.6</span></a> we can see that clusters 1, 6, and 8 share one end of the trunk (cluster 0). Cluster 8 is almost more closely connected with cluster 6, though, than cluster 0. PC1 and PC5 mostly show the distinction between cluster 8 and the rest of the points, but it is clearer if more variables are used.</p>
+<div id="fig-ft-cl2" class="quarto-layout-panel">
+<figure class="figure"><div class="quarto-layout-row quarto-layout-valign-top">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-ft-cl8" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure"><p><img src="gifs/ft_cl8.gif" class="img-fluid figure-img" alt="FIX ME" data-ref-parent="fig-ft-cl2" width="300"></p>
+<figcaption class="figure-caption">(a) Tour of most important variables for class 1.</figcaption></figure>
+</div>
+</div>
+<div class="cell quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div class="cell-output-display">
+<div id="fig-ft-cl8-pc" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure"><p><img src="15-forests_files/figure-html/fig-ft-cl8-pc-1.png" class="img-fluid figure-img" style="width:100.0%" data-ref-parent="fig-ft-cl2"></p>
+<figcaption class="figure-caption">(b) PC1 and PC5 together mostly reveal cluster 8.</figcaption></figure>
+</div>
+</div>
+</div>
+</div>
+<p></p><figcaption class="figure-caption">Figure&nbsp;15.6: Focusing on class 8 in the fake_trees data, relative to nearby clusters 1 and 6. The most important variables for cluster 8 are PC1, PC2, PC5, but to explore in association with clusters 1 and 6, we include PC4 and PC6. A combination of PC1 and PC5 reveals the difference between cluster 8, 6, 1 and 0.</figcaption><p></p>
+</figure>
+</div>
+<div class="info">
+<p>Variable importance can be used in feature selection. Looking at class-wise variable importance we can select a subspace that can separate a selected class and with a tour we can understand how this separation in multiple variables looks like. This works best when focusing on a small subset of classes.</p>
+</div>
+</section></section><section id="exercises" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="exercises">Exercises</h2>
+<ol type="1">
+<li>Using a grand tour compare the boundaries from the random forest model on the <code>penguins</code> data to that of (a) a default tree model, (b) an LDA model. Is it less boxy than the tree model, but still more boxy than that of the LDA model?</li>
+<li>Tinker with the parameters of the tree model to force it to fit a tree more closely to the data. Compare the boundaries from this with the default tree, and with the forest model. Is it less boxy than the default tree, but more boxy than the forest model?</li>
+<li>Fit a random forest model to the <code>bushfires</code> data using the <code>cause</code> variable as the class. It is a highly imbalanced classification problem. What is the out-of-bag error rate for the forest? Are there some classes that have lower error rate than others? Examine the 4D votes matrix with a tour, and describe the confusion between classes. This is interesting because it is difficult to accurately classify the fire ignition cause, and only some groups are often confused with each other. You should be able to see this from the 3D votes matrix.</li>
+<li>Fit a forest model to the first 21 PCs of the <code>sketches</code> data. Explore the 5D votes matrix. Why does it look star-shaped?</li>
+<li>Choose a cluster (or group of clusters) from the fake_trees data (2, 3, 4, 5, 7, 9) to explore in detail like done in <a href="#sec-forest-var-imp"><span>Section&nbsp;15.2.2</span></a>. Be sure to choose which PCs are the most useful using a tour, and follow-up by making a scatterplot showing the best distinction between your chosen cluster and the other observations.</li>
+</ol>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" data-line-spacing="2" role="list" style="display: none">
@@ -1249,11 +2196,7 @@ Zhang, H. S., Cook, D., Laa, U., Langrené, N., &amp; Menéndez, P. (2022). <em>
 Zhu, H. (2021). <em>kableExtra: Construct complex table with kable and pipe syntax</em>. <a href="https://CRAN.R-project.org/package=kableExtra">https://CRAN.R-project.org/package=kableExtra</a>
 </div>
 </div>
-</section></section><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><hr>
-<ol>
-<li id="fn1"><p>Mulga is a type of Australian habitat composed of woodland or open forest dominated by the mulga tree. Massive clearing of mulga led to the vast wheat fields of Western Australia. Here <strong>mulgar</strong> is an acronym for <strong>MUL</strong>tivariate <strong>G</strong>raphical <strong>A</strong>nalysis with <strong>R</strong>.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn2"><p>Photo of mulga tree taken by L. G. Cook.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-</ol></section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+</section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
     const mode = bsSheetEl.getAttribute("data-mode");
@@ -1486,10 +2429,13 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
 });
 </script><nav class="page-navigation"><div class="nav-page nav-page-previous">
+      <a href="./14-lda.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Linear discriminant analysis</span></span>
+      </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./1-intro.html" class="pagination-link">
-        <span class="nav-page-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Picturing high dimensions</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./16-svm.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Support vector machines</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

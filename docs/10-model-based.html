@@ -4,9 +4,7 @@
 <meta charset="utf-8">
 <meta name="generator" content="quarto-1.3.433">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<meta name="author" content="Dianne Cook and Ursula Laa">
-<meta name="dcterms.date" content="2023-08-14">
-<title>Interactively exploring high-dimensional data and models in R</title>
+<title>Interactively exploring high-dimensional data and models in R - 10&nbsp; Model-based clustering</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -81,7 +79,8 @@ div.csl-indent {
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./1-intro.html" rel="next">
+<link href="./11-som.html" rel="next">
+<link href="./9-kmeans.html" rel="prev">
 <link href="./cover.png" rel="icon" type="image/png">
 <script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
@@ -110,7 +109,8 @@ div.csl-indent {
     "search-submit-button-title": "Submit",
     "search-label": "Search"
   }
-}</script><script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+}</script><script src="site_libs/kePrint-0.0.1/kePrint.js"></script><link href="site_libs/lightable-0.0.1/lightable.css" rel="stylesheet">
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 </head>
 <body class="nav-sidebar floating">
 
@@ -119,7 +119,7 @@ div.csl-indent {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./index.html">Preface</a></li></ol></nav>
+      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./6-intro-clust.html">Cluster analysis</a></li><li class="breadcrumb-item"><a href="./10-model-based.html"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Model-based clustering</span></a></li></ol></nav>
       <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
       </a>
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
@@ -145,7 +145,7 @@ div.csl-indent {
     <ul class="list-unstyled mt-1">
 <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./index.html" class="sidebar-item-text sidebar-link active">
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Preface</span></a>
   </div>
 </li>
@@ -236,7 +236,7 @@ div.csl-indent {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./10-model-based.html" class="sidebar-item-text sidebar-link">
+  <a href="./10-model-based.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Model-based clustering</span></span></a>
   </div>
 </li>
@@ -367,113 +367,347 @@ div.csl-indent {
         <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Table of contents</h2>
    
   <ul>
-<li>
-<a href="#preface" id="toc-preface" class="nav-link active" data-scroll-target="#preface">Preface</a>
-  <ul class="collapse">
-<li><a href="#whats-in-this-book" id="toc-whats-in-this-book" class="nav-link" data-scroll-target="#whats-in-this-book">What’s in this book?</a></li>
-  <li><a href="#audience" id="toc-audience" class="nav-link" data-scroll-target="#audience">Audience</a></li>
-  <li><a href="#how-to-use-the-book" id="toc-how-to-use-the-book" class="nav-link" data-scroll-target="#how-to-use-the-book">How to use the book?</a></li>
-  <li><a href="#what-should-i-know-before-reading-this-book" id="toc-what-should-i-know-before-reading-this-book" class="nav-link" data-scroll-target="#what-should-i-know-before-reading-this-book">What should I know before reading this book?</a></li>
-  <li><a href="#setting-up-your-workflow" id="toc-setting-up-your-workflow" class="nav-link" data-scroll-target="#setting-up-your-workflow">Setting up your workflow</a></li>
-  <li><a href="#suggestion-feedback-or-error" id="toc-suggestion-feedback-or-error" class="nav-link" data-scroll-target="#suggestion-feedback-or-error">Suggestion, feedback or error?</a></li>
-  <li><a href="#license" id="toc-license" class="nav-link" data-scroll-target="#license">License</a></li>
-  </ul>
-</li>
-  </ul><div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/dicook/mulgar_book/edit/master/index.qmd" class="toc-action">Edit this page</a></p><p><a href="https://github.com/dicook/mulgar_book/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
+<li><a href="#examining-the-model-in-2d" id="toc-examining-the-model-in-2d" class="nav-link active" data-scroll-target="#examining-the-model-in-2d"><span class="header-section-number">10.1</span> Examining the model in 2D</a></li>
+  <li><a href="#extending-to-higher-dimensions" id="toc-extending-to-higher-dimensions" class="nav-link" data-scroll-target="#extending-to-higher-dimensions"><span class="header-section-number">10.2</span> Extending to higher dimensions</a></li>
+  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises">Exercises</a></li>
+  </ul><div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/dicook/mulgar_book/edit/master/10-model-based.qmd" class="toc-action">Edit this page</a></p><p><a href="https://github.com/dicook/mulgar_book/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
-<h1 class="title">Interactively exploring high-dimensional data and models in R</h1>
+<h1 class="title"><span id="sec-mclust" class="quarto-section-identifier"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Model-based clustering</span></span></h1>
 </div>
 
 
 
 <div class="quarto-title-meta">
 
-    <div>
-    <div class="quarto-title-meta-heading">Author</div>
-    <div class="quarto-title-meta-contents">
-             <p>Dianne Cook and Ursula Laa </p>
-          </div>
-  </div>
     
-    <div>
-    <div class="quarto-title-meta-heading">Published</div>
-    <div class="quarto-title-meta-contents">
-      <p class="date">August 14, 2023</p>
-    </div>
-  </div>
   
     
   </div>
   
 
-</header>
-<section id="preface" class="level1 unnumbered"><h1 class="unnumbered">Preface</h1><p><img src="cover.png" title="Interactively exploring high-dimensional data and models in R" class="quarto-cover-image img-fluid"></p>
-<!-- Why write this book
+</header><p></p>
+<p>Model-based clustering <span class="citation" data-cites="FR02">Fraley &amp; Raftery (<a href="references.html#ref-FR02" role="doc-biblioref">2002</a>)</span> fits a multivariate normal mixture model to the data. It uses the EM algorithm to fit the parameters for the mean, variance–covariance of each population, and the mixing proportion. The variance-covariance matrix is re-parametrized using an eigen-decomposition</p>
+<p><span class="math display">\[
+\Sigma_k = \lambda_kD_kA_kD_k^\top, ~~~k=1, \dots, g ~~\mbox{(number of clusters)}
+\]</span></p>
+<p>resulting in several model choices, ranging from simple to complex, as shown in <a href="#tbl-covariances">Table&nbsp;<span>10.1</span></a>.</p>
+<div class="cell">
+<details><summary>Load libraries</summary><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://haozhu233.github.io/kableExtra/">kableExtra</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://mclust-org.github.io/mclust/">mclust</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dicook.github.io/mulgar/">mulgar</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://patchwork.data-imaginist.com">patchwork</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://colorspace.R-Forge.R-project.org/">colorspace</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/ggobi/tourr">tourr</a></span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div id="tbl-covariances" class="anchored">
+<table class="table table-sm table-striped small" data-quarto-postprocess="true">
+<caption>Table&nbsp;10.1: Parameterizations of the covariance matrix.</caption>
+<thead><tr class="header">
+<th style="text-align: center;" data-quarto-table-cell-role="th">Model</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">Sigma</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">Family</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">Volume</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">Shape</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">Orientation</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">EII</td>
+<td style="text-align: center;">$$\lambda I$$</td>
+<td style="text-align: center;">Spherical</td>
+<td style="text-align: center;">Equal</td>
+<td style="text-align: center;">Equal</td>
+<td style="text-align: center;">NA</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">VII</td>
+<td style="text-align: center;">$$\lambda_k I$$</td>
+<td style="text-align: center;">Spherical</td>
+<td style="text-align: center;">Variable</td>
+<td style="text-align: center;">Equal</td>
+<td style="text-align: center;">NA</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">EEI</td>
+<td style="text-align: center;">$$\lambda A$$</td>
+<td style="text-align: center;">Diagonal</td>
+<td style="text-align: center;">Equal</td>
+<td style="text-align: center;">Equal</td>
+<td style="text-align: center;">Coordinate axes</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">VEI</td>
+<td style="text-align: center;">$$\lambda_kA$$</td>
+<td style="text-align: center;">Diagonal</td>
+<td style="text-align: center;">Variable</td>
+<td style="text-align: center;">Equal</td>
+<td style="text-align: center;">Coordinate axes</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">EVI</td>
+<td style="text-align: center;">$$\lambda A_k$$</td>
+<td style="text-align: center;">Diagonal</td>
+<td style="text-align: center;">Equal</td>
+<td style="text-align: center;">Variable</td>
+<td style="text-align: center;">Coordinate axes</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">VVI</td>
+<td style="text-align: center;">$$\lambda_k A_k$$</td>
+<td style="text-align: center;">Diagonal</td>
+<td style="text-align: center;">Variable</td>
+<td style="text-align: center;">Variable</td>
+<td style="text-align: center;">Coordinate axes</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">EEE</td>
+<td style="text-align: center;">$$\lambda DAD^\top$$</td>
+<td style="text-align: center;">Diagonal</td>
+<td style="text-align: center;">Equal</td>
+<td style="text-align: center;">Equal</td>
+<td style="text-align: center;">Equal</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">EVE</td>
+<td style="text-align: center;">$$\lambda DA_kD^\top$$</td>
+<td style="text-align: center;">Ellipsoidal</td>
+<td style="text-align: center;">Equal</td>
+<td style="text-align: center;">Variable</td>
+<td style="text-align: center;">Equal</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">VEE</td>
+<td style="text-align: center;">$$\lambda_k DAD^\top$$</td>
+<td style="text-align: center;">Ellipsoidal</td>
+<td style="text-align: center;">Variable</td>
+<td style="text-align: center;">Equal</td>
+<td style="text-align: center;">Equal</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">VVE</td>
+<td style="text-align: center;">$$\lambda_k DA_kD^\top$$</td>
+<td style="text-align: center;">Ellipsoidal</td>
+<td style="text-align: center;">Variable</td>
+<td style="text-align: center;">Equal</td>
+<td style="text-align: center;">Equal</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">EEV</td>
+<td style="text-align: center;">$$\lambda D_kAD_k^\top$$</td>
+<td style="text-align: center;">Ellipsoidal</td>
+<td style="text-align: center;">Equal</td>
+<td style="text-align: center;">Variable</td>
+<td style="text-align: center;">Variable</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">VEV</td>
+<td style="text-align: center;">$$\lambda_k D_kAD_k^\top$$</td>
+<td style="text-align: center;">Ellipsoidal</td>
+<td style="text-align: center;">Variable</td>
+<td style="text-align: center;">Variable</td>
+<td style="text-align: center;">Variable</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">EVV</td>
+<td style="text-align: center;">$$\lambda D_kA_kD_k^\top$$</td>
+<td style="text-align: center;">Ellipsoidal</td>
+<td style="text-align: center;">Equal</td>
+<td style="text-align: center;">Variable</td>
+<td style="text-align: center;">Variable</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">VVV</td>
+<td style="text-align: center;">$$\lambda_k D_kA_kD_k^\top$$</td>
+<td style="text-align: center;">Ellipsoidal</td>
+<td style="text-align: center;">Variable</td>
+<td style="text-align: center;">Variable</td>
+<td style="text-align: center;">Variable</td>
+</tr>
+</tbody>
+</table>
+</div>
 
--   an introduction to modern statistical methods through the lens of visualisation
--   focus on data analysis and computing over mathematics
--   intuit high dimensional data through dynamic graphics
--   use R + graphics as tool for augmenting understanding of data, models and inferences(?)
--->
-<p>It is important to visualise your data because you might discover things that you could never have anticipated. Although there are many resources available for data visualisation, there are few comprehensive resources on high-dimensional data visualisation. High-dimensional (or multivariate) data arises when many different things are measured for each observation. While we can learn many things from plotting with 1D and 2D or 3D methods there are likely more structures hidden in the higher dimensions. This book provides guidance on visualising high-dimensional data and models using linear projections, with R.</p>
-<p>High-dimensional data spaces are fascinating places. You may think that there’s a lot of ways to plot one or two variables, and a lot of types of patterns that can be found. You might use a density plot and see skewness or a dot plot to find outliers. A scatterplot of two variables might reveal a non-linear relationship or a barrier beyond which no observations exist. We don’t as yet have so many different choices of plot types for high-dimensions, but these types of patterns are also what we seek in scatterplots of high-dimensional data. The additional dimensions can clarify these patterns, that clusters are likely to be more distinct. Observations that did not appear to be very different can be seen to be lonely anomalies in high-dimensions, that no other observations have quite the same combination of values.</p>
-<section id="whats-in-this-book" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="whats-in-this-book">What’s in this book?</h2>
-<p>The book is divided into these parts:</p>
-<ul>
-<li>
-<strong>Introduction</strong>: Here we introduce you to high-dimensional spaces, how they can be visualised, and notation that is useful for describing methods in later chapters.<br>
-</li>
-<li>
-<strong>Dimension reduction</strong>: This part covers linear and non-linear dimension reduction. It includes ways to help decide on the number of dimensions needed to summarise the high dimensional data, whether linear dimension reduction is appropriate, detecting problems that might affect the dimension reduction, and examining how well or badly a non-linear dimension reduction is representing the data.</li>
-<li>
-<strong>Cluster analysis</strong>: This part described methods for finding groups in data. Although it includes an explanation of a purely graphical approach, it is mostly on using graphics in association with numerical clustering algorithms. There are explanations of assessing the suitability of different numerical techniques for extracting clusters, based on the data shapes, evaluating the clustering result, and showing the solutions in high dimensions.</li>
-<li>
-<strong>Classification</strong>: This part describes methods for exploring known groups in the data. You’ll learn how to check model assumptions, to help decide if a method is suited to the data, examine classification boundaries and explore where errors arise.</li>
-<li>
-<strong>Miscellaneous</strong>: The material in this part focuses on examining data from different contexts. This includes multiple time series, longitudinal data. A key pre-processing step is to convert the data into Euclidean space.</li>
-</ul>
-<p>In each of these parts an emphasis is also showing your model with your data in the high dimensional space.</p>
-<p>Our hopes are that you will come away with understanding the importance of plotting your high dimensional data as a regular step in your statistical or machine learning analyses. There are many examples of what you might miss if you don’t plot the data. Effective use of graphics goes hand-in-hand with analytical techniques. With high dimensions visualisation is a challenge but it is fascinating, and leads to many surprising moments.</p>
-</section><section id="audience" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="audience">Audience</h2>
-<p>High-dimensional data arises in many fields such as biology, social sciences, finance, and more. Anyone who is doing exploratory data analysis and model fitting for more than two variables will benefit from learning how to effectively visualise high-dimensions. This book will be useful for students and teachers of multivariate data analysis and machine learning, and researchers, data analysts, and industry professionals who work in these areas.</p>
-</section><section id="how-to-use-the-book" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="how-to-use-the-book">How to use the book?</h2>
-<p>The book is written with explanations accompanied by examples with R code. The chapters are organised by types of analysis and focus on how to use the high-dimensional visualisation to complement the commonly used analytical methods. The toolbox chapter in the Appendix provides an overview of the primary high-dimensional visualisation methods discussed in the book and how to get started.</p>
-</section><section id="what-should-i-know-before-reading-this-book" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="what-should-i-know-before-reading-this-book">What should I know before reading this book?</h2>
-<p>The examples assume that you already use R, and have a working knowledge of base R and tidyverse way of thinking about data analysis. It also assumes that you have some knowledge of statistical methods, and some experience with machine learning methods.</p>
-<p>If you feel like you need build up your skills in these areas in preparation for working through this book, these are our recommended resources:</p>
-<ul>
-<li>
-<a href="https://r4ds.had.co.nz">R for Data Science</a> by Wickham and Grolemund for learning about data wrangling and visualisation.</li>
-<li>
-<a href="https://openintro-ims.netlify.app">Introduction to Modern Statistics</a> by Çetinkaya-Rundel and Hardin to learn about introductory statistics.</li>
-<li>
-<a href="https://bradleyboehmke.github.io/HOML/">Hands-On Machine Learning with R</a> by Boehmke and Greenwell to learn about machine learning.</li>
-</ul>
-<p>We will assume you know how to plot your data and models in 2D. Our material starts from 2D and beyond.</p>
-</section><section id="setting-up-your-workflow" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="setting-up-your-workflow">Setting up your workflow</h2>
-<p>To get started set up your computer with the current versions of <a href="https://cran.r-project.org">R</a> and ideally also with <a href="https://posit.co/download/rstudio-desktop/">Rstudio Desktop</a>.</p>
-<p>In addition, we have made an R package to share the data and functions used in this book, called <a href="http://dicook.github.io/mulgar"><code>mulgar</code></a>.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a><a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></p>
-<div class="cell">
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span><span class="op">(</span><span class="st">"mulgar"</span>, dependencies<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="co"># or the development version</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html">install_github</a></span><span class="op">(</span><span class="st">"dicook/mulgar"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
 </div>
-<p>To get a copy of the code and data used and an RStudio project to get started, you can download with this code:</p>
-<div class="cell">
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">usethis</span><span class="fu">::</span><span class="fu"><a href="https://usethis.r-lib.org/reference/zip-utils.html">use_zip</a></span><span class="op">(</span>url<span class="op">=</span><span class="st">"https://dicook.github.io/mulgar_book/code_and_data.zip"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>You will be able to click on the <code>mulgar_book.Rproj</code> to get started with the code.</p>
-</section><section id="suggestion-feedback-or-error" class="level2"><h2 class="anchored" data-anchor-id="suggestion-feedback-or-error">Suggestion, feedback or error?</h2>
-<p>We welcome suggestions, feedback or details of errors. You can report them as an issue at the <a href="https://github.com/dicook/mulgar_book">Github repo for this book</a>.</p>
-<p>Please make a small <a href="https://reprex.tidyverse.org">reproducible example</a> and report the error encountered. Reproducible examples have these components:</p>
-<ul>
-<li>a small amount of data</li>
-<li>small amount of code that generates the error</li>
-<li>copy of the error message that was generated</li>
-</ul></section><section id="license" class="level2"><h2 class="anchored" data-anchor-id="license">License</h2>
-<p><a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png"></a><br>The online version of this book is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.</p>
+<p>Note the distribution descriptions “spherical” and “ellipsoidal”. These are descriptions of the shape of the variance-covariance for a multivariate normal distribution. A standard multivariate normal distribution has a variance-covariance matrix with zeros in the off-diagonal elements, which corresponds to spherically shaped data. When the variances (diagonals) are different or the variables are correlated, then the shape of data from a multivariate normal is ellipsoidal.</p>
+<p></p>
+<p>The models are typically scored using the Bayes Information Criterion (BIC), which is based on the log likelihood, number of variables, and number of mixture components. They should also be assessed using graphical methods, as we demonstrate using the data.</p>
+<section id="examining-the-model-in-2d" class="level2" data-number="10.1"><h2 data-number="10.1" class="anchored" data-anchor-id="examining-the-model-in-2d">
+<span class="header-section-number">10.1</span> Examining the model in 2D</h2>
+<p>We start with two of the four real-valued variables (<code>bl</code>, <code>fl</code>) and the three <code>species</code>. The goal is to determine whether model-based methods can discover clusters that closely correspond to the three species. Based on the scatterplot in <a href="#fig-penguins-bl-fl">Figure&nbsp;<span>10.1</span></a> we would expect it to do well, and suggest an elliptical variance-covariance of roughly equal sizes as the model.</p>
+<div class="cell">
+<details><summary>Code to make plot</summary><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"data/penguins_sub.rda"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">penguins_sub</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">bl</span>, </span>
+<span>                         y<span class="op">=</span><span class="va">fl</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="co">#, </span></span>
+<span>                         <span class="co">#colour=species)) +</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_density_2d.html">geom_density2d</a></span><span class="op">(</span>colour<span class="op">=</span><span class="st">"#3B99B1"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>aspect.ratio <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div id="fig-penguins-bl-fl" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure"><p><img src="10-model-based_files/figure-html/fig-penguins-bl-fl-1.png" class="img-fluid figure-img" width="480"></p>
+<figcaption class="figure-caption">Figure&nbsp;10.1: Scatterplot of flipper length by bill length of the penguins data.</figcaption></figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">penguins_BIC</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mclust-org.github.io/mclust/reference/mclustBIC.html">mclustBIC</a></span><span class="op">(</span><span class="va">penguins_sub</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">3</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="va">ggmc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dicook.github.io/mulgar/reference/ggmcbic.html">ggmcbic</a></span><span class="op">(</span><span class="va">penguins_BIC</span>, cl<span class="op">=</span><span class="fl">2</span><span class="op">:</span><span class="fl">9</span>, top<span class="op">=</span><span class="fl">4</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://colorspace.R-Forge.R-project.org/reference/scale_colour_discrete_divergingx.html">scale_color_discrete_divergingx</a></span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"Roma"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ggtitle</a></span><span class="op">(</span><span class="st">"(a)"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> </span>
+<span><span class="va">penguins_mc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mclust-org.github.io/mclust/reference/Mclust.html">Mclust</a></span><span class="op">(</span><span class="va">penguins_sub</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">3</span><span class="op">)</span><span class="op">]</span>, </span>
+<span>                      G<span class="op">=</span><span class="fl">3</span>, </span>
+<span>                      modelNames <span class="op">=</span> <span class="st">"EVE"</span><span class="op">)</span></span>
+<span><span class="va">penguins_mce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dicook.github.io/mulgar/reference/mc_ellipse.html">mc_ellipse</a></span><span class="op">(</span><span class="va">penguins_mc</span><span class="op">)</span></span>
+<span><span class="va">penguins_cl</span> <span class="op">&lt;-</span> <span class="va">penguins_sub</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">3</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="va">penguins_cl</span><span class="op">$</span><span class="va">cl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">penguins_mc</span><span class="op">$</span><span class="va">classification</span><span class="op">)</span></span>
+<span><span class="va">ggell</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">penguins_cl</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">bl</span>, y<span class="op">=</span><span class="va">fl</span>,</span>
+<span>                                    colour<span class="op">=</span><span class="va">cl</span><span class="op">)</span>,</span>
+<span>              alpha<span class="op">=</span><span class="fl">0.3</span><span class="op">)</span> <span class="op">+</span></span>
+<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">penguins_mce</span><span class="op">$</span><span class="va">ell</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">bl</span>, y<span class="op">=</span><span class="va">fl</span>,</span>
+<span>                                         colour<span class="op">=</span><span class="va">cl</span><span class="op">)</span>,</span>
+<span>              shape<span class="op">=</span><span class="fl">16</span><span class="op">)</span> <span class="op">+</span></span>
+<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">penguins_mce</span><span class="op">$</span><span class="va">mn</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">bl</span>, y<span class="op">=</span><span class="va">fl</span>,</span>
+<span>                                        colour<span class="op">=</span><span class="va">cl</span><span class="op">)</span>,</span>
+<span>              shape<span class="op">=</span><span class="fl">3</span>, size<span class="op">=</span><span class="fl">2</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://colorspace.R-Forge.R-project.org/reference/scale_colour_discrete_divergingx.html">scale_color_discrete_divergingx</a></span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"Zissou 1"</span><span class="op">)</span>  <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>aspect.ratio<span class="op">=</span><span class="fl">1</span>, legend.position<span class="op">=</span><span class="st">"none"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ggtitle</a></span><span class="op">(</span><span class="st">"(b)"</span><span class="op">)</span></span>
+<span><span class="va">ggmc</span> <span class="op">+</span> <span class="va">ggell</span> <span class="op">+</span> <span class="fu"><a href="https://patchwork.data-imaginist.com/reference/plot_layout.html">plot_layout</a></span><span class="op">(</span>ncol<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div id="fig-penguins-bl-fl-mc" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure"><p><img src="10-model-based_files/figure-html/fig-penguins-bl-fl-mc-1.png" class="img-fluid figure-img" width="768"></p>
+<figcaption class="figure-caption">Figure&nbsp;10.2: Summary plots from model-based clustering: (a) BIC values for clusters 2-9 of top four models, (b) variance-covariance ellipses and cluster means (+) corresponding to the best model. The best model is three-cluster EVE, which has differently shaped variance-covariances albeit the same volume and orientation.</figcaption></figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-penguins-bl-fl-mc">Figure&nbsp;<span>10.2</span></a> summarises the results. All models agree that three clusters is the best. The different variance-covariance models for three clusters have similar BIC values with EVE (different shape, same volume and orientation) being slightly higher. These plots are made from the <code>mclust</code> package output using the <code>ggmcbic</code> and <code>mc_ellipse</code> functions fro the <code>mulgar</code> package.</p>
+</section><section id="extending-to-higher-dimensions" class="level2" data-number="10.2"><h2 data-number="10.2" class="anchored" data-anchor-id="extending-to-higher-dimensions">
+<span class="header-section-number">10.2</span> Extending to higher dimensions</h2>
+<p>Now we will examine how model-based clustering will group the penguins data using all four variables.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">penguins_BIC</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mclust-org.github.io/mclust/reference/mclustBIC.html">mclustBIC</a></span><span class="op">(</span><span class="va">penguins_sub</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="va">ggmc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dicook.github.io/mulgar/reference/ggmcbic.html">ggmcbic</a></span><span class="op">(</span><span class="va">penguins_BIC</span>, cl<span class="op">=</span><span class="fl">2</span><span class="op">:</span><span class="fl">9</span>, top<span class="op">=</span><span class="fl">7</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://colorspace.R-Forge.R-project.org/reference/scale_colour_discrete_divergingx.html">scale_color_discrete_divergingx</a></span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"Roma"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> </span>
+<span><span class="va">ggmc</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div id="fig-penguins-bic" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure"><p><img src="10-model-based_files/figure-html/fig-penguins-bic-1.png" class="img-fluid figure-img" width="576"></p>
+<figcaption class="figure-caption">Figure&nbsp;10.3: BIC values for the top models for 2-9 clusters on the penguins data. The interpretation is mixed: if one were to choose three clusters any of the variance-covariance models would be equally as good, but the very best model is the four-cluster VEE.</figcaption></figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">penguins_mc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mclust-org.github.io/mclust/reference/Mclust.html">Mclust</a></span><span class="op">(</span><span class="va">penguins_sub</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, </span>
+<span>                      G<span class="op">=</span><span class="fl">4</span>, </span>
+<span>                      modelNames <span class="op">=</span> <span class="st">"VEE"</span><span class="op">)</span></span>
+<span><span class="va">penguins_mce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dicook.github.io/mulgar/reference/mc_ellipse.html">mc_ellipse</a></span><span class="op">(</span><span class="va">penguins_mc</span><span class="op">)</span></span>
+<span><span class="va">penguins_cl</span> <span class="op">&lt;-</span> <span class="va">penguins_sub</span></span>
+<span><span class="va">penguins_cl</span><span class="op">$</span><span class="va">cl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">penguins_mc</span><span class="op">$</span><span class="va">classification</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">penguins_mc_data</span> <span class="op">&lt;-</span> <span class="va">penguins_cl</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">bl</span><span class="op">:</span><span class="va">bm</span>, <span class="va">cl</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>type <span class="op">=</span> <span class="st">"data"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html">bind_rows</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_cols.html">bind_cols</a></span><span class="op">(</span><span class="va">penguins_mce</span><span class="op">$</span><span class="va">ell</span>,</span>
+<span>                      type<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="st">"ellipse"</span>,</span>
+<span>                               <span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">penguins_mce</span><span class="op">$</span><span class="va">ell</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">type</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<details><summary>Code to make animated gifs</summary><div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/tourr/man/display_xy.html">animate_xy</a></span><span class="op">(</span><span class="va">penguins_mc_data</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,</span>
+<span>           col<span class="op">=</span><span class="va">penguins_mc_data</span><span class="op">$</span><span class="va">cl</span>,</span>
+<span>           pch<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">20</span> <span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="va">penguins_mc_data</span><span class="op">$</span><span class="va">type</span><span class="op">)</span><span class="op">]</span>, </span>
+<span>           axes<span class="op">=</span><span class="st">"off"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"data/penguins_tour_path.rda"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/tourr/man/render_gif.html">render_gif</a></span><span class="op">(</span><span class="va">penguins_mc_data</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, </span>
+<span>           <span class="fu"><a href="https://rdrr.io/pkg/tourr/man/planned_tour.html">planned_tour</a></span><span class="op">(</span><span class="va">pt1</span><span class="op">)</span>, </span>
+<span>           <span class="fu"><a href="https://rdrr.io/pkg/tourr/man/display_xy.html">display_xy</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">penguins_mc_data</span><span class="op">$</span><span class="va">cl</span>,</span>
+<span>               pch<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">20</span><span class="op">)</span><span class="op">[</span></span>
+<span>                 <span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="va">penguins_mc_data</span><span class="op">$</span><span class="va">type</span><span class="op">)</span><span class="op">]</span>, </span>
+<span>                      axes<span class="op">=</span><span class="st">"off"</span>,</span>
+<span>               half_range <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span>,</span>
+<span>           gif_file<span class="op">=</span><span class="st">"gifs/penguins_best_mc.gif"</span>,</span>
+<span>           frames<span class="op">=</span><span class="fl">500</span>,</span>
+<span>           loop<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">penguins_mc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mclust-org.github.io/mclust/reference/Mclust.html">Mclust</a></span><span class="op">(</span><span class="va">penguins_sub</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, </span>
+<span>                      G<span class="op">=</span><span class="fl">3</span>, </span>
+<span>                      modelNames <span class="op">=</span> <span class="st">"EEE"</span><span class="op">)</span></span>
+<span><span class="va">penguins_mce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dicook.github.io/mulgar/reference/mc_ellipse.html">mc_ellipse</a></span><span class="op">(</span><span class="va">penguins_mc</span><span class="op">)</span></span>
+<span><span class="va">penguins_cl</span> <span class="op">&lt;-</span> <span class="va">penguins_sub</span></span>
+<span><span class="va">penguins_cl</span><span class="op">$</span><span class="va">cl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">penguins_mc</span><span class="op">$</span><span class="va">classification</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">penguins_mc_data</span> <span class="op">&lt;-</span> <span class="va">penguins_cl</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">bl</span><span class="op">:</span><span class="va">bm</span>, <span class="va">cl</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>type <span class="op">=</span> <span class="st">"data"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html">bind_rows</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_cols.html">bind_cols</a></span><span class="op">(</span><span class="va">penguins_mce</span><span class="op">$</span><span class="va">ell</span>,</span>
+<span>                      type<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="st">"ellipse"</span>,</span>
+<span>                               <span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">penguins_mce</span><span class="op">$</span><span class="va">ell</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">type</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/tourr/man/display_xy.html">animate_xy</a></span><span class="op">(</span><span class="va">penguins_mc_data</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,</span>
+<span>           col<span class="op">=</span><span class="va">penguins_mc_data</span><span class="op">$</span><span class="va">cl</span>,</span>
+<span>           pch<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">20</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="va">penguins_mc_data</span><span class="op">$</span><span class="va">type</span><span class="op">)</span><span class="op">]</span>, </span>
+<span>           axes<span class="op">=</span><span class="st">"off"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Save the animated gif</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"data/penguins_tour_path.rda"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/tourr/man/render_gif.html">render_gif</a></span><span class="op">(</span><span class="va">penguins_mc_data</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, </span>
+<span>           <span class="fu"><a href="https://rdrr.io/pkg/tourr/man/planned_tour.html">planned_tour</a></span><span class="op">(</span><span class="va">pt1</span><span class="op">)</span>, </span>
+<span>           <span class="fu"><a href="https://rdrr.io/pkg/tourr/man/display_xy.html">display_xy</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">penguins_mc_data</span><span class="op">$</span><span class="va">cl</span>,</span>
+<span>               pch<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">20</span><span class="op">)</span><span class="op">[</span></span>
+<span>                 <span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="va">penguins_mc_data</span><span class="op">$</span><span class="va">type</span><span class="op">)</span><span class="op">]</span>, </span>
+<span>                      axes<span class="op">=</span><span class="st">"off"</span>,</span>
+<span>               half_range <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span>,</span>
+<span>           gif_file<span class="op">=</span><span class="st">"gifs/penguins_simpler_mc.gif"</span>,</span>
+<span>           frames<span class="op">=</span><span class="fl">500</span>,</span>
+<span>           loop<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div id="fig-penguins-mc" class="quarto-layout-panel">
+<figure class="figure"><div class="quarto-layout-row quarto-layout-valign-top">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-penguins-best_mc" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure"><p><img src="gifs/penguins_best_mc.gif" class="img-fluid figure-img" data-fig.align="center" alt="FIX ME" data-ref-parent="fig-penguins-mc"></p>
+<figcaption class="figure-caption">(a) Best model: four-cluster VEE</figcaption></figure>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-penguins-simpler_mc" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure"><p><img src="gifs/penguins_simpler_mc.gif" class="img-fluid figure-img" data-fig.align="center" alt="FIX ME" data-ref-parent="fig-penguins-mc"></p>
+<figcaption class="figure-caption">(b) Three-cluster EEE</figcaption></figure>
+</div>
+</div>
+</div>
+<p></p><figcaption class="figure-caption">Figure&nbsp;10.4: Examining the model-based clustering results for the penguins data: (a) best model according to BIC value, (b) simpler three-cluster model. Dots are ellipse points, and “x” are data points. It is important to note that the three cluster solution fits the data better, even though it has a lower BIC.</figcaption><p></p>
+</figure>
+</div>
+<div class="info">
+<p>Using the tour to visualise the final choices of models with similarly high BIC values helps to choose which best fits the data. It may not be the one with the highest BIC value.</p>
+</div>
+</section><section id="exercises" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="exercises">Exercises</h2>
+<ol type="1">
+<li>Examine the three cluster EVE, VVE and VEE models with the tour, and explain whether these are distinguishably different from the EEE three cluster model.</li>
+<li>Fit model-based clustering to the the <code>clusters</code>. Does it suggest the data has three clusters? Using the tour examine the best model model. How well does this fit the data?</li>
+<li>Fit model-based clustering to the the <code>multicluster</code>. Does it suggest the data has six clusters? Using the tour examine the best model model. How well does this fit the data?</li>
+<li>Fit model-based clustering to the <code>fake_trees</code> data. Does it suggest that the data has 10 clusters? If not, why do you think this is? Using the tour examine the best model model. How well does this fit the branching structure?</li>
+<li>Try fitting model-based clustering to the <code>aflw</code> data? What is the best model? Is the solution related to offensive vs defensive vs mid-fielder skills?</li>
+<li>Use model-based clustering on the challenge data sets, <code>c1</code>-<code>c7</code> from the <code>mulgar</code> package. Explain why or why not the best model fits the cluster structure or not.</li>
+</ol>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" data-line-spacing="2" role="list" style="display: none">
@@ -1249,11 +1483,7 @@ Zhang, H. S., Cook, D., Laa, U., Langrené, N., &amp; Menéndez, P. (2022). <em>
 Zhu, H. (2021). <em>kableExtra: Construct complex table with kable and pipe syntax</em>. <a href="https://CRAN.R-project.org/package=kableExtra">https://CRAN.R-project.org/package=kableExtra</a>
 </div>
 </div>
-</section></section><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><hr>
-<ol>
-<li id="fn1"><p>Mulga is a type of Australian habitat composed of woodland or open forest dominated by the mulga tree. Massive clearing of mulga led to the vast wheat fields of Western Australia. Here <strong>mulgar</strong> is an acronym for <strong>MUL</strong>tivariate <strong>G</strong>raphical <strong>A</strong>nalysis with <strong>R</strong>.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn2"><p>Photo of mulga tree taken by L. G. Cook.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-</ol></section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+</section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
     const mode = bsSheetEl.getAttribute("data-mode");
@@ -1486,10 +1716,13 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
 });
 </script><nav class="page-navigation"><div class="nav-page nav-page-previous">
+      <a href="./9-kmeans.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title"><span class="math inline">\(k\)</span>-means clustering</span></span>
+      </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./1-intro.html" class="pagination-link">
-        <span class="nav-page-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Picturing high dimensions</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./11-som.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Self-organizing maps</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

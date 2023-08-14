@@ -4,9 +4,7 @@
 <meta charset="utf-8">
 <meta name="generator" content="quarto-1.3.433">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<meta name="author" content="Dianne Cook and Ursula Laa">
-<meta name="dcterms.date" content="2023-08-14">
-<title>Interactively exploring high-dimensional data and models in R</title>
+<title>Interactively exploring high-dimensional data and models in R - 7&nbsp; Spin-and-brush approach</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -81,7 +79,8 @@ div.csl-indent {
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./1-intro.html" rel="next">
+<link href="./8-hierarchical.html" rel="next">
+<link href="./6-intro-clust.html" rel="prev">
 <link href="./cover.png" rel="icon" type="image/png">
 <script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
@@ -119,7 +118,7 @@ div.csl-indent {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./index.html">Preface</a></li></ol></nav>
+      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./6-intro-clust.html">Cluster analysis</a></li><li class="breadcrumb-item"><a href="./7-spin-and-brush.html"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Spin-and-brush approach</span></a></li></ol></nav>
       <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
       </a>
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
@@ -145,7 +144,7 @@ div.csl-indent {
     <ul class="list-unstyled mt-1">
 <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./index.html" class="sidebar-item-text sidebar-link active">
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Preface</span></a>
   </div>
 </li>
@@ -218,7 +217,7 @@ div.csl-indent {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./7-spin-and-brush.html" class="sidebar-item-text sidebar-link">
+  <a href="./7-spin-and-brush.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Spin-and-brush approach</span></span></a>
   </div>
 </li>
@@ -367,113 +366,231 @@ div.csl-indent {
         <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Table of contents</h2>
    
   <ul>
-<li>
-<a href="#preface" id="toc-preface" class="nav-link active" data-scroll-target="#preface">Preface</a>
-  <ul class="collapse">
-<li><a href="#whats-in-this-book" id="toc-whats-in-this-book" class="nav-link" data-scroll-target="#whats-in-this-book">What’s in this book?</a></li>
-  <li><a href="#audience" id="toc-audience" class="nav-link" data-scroll-target="#audience">Audience</a></li>
-  <li><a href="#how-to-use-the-book" id="toc-how-to-use-the-book" class="nav-link" data-scroll-target="#how-to-use-the-book">How to use the book?</a></li>
-  <li><a href="#what-should-i-know-before-reading-this-book" id="toc-what-should-i-know-before-reading-this-book" class="nav-link" data-scroll-target="#what-should-i-know-before-reading-this-book">What should I know before reading this book?</a></li>
-  <li><a href="#setting-up-your-workflow" id="toc-setting-up-your-workflow" class="nav-link" data-scroll-target="#setting-up-your-workflow">Setting up your workflow</a></li>
-  <li><a href="#suggestion-feedback-or-error" id="toc-suggestion-feedback-or-error" class="nav-link" data-scroll-target="#suggestion-feedback-or-error">Suggestion, feedback or error?</a></li>
-  <li><a href="#license" id="toc-license" class="nav-link" data-scroll-target="#license">License</a></li>
-  </ul>
-</li>
-  </ul><div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/dicook/mulgar_book/edit/master/index.qmd" class="toc-action">Edit this page</a></p><p><a href="https://github.com/dicook/mulgar_book/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
+<li><a href="#exercises" id="toc-exercises" class="nav-link active" data-scroll-target="#exercises">Exercises</a></li>
+  </ul><div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/dicook/mulgar_book/edit/master/7-spin-and-brush.qmd" class="toc-action">Edit this page</a></p><p><a href="https://github.com/dicook/mulgar_book/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
-<h1 class="title">Interactively exploring high-dimensional data and models in R</h1>
+<h1 class="title"><span id="sec-clust-graphics" class="quarto-section-identifier"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Spin-and-brush approach</span></span></h1>
 </div>
 
 
 
 <div class="quarto-title-meta">
 
-    <div>
-    <div class="quarto-title-meta-heading">Author</div>
-    <div class="quarto-title-meta-contents">
-             <p>Dianne Cook and Ursula Laa </p>
-          </div>
-  </div>
     
-    <div>
-    <div class="quarto-title-meta-heading">Published</div>
-    <div class="quarto-title-meta-contents">
-      <p class="date">August 14, 2023</p>
-    </div>
-  </div>
   
     
   </div>
   
 
-</header>
-<section id="preface" class="level1 unnumbered"><h1 class="unnumbered">Preface</h1><p><img src="cover.png" title="Interactively exploring high-dimensional data and models in R" class="quarto-cover-image img-fluid"></p>
-<!-- Why write this book
+</header><p> </p>
+<p>Several examples of the spin-and-brush approach are documented in the literature, such as <span class="citation" data-cites="CBCH95">Cook et al. (<a href="references.html#ref-CBCH95" role="doc-biblioref">1995a</a>)</span> and <span class="citation" data-cites="WWS99">Wilhelm et al. (<a href="references.html#ref-WWS99" role="doc-biblioref">1999</a>)</span>. The steps are:</p>
+<ol type="1">
+<li>Run the (grand) tour.</li>
+<li>Stop when you see a separated cluster of points.</li>
+<li>Paint the cluster a chosen colour.</li>
+<li>Repeat 1-2 until the data is grouped, and when no other separated cluster is visible in any projection. You may need to re-paint some points if they appear to be grouped incorrectly in a different projection, or paint more points that after spinning most likely belong to an existing group.</li>
+</ol>
+<p>Spin-and-brush is useful for exploring clustering when the data is numeric, and contains well-separated clusters. Patterns that adversely affect numerical techniques, such as nuisance variables or cases, differences in variances or shapes between clusters, don’t pose any problems for spin-and-brush. It is also effective if the data has connected low-dimensional (1D or 2D) clusters in high dimensions.</p>
+<p>It will not work very well when there are no distinct clusters and the purpose of clustering is to partition the data into subsets. Here, you could begin with a solution provided by some numerical clustering algorithm, and to use visual tools to evaluate it, with goal of refining the results.</p>
+<p>With a complex problem where there are many clusters, one can work sequentially, and remove each cluster after it is brushed, to de-clutter the display, in order to find more clusters.</p>
+<!--
+## Using `plotly`
 
--   an introduction to modern statistical methods through the lens of visualisation
--   focus on data analysis and computing over mathematics
--   intuit high dimensional data through dynamic graphics
--   use R + graphics as tool for augmenting understanding of data, models and inferences(?)
+@fig-penguins-brush-and-spin shows a fixed length grand tour produced using `plotly`, with a brush tool made available to colour points. The code is messy, but follows that of [animation-tour-basic.R](https://github.com/plotly/plotly.R/blob/master/demo/animation-tour-basic.R) from @plotly2020. There are key pieces in the code:
+
+1. Create the sequence of tour projections, and the data object containing data projections and projection coordinates. Include an observation id in the data object.
+2. Specify that the `id` variable is to be used to mark observations across animation frames using `highlight_key`.
+3. Draw them using `plotly`, with a `frame` parameter which specifies the animation sequence. 
+4. Add a brush colour palette and specific brushing control using `highlight` to the plotly plot.
+
+The result is an HTML object which can be saved for sharing. The drawback of this approach is that the results of the user actions cannot be saved, so you cannot recover the clusters corresponding to the colours.
+
+
+::: {.cell}
+
+```{.r .cell-code}
+# Following https://github.com/plotly/plotly.R/blob/master/demo/animation-tour-basic.R
+# TURN INTO A FUNCTION TO MAKE IT EASIER
+library(tourr)
+library(plotly)
+load("data/penguins_sub.rda")
+p_mat <- as.matrix(penguins_sub[,1:4])
+tour <- new_tour(p_mat, 
+                 grand_tour(), NULL)
+
+tour_dat <- function(step_size) {
+  step <- tour(step_size)
+  proj <- center(p_mat %*% step$proj)
+  data.frame(x = proj[,1], y = proj[,2], 
+             species = penguins_sub$species,
+             id = 1:nrow(penguins_sub))
+}
+
+proj_dat <- function(step_size) {
+  step <- tour(step_size)
+  data.frame(
+    x = step$proj[,1], y = step$proj[,2], measure = colnames(p_mat)
+ )
+}
+
+steps <- c(0, rep(1/15, 150))
+stepz <- cumsum(steps)
+
+# tidy version of tour data
+tour_dats <- lapply(steps, tour_dat)
+tour_datz <- Map(function(x, y) cbind(x, step = y),
+                 tour_dats, stepz)
+tour_data <- dplyr::bind_rows(tour_datz)
+
+tour_data <- highlight_key(tour_data, ~id)
+
+# tidy version of tour projection data
+proj_dats <- lapply(steps, proj_dat)
+proj_datz <- Map(function(x, y) cbind(x, step = y), proj_dats, stepz)
+proj_data <- dplyr::bind_rows(proj_datz)
+proj_data$x <- proj_data$x*3
+proj_data$y <- proj_data$y*3
+
+ax <- list(
+  title = "",
+  range = c(-3, 3),
+  zeroline = FALSE
+)
+
+# Set colors
+clrs <- grDevices::hcl.colors(6, palette="Zissou 1")
+  
+# for nicely formatted slider labels
+options(digits = 2)
+
+p_b_s <- proj_data %>%
+  plot_ly(x = ~x, y = ~y, frame = ~step, 
+          color = I("gray80"),
+          width=600, height=600) %>%
+  config(displaylogo = FALSE, 
+         modeBarButtonsToRemove = c("sendDataToCloud", "editInChartStudio", "zoom2d", "zoomIn2d", "zoomOut2d", "pan2d", "drawclosedpath", "drawopenpath", "autoScale2d", "hoverClosestCartesian", "hoverCompareCartesian", "resetScale2d")) %>%
+  add_segments(xend = 0, yend = 0) %>%
+  add_text(text = ~measure) %>%
+  add_markers(color = I("black"), data = tour_data, text = ~id, ids = ~id, hoverinfo = "text") %>%
+  layout(xaxis = ax, yaxis = ax) %>%
+  hide_legend() %>%
+  animation_opts(50, transition = 0, redraw = FALSE) %>%
+  highlight(on = "plotly_selected", 
+            off = "plotly_doubleclick",
+            color = clrs, 
+            persistent = TRUE, 
+            dynamic = TRUE, 
+            opacityDim = 0.5)
+htmlwidgets::saveWidget(p_b_s,
+          file="html/penguins_brush_and_spin.html",
+          selfcontained = TRUE)
+```
+:::
+
+
+::: {.content-hidden when-format="pdf"}
+
+::: {#fig-penguins-brush-and-spin fig-align="center"}
+
+<iframe width="600" height="650" src="html/penguins_brush_and_spin.html" title="Controls to brush and spin to discover the three clusters in the penguins data."></iframe>
+
+Controls to brush and spin to discover the three clusters in the penguins data. Use the lasso brush to colour points persistently when you see a cluster. Spin and colour again as necessary to identify all the clusters.
+:::
+
+:::
+
+::: {#fig-penguins-bs-static fig-align="center" layout-ncol=2}
+
+
+![](images/penguins-bs4.png){#fig-penguins-bs1 fig-alt="FIX ME" fig.align="center"}
+
+![](images/penguins-bs5.png){#fig-penguins-bs2 fig-alt="FIX ME" fig.align="center"}
+
+Screenshots of the spin-and-brush approach being used on the penguins data.
+:::
+
+## Using `detourr`
 -->
-<p>It is important to visualise your data because you might discover things that you could never have anticipated. Although there are many resources available for data visualisation, there are few comprehensive resources on high-dimensional data visualisation. High-dimensional (or multivariate) data arises when many different things are measured for each observation. While we can learn many things from plotting with 1D and 2D or 3D methods there are likely more structures hidden in the higher dimensions. This book provides guidance on visualising high-dimensional data and models using linear projections, with R.</p>
-<p>High-dimensional data spaces are fascinating places. You may think that there’s a lot of ways to plot one or two variables, and a lot of types of patterns that can be found. You might use a density plot and see skewness or a dot plot to find outliers. A scatterplot of two variables might reveal a non-linear relationship or a barrier beyond which no observations exist. We don’t as yet have so many different choices of plot types for high-dimensions, but these types of patterns are also what we seek in scatterplots of high-dimensional data. The additional dimensions can clarify these patterns, that clusters are likely to be more distinct. Observations that did not appear to be very different can be seen to be lonely anomalies in high-dimensions, that no other observations have quite the same combination of values.</p>
-<section id="whats-in-this-book" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="whats-in-this-book">What’s in this book?</h2>
-<p>The book is divided into these parts:</p>
-<ul>
-<li>
-<strong>Introduction</strong>: Here we introduce you to high-dimensional spaces, how they can be visualised, and notation that is useful for describing methods in later chapters.<br>
-</li>
-<li>
-<strong>Dimension reduction</strong>: This part covers linear and non-linear dimension reduction. It includes ways to help decide on the number of dimensions needed to summarise the high dimensional data, whether linear dimension reduction is appropriate, detecting problems that might affect the dimension reduction, and examining how well or badly a non-linear dimension reduction is representing the data.</li>
-<li>
-<strong>Cluster analysis</strong>: This part described methods for finding groups in data. Although it includes an explanation of a purely graphical approach, it is mostly on using graphics in association with numerical clustering algorithms. There are explanations of assessing the suitability of different numerical techniques for extracting clusters, based on the data shapes, evaluating the clustering result, and showing the solutions in high dimensions.</li>
-<li>
-<strong>Classification</strong>: This part describes methods for exploring known groups in the data. You’ll learn how to check model assumptions, to help decide if a method is suited to the data, examine classification boundaries and explore where errors arise.</li>
-<li>
-<strong>Miscellaneous</strong>: The material in this part focuses on examining data from different contexts. This includes multiple time series, longitudinal data. A key pre-processing step is to convert the data into Euclidean space.</li>
-</ul>
-<p>In each of these parts an emphasis is also showing your model with your data in the high dimensional space.</p>
-<p>Our hopes are that you will come away with understanding the importance of plotting your high dimensional data as a regular step in your statistical or machine learning analyses. There are many examples of what you might miss if you don’t plot the data. Effective use of graphics goes hand-in-hand with analytical techniques. With high dimensions visualisation is a challenge but it is fascinating, and leads to many surprising moments.</p>
-</section><section id="audience" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="audience">Audience</h2>
-<p>High-dimensional data arises in many fields such as biology, social sciences, finance, and more. Anyone who is doing exploratory data analysis and model fitting for more than two variables will benefit from learning how to effectively visualise high-dimensions. This book will be useful for students and teachers of multivariate data analysis and machine learning, and researchers, data analysts, and industry professionals who work in these areas.</p>
-</section><section id="how-to-use-the-book" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="how-to-use-the-book">How to use the book?</h2>
-<p>The book is written with explanations accompanied by examples with R code. The chapters are organised by types of analysis and focus on how to use the high-dimensional visualisation to complement the commonly used analytical methods. The toolbox chapter in the Appendix provides an overview of the primary high-dimensional visualisation methods discussed in the book and how to get started.</p>
-</section><section id="what-should-i-know-before-reading-this-book" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="what-should-i-know-before-reading-this-book">What should I know before reading this book?</h2>
-<p>The examples assume that you already use R, and have a working knowledge of base R and tidyverse way of thinking about data analysis. It also assumes that you have some knowledge of statistical methods, and some experience with machine learning methods.</p>
-<p>If you feel like you need build up your skills in these areas in preparation for working through this book, these are our recommended resources:</p>
-<ul>
-<li>
-<a href="https://r4ds.had.co.nz">R for Data Science</a> by Wickham and Grolemund for learning about data wrangling and visualisation.</li>
-<li>
-<a href="https://openintro-ims.netlify.app">Introduction to Modern Statistics</a> by Çetinkaya-Rundel and Hardin to learn about introductory statistics.</li>
-<li>
-<a href="https://bradleyboehmke.github.io/HOML/">Hands-On Machine Learning with R</a> by Boehmke and Greenwell to learn about machine learning.</li>
-</ul>
-<p>We will assume you know how to plot your data and models in 2D. Our material starts from 2D and beyond.</p>
-</section><section id="setting-up-your-workflow" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="setting-up-your-workflow">Setting up your workflow</h2>
-<p>To get started set up your computer with the current versions of <a href="https://cran.r-project.org">R</a> and ideally also with <a href="https://posit.co/download/rstudio-desktop/">Rstudio Desktop</a>.</p>
-<p>In addition, we have made an R package to share the data and functions used in this book, called <a href="http://dicook.github.io/mulgar"><code>mulgar</code></a>.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a><a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></p>
+<p>Spin-and-brush is best achieved using a fully interactive graphics system like in the <code>detourr</code> package, where the results can be saved for further analysis. The code is very easy, and then all the controls are interactive.</p>
 <div class="cell">
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span><span class="op">(</span><span class="st">"mulgar"</span>, dependencies<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="co"># or the development version</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html">install_github</a></span><span class="op">(</span><span class="st">"dicook/mulgar"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://casperhart.github.io/detourr/">detourr</a></span><span class="op">)</span></span>
+<span><span class="fu">grDevices</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/grDevices/palettes.html">hcl.colors</a></span><span class="op">(</span><span class="fl">3</span>, palette<span class="op">=</span><span class="st">"Zissou 1"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://casperhart.github.io/detourr/reference/detour.html">detour</a></span><span class="op">(</span><span class="va">penguins_sub</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, </span>
+<span>       <span class="fu"><a href="https://casperhart.github.io/detourr/reference/tour_aes.html">tour_aes</a></span><span class="op">(</span>projection <span class="op">=</span> <span class="va">bl</span><span class="op">:</span><span class="va">bm</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>       <span class="fu"><a href="https://casperhart.github.io/detourr/reference/tour_path.html">tour_path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/tourr/man/grand_tour.html">grand_tour</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span>, fps <span class="op">=</span> <span class="fl">60</span>, </span>
+<span>                 max_bases<span class="op">=</span><span class="fl">20</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>       <span class="fu"><a href="https://casperhart.github.io/detourr/reference/show_scatter.html">show_scatter</a></span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.7</span>, </span>
+<span>                    axes <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>To get a copy of the code and data used and an RStudio project to get started, you can download with this code:</p>
-<div class="cell">
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">usethis</span><span class="fu">::</span><span class="fu"><a href="https://usethis.r-lib.org/reference/zip-utils.html">use_zip</a></span><span class="op">(</span>url<span class="op">=</span><span class="st">"https://dicook.github.io/mulgar_book/code_and_data.zip"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>You will be able to click on the <code>mulgar_book.Rproj</code> to get started with the code.</p>
-</section><section id="suggestion-feedback-or-error" class="level2"><h2 class="anchored" data-anchor-id="suggestion-feedback-or-error">Suggestion, feedback or error?</h2>
-<p>We welcome suggestions, feedback or details of errors. You can report them as an issue at the <a href="https://github.com/dicook/mulgar_book">Github repo for this book</a>.</p>
-<p>Please make a small <a href="https://reprex.tidyverse.org">reproducible example</a> and report the error encountered. Reproducible examples have these components:</p>
 <ul>
-<li>a small amount of data</li>
-<li>small amount of code that generates the error</li>
-<li>copy of the error message that was generated</li>
-</ul></section><section id="license" class="level2"><h2 class="anchored" data-anchor-id="license">License</h2>
-<p><a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png"></a><br>The online version of this book is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.</p>
+<li>
+<code>tour_aes(projection = bl:bm))</code> is <code>ggplot</code>-style syntax for specifying the variables <code>bl:bm</code> to include in the tour.</li>
+<li>
+<code>tour_path(grand_tour(2), fps = 60,                   max_bases=20)</code> specifies 2D grand tour path, with a longer than default path set by <code>max_bases=20</code> and the <code>fps</code> argument sets the smoothness.</li>
+<li>Brush interaction is set by choosing the square icon (4th from top), so when the cursor is moved over the window points are selected.</li>
+<li>You can choose specific colours to brush, from the colour palette by using hexcolours to match your favourite palette. Here we’ve used colours from the Zissou palette.</li>
+<li>The paintbrush icon sets the selected points to the current colour.</li>
+<li>Save the final colour labels using the download icon.</li>
+</ul>
+<div id="fig-penguins-bs-detourr" class="quarto-layout-panel" data-fig-align="center">
+<figure class="figure"><div class="quarto-layout-row quarto-layout-valign-top">
+<div class="quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-penguins-bs3" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure"><p><img src="images/penguins-bs6.png" class="img-fluid figure-img" data-fig.align="center" alt="FIX ME" data-ref-parent="fig-penguins-bs-detourr" width="300"></p>
+<figcaption class="figure-caption">(a) One cluster painted</figcaption></figure>
+</div>
+</div>
+<div class="quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-penguins-bs4" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure"><p><img src="images/penguins-bs7.png" class="img-fluid figure-img" data-fig.align="center" alt="FIX ME" data-ref-parent="fig-penguins-bs-detourr" width="300"></p>
+<figcaption class="figure-caption">(b) Another cluster painted</figcaption></figure>
+</div>
+</div>
+</div>
+<p></p><figcaption class="figure-caption">Figure&nbsp;7.1: Screenshots of the spin-and-brush approach using <code>detourr</code> on the penguins data.</figcaption><p></p>
+</figure>
+</div>
+<p><a href="#fig-penguins-bs-detourr">Figure&nbsp;<span>7.1</span></a> shows the stages of spin-and-brush on the penguins data using detourr. The final results can be examined and used for later analysis. Because this data came with a class variable, the penguin species, it is interesting to see how close the spin-and-brush clustering approach came to recovering these:</p>
+<div class="cell">
+<details><summary>Code to make confusion matrix</summary><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://readr.tidyverse.org">readr</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"data/penguins_sub.rda"</span><span class="op">)</span></span>
+<span><span class="va">detourr_penguins</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html">read_csv</a></span><span class="op">(</span><span class="st">"data/detourr_penguins.csv"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="va">penguins_sub</span><span class="op">$</span><span class="va">species</span>, <span class="va">detourr_penguins</span><span class="op">$</span><span class="va">colour</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>           
+            000000 3e9eb6 f5191c
+  Adelie       143      0      3
+  Chinstrap      6      0     62
+  Gentoo         2    117      0</code></pre>
+</div>
+</div>
+<p>It’s quite close! All but two of the 119 Gentoo penguins were identified as a cluster (labelled as “3e9eb6” from the chosen light blue hex colour), and all but three of the 146 Adelie penguins were identified as a cluster, (labelled as “000000” which is the unbrushed black group). Most of the Chinstrap species were recovered also (labelled as “f5191c” for the red hex colour).</p>
+<section id="exercises" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="exercises">Exercises</h2>
+<ol type="1">
+<li>Use the spin-and-brush approach to identify the three clusters in the <code><a href="https://dicook.github.io/mulgar/reference/clusters.html">mulgar::clusters</a></code> data set.</li>
+<li>Use the spin-and-brush approach to identify the six clusters in the <code><a href="https://dicook.github.io/mulgar/reference/multicluster.html">mulgar::multicluster</a></code> data set. (The code below using detourr could be useful.)</li>
+<li>Use spin-and-brush on the challenge data sets, <code>c1</code>-<code>c7</code> from the <code>mulgar</code> package. How many clusters do you detect in each?</li>
+</ol>
+<div class="cell">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://casperhart.github.io/detourr/">detourr</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Use a random starting basis because the first two variables make it too easy</span></span>
+<span><span class="va">strt</span> <span class="op">&lt;-</span> <span class="fu">tourr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/tourr/man/basis_random.html">basis_random</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://casperhart.github.io/detourr/reference/detour.html">detour</a></span><span class="op">(</span><span class="va">multicluster</span>, </span>
+<span>       <span class="fu"><a href="https://casperhart.github.io/detourr/reference/tour_aes.html">tour_aes</a></span><span class="op">(</span>projection <span class="op">=</span> <span class="op">-</span><span class="va">group</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>       <span class="fu"><a href="https://casperhart.github.io/detourr/reference/tour_path.html">tour_path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/tourr/man/grand_tour.html">grand_tour</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span>, start<span class="op">=</span><span class="va">strt</span>, fps <span class="op">=</span> <span class="fl">60</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>       <span class="fu"><a href="https://casperhart.github.io/detourr/reference/show_scatter.html">show_scatter</a></span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.7</span>, axes <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ol start="3" type="1">
+<li>Use the spin-and-brush technique to identify the branches of the <code>fake_trees</code> data available in the <code>liminal</code> package (originally from <a href="https://phate.readthedocs.io/en/stable/">PHATE</a>). The result should look something like this:</li>
+</ol>
+<div id="fig-fake-trees-sb" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure"><p><img src="images/fake_trees_sb.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">Figure&nbsp;7.2: Example solution after spin-and-brush on fake_trees data.</figcaption></figure>
+</div>
+<p>You can use the download button to save the data with the colours. Tabulate the <code>branches</code> id variable in the original data with the <code>colour</code> groups created from brushing, to see how closely you have recovered the original classes.</p>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" data-line-spacing="2" role="list" style="display: none">
@@ -625,10 +742,10 @@ Cook, D., &amp; Buja, A. (1997). <span>M</span>anual <span>C</span>ontrols <span
 Cook, D., Buja, A., &amp; Cabrera, J. (1993). <span>P</span>rojection <span>P</span>ursuit <span>I</span>ndexes <span>B</span>ased on <span>O</span>rthonormal <span>F</span>unction <span>E</span>xpansions. <em>Journal of Computational and Graphical Statistics</em>, <em>2</em>(3), 225–250.
 </div>
 <div id="ref-CBCH95" class="csl-entry" role="listitem">
-Cook, D., Buja, A., Cabrera, J., &amp; Hurley, C. (1995b). Grand <span>T</span>our and <span>P</span>rojection <span>P</span>ursuit. <em>Journal of Computational and Graphical Statistics</em>, <em>4</em>(3), 155–172.
+Cook, D., Buja, A., Cabrera, J., &amp; Hurley, C. (1995a). Grand <span>T</span>our and <span>P</span>rojection <span>P</span>ursuit. <em>Journal of Computational and Graphical Statistics</em>, <em>4</em>(3), 155–172.
 </div>
 <div id="ref-CBCH94" class="csl-entry" role="listitem">
-Cook, D., Buja, A., Cabrera, J., &amp; Hurley, C. (1995a). Grand <span>T</span>our and <span>P</span>rojection <span>P</span>ursuit. <em>Journal of Computational and Graphical Statistics</em>, <em>4</em>(3), 155–172.
+Cook, D., Buja, A., Cabrera, J., &amp; Hurley, C. (1995b). Grand <span>T</span>our and <span>P</span>rojection <span>P</span>ursuit. <em>Journal of Computational and Graphical Statistics</em>, <em>4</em>(3), 155–172.
 </div>
 <div id="ref-CHLYNW06" class="csl-entry" role="listitem">
 Cook, D., Hofmann, H., Lee, E.-K., Yang, H., Nikolau, B., &amp; Wurtele, E. (2007). Exploring <span>G</span>ene <span>E</span>xpression <span>D</span>ata, <span>U</span>sing <span>P</span>lots. <em>Journal of Data Science</em>, <em>5</em>(2), 151–182.
@@ -1249,11 +1366,7 @@ Zhang, H. S., Cook, D., Laa, U., Langrené, N., &amp; Menéndez, P. (2022). <em>
 Zhu, H. (2021). <em>kableExtra: Construct complex table with kable and pipe syntax</em>. <a href="https://CRAN.R-project.org/package=kableExtra">https://CRAN.R-project.org/package=kableExtra</a>
 </div>
 </div>
-</section></section><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><hr>
-<ol>
-<li id="fn1"><p>Mulga is a type of Australian habitat composed of woodland or open forest dominated by the mulga tree. Massive clearing of mulga led to the vast wheat fields of Western Australia. Here <strong>mulgar</strong> is an acronym for <strong>MUL</strong>tivariate <strong>G</strong>raphical <strong>A</strong>nalysis with <strong>R</strong>.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn2"><p>Photo of mulga tree taken by L. G. Cook.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-</ol></section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+</section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
     const mode = bsSheetEl.getAttribute("data-mode");
@@ -1486,10 +1599,13 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
 });
 </script><nav class="page-navigation"><div class="nav-page nav-page-previous">
+      <a href="./6-intro-clust.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Overview</span></span>
+      </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./1-intro.html" class="pagination-link">
-        <span class="nav-page-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Picturing high dimensions</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./8-hierarchical.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Hierarchical clustering</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
