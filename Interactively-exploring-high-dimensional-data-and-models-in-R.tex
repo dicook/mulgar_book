@@ -143,13 +143,13 @@
 % Macro to make the info box
 \newcommand{\insightbox}[1]{%
 \noindent\colorbox{insight!30}{%
-\begin{minipage}{\linewidth}%
+\begin{minipage}{0.95\textwidth}%
     \centering%
-    \begin{minipage}[c]{0.15\linewidth} % Adjust width as needed for the image
+    \begin{minipage}[c]{0.15\textwidth} % Adjust width as needed for the image
       \includegraphics[width=1.5cm]{images/mulga-seeds3.png} % Adjust the image size as needed
     \end{minipage}%
     \hfill % Horizontal space between image and text
-    \begin{minipage}[c]{0.8\linewidth} % Adjust width as needed for the text
+    \begin{minipage}[c]{0.8\textwidth} % Adjust width as needed for the text
       \bigskip%
       \textsf{#1}%
       \bigskip%
@@ -176,6 +176,9 @@
   \end{minipage}%
 }%
 }
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{longtable}
 \usepackage{amsmath}
 \usepackage{blkarray}
 \usepackage[most]{tcolorbox}
@@ -257,11 +260,11 @@
 
 \title{Interactively exploring high-dimensional data and models in R}
 \author{Dianne Cook and Ursula Laa}
-\date{2023-11-12}
+\date{2023-11-15}
 
 \begin{document}
 \maketitle
-\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[enhanced, borderline west={3pt}{0pt}{shadecolor}, boxrule=0pt, breakable, interior hidden, sharp corners, frame hidden]}{\end{tcolorbox}}\fi
+\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[interior hidden, frame hidden, borderline west={3pt}{0pt}{shadecolor}, sharp corners, enhanced, breakable, boxrule=0pt]}{\end{tcolorbox}}\fi
 
 \renewcommand*\contentsname{Table of contents}
 {
@@ -1101,6 +1104,1540 @@ matrix
   \texttt{mulgar::clusters} data onto the 2D plane defined by \(A\).
   Make a scatterplot of the projected data. Can you identify clustering
   in this view?
+\end{enumerate}
+
+\part{Dimension reduction}
+
+\hypertarget{sec-dimension-overview}{%
+\chapter{Overview}\label{sec-dimension-overview}}
+
+This chapter will focus on methods for reducing dimension, and how the
+tour can be used to assist with the common methods such as principal
+component analysis (PCA), multidimensional scaling (MDS), t-stochastic
+neighbour embedding (t-SNE), and factor analysis.
+
+Dimension is perceived in a tour using the spread of points. When the
+points are spread far apart, then the data is filling the space.
+Conversely when the points ``collapse'' into a sub-region then the data
+is only partially filling the space, and some dimension reduction to
+reduce to this smaller dimensional space may be worthwhile.
+
+\infobox{When points do not fill the plotting canvas fully, it means that it lives in a lower dimension. This low-dimensional space might be linear or non-linear, with the latter being much harder to define and capture.}
+
+Let's start with some 2D examples. You need at least two variables to be
+able to talk about association between variables. Figure~\ref{fig-2D}
+shows three plots of two variables. Plot (a) shows two variables that
+are strongly linearly associated\footnote{It is generally better to use
+  \emph{associated} than \emph{correlated}. Correlation is a statistical
+  quantity, measuring linear association. The term \emph{associated} can
+  be prefaced with the type of association, such as \emph{linear} or
+  \emph{non-linear}.}, because when \texttt{x1} is low, \texttt{x2} is
+low also, and conversely when \texttt{x1} is high, \texttt{x2} is also
+high. This can also be seen by the reducton in spread of points (or
+``collapse'') in one direction making the data fill less than the full
+square of the plot. \emph{So from this we can conclude that the data is
+not fully 2D.} The second step is to infer which variables contribute to
+this reduction in dimension. The axes for \texttt{x1} and \texttt{x2}
+are drawn extending from \((0,0)\) and because they both extend out of
+the cloud of points, in the direction away from the collapse of points
+we can say that they are jointly responsible for the dimension
+reduction.
+
+Figure~\ref{fig-2D} (b) shows a pair of variables that are \textbf{not}
+linearly associated. Variable \texttt{x1} is more varied than
+\texttt{x3} but knowing the value on \texttt{x1} tells us nothing about
+possible values on \texttt{x3}. Before running a tour all variables are
+typically scaled to have equal spread. The purpose of the tour is to
+capture association and relationships between the variables, so any
+univariate differences should be removed ahead of time.
+Figure~\ref{fig-2D} (c) shows what this would look like when \texttt{x3}
+is scaled - the points are fully spread in the full square of the plot.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(tibble)}
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{6045}\NormalTok{)}
+\NormalTok{x1 }\OtherTok{\textless{}{-}} \FunctionTok{runif}\NormalTok{(}\DecValTok{123}\NormalTok{)}
+\NormalTok{x2 }\OtherTok{\textless{}{-}}\NormalTok{ x1 }\SpecialCharTok{+} \FunctionTok{rnorm}\NormalTok{(}\DecValTok{123}\NormalTok{, }\AttributeTok{sd=}\FloatTok{0.1}\NormalTok{)}
+\NormalTok{x3 }\OtherTok{\textless{}{-}} \FunctionTok{rnorm}\NormalTok{(}\DecValTok{123}\NormalTok{, }\AttributeTok{sd=}\FloatTok{0.2}\NormalTok{)}
+\NormalTok{df }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{(}\AttributeTok{x1 =}\NormalTok{ (x1}\SpecialCharTok{{-}}\FunctionTok{mean}\NormalTok{(x1))}\SpecialCharTok{/}\FunctionTok{sd}\NormalTok{(x1), }
+             \AttributeTok{x2 =}\NormalTok{ (x2}\SpecialCharTok{{-}}\FunctionTok{mean}\NormalTok{(x2))}\SpecialCharTok{/}\FunctionTok{sd}\NormalTok{(x2),}
+\NormalTok{             x3, }
+             \AttributeTok{x3scaled =}\NormalTok{ (x3}\SpecialCharTok{{-}}\FunctionTok{mean}\NormalTok{(x3))}\SpecialCharTok{/}\FunctionTok{sd}\NormalTok{(x3))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}
+
+{\centering \includegraphics[width=1\textwidth,height=\textheight]{3-intro-dimred_files/figure-pdf/fig-2D-1.pdf}
+
+}
+
+\caption{\label{fig-2D}Explanation of how dimension reduction is
+perceived in 2D, relative to variables: (a) Two variables with strong
+linear association. Both variables contribute to the association, as
+indicated by their axes extending out from the `collapsed' direction of
+the points; (b) Two variables with no linear association. But x3 has
+less variation, so points collapse in this direction; (c) The situation
+in plot (b) does not arise in a tour because all variables are (usually)
+scaled. When an axes extends out of a direction where the points are
+collapsed, it means that this variable is partially responsible for the
+reduced dimension.}
+
+\end{figure}
+
+Now let's think about what this looks like with five variables.
+Figure~\ref{fig-dimension-pdf} shows a grand tour on five variables,
+with (a) data that is primarily 2D, (b) data that is primarily 3D and
+(c) fully 5D data. You can see that both (a) and (b) the spread of
+points collapse in some projections, with it happening more in (a). In
+(c) the data is always spread out in the square, although it does seem
+to concentrate or pile in the centre. This piling is typical when
+projecting from high dimensions to low dimensions. The sage tour (Laa et
+al., 2020a) makes a correction for this.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(mulgar)}
+\FunctionTok{data}\NormalTok{(plane)}
+\FunctionTok{data}\NormalTok{(box)}
+\FunctionTok{render\_gif}\NormalTok{(plane,}
+           \FunctionTok{grand\_tour}\NormalTok{(), }
+           \FunctionTok{display\_xy}\NormalTok{(),}
+           \AttributeTok{gif\_file=}\StringTok{"gifs/plane.gif"}\NormalTok{,}
+           \AttributeTok{frames=}\DecValTok{500}\NormalTok{,}
+           \AttributeTok{width=}\DecValTok{200}\NormalTok{,}
+           \AttributeTok{height=}\DecValTok{200}\NormalTok{)}
+\FunctionTok{render\_gif}\NormalTok{(box,}
+           \FunctionTok{grand\_tour}\NormalTok{(), }
+           \FunctionTok{display\_xy}\NormalTok{(),}
+           \AttributeTok{gif\_file=}\StringTok{"gifs/box.gif"}\NormalTok{,}
+           \AttributeTok{frames=}\DecValTok{500}\NormalTok{,}
+           \AttributeTok{width=}\DecValTok{200}\NormalTok{,}
+           \AttributeTok{height=}\DecValTok{200}\NormalTok{)}
+\CommentTok{\# Simulate full cube}
+\FunctionTok{library}\NormalTok{(geozoo)}
+\NormalTok{cube5d }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\FunctionTok{cube.solid.random}\NormalTok{(}\AttributeTok{p=}\DecValTok{5}\NormalTok{, }\AttributeTok{n=}\DecValTok{300}\NormalTok{)}\SpecialCharTok{$}\NormalTok{points)}
+\FunctionTok{colnames}\NormalTok{(cube5d) }\OtherTok{\textless{}{-}} \FunctionTok{paste0}\NormalTok{(}\StringTok{"x"}\NormalTok{, }\DecValTok{1}\SpecialCharTok{:}\DecValTok{5}\NormalTok{)}
+\NormalTok{cube5d }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\FunctionTok{apply}\NormalTok{(cube5d, }\DecValTok{2}\NormalTok{, }\ControlFlowTok{function}\NormalTok{(x) (x}\SpecialCharTok{{-}}\FunctionTok{mean}\NormalTok{(x))}\SpecialCharTok{/}\FunctionTok{sd}\NormalTok{(x)))}
+\FunctionTok{render\_gif}\NormalTok{(cube5d,}
+           \FunctionTok{grand\_tour}\NormalTok{(), }
+           \FunctionTok{display\_xy}\NormalTok{(),}
+           \AttributeTok{gif\_file=}\StringTok{"gifs/cube5d.gif"}\NormalTok{,}
+           \AttributeTok{frames=}\DecValTok{500}\NormalTok{,}
+           \AttributeTok{width=}\DecValTok{200}\NormalTok{,}
+           \AttributeTok{height=}\DecValTok{200}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}
+
+\begin{minipage}[t]{0.33\linewidth}
+
+{\centering 
+
+\raisebox{-\height}{
+
+\includegraphics[width=1.66667in,height=\textheight]{images/plane.png}
+
+}
+
+}
+
+\subcaption{\label{fig-plane}2D plane in 5D}
+\end{minipage}%
+%
+\begin{minipage}[t]{0.33\linewidth}
+
+{\centering 
+
+\raisebox{-\height}{
+
+\includegraphics[width=1.66667in,height=\textheight]{images/box.png}
+
+}
+
+}
+
+\subcaption{\label{fig-box}3D plane in 5D}
+\end{minipage}%
+%
+\begin{minipage}[t]{0.33\linewidth}
+
+{\centering 
+
+\raisebox{-\height}{
+
+\includegraphics[width=1.66667in,height=\textheight]{images/cube5d.png}
+
+}
+
+}
+
+\subcaption{\label{fig-cube5}5D plane in 5D}
+\end{minipage}%
+
+\caption{\label{fig-dimension-pdf}Single frames from different
+dimensional planes - 2D, 3D, 5D - displayed in a grand tour projecting
+into 2D. Notice that the 5D in 5D always fills out the box (although it
+does concentrate some in the middle which is typical when projecting
+from high to low dimensions). Also you can see that the 2D in 5D,
+concentrates into a line more than the 3D in 5D. This suggests that it
+is lower dimensional. (Animations can be viewed
+\href{https://dicook.github.io/mulgar_book/3-intro-dimred.html}{here}.)}
+
+\end{figure}
+
+The next step is to determine which variables contribute. In the
+examples just provided, all variables are linearly associated in the 2D
+and 3D data. You can check this by making a scatterplot matrix,
+Figure~\ref{fig-plane-scatmat}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(GGally)}
+\FunctionTok{library}\NormalTok{(mulgar)}
+\FunctionTok{data}\NormalTok{(plane)}
+\FunctionTok{ggscatmat}\NormalTok{(plane) }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{panel.background =} 
+          \FunctionTok{element\_rect}\NormalTok{(}\AttributeTok{colour=}\StringTok{"black"}\NormalTok{, }\AttributeTok{fill=}\ConstantTok{NA}\NormalTok{),}
+    \AttributeTok{axis.text =} \FunctionTok{element\_blank}\NormalTok{(),}
+    \AttributeTok{axis.ticks =} \FunctionTok{element\_blank}\NormalTok{())}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.8\textwidth,height=\textheight]{3-intro-dimred_files/figure-pdf/fig-plane-scatmat-1.pdf}
+
+}
+
+\caption{\label{fig-plane-scatmat}Scatterplot matrix of plane data. You
+can see that x1-x3 are strongly linearly associated, and also x4 and x5.
+When you watch the tour of this data, any time the data collapses into a
+line you should see only (x1, x2, x3) or (x4, x5). When combinations of
+x1 and x4 or x5 show, the data should be spread out.}
+
+\end{figure}
+
+To make an example where not all variables contribute, we have added two
+additional variables to the \texttt{plane} data set, which are purely
+noise.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Add two pure noise dimensions to the plane}
+\NormalTok{plane\_noise }\OtherTok{\textless{}{-}}\NormalTok{ plane}
+\NormalTok{plane\_noise}\SpecialCharTok{$}\NormalTok{x6 }\OtherTok{\textless{}{-}} \FunctionTok{rnorm}\NormalTok{(}\DecValTok{100}\NormalTok{)}
+\NormalTok{plane\_noise}\SpecialCharTok{$}\NormalTok{x7 }\OtherTok{\textless{}{-}} \FunctionTok{rnorm}\NormalTok{(}\DecValTok{100}\NormalTok{)}
+\NormalTok{plane\_noise }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\FunctionTok{apply}\NormalTok{(plane\_noise, }\DecValTok{2}\NormalTok{, }
+    \ControlFlowTok{function}\NormalTok{(x) (x}\SpecialCharTok{{-}}\FunctionTok{mean}\NormalTok{(x))}\SpecialCharTok{/}\FunctionTok{sd}\NormalTok{(x)))}
+\FunctionTok{ggduo}\NormalTok{(plane\_noise, }\AttributeTok{columnsX =} \DecValTok{1}\SpecialCharTok{:}\DecValTok{5}\NormalTok{, }\AttributeTok{columnsY =} \DecValTok{6}\SpecialCharTok{:}\DecValTok{7}\NormalTok{, }
+    \AttributeTok{types =} \FunctionTok{list}\NormalTok{(}\AttributeTok{continuous =} \StringTok{"points"}\NormalTok{)) }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{aspect.ratio=}\DecValTok{1}\NormalTok{,}
+    \AttributeTok{panel.background =} 
+          \FunctionTok{element\_rect}\NormalTok{(}\AttributeTok{colour=}\StringTok{"black"}\NormalTok{, }\AttributeTok{fill=}\ConstantTok{NA}\NormalTok{),}
+    \AttributeTok{axis.text =} \FunctionTok{element\_blank}\NormalTok{(),}
+    \AttributeTok{axis.ticks =} \FunctionTok{element\_blank}\NormalTok{())}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.8\textwidth,height=\textheight]{3-intro-dimred_files/figure-pdf/fig-plane-noise-scatter-1.pdf}
+
+}
+
+\caption{\label{fig-plane-noise-scatter}Scatterplots showing two
+additional noise variables that are not associated with any of the first
+five variables.}
+
+\end{figure}
+
+Now we have 2D structure in 7D, but only five of the variables
+contribute to the 2D structure, that is, five of the variables are
+linearly related with each other. The other two variables (x6, x7) are
+not linearly related to any of the others.
+
+The data is viewed with a grand tour in
+Figure~\ref{fig-plane-noise-pdf}. We can still see the concentration of
+points along a line in some dimensions, which tells us that the data is
+not fully 7D. Then if you look closely at the variable axes you will see
+that the collapsing to a line only occurs when any of x1-x5 contribute
+strongly in the direction orthogonal to this. This does not happen when
+x6 or x7 contribute strongly to a projection - the data is always
+expanded to fill much of the space. That tells us that x6 and x7 don't
+substantially contribute to the dimension reduction, that is, they are
+not linearly related to the other variables.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(ggplot2)}
+\FunctionTok{library}\NormalTok{(plotly)}
+\FunctionTok{library}\NormalTok{(htmlwidgets)}
+
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{78}\NormalTok{)}
+\NormalTok{b }\OtherTok{\textless{}{-}} \FunctionTok{basis\_random}\NormalTok{(}\DecValTok{7}\NormalTok{, }\DecValTok{2}\NormalTok{)}
+\NormalTok{pn\_t }\OtherTok{\textless{}{-}}\NormalTok{ tourr}\SpecialCharTok{::}\FunctionTok{save\_history}\NormalTok{(plane\_noise, }
+                    \AttributeTok{tour\_path =} \FunctionTok{grand\_tour}\NormalTok{(),}
+                    \AttributeTok{start =}\NormalTok{ b,}
+                    \AttributeTok{max\_bases =} \DecValTok{8}\NormalTok{)}
+\NormalTok{pn\_t }\OtherTok{\textless{}{-}} \FunctionTok{interpolate}\NormalTok{(pn\_t, }\FloatTok{0.1}\NormalTok{)}
+\NormalTok{pn\_anim }\OtherTok{\textless{}{-}} \FunctionTok{render\_anim}\NormalTok{(plane\_noise,}
+                         \AttributeTok{frames=}\NormalTok{pn\_t)}
+
+\NormalTok{pn\_gp }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{() }\SpecialCharTok{+}
+     \FunctionTok{geom\_path}\NormalTok{(}\AttributeTok{data=}\NormalTok{pn\_anim}\SpecialCharTok{$}\NormalTok{circle, }
+               \FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{c1, }\AttributeTok{y=}\NormalTok{c2,}
+                   \AttributeTok{frame=}\NormalTok{frame), }\AttributeTok{linewidth=}\FloatTok{0.1}\NormalTok{) }\SpecialCharTok{+}
+     \FunctionTok{geom\_segment}\NormalTok{(}\AttributeTok{data=}\NormalTok{pn\_anim}\SpecialCharTok{$}\NormalTok{axes, }
+                  \FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{x1, }\AttributeTok{y=}\NormalTok{y1, }
+                      \AttributeTok{xend=}\NormalTok{x2, }\AttributeTok{yend=}\NormalTok{y2, }
+                      \AttributeTok{frame=}\NormalTok{frame), }
+                  \AttributeTok{linewidth=}\FloatTok{0.1}\NormalTok{) }\SpecialCharTok{+}
+     \FunctionTok{geom\_text}\NormalTok{(}\AttributeTok{data=}\NormalTok{pn\_anim}\SpecialCharTok{$}\NormalTok{axes, }
+               \FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{x2, }\AttributeTok{y=}\NormalTok{y2, }
+                   \AttributeTok{frame=}\NormalTok{frame, }
+                   \AttributeTok{label=}\NormalTok{axis\_labels), }
+               \AttributeTok{size=}\DecValTok{5}\NormalTok{) }\SpecialCharTok{+}
+     \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{data=}\NormalTok{pn\_anim}\SpecialCharTok{$}\NormalTok{frames, }
+                \FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{P1, }\AttributeTok{y=}\NormalTok{P2, }
+                    \AttributeTok{frame=}\NormalTok{frame), }
+                \AttributeTok{alpha=}\FloatTok{0.8}\NormalTok{) }\SpecialCharTok{+}
+     \FunctionTok{xlim}\NormalTok{(}\SpecialCharTok{{-}}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{ylim}\NormalTok{(}\SpecialCharTok{{-}}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{) }\SpecialCharTok{+}
+     \FunctionTok{coord\_equal}\NormalTok{() }\SpecialCharTok{+}
+     \FunctionTok{theme\_bw}\NormalTok{() }\SpecialCharTok{+}
+     \FunctionTok{theme}\NormalTok{(}\AttributeTok{axis.text=}\FunctionTok{element\_blank}\NormalTok{(),}
+         \AttributeTok{axis.title=}\FunctionTok{element\_blank}\NormalTok{(),}
+         \AttributeTok{axis.ticks=}\FunctionTok{element\_blank}\NormalTok{(),}
+         \AttributeTok{panel.grid=}\FunctionTok{element\_blank}\NormalTok{())}
+\NormalTok{pn\_tour }\OtherTok{\textless{}{-}} \FunctionTok{ggplotly}\NormalTok{(pn\_gp,}
+                        \AttributeTok{width=}\DecValTok{500}\NormalTok{,}
+                        \AttributeTok{height=}\DecValTok{550}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+       \FunctionTok{animation\_button}\NormalTok{(}\AttributeTok{label=}\StringTok{"Go"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+       \FunctionTok{animation\_slider}\NormalTok{(}\AttributeTok{len=}\FloatTok{0.8}\NormalTok{, }\AttributeTok{x=}\FloatTok{0.5}\NormalTok{,}
+                        \AttributeTok{xanchor=}\StringTok{"center"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+       \FunctionTok{animation\_opts}\NormalTok{(}\AttributeTok{easing=}\StringTok{"linear"}\NormalTok{, }
+                      \AttributeTok{transition =} \DecValTok{0}\NormalTok{)}
+
+\NormalTok{htmlwidgets}\SpecialCharTok{::}\FunctionTok{saveWidget}\NormalTok{(pn\_tour,}
+          \AttributeTok{file=}\StringTok{"html/plane\_noise.html"}\NormalTok{,}
+          \AttributeTok{selfcontained =} \ConstantTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}
+
+\begin{minipage}[t]{0.50\linewidth}
+
+{\centering 
+
+\raisebox{-\height}{
+
+\includegraphics[width=2.08333in,height=\textheight]{images/plane_noise1.png}
+
+}
+
+}
+
+\end{minipage}%
+%
+\begin{minipage}[t]{0.50\linewidth}
+
+{\centering 
+
+\raisebox{-\height}{
+
+\includegraphics[width=2.08333in,height=\textheight]{images/plane_noise2.png}
+
+}
+
+}
+
+\end{minipage}%
+
+\caption{\label{fig-plane-noise-pdf}Two frames from a grand tour of the
+plane with two additional dimensions of pure noise
+(\href{https://dicook.github.io/mulgar_book/3-intro-dimred.html}{can be
+viewed here}). The collapsing of the points indicates that this is not
+fully 7D. This only happens when any of x1-x5 are contributing strongly
+(frame 49 x4, x5; frame 79 x1; frame 115 x2, x3). If x6 or x7 are
+contributing strongly the data is spread out fully (frames 27, 96). This
+tells us that x6 and x7 are not linearly associated, but other variables
+are.}
+
+\end{figure}
+
+\infobox{To determine which variables are responsible for the reduced dimension look for the axes that extend out of the point cloud. These contribute to smaller variation in the observations, and thus indicate dimension reduction.}
+
+The simulated data here is very simple, and what we have learned from
+the tour could also be learned from principal component analysis.
+However, if there are small complications, such as outliers or nonlinear
+relationships, that might not be visible from principal component
+analysis, the tour can help you to see them.
+
+Figure~\ref{fig-plane-noise-outlier} and
+Figure~\ref{fig-outlier-nonlin-pdf}(a) show example data with an outlier
+and Figure~\ref{fig-outlier-nonlin-pdf}(b) shows data with non-linear
+relationships.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Add several outliers to the plane\_noise data}
+\NormalTok{plane\_noise\_outliers }\OtherTok{\textless{}{-}}\NormalTok{ plane\_noise}
+\NormalTok{plane\_noise\_outliers[}\DecValTok{101}\NormalTok{,] }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{, }\DecValTok{2}\NormalTok{, }\SpecialCharTok{{-}}\DecValTok{2}\NormalTok{, }\DecValTok{0}\NormalTok{, }\DecValTok{0}\NormalTok{, }\DecValTok{0}\NormalTok{, }\DecValTok{0}\NormalTok{)}
+\NormalTok{plane\_noise\_outliers[}\DecValTok{102}\NormalTok{,] }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{0}\NormalTok{, }\DecValTok{0}\NormalTok{,}\SpecialCharTok{{-}}\DecValTok{2}\NormalTok{, }\SpecialCharTok{{-}}\DecValTok{2}\NormalTok{, }\DecValTok{0}\NormalTok{, }\DecValTok{0}\NormalTok{)}
+
+\FunctionTok{ggscatmat}\NormalTok{(plane\_noise\_outliers, }\AttributeTok{columns =} \DecValTok{1}\SpecialCharTok{:}\DecValTok{5}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{aspect.ratio=}\DecValTok{1}\NormalTok{,}
+    \AttributeTok{panel.background =} 
+          \FunctionTok{element\_rect}\NormalTok{(}\AttributeTok{colour=}\StringTok{"black"}\NormalTok{, }\AttributeTok{fill=}\ConstantTok{NA}\NormalTok{),}
+    \AttributeTok{axis.text =} \FunctionTok{element\_blank}\NormalTok{(),}
+    \AttributeTok{axis.ticks =} \FunctionTok{element\_blank}\NormalTok{())}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.8\textwidth,height=\textheight]{3-intro-dimred_files/figure-pdf/fig-plane-noise-outlier-1.pdf}
+
+}
+
+\caption{\label{fig-plane-noise-outlier}Scatterplot matrix of the plane
+with noise data, with two added outliers in variables with strong
+correlation.}
+
+\end{figure}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{render\_gif}\NormalTok{(plane\_noise\_outliers,          }
+           \FunctionTok{grand\_tour}\NormalTok{(), }
+           \FunctionTok{display\_xy}\NormalTok{(),}
+           \AttributeTok{gif\_file=}\StringTok{"gifs/pn\_outliers.gif"}\NormalTok{,}
+           \AttributeTok{frames=}\DecValTok{500}\NormalTok{,}
+           \AttributeTok{width=}\DecValTok{200}\NormalTok{,}
+           \AttributeTok{height=}\DecValTok{200}\NormalTok{)}
+
+\FunctionTok{data}\NormalTok{(plane\_nonlin)}
+\FunctionTok{render\_gif}\NormalTok{(plane\_nonlin,          }
+           \FunctionTok{grand\_tour}\NormalTok{(), }
+           \FunctionTok{display\_xy}\NormalTok{(),}
+           \AttributeTok{gif\_file=}\StringTok{"gifs/plane\_nonlin.gif"}\NormalTok{,}
+           \AttributeTok{frames=}\DecValTok{500}\NormalTok{,}
+           \AttributeTok{width=}\DecValTok{200}\NormalTok{,}
+           \AttributeTok{height=}\DecValTok{200}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}
+
+\begin{minipage}[t]{0.50\linewidth}
+
+{\centering 
+
+\raisebox{-\height}{
+
+\includegraphics[width=2.08333in,height=\textheight]{images/pn_outliers.png}
+
+}
+
+}
+
+\subcaption{\label{fig-outlier}Outliers}
+\end{minipage}%
+%
+\begin{minipage}[t]{0.50\linewidth}
+
+{\centering 
+
+\raisebox{-\height}{
+
+\includegraphics[width=2.08333in,height=\textheight]{images/plane_nonlin.png}
+
+}
+
+}
+
+\subcaption{\label{fig-nonlinear}Non-linear relationship}
+\end{minipage}%
+
+\caption{\label{fig-outlier-nonlin-pdf}Two frames from tours of examples
+of different types of dimensionality issues: outliers (a) and
+non-linearity (b). In (a) you can see two points far from the others in
+the projection. During a tour the two can be seen with different
+movement patterns -- moving faster and in different directions than
+other points. Outliers will affect detection of reduced dimension, but
+they can be ignored when assessing dimensionality with the tour. In (b)
+there is a non-linear relationship between several variables, primarily
+with x3. Non-linear relationships may not be easily captured by other
+techniques but are often visible with the tour. (The tours can be viewed
+\href{https://dicook.github.io/mulgar_book/3-intro-dimred.html}{here}.)}
+
+\end{figure}
+
+\hypertarget{exercises-2}{%
+\section*{Exercises}\label{exercises-2}}
+\addcontentsline{toc}{section}{Exercises}
+
+\markright{Exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Multicollinearity is when the predictors for a model are strongly
+  linearly associated. It can adversely affect the fitting of most
+  models, because many possible models may be equally as good. Variable
+  importance might be masked by correlated variables, and confidence
+  intervals generated for linear models might be too wide. Check the for
+  multicollinearity or other associations between the predictors in:
+\end{enumerate}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\tightlist
+\item
+  2001 Australian election data
+\item
+  2016 Australian election data
+\end{enumerate}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{1}
+\tightlist
+\item
+  Examine 5D multivariate normal samples drawn from populations with a
+  range of variance-covariance matrices. (You can use the
+  \texttt{mvtnorm} package to do the sampling, for example.) Examine the
+  data using a grand tour. What changes when you change the correlation
+  from close to zero to close to 1? Can you see a difference between
+  strong positive correlation and strong negative correlation?
+\end{enumerate}
+
+\hypertarget{principal-component-analysis}{%
+\chapter{Principal component
+analysis}\label{principal-component-analysis}}
+
+Reducing dimensionality using principal component analysis (PCA) dates
+back to Pearson (1901) and Hotelling (1933), and Jolliffe \& Cadima
+(2016) provides a current overview. The goal is to find a smaller set of
+variables, \(q (< p)\), that contain as much information as the original
+as possible. The new set of variables, known as principal components
+(PCs), are linear combinations of the original variables. The PCs can be
+used to represent the data in a lower-dimensional space.
+
+The process is essentially an optimisation procedure, although PCA has
+an analytical solution. It solves the problem of
+
+\[
+\max_{a_k} ~\text{Var} (Xa_k),
+\] where \(X\) is the \(n \times p\) data matrix, \(a_k (k=1, ..., p)\)
+is a 1D projection vector, called an eigenvector, and the
+\(\text{Var} (Xa_k)\) is called an eigenvalue. So PCA is a sequential
+process, that will find the direction in the high-dimensional space (as
+given by the first eigenvector) where the data is most varied, and then
+find the second most varied direction, and so on. The eigenvectors
+define the combination of the original variables, and the eigenvalues
+define the amount of variance explained by the reduced number of
+variables.
+
+PCA is very broadly useful for summarising linear association by using
+combinations of variables that are highly correlated. However, high
+correlation can also occur when there are outliers, or clustering. PCA
+is commonly used to detect these patterns also.
+
+\infobox{With visualisation we want to assess whether it is appropriate to use PCA to summarise any linear association by using combinations of variables that are highly correlated. It can help to detect other patterns that might affect the PCA results such as outliers, clustering or non-linear dependence.}
+
+PCA is not very effective when the distribution of the variables is
+highly skewed, so it can be helpful to transform variables to make them
+more symmetrically distributed before conducting PCA. It is also
+possible to summarise different types of structure by generalising the
+optimisation criteria to any function of projected data, \(f(XA)\),
+which is called \emph{projection pursuit} (PP). PP has a long history
+(Kruskal (1964a), Friedman \& Tukey (1974), Diaconis \& Freedman
+(1984b), Jones \& Sibson (1987), Huber (1985)), and there are regularly
+new developments (e.g. E.-K. Lee \& Cook (2009), Perisic \& Posse
+(2005), Y. D. Lee et al. (2013), Loperfido (2018), Bickel et al. (2018),
+C. Zhang et al. (2023)).
+
+\hypertarget{determining-how-many-dimensions}{%
+\section{Determining how many
+dimensions}\label{determining-how-many-dimensions}}
+
+We would start by examining the data using a grand tour. The goal is to
+check whether there might be potential issues for PCA, such as skewness,
+outliers or clustering, or even non-linear dependencies.
+
+We'll start be showing PCA on the simulated data from
+Chapter~\ref{sec-dimension-overview}. The scree plots show that PCA
+supports that the data are 2D, 3D and 5D respectively.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(dplyr)}
+\FunctionTok{library}\NormalTok{(ggplot2)}
+\FunctionTok{library}\NormalTok{(mulgar)}
+\FunctionTok{data}\NormalTok{(plane)}
+\FunctionTok{data}\NormalTok{(box)}
+\FunctionTok{library}\NormalTok{(geozoo)}
+\NormalTok{cube5d }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\FunctionTok{cube.solid.random}\NormalTok{(}\AttributeTok{p=}\DecValTok{5}\NormalTok{, }\AttributeTok{n=}\DecValTok{300}\NormalTok{)}\SpecialCharTok{$}\NormalTok{points)}
+\FunctionTok{colnames}\NormalTok{(cube5d) }\OtherTok{\textless{}{-}} \FunctionTok{paste0}\NormalTok{(}\StringTok{"x"}\NormalTok{, }\DecValTok{1}\SpecialCharTok{:}\DecValTok{5}\NormalTok{)}
+\NormalTok{cube5d }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\FunctionTok{apply}\NormalTok{(cube5d, }\DecValTok{2}\NormalTok{, }\ControlFlowTok{function}\NormalTok{(x) (x}\SpecialCharTok{{-}}\FunctionTok{mean}\NormalTok{(x))}\SpecialCharTok{/}\FunctionTok{sd}\NormalTok{(x)))}
+\NormalTok{p\_pca }\OtherTok{\textless{}{-}} \FunctionTok{prcomp}\NormalTok{(plane)}
+\NormalTok{b\_pca }\OtherTok{\textless{}{-}} \FunctionTok{prcomp}\NormalTok{(box)}
+\NormalTok{c\_pca }\OtherTok{\textless{}{-}} \FunctionTok{prcomp}\NormalTok{(cube5d)}
+\NormalTok{p\_scree }\OtherTok{\textless{}{-}} \FunctionTok{ggscree}\NormalTok{(p\_pca, }\AttributeTok{q =} \DecValTok{5}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{theme\_minimal}\NormalTok{()}
+
+\NormalTok{b\_scree }\OtherTok{\textless{}{-}} \FunctionTok{ggscree}\NormalTok{(b\_pca, }\AttributeTok{q =} \DecValTok{5}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{theme\_minimal}\NormalTok{()}
+\NormalTok{c\_scree }\OtherTok{\textless{}{-}} \FunctionTok{ggscree}\NormalTok{(c\_pca, }\AttributeTok{q =} \DecValTok{5}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{theme\_minimal}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}
+
+{\centering \includegraphics[width=1\textwidth,height=\textheight]{4-pca_files/figure-pdf/fig-2D-pca-1.pdf}
+
+}
+
+\caption{\label{fig-2D-pca}Scree plots for the three simulated data sets
+shown in Figure 3.2. The 2D in 5D is clearly recognised by PCA to be 2D
+because the variance drops substantially between 2-3 principal
+components. The 3D in 5D is possibly 3D because the variance drops from
+3-4 principal components. The fully 5D data has no drop in variance, and
+all values are close to the typical value one would observe if the data
+was fully 5D.}
+
+\end{figure}
+
+The next step is to look at the coefficients for the selected number of
+PCs. Table~\ref{tbl-plane-pcs} shows the coefficients for the first two
+PCs of the \texttt{plane} data. All five variables contribute, with
+\texttt{x1}, \texttt{x2}, \texttt{x3} contributing more to \texttt{PC1},
+and \texttt{x4}, \texttt{x5} contributing more to \texttt{PC2}.
+Table~\ref{tbl-box-pcs} shows the coefficients for the first three PCs.
+Variables \texttt{x1}, \texttt{x2}, \texttt{x3} contribute strongly to
+\texttt{PC1}, \texttt{PC2} has contributions from all variables except
+\texttt{x3} and variables \texttt{x4} and \texttt{x5} contribute
+strongly to \texttt{PC3}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(gt)}
+\NormalTok{p\_pca}\SpecialCharTok{$}\NormalTok{rotation[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{2}\NormalTok{] }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{as\_tibble}\NormalTok{(}\AttributeTok{rownames=}\StringTok{"Variable"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{gt}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{fmt\_number}\NormalTok{(}\AttributeTok{columns =} \FunctionTok{c}\NormalTok{(PC1, PC2),}
+             \AttributeTok{decimals =} \DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{tbl-plane-pcs}{}
+\begin{longtable}{lrr}
+\caption{\label{tbl-plane-pcs}Coefficients for the first two PCs for the plane data. }\tabularnewline
+
+\toprule
+Variable & PC1 & PC2 \\ 
+\midrule
+x1 & $0.58$ & $-0.06$ \\ 
+x2 & $-0.55$ & $0.21$ \\ 
+x3 & $0.47$ & $-0.41$ \\ 
+x4 & $0.25$ & $0.64$ \\ 
+x5 & $-0.29$ & $-0.62$ \\ 
+\bottomrule
+\end{longtable}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{b\_pca}\SpecialCharTok{$}\NormalTok{rotation[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{3}\NormalTok{] }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{as\_tibble}\NormalTok{(}\AttributeTok{rownames=}\StringTok{"Variable"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{gt}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{fmt\_number}\NormalTok{(}\AttributeTok{columns =} \FunctionTok{c}\NormalTok{(PC1, PC2, PC3),}
+             \AttributeTok{decimals =} \DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{tbl-box-pcs}{}
+\begin{longtable}{lrrr}
+\caption{\label{tbl-box-pcs}Coefficients for the first three PCs for the box data. }\tabularnewline
+
+\toprule
+Variable & PC1 & PC2 & PC3 \\ 
+\midrule
+x1 & $-0.51$ & $0.46$ & $0.11$ \\ 
+x2 & $0.51$ & $0.46$ & $0.00$ \\ 
+x3 & $-0.65$ & $-0.09$ & $0.23$ \\ 
+x4 & $-0.22$ & $0.36$ & $-0.87$ \\ 
+x5 & $0.02$ & $0.66$ & $0.43$ \\ 
+\bottomrule
+\end{longtable}
+
+In each of these simulated data sets, all five variables contributed to
+the dimension reduction. If we added two purely noise variables to the
+plane data, as done in Chapter~\ref{sec-dimension-overview}, the scree
+plot would indicate that the data is now 4D, and we would get a
+different interpretation of the coefficients from the PCA. We see that
+\texttt{PC1} and \texttt{PC2} are approximately the same as before, with
+main variables being (\texttt{x1}, \texttt{x2}, \texttt{x3}) and
+(\texttt{x4}, \texttt{x5}) respectively. \texttt{PC3} and \texttt{PC4}
+are both \texttt{x6} and \texttt{x7}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{5143}\NormalTok{)}
+\NormalTok{plane\_noise }\OtherTok{\textless{}{-}}\NormalTok{ plane}
+\NormalTok{plane\_noise}\SpecialCharTok{$}\NormalTok{x6 }\OtherTok{\textless{}{-}} \FunctionTok{rnorm}\NormalTok{(}\DecValTok{100}\NormalTok{)}
+\NormalTok{plane\_noise}\SpecialCharTok{$}\NormalTok{x7 }\OtherTok{\textless{}{-}} \FunctionTok{rnorm}\NormalTok{(}\DecValTok{100}\NormalTok{)}
+\NormalTok{plane\_noise }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\FunctionTok{apply}\NormalTok{(plane\_noise, }\DecValTok{2}\NormalTok{, }\ControlFlowTok{function}\NormalTok{(x) (x}\SpecialCharTok{{-}}\FunctionTok{mean}\NormalTok{(x))}\SpecialCharTok{/}\FunctionTok{sd}\NormalTok{(x)))}
+
+\NormalTok{pn\_pca }\OtherTok{\textless{}{-}} \FunctionTok{prcomp}\NormalTok{(plane\_noise)}
+\FunctionTok{ggscree}\NormalTok{(pn\_pca, }\AttributeTok{q =} \DecValTok{7}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{theme\_minimal}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.8\textwidth,height=\textheight]{4-pca_files/figure-pdf/fig-plane-noise-scree-1.pdf}
+
+}
+
+\caption{\label{fig-plane-noise-scree}Additional noise variables expands
+the data to 4D.}
+
+\end{figure}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{pn\_pca}\SpecialCharTok{$}\NormalTok{rotation[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{] }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{as\_tibble}\NormalTok{(}\AttributeTok{rownames=}\StringTok{"Variable"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{gt}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{fmt\_number}\NormalTok{(}\AttributeTok{columns =} \FunctionTok{c}\NormalTok{(PC1, PC2, PC3, PC4),}
+             \AttributeTok{decimals =} \DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{tbl-plane-noise-pcs}{}
+\begin{longtable}{lrrrr}
+\caption{\label{tbl-plane-noise-pcs}Coefficients for the first four PCs for the box data. }\tabularnewline
+
+\toprule
+Variable & PC1 & PC2 & PC3 & PC4 \\ 
+\midrule
+x1 & $0.58$ & $0.04$ & $0.01$ & $0.00$ \\ 
+x2 & $-0.55$ & $-0.18$ & $-0.03$ & $0.07$ \\ 
+x3 & $0.47$ & $0.37$ & $0.05$ & $-0.20$ \\ 
+x4 & $0.24$ & $-0.62$ & $-0.06$ & $0.17$ \\ 
+x5 & $-0.28$ & $0.60$ & $0.07$ & $-0.14$ \\ 
+x6 & $0.05$ & $0.29$ & $-0.58$ & $0.76$ \\ 
+x7 & $-0.02$ & $-0.08$ & $-0.81$ & $-0.58$ \\ 
+\bottomrule
+\end{longtable}
+
+\hypertarget{example-pisa}{%
+\subsection{Example: pisa}\label{example-pisa}}
+
+The \texttt{pisa} data contains simulated data from math, reading and
+science scores, totalling 30 variables. PCA is used here to examine the
+association. We might expect that it is 3D, but what we see suggests it
+is primarily 1D. This means that a student that scores well in math,
+will also score well in reading and science.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{data}\NormalTok{(pisa)}
+\NormalTok{pisa\_std }\OtherTok{\textless{}{-}}\NormalTok{ pisa }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(CNT }\SpecialCharTok{==} \StringTok{"Australia"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{(}\SpecialCharTok{{-}}\NormalTok{CNT) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate\_all}\NormalTok{(mulgar}\SpecialCharTok{:::}\NormalTok{scale2)}
+\NormalTok{pisa\_pca }\OtherTok{\textless{}{-}} \FunctionTok{prcomp}\NormalTok{(pisa\_std)}
+\NormalTok{pisa\_scree }\OtherTok{\textless{}{-}} \FunctionTok{ggscree}\NormalTok{(pisa\_pca, }\AttributeTok{q =} \DecValTok{15}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{theme\_minimal}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+The scree plot in \textbf{?@fig-pisa-scree} shows a big drop from one to
+two PCs in the amount of variance explained. A grand tour on the 30
+variables can be run using \texttt{animate\_xy()}:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{animate\_xy}\NormalTok{(pisa\_std, }\AttributeTok{half\_range=}\DecValTok{1}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+or rendered as an animated gif using \texttt{render\_gif()}:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{render\_gif}\NormalTok{(pisa\_std, }
+           \FunctionTok{grand\_tour}\NormalTok{(), }
+           \FunctionTok{display\_xy}\NormalTok{(}\AttributeTok{half\_range=}\FloatTok{0.9}\NormalTok{),}
+           \AttributeTok{gif\_file=}\StringTok{"gifs/pisa\_gt.gif"}\NormalTok{,}
+           \AttributeTok{frames=}\DecValTok{500}\NormalTok{,}
+           \AttributeTok{width=}\DecValTok{400}\NormalTok{,}
+           \AttributeTok{height=}\DecValTok{400}\NormalTok{,}
+           \AttributeTok{loop=}\ConstantTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+and we can see that the data is elliptical in most projections,
+sometimes shrinking to be a small circle. This pattern strongly
+indicates that there is one primary direction of variation in the data,
+with only small variation in any direction away from it. Shrinking to
+the small circle is analogous to to how \emph{a pencil or cigar or water
+bottle in 3D looks from some angles}.
+
+The coefficients of the first PC (first eigenvector) are roughly equal
+in magnitude (as shown below), which tells us that all variables roughly
+contribute. Interestingly, they are all negative, which is not actually
+meaningful. With different software these could easily have been all
+positive. The sign of the coefficients can be reversed, as long as all
+are reversed, which is the same as an arrow pointing one way, changing
+and pointing the other way.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{round}\NormalTok{(pisa\_pca}\SpecialCharTok{$}\NormalTok{rotation[,}\DecValTok{1}\NormalTok{], }\DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+ PV1MATH  PV2MATH  PV3MATH  PV4MATH  PV5MATH  PV6MATH 
+   -0.18    -0.18    -0.18    -0.18    -0.18    -0.18 
+ PV7MATH  PV8MATH  PV9MATH PV10MATH  PV1READ  PV2READ 
+   -0.18    -0.18    -0.18    -0.18    -0.19    -0.18 
+ PV3READ  PV4READ  PV5READ  PV6READ  PV7READ  PV8READ 
+   -0.19    -0.19    -0.19    -0.19    -0.19    -0.19 
+ PV9READ PV10READ  PV1SCIE  PV2SCIE  PV3SCIE  PV4SCIE 
+   -0.19    -0.19    -0.18    -0.18    -0.19    -0.18 
+ PV5SCIE  PV6SCIE  PV7SCIE  PV8SCIE  PV9SCIE PV10SCIE 
+   -0.19    -0.18    -0.19    -0.18    -0.19    -0.18 
+\end{verbatim}
+
+\insightbox{The tour verifies that the `pisa` data is primarily 1D, indicating that a student who scores well in math, probably scores well in reading and science, too. More interestingly, the regular shape of the data strongly indicates that it is "synthetic", simulated rather than observed.}
+
+\hypertarget{example-aflw}{%
+\subsection{Example: aflw}\label{example-aflw}}
+
+This data has player statistics for all the matches in the 2021 season.
+We would be interested to know which variables contain similar
+information, and thus might be combined into single variables. We would
+expect that many statistics to group into a few small sets, such as
+offensive and defensive skills. We might also expect that some of the
+statistics are skewed, most players have low values and just a handful
+of players are stellar. It is also possible that there are some extreme
+values. These are interesting features, but they will distract from the
+main purpose of grouping the statistics. Thus the tour is used to check
+for potential problems with the data prior to conducting PCA.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(tourr)}
+\FunctionTok{data}\NormalTok{(aflw)}
+\NormalTok{aflw\_std }\OtherTok{\textless{}{-}}\NormalTok{ aflw }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate\_if}\NormalTok{(is.numeric, }\ControlFlowTok{function}\NormalTok{(x) (x}\SpecialCharTok{{-}}
+      \FunctionTok{mean}\NormalTok{(x, }\AttributeTok{na.rm=}\ConstantTok{TRUE}\NormalTok{))}\SpecialCharTok{/}
+      \FunctionTok{sd}\NormalTok{(x, }\AttributeTok{na.rm=}\ConstantTok{TRUE}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+To look at all of the 29 player statistics in a grand tour.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{animate\_xy}\NormalTok{(aflw\_std[,}\DecValTok{7}\SpecialCharTok{:}\DecValTok{35}\NormalTok{], }\AttributeTok{half\_range=}\FloatTok{0.9}\NormalTok{)}
+\FunctionTok{render\_gif}\NormalTok{(aflw\_std[,}\DecValTok{7}\SpecialCharTok{:}\DecValTok{35}\NormalTok{], }
+           \FunctionTok{grand\_tour}\NormalTok{(), }
+           \FunctionTok{display\_xy}\NormalTok{(}\AttributeTok{half\_range=}\FloatTok{0.9}\NormalTok{),}
+           \AttributeTok{gif\_file=}\StringTok{"gifs/aflw\_gt.gif"}\NormalTok{,}
+           \AttributeTok{frames=}\DecValTok{500}\NormalTok{,}
+           \AttributeTok{loop=}\ConstantTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+No major surprises! There is a small amount of skewness, and there are
+no major outliers. Skewness indicates that most players have reasonably
+similar skills (bunching of points), except for some key players (the
+moderate outliers). The skewness could be reduced by applying a log or
+square root transformation to some variables prior to running the PCA.
+However, we elect not to do this because the moderate outliers are of
+interest. These correspond to talented players that we'd like to explore
+further with the analysis.
+
+Below we have the conventional summary of the PCA, a scree plot showing
+the reduction in variance to be explained when each additional PC is
+considered. It is also conventional to look at a table summarising the
+proportions of variance explained by PCs, but with almost 30 variables
+it is easier to make some decision on the number of PCs needed based on
+the scree plot.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{aflw\_pca }\OtherTok{\textless{}{-}} \FunctionTok{prcomp}\NormalTok{(aflw\_std[,}\DecValTok{7}\SpecialCharTok{:}\DecValTok{35}\NormalTok{], }
+               \AttributeTok{scale =} \ConstantTok{FALSE}\NormalTok{, }
+               \AttributeTok{retx=}\ConstantTok{TRUE}\NormalTok{)}
+
+\FunctionTok{ggscree}\NormalTok{(aflw\_pca, }\AttributeTok{q =} \DecValTok{29}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{theme\_minimal}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.8\textwidth,height=\textheight]{4-pca_files/figure-pdf/fig-aflw-pca-1.pdf}
+
+}
+
+\caption{\label{fig-aflw-pca}Scree plot showing decay in variance of
+PCs.}
+
+\end{figure}
+
+From the scree plot in Figure~\ref{fig-aflw-pca}, we see a sharp drop
+from one to two, two to three and then smaller drops. After four PCs the
+variance drops again at six PCs and then gradually decays. We will
+choose four PCs to examine more closely. This explains 67.2\% of the
+variance.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(gt)}
+\NormalTok{aflw\_pca}\SpecialCharTok{$}\NormalTok{rotation[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{] }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{as\_tibble}\NormalTok{(}\AttributeTok{rownames=}\StringTok{"Variable"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{arrange}\NormalTok{(}\FunctionTok{desc}\NormalTok{(PC1), }\FunctionTok{desc}\NormalTok{(PC2), }\FunctionTok{desc}\NormalTok{(PC3)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{gt}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{fmt\_number}\NormalTok{(}\AttributeTok{columns =} \FunctionTok{c}\NormalTok{(PC1, PC2, PC3, PC4),}
+             \AttributeTok{decimals =} \DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{tbl-aflw-pcs}{}
+\begin{longtable}{lrrrr}
+\caption{\label{tbl-aflw-pcs}Coefficients for the first four PCs. }\tabularnewline
+
+\toprule
+Variable & PC1 & PC2 & PC3 & PC4 \\ 
+\midrule
+disposals & $0.31$ & $-0.05$ & $-0.03$ & $0.07$ \\ 
+possessions & $0.31$ & $-0.03$ & $-0.07$ & $0.09$ \\ 
+kicks & $0.29$ & $-0.04$ & $0.09$ & $-0.12$ \\ 
+metres & $0.28$ & $-0.03$ & $0.10$ & $-0.15$ \\ 
+contested & $0.28$ & $0.01$ & $-0.12$ & $0.23$ \\ 
+uncontested & $0.28$ & $-0.06$ & $-0.01$ & $-0.05$ \\ 
+turnovers & $0.27$ & $-0.01$ & $-0.01$ & $-0.29$ \\ 
+clearances & $0.23$ & $0.00$ & $-0.29$ & $0.19$ \\ 
+clangers & $0.23$ & $-0.02$ & $-0.06$ & $-0.33$ \\ 
+handballs & $0.23$ & $-0.04$ & $-0.19$ & $0.31$ \\ 
+frees\_for & $0.21$ & $0.02$ & $-0.13$ & $0.18$ \\ 
+marks & $0.21$ & $0.03$ & $0.32$ & $0.02$ \\ 
+tackles & $0.20$ & $0.01$ & $-0.28$ & $0.09$ \\ 
+time\_pct & $0.16$ & $-0.04$ & $0.35$ & $-0.02$ \\ 
+intercepts & $0.13$ & $-0.28$ & $0.24$ & $0.03$ \\ 
+rebounds\_in50 & $0.13$ & $-0.28$ & $0.24$ & $-0.06$ \\ 
+frees\_against & $0.13$ & $0.03$ & $-0.16$ & $-0.23$ \\ 
+assists & $0.09$ & $0.23$ & $0.00$ & $0.05$ \\ 
+bounces & $0.09$ & $0.03$ & $0.02$ & $-0.28$ \\ 
+behinds & $0.09$ & $0.32$ & $0.08$ & $-0.02$ \\ 
+shots & $0.08$ & $0.38$ & $0.12$ & $-0.03$ \\ 
+tackles\_in50 & $0.07$ & $0.27$ & $-0.18$ & $0.03$ \\ 
+marks\_in50 & $0.06$ & $0.34$ & $0.18$ & $0.04$ \\ 
+contested\_marks & $0.05$ & $0.16$ & $0.34$ & $0.15$ \\ 
+goals & $0.04$ & $0.37$ & $0.16$ & $0.03$ \\ 
+accuracy & $0.04$ & $0.34$ & $0.10$ & $0.06$ \\ 
+one\_pct & $0.03$ & $-0.21$ & $0.33$ & $0.08$ \\ 
+disposal & $0.02$ & $-0.13$ & $0.20$ & $0.50$ \\ 
+hitouts & $-0.04$ & $0.00$ & $-0.03$ & $0.32$ \\ 
+\bottomrule
+\end{longtable}
+
+When there are as many variables as this, it can be hard to digest the
+combinations of variables most contributing to each PC. Rearranging the
+table by sorting on a selected PC can help. Table~\ref{tbl-aflw-pcs} has
+been sorted according to the PC 1 coefficients.
+
+PC 1 is primarily composed of \texttt{disposals}, \texttt{possessions},
+\texttt{kicks}, \texttt{metres}, \texttt{uncontested},
+\texttt{contested}, \ldots. Actually almost all variables positively
+contribute, albeit in different amounts! It is quite common in PCA for
+the first PC to be a combination of all variables, although it might
+commonly be a closer to equal contribution, and it tells us that there
+is one main direction of variation in the data. For PC 1 in the
+\texttt{aflw} data, PCA is telling us that the primary variation is
+through a combination of skills, and this maps to basic football playing
+skills, where some skills (e.g.~disposals, possessions, kicks, \ldots)
+are more important.
+
+Thus the second PC might be the more interesting. PC 2 is primarily a
+combination of \texttt{shots}, \texttt{goals}, \texttt{marks\_in50},
+\texttt{accuracy}, and \texttt{behinds} contrasted against
+\texttt{rebounds\_in50} and \texttt{intercepts}. The negative
+coefficients are primary offensive skills and the positive coefficients
+are defensive skills. This PC is reasonable measure of the offensive vs
+defensive skills of a player.
+
+We would continue to interpret each PC by examining large coefficients
+to help decide how many PCs are a suitable summary of the information in
+the data. Briefly, PC 3 is a measure of worth of the player because
+\texttt{time\_pct} has a large coefficient, so players that are on the
+field longer will contribute strongly to this new variable. It also has
+large (and opposite) contributions from \texttt{clearances},
+\texttt{tackles}, \texttt{contested\_marks}. PC 4 appears to be related
+to aggressive play with \texttt{clangers}, \texttt{turnovers},
+\texttt{bounces} and \texttt{frees\_against} featuring. So all four PCs
+have useful information. (Note, if we had continued to examine large
+coefficients on PC 5 we would find that all variables already have had
+reasonably large coefficients on PC 1-4, which supports restricting
+attention to the first four.)
+
+Ideally, when we tour the four PCs, we'd like to be able to stop and
+identify players. This involves creating a pre-computed animation, with
+additional mouse-over. This is only feasible with a small number of
+observations, like the \texttt{aflw} data, because all of the animation
+frames are constructed in a single object and passed to \texttt{plotly}.
+This object gets large very quickly!
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(plotly)}
+\FunctionTok{library}\NormalTok{(htmlwidgets)}
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{20}\NormalTok{)}
+\NormalTok{b }\OtherTok{\textless{}{-}} \FunctionTok{basis\_random}\NormalTok{(}\DecValTok{4}\NormalTok{, }\DecValTok{2}\NormalTok{)}
+\NormalTok{aflw\_pct }\OtherTok{\textless{}{-}}\NormalTok{ tourr}\SpecialCharTok{::}\FunctionTok{save\_history}\NormalTok{(aflw\_pca}\SpecialCharTok{$}\NormalTok{x[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{], }
+                    \AttributeTok{tour\_path =} \FunctionTok{grand\_tour}\NormalTok{(),}
+                    \AttributeTok{start =}\NormalTok{ b,}
+                    \AttributeTok{max\_bases =} \DecValTok{5}\NormalTok{)}
+\CommentTok{\# To reconstruct projected data plots, later}
+\FunctionTok{save}\NormalTok{(aflw\_pct, }\AttributeTok{file=}\StringTok{"data/aflw\_pct.rda"}\NormalTok{) }
+\NormalTok{aflw\_pcti }\OtherTok{\textless{}{-}} \FunctionTok{interpolate}\NormalTok{(aflw\_pct, }\FloatTok{0.1}\NormalTok{)}
+\NormalTok{aflw\_anim }\OtherTok{\textless{}{-}} \FunctionTok{render\_anim}\NormalTok{(aflw\_pca}\SpecialCharTok{$}\NormalTok{x[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{],}
+                         \AttributeTok{frames=}\NormalTok{aflw\_pcti, }
+             \AttributeTok{obs\_labels=}\FunctionTok{paste0}\NormalTok{(aflw}\SpecialCharTok{$}\NormalTok{surname,}
+\NormalTok{                               aflw}\SpecialCharTok{$}\NormalTok{given\_name))}
+
+\NormalTok{aflw\_gp }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{() }\SpecialCharTok{+}
+     \FunctionTok{geom\_path}\NormalTok{(}\AttributeTok{data=}\NormalTok{aflw\_anim}\SpecialCharTok{$}\NormalTok{circle, }
+               \FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{c1, }\AttributeTok{y=}\NormalTok{c2,}
+                   \AttributeTok{frame=}\NormalTok{frame), }\AttributeTok{linewidth=}\FloatTok{0.1}\NormalTok{) }\SpecialCharTok{+}
+     \FunctionTok{geom\_segment}\NormalTok{(}\AttributeTok{data=}\NormalTok{aflw\_anim}\SpecialCharTok{$}\NormalTok{axes, }
+                  \FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{x1, }\AttributeTok{y=}\NormalTok{y1, }
+                      \AttributeTok{xend=}\NormalTok{x2, }\AttributeTok{yend=}\NormalTok{y2, }
+                      \AttributeTok{frame=}\NormalTok{frame), }
+                  \AttributeTok{linewidth=}\FloatTok{0.1}\NormalTok{) }\SpecialCharTok{+}
+     \FunctionTok{geom\_text}\NormalTok{(}\AttributeTok{data=}\NormalTok{aflw\_anim}\SpecialCharTok{$}\NormalTok{axes, }
+               \FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{x2, }\AttributeTok{y=}\NormalTok{y2, }
+                   \AttributeTok{frame=}\NormalTok{frame, }
+                   \AttributeTok{label=}\NormalTok{axis\_labels), }
+               \AttributeTok{size=}\DecValTok{5}\NormalTok{) }\SpecialCharTok{+}
+     \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{data=}\NormalTok{aflw\_anim}\SpecialCharTok{$}\NormalTok{frames, }
+                \FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{P1, }\AttributeTok{y=}\NormalTok{P2, }
+                    \AttributeTok{frame=}\NormalTok{frame, }
+                    \AttributeTok{label=}\NormalTok{obs\_labels), }
+                \AttributeTok{alpha=}\FloatTok{0.8}\NormalTok{) }\SpecialCharTok{+}
+     \FunctionTok{xlim}\NormalTok{(}\SpecialCharTok{{-}}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{ylim}\NormalTok{(}\SpecialCharTok{{-}}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{) }\SpecialCharTok{+}
+     \FunctionTok{coord\_equal}\NormalTok{() }\SpecialCharTok{+}
+     \FunctionTok{theme\_bw}\NormalTok{() }\SpecialCharTok{+}
+     \FunctionTok{theme}\NormalTok{(}\AttributeTok{axis.text=}\FunctionTok{element\_blank}\NormalTok{(),}
+         \AttributeTok{axis.title=}\FunctionTok{element\_blank}\NormalTok{(),}
+         \AttributeTok{axis.ticks=}\FunctionTok{element\_blank}\NormalTok{(),}
+         \AttributeTok{panel.grid=}\FunctionTok{element\_blank}\NormalTok{())}
+\NormalTok{aflw\_pctour }\OtherTok{\textless{}{-}} \FunctionTok{ggplotly}\NormalTok{(aflw\_gp,}
+                        \AttributeTok{width=}\DecValTok{500}\NormalTok{,}
+                        \AttributeTok{height=}\DecValTok{550}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+       \FunctionTok{animation\_button}\NormalTok{(}\AttributeTok{label=}\StringTok{"Go"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+       \FunctionTok{animation\_slider}\NormalTok{(}\AttributeTok{len=}\FloatTok{0.8}\NormalTok{, }\AttributeTok{x=}\FloatTok{0.5}\NormalTok{,}
+                        \AttributeTok{xanchor=}\StringTok{"center"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+       \FunctionTok{animation\_opts}\NormalTok{(}\AttributeTok{easing=}\StringTok{"linear"}\NormalTok{, }\AttributeTok{transition =} \DecValTok{0}\NormalTok{)}
+
+\NormalTok{htmlwidgets}\SpecialCharTok{::}\FunctionTok{saveWidget}\NormalTok{(aflw\_pctour,}
+          \AttributeTok{file=}\StringTok{"html/aflw\_pca.html"}\NormalTok{,}
+          \AttributeTok{selfcontained =} \ConstantTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+From \textbf{?@fig-aflw-pcatour} the shape of the four PCs is similar to
+that of all the variables, bunching of points in the centre with a lot
+of moderate outliers.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(plotly)}
+\FunctionTok{load}\NormalTok{(}\StringTok{"data/aflw\_pct.rda"}\NormalTok{)}
+\NormalTok{aflw\_pcti }\OtherTok{\textless{}{-}} \FunctionTok{interpolate}\NormalTok{(aflw\_pct, }\FloatTok{0.1}\NormalTok{)}
+\NormalTok{f18 }\OtherTok{\textless{}{-}} \FunctionTok{matrix}\NormalTok{(aflw\_pcti[,,}\DecValTok{18}\NormalTok{], }\AttributeTok{ncol=}\DecValTok{2}\NormalTok{)}
+\NormalTok{p18 }\OtherTok{\textless{}{-}} \FunctionTok{render\_proj}\NormalTok{(aflw\_pca}\SpecialCharTok{$}\NormalTok{x[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{], f18, }
+                   \AttributeTok{obs\_labels=}\FunctionTok{paste0}\NormalTok{(aflw}\SpecialCharTok{$}\NormalTok{surname,}
+\NormalTok{                               aflw}\SpecialCharTok{$}\NormalTok{given\_name))}
+\NormalTok{pg18 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{geom\_path}\NormalTok{(}\AttributeTok{data=}\NormalTok{p18}\SpecialCharTok{$}\NormalTok{circle, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{c1, }\AttributeTok{y=}\NormalTok{c2)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_segment}\NormalTok{(}\AttributeTok{data=}\NormalTok{p18}\SpecialCharTok{$}\NormalTok{axes, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{x1, }\AttributeTok{y=}\NormalTok{y1, }\AttributeTok{xend=}\NormalTok{x2, }\AttributeTok{yend=}\NormalTok{y2)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_text}\NormalTok{(}\AttributeTok{data=}\NormalTok{p18}\SpecialCharTok{$}\NormalTok{axes, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{x2, }\AttributeTok{y=}\NormalTok{y2, }\AttributeTok{label=}\FunctionTok{rownames}\NormalTok{(p18}\SpecialCharTok{$}\NormalTok{axes))) }\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{data=}\NormalTok{p18}\SpecialCharTok{$}\NormalTok{data\_prj, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{P1, }\AttributeTok{y=}\NormalTok{P2, }\AttributeTok{label=}\NormalTok{obs\_labels)) }\SpecialCharTok{+}
+  \FunctionTok{xlim}\NormalTok{(}\SpecialCharTok{{-}}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{ylim}\NormalTok{(}\SpecialCharTok{{-}}\DecValTok{1}\NormalTok{, }\DecValTok{1}\NormalTok{) }\SpecialCharTok{+}
+  \CommentTok{\#ggtitle("Frame 18") +}
+  \FunctionTok{theme\_bw}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}
+    \AttributeTok{axis.text=}\FunctionTok{element\_blank}\NormalTok{(),}
+    \AttributeTok{axis.title=}\FunctionTok{element\_blank}\NormalTok{(),}
+    \AttributeTok{axis.ticks=}\FunctionTok{element\_blank}\NormalTok{(),}
+    \AttributeTok{panel.grid=}\FunctionTok{element\_blank}\NormalTok{())}
+\FunctionTok{ggplotly}\NormalTok{(pg18, }\AttributeTok{width=}\DecValTok{500}\NormalTok{, }\AttributeTok{height=}\DecValTok{500}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.8\textwidth,height=\textheight]{4-pca_files/figure-pdf/fig-aflw-pcaplots-1.pdf}
+
+}
+
+\caption{\label{fig-aflw-pcaplots}Frame 18 re-plotted so that players
+can be identified on mouse-over.}
+
+\end{figure}
+
+For any particular frame, like 18 re-plotted in
+Figure~\ref{fig-aflw-pcaplots}, we can investigate further. Here there
+is a branching pattern, where the branch points in the direction of PC
+1. Mouse-over the players at the tip of this branch and we find players
+like Alyce Parker, Brittany Bonnici, Dana Hooker, Kiara Bowers. If you
+look up the bios of these players you'll find they all have generally
+good player descriptions like ``elite disposals'', ``powerful left
+foot'', ``hard-running midfielder'', ``best and fairest''.
+
+In the direction of PC 2, you'll find players like Lauren Ahrens, Stacey
+Livingstone who are star defenders. Players in this end of PC 1, have
+high scores on \texttt{intercepts} and \texttt{rebounds\_in50}.
+
+Another interesting frame for inspecting PC 2 is 59. PC 2 at one end has
+players with high goal scoring skills, and the other good defending
+skills. So mousing over the other end of PC 2 finds players like Gemma
+Houghton and Katie Brennan who are known for their goal scoring. The
+branch pattern is an interesting one, because it tells us there is some
+combination of skills that are lacking among all players, primarily this
+appears to be there some distinction between defenders skills and
+general playing skills. It's not as simple as this because the branching
+is only visible when PC 1 and PC 2 are examined with PC 3.
+
+PCA is useful for getting a sense of the variation in a high-dimensional
+data set. Interpreting the principal components is often useful, but it
+can be discombobulating. For the \texttt{aflw} data it would be good to
+think about it as a guide to the main directions of variation and to
+follow with a more direct engineering of variables into interesting
+player characteristics. For example, calculate offensive skill as an
+equal combination of goals, accuracy, shots, behinds. A set of new
+variables specifically computed to measure particular skills would make
+explaining an analysis easier.
+
+\hypertarget{examining-the-pca-model-in-the-data-space}{%
+\section{Examining the PCA model in the data
+space}\label{examining-the-pca-model-in-the-data-space}}
+
+When you choose a smaller number of PCs \((k)\) than the number of
+original variables, this is essentially producing a model for the data.
+The model is the lower dimensional \(k\)-D space. It is analogous to a
+linear regression model, except that the residuals from the model are
+\((p-k)\)-D.
+
+It is common to show the model, that is the data projected into the
+\(k\)-D model space. When \(k=2\) this is called a ``biplot''. For the
+\texttt{plane} and \texttt{plane\_noise} data the biplots are shown in
+Figure~\ref{fig-plane-biplot}. This is useful for checking which
+variables contribute most to the new principal component variables, and
+also to check for any problems that might have affected the fit, such as
+outliers, clusters or non-linearity. Interestingly, biplots are
+typically only made in 2D, even if the data should be summarised by more
+than two PCs. Occasionally you will see the biplot made for PC \(j\) vs
+PC \(k\) also. With the \texttt{pca\_tour()} function in the
+\texttt{tourr} package you can view a \(k\)-D biplot. This will display
+the \(k\) PCs with the axes displaying the original variables, and thus
+see their contribution to the PCs.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(ggfortify)}
+\FunctionTok{library}\NormalTok{(patchwork)}
+\NormalTok{plane\_pca }\OtherTok{\textless{}{-}} \FunctionTok{prcomp}\NormalTok{(plane)}
+\NormalTok{pl1 }\OtherTok{\textless{}{-}} \FunctionTok{autoplot}\NormalTok{(plane\_pca, }\AttributeTok{loadings =} \ConstantTok{TRUE}\NormalTok{, }
+         \AttributeTok{loadings.label =} \ConstantTok{TRUE}\NormalTok{) }\SpecialCharTok{+} 
+  \FunctionTok{ggtitle}\NormalTok{(}\StringTok{"(a)"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+} 
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{aspect.ratio=}\DecValTok{1}\NormalTok{)}
+\NormalTok{plane\_noise\_pca }\OtherTok{\textless{}{-}} \FunctionTok{prcomp}\NormalTok{(plane\_noise)}
+\NormalTok{pl2 }\OtherTok{\textless{}{-}} \FunctionTok{autoplot}\NormalTok{(plane\_noise\_pca, }\AttributeTok{loadings =} \ConstantTok{TRUE}\NormalTok{, }
+         \AttributeTok{loadings.label =} \ConstantTok{TRUE}\NormalTok{) }\SpecialCharTok{+} 
+  \FunctionTok{ggtitle}\NormalTok{(}\StringTok{"(b)"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+} 
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{aspect.ratio=}\DecValTok{1}\NormalTok{)}
+\NormalTok{pl1 }\SpecialCharTok{+}\NormalTok{ pl2}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.8\textwidth,height=\textheight]{4-pca_files/figure-pdf/fig-plane-biplot-1.pdf}
+
+}
+
+\caption{\label{fig-plane-biplot}Biplots of the plane (a) and plane +
+noise (b) data. All five variables contribute strongly to the two
+principal components in (a): PC1 is primarily \texttt{x1}, \texttt{x2}
+and \texttt{x3} and PC2 is primarily \texttt{x4} and \texttt{x5}. In (b)
+the same four variables contribute in almost the same way, with
+variables \texttt{x6} and \texttt{x7} contributing very little. The data
+was constructed this way, that these two dimensions were purely noise.}
+
+\end{figure}
+
+It can be useful to examine this model using the tour. The model is
+simply a plane in high dimensions. This would be considered to be the
+model in the data space. The reason to do this is to check how well the
+model fits the data. The plane corresponding to the model should be
+oriented along the main direction of the points, and the spread of
+points around the plane should be small. We should also be able to see
+if there has been any strong non-linear relationship missed by the
+model, or outliers and clusters.
+
+The function \texttt{pca\_model()} from the \texttt{mulgar} package can
+be used to represent the model as a \(k\)-D wire-frame plane.
+\textbf{?@fig-plane-box-model} shows the models for the \texttt{plane}
+and \texttt{box} data, 2D and 3D respectively.
+
+\infobox{We look at the model in the data space to check how well the model fits the data. If it fits well, the points will cluster tightly around the model representation, with little spread in other directions.}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{plane\_m }\OtherTok{\textless{}{-}} \FunctionTok{pca\_model}\NormalTok{(plane\_pca)}
+\NormalTok{plane\_m\_d }\OtherTok{\textless{}{-}} \FunctionTok{rbind}\NormalTok{(plane\_m}\SpecialCharTok{$}\NormalTok{points, plane)}
+\FunctionTok{animate\_xy}\NormalTok{(plane\_m\_d, }\AttributeTok{edges=}\NormalTok{plane\_m}\SpecialCharTok{$}\NormalTok{edges,}
+           \AttributeTok{axes=}\StringTok{"bottomleft"}\NormalTok{,}
+           \AttributeTok{edges.col=}\StringTok{"\#E7950F"}\NormalTok{,}
+           \AttributeTok{edges.width=}\DecValTok{3}\NormalTok{)}
+\FunctionTok{render\_gif}\NormalTok{(plane\_m\_d, }
+           \FunctionTok{grand\_tour}\NormalTok{(), }
+           \FunctionTok{display\_xy}\NormalTok{(}\AttributeTok{half\_range=}\FloatTok{0.9}\NormalTok{,}
+                      \AttributeTok{edges=}\NormalTok{plane\_m}\SpecialCharTok{$}\NormalTok{edges, }
+                      \AttributeTok{edges.col=}\StringTok{"\#E7950F"}\NormalTok{,}
+                      \AttributeTok{edges.width=}\DecValTok{3}\NormalTok{),}
+           \AttributeTok{gif\_file=}\StringTok{"gifs/plane\_model.gif"}\NormalTok{,}
+           \AttributeTok{frames=}\DecValTok{500}\NormalTok{,}
+           \AttributeTok{width=}\DecValTok{400}\NormalTok{,}
+           \AttributeTok{height=}\DecValTok{400}\NormalTok{,}
+           \AttributeTok{loop=}\ConstantTok{FALSE}\NormalTok{)}
+\NormalTok{box\_pca }\OtherTok{\textless{}{-}} \FunctionTok{prcomp}\NormalTok{(box)}
+\NormalTok{box\_m }\OtherTok{\textless{}{-}} \FunctionTok{pca\_model}\NormalTok{(box\_pca, }\AttributeTok{d=}\DecValTok{3}\NormalTok{)}
+\NormalTok{box\_m\_d }\OtherTok{\textless{}{-}} \FunctionTok{rbind}\NormalTok{(box\_m}\SpecialCharTok{$}\NormalTok{points, box)}
+\FunctionTok{animate\_xy}\NormalTok{(box\_m\_d, }\AttributeTok{edges=}\NormalTok{box\_m}\SpecialCharTok{$}\NormalTok{edges, }
+           \AttributeTok{axes=}\StringTok{"bottomleft"}\NormalTok{, }\AttributeTok{edges.col=}\StringTok{"\#E7950F"}\NormalTok{, }\AttributeTok{edges.width=}\DecValTok{3}\NormalTok{)}
+\FunctionTok{render\_gif}\NormalTok{(box\_m\_d, }
+           \FunctionTok{grand\_tour}\NormalTok{(), }
+           \FunctionTok{display\_xy}\NormalTok{(}\AttributeTok{half\_range=}\FloatTok{0.9}\NormalTok{,}
+                      \AttributeTok{edges=}\NormalTok{box\_m}\SpecialCharTok{$}\NormalTok{edges, }
+                      \AttributeTok{edges.col=}\StringTok{"\#E7950F"}\NormalTok{,}
+                      \AttributeTok{edges.width=}\DecValTok{3}\NormalTok{),}
+           \AttributeTok{gif\_file=}\StringTok{"gifs/box\_model.gif"}\NormalTok{,}
+           \AttributeTok{frames=}\DecValTok{500}\NormalTok{,}
+           \AttributeTok{width=}\DecValTok{400}\NormalTok{,}
+           \AttributeTok{height=}\DecValTok{400}\NormalTok{,}
+           \AttributeTok{loop=}\ConstantTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{example-pisa-1}{%
+\subsection{Example: pisa}\label{example-pisa-1}}
+
+The model for the \texttt{pisa} data is a 1D vector, shown in
+\textbf{?@fig-pisa-model}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{pisa\_model }\OtherTok{\textless{}{-}} \FunctionTok{pca\_model}\NormalTok{(pisa\_pca, }\AttributeTok{d=}\DecValTok{1}\NormalTok{, }\AttributeTok{s=}\DecValTok{2}\NormalTok{)}
+
+\NormalTok{pisa\_all }\OtherTok{\textless{}{-}} \FunctionTok{rbind}\NormalTok{(pisa\_model}\SpecialCharTok{$}\NormalTok{points, pisa\_std)}
+\FunctionTok{animate\_xy}\NormalTok{(pisa\_all, }\AttributeTok{edges=}\NormalTok{pisa\_model}\SpecialCharTok{$}\NormalTok{edges,}
+           \AttributeTok{edges.col=}\StringTok{"\#E7950F"}\NormalTok{, }\AttributeTok{edges.width=}\DecValTok{3}\NormalTok{)}
+\FunctionTok{render\_gif}\NormalTok{(pisa\_all, }
+           \FunctionTok{grand\_tour}\NormalTok{(), }
+           \FunctionTok{display\_xy}\NormalTok{(}\AttributeTok{half\_range=}\FloatTok{0.9}\NormalTok{,}
+                      \AttributeTok{edges=}\NormalTok{pisa\_model}\SpecialCharTok{$}\NormalTok{edges, }
+                      \AttributeTok{edges.col=}\StringTok{"\#E7950F"}\NormalTok{, }
+                      \AttributeTok{edges.width=}\DecValTok{5}\NormalTok{),}
+           \AttributeTok{gif\_file=}\StringTok{"gifs/pisa\_model.gif"}\NormalTok{,}
+           \AttributeTok{frames=}\DecValTok{500}\NormalTok{,}
+           \AttributeTok{width=}\DecValTok{400}\NormalTok{,}
+           \AttributeTok{height=}\DecValTok{400}\NormalTok{,}
+           \AttributeTok{loop=}\ConstantTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{example-aflw-1}{%
+\subsection{Example: aflw}\label{example-aflw-1}}
+
+It is less useful to examine the PCA model for the \texttt{aflw} data,
+because the main patterns that were of interest were the exceptional
+players. However, we will do it anyway! \textbf{?@fig-aflw-model} shows
+the 4D PCA model overlain on the data. Even though the distribution of
+points is not as symmetric and balanced as the other examples, we can
+see that the cube structure mirrors the variation. We can see that the
+relationships between variables are not strictly linear, because the
+spread extends unevenly away from the box.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{aflw\_model }\OtherTok{\textless{}{-}} \FunctionTok{pca\_model}\NormalTok{(aflw\_pca, }\AttributeTok{d=}\DecValTok{4}\NormalTok{, }\AttributeTok{s=}\DecValTok{1}\NormalTok{)}
+
+\NormalTok{aflw\_all }\OtherTok{\textless{}{-}} \FunctionTok{rbind}\NormalTok{(aflw\_model}\SpecialCharTok{$}\NormalTok{points, aflw\_std[,}\DecValTok{7}\SpecialCharTok{:}\DecValTok{35}\NormalTok{])}
+\FunctionTok{animate\_xy}\NormalTok{(aflw\_all, }\AttributeTok{edges=}\NormalTok{aflw\_model}\SpecialCharTok{$}\NormalTok{edges,}
+           \AttributeTok{edges.col=}\StringTok{"\#E7950F"}\NormalTok{, }
+           \AttributeTok{edges.width=}\DecValTok{3}\NormalTok{, }
+           \AttributeTok{half\_range=}\FloatTok{0.8}\NormalTok{, }
+           \AttributeTok{axes=}\StringTok{"off"}\NormalTok{)}
+\FunctionTok{render\_gif}\NormalTok{(aflw\_all, }
+           \FunctionTok{grand\_tour}\NormalTok{(), }
+           \FunctionTok{display\_xy}\NormalTok{(}\AttributeTok{half\_range=}\FloatTok{0.8}\NormalTok{,}
+                      \AttributeTok{edges=}\NormalTok{aflw\_model}\SpecialCharTok{$}\NormalTok{edges, }
+                      \AttributeTok{edges.col=}\StringTok{"\#E7950F"}\NormalTok{, }
+                      \AttributeTok{edges.width=}\DecValTok{3}\NormalTok{, }
+                      \AttributeTok{axes=}\StringTok{"off"}\NormalTok{),}
+           \AttributeTok{gif\_file=}\StringTok{"gifs/aflw\_model.gif"}\NormalTok{,}
+           \AttributeTok{frames=}\DecValTok{500}\NormalTok{,}
+           \AttributeTok{width=}\DecValTok{400}\NormalTok{,}
+           \AttributeTok{height=}\DecValTok{400}\NormalTok{,}
+           \AttributeTok{loop=}\ConstantTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{when-relationships-are-not-linear}{%
+\section{When relationships are not
+linear}\label{when-relationships-are-not-linear}}
+
+\hypertarget{example-outliers}{%
+\subsection{Example: outliers}\label{example-outliers}}
+
+Figure~\ref{fig-plane-n-o-scree} shows the scree plot for the planar
+data with noise and outliers. It is very similar to the scree plot on
+the data without the outliers (Figure~\ref{fig-plane-noise-scree}).
+However, what we see from \textbf{?@fig-p-o-pca} is that PCA loses the
+outliers. The animation in (a) shows the full data, and the outliers
+marked by colour and labels 1, 2, are clearly unusual in some
+projections. When we examine the tour of the first four PCs (as
+suggested by the scree plot) the outliers are not unusual. They are
+almost contained in the point cloud. The reason is clear when all the
+PCs are plotted, and the outliers can be seen to be clearly detected
+only in PC5, PC6 and PC7.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{plane\_n\_o\_pca }\OtherTok{\textless{}{-}} \FunctionTok{prcomp}\NormalTok{(plane\_noise\_outliers)}
+\FunctionTok{ggscree}\NormalTok{(plane\_n\_o\_pca, }\AttributeTok{q =} \DecValTok{7}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{theme\_minimal}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.8\textwidth,height=\textheight]{4-pca_files/figure-pdf/fig-plane-n-o-scree-1.pdf}
+
+}
+
+\caption{\label{fig-plane-n-o-scree}Scree plot of the planar data with
+noise and an outlier. It is almost the same as the data without the
+outliers.}
+
+\end{figure}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{clrs }\OtherTok{\textless{}{-}} \FunctionTok{hcl.colors}\NormalTok{(}\DecValTok{12}\NormalTok{, }\StringTok{"Zissou 1"}\NormalTok{)}
+\NormalTok{p\_col }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\FunctionTok{rep}\NormalTok{(}\StringTok{"black"}\NormalTok{, }\DecValTok{100}\NormalTok{), clrs[}\DecValTok{11}\NormalTok{], clrs[}\DecValTok{11}\NormalTok{])}
+\NormalTok{p\_obs\_labels }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\FunctionTok{rep}\NormalTok{(}\StringTok{""}\NormalTok{, }\DecValTok{100}\NormalTok{), }\StringTok{"1"}\NormalTok{, }\StringTok{"2"}\NormalTok{)}
+
+\FunctionTok{animate\_xy}\NormalTok{(plane\_n\_o\_pca}\SpecialCharTok{$}\NormalTok{x[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{],}
+           \AttributeTok{col=}\NormalTok{p\_col,}
+           \AttributeTok{obs\_labels=}\NormalTok{p\_obs\_labels)}
+\FunctionTok{animate\_xy}\NormalTok{(plane\_noise\_outliers,}
+           \AttributeTok{col=}\NormalTok{p\_col,}
+           \AttributeTok{obs\_labels=}\NormalTok{p\_obs\_labels)}
+\FunctionTok{render\_gif}\NormalTok{(plane\_noise\_outliers, }
+           \FunctionTok{grand\_tour}\NormalTok{(), }
+           \FunctionTok{display\_xy}\NormalTok{(}\AttributeTok{half\_range=}\FloatTok{0.8}\NormalTok{,}
+                      \AttributeTok{col=}\NormalTok{p\_col,}
+             \AttributeTok{obs\_labels=}\NormalTok{p\_obs\_labels),}
+           \AttributeTok{gif\_file=}\StringTok{"gifs/plane\_n\_o\_clr.gif"}\NormalTok{,}
+           \AttributeTok{frames=}\DecValTok{500}\NormalTok{,}
+           \AttributeTok{width=}\DecValTok{200}\NormalTok{,}
+           \AttributeTok{height=}\DecValTok{200}\NormalTok{,}
+           \AttributeTok{loop=}\ConstantTok{FALSE}\NormalTok{)}
+\FunctionTok{render\_gif}\NormalTok{(plane\_n\_o\_pca}\SpecialCharTok{$}\NormalTok{x[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{], }
+           \FunctionTok{grand\_tour}\NormalTok{(), }
+           \FunctionTok{display\_xy}\NormalTok{(}\AttributeTok{half\_range=}\FloatTok{0.8}\NormalTok{,}
+                      \AttributeTok{col=}\NormalTok{p\_col,}
+             \AttributeTok{obs\_labels=}\NormalTok{p\_obs\_labels),}
+           \AttributeTok{gif\_file=}\StringTok{"gifs/plane\_n\_o\_pca.gif"}\NormalTok{,}
+           \AttributeTok{frames=}\DecValTok{500}\NormalTok{,}
+           \AttributeTok{width=}\DecValTok{200}\NormalTok{,}
+           \AttributeTok{height=}\DecValTok{200}\NormalTok{,}
+           \AttributeTok{loop=}\ConstantTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(GGally)}
+\FunctionTok{ggscatmat}\NormalTok{(plane\_n\_o\_pca}\SpecialCharTok{$}\NormalTok{x) }\SpecialCharTok{+} \FunctionTok{theme\_minimal}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.8\textwidth,height=\textheight]{4-pca_files/figure-pdf/fig-plane-o-n-pairs-1.pdf}
+
+}
+
+\caption{\label{fig-plane-o-n-pairs}From the scatterplot matrix we can
+see that the outliers are present in PC5, PC6 and PC7. That means by
+reducing the dimensionality to the first four PCs the model has missed
+some important characteristics in the data.}
+
+\end{figure}
+
+\hypertarget{example-non-linear-associations}{%
+\subsection{Example: Non-linear
+associations}\label{example-non-linear-associations}}
+
+\textbf{?@fig-plane-nonlin} shows the tour of the full 5D data
+containing non-linear relationships in comparison with a tour of the
+first three PCs, as recommended by the scree plot
+(Figure~\ref{fig-plane-nonlin-scree}). The PCs capture some clear and
+very clean non-linear relationship, but it looks like it has missed some
+of the complexities of the relationships. The scatterplot matrix of all
+5 PCs (Figure~\ref{fig-plane-nonlin-pairs}) shows that PC4 and PC5
+contain interesting features: more non-linearity, and curiously an
+outlier.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{data}\NormalTok{(plane\_nonlin)}
+\NormalTok{plane\_nonlin\_pca }\OtherTok{\textless{}{-}} \FunctionTok{prcomp}\NormalTok{(plane\_nonlin)}
+\FunctionTok{ggscree}\NormalTok{(plane\_nonlin\_pca, }\AttributeTok{q =} \DecValTok{5}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{theme\_minimal}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.8\textwidth,height=\textheight]{4-pca_files/figure-pdf/fig-plane-nonlin-scree-1.pdf}
+
+}
+
+\caption{\label{fig-plane-nonlin-scree}Scree plot of the non-linear data
+suggests three PCs.}
+
+\end{figure}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{animate\_xy}\NormalTok{(plane\_nonlin\_pca}\SpecialCharTok{$}\NormalTok{x[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{3}\NormalTok{])}
+\FunctionTok{render\_gif}\NormalTok{(plane\_nonlin\_pca}\SpecialCharTok{$}\NormalTok{x[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{3}\NormalTok{], }
+           \FunctionTok{grand\_tour}\NormalTok{(), }
+           \FunctionTok{display\_xy}\NormalTok{(}\AttributeTok{half\_range=}\FloatTok{0.8}\NormalTok{),}
+           \AttributeTok{gif\_file=}\StringTok{"gifs/plane\_nonlin\_pca.gif"}\NormalTok{,}
+           \AttributeTok{frames=}\DecValTok{500}\NormalTok{,}
+           \AttributeTok{width=}\DecValTok{200}\NormalTok{,}
+           \AttributeTok{height=}\DecValTok{200}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{ggscatmat}\NormalTok{(plane\_nonlin\_pca}\SpecialCharTok{$}\NormalTok{x)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.8\textwidth,height=\textheight]{4-pca_files/figure-pdf/fig-plane-nonlin-pairs-1.pdf}
+
+}
+
+\caption{\label{fig-plane-nonlin-pairs}From the scatterplot matrix we
+can see that the there is a non-linear relationship visible in PC1 and
+PC2, with perhaps a small contribution from PC3. However, we can see
+that when the data is reduced to three PCs, it misses catching all on
+the non-linear relationships and also interestingly it seems that there
+is an unusual observation also.}
+
+\end{figure}
+
+\infobox{One of the dangers of PCA is that interesting and curious details of the data only emerge in the lowest PCs, that are usually discarded. The tour, and examining the smaller PCs, can help to discover them.}
+
+\hypertarget{exercises-3}{%
+\section*{Exercises}\label{exercises-3}}
+\addcontentsline{toc}{section}{Exercises}
+
+\markright{Exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Make a scatterplot matrix of the first four PCs of the \texttt{aflw}
+  data. Is the branch pattern visible in any pair?
+\item
+  Construct five new variables to measure these skills offense, defense,
+  playing time, ball movement, errors. Using the tour, examine the
+  relationship between these variables. Map out how a few players could
+  be characterised based on these directions of skills.
+\item
+  Symmetrise any \texttt{aflw} variables that have skewed distributions
+  using a log or square root transformation. Then re-do the PCA. What do
+  we learn that is different about associations between the skill
+  variables?
+\item
+  Examine the \texttt{bushfires} data using a grand tour on the numeric
+  variables, ignoring the \texttt{cause} (class) variable. Note any
+  issues such as outliers, or skewness that might affect PCA. How many
+  principal components would be recommended by the scree plot? Examine
+  this PCA model with the data, and explain how well it does or doesn't
+  fit.
+\item
+  Use the \texttt{pca\_tour} to examine the first five PCs of the
+  \texttt{bushfires} data. How do all of the variables contribute to
+  this reduced space?
+\item
+  Reduce the dimension of the \texttt{sketches} data to 12 PCs. How much
+  variation does this explain? Is there any obvious clustering in this
+  lower dimensional space?
+\end{enumerate}
+
+\hypertarget{project}{%
+\section*{Project}\label{project}}
+\addcontentsline{toc}{section}{Project}
+
+\markright{Project}
+
+Linear dimension reduction can optimise for other criteria, and here we
+will explore one example: the algorithm implemented in the
+\texttt{dobin} package finds a basis in which the first few directions
+are optimized for the detection of outliers in the data. We will examine
+how it performs for the \texttt{plane\_noise\_outliers} data (the
+example where outliers were hidden in the first four principal
+components.)
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Start by looking up the documentation of \texttt{dobin::dobin}. How
+  many parameters does the method depend on?
+\item
+  We first apply the function to the \texttt{plane\_noise\_outliers}
+  data using default values for all parameters.
+\item
+  Recall that the outliers were added in rows 101 and 102 of the data.
+  Make a scatter plots showing the projection onto the first, second and
+  third component, using color to highlight the outliers. Are they
+  visible as outliers with three components?
+\item
+  Adjust the \texttt{frac} parameter of the \texttt{dobin} function to
+  \texttt{frac\ =\ 0.99} and repeat the graphical evaluation from point
+  3. How does it compare to the previous solution?
 \end{enumerate}
 
 \bookmarksetup{startatroot}
