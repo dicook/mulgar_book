@@ -264,7 +264,7 @@
 
 \begin{document}
 \maketitle
-\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[interior hidden, frame hidden, borderline west={3pt}{0pt}{shadecolor}, sharp corners, enhanced, breakable, boxrule=0pt]}{\end{tcolorbox}}\fi
+\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[boxrule=0pt, interior hidden, sharp corners, frame hidden, borderline west={3pt}{0pt}{shadecolor}, enhanced, breakable]}{\end{tcolorbox}}\fi
 
 \renewcommand*\contentsname{Table of contents}
 {
@@ -2638,6 +2638,282 @@ components.)
   Adjust the \texttt{frac} parameter of the \texttt{dobin} function to
   \texttt{frac\ =\ 0.99} and repeat the graphical evaluation from point
   3. How does it compare to the previous solution?
+\end{enumerate}
+
+\hypertarget{non-linear-dimension-reduction}{%
+\chapter{Non-linear dimension
+reduction}\label{non-linear-dimension-reduction}}
+
+\hypertarget{background}{%
+\section{Background}\label{background}}
+
+Non-linear dimension reduction (NLDR) aims to find a low-dimensional
+representation of the high-dimensional data that shows the main features
+of the data. In statistics, it dates back to Kruskal (1964a)'s work on
+multidimensional scaling (MDS). Some techniques only require an
+interpoint similarity or distance matrix as the main ingredient, rather
+than the full data. We'll focus on when the full data is available here,
+so we can also compare structure perceived using the tour on the
+high-dimensional space, relative to structure revealed in the
+low-dimensional embedding.
+
+There are many methods available for generating non-linear low
+dimensional representations of the data. MDS is a classical technique
+that minimises the difference between two interpoint distance matrices,
+the distance between points in the high-dimensions, and in the
+low-dimensional representations. A good resource for learning about MDS
+is Borg \& Groenen (2005).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(mulgar)}
+\FunctionTok{library}\NormalTok{(Rtsne)}
+\FunctionTok{library}\NormalTok{(uwot)}
+\FunctionTok{library}\NormalTok{(ggplot2)}
+\FunctionTok{library}\NormalTok{(patchwork)}
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{42}\NormalTok{)}
+\NormalTok{cnl\_tsne }\OtherTok{\textless{}{-}} \FunctionTok{Rtsne}\NormalTok{(clusters\_nonlin)}
+\NormalTok{cnl\_umap }\OtherTok{\textless{}{-}} \FunctionTok{umap}\NormalTok{(clusters\_nonlin)}
+\NormalTok{n1 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(}\FunctionTok{as.data.frame}\NormalTok{(cnl\_tsne}\SpecialCharTok{$}\NormalTok{Y), }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{V1, }\AttributeTok{y=}\NormalTok{V2)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{() }\SpecialCharTok{+} 
+  \FunctionTok{ggtitle}\NormalTok{(}\StringTok{"(a) t{-}SNE"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+} 
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{aspect.ratio=}\DecValTok{1}\NormalTok{)}
+\NormalTok{n2 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(}\FunctionTok{as.data.frame}\NormalTok{(cnl\_umap), }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{V1, }\AttributeTok{y=}\NormalTok{V2)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{() }\SpecialCharTok{+} 
+  \FunctionTok{ggtitle}\NormalTok{(}\StringTok{"(b) UMAP"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+} 
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{aspect.ratio=}\DecValTok{1}\NormalTok{)}
+\NormalTok{n1 }\SpecialCharTok{+}\NormalTok{ n2}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.8\textwidth,height=\textheight]{5-nldr_files/figure-pdf/fig-nldr-clusters-1.pdf}
+
+}
+
+\caption{\label{fig-nldr-clusters}Two non-linear embeddings of the
+non-linear clusters data: (a) t-SNE, (b) UMAP. Both suggest four
+clusters, with two being non-linear in some form.}
+
+\end{figure}
+
+Figure~\ref{fig-nldr-clusters} show two NLDR views of the
+\texttt{clusters\_nonlin} data set from the \texttt{mulgar} package.
+Both suggest that there are four clusters, and that some clusters are
+non-linearly shaped. They disagree on the type of non-linear pattern,
+where t-SNE represents one cluster as a wavy-shape and UMAP both have a
+simple parabolic shape. Popular methods in current use include t-SNE
+(Maaten \& Hinton, 2008), UMAP (McInnes et al., 2018) and PHATE (Moon et
+al., 2019).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(tourr)}
+\FunctionTok{render\_gif}\NormalTok{(clusters\_nonlin, }
+           \FunctionTok{grand\_tour}\NormalTok{(),}
+           \FunctionTok{display\_xy}\NormalTok{(),}
+           \AttributeTok{gif\_file =} \StringTok{"gifs/clusters\_nonlin.gif"}\NormalTok{,}
+           \AttributeTok{frames =} \DecValTok{500}\NormalTok{,}
+           \AttributeTok{width =} \DecValTok{300}\NormalTok{, }
+           \AttributeTok{height =} \DecValTok{300}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+The full 4D data is shown with a grand tour in
+\textbf{?@fig-clusters-nonlin}. The four clusters suggested by the NLDR
+methods can be seen. We also get a better sense of the relative size and
+proximity of the clusters. There are two small spherical clusters, one
+quite close to the end of the large sine wave cluster. The fourth
+cluster is relatively small, and has a slight curve, like a bent rod.
+The t-SNE representation is slightly more accurate than the UMAP
+representation. We would expect that the wavy cluster is the sine wave
+seen in the tour.
+
+NLDR can provide useful low-dimensional summaries of high-dimensional
+structure but you need to check whether it is a sensible and accurate
+representation by comparing with what is perceivd from a tour.
+
+\hypertarget{linking-nldr-representation-with-tour-view}{%
+\section{Linking NLDR representation with tour
+view}\label{linking-nldr-representation-with-tour-view}}
+
+NLDR can produce useful low-dimensional summaries of structure in
+high-dimensional data, like those shown in
+Figure~\ref{fig-nldr-clusters}. However, there are numerous pitfalls.
+The fitting procedure can produce very different representations
+depending on the parameter choices, and even the random number seeding
+the fit. (You can check this by changing the \texttt{set.seed} in the
+code above, and by changing from the default parameters.) Also, it may
+not be possible to represent the high-dimensional structures faithfully
+low dimensions. For these reasons, one needs to connect the NLDR view
+with a tour of the data, to help assess its usefulness and accuracy. For
+example, with this data, we would want to know which of the two curved
+clusters in the UMAP representation correspond to the sine wave cluster.
+
+\hypertarget{using-liminal}{%
+\subsection{\texorpdfstring{Using
+\texttt{liminal}}{Using liminal}}\label{using-liminal}}
+
+Figure~\ref{fig-liminal-clusters-nonlin} shows how the NLDR plot can be
+linked to a tour view, using the \texttt{liminal} package, to better
+understand how well the structure of the data is represented. Here we
+see learn that the smile in the UMAP embedding is the small bent rod
+cluster, and that the unibrow is the sine wave.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(liminal)}
+\NormalTok{umap\_df }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\AttributeTok{umapX =}\NormalTok{ cnl\_umap[, }\DecValTok{1}\NormalTok{],}
+                      \AttributeTok{umapY =}\NormalTok{ cnl\_umap[, }\DecValTok{2}\NormalTok{])}
+\FunctionTok{limn\_tour\_link}\NormalTok{(}
+\NormalTok{  umap\_df,}
+\NormalTok{  clusters\_nonlin,}
+  \AttributeTok{cols =}\NormalTok{ x1}\SpecialCharTok{:}\NormalTok{x4}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}
+
+{\centering 
+
+}
+
+\caption{\label{fig-liminal-clusters-nonlin}Two screenshots from liminal
+showing which clusters match between the UMAP representation and the
+tour animation. The smile corresponds to the small bent rod cluster. The
+unibrow matches to the sine wave cluster.}
+
+\end{figure}
+
+\hypertarget{using-detourr}{%
+\subsection{\texorpdfstring{Using
+\texttt{detourr}}{Using detourr}}\label{using-detourr}}
+
+\textbf{?@fig-detourr-clusters-nonlin} shows how the linking is achieved
+using \texttt{detourr}. It uses a shared data object, as made possible
+by the \texttt{crosstalk} package, and the UMAP view is made interactive
+using \texttt{plotly}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(detourr)}
+\FunctionTok{library}\NormalTok{(dplyr)}
+\FunctionTok{library}\NormalTok{(crosstalk)}
+\FunctionTok{library}\NormalTok{(plotly)}
+\NormalTok{umap\_df }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\AttributeTok{umapX =}\NormalTok{ cnl\_umap[, }\DecValTok{1}\NormalTok{],}
+                      \AttributeTok{umapY =}\NormalTok{ cnl\_umap[, }\DecValTok{2}\NormalTok{])}
+\NormalTok{cnl\_df }\OtherTok{\textless{}{-}} \FunctionTok{bind\_cols}\NormalTok{(clusters\_nonlin, umap\_df)}
+\NormalTok{shared\_cnl }\OtherTok{\textless{}{-}}\NormalTok{ SharedData}\SpecialCharTok{$}\FunctionTok{new}\NormalTok{(cnl\_df)}
+
+\NormalTok{detour\_plot }\OtherTok{\textless{}{-}} \FunctionTok{detour}\NormalTok{(shared\_cnl, }\FunctionTok{tour\_aes}\NormalTok{(}
+  \AttributeTok{projection =} \FunctionTok{starts\_with}\NormalTok{(}\StringTok{"x"}\NormalTok{))) }\SpecialCharTok{|\textgreater{}}
+    \FunctionTok{tour\_path}\NormalTok{(}\FunctionTok{grand\_tour}\NormalTok{(}\DecValTok{2}\NormalTok{), }
+                    \AttributeTok{max\_bases=}\DecValTok{50}\NormalTok{, }\AttributeTok{fps =} \DecValTok{60}\NormalTok{) }\SpecialCharTok{|\textgreater{}}
+       \FunctionTok{show\_scatter}\NormalTok{(}\AttributeTok{alpha =} \FloatTok{0.7}\NormalTok{, }\AttributeTok{axes =} \ConstantTok{FALSE}\NormalTok{,}
+                    \AttributeTok{width =} \StringTok{"100\%"}\NormalTok{, }\AttributeTok{height =} \StringTok{"450px"}\NormalTok{)}
+
+\NormalTok{umap\_plot }\OtherTok{\textless{}{-}} \FunctionTok{plot\_ly}\NormalTok{(shared\_cnl,}
+                    \AttributeTok{x =} \SpecialCharTok{\textasciitilde{}}\NormalTok{umapX, }
+                    \AttributeTok{y =} \SpecialCharTok{\textasciitilde{}}\NormalTok{umapY,}
+                    \AttributeTok{color =} \FunctionTok{I}\NormalTok{(}\StringTok{"black"}\NormalTok{),}
+                    \AttributeTok{height =} \DecValTok{450}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{highlight}\NormalTok{(}\AttributeTok{on =} \StringTok{"plotly\_selected"}\NormalTok{, }
+              \AttributeTok{off =} \StringTok{"plotly\_doubleclick"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{add\_trace}\NormalTok{(}\AttributeTok{type =} \StringTok{"scatter"}\NormalTok{, }
+              \AttributeTok{mode =} \StringTok{"markers"}\NormalTok{)}
+
+\FunctionTok{bscols}\NormalTok{(}
+\NormalTok{     detour\_plot, umap\_plot,}
+     \AttributeTok{widths =} \FunctionTok{c}\NormalTok{(}\DecValTok{5}\NormalTok{, }\DecValTok{6}\NormalTok{)}
+\NormalTok{ )}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{example-fake_trees}{%
+\section{\texorpdfstring{Example:
+\texttt{fake\_trees}}{Example: fake\_trees}}\label{example-fake_trees}}
+
+Figure~\ref{fig-liminal-trees} shows a more complex example, using the
+\texttt{fake\_trees} data. We know that the 10D data has a main branch,
+and 9 branches (clusters) attached to it, absed on our explorations in
+the earlier chapters. The t-SNE view, where points are coloured by the
+known branch ids, is very helpful for seeing the linear branch
+structure.
+
+What we can't tell is that there is a main branch from which all of the
+others extend. We also can't tell which of the clusters corresponds to
+this branch. Linking the plot with a tour helps with this. Although, not
+shown in the sequence of snapshots in Figure~\ref{fig-liminal-trees},
+the main branch is actually the dark blue cluster, which is separated
+into three pieces by t-SNE.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(liminal)}
+\FunctionTok{library}\NormalTok{(Rtsne)}
+\FunctionTok{data}\NormalTok{(fake\_trees)}
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{2020}\NormalTok{)}
+\NormalTok{tsne }\OtherTok{\textless{}{-}}\NormalTok{ Rtsne}\SpecialCharTok{::}\FunctionTok{Rtsne}\NormalTok{(dplyr}\SpecialCharTok{::}\FunctionTok{select}\NormalTok{(fake\_trees, dplyr}\SpecialCharTok{::}\FunctionTok{starts\_with}\NormalTok{(}\StringTok{"dim"}\NormalTok{)))}
+\NormalTok{tsne\_df }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\AttributeTok{tsneX =}\NormalTok{ tsne}\SpecialCharTok{$}\NormalTok{Y[, }\DecValTok{1}\NormalTok{],}
+                      \AttributeTok{tsneY =}\NormalTok{ tsne}\SpecialCharTok{$}\NormalTok{Y[, }\DecValTok{2}\NormalTok{])}
+\FunctionTok{limn\_tour\_link}\NormalTok{(}
+\NormalTok{  tsne\_df,}
+\NormalTok{  fake\_trees,}
+  \AttributeTok{cols =}\NormalTok{ dim1}\SpecialCharTok{:}\NormalTok{dim10,}
+  \AttributeTok{color =}\NormalTok{ branches}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}
+
+{\centering 
+
+}
+
+\caption{\label{fig-liminal-trees}Three snapshots of using the
+\texttt{liminal} linked views to explore how t-SNE has summarised the
+\texttt{fake\_trees} data in 2D.}
+
+\end{figure}
+
+The t-SNE representation clearly shows the linear structures of the
+data, but viewing this 10D data with the tour shows that t-SNE makes
+several inaccurate breaks of some of the branches.
+
+\hypertarget{exercises-4}{%
+\section*{Exercises}\label{exercises-4}}
+\addcontentsline{toc}{section}{Exercises}
+
+\markright{Exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Using the \texttt{penguins\_sub} data generate a 2D representation
+  using t-SNE. Plot the points mapping the colour to species. What is
+  most surprising? (Hint: Are the three species represented by three
+  distinct clusters?)
+\item
+  Re-do the t-SNE representation with different parameter choices. Are
+  the results different each time, or could they be considered to be
+  equivalent?
+\item
+  Use \texttt{liminal} to link the t-SNE representation to a tour of the
+  penguins. Highlight the points that have been placed in an awkward
+  position by t-SNE from others in their species. Watch them relative to
+  the others in their species in the tour view, and think about whether
+  there is any rationale for the awkward placement.
+\item
+  Use UMAP to make the 2D representation, and use \texttt{liminal} to
+  link with a tour to explore the result.
+\item
+  Repeat 1-4 using \texttt{detourr}.
 \end{enumerate}
 
 \bookmarksetup{startatroot}
