@@ -83,7 +83,7 @@ and the predicted values, which include class predictions, and coordinates in th
 p_lda_pred <- predict(p_lda, penguins_sub)
 ```
 
-The best separation between classes can be viewed from this object, which can be shown to match the original data projected using the `scaling` component of the model object.
+The best separation between classes can be viewed from this object, which can be shown to match the original data projected using the `scaling` component of the model object (see @fig-p-lda).
 
 ```{r}
 #| label: fig-p-lda
@@ -421,38 +421,49 @@ p_bl_bd_lda <- lda(species~bl+bd, data=penguins_sub,
                                   prior = c(1/3, 1/3, 1/3))
 ```
 
-The fitted model parameters are the means: 
-$\bar{x}_{Adelie} = ($ `r p_bl_bd_lda$means[1,1]`, `r p_bl_bd_lda$means[1,2]`$)^\top$, $\bar{x}_{Chinstrap} = ($ `r p_bl_bd_lda$means[2,1]`, `r p_bl_bd_lda$means[2,2]`$)^\top$, and $\bar{x}_{Gentoo} = ($ `r p_bl_bd_lda$means[3,1]`, `r p_bl_bd_lda$means[3,2]`$)^\top$. 
+The fitted model means 
+$\bar{x}_{Adelie} = ($ `r p_bl_bd_lda$means[1,1]`, `r p_bl_bd_lda$means[1,2]`$)^\top$, $\bar{x}_{Chinstrap} = ($ `r p_bl_bd_lda$means[2,1]`, `r p_bl_bd_lda$means[2,2]`$)^\top$, and $\bar{x}_{Gentoo} = ($ `r p_bl_bd_lda$means[3,1]`, `r p_bl_bd_lda$means[3,2]`$)^\top$ can be added to the plots. 
 
-The boundaries can be examined using the `explore()` function from the `classifly` package, which generates observations in the range of all values of`bl` and `bd` and predicts their class. We can overlay the sample means and an ellipse corresponding to the variance-covariance also, by extracting these from the model object.
+The boundaries can be examined using the `explore()` function from the `classifly` package, which generates observations in the range of all values of`bl` and `bd` and predicts their class. @fig-lda-2D-boundary shows the resulting prediction regions, with the observed data and the sample means overlaid.
 
 ```{r}
 #| message: false
 #| label: fig-lda-2D-boundary
-#| fig-cap: "Boundary of the LDA model for two variables of the penguins data."
+#| fig-cap: "Prediction regions of the LDA model for two variables of the three species of penguins indicated by the small points. Large points are the observations, and the sample mean of each species is represented by the plus. The boundaries between groups can be seen to be roughly half-way between the means, taking the elliptical spread into account, and mostly distinguishes the three species."
+#| fig-alt: "Square divided into three regions by the coloured points, primarily a wedge of yellow (Chinstrap) extending from the top right divides the other two groups. The regions mostly contain the observed values, with just a few over the boundary in the wrong region."
 #| fig-width: 3
 #| fig-height: 3
+#| out-width: 70%
 #| code-fold: false
 p_bl_bd_lda_boundaries <- explore(p_bl_bd_lda, penguins_sub)
 p_bl_bd_lda_m1 <- ggplot(p_bl_bd_lda_boundaries) +
-  geom_point(aes(x=bl, y=bd, colour=species, shape=.TYPE)) + 
+  geom_point(aes(x=bl, y=bd, 
+                 colour=species, 
+                 shape=.TYPE), alpha=0.8) + 
   scale_color_discrete_divergingx("Zissou 1") +
   scale_shape_manual(values=c(46, 16)) +
   theme_minimal() +
   theme(aspect.ratio = 1, legend.position = "none")
 
-p_bl_bd_lda_means <- data.frame(p_bl_bd_lda$means, species=rownames(p_bl_bd_lda$means))
-
+p_bl_bd_lda_means <- data.frame(p_bl_bd_lda$means,
+                        species=rownames(p_bl_bd_lda$means))
+p_bl_bd_lda_m1 +   
+  geom_point(data=p_bl_bd_lda_means, 
+             aes(x=bl, y=bd), 
+             colour="black", 
+             shape=3,
+             size=3) 
 ```
 
+This approach can be readily extended to higher dimensions. One first fits the model with all four variables, and uses the `explore()` to generate points in the 4D space with predictions, generating a representation of the prediction regions. `r ifelse(knitr::is_html_output(), '@fig-penguins-lda-boundaries-html', '@fig-penguins-lda-boundaries-pdf')` shows the results.
 
-```{r}
+```{r echo=knitr::is_html_output()}
 #| code-fold: false
 p_lda <- lda(species ~ ., penguins_sub[,1:5], prior = c(1/3, 1/3, 1/3))
 p_lda_boundaries <- explore(p_lda, penguins_sub)
 ```
 
-```{r}
+```{r echo=knitr::is_html_output()}
 #| eval: false
 #| code-summary: "Code for generating slice tour"
 # Code to run the tour
@@ -468,7 +479,7 @@ render_gif(p_lda_boundaries[p_lda_boundaries$.TYPE == "simulated",1:4],
            )
 ```
 
-```{r}
+```{r echo=knitr::is_html_output()}
 #| code-summary: "Code for projecting into LDA space"
 # Project the boundaries into the 2D discriminant space
 p_lda_b_sub <- p_lda_boundaries[
@@ -486,18 +497,15 @@ p_lda_b_sub_ds_p <- ggplot(p_lda_b_sub_ds,
   theme(aspect.ratio = 1, 
         legend.position = "bottom",
         legend.title = element_blank()) 
-
-  
 ```
 
 ::: {.content-visible when-format="html"}
 
-::: {#fig-penguins-lda-boundaries layout-ncol=2}
+::: {#fig-penguins-lda-boundaries-html layout-ncol=2}
 
 ![4D](gifs/penguins_lda_boundaries.gif){#fig-lda-4D-boundaries fig-alt="Sliced tour to explore the boundaries produced by the LDA classifier on the penguins data." width=300}
 
 ```{r}
-#| label: fig-lda-2D-boundaries
 #| echo: false
 #| fig-width: 5
 #| fig-height: 5
@@ -509,6 +517,29 @@ Examining the boundaries produced by the LDA model in the full 4D with a slice t
 :::
 :::
 
+::: {.content-visible when-format="pdf"}
+
+::: {#fig-penguins-lda-boundaries-pdf layout-ncol=2 fig-alt="FIX-ME"}
+
+![4D](images/penguins_lda_boundaries.png){#fig-lda-4D-boundaries fig-alt="Single frame from a sliced tour to explore the boundaries produced by the LDA classifier on the penguins data." width=200}
+
+![Discriminant space](images/fig-lda-2D-boundaries-1.png){#fig-lda-4D-ds fig-alt="FIX-ME" width=200}
+
+```{r}
+#| echo: false
+#| eval: false
+#| fig-width: 5
+#| fig-height: 5
+#| out-width: 50%
+#| fig-cap: "Discriminant space"
+p_lda_b_sub_ds_p
+```
+
+Examining the boundaries produced by the LDA model in the full 4D with a slice tour (left) and in the discriminant space (right). 
+:::
+:::
+
+
 ::: {.content-visible when-format="html"}
 ::: insight
 From the tour, we can see that the LDA boundaries divide the classes only in the discriminant space. It is not using the space orthogonal to the 2D discriminant space. You can see this because the boundary is sharp in just one 2D projection, while most of the projections show some overlap of regions.
@@ -519,6 +550,8 @@ From the tour, we can see that the LDA boundaries divide the classes only in the
 
 \insightbox{From the tour, we can see that the LDA boundaries divide the classes only in the discriminant space. It is not using the space orthogonal to the 2D discriminant space. You can see this because the boundary is sharp in just one 2D projection, while most of the projections show some overlap of regions.}
 :::
+
+<!-- FIX-ME: add index items-->
 
 ## Exercises {-}
 

@@ -265,7 +265,7 @@
 
 \begin{document}
 \maketitle
-\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[boxrule=0pt, sharp corners, frame hidden, breakable, borderline west={3pt}{0pt}{shadecolor}, enhanced, interior hidden]}{\end{tcolorbox}}\fi
+\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[frame hidden, boxrule=0pt, interior hidden, sharp corners, enhanced, breakable, borderline west={3pt}{0pt}{shadecolor}]}{\end{tcolorbox}}\fi
 
 \renewcommand*\contentsname{Table of contents}
 {
@@ -3680,7 +3680,8 @@ coordinates in the discriminant space are generated as:
 
 The best separation between classes can be viewed from this object,
 which can be shown to match the original data projected using the
-\texttt{scaling} component of the model object.
+\texttt{scaling} component of the model object (see
+Figure~\ref{fig-p-lda}).
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -3974,73 +3975,106 @@ We'll look at this for 2D using the LDA model fitted to \texttt{bl}, and
 \end{Highlighting}
 \end{Shaded}
 
-The fitted model parameters are the means: \(\bar{x}_{Adelie} = (\)
--0.95, 0.6\()^\top\), \(\bar{x}_{Chinstrap} = (\) 0.89, 0.64\()^\top\),
-and \(\bar{x}_{Gentoo} = (\) 0.65, -1.1\()^\top\).
+The fitted model means \(\bar{x}_{Adelie} = (\) -0.95, 0.6\()^\top\),
+\(\bar{x}_{Chinstrap} = (\) 0.89, 0.64\()^\top\), and
+\(\bar{x}_{Gentoo} = (\) 0.65, -1.1\()^\top\) can be added to the plots.
 
 The boundaries can be examined using the \texttt{explore()} function
 from the \texttt{classifly} package, which generates observations in the
 range of all values of\texttt{bl} and \texttt{bd} and predicts their
-class. We can overlay the sample means and an ellipse corresponding to
-the variance-covariance also, by extracting these from the model object.
+class. Figure~\ref{fig-lda-2D-boundary} shows the resulting prediction
+regions, with the observed data and the sample means overlaid.
 
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{p\_bl\_bd\_lda\_boundaries }\OtherTok{\textless{}{-}} \FunctionTok{explore}\NormalTok{(p\_bl\_bd\_lda, penguins\_sub)}
 \NormalTok{p\_bl\_bd\_lda\_m1 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(p\_bl\_bd\_lda\_boundaries) }\SpecialCharTok{+}
-  \FunctionTok{geom\_point}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{bl, }\AttributeTok{y=}\NormalTok{bd, }\AttributeTok{colour=}\NormalTok{species, }\AttributeTok{shape=}\NormalTok{.TYPE)) }\SpecialCharTok{+} 
+  \FunctionTok{geom\_point}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{bl, }\AttributeTok{y=}\NormalTok{bd, }
+                 \AttributeTok{colour=}\NormalTok{species, }
+                 \AttributeTok{shape=}\NormalTok{.TYPE), }\AttributeTok{alpha=}\FloatTok{0.8}\NormalTok{) }\SpecialCharTok{+} 
   \FunctionTok{scale\_color\_discrete\_divergingx}\NormalTok{(}\StringTok{"Zissou 1"}\NormalTok{) }\SpecialCharTok{+}
   \FunctionTok{scale\_shape\_manual}\NormalTok{(}\AttributeTok{values=}\FunctionTok{c}\NormalTok{(}\DecValTok{46}\NormalTok{, }\DecValTok{16}\NormalTok{)) }\SpecialCharTok{+}
   \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
   \FunctionTok{theme}\NormalTok{(}\AttributeTok{aspect.ratio =} \DecValTok{1}\NormalTok{, }\AttributeTok{legend.position =} \StringTok{"none"}\NormalTok{)}
 
-\NormalTok{p\_bl\_bd\_lda\_means }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(p\_bl\_bd\_lda}\SpecialCharTok{$}\NormalTok{means, }\AttributeTok{species=}\FunctionTok{rownames}\NormalTok{(p\_bl\_bd\_lda}\SpecialCharTok{$}\NormalTok{means))}
+\NormalTok{p\_bl\_bd\_lda\_means }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(p\_bl\_bd\_lda}\SpecialCharTok{$}\NormalTok{means,}
+                        \AttributeTok{species=}\FunctionTok{rownames}\NormalTok{(p\_bl\_bd\_lda}\SpecialCharTok{$}\NormalTok{means))}
+\NormalTok{p\_bl\_bd\_lda\_m1 }\SpecialCharTok{+}   
+  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{data=}\NormalTok{p\_bl\_bd\_lda\_means, }
+             \FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{bl, }\AttributeTok{y=}\NormalTok{bd), }
+             \AttributeTok{colour=}\StringTok{"black"}\NormalTok{, }
+             \AttributeTok{shape=}\DecValTok{3}\NormalTok{,}
+             \AttributeTok{size=}\DecValTok{3}\NormalTok{) }
 \end{Highlighting}
 \end{Shaded}
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{p\_lda }\OtherTok{\textless{}{-}} \FunctionTok{lda}\NormalTok{(species }\SpecialCharTok{\textasciitilde{}}\NormalTok{ ., penguins\_sub[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{5}\NormalTok{], }\AttributeTok{prior =} \FunctionTok{c}\NormalTok{(}\DecValTok{1}\SpecialCharTok{/}\DecValTok{3}\NormalTok{, }\DecValTok{1}\SpecialCharTok{/}\DecValTok{3}\NormalTok{, }\DecValTok{1}\SpecialCharTok{/}\DecValTok{3}\NormalTok{))}
-\NormalTok{p\_lda\_boundaries }\OtherTok{\textless{}{-}} \FunctionTok{explore}\NormalTok{(p\_lda, penguins\_sub)}
-\end{Highlighting}
-\end{Shaded}
+\begin{figure}[H]
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\# Code to run the tour}
-\NormalTok{p\_lda\_boundaries}\SpecialCharTok{$}\NormalTok{species}
-\FunctionTok{animate\_slice}\NormalTok{(p\_lda\_boundaries[p\_lda\_boundaries}\SpecialCharTok{$}\NormalTok{.TYPE }\SpecialCharTok{==} \StringTok{"simulated"}\NormalTok{,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{], }\AttributeTok{col=}\NormalTok{p\_lda\_boundaries}\SpecialCharTok{$}\NormalTok{species[p\_lda\_boundaries}\SpecialCharTok{$}\NormalTok{.TYPE }\SpecialCharTok{==} \StringTok{"simulated"}\NormalTok{], }\AttributeTok{v\_rel=}\FloatTok{0.02}\NormalTok{, }\AttributeTok{axes=}\StringTok{"bottomleft"}\NormalTok{)}
-\FunctionTok{render\_gif}\NormalTok{(p\_lda\_boundaries[p\_lda\_boundaries}\SpecialCharTok{$}\NormalTok{.TYPE }\SpecialCharTok{==} \StringTok{"simulated"}\NormalTok{,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{],}
-           \FunctionTok{planned\_tour}\NormalTok{(pt1),}
-           \FunctionTok{display\_slice}\NormalTok{(}\AttributeTok{v\_rel=}\FloatTok{0.02}\NormalTok{, }
-             \AttributeTok{col=}\NormalTok{p\_lda\_boundaries}\SpecialCharTok{$}\NormalTok{species[p\_lda\_boundaries}\SpecialCharTok{$}\NormalTok{.TYPE }\SpecialCharTok{==} \StringTok{"simulated"}\NormalTok{], }
-             \AttributeTok{axes=}\StringTok{"bottomleft"}\NormalTok{),                     }\AttributeTok{gif\_file=}\StringTok{"gifs/penguins\_lda\_boundaries.gif"}\NormalTok{,}
-           \AttributeTok{frames=}\DecValTok{500}\NormalTok{,}
-           \AttributeTok{loop=}\ConstantTok{FALSE}
-\NormalTok{           )}
-\end{Highlighting}
-\end{Shaded}
+{\centering \includegraphics[width=0.7\textwidth,height=\textheight]{14-lda_files/figure-pdf/fig-lda-2D-boundary-1.pdf}
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\# Project the boundaries into the 2D discriminant space}
-\NormalTok{p\_lda\_b\_sub }\OtherTok{\textless{}{-}}\NormalTok{ p\_lda\_boundaries[}
-\NormalTok{  p\_lda\_boundaries}\SpecialCharTok{$}\NormalTok{.TYPE }\SpecialCharTok{==} \StringTok{"simulated"}\NormalTok{, }
-  \FunctionTok{c}\NormalTok{(}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{, }\DecValTok{6}\NormalTok{)]}
-\NormalTok{p\_lda\_b\_sub\_ds }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\FunctionTok{as.matrix}\NormalTok{(p\_lda\_b\_sub[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{]) }\SpecialCharTok{\%*\%}
-\NormalTok{  p\_lda}\SpecialCharTok{$}\NormalTok{scaling)}
-\NormalTok{p\_lda\_b\_sub\_ds}\SpecialCharTok{$}\NormalTok{species }\OtherTok{\textless{}{-}}\NormalTok{ p\_lda\_b\_sub}\SpecialCharTok{$}\NormalTok{species}
-\NormalTok{p\_lda\_b\_sub\_ds\_p }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(p\_lda\_b\_sub\_ds, }
-       \FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{LD1, }\AttributeTok{y=}\NormalTok{LD2, }
-           \AttributeTok{colour=}\NormalTok{species)) }\SpecialCharTok{+}
-  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{alpha=}\FloatTok{0.2}\NormalTok{) }\SpecialCharTok{+}  
-  \FunctionTok{scale\_color\_discrete\_divergingx}\NormalTok{(}\StringTok{"Zissou 1"}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{theme}\NormalTok{(}\AttributeTok{aspect.ratio =} \DecValTok{1}\NormalTok{, }
-        \AttributeTok{legend.position =} \StringTok{"bottom"}\NormalTok{,}
-        \AttributeTok{legend.title =} \FunctionTok{element\_blank}\NormalTok{()) }
-\end{Highlighting}
-\end{Shaded}
+}
+
+\caption{\label{fig-lda-2D-boundary}Prediction regions of the LDA model
+for two variables of the three species of penguins indicated by the
+small points. Large points are the observations, and the sample mean of
+each species is represented by the plus. The boundaries between groups
+can be seen to be roughly half-way between the means, taking the
+elliptical spread into account, and mostly distinguishes the three
+species.}
+
+\end{figure}
+
+This approach can be readily extended to higher dimensions. One first
+fits the model with all four variables, and uses the \texttt{explore()}
+to generate points in the 4D space with predictions, generating a
+representation of the prediction regions.
+Figure~\ref{fig-penguins-lda-boundaries-pdf} shows the results.
+
+\begin{figure}
+
+\begin{minipage}[t]{0.50\linewidth}
+
+{\centering 
+
+\raisebox{-\height}{
+
+\includegraphics[width=2.08333in,height=\textheight]{images/penguins_lda_boundaries.png}
+
+}
+
+}
+
+\subcaption{\label{fig-lda-4D-boundaries}4D}
+\end{minipage}%
+%
+\begin{minipage}[t]{0.50\linewidth}
+
+{\centering 
+
+\raisebox{-\height}{
+
+\includegraphics[width=2.08333in,height=\textheight]{images/fig-lda-2D-boundaries-1.png}
+
+}
+
+}
+
+\subcaption{\label{fig-lda-4D-ds}Discriminant space}
+\end{minipage}%
+\newline
+\begin{minipage}[t]{0.50\linewidth}
+
+{\centering 
+
+}
+
+\end{minipage}%
+
+\caption{\label{fig-penguins-lda-boundaries-pdf}Examining the boundaries
+produced by the LDA model in the full 4D with a slice tour (left) and in
+the discriminant space (right).}
+
+\end{figure}
 
 \insightbox{From the tour, we can see that the LDA boundaries divide the classes only in the discriminant space. It is not using the space orthogonal to the 2D discriminant space. You can see this because the boundary is sharp in just one 2D projection, while most of the projections show some overlap of regions.}
 
