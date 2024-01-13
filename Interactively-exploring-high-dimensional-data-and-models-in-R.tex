@@ -261,11 +261,11 @@
 
 \title{Interactively exploring high-dimensional data and models in R}
 \author{Dianne Cook and Ursula Laa}
-\date{2024-01-08}
+\date{2024-01-14}
 
 \begin{document}
 \maketitle
-\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[sharp corners, frame hidden, interior hidden, breakable, enhanced, borderline west={3pt}{0pt}{shadecolor}, boxrule=0pt]}{\end{tcolorbox}}\fi
+\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[interior hidden, borderline west={3pt}{0pt}{shadecolor}, breakable, frame hidden, enhanced, boxrule=0pt, sharp corners]}{\end{tcolorbox}}\fi
 
 \renewcommand*\contentsname{Table of contents}
 {
@@ -4205,13 +4205,27 @@ model should be applied. In classification problems, it is useful to
 explore the cluster structure, comparing the clusters with the classes
 and looking for evidence of correlation within each class. The plots in
 Figure~\ref{fig-lda-assumptions1} and
-\textbf{?@fig-penguins-lda-ellipses} shows a strong correlation between
-the variables within each species, which indicates that the tree model
-may not give good results for the penguins data. We'll show how this is
-the case with two variables initially, and then extend to the four
-variables.
+Figure~\ref{fig-penguins-lda-ellipses-pdf} shows a strong correlation
+between the variables within each species, which indicates that the tree
+model may not give good results for the penguins data. We'll show how
+this is the case with two variables initially, and then extend to the
+four variables.
 
-The plots in \textbf{?@fig-p-bl-bd-tree} show the inadequacies of the
+\begin{figure}
+
+{\centering \includegraphics[width=1\textwidth,height=\textheight]{15-forests_files/figure-pdf/fig-p-bl-bd-tree-1.pdf}
+
+}
+
+\caption{\label{fig-p-bl-bd-tree}The association between variables in
+the penguins data causes problems for fitting a tree model. Although the
+model, computed using only bl and bd, is simple (left), the fit is poor
+(right) because it doesn't adequately utilise combinations of
+variables.}
+
+\end{figure}
+
+The plots in Figure~\ref{fig-p-bl-bd-tree} show the inadequacies of the
 tree fit. The background color indicates the class predictions, and thus
 boundaries produced by the tree fit. They can be seen to be boxy, and
 missing the elliptical nature of the penguin clusters. This produces
@@ -4220,7 +4234,10 @@ could always force the tree to fit the data more closely by adjusting
 the parameters, but the main problem persists: that one is trying to fit
 elliptical data using boxes.
 
-\infobox{For a non-parametric model we do not need to check assumptions. However, it is still important to understand the model and the data to make sure they work well together. For example, a tree model may not be a good choice in case of correlated variables, since all interactions need to be described via alternating splits on the variables.}
+\infobox{There are less strict assumptions for a non-parametric model but it is still important to understand the model fit relative to the data. 
+}
+
+\insightbox{With the penguins data, a tree model may not be a good choice due to the strong correlation between variables. The best separation is in combinations of variables, not the single variable tree splits.}
 
 The boundaries for the tree model on all four variables of the penguins
 data can be viewed similarly using the tour. The default fitted tree is
@@ -4274,10 +4291,10 @@ Call:
                      Number of trees: 500
 No. of variables tried at each split: 2
 
-        OOB estimate of  error rate: 2.7%
+        OOB estimate of  error rate: 2.4%
 Confusion matrix:
           Adelie Chinstrap Gentoo class.error
-Adelie       142         3      1 0.027397260
+Adelie       143         3      0 0.020547945
 Chinstrap      4        64      0 0.058823529
 Gentoo         0         1    118 0.008403361
 \end{verbatim}
@@ -4435,19 +4452,19 @@ Call:
                      Number of trees: 500
 No. of variables tried at each split: 3
 
-        OOB estimate of  error rate: 4.33%
+        OOB estimate of  error rate: 4.17%
 Confusion matrix:
     0   1   2   3   4   5   6   7   8   9 class.error
-0 265   5   2   3   3   4   4   3   7   4  0.11666667
+0 268   5   2   2   3   5   4   2   5   4  0.10666667
 1  12 288   0   0   0   0   0   0   0   0  0.04000000
-2   9   0 289   0   2   0   0   0   0   0  0.03666667
-3   6   0   0 289   0   0   0   3   0   2  0.03666667
-4  13   0   0   0 287   0   0   0   0   0  0.04333333
-5  13   0   0   0   0 287   0   0   0   0  0.04333333
+2  10   0 289   0   1   0   0   0   0   0  0.03666667
+3   6   0   0 290   0   0   0   3   0   1  0.03333333
+4  12   0   0   0 288   0   0   0   0   0  0.04000000
+5  11   0   0   0   0 289   0   0   0   0  0.03666667
 6  12   0   0   0   0   0 287   0   1   0  0.04333333
-7   6   0   0   3   0   0   0 291   0   0  0.03000000
-8   7   0   0   0   0   0   0   0 293   0  0.02333333
-9   6   0   0   0   0   0   0   0   0 294  0.02000000
+7   4   0   0   5   0   0   0 289   0   2  0.03666667
+8   8   0   0   0   0   0   0   0 292   0  0.02666667
+9   5   0   0   0   0   0   0   0   0 295  0.01666667
 \end{verbatim}
 
 \begin{Shaded}
@@ -4547,16 +4564,16 @@ difference between importance for some classes.
 \toprule
 Variable & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & Accuracy & Gini \\ 
 \midrule
-PC1 & $0.10$ & $0.34$ & $0.44$ & $0.28$ & $0.18$ & $0.47$ & $0.40$ & $0.17$ & $0.32$ & $0.30$ & $0.30$ & $472$ \\ 
-PC2 & $0.13$ & $0.24$ & $0.23$ & $0.53$ & $0.28$ & $0.30$ & $0.18$ & $0.41$ & $0.24$ & $0.30$ & $0.28$ & $383$ \\ 
-PC3 & $0.09$ & $0.06$ & $0.10$ & $0.14$ & $0.53$ & $0.14$ & $0.09$ & $0.13$ & $0.18$ & $0.16$ & $0.16$ & $305$ \\ 
-PC4 & $0.09$ & $0.47$ & $0.06$ & $0.04$ & $0.10$ & $0.03$ & $0.37$ & $0.15$ & $0.07$ & $0.09$ & $0.15$ & $325$ \\ 
-PC5 & $0.13$ & $0.13$ & $0.36$ & $0.08$ & $0.16$ & $0.24$ & $0.10$ & $0.11$ & $0.30$ & $0.22$ & $0.18$ & $338$ \\ 
-PC6 & $0.10$ & $0.23$ & $0.24$ & $0.18$ & $0.05$ & $0.13$ & $0.04$ & $0.28$ & $0.16$ & $0.18$ & $0.16$ & $291$ \\ 
-PC7 & $0.06$ & $0.03$ & $0.15$ & $0.04$ & $0.04$ & $0.07$ & $0.11$ & $0.34$ & $0.13$ & $0.15$ & $0.11$ & $256$ \\ 
-PC8 & $0.05$ & $0.07$ & $0.02$ & $0.24$ & $0.05$ & $0.08$ & $0.02$ & $0.04$ & $0.09$ & $0.26$ & $0.09$ & $224$ \\ 
-PC9 & $0.08$ & $0.01$ & $0.01$ & $0.01$ & $0.01$ & $0.01$ & $0.01$ & $0.03$ & $0.06$ & $0.02$ & $0.02$ & $60$ \\ 
-PC10 & $0.03$ & $0.01$ & $0.01$ & $0.01$ & $0.01$ & $0.02$ & $0.01$ & $0.01$ & $0.01$ & $0.02$ & $0.01$ & $45$ \\ 
+PC1 & $0.11$ & $0.37$ & $0.45$ & $0.30$ & $0.21$ & $0.50$ & $0.39$ & $0.20$ & $0.32$ & $0.31$ & $0.32$ & $493$ \\ 
+PC2 & $0.13$ & $0.22$ & $0.21$ & $0.50$ & $0.27$ & $0.28$ & $0.16$ & $0.37$ & $0.21$ & $0.27$ & $0.26$ & $365$ \\ 
+PC3 & $0.09$ & $0.06$ & $0.11$ & $0.14$ & $0.54$ & $0.16$ & $0.08$ & $0.14$ & $0.19$ & $0.16$ & $0.17$ & $313$ \\ 
+PC4 & $0.09$ & $0.46$ & $0.05$ & $0.04$ & $0.09$ & $0.03$ & $0.37$ & $0.15$ & $0.08$ & $0.09$ & $0.14$ & $341$ \\ 
+PC5 & $0.13$ & $0.11$ & $0.36$ & $0.07$ & $0.17$ & $0.24$ & $0.10$ & $0.12$ & $0.30$ & $0.22$ & $0.18$ & $336$ \\ 
+PC6 & $0.11$ & $0.22$ & $0.23$ & $0.18$ & $0.04$ & $0.12$ & $0.04$ & $0.29$ & $0.14$ & $0.18$ & $0.15$ & $287$ \\ 
+PC7 & $0.07$ & $0.03$ & $0.15$ & $0.04$ & $0.04$ & $0.06$ & $0.12$ & $0.31$ & $0.12$ & $0.15$ & $0.11$ & $242$ \\ 
+PC8 & $0.05$ & $0.08$ & $0.02$ & $0.23$ & $0.06$ & $0.09$ & $0.02$ & $0.05$ & $0.09$ & $0.26$ & $0.09$ & $224$ \\ 
+PC9 & $0.07$ & $0.01$ & $0.01$ & $0.02$ & $0.01$ & $0.01$ & $0.00$ & $0.03$ & $0.05$ & $0.02$ & $0.02$ & $55$ \\ 
+PC10 & $0.04$ & $0.01$ & $0.01$ & $0.00$ & $0.01$ & $0.01$ & $0.01$ & $0.00$ & $0.01$ & $0.02$ & $0.01$ & $44$ \\ 
 \bottomrule
 \end{longtable}
 

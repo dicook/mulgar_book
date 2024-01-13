@@ -6,63 +6,78 @@ The tree algorithm @BFOS84 is a simple and versatile algorithmic method for supe
 tailored to the sample.  When applying tree methods, exploring the effects of the input parameters on the tree is instructive; for example, it helps us to assess the stability of the tree model.
 
 Although algorithmic models do not depend on distributional assumptions, that does not mean that every algorithm is suitable for all data.  For example, the tree model works best when all variables are independent within each class, because it does not take such dependencies into account.  Visualization can help us to determine whether a particular model should be applied.  In classification problems, it is useful to explore the cluster structure, comparing the clusters with the classes and looking for evidence of correlation within each class. 
-The plots in @fig-lda-assumptions1 and @fig-penguins-lda-ellipses shows a strong correlation between the variables within each species, which indicates that the tree model may not give good results for the penguins data. We'll show how this is the case with two variables initially, and then extend to the four variables.
-
-::: {.content-visible when-format="html"}
-
-::: {#fig-p-bl-bd-tree layout-ncol=2}
+The plots in @fig-lda-assumptions1 and @fig-penguins-lda-ellipses-pdf shows a strong correlation between the variables within each species, which indicates that the tree model may not give good results for the penguins data. We'll show how this is the case with two variables initially, and then extend to the four variables.
 
 ```{r echo=knitr::is_html_output()}
 #| message: false
-#| label: fig-p-bl-bd-tree1
-#| fig-cap: Default tree fit.
-#| fig-alt: "FIX-ME"
-#| fig-width: 3
+#| label: fig-p-bl-bd-tree
+#| fig-width: 6
 #| fig-height: 3
+#| out-width: 100%
+#| code-summary: "Draw tree and model boundaries"
+#| fig-cap: "The association between variables in the penguins data causes problems for fitting a tree model. Although the model, computed using only bl and bd, is simple (left), the fit is poor (right) because it doesn't adequately utilise combinations of variables."
+#| fig-alt: "Tree diagram with top split bl<0.3004, leading to Adelie branch, second split at bd >= -0.4138, leading to Gentoo branch, and final split at bl< 0.1476, leading to Adelie and Chinstrap branches. The scatterplot at right shows bd vs bl, with three predictive region partitions, and the data is overplotted. The elliptical spreads of data points crosses the rectangular partitions in places."
 library(mulgar)
 library(rpart)
 library(rpart.plot)
 library(colorspace)
 library(classifly)
 library(ggplot2)
+library(ggdendro)
+library(patchwork)
 library(ggthemes)
 
 load("data/penguins_sub.rda")
 p_bl_bd_tree <- rpart(species~bl+bd, data=penguins_sub)
-rpart.plot(p_bl_bd_tree, box.palette="Grays")
-```
+#f1 <- rpart.plot(p_bl_bd_tree, box.palette="Grays")
+d <- dendro_data(p_bl_bd_tree)
+f1 <- ggplot() +
+  geom_segment(data = d$segments, 
+               aes(x = x, y = y, 
+                   xend = xend, yend = yend)) +
+  geom_text(data = d$labels, 
+            aes(x = x, y = y, 
+                label = label), size = 2.7, 
+            vjust = 1.2) +
+  geom_text(data = d$leaf_labels,
+            aes(x = x, y = y, 
+                label = label), size = 2.5, 
+            vjust = 2, hjust=c(0,0.5,0,0.5)) + 
+  expand_limits(x=0.9, y=0) +
+  theme_dendro()
 
-```{r echo=knitr::is_html_output()}
-#| message: false
-#| label: fig-p-bl-bd-tree2
-#| fig-cap: Boundaries of tree fit
-#| fig-alt: "FIX-ME"
-#| fig-width: 3
-#| fig-height: 3
-#| code-summary: "Code to draw tree and model fit"
 p_bl_bd_tree_boundaries <- explore(p_bl_bd_tree, penguins_sub)
-ggplot(p_bl_bd_tree_boundaries) +
+f2 <- ggplot(p_bl_bd_tree_boundaries) +
   geom_point(aes(x=bl, y=bd, colour=species, shape=.TYPE)) + 
   scale_color_discrete_divergingx(palette="Zissou 1") +
   scale_shape_manual(values=c(46, 16)) +
   theme_minimal() +
   theme(aspect.ratio = 1, legend.position = "none")
-```
 
-The correlation between variables causes problems for using a tree model on the penguins data.
-:::
-:::
+f1 + f2 + plot_layout(ncol=2)
+```
 
 The plots in @fig-p-bl-bd-tree show the inadequacies of the tree fit. The background color indicates the class predictions, and thus boundaries produced by the tree fit. They can be seen to be boxy, and missing the elliptical nature of the penguin clusters. This produces errors in the classification of observations which are indefensible. One could always force the tree to fit the data more closely by adjusting the parameters, but the main problem persists: that one is trying to fit elliptical data using boxes.
 
 ::: {.content-visible when-format="html"}
 ::: info
-For a non-parametric model we do not need to check assumptions. However, it is still important to understand the model and the data to make sure they work well together. For example, a tree model may not be a good choice in case of correlated variables, since all interactions need to be described via alternating splits on the variables.
+There are less strict assumptions for a non-parametric model but it is still important to understand the model fit relative to the data. 
 :::
 :::
 
 ::: {.content-visible when-format="pdf"}
-\infobox{For a non-parametric model we do not need to check assumptions. However, it is still important to understand the model and the data to make sure they work well together. For example, a tree model may not be a good choice in case of correlated variables, since all interactions need to be described via alternating splits on the variables.}
+\infobox{There are less strict assumptions for a non-parametric model but it is still important to understand the model fit relative to the data. 
+}
+:::
+
+::: {.content-visible when-format="html"}
+::: insight
+With the penguins data, a tree model may not be a good choice due to the strong correlation between variables. The best separation is in combinations of variables, not the single variable tree splits. 
+:::
+:::
+
+::: {.content-visible when-format="pdf"}
+\insightbox{With the penguins data, a tree model may not be a good choice due to the strong correlation between variables. The best separation is in combinations of variables, not the single variable tree splits.}
 :::
 
 The boundaries for the tree model on all four variables of the penguins data can be viewed similarly using the tour. The default fitted tree is delightfully simple, with just six splits of the data. 
