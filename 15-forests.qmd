@@ -1,8 +1,9 @@
 # Trees and forests {#sec-trees-forests}
 
 ## Trees {#sec-trees}
+\index{classification methods!trees}
 
-The tree algorithm @BFOS84 is a simple and versatile algorithmic method for supervised classification. The basic tree algorithm generates a classification rule by sequentially splitting the data into two buckets. Splits are made between sorted data values of individual variables, with the goal of obtaining pure classes on each side of the split. The inputs for a simple tree classifier commonly include (1) an impurity measure, an indication of the relative diversity among the cases in the terminal nodes; (2) a parameter that sets the minimum number of cases in a node, or the minimum number of observations in a terminal node of the tree; and (3) a complexity measure that controls the growth of a tree, balancing the use of a simple generalizable tree against a more accurate tree
+The tree algorithm [@BFOS84] is a simple and versatile algorithmic method for supervised classification. The basic tree algorithm generates a classification rule by sequentially splitting the data into two buckets. Splits are made between sorted data values of individual variables, with the goal of obtaining pure classes on each side of the split. The inputs for a simple tree classifier commonly include (1) an impurity measure, an indication of the relative diversity among the cases in the terminal nodes; (2) a parameter that sets the minimum number of cases in a node, or the minimum number of observations in a terminal node of the tree; and (3) a complexity measure that controls the growth of a tree, balancing the use of a simple generalizable tree against a more accurate tree
 tailored to the sample.  When applying tree methods, exploring the effects of the input parameters on the tree is instructive; for example, it helps us to assess the stability of the tree model.
 
 Although algorithmic models do not depend on distributional assumptions, that does not mean that every algorithm is suitable for all data.  For example, the tree model works best when all variables are independent within each class, because it does not take such dependencies into account.  Visualization can help us to determine whether a particular model should be applied.  In classification problems, it is useful to explore the cluster structure, comparing the clusters with the classes and looking for evidence of correlation within each class. 
@@ -70,17 +71,9 @@ There are less strict assumptions for a non-parametric model but it is still imp
 }
 :::
 
-::: {.content-visible when-format="html"}
-::: insight
-With the penguins data, a tree model may not be a good choice due to the strong correlation between variables. The best separation is in combinations of variables, not the single variable tree splits. 
-:::
-:::
+The boundaries for the tree model on all four variables of the penguins data can be viewed similarly, by predicting a set of points randomly generated in the 4D domain of observed values. `r ifelse(knitr::is_html_output(), '@fig-penguins-lda-tree-html', '@fig-penguins-lda-tree-pdf')` shows the prediction regions for LDA and a default tree in a slice tour. The slice tour is used to help see into the middle of the 4D cube. It slices the cube through the centre of the data, where the boundaries of the regions should meet. 
 
-::: {.content-visible when-format="pdf"}
-\insightbox{With the penguins data, a tree model may not be a good choice due to the strong correlation between variables. The best separation is in combinations of variables, not the single variable tree splits.}
-:::
-
-The boundaries for the tree model on all four variables of the penguins data can be viewed similarly, by predicting a set of points randomly generated in the 4D domain of observed values. `r ifelse(knitr::is_html_output(), '@fig-penguins-lda-tree-html', '@fig-penguins-lda-tree-pdf')` shows the prediction regions for LDA and a default tree in a slice tour. The default fitted tree is delightfully simple - it has just six splits of the data. However, the result is not adequate for the penguins data, because it is generating boxy boundaries between elliptically shaped clusters. 
+The prediction regions of the default fitted tree are shown in comparison to those from the LDA model. We don't show the tree diagram here, but it makes only six splits of the tree model, which is delightfully simple. However, just like the model fitted to two variables, the result is not adequate for the penguins data. The tree model generates boxy boundaries, whereas the LDA model splits the 4D cube obliquely. The boxy regions don't capture the differences between the elliptically-shaped clusters. Overlaying the observed data on this display would make this clearer, but the boundaries are easier to examine without them.
 
 ```{r echo=knitr::is_html_output()}
 #| eval: false
@@ -100,6 +93,8 @@ render_gif(p_tree_boundaries[p_tree_boundaries$.TYPE == "simulated",1:4],
            loop=FALSE
            )
 ```
+
+\index{tour!slice} 
 
 ::: {.content-visible when-format="html"}
 
@@ -125,9 +120,21 @@ Comparison of the boundaries produced by the LDA (a) and the tree (b) model, usi
 :::
 :::
 
-\index{classification methods!random forest}
+
+::: {.content-visible when-format="html"}
+::: insight
+With the penguins data, a tree model may not be a good choice due to the strong correlation between variables. The best separation is in combinations of variables, not the single variable tree splits. 
+:::
+:::
+
+::: {.content-visible when-format="pdf"}
+\insightbox{With the penguins data, a tree model may not be a good choice due to the strong correlation between variables. The best separation is in combinations of variables, not the single variable tree splits.}
+:::
+
+
 
 ## Random forests 
+\index{classification methods!random forest}
 
 A random forest [@Br01] is a classifier that is built from multiple trees generated by randomly sampling the cases and the variables.  The random sampling (with replacement) of cases has the fortunate effect of creating a training ("in-bag") and a test ("out-of-bag") sample for each tree computed.  The class of each case in the out-of-bag sample for each tree is predicted, and the predictions for all trees are combined into a vote for the class identity.  
 
