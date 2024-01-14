@@ -265,7 +265,7 @@
 
 \begin{document}
 \maketitle
-\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[interior hidden, borderline west={3pt}{0pt}{shadecolor}, breakable, frame hidden, enhanced, boxrule=0pt, sharp corners]}{\end{tcolorbox}}\fi
+\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[interior hidden, sharp corners, breakable, enhanced, frame hidden, borderline west={3pt}{0pt}{shadecolor}, boxrule=0pt]}{\end{tcolorbox}}\fi
 
 \renewcommand*\contentsname{Table of contents}
 {
@@ -4232,7 +4232,7 @@ missing the elliptical nature of the penguin clusters. This produces
 errors in the classification of observations which are indefensible. One
 could always force the tree to fit the data more closely by adjusting
 the parameters, but the main problem persists: that one is trying to fit
-elliptical data using boxes.
+elliptical shapes using boxes.
 
 \infobox{There are less strict assumptions for a non-parametric model but it is still important to understand the model fit relative to the data. 
 }
@@ -4240,8 +4240,54 @@ elliptical data using boxes.
 \insightbox{With the penguins data, a tree model may not be a good choice due to the strong correlation between variables. The best separation is in combinations of variables, not the single variable tree splits.}
 
 The boundaries for the tree model on all four variables of the penguins
-data can be viewed similarly using the tour. The default fitted tree is
-delightfully simple, with just six splits of the data.
+data can be viewed similarly, by predicting a set of points randomly
+generated in the 4D domain of observed values.
+Figure~\ref{fig-penguins-lda-tree-pdf} shows the prediction regions for
+LDA and a default tree in a slice tour. The default fitted tree is
+delightfully simple - it has just six splits of the data. However, the
+result is not adequate for the penguins data, because it is generating
+boxy boundaries between elliptically shaped clusters.
+
+\begin{figure}
+
+\begin{minipage}[t]{0.50\linewidth}
+
+{\centering 
+
+\raisebox{-\height}{
+
+\includegraphics{images/penguins_lda_boundaries.png}
+
+}
+
+}
+
+\subcaption{\label{fig-lda-boundary}LDA model}
+\end{minipage}%
+%
+\begin{minipage}[t]{0.50\linewidth}
+
+{\centering 
+
+\raisebox{-\height}{
+
+\includegraphics{images/penguins_tree_boundaries.png}
+
+}
+
+}
+
+\subcaption{\label{fig-tree-boundary}Tree model}
+\end{minipage}%
+
+\caption{\label{fig-penguins-lda-tree-pdf}Comparison of the boundaries
+produced by the LDA (a) and the tree (b) model, using a slice tour.
+(Here only a single frame is shown.) The tree boundaries are more
+box-shaped than the LDA boundaries, which does not adequately capture
+the differences between the elliptically-shaped clusters of the penguins
+data.}
+
+\end{figure}
 
 \index{classification methods!random forest}
 
@@ -4294,7 +4340,7 @@ No. of variables tried at each split: 2
         OOB estimate of  error rate: 2.4%
 Confusion matrix:
           Adelie Chinstrap Gentoo class.error
-Adelie       143         3      0 0.020547945
+Adelie       143         2      1 0.020547945
 Chinstrap      4        64      0 0.058823529
 Gentoo         0         1    118 0.008403361
 \end{verbatim}
@@ -4452,19 +4498,19 @@ Call:
                      Number of trees: 500
 No. of variables tried at each split: 3
 
-        OOB estimate of  error rate: 4.17%
+        OOB estimate of  error rate: 4.3%
 Confusion matrix:
     0   1   2   3   4   5   6   7   8   9 class.error
-0 268   5   2   2   3   5   4   2   5   4  0.10666667
+0 270   4   2   2   3   4   4   4   4   3  0.10000000
 1  12 288   0   0   0   0   0   0   0   0  0.04000000
-2  10   0 289   0   1   0   0   0   0   0  0.03666667
-3   6   0   0 290   0   0   0   3   0   1  0.03333333
-4  12   0   0   0 288   0   0   0   0   0  0.04000000
-5  11   0   0   0   0 289   0   0   0   0  0.03666667
+2  10   0 288   0   2   0   0   0   0   0  0.04000000
+3   6   0   0 288   0   0   0   4   0   2  0.04000000
+4  13   0   0   0 287   0   0   0   0   0  0.04333333
+5  13   0   0   0   0 287   0   0   0   0  0.04333333
 6  12   0   0   0   0   0 287   0   1   0  0.04333333
-7   4   0   0   5   0   0   0 289   0   2  0.03666667
-8   8   0   0   0   0   0   0   0 292   0  0.02666667
-9   5   0   0   0   0   0   0   0   0 295  0.01666667
+7   6   0   0   4   0   0   0 289   0   1  0.03666667
+8   7   0   0   0   0   0   0   0 293   0  0.02333333
+9   5   0   0   0   0   0   0   1   0 294  0.02000000
 \end{verbatim}
 
 \begin{Shaded}
@@ -4564,16 +4610,16 @@ difference between importance for some classes.
 \toprule
 Variable & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & Accuracy & Gini \\ 
 \midrule
-PC1 & $0.11$ & $0.37$ & $0.45$ & $0.30$ & $0.21$ & $0.50$ & $0.39$ & $0.20$ & $0.32$ & $0.31$ & $0.32$ & $493$ \\ 
-PC2 & $0.13$ & $0.22$ & $0.21$ & $0.50$ & $0.27$ & $0.28$ & $0.16$ & $0.37$ & $0.21$ & $0.27$ & $0.26$ & $365$ \\ 
-PC3 & $0.09$ & $0.06$ & $0.11$ & $0.14$ & $0.54$ & $0.16$ & $0.08$ & $0.14$ & $0.19$ & $0.16$ & $0.17$ & $313$ \\ 
-PC4 & $0.09$ & $0.46$ & $0.05$ & $0.04$ & $0.09$ & $0.03$ & $0.37$ & $0.15$ & $0.08$ & $0.09$ & $0.14$ & $341$ \\ 
-PC5 & $0.13$ & $0.11$ & $0.36$ & $0.07$ & $0.17$ & $0.24$ & $0.10$ & $0.12$ & $0.30$ & $0.22$ & $0.18$ & $336$ \\ 
-PC6 & $0.11$ & $0.22$ & $0.23$ & $0.18$ & $0.04$ & $0.12$ & $0.04$ & $0.29$ & $0.14$ & $0.18$ & $0.15$ & $287$ \\ 
-PC7 & $0.07$ & $0.03$ & $0.15$ & $0.04$ & $0.04$ & $0.06$ & $0.12$ & $0.31$ & $0.12$ & $0.15$ & $0.11$ & $242$ \\ 
-PC8 & $0.05$ & $0.08$ & $0.02$ & $0.23$ & $0.06$ & $0.09$ & $0.02$ & $0.05$ & $0.09$ & $0.26$ & $0.09$ & $224$ \\ 
-PC9 & $0.07$ & $0.01$ & $0.01$ & $0.02$ & $0.01$ & $0.01$ & $0.00$ & $0.03$ & $0.05$ & $0.02$ & $0.02$ & $55$ \\ 
-PC10 & $0.04$ & $0.01$ & $0.01$ & $0.00$ & $0.01$ & $0.01$ & $0.01$ & $0.00$ & $0.01$ & $0.02$ & $0.01$ & $44$ \\ 
+PC1 & $0.10$ & $0.35$ & $0.47$ & $0.28$ & $0.19$ & $0.48$ & $0.40$ & $0.17$ & $0.30$ & $0.30$ & $0.30$ & $472$ \\ 
+PC2 & $0.13$ & $0.25$ & $0.22$ & $0.52$ & $0.29$ & $0.30$ & $0.17$ & $0.40$ & $0.24$ & $0.30$ & $0.28$ & $377$ \\ 
+PC3 & $0.10$ & $0.06$ & $0.10$ & $0.13$ & $0.54$ & $0.16$ & $0.10$ & $0.13$ & $0.19$ & $0.16$ & $0.17$ & $317$ \\ 
+PC4 & $0.08$ & $0.45$ & $0.06$ & $0.04$ & $0.10$ & $0.04$ & $0.38$ & $0.15$ & $0.07$ & $0.09$ & $0.15$ & $340$ \\ 
+PC5 & $0.13$ & $0.12$ & $0.33$ & $0.08$ & $0.17$ & $0.24$ & $0.09$ & $0.11$ & $0.30$ & $0.20$ & $0.18$ & $342$ \\ 
+PC6 & $0.10$ & $0.24$ & $0.25$ & $0.17$ & $0.04$ & $0.13$ & $0.04$ & $0.28$ & $0.14$ & $0.18$ & $0.16$ & $283$ \\ 
+PC7 & $0.07$ & $0.03$ & $0.14$ & $0.04$ & $0.04$ & $0.06$ & $0.12$ & $0.31$ & $0.12$ & $0.15$ & $0.11$ & $245$ \\ 
+PC8 & $0.05$ & $0.06$ & $0.02$ & $0.24$ & $0.06$ & $0.08$ & $0.02$ & $0.04$ & $0.09$ & $0.29$ & $0.09$ & $221$ \\ 
+PC9 & $0.08$ & $0.01$ & $0.01$ & $0.02$ & $0.01$ & $0.01$ & $0.00$ & $0.03$ & $0.06$ & $0.02$ & $0.02$ & $59$ \\ 
+PC10 & $0.04$ & $0.01$ & $0.01$ & $0.01$ & $0.01$ & $0.01$ & $0.01$ & $0.00$ & $0.01$ & $0.02$ & $0.01$ & $43$ \\ 
 \bottomrule
 \end{longtable}
 
