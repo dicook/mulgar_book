@@ -300,10 +300,6 @@ ft_rf <- randomForest(branches~., data=ft_pc,
                             importance=TRUE)
 ```
 
-```{r echo=knitr::is_html_output(), eval=knitr::is_html_output()}
-ft_rf
-```
-
 ```{r}
 #| echo: false
 options(digits=1)
@@ -383,6 +379,7 @@ The votes matrix is 9D, due to the 9 groups. With this many dimensions, if the c
 
 Points concentrate at the vertices, which means that most are confidently predicted to be their true class. The most spread of points is along single edges, between pairs of vertices. This means that when there is confusion it is mostly with just one other group. One vertex (0) which has connections to all other vertexes. That is, there are points stretching from this vertex to every other. It means that some observations in every other class can be confused with class 0, and class 0 observations can be confused with every other class. This information suggests that cluster 0 is central to all the other clusters. 
 
+
 Some of this information could also be inferred from the confusion matrix for the model. However visualising the votes matrix provides more intricate details. Here we have seen that the points spread out from a vertex, with fewer and fewer the further one gets. It allows us to see the distribution of points, which is not possible from the confusion matrix alone. The same misclaassification rate could be due to a variety of distributions. The visual pattern in the votes matrix is striking, and gives additional information about how the clustering distribution, and shapes of clusters, matches the class labels. It reinforces the clusters are linear extending into different dimensions in the 100D space, but really only into about 8D (as we'll see from the variable importance explanation below). We also see that nine of the clusters are all connected to a single cluster.
 
 ::: {.content-visible when-format="html"}
@@ -396,27 +393,45 @@ The votes matrix for the fake trees has a striking geometric structure, with one
 :::
 
 ### Using variable importance {#sec-forest-var-imp}
+\index{classification methods!variable importance}
 
 The variable importance score across all classes, and for each class is useful for choosing variables to enter into a tour, to explore class differences. This is particularly so when there are many variables, as in the fake_trees data. We would also expect that this data will have a difference between importance for some classes.
 
-```{r}
+
+```{r echo=knitr::is_html_output()}
 #| code-fold: false
 #| label: tbl-ft-importance
-#| tbl-cap: Variable importance from the random forest fit to the fake_trees data.
+#| tbl-cap: Variable importance from the random forest fit to the fake_trees data, for each of the 9 classes, and using the accuracy and Gini metrics.
 library(gt)
 ft_rf$importance %>% 
-  as_tibble(rownames="Variable") %>% 
-  rename(Accuracy=MeanDecreaseAccuracy,
+  as_tibble(rownames="Var") %>% 
+  rename(Acc=MeanDecreaseAccuracy,
          Gini=MeanDecreaseGini) %>%
   #arrange(desc(Gini)) %>%
   gt() %>%
-  fmt_number(columns = c(`0`,`1`,`2`,`3`,`4`,`5`,`6`,`7`,`8`,`9`, Accuracy),
+  fmt_number(columns = c(`0`,`1`,`2`,`3`,`4`,
+                         `5`,`6`,`7`,`8`,`9`),
+             decimals = 1) %>% 
+  fmt_number(columns = Acc,
              decimals = 2) %>%
   fmt_number(columns = Gini,
              decimals = 0)
 ```
 
-From the variable importance, we can see that PC9 and PC10 do not substantially contribute. That means the 100D data can be reduced to 8 PCs while maintaining the information about the clustering. PC1 is most important overall, but each cluster has a different set of variables that are important. For example, the variables important for distinguishing cluster 1 are PC1, PC2, PC4 and PC6, and for cluster 7 they are PC2, PC6, PC7. We can use this information to choose variables to provide to the tour. It can be helpful to reduce the class variable to focus on a particular class, by creating a new class variable, as follows. 
+From the variable importance (@tbl-ft-importance), we can see that PC9 and PC10 do not substantially contribute. That means the 100D data can be reduced to 8D without losing the information about the cluster structure. PC1 is most important overall, and the order matches the PC order, as might be expected because highest variance corresponds to the most spread clusters. Each cluster has a different set of variables that are important. For example, the variables important for distinguishing cluster 1 are PC1 and PC4, and for cluster 2 they are PC1 and PC5. 
+
+
+::: {.content-visible when-format="html"}
+::: info
+Class-wise variable importance helps to find a subspace on which to tour to examine how this class cluster differs from the others.
+:::
+:::
+
+::: {.content-visible when-format="pdf"}
+\infobox{Class-wise variable importance helps to find a subspace on which to tour to examine how this class cluster differs from the others.}
+:::
+
+We can use the accuracy information to choose variables to provide to the tour. Overall, one would sequentially add the variables into a tour based on their accuracy or Gini value. Here it is simply starting with the first three PCs, and then sequentially adding the PCs to examine how distinct the clusters are with ot without the extra variable. It can be helpful to focus on a single class against all the others. To do this create a new binary class variable, indicating that the observation belongs to class $k$ or not, as follows: 
 
 ```{r}
 #| code-fold: false
@@ -428,7 +443,7 @@ ft_pc <- ft_pc %>%
   )))
 ```
 
-```{r}
+```{r echo=knitr::is_html_output()}
 #| eval: false
 #| code-summary: "Code to make animated gifs"
 animate_xy(ft_pc[,c("PC1", "PC2", "PC4", "PC6")], col=ft_pc$cl1, palette="Viridis")
@@ -439,20 +454,20 @@ render_gif(ft_pc[,c("PC1", "PC2", "PC4", "PC6")],
            frames=500)
 ```
 
-```{r}
+```{r echo=knitr::is_html_output()}
 #| code-summary: "Code to make plot"
-ft_pc_cl1 <- ggplot(ft_pc, aes(x=PC4, y=PC2, col=cl1)) +
+ft_pc_cl1 <- ggplot(ft_pc, aes(x=PC4, y=PC1, col=cl1)) +
   geom_point(alpha=0.7, size=1) +
   scale_color_discrete_sequential(palette="Viridis", rev=FALSE) +
   theme_minimal() +
   theme(aspect.ratio = 1)
 ```
 
-From @fig-ft-cl we can see how cluster 1 is distinct from all of the other observations, albeit with a close connection to the trunk of the tree (cluster 0). The distinction is visible in PC1, PC2, PC4, PC6, but can be seen clearly with just two of these.
+From `r ifelse(knitr::is_html_output(), '@fig-ft-cl-html', '@fig-ft-cl-pdf')` we can see how cluster 1 is distinct from all of the other observations, albeit with a close connection to the trunk of the tree (cluster 0). The distinction is visible whenever PC4 contributes to the projection, but can be seen clearly with only PC1 and PC4.
 
 ::: {.content-visible when-format="html"}
 
-::: {#fig-ft-cl layout-ncol=2}
+::: {#fig-ft-cl-html layout-ncol=2}
 
 ![Tour of most important variables for class 1.](gifs/ft_cl1.gif){#fig-ft-cl1 fig-alt="FIX ME" width=300}
 
@@ -462,17 +477,41 @@ From @fig-ft-cl we can see how cluster 1 is distinct from all of the other obser
 #| fig-height: 4
 #| out-width: 100%
 #| label: fig-ft-cl1-pc
-#| fig-cap: PC2 and PC4 together reveal cluster 1.
+#| fig-cap: PC1 and PC4 together reveal cluster 1.
 ft_pc_cl1 
 ```
 
-Focusing on class 1 in the fake_trees data. The most important variables were PC1, PC2, PC4, PC6. A combination of PC2 and PC4 reveals the difference between cluster 1 and all the other clusters.
+Focusing on class 1 in the fake_trees data. The most important variables were PC1 and PC4. A combination of PC2 and PC4 reveals the difference between cluster 1 and all the other clusters.
 :::
 :::
 
-For a problem with this many classes it can be useful to focus on several groups together. We've chosen cluster 8, because it appears to have less of a connection with cluster 0. See the light green cluster in bottom right static plot of @fig-ft-votes-prj is connected more to a different vertex, which is cluster 6 when carefully viewed. This is also suggested by the confusion matrix, where there is one observation from cluster 8 confused with cluster 6, although somewhat contradictory information, most are confused with cluster 0. We have also added cluster 1 to the investigation because it is closely connected to 6 and 8.
+::: {.content-visible when-format="pdf"}
+
+::: {#fig-ft-cl-pdf layout-ncol=2}
+
+![](images/ft_cl1.png){fig-alt="FIX ME"}
+
+
+![](images/fig-ft-cl1-pc-1.png){fig-alt="FIX ME"} 
+
+Focusing on class 1 in the fake_trees data. The most important variables were PC1 and PC4. A combination of PC2 and PC4 reveals the difference between cluster 1 and all the other clusters.
+:::
+:::
+
+For a problem like this, it can be useful to several classes together. We've chosen to start with class 8 (light green), because from `r ifelse(knitr::is_html_output(), '@fig-ft-votes-html', '@fig-ft-votes-pdf')` it appears to have less connection with class 0, and closer connection with another class. This is class 6 (medium green). A good guess because it has one observation confused with class 8 according to the confusion matrix (printed below). 
+
+When we examine these two clusters in association with class 0, we can see that there is a third cluster that is connected with clusters 6 and 8. It turns out to be cluster 1. It's confusing, because the confusion matrix would suggest that the overlap from all is with cluster 0, but not each other. 
 
 ```{r}
+#| echo: false
+options(digits=2)
+```
+
+```{r}
+ft_rf$confusion
+```
+
+```{r echo=knitr::is_html_output()}
 #| code-fold: false
 ft_pc <- ft_pc %>%
   mutate(cl8 = factor(case_when(
@@ -484,7 +523,7 @@ ft_pc <- ft_pc %>%
   )))
 ```
 
-```{r}
+```{r echo=knitr::is_html_output()}
 #| eval: false
 #| code-summary: "Code to make animated gif"
 animate_xy(ft_pc[,c("PC1", "PC2", "PC4", "PC5", "PC6")], col=ft_pc$cl8, palette="Viridis")
@@ -495,7 +534,7 @@ render_gif(ft_pc[,c("PC1", "PC2", "PC4", "PC5", "PC6")],
            frames=500)
 ```
 
-```{r}
+```{r echo=knitr::is_html_output()}
 #| code-summary: "Code to make plot"
 ft_pc_cl8 <- ggplot(ft_pc, aes(x=PC1, y=PC5, col=cl8)) +
   geom_point(alpha=0.7, size=1) +
@@ -504,7 +543,7 @@ ft_pc_cl8 <- ggplot(ft_pc, aes(x=PC1, y=PC5, col=cl8)) +
   theme(aspect.ratio = 1)
 ```
 
-From @fig-ft-cl2 we can see that clusters 1, 6, and 8 share one end of the trunk (cluster 0). Cluster 8 is almost more closely connected with cluster 6, though, than cluster 0. PC1 and PC5 mostly show the distinction between cluster 8 and the rest of the points, but it is clearer if more variables are used.
+From the tour in @fig-ft-cl2 we can see that clusters 1, 6, and 8 share one end of the trunk (cluster 0). Cluster 8 is almost more closely connected with cluster 6, though, than cluster 0. PC1 and PC5 mostly show the distinction between cluster 8 and the rest of the points, but it is clearer if more variables are used.
 
 ::: {.content-visible when-format="html"}
 
@@ -526,14 +565,26 @@ Focusing on class 8 in the fake_trees data, relative to nearby clusters 1 and 6.
 :::
 :::
 
+::: {.content-visible when-format="pdf"}
+
+::: {#fig-ft-cl2 layout-ncol=2}
+
+![](images/ft_cl8.png){fig-alt="FIX ME"}
+
+![](images/fig-ft-cl8-pc-1.png){fig-alt="FIX ME"}
+
+Focusing on class 8 in the fake_trees data using a tour (left) reveals that it shares an end of cluster 0 with clusters 1 and 6. A combination of PC1 and PC5 reveals that there is a difference between the observations in class 8 relative to 6, 1 and 0 is largely due to PC5 (right).
+:::
+:::
+
 ::: {.content-visible when-format="html"}
-::: info
-Variable importance can be used in feature selection. Looking at class-wise variable importance we can select a subspace that can separate a selected class and with a tour we can understand how this separation in multiple variables looks like. This works best when focusing on a small subset of classes.
+::: insight
+Although the confusion matrix suggests that class clusters are separated except for class 0, focusing on a few classes and using the variable importance to examine smaller subspaces, reveals they are connected in groups of three to class 0.
 :::
 :::
 
 ::: {.content-visible when-format="pdf"}
-\infobox{Variable importance can be used in feature selection. Looking at class-wise variable importance we can select a subspace that can separate a selected class and with a tour we can understand how this separation in multiple variables looks like. This works best when focusing on a small subset of classes.}
+\insightbox{Although the confusion matrix suggests that class clusters are separated except for class 0, focusing on a few classes and using the variable importance to examine smaller subspaces, reveals they are connected in groups of three to class 0.}
 :::
 
 ## Exercises {-}

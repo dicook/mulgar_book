@@ -265,7 +265,7 @@
 
 \begin{document}
 \maketitle
-\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[borderline west={3pt}{0pt}{shadecolor}, interior hidden, breakable, enhanced, frame hidden, boxrule=0pt, sharp corners]}{\end{tcolorbox}}\fi
+\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[boxrule=0pt, breakable, frame hidden, interior hidden, borderline west={3pt}{0pt}{shadecolor}, enhanced, sharp corners]}{\end{tcolorbox}}\fi
 
 \renewcommand*\contentsname{Table of contents}
 {
@@ -4353,11 +4353,11 @@ the random forest model object. The first five rows are:
 
 \begin{verbatim}
   Adelie Chinstrap Gentoo
-1 0.9947  0.005291      0
-2 0.9826  0.017442      0
-3 0.9807  0.019324      0
-4 0.9948  0.005236      0
-5 0.9942  0.005814      0
+1 0.9950  0.004975      0
+2 0.9620  0.038043      0
+3 0.9943  0.005682      0
+4 1.0000  0.000000      0
+5 1.0000  0.000000      0
 \end{verbatim}
 
 This has three columns corresponding to the three species, but because
@@ -4518,12 +4518,12 @@ model performs.
 \end{Shaded}
 
 \begin{verbatim}
-    0 1     2    3     4    5     6 7    8    9
-1 0.9 0 0.006 0.00 0.011 0.10 0.000 0 0.01 0.00
-2 0.6 0 0.011 0.00 0.017 0.33 0.000 0 0.00 0.00
-3 0.8 0 0.057 0.01 0.068 0.01 0.000 0 0.00 0.01
-4 0.9 0 0.028 0.00 0.006 0.08 0.000 0 0.00 0.00
-5 0.6 0 0.081 0.00 0.022 0.30 0.005 0 0.00 0.00
+    0 1     2    3     4    5 6     7     8     9
+1 0.9 0 0.012 0.00 0.012 0.11 0 0.000 0.000 0.000
+2 0.7 0 0.015 0.00 0.000 0.29 0 0.000 0.005 0.000
+3 0.8 0 0.022 0.01 0.148 0.01 0 0.005 0.000 0.027
+4 0.9 0 0.005 0.00 0.011 0.08 0 0.000 0.000 0.005
+5 0.6 0 0.073 0.02 0.006 0.26 0 0.000 0.011 0.000
 \end{verbatim}
 
 \begin{figure}
@@ -4590,58 +4590,55 @@ all connected to a single cluster.
 \hypertarget{sec-forest-var-imp}{%
 \subsection{Using variable importance}\label{sec-forest-var-imp}}
 
+\index{classification methods!variable importance}
+
 The variable importance score across all classes, and for each class is
 useful for choosing variables to enter into a tour, to explore class
 differences. This is particularly so when there are many variables, as
 in the fake\_trees data. We would also expect that this data will have a
 difference between importance for some classes.
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{library}\NormalTok{(gt)}
-\NormalTok{ft\_rf}\SpecialCharTok{$}\NormalTok{importance }\SpecialCharTok{\%\textgreater{}\%} 
-  \FunctionTok{as\_tibble}\NormalTok{(}\AttributeTok{rownames=}\StringTok{"Variable"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} 
-  \FunctionTok{rename}\NormalTok{(}\AttributeTok{Accuracy=}\NormalTok{MeanDecreaseAccuracy,}
-         \AttributeTok{Gini=}\NormalTok{MeanDecreaseGini) }\SpecialCharTok{\%\textgreater{}\%}
-  \CommentTok{\#arrange(desc(Gini)) \%\textgreater{}\%}
-  \FunctionTok{gt}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{fmt\_number}\NormalTok{(}\AttributeTok{columns =} \FunctionTok{c}\NormalTok{(}\StringTok{\textasciigrave{}}\AttributeTok{0}\StringTok{\textasciigrave{}}\NormalTok{,}\StringTok{\textasciigrave{}}\AttributeTok{1}\StringTok{\textasciigrave{}}\NormalTok{,}\StringTok{\textasciigrave{}}\AttributeTok{2}\StringTok{\textasciigrave{}}\NormalTok{,}\StringTok{\textasciigrave{}}\AttributeTok{3}\StringTok{\textasciigrave{}}\NormalTok{,}\StringTok{\textasciigrave{}}\AttributeTok{4}\StringTok{\textasciigrave{}}\NormalTok{,}\StringTok{\textasciigrave{}}\AttributeTok{5}\StringTok{\textasciigrave{}}\NormalTok{,}\StringTok{\textasciigrave{}}\AttributeTok{6}\StringTok{\textasciigrave{}}\NormalTok{,}\StringTok{\textasciigrave{}}\AttributeTok{7}\StringTok{\textasciigrave{}}\NormalTok{,}\StringTok{\textasciigrave{}}\AttributeTok{8}\StringTok{\textasciigrave{}}\NormalTok{,}\StringTok{\textasciigrave{}}\AttributeTok{9}\StringTok{\textasciigrave{}}\NormalTok{, Accuracy),}
-             \AttributeTok{decimals =} \DecValTok{2}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{fmt\_number}\NormalTok{(}\AttributeTok{columns =}\NormalTok{ Gini,}
-             \AttributeTok{decimals =} \DecValTok{0}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
 \hypertarget{tbl-ft-importance}{}
 \begin{longtable}{lrrrrrrrrrrrr}
-\caption{\label{tbl-ft-importance}Variable importance from the random forest fit to the fake\_trees data. }\tabularnewline
+\caption{\label{tbl-ft-importance}Variable importance from the random forest fit to the fake\_trees data,
+for each of the 9 classes, and using the accuracy and Gini metrics. }\tabularnewline
 
 \toprule
-Variable & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & Accuracy & Gini \\ 
+Var & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & Acc & Gini \\ 
 \midrule
-PC1 & $0.11$ & $0.35$ & $0.46$ & $0.27$ & $0.20$ & $0.50$ & $0.40$ & $0.18$ & $0.30$ & $0.29$ & $0.31$ & $473$ \\ 
-PC2 & $0.13$ & $0.24$ & $0.22$ & $0.52$ & $0.29$ & $0.30$ & $0.17$ & $0.40$ & $0.23$ & $0.28$ & $0.28$ & $383$ \\ 
-PC3 & $0.09$ & $0.05$ & $0.11$ & $0.14$ & $0.54$ & $0.15$ & $0.08$ & $0.12$ & $0.19$ & $0.15$ & $0.16$ & $313$ \\ 
-PC4 & $0.09$ & $0.46$ & $0.05$ & $0.04$ & $0.10$ & $0.03$ & $0.35$ & $0.15$ & $0.07$ & $0.09$ & $0.14$ & $322$ \\ 
-PC5 & $0.14$ & $0.12$ & $0.34$ & $0.08$ & $0.17$ & $0.24$ & $0.10$ & $0.12$ & $0.30$ & $0.23$ & $0.18$ & $334$ \\ 
-PC6 & $0.11$ & $0.22$ & $0.25$ & $0.18$ & $0.05$ & $0.13$ & $0.05$ & $0.29$ & $0.14$ & $0.19$ & $0.16$ & $295$ \\ 
-PC7 & $0.07$ & $0.03$ & $0.14$ & $0.04$ & $0.04$ & $0.06$ & $0.11$ & $0.33$ & $0.12$ & $0.15$ & $0.11$ & $256$ \\ 
-PC8 & $0.05$ & $0.07$ & $0.02$ & $0.24$ & $0.05$ & $0.09$ & $0.02$ & $0.04$ & $0.08$ & $0.29$ & $0.10$ & $219$ \\ 
-PC9 & $0.07$ & $0.01$ & $0.01$ & $0.01$ & $0.01$ & $0.01$ & $0.00$ & $0.04$ & $0.06$ & $0.02$ & $0.02$ & $61$ \\ 
-PC10 & $0.04$ & $0.01$ & $0.01$ & $0.01$ & $0.01$ & $0.01$ & $0.01$ & $0.00$ & $0.01$ & $0.02$ & $0.01$ & $44$ \\ 
+PC1 & $0.1$ & $0.3$ & $0.4$ & $0.3$ & $0.2$ & $0.5$ & $0.4$ & $0.2$ & $0.3$ & $0.3$ & $0.31$ & $475$ \\ 
+PC2 & $0.1$ & $0.2$ & $0.2$ & $0.5$ & $0.3$ & $0.3$ & $0.2$ & $0.4$ & $0.2$ & $0.3$ & $0.28$ & $375$ \\ 
+PC3 & $0.1$ & $0.1$ & $0.1$ & $0.1$ & $0.5$ & $0.1$ & $0.1$ & $0.1$ & $0.2$ & $0.2$ & $0.17$ & $314$ \\ 
+PC4 & $0.1$ & $0.5$ & $0.1$ & $0.0$ & $0.1$ & $0.0$ & $0.4$ & $0.2$ & $0.1$ & $0.1$ & $0.14$ & $340$ \\ 
+PC5 & $0.1$ & $0.1$ & $0.3$ & $0.1$ & $0.2$ & $0.2$ & $0.1$ & $0.1$ & $0.3$ & $0.2$ & $0.18$ & $341$ \\ 
+PC6 & $0.1$ & $0.2$ & $0.3$ & $0.2$ & $0.0$ & $0.1$ & $0.0$ & $0.3$ & $0.1$ & $0.2$ & $0.16$ & $276$ \\ 
+PC7 & $0.1$ & $0.0$ & $0.1$ & $0.0$ & $0.0$ & $0.1$ & $0.1$ & $0.3$ & $0.1$ & $0.1$ & $0.11$ & $258$ \\ 
+PC8 & $0.0$ & $0.1$ & $0.0$ & $0.2$ & $0.1$ & $0.1$ & $0.0$ & $0.0$ & $0.1$ & $0.3$ & $0.09$ & $215$ \\ 
+PC9 & $0.1$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.1$ & $0.0$ & $0.02$ & $61$ \\ 
+PC10 & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.01$ & $44$ \\ 
 \bottomrule
 \end{longtable}
 
-From the variable importance, we can see that PC9 and PC10 do not
-substantially contribute. That means the 100D data can be reduced to 8
-PCs while maintaining the information about the clustering. PC1 is most
-important overall, but each cluster has a different set of variables
-that are important. For example, the variables important for
-distinguishing cluster 1 are PC1, PC2, PC4 and PC6, and for cluster 7
-they are PC2, PC6, PC7. We can use this information to choose variables
-to provide to the tour. It can be helpful to reduce the class variable
-to focus on a particular class, by creating a new class variable, as
-follows.
+From the variable importance (Table~\ref{tbl-ft-importance}), we can see
+that PC9 and PC10 do not substantially contribute. That means the 100D
+data can be reduced to 8D without losing the information about the
+cluster structure. PC1 is most important overall, and the order matches
+the PC order, as might be expected because highest variance corresponds
+to the most spread clusters. Each cluster has a different set of
+variables that are important. For example, the variables important for
+distinguishing cluster 1 are PC1 and PC4, and for cluster 2 they are PC1
+and PC5.
+
+\infobox{Class-wise variable importance helps to find a subspace on which to tour to examine how this class cluster differs from the others.}
+
+We can use the accuracy information to choose variables to provide to
+the tour. Overall, one would sequentially add the variables into a tour
+based on their accuracy or Gini value. Here it is simply starting with
+the first three PCs, and then sequentially adding the PCs to examine how
+distinct the clusters are with ot without the extra variable. It can be
+helpful to focus on a single class against all the others. To do this
+create a new binary class variable, indicating that the observation
+belongs to class \(k\) or not, as follows:
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -4654,84 +4651,127 @@ follows.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{animate\_xy}\NormalTok{(ft\_pc[,}\FunctionTok{c}\NormalTok{(}\StringTok{"PC1"}\NormalTok{, }\StringTok{"PC2"}\NormalTok{, }\StringTok{"PC4"}\NormalTok{, }\StringTok{"PC6"}\NormalTok{)], }\AttributeTok{col=}\NormalTok{ft\_pc}\SpecialCharTok{$}\NormalTok{cl1, }\AttributeTok{palette=}\StringTok{"Viridis"}\NormalTok{)}
-\FunctionTok{render\_gif}\NormalTok{(ft\_pc[,}\FunctionTok{c}\NormalTok{(}\StringTok{"PC1"}\NormalTok{, }\StringTok{"PC2"}\NormalTok{, }\StringTok{"PC4"}\NormalTok{, }\StringTok{"PC6"}\NormalTok{)],}
-           \FunctionTok{grand\_tour}\NormalTok{(),}
-           \FunctionTok{display\_xy}\NormalTok{(}\AttributeTok{col=}\NormalTok{ft\_pc}\SpecialCharTok{$}\NormalTok{cl1, }\AttributeTok{palette=}\StringTok{"Viridis"}\NormalTok{),}
-           \AttributeTok{gif\_file=}\StringTok{"gifs/ft\_cl1.gif"}\NormalTok{,}
-           \AttributeTok{frames=}\DecValTok{500}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
+From Figure~\ref{fig-ft-cl-pdf} we can see how cluster 1 is distinct
+from all of the other observations, albeit with a close connection to
+the trunk of the tree (cluster 0). The distinction is visible whenever
+PC4 contributes to the projection, but can be seen clearly with only PC1
+and PC4.
+
+\begin{figure}
+
+\begin{minipage}[t]{0.50\linewidth}
+
+{\centering 
+
+\raisebox{-\height}{
+
+\includegraphics{images/ft_cl1.png}
+
+}
+
+}
+
+\end{minipage}%
+%
+\begin{minipage}[t]{0.50\linewidth}
+
+{\centering 
+
+\raisebox{-\height}{
+
+\includegraphics{images/fig-ft-cl1-pc-1.png}
+
+}
+
+}
+
+\end{minipage}%
+
+\caption{\label{fig-ft-cl-pdf}Focusing on class 1 in the fake\_trees
+data. The most important variables were PC1 and PC4. A combination of
+PC2 and PC4 reveals the difference between cluster 1 and all the other
+clusters.}
+
+\end{figure}
+
+For a problem like this, it can be useful to several classes together.
+We've chosen to start with class 8 (light green), because from
+Figure~\ref{fig-ft-votes-pdf} it appears to have less connection with
+class 0, and closer connection with another class. This is class 6
+(medium green). A good guess because it has one observation confused
+with class 8 according to the confusion matrix (printed below).
+
+When we examine these two clusters in association with class 0, we can
+see that there is a third cluster that is connected with clusters 6 and
+8. It turns out to be cluster 1. It's confusing, because the confusion
+matrix would suggest that the overlap from all is with cluster 0, but
+not each other.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{ft\_pc\_cl1 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(ft\_pc, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{PC4, }\AttributeTok{y=}\NormalTok{PC2, }\AttributeTok{col=}\NormalTok{cl1)) }\SpecialCharTok{+}
-  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{alpha=}\FloatTok{0.7}\NormalTok{, }\AttributeTok{size=}\DecValTok{1}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{scale\_color\_discrete\_sequential}\NormalTok{(}\AttributeTok{palette=}\StringTok{"Viridis"}\NormalTok{, }\AttributeTok{rev=}\ConstantTok{FALSE}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{theme}\NormalTok{(}\AttributeTok{aspect.ratio =} \DecValTok{1}\NormalTok{)}
+\NormalTok{ft\_rf}\SpecialCharTok{$}\NormalTok{confusion}
 \end{Highlighting}
 \end{Shaded}
 
-From \textbf{?@fig-ft-cl} we can see how cluster 1 is distinct from all
-of the other observations, albeit with a close connection to the trunk
-of the tree (cluster 0). The distinction is visible in PC1, PC2, PC4,
-PC6, but can be seen clearly with just two of these.
+\begin{verbatim}
+    0   1   2   3   4   5   6   7   8   9 class.error
+0 262   5   2   2   3   4   5   5   8   4       0.127
+1  13 287   0   0   0   0   0   0   0   0       0.043
+2   9   0 289   0   2   0   0   0   0   0       0.037
+3   6   0   0 290   0   0   0   3   0   1       0.033
+4  12   0   0   0 288   0   0   0   0   0       0.040
+5  12   0   0   0   0 288   0   0   0   0       0.040
+6  13   0   0   0   0   0 286   0   1   0       0.047
+7   6   0   0   2   0   0   0 292   0   0       0.027
+8   7   0   0   0   0   0   0   0 293   0       0.023
+9   5   0   0   0   0   0   0   0   0 295       0.017
+\end{verbatim}
 
-For a problem with this many classes it can be useful to focus on
-several groups together. We've chosen cluster 8, because it appears to
-have less of a connection with cluster 0. See the light green cluster in
-bottom right static plot of \textbf{?@fig-ft-votes-prj} is connected
-more to a different vertex, which is cluster 6 when carefully viewed.
-This is also suggested by the confusion matrix, where there is one
-observation from cluster 8 confused with cluster 6, although somewhat
-contradictory information, most are confused with cluster 0. We have
-also added cluster 1 to the investigation because it is closely
-connected to 6 and 8.
+From the tour in Figure~\ref{fig-ft-cl2} we can see that clusters 1, 6,
+and 8 share one end of the trunk (cluster 0). Cluster 8 is almost more
+closely connected with cluster 6, though, than cluster 0. PC1 and PC5
+mostly show the distinction between cluster 8 and the rest of the
+points, but it is clearer if more variables are used.
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{ft\_pc }\OtherTok{\textless{}{-}}\NormalTok{ ft\_pc }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{cl8 =} \FunctionTok{factor}\NormalTok{(}\FunctionTok{case\_when}\NormalTok{(}
-\NormalTok{                 branches }\SpecialCharTok{==} \StringTok{"0"} \SpecialCharTok{\textasciitilde{}} \StringTok{"0"}\NormalTok{,}
-\NormalTok{                 branches }\SpecialCharTok{==} \StringTok{"6"} \SpecialCharTok{\textasciitilde{}} \StringTok{"6"}\NormalTok{,}
-\NormalTok{                 branches }\SpecialCharTok{==} \StringTok{"1"} \SpecialCharTok{\textasciitilde{}} \StringTok{"1"}\NormalTok{,}
-\NormalTok{                 branches }\SpecialCharTok{==} \StringTok{"8"} \SpecialCharTok{\textasciitilde{}} \StringTok{"8"}\NormalTok{,}
-                 \AttributeTok{.default =} \StringTok{"other"}
-\NormalTok{  )))}
-\end{Highlighting}
-\end{Shaded}
+\begin{figure}
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{animate\_xy}\NormalTok{(ft\_pc[,}\FunctionTok{c}\NormalTok{(}\StringTok{"PC1"}\NormalTok{, }\StringTok{"PC2"}\NormalTok{, }\StringTok{"PC4"}\NormalTok{, }\StringTok{"PC5"}\NormalTok{, }\StringTok{"PC6"}\NormalTok{)], }\AttributeTok{col=}\NormalTok{ft\_pc}\SpecialCharTok{$}\NormalTok{cl8, }\AttributeTok{palette=}\StringTok{"Viridis"}\NormalTok{)}
-\FunctionTok{render\_gif}\NormalTok{(ft\_pc[,}\FunctionTok{c}\NormalTok{(}\StringTok{"PC1"}\NormalTok{, }\StringTok{"PC2"}\NormalTok{, }\StringTok{"PC4"}\NormalTok{, }\StringTok{"PC5"}\NormalTok{, }\StringTok{"PC6"}\NormalTok{)],}
-           \FunctionTok{grand\_tour}\NormalTok{(),}
-           \FunctionTok{display\_xy}\NormalTok{(}\AttributeTok{col=}\NormalTok{ft\_pc}\SpecialCharTok{$}\NormalTok{cl8, }\AttributeTok{palette=}\StringTok{"Viridis"}\NormalTok{),}
-           \AttributeTok{gif\_file=}\StringTok{"gifs/ft\_cl8.gif"}\NormalTok{,}
-           \AttributeTok{frames=}\DecValTok{500}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
+\begin{minipage}[t]{0.50\linewidth}
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{ft\_pc\_cl8 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(ft\_pc, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{PC1, }\AttributeTok{y=}\NormalTok{PC5, }\AttributeTok{col=}\NormalTok{cl8)) }\SpecialCharTok{+}
-  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{alpha=}\FloatTok{0.7}\NormalTok{, }\AttributeTok{size=}\DecValTok{1}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{scale\_color\_discrete\_sequential}\NormalTok{(}\AttributeTok{palette=}\StringTok{"Viridis"}\NormalTok{, }\AttributeTok{rev=}\ConstantTok{FALSE}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{theme}\NormalTok{(}\AttributeTok{aspect.ratio =} \DecValTok{1}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
+{\centering 
 
-From \textbf{?@fig-ft-cl2} we can see that clusters 1, 6, and 8 share
-one end of the trunk (cluster 0). Cluster 8 is almost more closely
-connected with cluster 6, though, than cluster 0. PC1 and PC5 mostly
-show the distinction between cluster 8 and the rest of the points, but
-it is clearer if more variables are used.
+\raisebox{-\height}{
 
-\infobox{Variable importance can be used in feature selection. Looking at class-wise variable importance we can select a subspace that can separate a selected class and with a tour we can understand how this separation in multiple variables looks like. This works best when focusing on a small subset of classes.}
+\includegraphics{images/ft_cl8.png}
+
+}
+
+}
+
+\end{minipage}%
+%
+\begin{minipage}[t]{0.50\linewidth}
+
+{\centering 
+
+\raisebox{-\height}{
+
+\includegraphics{images/fig-ft-cl8-pc-1.png}
+
+}
+
+}
+
+\end{minipage}%
+
+\caption{\label{fig-ft-cl2}Focusing on class 8 in the fake\_trees data
+using a tour (left) reveals that it shares an end of cluster 0 with
+clusters 1 and 6. A combination of PC1 and PC5 reveals that there is a
+difference between the observations in class 8 relative to 6, 1 and 0 is
+largely due to PC5 (right).}
+
+\end{figure}
+
+\insightbox{Although the confusion matrix suggests that class clusters are separated except for class 0, focusing on a few classes and using the variable importance to examine smaller subspaces, reveals they are connected in groups of three to class 0.}
 
 \hypertarget{exercises-8}{%
 \section*{Exercises}\label{exercises-8}}
