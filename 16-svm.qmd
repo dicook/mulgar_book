@@ -3,12 +3,24 @@
 
 A support vector machine (SVM) [@Va99] looks for gaps between clusters in the data, based on the extreme observations in each class. In this sense it mirrors the graphical approach described @sec-clust-graphics, in which we searched for gaps between groups. It can be viewed as similar to LDA, in that the boundary between classes is a hyperplane.  The difference between LDA and SVM is the placement of the boundary. LDA uses the means and covariance matrices of the classes to place the boundary, but SVM uses extreme observations.
 
+::: {.content-visible when-format="html"}
 ::: info
-The key elements of the SVM model to examine are:
+The key elements of the SVM model to extract are:
 
 - support vectors
 - separating hyperplane.
 
+:::
+:::
+
+::: {.content-visible when-format="pdf"}
+\infobox{
+The key elements of the SVM model to examine are:
+\begin{itemize}
+\item support vectors
+\item separating hyperplane.
+\end{itemize}
+}
 :::
 
 SVM is widely used for it's ability to fit non-linear classification models in a simple fashion using kernels in the boundary equation. We are focusing on linear methods here because it makes for a useful comparison with how the models differ from those provided by SVM. SVM tends to place the boundary between groups in a gap, if it exists. This is nice from a visual perspective because when we look at differences between classes using a tour, we naturally focus on the gaps. SVM better fits this perception than LDA. 
@@ -21,7 +33,7 @@ To illustrate the approach, we use two simple simulated data examples. Both have
 
 Note that the `svm` function in the `e1071` package will automatically scale observations into the range $[0,1]$. To make it easier to examine the fitted model, it is best to scale your data first, and then fit the model.
 
-```{r}
+```{r echo=knitr::is_html_output()}
 #| code-summary: "Code to simulate data examples"
 # Toy examples
 library(mulgar)
@@ -66,7 +78,7 @@ df2_svm <- svm(cl~., data=df2,
 df2_svm_e <- explore(df2_svm, df2)
 ```
 
-```{r}
+```{r echo=knitr::is_html_output()}
 #| label: fig-svm-toy
 #| fig-cap: "SVM classifier fit overlaid on two simulated data examples: (a) groups with different variance-covariance, fitted using a linear kernel, (b) groups with non-linear separation, fitted using a radial kernel. The band of points shown as '+' mark the SVM boundary, and points marked by 'x' are the support vectors used to define the boundary. "
 #| fig-width: 8
@@ -153,9 +165,14 @@ s1 + geom_abline(intercept=df1_svm$rho/w[2],
 
 **Note that** care in scaling of data is important to get the intercept calculated exactly. We have standardised the data, and set the `scale=FALSE` parameter in the `svm` function. The slope calculation is quite robust to the data scaling.
 
+::: {.content-visible when-format="html"}
 ::: info
 An SVM model is fully determined by the support vectors that fix the position of the hyperplane. To construct the plane we also need the model coefficients and these are constrained for observations on the wrong side of the margin. For a linear SVM we can extract these components and write down the equation for the hyperplane.
+:::
+:::
 
+::: {.content-visible when-format="pdf"}
+\infobox{An SVM model is fully determined by the support vectors that fix the position of the hyperplane. To construct the plane we also need the model coefficients and these are constrained for observations on the wrong side of the margin. For a linear SVM we can extract these components and write down the equation for the hyperplane.}
 :::
 
 ## Examining the model components in high-dimensions
@@ -179,7 +196,7 @@ chinstrap_svm <- svm(sex~., data=chinstrap,
 chinstrap_svm_e <- explore(chinstrap_svm, chinstrap)
 ```
 
-```{r}
+```{r echo=knitr::is_html_output()}
 #| eval: false
 #| code-summary: "Code to make the tours"
 # Tour raw data
@@ -218,17 +235,15 @@ render_gif(chinstrap_svm_e[!chinstrap_svm_e$.BOUNDARY,1:4],
            frames=500)
 ```
 
+::: {.content-visible when-format="html"}
 ::: {#fig-p-svm layout-ncol=2}
 
-::: {.content-hidden when-format="pdf"}
 ![Exploring which points are support vectors.](gifs/chinstrap_svs.gif){#fig-chinstrap_svs fig-alt="FIX ME" width=300}
-:::
 
-::: {.content-hidden when-format="pdf"}
 ![Exploring SVM boundary.](gifs/chinstrap_svm.gif){#fig-chinstrap_svm fig-alt="FIX ME" width=300}
-:::
 
 SVM model for distinguishing the sexes of the Chinstrap penguins. The separating hyperplane is 3D, and separates primarily on variables `bl` and `bd`, as seen because these two axes extend out from the plane when it is seen on its side, separating the two groups.
+:::
 :::
 
 Examining the hyperplane in a grand tour display indicates that two of the variables, `bl` and `bd`, are important for separating the two classes. We can check this interpretation using the radial tour. Using the components from the model, the coefficients of the hyperplane are: 
@@ -251,7 +266,7 @@ prj <- orthonormalise(cbind(prj1, prj2))
 prj
 ```
 
-```{r}
+```{r echo=knitr::is_html_output()}
 #| eval: false
 #| code-summary: "Code to conduct the radial tours"
 animate_xy(chinstrap_svm_e[!chinstrap_svm_e$.BOUNDARY,1:4], 
@@ -292,31 +307,30 @@ render_gif(chinstrap_svm_e[!chinstrap_svm_e$.BOUNDARY,1:4],
            frames=500)
 ```
 
+::: {.content-visible when-format="html"}
 ::: {#fig-chinstrap-radial layout-ncol=2}
 
-::: {.content-hidden when-format="pdf"}
 ![bl](gifs/chinstrap_rad_bl.gif){#fig-chinstrap-radial-bl}
-:::
 
-::: {.content-hidden when-format="pdf"}
 ![bd](gifs/chinstrap_rad_bd.gif){#fig-chinstrap-radial-bd}
-:::
 
-::: {.content-hidden when-format="pdf"}
 ![fl](gifs/chinstrap_rad_fl.gif){#fig-chinstrap-radial-fl}
-:::
 
-::: {.content-hidden when-format="pdf"}
 ![bm](gifs/chinstrap_rad_bm.gif){#fig-chinstrap-radial-bm}
-:::
 
 Exploring the importance of the four variables to the separating hyperplane using a radial tour where the contribution of each variable is reduced to 0, and then increased to it's original value. You can see that `bl` and `bd` contribute most to the plane, because when they are removed the plane is no longer on it side marking the boundary. Variables `fl` and `bm` contribute a small amount to the separating hyperplane, but it is possible that these two could be removed without affecting the strength of the separation between the sexes. 
 :::
+:::
 
+::: {.content-visible when-format="html"}
 ::: insight
 When we use the radial tour to examine how the different variables contribute to the separating hyperplane between the sexes, we learn that `bl` and `bd` are the most important variables. Very little contribution comes from `fl` and `bm`.
 :::
+:::
 
+::: {.content-visible when-format="pdf"}
+\insightbox{When we use the radial tour to examine how the different variables contribute to the separating hyperplane between the sexes, we learn that `bl` and `bd` are the most important variables. Very little contribution comes from {\textsf fl} and {\textsf bm}.}
+:::
 
 <!-- include Distance-weighted discrimination, eg kerndwd -->
 

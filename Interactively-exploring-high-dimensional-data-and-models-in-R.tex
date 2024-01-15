@@ -261,11 +261,11 @@
 
 \title{Interactively exploring high-dimensional data and models in R}
 \author{Dianne Cook and Ursula Laa}
-\date{2024-01-15}
+\date{2024-01-16}
 
 \begin{document}
 \maketitle
-\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[boxrule=0pt, breakable, frame hidden, interior hidden, borderline west={3pt}{0pt}{shadecolor}, enhanced, sharp corners]}{\end{tcolorbox}}\fi
+\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[frame hidden, interior hidden, boxrule=0pt, borderline west={3pt}{0pt}{shadecolor}, sharp corners, breakable, enhanced]}{\end{tcolorbox}}\fi
 
 \renewcommand*\contentsname{Table of contents}
 {
@@ -4812,6 +4812,337 @@ largely due to PC5 (right).}
   most useful using a tour, and follow-up by making a scatterplot
   showing the best distinction between your chosen cluster and the other
   observations.
+\end{enumerate}
+
+\hypertarget{support-vector-machines}{%
+\chapter{Support vector machines}\label{support-vector-machines}}
+
+\index{classification methods!support vector machines (SVM)}
+
+A support vector machine (SVM) (Vapnik, 1999) looks for gaps between
+clusters in the data, based on the extreme observations in each class.
+In this sense it mirrors the graphical approach described
+Chapter~\ref{sec-clust-graphics}, in which we searched for gaps between
+groups. It can be viewed as similar to LDA, in that the boundary between
+classes is a hyperplane. The difference between LDA and SVM is the
+placement of the boundary. LDA uses the means and covariance matrices of
+the classes to place the boundary, but SVM uses extreme observations.
+
+\infobox{
+The key elements of the SVM model to examine are:
+\begin{itemize}
+\item support vectors
+\item separating hyperplane.
+\end{itemize}
+}
+
+SVM is widely used for it's ability to fit non-linear classification
+models in a simple fashion using kernels in the boundary equation. We
+are focusing on linear methods here because it makes for a useful
+comparison with how the models differ from those provided by SVM. SVM
+tends to place the boundary between groups in a gap, if it exists. This
+is nice from a visual perspective because when we look at differences
+between classes using a tour, we naturally focus on the gaps. SVM better
+fits this perception than LDA.
+
+Non-linear SVM models are interesting to examine also. Mostly one would
+examine the boundaries between classes which can be done in the same way
+that is documented in the Chapter~\ref{sec-lda} and
+Chapter~\ref{sec-trees-forests}.
+
+\hypertarget{components-of-the-svm-model}{%
+\section{Components of the SVM
+model}\label{components-of-the-svm-model}}
+
+To illustrate the approach, we use two simple simulated data examples.
+Both have only two variables, and two classes. Explaining SVM is easier
+when there are just two groups. In the first data set the two classes
+have different covariances matrices, which will cause trouble for LDA,
+but SVM should see the gap between the two clusters and place the
+separating hyperplane in the middle of the gap. In the second data set
+the two groups are concentric circles, with the inner one solid. A
+non-linear SVM should be fitted to this data, which should see circular
+gap between the two classes.
+
+Note that the \texttt{svm} function in the \texttt{e1071} package will
+automatically scale observations into the range \([0,1]\). To make it
+easier to examine the fitted model, it is best to scale your data first,
+and then fit the model.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(classifly)}
+\FunctionTok{library}\NormalTok{(e1071)}
+\NormalTok{df1\_svm }\OtherTok{\textless{}{-}} \FunctionTok{svm}\NormalTok{(cl}\SpecialCharTok{\textasciitilde{}}\NormalTok{., }\AttributeTok{data=}\NormalTok{df1, }
+                     \AttributeTok{probability=}\ConstantTok{TRUE}\NormalTok{, }
+                     \AttributeTok{kernel=}\StringTok{"linear"}\NormalTok{, }
+               \AttributeTok{scale=}\ConstantTok{FALSE}\NormalTok{)}
+\NormalTok{df1\_svm\_e }\OtherTok{\textless{}{-}} \FunctionTok{explore}\NormalTok{(df1\_svm, df1)}
+
+\NormalTok{df2\_svm }\OtherTok{\textless{}{-}} \FunctionTok{svm}\NormalTok{(cl}\SpecialCharTok{\textasciitilde{}}\NormalTok{., }\AttributeTok{data=}\NormalTok{df2,  }
+                     \AttributeTok{probability=}\ConstantTok{TRUE}\NormalTok{, }
+                     \AttributeTok{kernel=}\StringTok{"radial"}\NormalTok{)}
+\NormalTok{df2\_svm\_e }\OtherTok{\textless{}{-}} \FunctionTok{explore}\NormalTok{(df2\_svm, df2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}
+
+{\centering \includegraphics[width=0.8\textwidth,height=\textheight]{16-svm_files/figure-pdf/fig-svm-toy-1.pdf}
+
+}
+
+\caption{\label{fig-svm-toy}SVM classifier fit overlaid on two simulated
+data examples: (a) groups with different variance-covariance, fitted
+using a linear kernel, (b) groups with non-linear separation, fitted
+using a radial kernel. The band of points shown as `+' mark the SVM
+boundary, and points marked by `x' are the support vectors used to
+define the boundary.}
+
+\end{figure}
+
+Figure~\ref{fig-svm-toy} shows the two data sets and the important
+aspects of the fitted SVM model for each. The observations are
+represented by dots, the separating hyperplane (just a line for 2D) is
+represented by `+'. Where the two colours merge is the actual location
+of the boundary between classes. It can be seen that this is located
+right down the middle of the gap, for both data sets. Even though the
+boundary is circular for the second data set, in a transformed
+high-dimensional space it would be linear.
+
+SVMs use a subset of the observations to define the boundary, and these
+are called the support vectors. For each of the data sets these are
+marked with `x'. For the linear boundary, there are nine support
+vectors, five in one group and four in the other. There is one
+interesting observation in the red group, which falls on the other side
+of the boundary. It is marked as a support vector, but its contribution
+to the fitted hyperplane is limited by a control parameter in the model
+fitting process.
+
+Linear SVMs can be assessed similarly to regression models. The
+components of the model are:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  The points that are the support vectors:
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df1\_svm}\SpecialCharTok{$}\NormalTok{index}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+[1]  15  45 123 135 155 180 202 239 292
+\end{verbatim}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{1}
+\tightlist
+\item
+  Their coefficients:
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df1\_svm}\SpecialCharTok{$}\NormalTok{coefs}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+            [,1]
+ [1,]  0.3771240
+ [2,]  0.1487726
+ [3,]  1.0000000
+ [4,]  1.0000000
+ [5,]  1.0000000
+ [6,] -0.5258966
+ [7,] -1.0000000
+ [8,] -1.0000000
+ [9,] -1.0000000
+\end{verbatim}
+
+which indicate that all but 15, 45 and 180 are actually bounded support
+vectors (their coefficients are bounded to magnitude 1).
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{2}
+\tightlist
+\item
+  that when used with the intercept:
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df1\_svm}\SpecialCharTok{$}\NormalTok{rho}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+[1] 0.3520001
+\end{verbatim}
+
+can be used to compute the equation of the fitted hyperplane.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{w }\OtherTok{=} \FunctionTok{t}\NormalTok{(df1\_svm}\SpecialCharTok{$}\NormalTok{SV) }\SpecialCharTok{\%*\%}\NormalTok{ df1\_svm}\SpecialCharTok{$}\NormalTok{coefs}
+\NormalTok{w}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+        [,1]
+x1 -1.501086
+x2 -1.356237
+\end{verbatim}
+
+Giving the equation to be -1.5 \(x_1 +\) -1.36 \(x_2 +\) -0.35 \(=0\),
+or alternatively, \(x_2 =\) -1.11 \(x_1 +\) -0.26.
+
+which can be used to generate a line to show the boundary with the data.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{s1 }\SpecialCharTok{+} \FunctionTok{geom\_abline}\NormalTok{(}\AttributeTok{intercept=}\NormalTok{df1\_svm}\SpecialCharTok{$}\NormalTok{rho}\SpecialCharTok{/}\NormalTok{w[}\DecValTok{2}\NormalTok{],}
+                 \AttributeTok{slope=}\SpecialCharTok{{-}}\NormalTok{w[}\DecValTok{1}\NormalTok{]}\SpecialCharTok{/}\NormalTok{w[}\DecValTok{2}\NormalTok{])}
+\end{Highlighting}
+\end{Shaded}
+
+\textbf{Note that} care in scaling of data is important to get the
+intercept calculated exactly. We have standardised the data, and set the
+\texttt{scale=FALSE} parameter in the \texttt{svm} function. The slope
+calculation is quite robust to the data scaling.
+
+\infobox{An SVM model is fully determined by the support vectors that fix the position of the hyperplane. To construct the plane we also need the model coefficients and these are constrained for observations on the wrong side of the margin. For a linear SVM we can extract these components and write down the equation for the hyperplane.}
+
+\hypertarget{examining-the-model-components-in-high-dimensions}{%
+\section{Examining the model components in
+high-dimensions}\label{examining-the-model-components-in-high-dimensions}}
+
+For higher dimensions, the procedures are similar, with the hyperplane
+and support vectors being examined using a tour. Here we examine the
+model for differentiating male and female Chinstrap penguins. The
+Chinstrap penguins have a noticeable difference in size of the sexes,
+unlike the other two species. Working with a two-class problem is easier
+for explaining SVM, but multi-class calculations can also follow this
+approach.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(dplyr)}
+\FunctionTok{load}\NormalTok{(}\StringTok{"data/penguins\_sub.rda"}\NormalTok{)}
+\NormalTok{chinstrap }\OtherTok{\textless{}{-}}\NormalTok{ penguins\_sub }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(species }\SpecialCharTok{==} \StringTok{"Chinstrap"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{(}\SpecialCharTok{{-}}\NormalTok{species) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate\_if}\NormalTok{(is.numeric, mulgar}\SpecialCharTok{:::}\NormalTok{scale2)}
+\NormalTok{chinstrap\_svm }\OtherTok{\textless{}{-}} \FunctionTok{svm}\NormalTok{(sex}\SpecialCharTok{\textasciitilde{}}\NormalTok{., }\AttributeTok{data=}\NormalTok{chinstrap, }
+                     \AttributeTok{kernel=}\StringTok{"linear"}\NormalTok{,}
+                     \AttributeTok{probability=}\ConstantTok{TRUE}\NormalTok{, }
+                     \AttributeTok{scale=}\ConstantTok{FALSE}\NormalTok{)}
+\NormalTok{chinstrap\_svm\_e }\OtherTok{\textless{}{-}} \FunctionTok{explore}\NormalTok{(chinstrap\_svm, chinstrap)}
+\end{Highlighting}
+\end{Shaded}
+
+Examining the hyperplane in a grand tour display indicates that two of
+the variables, \texttt{bl} and \texttt{bd}, are important for separating
+the two classes. We can check this interpretation using the radial tour.
+Using the components from the model, the coefficients of the hyperplane
+are:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{t}\NormalTok{(chinstrap\_svm}\SpecialCharTok{$}\NormalTok{SV) }\SpecialCharTok{\%*\%}\NormalTok{ chinstrap\_svm}\SpecialCharTok{$}\NormalTok{coefs}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+         [,1]
+bl -0.9102439
+bd -1.1073475
+fl -0.5223364
+bm -0.2846370
+\end{verbatim}
+
+This supports the observation that \texttt{bl} and \texttt{bd} are most
+important, because they have the largest magnitudes. We can use this
+vector to set the starting point for radial tour. It needs to be
+normalised. A randomly generated second vector orthonormal to this one
+can be added to make a 2D projection from which to see the boundary.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{1022}\NormalTok{)}
+\NormalTok{prj1 }\OtherTok{\textless{}{-}}\NormalTok{ mulgar}\SpecialCharTok{::}\FunctionTok{norm\_vec}\NormalTok{(}\FunctionTok{t}\NormalTok{(chinstrap\_svm}\SpecialCharTok{$}\NormalTok{SV) }\SpecialCharTok{\%*\%}
+\NormalTok{                           chinstrap\_svm}\SpecialCharTok{$}\NormalTok{coefs)}
+\NormalTok{prj2 }\OtherTok{\textless{}{-}} \FunctionTok{basis\_random}\NormalTok{(}\DecValTok{4}\NormalTok{, }\DecValTok{1}\NormalTok{)}
+\NormalTok{prj }\OtherTok{\textless{}{-}} \FunctionTok{orthonormalise}\NormalTok{(}\FunctionTok{cbind}\NormalTok{(prj1, prj2))}
+\NormalTok{prj}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+         [,1]        [,2]
+bl -0.5865081 -0.06412875
+bd -0.7135101  0.51192498
+fl -0.3365631 -0.77713899
+bm -0.1834035 -0.36038216
+\end{verbatim}
+
+\insightbox{When we use the radial tour to examine how the different variables contribute to the separating hyperplane between the sexes, we learn that `bl` and `bd` are the most important variables. Very little contribution comes from {\textsf fl} and {\textsf bm}.}
+
+\hypertarget{exercises-9}{%
+\section*{Exercises}\label{exercises-9}}
+\addcontentsline{toc}{section}{Exercises}
+
+\markright{Exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Generate a small subset from the \texttt{bushfire} data: we keep the
+  variables \texttt{log\_dist\_cfa}, \texttt{log\_dist\_road} and
+  \texttt{cause}, and we select only observations where \texttt{cause}
+  is either lightning or arson. Fit a linear SVM model to separate the
+  two classes and show the decision boundary together with the data.
+  Compare to the boundary obtained by LDA and argue how the two models
+  place the separating hyperplane in different ways.
+\item
+  We extend this into a multivariate setting by also including
+  \texttt{amaxt180} and \texttt{amaxt720} as predictors. Fit a linear
+  SVM model and calculate the hyperplane to judge which of these
+  variables are important.
+\item
+  Calculate the decision boundary and look at it with a radial tour to
+  see the effect from including individual predictors in a projection.
+  Also explore what happens when rotating out multiple variables
+  together. What can you learn from this?
+\item
+  From the \texttt{sketches\_train} data select all observations of
+  class banana or boomerang For this subset use PCA to find the first 5
+  PCs. Fit two SVM models: once with linear kernel and once with radial
+  kernel and default value for the gamma parameter. Compare the number
+  of missclassified observations in the training data for the two
+  models.
+\item
+  Compute the model predictions and compare the decision boundaries
+  between the linear and radial SVM using a slice tour. Does the shape
+  match what you expect given the respective kernel function?
+\item
+  SVM models are defined for separating two classes, but and ensemble of
+  such models can be used when we want to distinguish more than two
+  classes. Look up the documentation of the \texttt{svm} function to
+  learn how this works, then fit an SVM model to separate the three
+  penguin species. In this case we primarily use the model predictions
+  to investigate the decision boundaries, you can use \texttt{explore}
+  together with the slice tour to do this. You can use different kernels
+  and compare the resulting decision boundaries.
 \end{enumerate}
 
 \bookmarksetup{startatroot}
