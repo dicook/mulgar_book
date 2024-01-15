@@ -154,11 +154,26 @@ library(dplyr)
 penguins_rf <- randomForest(species~.,
                              data=penguins_sub[,1:5],
                              importance=TRUE)
+```
+
+```{r echo=knitr::is_html_output(), eval=knitr::is_html_output()}
 penguins_rf
 ```
 
 
-To examine the votes matrix, we extract the `votes` element from the random forest model object. This will have three columns corresponding to the three species, but because each row is a set of proportions it is only a 2D object, as seen in @fig-p-votes-tour. To reduce the dimension from 3D to the 2D we use a Helmert matrix [@helmert]. A Helmert matrix has a first row of all 1's. The remaining components of the matrix are 1's in the lower triangle, and 0's in the upper triangle and the diagonal elements are the negative row sum. The rows are usually normalised to have length 1. They are used to create contrasts to test combinations of factor levels for post-testing after Analysis of Variance (ANOVA). For compositional data, like the votes matrix, when the first row is removed a Helmert matrix can be used to reduce the dimension appropriately. For three classes, this will generate the common 2D ternary diagram, but for higher dimensions it will reduce to a $(g-1)$-dimensional simplex. For the penguins data, the Helmert matrix for 3D is 
+To examine the votes matrix, we extract the `votes` element from the random forest model object. The first five rows are:
+
+```{r}
+#| echo: false
+options(digits=4)
+```
+
+```{r}
+head(penguins_rf$votes, 5)
+```
+
+This has three columns corresponding to the three species, but because each row is a set of proportions it is only a 2D object. To reduce the dimension from 3D to the 2D we use a Helmert matrix [@helmert]. A Helmert matrix has a first row of all 1's. The remaining components of the matrix are 1's in the lower triangle, and 0's in the upper triangle and the diagonal elements are the negative row sum. The rows are usually normalised to have length 1. They are used to create contrasts to test combinations of factor levels for post-testing after Analysis of Variance (ANOVA). For compositional data, like the votes matrix, when the first row is removed a Helmert matrix can be used to reduce the dimension appropriately. For three classes, this will generate the common 2D ternary diagram, but for higher dimensions it will reduce to a $(g-1)$-dimensional simplex. For the penguins data, the Helmert matrix for 3D is 
+\index{ternary diagram}
 
 ```{r}
 #| code-summary: "Code to compute Helmert matrix"
@@ -180,9 +195,8 @@ p_rf_v_p <- p_rf_v_p %>%
   mutate(species = penguins_sub$species)
 ```
 
-We can use the `geozoo` package to generate the surrounding simplex, which is a triangle for 2D.
 
-```{r}
+```{r echo=knitr::is_html_output()}
 #| code-fold: false
 # Add simplex
 simp <- simplex(p=2)
@@ -194,13 +208,15 @@ p_ternary <- ggplot() +
   geom_text(data=sp, aes(x=x1, y=x2, label=species),
             nudge_x=c(-0.06, 0.07, 0),
             nudge_y=c(0.05, 0.05, -0.05)) +
-  geom_point(data=p_rf_v_p, aes(x=x1, y=x2, colour=species), size=2, alpha=0.5) +
+  geom_point(data=p_rf_v_p, aes(x=x1, y=x2, 
+                                colour=species), 
+             size=2, alpha=0.5) +
   scale_color_discrete_divergingx(palette="Zissou 1") +
   theme_map() +
   theme(aspect.ratio=1, legend.position="none")
 ```
 
-```{r}
+```{r echo=knitr::is_html_output()}
 #| eval: false
 #| code-summary: "Code to generate animated gifs"
 # Look at the votes matrix, in its 3D space
@@ -219,28 +235,54 @@ render_gif(penguins_rf$votes,
 ```
 
 ::: {.content-visible when-format="html"}
-::: {#fig-penguins-votes layout-ncol=2}
+::: {#fig-penguins-votes-html layout-ncol=2}
 
-![Votes matrix in a tour.](gifs/penguins_rf_votes.gif){#fig-p-votes-tour fig-alt="FIX ME" width=300}
+![3D](gifs/penguins_rf_votes.gif){#fig-p-votes-tour fig-alt="FIX ME" width=300}
 
-```{r}
+```{r eval=knitr::is_html_output()}
 #| echo: false
-#| label: fig-p-votes-ggplot
-#| fig-cap: Votes matrix in its 2D space, a ternary diagram.
+#| label: fig-p-votes-ggplot-html
+#| fig-cap: 2D ternary diagram
 #| fig-width: 4
 #| fig-height: 4
 p_ternary
 ```
 
-Examining the votes matrix from a random forest fit to the penguins.
+Examining the votes matrix from a random forest fit to the penguins: (a) from a tour of the 3D, (b) projected into 2D, to make a ternary diagram. In 3D the points can be seen to lie along a 2D plane, which is due to the constraint that the values sum to 1. From the ternary diagram, the classification can be seen to be reasonably well distinguished because points mostly lie at the vertex. There are a few penguins that are confused with a different species, as seen from the few points spread between vertices.
 :::
 :::
 
-The votes matrix reports the proportion of trees each observation is classified as each class. From the tour of the votes matrix, it can be seen to be 2D in 3D space. This is due to the constraint that the three proportions for each observation sum to 1. Using a Helmert matrix, this data can be projected into the 2D space, or more generally the $(g-1)$-dimensional space where it resides. In 2D this is called a ternary diagram, and in higher dimensions the bounding shapes might be considered to be a simplex. The vertices of this shape correspond to $(1,0,0), (0,1,0), (0,0,1)$ (and analogously for higher dimensions), which represent perfect confidence, that an observation is classified into that group all the time.
+::: {.content-visible when-format="pdf"}
+::: {#fig-penguins-votes-pdf layout-ncol=2}
+
+![3D](images/penguins_rf_votes.png){#fig-p-votes-tour fig-alt="FIX ME"}
+
+![2D ternary diagram](images/fig-p-votes-ggplot-1.png){#fig-p-votes-ggplot-pdf fig-alt="FIX ME"}
+
+Examining the votes matrix from a random forest fit to the penguins: (a) in a frame from a tour of the 3D, (b) projected into 2D, to make a ternary diagram. In 3D the points can be seen to lie along a 2D plane, which is due to the constraint that the values sum to 1. From the ternary diagram, the classification can be seen to be reasonably well distinguished because points mostly lie at the vertex. There are a few penguins that are confused with a different species, as seen from the few points spread between vertices.
+:::
+:::
+
+
+We can use the `geozoo` package to generate the surrounding simplex, which for 2D is a triangle.
+
+The votes matrix reports the proportion of trees each observation is classified as each class. From the tour of the votes matrix, as in `r ifelse(knitr::is_html_output(), '@fig-penguins-votes-html', '@fig-penguins-votes-pdf')`(a), it can be seen to be 2D in 3D space. This is due to the constraint that the three proportions for each observation sum to 1. Using a Helmert matrix, this data can be projected into the 2D space, or more generally the $(g-1)$-dimensional space where it resides, shown in `r ifelse(knitr::is_html_output(), '@fig-penguins-votes-html', '@fig-penguins-votes-pdf')`(b). In 2D this is called a ternary diagram, and in higher dimensions the bounding shapes might be considered to be a simplex. The vertices of this shape correspond to $(1,0,0), (0,1,0), (0,0,1)$ (and analogously for higher dimensions), which represent perfect confidence, that an observation is classified into that group all the time.
 
 What we can see here is a concentration of points in the corners of the triangle indicates that most of the penguins are confidently classified into their correct class. Then there is more separation between the Gentoo and the others, than between Chinstrap and Adelie. That means that as a group Gentoo are more distinguishable. Only one of the Gentoo penguins has substantial confusion, mostly confused as a Chinstrap, but occasionally confused as an Adelie -- if it was only ever confused as a Chinstrap it would fall on the edge between Gentoo and Chinstrap. There are quite a few Chinstrap and Adelie penguins confused as each other, with a couple of each more confidently predicted to be the other class. This can be seen because there are points of the wrong colour close to those vertices. 
 
-The votes matrix is useful for investigating the fit, but one should remember that there are some structural elements of this data that don't lend themselves to tree models. Although a forest has the capacity to generate non-linear boundaries by combining predictions from multiple trees, it is still based on the boxy boundaries of trees. This makes it less suitable for the penguins data with elliptical classes. You could use the techniques from the previous section to explore the boundaries produced by the forest, and you will find that the are more boxy than the LDA models.
+The votes matrix is useful for investigating the fit, but one should remember that there are some structural elements of the penguins data that don't lend themselves to tree models. Although a forest has the capacity to generate non-linear boundaries by combining predictions from multiple trees, it is still based on the boxy boundaries of trees. This makes it less suitable for the penguins data with elliptical classes. You could use the techniques from the previous section to explore the boundaries produced by the forest, and you will find that the are more boxy than the LDA models.
+\index{classification methods!votes matrix}
+
+
+::: {.content-visible when-format="pdf"}
+\infobox{By visualising the votes matrix we can understand which observations are harder to classify, which of the classes are more easily confused with each other.}
+:::
+
+::: {.content-visible when-format="html"}
+::: info
+By visualising the votes matrix we can understand which observations are harder to classify, which of the classes are more easily confused with each other.
+:::
+:::
 
 To examine a vote matrix for a problem with more classes, we will examine the 10 class fake_trees data example. The full data has 100 variables, and we have seen from @sec-clust-graphics that reducing to 10 principal components allows the linear branching structure in the data to be seen. Given that the branches correspond to the classes, it will be interesting to see how well the random forest model performs.
 
@@ -256,9 +298,22 @@ ft_pc$branches <- fake_trees$branches
 library(randomForest)
 ft_rf <- randomForest(branches~., data=ft_pc, 
                             importance=TRUE)
+```
+
+```{r echo=knitr::is_html_output(), eval=knitr::is_html_output()}
 ft_rf
 ```
 
+```{r}
+#| echo: false
+options(digits=1)
+```
+
+```{r}
+head(ft_rf$votes, 5)
+```
+
+::: {.content-visible when-format="html"}
 ```{r}
 #| code-fold: false
 ft_rf_votes <- ft_rf$votes %>%
@@ -299,6 +354,7 @@ render_gif(f_rf_v_p_s[,1:9],
            gif_file="gifs/ft_votes.gif",
            frames=500) 
 ```
+:::
 
 ::: {.content-visible when-format="html"}
 
@@ -308,22 +364,35 @@ render_gif(f_rf_v_p_s[,1:9],
 
 ![Several static views from the tour revealing how clusters connect.](images/ft-votes.png){#fig-ft-votes-prj fig-alt="FIX ME" width=300}
 
-The votes matrix for the fake_trees data has a very striking geometric shape. The branching nature of the clusters is very clear. Most classes are distinct except for a connection with class 0.
-:::
-:::
-
-The votes matrix is 9D, but the structure of it is easy to read, and very interesting. The observations are coloured by class. There is one vertex (0) which has connections to all other vertexes. That is, there are points stretching without big breaks from this vertex to every other. It means that some observations in every other class can be confused with class 0, and class 0 observations can be confused with every other class. All of the other vertexes have a string of points almost entirely along one edge, the edge leading to vertex 0. This shows the lack of confusion with any other class, except 0. Cluster 0 could be considered the trunk of the tree, from which the other clusters grow. 
-
-This pattern is what can be inferred from the confusion matrix, but we can't determine whether the clusters are mostly separated except for a few observations, or some other clustering shape. The visual pattern in the votes matrix is so striking, and gives additional information about the clustering distribution, and shapes of clusters. It reinforces the clusters are linear extending into different dimensions in the 100D space, but really only into about 8D (as we'll see from the variable importance explanation below). We also see that 9 of the clusters are all connected to one cluster.
-
-::: {.content-visible when-format="html"}
-::: info
-By visualizing the votes matrix we can understand which observations are harder to classify, which of the classes are more easily confused with each other and if there are groups with similar patterns in the data.
+A tour and several static views of the votes matrix. Lines are the edges of the 8D simplex, which bounds the shape. Points mostly concentrate in the vertices, or spread along one of the edges, which means that most observations are clearly belonging to one group, or confused with a single other group. The exception to this is class 0, which spreads in many directions.
 :::
 :::
 
 ::: {.content-visible when-format="pdf"}
-\infobox{By visualizing the votes matrix we can understand which observations are harder to classify, which of the classes are more easily confused with each other and if there are groups with similar patterns in the data.}
+
+::: {#fig-ft-votes-pdf layout-ncol=2}
+
+![](images/ft-votes.png){fig-alt="FIX ME" width=400}
+
+Several static views from the tour of the votes matrix. Lines are the edges of the 8D simplex, which bounds the shape. Points mostly concentrate in the vertices, or spread along one of the edges, which means that most observations are clearly belonging to one group, or confused with a single other group. The exception to this is class 0, which spreads in many directions.
+:::
+:::
+
+\index{data!fake trees}
+The votes matrix is 9D, due to the 9 groups. With this many dimensions, if the cluster structure is weak, it will look messy in a tour. However, what we can see in `r ifelse(knitr::is_html_output(), '@fig-ft-votes-html', '@fig-ft-votes-pdf')` is that the structure is relatively simple, and very interesting in that it suggests a strong clustering of classes. Points are coloured by their true class. The lines represent the 8D simplex that bounds the observations, akin to the triangle in the ternary diagram.
+
+Points concentrate at the vertices, which means that most are confidently predicted to be their true class. The most spread of points is along single edges, between pairs of vertices. This means that when there is confusion it is mostly with just one other group. One vertex (0) which has connections to all other vertexes. That is, there are points stretching from this vertex to every other. It means that some observations in every other class can be confused with class 0, and class 0 observations can be confused with every other class. This information suggests that cluster 0 is central to all the other clusters. 
+
+Some of this information could also be inferred from the confusion matrix for the model. However visualising the votes matrix provides more intricate details. Here we have seen that the points spread out from a vertex, with fewer and fewer the further one gets. It allows us to see the distribution of points, which is not possible from the confusion matrix alone. The same misclaassification rate could be due to a variety of distributions. The visual pattern in the votes matrix is striking, and gives additional information about how the clustering distribution, and shapes of clusters, matches the class labels. It reinforces the clusters are linear extending into different dimensions in the 100D space, but really only into about 8D (as we'll see from the variable importance explanation below). We also see that nine of the clusters are all connected to a single cluster.
+
+::: {.content-visible when-format="html"}
+::: insight
+The votes matrix for the fake trees has a striking geometric structure, with one central cluster connected to all other clusters, each of which is distinct from each other.
+:::
+:::
+
+::: {.content-visible when-format="pdf"}
+\insightbox{The votes matrix for the fake trees has a striking geometric structure, with one central cluster connected to all other clusters, each of which is distinct from each other.}
 :::
 
 ### Using variable importance {#sec-forest-var-imp}
