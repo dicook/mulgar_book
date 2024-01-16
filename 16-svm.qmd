@@ -15,8 +15,8 @@ The key elements of the SVM model to extract are:
 
 ::: {.content-visible when-format="pdf"}
 \infobox{
-The key elements of the SVM model to examine are:
-\begin{itemize}
+The key elements of the SVM model to extract are:
+\begin{itemize} \itemsep 0in
 \item support vectors
 \item separating hyperplane.
 \end{itemize}
@@ -83,6 +83,7 @@ df2_svm_e <- explore(df2_svm, df2)
 #| fig-cap: "SVM classifier fit overlaid on two simulated data examples: (a) groups with different variance-covariance, fitted using a linear kernel, (b) groups with non-linear separation, fitted using a radial kernel. The band of points shown as '+' mark the SVM boundary, and points marked by 'x' are the support vectors used to define the boundary. "
 #| fig-width: 8
 #| fig-height: 4
+#| out-width: 100%
 #| code-summary: "Code to make plots"
 library(patchwork)
 library(colorspace)
@@ -167,12 +168,13 @@ s1 + geom_abline(intercept=df1_svm$rho/w[2],
 
 ::: {.content-visible when-format="html"}
 ::: info
-An SVM model is fully determined by the support vectors that fix the position of the hyperplane. To construct the plane we also need the model coefficients and these are constrained for observations on the wrong side of the margin. For a linear SVM we can extract these components and write down the equation for the hyperplane.
+Like LDA, a linear SVM model for two groups can be written using the equation of a hyperplane. The fitted model coefficients are then used to generate points on this plane, to examine the boundary between groups.
 :::
 :::
 
 ::: {.content-visible when-format="pdf"}
-\infobox{An SVM model is fully determined by the support vectors that fix the position of the hyperplane. To construct the plane we also need the model coefficients and these are constrained for observations on the wrong side of the margin. For a linear SVM we can extract these components and write down the equation for the hyperplane.}
+\infobox{Like LDA, a linear SVM model for two groups can be written using the equation of a hyperplane. The fitted model coefficients are then used to generate points on this plane, to examine the boundary between groups.
+}
 :::
 
 ## Examining the model components in high-dimensions
@@ -236,17 +238,28 @@ render_gif(chinstrap_svm_e[!chinstrap_svm_e$.BOUNDARY,1:4],
 ```
 
 ::: {.content-visible when-format="html"}
-::: {#fig-p-svm layout-ncol=2}
+::: {#fig-p-svm-html layout-ncol=2}
 
-![Exploring which points are support vectors.](gifs/chinstrap_svs.gif){#fig-chinstrap_svs fig-alt="FIX ME" width=300}
+![Support vectors](gifs/chinstrap_svs.gif){#fig-chinstrap_svs fig-alt="FIX ME" width=300}
 
-![Exploring SVM boundary.](gifs/chinstrap_svm.gif){#fig-chinstrap_svm fig-alt="FIX ME" width=300}
+![SVM boundary](gifs/chinstrap_svm.gif){#fig-chinstrap_svm fig-alt="FIX ME" width=300}
 
 SVM model for distinguishing the sexes of the Chinstrap penguins. The separating hyperplane is 3D, and separates primarily on variables `bl` and `bd`, as seen because these two axes extend out from the plane when it is seen on its side, separating the two groups.
 :::
 :::
 
-Examining the hyperplane in a grand tour display indicates that two of the variables, `bl` and `bd`, are important for separating the two classes. We can check this interpretation using the radial tour. Using the components from the model, the coefficients of the hyperplane are: 
+::: {.content-visible when-format="pdf"}
+::: {#fig-p-svm-pdf layout-ncol=2}
+
+![Support vectors](images/chinstrap_svs.png){#fig-chinstrap_svs fig-alt="FIX ME" width=200}
+
+![SVM boundary](images/chinstrap_svm.png){#fig-chinstrap_svm fig-alt="FIX ME" width=200}
+
+SVM model for distinguishing the sexes of the Chinstrap penguins. The separating hyperplane is 3D, and separates primarily on variables `bl` and `bd`, as seen because these two axes extend out from the plane when it is seen on its side, separating the two groups.
+:::
+:::
+
+Examining the hyperplane in a grand tour display (`r ifelse(knitr::is_html_output(), '@fig-p-svm-html', '@fig-p-svm-pdf')`) indicates that two of the variables, `bl` and `bd`, are important for separating the two classes. We can check this interpretation using the radial tour. Using the components from the model, the coefficients of the hyperplane are: 
 
 
 ```{r}

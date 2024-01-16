@@ -265,7 +265,7 @@
 
 \begin{document}
 \maketitle
-\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[frame hidden, interior hidden, boxrule=0pt, borderline west={3pt}{0pt}{shadecolor}, sharp corners, breakable, enhanced]}{\end{tcolorbox}}\fi
+\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[enhanced, interior hidden, frame hidden, breakable, sharp corners, boxrule=0pt, borderline west={3pt}{0pt}{shadecolor}]}{\end{tcolorbox}}\fi
 
 \renewcommand*\contentsname{Table of contents}
 {
@@ -4829,8 +4829,8 @@ placement of the boundary. LDA uses the means and covariance matrices of
 the classes to place the boundary, but SVM uses extreme observations.
 
 \infobox{
-The key elements of the SVM model to examine are:
-\begin{itemize}
+The key elements of the SVM model to extract are:
+\begin{itemize} \itemsep 0in
 \item support vectors
 \item separating hyperplane.
 \end{itemize}
@@ -4888,7 +4888,7 @@ and then fit the model.
 
 \begin{figure}
 
-{\centering \includegraphics[width=0.8\textwidth,height=\textheight]{16-svm_files/figure-pdf/fig-svm-toy-1.pdf}
+{\centering \includegraphics[width=1\textwidth,height=\textheight]{16-svm_files/figure-pdf/fig-svm-toy-1.pdf}
 
 }
 
@@ -5019,7 +5019,8 @@ intercept calculated exactly. We have standardised the data, and set the
 \texttt{scale=FALSE} parameter in the \texttt{svm} function. The slope
 calculation is quite robust to the data scaling.
 
-\infobox{An SVM model is fully determined by the support vectors that fix the position of the hyperplane. To construct the plane we also need the model coefficients and these are constrained for observations on the wrong side of the margin. For a linear SVM we can extract these components and write down the equation for the hyperplane.}
+\infobox{Like LDA, a linear SVM model for two groups can be written using the equation of a hyperplane. The fitted model coefficients are then used to generate points on this plane, to examine the boundary between groups.
+}
 
 \hypertarget{examining-the-model-components-in-high-dimensions}{%
 \section{Examining the model components in
@@ -5049,11 +5050,51 @@ approach.
 \end{Highlighting}
 \end{Shaded}
 
-Examining the hyperplane in a grand tour display indicates that two of
-the variables, \texttt{bl} and \texttt{bd}, are important for separating
-the two classes. We can check this interpretation using the radial tour.
-Using the components from the model, the coefficients of the hyperplane
-are:
+\begin{figure}
+
+\begin{minipage}[t]{0.50\linewidth}
+
+{\centering 
+
+\raisebox{-\height}{
+
+\includegraphics[width=2.08333in,height=\textheight]{images/chinstrap_svs.png}
+
+}
+
+}
+
+\subcaption{\label{fig-chinstrap_svs}Support vectors}
+\end{minipage}%
+%
+\begin{minipage}[t]{0.50\linewidth}
+
+{\centering 
+
+\raisebox{-\height}{
+
+\includegraphics[width=2.08333in,height=\textheight]{images/chinstrap_svm.png}
+
+}
+
+}
+
+\subcaption{\label{fig-chinstrap_svm}SVM boundary}
+\end{minipage}%
+
+\caption{\label{fig-p-svm-pdf}SVM model for distinguishing the sexes of
+the Chinstrap penguins. The separating hyperplane is 3D, and separates
+primarily on variables \texttt{bl} and \texttt{bd}, as seen because
+these two axes extend out from the plane when it is seen on its side,
+separating the two groups.}
+
+\end{figure}
+
+Examining the hyperplane in a grand tour display
+(Figure~\ref{fig-p-svm-pdf}) indicates that two of the variables,
+\texttt{bl} and \texttt{bd}, are important for separating the two
+classes. We can check this interpretation using the radial tour. Using
+the components from the model, the coefficients of the hyperplane are:
 
 \begin{Shaded}
 \begin{Highlighting}[]
