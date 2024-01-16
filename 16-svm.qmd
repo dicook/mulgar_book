@@ -255,9 +255,24 @@ SVM model for distinguishing the sexes of the Chinstrap penguins. The separating
 
 ![SVM boundary](images/chinstrap_svm.png){#fig-chinstrap_svm fig-alt="FIX ME" width=200}
 
+
 SVM model for distinguishing the sexes of the Chinstrap penguins. The separating hyperplane is 3D, and separates primarily on variables `bl` and `bd`, as seen because these two axes extend out from the plane when it is seen on its side, separating the two groups.
 :::
 :::
+\index{classification methods!separating hyperplane}
+\index{classification methods!support vectors}
+
+::: {.content-visible when-format="html"}
+::: info
+Mark the support vectors by point shape, and examine where these are relative to the difference between groups. 
+:::
+:::
+
+::: {.content-visible when-format="pdf"}
+\infobox{Mark the support vectors by point shape, and examine where these are relative to the difference between groups.
+}
+:::
+
 
 Examining the hyperplane in a grand tour display (`r ifelse(knitr::is_html_output(), '@fig-p-svm-html', '@fig-p-svm-pdf')`) indicates that two of the variables, `bl` and `bd`, are important for separating the two classes. We can check this interpretation using the radial tour. Using the components from the model, the coefficients of the hyperplane are: 
 
@@ -267,7 +282,8 @@ Examining the hyperplane in a grand tour display (`r ifelse(knitr::is_html_outpu
 t(chinstrap_svm$SV) %*% chinstrap_svm$coefs
 ```
 
-This supports the observation that `bl` and `bd` are most important, because they have the largest magnitudes. We can use this vector to set the starting point for radial tour. It needs to be normalised. A randomly generated second vector orthonormal to this one can be added to make a 2D projection from which to see the boundary.
+The coefficients for `bl` and `bd` are the largest (in magnitude) which supports the the interpretation that they are most important. This vector can be used to set the starting point for radial tour, once it is normalised. Any orthonormal vector serves to turn this into a 2D projection, to visualise the boundary. 
+
 
 ```{r}
 #| code-fold: false
@@ -320,8 +336,11 @@ render_gif(chinstrap_svm_e[!chinstrap_svm_e$.BOUNDARY,1:4],
            frames=500)
 ```
 
+This projection is show in `r ifelse(knitr::is_html_output(), '@fig-chinstrap-radial-html', '@fig-chinstrap-radial-pdf')`. You can see the boundary between the two sexes as a clear line, marked by a sample of points on either side. We use the radial tour to remove each of the variables from the projection using the radial tour to examine it's importance on the model, and hence the boundary. If the clear view of the boundary gets jumbled when a variable is removed we infer that this variable is very important for the model (as seen for `bl` and `bd`). If there is little change in the clarity when a variable is removed, then it is less important (as seen for `fl` and `bm`). 
+\index{radial tour}
+
 ::: {.content-visible when-format="html"}
-::: {#fig-chinstrap-radial layout-ncol=2}
+::: {#fig-chinstrap-radial-html layout-ncol=2}
 
 ![bl](gifs/chinstrap_rad_bl.gif){#fig-chinstrap-radial-bl}
 
@@ -335,14 +354,44 @@ Exploring the importance of the four variables to the separating hyperplane usin
 :::
 :::
 
+::: {.content-visible when-format="pdf"}
+::: {#fig-chinstrap-radial-pdf layout-ncol=2}
+
+![bl in](images/chinstrap_rad_bl1.png){#fig-chinstrap-radial-bl1 width=200}
+
+![bl reduced](images/chinstrap_rad_bl2.png){#fig-chinstrap-radial-bl2 width=200}
+
+![bd reduced](images/chinstrap_rad_bd.png){#fig-chinstrap-radial-bd width=200}
+
+![bm out](images/chinstrap_rad_bm.png){#fig-chinstrap-radial-bm width=200}
+
+
+Exploring the importance of the four variables to the separating hyperplane using a radial tour to reduce the contribution of each variable to 0, and then back to it's original value: (a) separating hyperplane visible, (b) `bl` contribution reduced, (c) `bd` contribution decreased, (d) `bm` contribution removed. You can see that `bl` and `bd` contribute most to the plane, because when they are removed the plane is no longer on it side marking the boundary. Variables `fl` (not shown) and `bm` contribute a small amount to the separating hyperplane, but it is possible that these two could be removed with only a small effect on the strength of the separation between the sexes. 
+:::
+:::
+
+
 ::: {.content-visible when-format="html"}
-::: insight
-When we use the radial tour to examine how the different variables contribute to the separating hyperplane between the sexes, we learn that `bl` and `bd` are the most important variables. Very little contribution comes from `fl` and `bm`.
+::: info
+Use a radial tour to zero out coefficients defining the separating hyperplane to explore the variable importance. 
 :::
 :::
 
 ::: {.content-visible when-format="pdf"}
-\insightbox{When we use the radial tour to examine how the different variables contribute to the separating hyperplane between the sexes, we learn that `bl` and `bd` are the most important variables. Very little contribution comes from {\textsf fl} and {\textsf bm}.}
+\infobox{Use a radial tour to zero out coefficients defining the separating hyperplane to explore the variable importance. 
+}
+:::
+
+In this example, we can see that clarity of the boundary changes substantially when either `bl` and `bd` are removed. There is a small change when `fl` and `bm` are removed, so they are less important. This interpretation matches the interpretation that would be made from the magnitude of the coefficients of the hyperplane (printed earlier). They reinforce each other. It is possible that the interpretation of the coefficients could differ after using the radial tour, most likely in terms of simplifying the vector, supporting the forcing some coefficients to zero.  
+
+::: {.content-visible when-format="html"}
+::: insight
+When we use the radial tour to examine how the different variables contribute to the separating hyperplane between the sexes, we learn that `bl` and `bd` are the most important variables.  We could (almost) ignore `fl` and `bm` for this classification.
+:::
+:::
+
+::: {.content-visible when-format="pdf"}
+\insightbox{When we use the radial tour to examine how the different variables contribute to the separating hyperplane between the sexes, we learn that {\textsf bl} and {\textsf bd} are the most important variables.  We could (almost) ignore {\textsf fl} and {\textsf bm} for this classification.}
 :::
 
 <!-- include Distance-weighted discrimination, eg kerndwd -->

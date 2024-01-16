@@ -261,11 +261,11 @@
 
 \title{Interactively exploring high-dimensional data and models in R}
 \author{Dianne Cook and Ursula Laa}
-\date{2024-01-16}
+\date{2024-01-17}
 
 \begin{document}
 \maketitle
-\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[enhanced, interior hidden, frame hidden, breakable, sharp corners, boxrule=0pt, borderline west={3pt}{0pt}{shadecolor}]}{\end{tcolorbox}}\fi
+\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[borderline west={3pt}{0pt}{shadecolor}, interior hidden, boxrule=0pt, enhanced, frame hidden, sharp corners, breakable]}{\end{tcolorbox}}\fi
 
 \renewcommand*\contentsname{Table of contents}
 {
@@ -5090,6 +5090,12 @@ separating the two groups.}
 
 \end{figure}
 
+\index{classification methods!separating hyperplane}
+\index{classification methods!support vectors}
+
+\infobox{Mark the support vectors by point shape, and examine where these are relative to the difference between groups.
+}
+
 Examining the hyperplane in a grand tour display
 (Figure~\ref{fig-p-svm-pdf}) indicates that two of the variables,
 \texttt{bl} and \texttt{bd}, are important for separating the two
@@ -5110,11 +5116,11 @@ fl -0.5223364
 bm -0.2846370
 \end{verbatim}
 
-This supports the observation that \texttt{bl} and \texttt{bd} are most
-important, because they have the largest magnitudes. We can use this
-vector to set the starting point for radial tour. It needs to be
-normalised. A randomly generated second vector orthonormal to this one
-can be added to make a 2D projection from which to see the boundary.
+The coefficients for \texttt{bl} and \texttt{bd} are the largest (in
+magnitude) which supports the the interpretation that they are most
+important. This vector can be used to set the starting point for radial
+tour, once it is normalised. Any orthonormal vector serves to turn this
+into a 2D projection, to visualise the boundary.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -5135,7 +5141,108 @@ fl -0.3365631 -0.77713899
 bm -0.1834035 -0.36038216
 \end{verbatim}
 
-\insightbox{When we use the radial tour to examine how the different variables contribute to the separating hyperplane between the sexes, we learn that `bl` and `bd` are the most important variables. Very little contribution comes from {\textsf fl} and {\textsf bm}.}
+This projection is show in Figure~\ref{fig-chinstrap-radial-pdf}. You
+can see the boundary between the two sexes as a clear line, marked by a
+sample of points on either side. We use the radial tour to remove each
+of the variables from the projection using the radial tour to examine
+it's importance on the model, and hence the boundary. If the clear view
+of the boundary gets jumbled when a variable is removed we infer that
+this variable is very important for the model (as seen for \texttt{bl}
+and \texttt{bd}). If there is little change in the clarity when a
+variable is removed, then it is less important (as seen for \texttt{fl}
+and \texttt{bm}). \index{radial tour}
+
+\begin{figure}
+
+\begin{minipage}[t]{0.50\linewidth}
+
+{\centering 
+
+\raisebox{-\height}{
+
+\includegraphics[width=2.08333in,height=\textheight]{images/chinstrap_rad_bl1.png}
+
+}
+
+}
+
+\subcaption{\label{fig-chinstrap-radial-bl1}bl in}
+\end{minipage}%
+%
+\begin{minipage}[t]{0.50\linewidth}
+
+{\centering 
+
+\raisebox{-\height}{
+
+\includegraphics[width=2.08333in,height=\textheight]{images/chinstrap_rad_bl2.png}
+
+}
+
+}
+
+\subcaption{\label{fig-chinstrap-radial-bl2}bl reduced}
+\end{minipage}%
+\newline
+\begin{minipage}[t]{0.50\linewidth}
+
+{\centering 
+
+\raisebox{-\height}{
+
+\includegraphics[width=2.08333in,height=\textheight]{images/chinstrap_rad_bd.png}
+
+}
+
+}
+
+\subcaption{\label{fig-chinstrap-radial-bd}bd reduced}
+\end{minipage}%
+%
+\begin{minipage}[t]{0.50\linewidth}
+
+{\centering 
+
+\raisebox{-\height}{
+
+\includegraphics[width=2.08333in,height=\textheight]{images/chinstrap_rad_bm.png}
+
+}
+
+}
+
+\subcaption{\label{fig-chinstrap-radial-bm}bm out}
+\end{minipage}%
+
+\caption{\label{fig-chinstrap-radial-pdf}Exploring the importance of the
+four variables to the separating hyperplane using a radial tour to
+reduce the contribution of each variable to 0, and then back to it's
+original value: (a) separating hyperplane visible, (b) \texttt{bl}
+contribution reduced, (c) \texttt{bd} contribution decreased, (d)
+\texttt{bm} contribution removed. You can see that \texttt{bl} and
+\texttt{bd} contribute most to the plane, because when they are removed
+the plane is no longer on it side marking the boundary. Variables
+\texttt{fl} (not shown) and \texttt{bm} contribute a small amount to the
+separating hyperplane, but it is possible that these two could be
+removed with only a small effect on the strength of the separation
+between the sexes.}
+
+\end{figure}
+
+\infobox{Use a radial tour to zero out coefficients defining the separating hyperplane to explore the variable importance. 
+}
+
+In this example, we can see that clarity of the boundary changes
+substantially when either \texttt{bl} and \texttt{bd} are removed. There
+is a small change when \texttt{fl} and \texttt{bm} are removed, so they
+are less important. This interpretation matches the interpretation that
+would be made from the magnitude of the coefficients of the hyperplane
+(printed earlier). They reinforce each other. It is possible that the
+interpretation of the coefficients could differ after using the radial
+tour, most likely in terms of simplifying the vector, supporting the
+forcing some coefficients to zero.
+
+\insightbox{When we use the radial tour to examine how the different variables contribute to the separating hyperplane between the sexes, we learn that {\textsf bl} and {\textsf bd} are the most important variables.  We could (almost) ignore {\textsf fl} and {\textsf bm} for this classification.}
 
 \hypertarget{exercises-9}{%
 \section*{Exercises}\label{exercises-9}}
