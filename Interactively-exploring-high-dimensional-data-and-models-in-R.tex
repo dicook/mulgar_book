@@ -265,7 +265,7 @@
 
 \begin{document}
 \maketitle
-\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[borderline west={3pt}{0pt}{shadecolor}, interior hidden, boxrule=0pt, enhanced, frame hidden, sharp corners, breakable]}{\end{tcolorbox}}\fi
+\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[enhanced, boxrule=0pt, breakable, interior hidden, borderline west={3pt}{0pt}{shadecolor}, frame hidden, sharp corners]}{\end{tcolorbox}}\fi
 
 \renewcommand*\contentsname{Table of contents}
 {
@@ -5291,6 +5291,126 @@ forcing some coefficients to zero.
   to investigate the decision boundaries, you can use \texttt{explore}
   together with the slice tour to do this. You can use different kernels
   and compare the resulting decision boundaries.
+\end{enumerate}
+
+\hypertarget{exploring-misclassifications}{%
+\chapter{Exploring
+misclassifications}\label{exploring-misclassifications}}
+
+\index{classification methods!misclassification}
+
+To examine misclassifications, we can create a separate variable that
+identifies the errors or not. Constructing this for each class, and
+exploring in small steps is helpful. Let's do this using the random
+forest model for the penguins fit. The random forest fit has only a few
+misclassifications. There are four Adelie penguins confused with
+Chinstrap, and similarly four Chinstrap confused with Adelie. There is
+one Gentoo penguin confused with a Chinstrap. This is interesting,
+because the Gentoo cluster is well separated from the clusters of the
+other two penguin species.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{penguins\_rf}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{penguins\_errors }\OtherTok{\textless{}{-}}\NormalTok{ penguins\_sub }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{err =} \FunctionTok{ifelse}\NormalTok{(penguins\_rf}\SpecialCharTok{$}\NormalTok{predicted }\SpecialCharTok{!=}
+\NormalTok{                        penguins\_rf}\SpecialCharTok{$}\NormalTok{y, }\DecValTok{1}\NormalTok{, }\DecValTok{0}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+Figure~\ref{fig-p-errors-pdf} shows a grand tour, and a guided tour, of
+the penguins data, where the misclassifications are marked by an
+asterisk. (If these gifs are too small to see the different glyphs, zoom
+in to make the figures larger.) It can be seen that the one Gentoo
+penguin that is mistaken for a Chinstrap by the forest model is always
+moving with its other Gentoo (yellow) family. It can occasionally be
+seen to be on the edge of the group, closer to the Chinstraps, in some
+projections in the grand tour. But in the final projection from the
+guided tour it is hiding well among the other Gentoos. This is an
+observation where a mistake has been made because of the inadequacies of
+the forest algorithm. Forests are only as good as the trees they are
+constructed from, and we have seen from Section~\ref{sec-trees} that the
+splits only on single variables done by trees does not adequately
+utilise the covariance structure in each class. They make mistakes based
+on the boxy nature of the boundaries. This can carry through to the
+forests model. Even though many trees are combined to generate smoother
+boundaries, forests do not effectively utilise covariance in clusters
+either. The other mistakes, where Chinstrap are predicted to be Adelie,
+and vice versa, are more sensible. These mistaken observations can be
+seen to lie in the border region between the two clusters, and reflect
+genuine uncertainty about the classification of penguins in these two
+species.
+
+\begin{figure}
+
+\begin{minipage}[t]{0.50\linewidth}
+
+{\centering 
+
+\raisebox{-\height}{
+
+\includegraphics[width=2.08333in,height=\textheight]{images/p_rf_errors.png}
+
+}
+
+}
+
+\subcaption{\label{fig-rf-errors}Grand tour}
+\end{minipage}%
+%
+\begin{minipage}[t]{0.50\linewidth}
+
+{\centering 
+
+\raisebox{-\height}{
+
+\includegraphics[width=2.08333in,height=\textheight]{images/p_rf_errors_guided.png}
+
+}
+
+}
+
+\subcaption{\label{fig-rf-errors-guided}Guided tour}
+\end{minipage}%
+
+\caption{\label{fig-p-errors-pdf}Examining the misclassified cases
+(marked as asterisks) from a random forest fit to the penguins data. The
+one Gentoo penguin mistaken for a Chinstrap is a mistake made because
+the forest method suffers from the same problems as trees - cutting on
+single variables rather than effectively using covariance structure. The
+mistakes between the Adelie and Chinstrap penguins are more sensible
+because all of these observations lie is the bordering regions between
+the two clusters.}
+
+\end{figure}
+
+\infobox{Some errors are reasonable because there is overlap between the class clusters. Some errors are not reasonable because the model used is inadequate.
+}
+
+\hypertarget{exercises-10}{%
+\section*{Exercises}\label{exercises-10}}
+\addcontentsline{toc}{section}{Exercises}
+
+\markright{Exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Examine misclassifications for the fake\_trees data between cluster 1
+  and 0, using the votes matrix instead of the principal components.
+  Describe where these errors fall in the simplex.
+\item
+  Examine the misclassifications for the sketches data, focusing on
+  cactus sketches that were mistaken for bananas. Follow up by plotting
+  the images of these errors, and describe whether the classifier is
+  correct that these sketches are so poor their true cactus identity
+  cannot be determined.
 \end{enumerate}
 
 \bookmarksetup{startatroot}
