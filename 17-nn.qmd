@@ -16,6 +16,104 @@ This chapter will likely include:
 ```{r}
 #| eval: false
 #| echo: false
+# Penguins example
+# You need to install python and tensorflow, following
+# instructions at https://tensorflow.rstudio.com/install/
+library(mulgar)
+load("data/penguins_sub.rda") # from mulgar book
+
+library(ggplot2)
+library(dplyr)
+library(keras)
+library(tidymodels)
+library(tourr)
+library(classifly)
+
+# Create training and test split - absolutely vital now
+set.seed(1210)
+p_split <- initial_split(penguins_sub[,1:5])
+p_train <- training(p_split)
+p_test <- testing(p_split)
+p_train_x <- p_train[,1:4] %>% as.matrix()
+p_train_y <- p_train %>% pull(species) %>% as.numeric() 
+p_train_y <- p_train_y-1 # Needs to be 0, 1, 2
+p_test_x <- p_test[,1:4] %>% as.matrix()
+p_test_y <- p_test %>% pull(species) %>% as.numeric() 
+p_test_y <- p_test_y-1
+
+# Check training and test split
+p_split_check <- bind_rows(
+  bind_cols(p_train, type = "train"), 
+  bind_cols(p_test, type = "test")) %>%
+  mutate(type = factor(type))
+animate_xy(p_split_check[,1:4], 
+           col=p_split_check$species,
+           pch=p_split_check$type)
+
+# Define model
+model <- keras_model_sequential()
+model %>% 
+  layer_dense(units = 4, activation = 'relu', input_shape = 4) %>% 
+  layer_dense(units = 3, activation = 'softmax')
+model %>% summary
+
+loss_fn <- loss_sparse_categorical_crossentropy(from_logits = TRUE)
+
+model %>% compile(
+  optimizer = "adam",
+  loss      = loss_fn,
+  metrics   = c('accuracy')
+)
+
+# Fit model
+fit <- model %>% fit(
+  x = p_train_x, y = p_train_y,
+  epochs           = 50
+)
+plot(fit)
+
+# Check accuracy
+score <- model %>% evaluate(p_test_x, p_test_y, verbose = 0)
+
+# Predict
+predictions <- model %>% predict(p_test_x)
+predictions_cat <- levels(p_test$species)[apply(predictions, 1, which.max)]
+predictions_cat <- factor(predictions_cat, levels=levels(p_test$species))
+table(p_test$species, predictions_cat)
+
+# Examine boundaries
+# p_nn_boundaries <- explore(model, penguins_sub)
+p_grid <- tibble(bl = runif(10000, -2.2, 2.9),
+                 bd = runif(10000, -2.1, 2.2),
+                 fl = runif(10000, -2.1, 2.15),
+                 bm = runif(10000, -1.9, 2.6))
+p_grid_x <- p_grid %>% as.matrix()
+p_grid_pred <- model %>% predict(p_grid_x)
+p_pred_cat <- levels(p_test$species)[apply(p_grid_pred, 1, which.max)]
+p_pred_cat <- factor(p_pred_cat, levels=levels(p_test$species))
+
+p_grid <- p_grid %>%
+  mutate(species = p_pred_cat)
+
+animate_slice(p_grid[,1:4], col=p_grid$species)
+
+# Tour using same sequence as LDA boundaries
+load("data/penguins_tour_path.rda")
+render_gif(p_grid[,1:4],
+           planned_tour(pt1),
+           display_slice(v_rel=0.2, 
+             col=p_grid$species, 
+             axes="bottomleft"),                     gif_file="gifs/penguins_nn_boundaries.gif",
+           frames=500,
+           loop=FALSE
+           )
+
+```
+
+
+```{r}
+#| eval: false
+#| echo: false
 # Following https://parsnip.tidymodels.org/articles/Examples.html
 library(nnet)
 library(mulgar)
