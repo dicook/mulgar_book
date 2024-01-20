@@ -101,7 +101,7 @@ animate_slice(p_grid[,1:4], col=p_grid$species)
 load("data/penguins_tour_path.rda")
 render_gif(p_grid[,1:4],
            planned_tour(pt1),
-           display_slice(v_rel=0.2, 
+           display_slice(v_rel=0.3, 
              col=p_grid$species, 
              axes="bottomleft"),                     gif_file="gifs/penguins_nn_boundaries.gif",
            frames=500,
@@ -110,6 +110,76 @@ render_gif(p_grid[,1:4],
 
 ```
 
+::: {.content-visible when-format="html"}
+
+::: {#fig-penguins-lda-tree-html layout-ncol=2}
+
+![LDA model](gifs/penguins_lda_boundaries.gif){#fig-lda-boundary fig-alt="FIX ME" width=300}
+
+![NN model](gifs/penguins_nn_boundaries.gif){#fig-tree-boundary fig-alt="FIX ME" width=300}
+
+Comparison of the boundaries produced by the LDA (a) and the CNN (b) model, using a slice tour. 
+:::
+:::
+
+\index{tour!slice} 
+
+```{r}
+#| eval: false
+#| echo: false
+# Explore misclassifications
+# Predict
+p_test <- p_test %>% 
+  mutate(pred = predictions_cat)
+pred_tr <- model %>% predict(p_train_x)
+pred_tr_cat <- levels(p_train$species)[apply(pred_tr, 1, which.max)]
+pred_tr_cat <- factor(pred_tr_cat, levels=levels(p_train$species))
+p_train <- p_train %>% 
+  mutate(pred = pred_tr_cat)
+p_all <- bind_rows(p_train, p_test)
+p_all <- p_all %>% 
+  mutate(err = ifelse(p_all$pred !=
+                        p_all$species, 1, 0))
+
+symbols <- c(1, 16)
+p_pch <- symbols[p_all$err+1]
+p_cex <- rep(1, length(p_pch))
+p_cex[p_all$err==1] <- 2
+animate_xy(p_all[,1:4],
+           col=p_all$species,
+           pch=p_pch, cex=p_cex)
+render_gif(p_all[,1:4],
+           grand_tour(),
+           display_xy(col=p_all$species,
+                      pch=p_pch, cex=p_cex),
+           gif_file="gifs/p_nn_errors.gif",
+           frames=500,
+           width=400,
+           height=400)
+animate_xy(p_all[,1:4], 
+           guided_tour(lda_pp(p_all$species)),
+           col=p_all$species,
+           pch=p_pch, cex=p_cex)
+render_gif(p_all[,1:4],
+           guided_tour(lda_pp(p_all$species)),
+           display_xy(col=p_all$species,
+                      pch=p_pch, cex=p_cex),
+           gif_file="gifs/p_nn_errors_guided.gif",
+           frames=500,
+           width=400,
+           height=400)
+```
+
+```{r}
+# Explore probabilistic predictions like vote matrix
+```
+
+```{r}
+# Models at the nodes
+layer1 <- get_layer(model, index=1)
+layer2 <- get_layer(model, index=2)
+layer1$weights
+```
 
 ```{r}
 #| eval: false
