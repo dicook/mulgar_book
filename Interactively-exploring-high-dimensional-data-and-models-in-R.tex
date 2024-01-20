@@ -265,7 +265,7 @@
 
 \begin{document}
 \maketitle
-\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[breakable, boxrule=0pt, sharp corners, enhanced, frame hidden, interior hidden, borderline west={3pt}{0pt}{shadecolor}]}{\end{tcolorbox}}\fi
+\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[breakable, sharp corners, boxrule=0pt, interior hidden, frame hidden, enhanced, borderline west={3pt}{0pt}{shadecolor}]}{\end{tcolorbox}}\fi
 
 \renewcommand*\contentsname{Table of contents}
 {
@@ -3831,6 +3831,8 @@ cannot be assumed that the population variance-covariances are equal.}
 
 \end{figure}
 
+\index{data!bushfires}
+
 \insightbox{The equal and elliptical variance-covariance assumption is reasonable for the penguins data because the ellipse shapes roughly match the spread of the data. It is not a suitable assumption for the bushfires data, because the spread is not elliptically-shaped and varies in size between groups.}
 
 This approach extends to any dimension. We would use the same projection
@@ -4046,21 +4048,23 @@ species.}
 
 \end{figure}
 
-\index{classification!boundaries} \index{tour!slice} This approach can
-be readily extended to higher dimensions. One first fits the model with
-all four variables, and uses the \texttt{explore()} to generate points
-in the 4D space with predictions, generating a representation of the
-prediction regions. Figure~\ref{fig-penguins-lda-boundaries-pdf}(a)
-shows the results. Points inside the slice are shown in larger size. The
-slice is made in the centre of the data, to show the boundaries in this
-neighbourhood. As the tour progresses we see a thin slice through the
-centre of the data, parallel with the projection plane. In most
-projections there is some small overlap of points between groups, which
-happens because we are examining a 4D object with 2D. The slice helps ot
-alleviate this, allowing a focus on the boundaries in the centre of the
-cube. In all projections the boundaries between groups is linear, as
-would be expected when using LDA. We can also see that the model roughly
-divides the cube into three relatively equally-sized regions.
+\index{classification!boundaries}
+
+This approach can be readily extended to higher dimensions. One first
+fits the model with all four variables, and uses the \texttt{explore()}
+to generate points in the 4D space with predictions, generating a
+representation of the prediction regions.
+Figure~\ref{fig-penguins-lda-boundaries-pdf}(a) shows the results.
+Points inside the slice are shown in larger size. The slice is made in
+the centre of the data, to show the boundaries in this neighbourhood. As
+the tour progresses we see a thin slice through the centre of the data,
+parallel with the projection plane. In most projections there is some
+small overlap of points between groups, which happens because we are
+examining a 4D object with 2D. The slice helps ot alleviate this,
+allowing a focus on the boundaries in the centre of the cube. In all
+projections the boundaries between groups is linear, as would be
+expected when using LDA. We can also see that the model roughly divides
+the cube into three relatively equally-sized regions.
 
 Figure~\ref{fig-penguins-lda-boundaries-pdf}(b) shows the three
 prediction regions, represented by points in 4D, projected into the
@@ -5296,6 +5300,114 @@ forcing some coefficients to zero.
   together with the slice tour to do this. You can use different kernels
   and compare the resulting decision boundaries.
 \end{enumerate}
+
+\hypertarget{neural-networks-and-deep-learning}{%
+\chapter{Neural networks and deep
+learning}\label{neural-networks-and-deep-learning}}
+
+\index{classification!neural networks}
+
+Neural networks can be considered to be additive models where
+explanatory variables are combined, and transformed through an
+activation function like a logistic, added to other combinations of
+explanatory variables recursively to yield class predictions. They are
+considered to be the supreme black box models. Although as their
+complexity grows with difficult classification tasks which make it
+unappealing to understand, there is a growing demand for
+interpretability. In the simplest form, we might write the equation for
+a neural network as
+
+\[
+\hat{y} = f(x) = \phi(a_0+\sum_{h=1}^{s}
+w_{0h}\phi(a_h+\sum_{i=1}^{p} w_{ih}x_i))
+\] where \(s\) indicates the number of nodes in the hidden (middle
+layer), and \(\phi\) is a choice of activation function. In a simple
+situation where \(p=3\), \(s=2\) and \(\phi\) is linear, in theory, the
+model could be written as:
+
+\[
+\hat{y} = a_0+w_{01}(a_1+w_{11}x_1+w_{21}x_2+w_{31}x_3) +\\
+w_{02}(a_2+w_{12}x_1+w_{22}x_2+w_{32}x_3)
+\] In practice, there are often many nodes, and several hidden layers, a
+variety of activation functions, and regularisation modifications. One
+of the dangers with applying neural networks, is using overly complex
+construction which is over-parameterised. Although, the fitting
+procedures have vastly improved, providing more stable solutions, it is
+important to keep in mind that choices made in the model definition are
+important.
+
+About the software to use: \texttt{keras} over \texttt{nnet}.
+
+\hypertarget{setting-up-for-model-building}{%
+\section{Setting up for model
+building}\label{setting-up-for-model-building}}
+
+About how many nodes, activation functions.
+
+Splitting into training and test
+
+\hypertarget{extracting-model-components}{%
+\section{Extracting model
+components}\label{extracting-model-components}}
+
+Weights, and plotting nodes: reference Removing the blindfold
+
+\hypertarget{examining-predictive-probabilities}{%
+\section{Examining predictive
+probabilities}\label{examining-predictive-probabilities}}
+
+\hypertarget{building-a-diagnostic-data-set}{%
+\section{Building a diagnostic data
+set}\label{building-a-diagnostic-data-set}}
+
+Outline for chapter:
+
+\begin{itemize}
+\tightlist
+\item
+  Penguins data
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Setting up with the CNN with keras
+  \item
+    Splitting training and test, checking
+  \item
+    Specifying model, choices of layers
+  \item
+    Making predictions
+  \item
+    Extracting weights
+  \item
+    Building your diagnostic data set
+  \item
+    Examine predictive probabilities with simplex
+  \item
+    Examining the nodes - like the discriminant space when its 2
+  \item
+    Misclassifications
+  \item
+  \end{itemize}
+\end{itemize}
+
+Bushfires - Model fitting when regularisation needed - Overfitting
+
+Sketches as an example
+
+\index{tour!slice}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Explore probabilistic predictions like vote matrix}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Now look at interpretability metrics}
+\end{Highlighting}
+\end{Shaded}
 
 \hypertarget{exploring-misclassifications}{%
 \chapter{Exploring
