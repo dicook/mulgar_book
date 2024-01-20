@@ -261,11 +261,11 @@
 
 \title{Interactively exploring high-dimensional data and models in R}
 \author{Dianne Cook and Ursula Laa}
-\date{2024-01-20}
+\date{2024-01-21}
 
 \begin{document}
 \maketitle
-\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[breakable, sharp corners, boxrule=0pt, interior hidden, frame hidden, enhanced, borderline west={3pt}{0pt}{shadecolor}]}{\end{tcolorbox}}\fi
+\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[frame hidden, enhanced, boxrule=0pt, borderline west={3pt}{0pt}{shadecolor}, interior hidden, sharp corners, breakable]}{\end{tcolorbox}}\fi
 
 \renewcommand*\contentsname{Table of contents}
 {
@@ -5158,7 +5158,7 @@ of the boundary gets jumbled when a variable is removed we infer that
 this variable is very important for the model (as seen for \texttt{bl}
 and \texttt{bd}). If there is little change in the clarity when a
 variable is removed, then it is less important (as seen for \texttt{fl}
-and \texttt{bm}). \index{radial tour}
+and \texttt{bm}). \index{tour!radial}
 
 \begin{figure}
 
@@ -5336,13 +5336,73 @@ procedures have vastly improved, providing more stable solutions, it is
 important to keep in mind that choices made in the model definition are
 important.
 
-About the software to use: \texttt{keras} over \texttt{nnet}.
+For these examples we use the software \texttt{keras} (Allaire \&
+Chollet, 2023) following the installation and tutorial details at
+https://tensorflow.rstudio.com/tutorials/. Because it is an interface to
+python it can be tricky to install. If this is a problem, the example
+code should be possible to convert to use \texttt{nnet} (Venables \&
+Ripley, 2002a) or \texttt{neuralnet} (Fritsch et al., 2019). We will use
+the penguins data to illustrate the fitting, because it makes it easier
+to understand the procedures and the fit. However, a neural network is
+like using a jackhammer instead of a trowel on a pot plat, more
+complicated than necessary to build a good classification model.
 
 \hypertarget{setting-up-for-model-building}{%
 \section{Setting up for model
 building}\label{setting-up-for-model-building}}
 
-About how many nodes, activation functions.
+A first step is to decide how many nodes the neural network architecture
+should have, and and what activation function should be used. To make
+these decisions, ideally you already has some knowledge of the shapes of
+class clusters. For the penguins classification, we have seen that it
+contains three elliptically shaped clusters of roughly the same size.
+This suggests two nodes in the hidden layer would be sufficient to
+separate three clusters. Because the shapes of the clusters are convex,
+using linear activation (``relu'') will also be sufficient.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(keras)}
+\CommentTok{\# Define model}
+\NormalTok{model }\OtherTok{\textless{}{-}} \FunctionTok{keras\_model\_sequential}\NormalTok{()}
+\NormalTok{model }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{layer\_dense}\NormalTok{(}\AttributeTok{units =} \DecValTok{2}\NormalTok{, }\AttributeTok{activation =} \StringTok{\textquotesingle{}relu\textquotesingle{}}\NormalTok{, }
+              \AttributeTok{input\_shape =} \DecValTok{4}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{layer\_dense}\NormalTok{(}\AttributeTok{units =} \DecValTok{3}\NormalTok{, }\AttributeTok{activation =} \StringTok{\textquotesingle{}softmax\textquotesingle{}}\NormalTok{)}
+\NormalTok{model }\SpecialCharTok{\%\textgreater{}\%}\NormalTok{ summary}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Model: "sequential"
+______________________________________________________________
+ Layer (type)              Output Shape             Param #   
+==============================================================
+ dense_1 (Dense)           (None, 2)                10        
+ dense (Dense)             (None, 3)                9         
+==============================================================
+Total params: 19 (76.00 Byte)
+Trainable params: 19 (76.00 Byte)
+Non-trainable params: 0 (0.00 Byte)
+______________________________________________________________
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{loss\_fn }\OtherTok{\textless{}{-}} \FunctionTok{loss\_sparse\_categorical\_crossentropy}\NormalTok{(}
+  \AttributeTok{from\_logits =} \ConstantTok{TRUE}\NormalTok{)}
+
+\NormalTok{model }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{compile}\NormalTok{(}
+  \AttributeTok{optimizer =} \StringTok{"adam"}\NormalTok{,}
+  \AttributeTok{loss      =}\NormalTok{ loss\_fn,}
+  \AttributeTok{metrics   =} \FunctionTok{c}\NormalTok{(}\StringTok{\textquotesingle{}accuracy\textquotesingle{}}\NormalTok{)}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{checking-the-trainingtest-split}{%
+\section{Checking the training/test
+split}\label{checking-the-trainingtest-split}}
 
 Splitting into training and test
 
@@ -5355,6 +5415,8 @@ Weights, and plotting nodes: reference Removing the blindfold
 \hypertarget{examining-predictive-probabilities}{%
 \section{Examining predictive
 probabilities}\label{examining-predictive-probabilities}}
+
+\index{classification!predictive probabilities}
 
 \hypertarget{building-a-diagnostic-data-set}{%
 \section{Building a diagnostic data
@@ -5583,6 +5645,10 @@ Publications.
 Ahlberg, C., Williamson, C., \& Shneiderman, B. (1991). Dynamic
 {Q}ueries for {I}nformation {E}xploration: {A}n {I}mplementation and
 {E}valuation. \emph{ACM CHI `92 Conference Proceedings}, 619--626.
+
+\leavevmode\vadjust pre{\hypertarget{ref-keras}{}}%
+Allaire, J., \& Chollet, F. (2023). \emph{Keras: R interface to
+'keras'}. \url{https://CRAN.R-project.org/package=keras}
 
 \leavevmode\vadjust pre{\hypertarget{ref-An57}{}}%
 Anderson, E. (1957). A {S}emigraphical {M}ethod for the {A}nalysis of
@@ -5968,6 +6034,11 @@ on Computing C}, \emph{23}, 881--889.
 Friendly, M., \& Denis, D. J. (2004). \emph{Milestones in the history of
 thematic cartography, statistical graphics, and data visualization}.
 http://www.math.yorku.ca/SCS/Gallery/milestone/.
+
+\leavevmode\vadjust pre{\hypertarget{ref-neuralnet}{}}%
+Fritsch, S., Guenther, F., \& Wright, M. N. (2019). \emph{Neuralnet:
+Training of neural networks}.
+\url{https://CRAN.R-project.org/package=neuralnet}
 
 \leavevmode\vadjust pre{\hypertarget{ref-FB94}{}}%
 Furnas, G. W., \& Buja, A. (1994). Prosection {V}iews: {D}imensional

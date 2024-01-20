@@ -15,11 +15,35 @@ w_{02}(a_2+w_{12}x_1+w_{22}x_2+w_{32}x_3)
 $$
 In practice, there are often many nodes, and several hidden layers, a variety of activation functions, and regularisation modifications. One of the dangers with applying neural networks, is using overly complex construction which is over-parameterised. Although, the fitting procedures have vastly improved, providing more stable solutions, it is important to keep in mind that choices made in the model definition are important.
 
-About the software to use: `keras` over `nnet`.
+For these examples we use the software `keras` [@keras] following the installation and tutorial details at https://tensorflow.rstudio.com/tutorials/. Because it is an interface to python it can be tricky to install. If this is a problem, the example code should be possible to convert to use `nnet` [@VR02] or `neuralnet` [@neuralnet]. We will use the penguins data to illustrate the fitting, because it makes it easier to understand the procedures and the fit. However, a neural network is like using a jackhammer instead of a trowel on a pot plat, more complicated than necessary to build a good classification model.
 
 ## Setting up for model building
 
-About how many nodes, activation functions. 
+A first step is to decide how many nodes the neural network architecture should have, and and what activation function should be used. To make these decisions, ideally you already has some knowledge of the shapes of class clusters. For the 
+penguins classification, we have seen that it contains three elliptically shaped clusters of roughly the same size. This suggests two nodes in the hidden layer would be sufficient to separate three clusters. Because the shapes of the clusters are convex, using linear activation ("relu") will also be sufficient.
+
+```{r}
+#| echo: true
+library(keras)
+# Define model
+model <- keras_model_sequential()
+model %>% 
+  layer_dense(units = 2, activation = 'relu', 
+              input_shape = 4) %>% 
+  layer_dense(units = 3, activation = 'softmax')
+model %>% summary
+
+loss_fn <- loss_sparse_categorical_crossentropy(
+  from_logits = TRUE)
+
+model %>% compile(
+  optimizer = "adam",
+  loss      = loss_fn,
+  metrics   = c('accuracy')
+)
+```
+
+## Checking the training/test split
 
 Splitting into training and test
 
