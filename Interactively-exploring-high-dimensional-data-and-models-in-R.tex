@@ -265,7 +265,7 @@
 
 \begin{document}
 \maketitle
-\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[frame hidden, enhanced, boxrule=0pt, borderline west={3pt}{0pt}{shadecolor}, interior hidden, sharp corners, breakable]}{\end{tcolorbox}}\fi
+\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[breakable, frame hidden, borderline west={3pt}{0pt}{shadecolor}, boxrule=0pt, interior hidden, enhanced, sharp corners]}{\end{tcolorbox}}\fi
 
 \renewcommand*\contentsname{Table of contents}
 {
@@ -5347,9 +5347,8 @@ to understand the procedures and the fit. However, a neural network is
 like using a jackhammer instead of a trowel on a pot plat, more
 complicated than necessary to build a good classification model.
 
-\hypertarget{setting-up-for-model-building}{%
-\section{Setting up for model
-building}\label{setting-up-for-model-building}}
+\hypertarget{setting-up-the-model}{%
+\section{Setting up the model}\label{setting-up-the-model}}
 
 A first step is to decide how many nodes the neural network architecture
 should have, and and what activation function should be used. To make
@@ -5363,6 +5362,8 @@ using linear activation (``relu'') will also be sufficient.
 \begin{Shaded}
 \begin{Highlighting}[]
 \FunctionTok{library}\NormalTok{(keras)}
+\FunctionTok{library}\NormalTok{(rsample)}
+
 \CommentTok{\# Define model}
 \NormalTok{model }\OtherTok{\textless{}{-}} \FunctionTok{keras\_model\_sequential}\NormalTok{()}
 \NormalTok{model }\SpecialCharTok{\%\textgreater{}\%} 
@@ -5404,7 +5405,83 @@ ______________________________________________________________
 \section{Checking the training/test
 split}\label{checking-the-trainingtest-split}}
 
-Splitting into training and test
+Splitting the data into training and test is an essential way to protect
+against overfitting, for most classifiers, but especially so for the
+copiously parameterised neural networks. The model specified for the
+penguins data with only two nodes is unlikely to be overfitted, but it
+is nevertheless good practice to use a training set for building and a
+test set for evaluation.
+
+Figure~\ref{fig-p-split-pdf} shows the tour being used to examine the
+split into training and test samples for the penguins data. Using random
+sampling, particularly stratified by group, should result in similar
+samples, as can be seen here. It does happen that several observations
+in the test set are on the extremes of their class cluster, so it could
+be that the model makes errors here.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Split the data intro training and testing}
+\FunctionTok{library}\NormalTok{(dplyr)}
+\FunctionTok{library}\NormalTok{(rsample)}
+\FunctionTok{library}\NormalTok{(mulgar)}
+\FunctionTok{load}\NormalTok{(}\StringTok{"data/penguins\_sub.rda"}\NormalTok{) }\CommentTok{\# from mulgar book}
+
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{821}\NormalTok{)}
+\NormalTok{p\_split }\OtherTok{\textless{}{-}}\NormalTok{ penguins\_sub }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{select}\NormalTok{(bl}\SpecialCharTok{:}\NormalTok{species) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{initial\_split}\NormalTok{(}\AttributeTok{prop =} \DecValTok{2}\SpecialCharTok{/}\DecValTok{3}\NormalTok{, }
+                \AttributeTok{strata=}\NormalTok{species)}
+\NormalTok{p\_train }\OtherTok{\textless{}{-}} \FunctionTok{training}\NormalTok{(p\_split)}
+\NormalTok{p\_test }\OtherTok{\textless{}{-}} \FunctionTok{testing}\NormalTok{(p\_split)}
+
+\CommentTok{\# Check training and test split}
+\NormalTok{p\_split\_check }\OtherTok{\textless{}{-}} \FunctionTok{bind\_rows}\NormalTok{(}
+  \FunctionTok{bind\_cols}\NormalTok{(p\_train, }\AttributeTok{type =} \StringTok{"train"}\NormalTok{), }
+  \FunctionTok{bind\_cols}\NormalTok{(p\_test, }\AttributeTok{type =} \StringTok{"test"}\NormalTok{)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{type =} \FunctionTok{factor}\NormalTok{(type))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}
+
+\begin{minipage}[t]{0.50\linewidth}
+
+{\centering 
+
+\raisebox{-\height}{
+
+\includegraphics[width=2.29167in,height=\textheight]{images/p_split.png}
+
+}
+
+}
+
+\subcaption{\label{fig-split-grand}Grand tour}
+\end{minipage}%
+%
+\begin{minipage}[t]{0.50\linewidth}
+
+{\centering 
+
+\raisebox{-\height}{
+
+\includegraphics[width=2.29167in,height=\textheight]{images/p_split_guided.png}
+
+}
+
+}
+
+\subcaption{\label{fig-split-guided}Guided tour}
+\end{minipage}%
+
+\caption{\label{fig-p-split-pdf}Evaluating the training/test split. The
+two samples should roughly match, like they do here. There are a few
+observations in the test set that are on the outer edges of the
+clusters, which will likely result in the model making an error for
+them.}
+
+\end{figure}
 
 \hypertarget{extracting-model-components}{%
 \section{Extracting model

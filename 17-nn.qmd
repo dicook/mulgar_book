@@ -17,7 +17,7 @@ In practice, there are often many nodes, and several hidden layers, a variety of
 
 For these examples we use the software `keras` [@keras] following the installation and tutorial details at https://tensorflow.rstudio.com/tutorials/. Because it is an interface to python it can be tricky to install. If this is a problem, the example code should be possible to convert to use `nnet` [@VR02] or `neuralnet` [@neuralnet]. We will use the penguins data to illustrate the fitting, because it makes it easier to understand the procedures and the fit. However, a neural network is like using a jackhammer instead of a trowel on a pot plat, more complicated than necessary to build a good classification model.
 
-## Setting up for model building
+## Setting up the model 
 
 A first step is to decide how many nodes the neural network architecture should have, and and what activation function should be used. To make these decisions, ideally you already has some knowledge of the shapes of class clusters. For the 
 penguins classification, we have seen that it contains three elliptically shaped clusters of roughly the same size. This suggests two nodes in the hidden layer would be sufficient to separate three clusters. Because the shapes of the clusters are convex, using linear activation ("relu") will also be sufficient.
@@ -25,6 +25,8 @@ penguins classification, we have seen that it contains three elliptically shaped
 ```{r}
 #| echo: true
 library(keras)
+library(rsample)
+
 # Define model
 model <- keras_model_sequential()
 model %>% 
@@ -43,9 +45,131 @@ model %>% compile(
 )
 ```
 
+```{r}
+#| echo: false
+#| eval: false
+# tidymodels approach does not allow extracting weights
+library(keras)
+library(tidymodels)
+
+# Define model
+p_nn_spec <- 
+    mlp(hidden_units = 2, 
+        activation = 'relu',
+        penalty = 0, 
+        dropout = 0,
+        epochs = 500) %>% 
+    # This model can be used for classification or regression, so set mode
+    set_mode("classification") %>% 
+    set_engine("keras")
+
+set.seed(821)
+p_split <- penguins_sub %>% 
+  select(bl:species) %>%
+  initial_split(prop = 2/3, 
+                strata=species)
+p_train <- training(p_split)
+p_test <- testing(p_split)
+
+set.seed(834)
+p_nn_model <- p_nn_spec %>% fit(species~., p_train)
+
+p_nn_pred <- bind_cols(
+    predict(p_nn_model, p_test),
+    predict(p_nn_model, p_test, type = "prob")
+)
+
+p_nn_wgts <- keras::get_weights(p_nn_model, trainable=TRUE)
+
+```
+
 ## Checking the training/test split
 
-Splitting into training and test
+Splitting the data into training and test is an essential way to protect against overfitting, for most classifiers, but especially so for the copiously parameterised neural networks. The model specified for the penguins data with only two nodes is unlikely to be overfitted, but it is nevertheless good practice to use a training set for building and a test set for evaluation. 
+
+`r ifelse(knitr::is_html_output(), '@fig-p-split-html', '@fig-p-split-pdf')` shows the tour being used to examine the split into training and test samples for the penguins data. Using random sampling, particularly stratified by group, should result in similar samples, as can be seen here. It does happen that several observations in the test set are on the extremes of their class cluster, so it could be that the model makes errors here.
+
+```{r}
+#| echo: true
+#| message: false
+# Split the data intro training and testing
+library(dplyr)
+library(rsample)
+library(mulgar)
+load("data/penguins_sub.rda") # from mulgar book
+
+set.seed(821)
+p_split <- penguins_sub %>% 
+  select(bl:species) %>%
+  initial_split(prop = 2/3, 
+                strata=species)
+p_train <- training(p_split)
+p_test <- testing(p_split)
+
+# Check training and test split
+p_split_check <- bind_rows(
+  bind_cols(p_train, type = "train"), 
+  bind_cols(p_test, type = "test")) %>%
+  mutate(type = factor(type))
+```
+
+```{r echo=knitr::is_html_output()}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Code to run tours"
+animate_xy(p_split_check[,1:4], 
+           col=p_split_check$species,
+           pch=p_split_check$type)
+animate_xy(p_split_check[,1:4], 
+           guided_tour(lda_pp(p_split_check$species)),
+           col=p_split_check$species,
+           pch=p_split_check$type)
+render_gif(p_split_check[,1:4],
+           grand_tour(),
+           display_xy( 
+             col=p_split_check$species, 
+             pch=p_split_check$type,
+             cex=1.5,
+             axes="bottomleft"), 
+           gif_file="gifs/p_split.gif",
+           frames=500,
+           loop=FALSE
+)
+render_gif(p_split_check[,1:4],
+           guided_tour(lda_pp(p_split_check$species)),
+           display_xy( 
+             col=p_split_check$species, 
+             pch=p_split_check$type,
+             cex=1.5,
+             axes="bottomleft"), 
+           gif_file="gifs/p_split_guided.gif",
+           frames=500,
+           loop=FALSE
+)
+```
+
+::: {.content-visible when-format="html"}
+::: {#fig-p-split-html layout-ncol=2}
+
+![Grand tour](gifs/p_split.gif){#fig-split-grand fig-alt="FIX ME" width=300}
+
+![Guided tour](gifs/p_split_guided.gif){#fig-split-guided fig-alt="FIX ME" width=300}
+
+Evaluating the training/test split. The two samples should roughly match, like they do here. There are a few observations in the test set that are on the outer edges of the clusters, which will likely result in the model making an error for them.
+:::
+:::
+
+::: {.content-visible when-format="pdf"}
+::: {#fig-p-split-pdf layout-ncol=2}
+
+![Grand tour](images/p_split.png){#fig-split-grand fig-alt="FIX ME" width=220}
+
+![Guided tour](images/p_split_guided.png){#fig-split-guided fig-alt="FIX ME" width=220}
+
+Evaluating the training/test split. The two samples should roughly match, like they do here. There are a few observations in the test set that are on the outer edges of the clusters, which will likely result in the model making an error for them.
+:::
+:::
+
 
 ## Extracting model components
 
