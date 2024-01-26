@@ -324,6 +324,7 @@ ggplot() +
 ## Local interpretations
 
 ```{r}
+#| eval: false
 # Explanations
 # https://www.r-bloggers.com/2022/08/kernel-shap/
 library(kernelshap)
@@ -335,6 +336,11 @@ p_explain <- kernelshap(
     verbose = FALSE
   )
 p_exp_sv <- shapviz(p_explain)
+save(p_exp_sv, file="data/p_exp_sv.rda")
+```
+
+```{r}
+load("data/p_exp_sv.rda")
 p_exp_gentoo <- p_exp_sv$Class_3$S
 p_exp_gentoo <- p_exp_gentoo %>%
   as_tibble() %>%
@@ -367,9 +373,12 @@ p_exp_gentoo %>%
     geom_point(alpha=0.8) +
   scale_colour_discrete_divergingx(palette="Zissou 1") +
   scale_shape_manual(values=c(16, 1)) +
-  theme_minimal() 
+  theme_minimal() + theme(aspect.ratio=1)
 ```
 
+## Examining boundaries
+
+Check against LDA, suspect that `bm` is used too much in CNN model.
 
 <!--
 This chapter will likely include:
@@ -979,4 +988,4 @@ be used to inspect the model in more detail.
 
 ## Exercises {-}
 
-1. The problem with the CNN model fitted to the penguins is that the Gentoo are poorly classified, when they should be perfectly predictable due to the big gap between class clusters. Re-fit the CNN to the penguins data, to find a better model that appropriately perfectly predicts Gentoo penguins. Support this by plotting the model (using the hiddne layer), and the predictive probabilities as a ternary plot.
+1. The problem with the CNN model fitted to the penguins is that the Gentoo are poorly classified, when they should be perfectly predictable due to the big gap between class clusters. Re-fit the CNN to the penguins data, to find a better model that appropriately perfectly predicts Gentoo penguins. Support this by plotting the model (using the hiddne layer), and the predictive probabilities as a ternary plot. Do the SHAP values also support that `bd` plays a stronger role in your best model? (`bd` is the main variable for distinguishing Gentoo's from the other species, particularly when used with `fl` or `bl`.)
