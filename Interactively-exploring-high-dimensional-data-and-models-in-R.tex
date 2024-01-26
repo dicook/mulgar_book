@@ -265,7 +265,7 @@
 
 \begin{document}
 \maketitle
-\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[enhanced, boxrule=0pt, frame hidden, borderline west={3pt}{0pt}{shadecolor}, breakable, interior hidden, sharp corners]}{\end{tcolorbox}}\fi
+\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[borderline west={3pt}{0pt}{shadecolor}, enhanced, sharp corners, boxrule=0pt, frame hidden, breakable, interior hidden]}{\end{tcolorbox}}\fi
 
 \renewcommand*\contentsname{Table of contents}
 {
@@ -5630,7 +5630,7 @@ probabilities}\label{examining-predictive-probabilities}}
 \end{Shaded}
 
 \begin{verbatim}
-7/7 - 0s - 66ms/epoch - 9ms/step
+7/7 - 0s - 103ms/epoch - 15ms/step
 \end{verbatim}
 
 \begin{Shaded}
@@ -5657,7 +5657,7 @@ probabilities}\label{examining-predictive-probabilities}}
 \end{Shaded}
 
 \begin{verbatim}
-4/4 - 0s - 21ms/epoch - 5ms/step
+4/4 - 0s - 25ms/epoch - 6ms/step
 \end{verbatim}
 
 \begin{Shaded}
@@ -5734,9 +5734,308 @@ probabilities}\label{examining-predictive-probabilities}}
 
 \end{figure}
 
-\hypertarget{building-a-diagnostic-data-set}{%
-\section{Building a diagnostic data
-set}\label{building-a-diagnostic-data-set}}
+\hypertarget{local-interpretations}{%
+\section{Local interpretations}\label{local-interpretations}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Explanations}
+\CommentTok{\# https://www.r{-}bloggers.com/2022/08/kernel{-}shap/}
+\FunctionTok{library}\NormalTok{(kernelshap)}
+\FunctionTok{library}\NormalTok{(shapviz)}
+\NormalTok{p\_explain }\OtherTok{\textless{}{-}} \FunctionTok{kernelshap}\NormalTok{(}
+\NormalTok{    p\_nn\_model,}
+\NormalTok{    p\_train\_x, }
+    \AttributeTok{bg\_X =}\NormalTok{ p\_train\_x,}
+    \AttributeTok{verbose =} \ConstantTok{FALSE}
+\NormalTok{  )}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+7/7 - 0s - 24ms/epoch - 3ms/step
+7/7 - 0s - 23ms/epoch - 3ms/step
+97/97 - 0s - 187ms/epoch - 2ms/step
+97/97 - 0s - 159ms/epoch - 2ms/step
+97/97 - 0s - 144ms/epoch - 1ms/step
+97/97 - 0s - 147ms/epoch - 2ms/step
+97/97 - 0s - 145ms/epoch - 1ms/step
+97/97 - 0s - 154ms/epoch - 2ms/step
+97/97 - 0s - 151ms/epoch - 2ms/step
+97/97 - 0s - 149ms/epoch - 2ms/step
+97/97 - 0s - 149ms/epoch - 2ms/step
+97/97 - 0s - 153ms/epoch - 2ms/step
+97/97 - 0s - 147ms/epoch - 2ms/step
+97/97 - 0s - 164ms/epoch - 2ms/step
+97/97 - 0s - 183ms/epoch - 2ms/step
+97/97 - 0s - 246ms/epoch - 3ms/step
+97/97 - 0s - 213ms/epoch - 2ms/step
+97/97 - 0s - 152ms/epoch - 2ms/step
+97/97 - 0s - 175ms/epoch - 2ms/step
+97/97 - 0s - 215ms/epoch - 2ms/step
+97/97 - 0s - 183ms/epoch - 2ms/step
+97/97 - 0s - 205ms/epoch - 2ms/step
+97/97 - 0s - 171ms/epoch - 2ms/step
+97/97 - 0s - 176ms/epoch - 2ms/step
+97/97 - 0s - 170ms/epoch - 2ms/step
+97/97 - 0s - 184ms/epoch - 2ms/step
+97/97 - 0s - 166ms/epoch - 2ms/step
+97/97 - 0s - 152ms/epoch - 2ms/step
+97/97 - 0s - 144ms/epoch - 1ms/step
+97/97 - 0s - 171ms/epoch - 2ms/step
+97/97 - 0s - 150ms/epoch - 2ms/step
+97/97 - 0s - 141ms/epoch - 1ms/step
+97/97 - 0s - 151ms/epoch - 2ms/step
+97/97 - 0s - 143ms/epoch - 1ms/step
+97/97 - 0s - 143ms/epoch - 1ms/step
+97/97 - 0s - 156ms/epoch - 2ms/step
+97/97 - 0s - 144ms/epoch - 1ms/step
+97/97 - 0s - 142ms/epoch - 1ms/step
+97/97 - 0s - 147ms/epoch - 2ms/step
+97/97 - 0s - 157ms/epoch - 2ms/step
+97/97 - 0s - 151ms/epoch - 2ms/step
+97/97 - 0s - 153ms/epoch - 2ms/step
+97/97 - 0s - 142ms/epoch - 1ms/step
+97/97 - 0s - 146ms/epoch - 2ms/step
+97/97 - 0s - 148ms/epoch - 2ms/step
+97/97 - 0s - 151ms/epoch - 2ms/step
+97/97 - 0s - 173ms/epoch - 2ms/step
+97/97 - 0s - 143ms/epoch - 1ms/step
+97/97 - 0s - 166ms/epoch - 2ms/step
+97/97 - 0s - 144ms/epoch - 1ms/step
+97/97 - 0s - 145ms/epoch - 1ms/step
+97/97 - 0s - 169ms/epoch - 2ms/step
+97/97 - 0s - 145ms/epoch - 1ms/step
+97/97 - 0s - 144ms/epoch - 1ms/step
+97/97 - 0s - 148ms/epoch - 2ms/step
+97/97 - 0s - 146ms/epoch - 2ms/step
+97/97 - 0s - 151ms/epoch - 2ms/step
+97/97 - 0s - 153ms/epoch - 2ms/step
+97/97 - 0s - 152ms/epoch - 2ms/step
+97/97 - 0s - 155ms/epoch - 2ms/step
+97/97 - 0s - 151ms/epoch - 2ms/step
+97/97 - 0s - 147ms/epoch - 2ms/step
+97/97 - 0s - 163ms/epoch - 2ms/step
+97/97 - 0s - 149ms/epoch - 2ms/step
+97/97 - 0s - 141ms/epoch - 1ms/step
+97/97 - 0s - 146ms/epoch - 2ms/step
+97/97 - 0s - 148ms/epoch - 2ms/step
+97/97 - 0s - 153ms/epoch - 2ms/step
+97/97 - 0s - 144ms/epoch - 1ms/step
+97/97 - 0s - 144ms/epoch - 1ms/step
+97/97 - 0s - 154ms/epoch - 2ms/step
+97/97 - 0s - 146ms/epoch - 2ms/step
+97/97 - 0s - 151ms/epoch - 2ms/step
+97/97 - 0s - 157ms/epoch - 2ms/step
+97/97 - 0s - 142ms/epoch - 1ms/step
+97/97 - 0s - 146ms/epoch - 2ms/step
+97/97 - 0s - 147ms/epoch - 2ms/step
+97/97 - 0s - 149ms/epoch - 2ms/step
+97/97 - 0s - 151ms/epoch - 2ms/step
+97/97 - 0s - 144ms/epoch - 1ms/step
+97/97 - 0s - 143ms/epoch - 1ms/step
+97/97 - 0s - 150ms/epoch - 2ms/step
+97/97 - 0s - 151ms/epoch - 2ms/step
+97/97 - 0s - 154ms/epoch - 2ms/step
+97/97 - 0s - 153ms/epoch - 2ms/step
+97/97 - 0s - 144ms/epoch - 1ms/step
+97/97 - 0s - 144ms/epoch - 1ms/step
+97/97 - 0s - 146ms/epoch - 2ms/step
+97/97 - 0s - 147ms/epoch - 2ms/step
+97/97 - 0s - 150ms/epoch - 2ms/step
+97/97 - 0s - 142ms/epoch - 1ms/step
+97/97 - 0s - 145ms/epoch - 1ms/step
+97/97 - 0s - 143ms/epoch - 1ms/step
+97/97 - 0s - 148ms/epoch - 2ms/step
+97/97 - 0s - 157ms/epoch - 2ms/step
+97/97 - 0s - 166ms/epoch - 2ms/step
+97/97 - 0s - 146ms/epoch - 2ms/step
+97/97 - 0s - 142ms/epoch - 1ms/step
+97/97 - 0s - 147ms/epoch - 2ms/step
+97/97 - 0s - 146ms/epoch - 2ms/step
+97/97 - 0s - 152ms/epoch - 2ms/step
+97/97 - 0s - 144ms/epoch - 1ms/step
+97/97 - 0s - 144ms/epoch - 1ms/step
+97/97 - 0s - 151ms/epoch - 2ms/step
+97/97 - 0s - 148ms/epoch - 2ms/step
+97/97 - 0s - 154ms/epoch - 2ms/step
+97/97 - 0s - 154ms/epoch - 2ms/step
+97/97 - 0s - 141ms/epoch - 1ms/step
+97/97 - 0s - 146ms/epoch - 2ms/step
+97/97 - 0s - 148ms/epoch - 2ms/step
+97/97 - 0s - 157ms/epoch - 2ms/step
+97/97 - 0s - 157ms/epoch - 2ms/step
+97/97 - 0s - 150ms/epoch - 2ms/step
+97/97 - 0s - 148ms/epoch - 2ms/step
+97/97 - 0s - 145ms/epoch - 1ms/step
+97/97 - 0s - 153ms/epoch - 2ms/step
+97/97 - 0s - 150ms/epoch - 2ms/step
+97/97 - 0s - 156ms/epoch - 2ms/step
+97/97 - 0s - 144ms/epoch - 1ms/step
+97/97 - 0s - 145ms/epoch - 1ms/step
+97/97 - 0s - 147ms/epoch - 2ms/step
+97/97 - 0s - 150ms/epoch - 2ms/step
+97/97 - 0s - 160ms/epoch - 2ms/step
+97/97 - 0s - 154ms/epoch - 2ms/step
+97/97 - 0s - 146ms/epoch - 2ms/step
+97/97 - 0s - 141ms/epoch - 1ms/step
+97/97 - 0s - 148ms/epoch - 2ms/step
+97/97 - 0s - 153ms/epoch - 2ms/step
+97/97 - 0s - 163ms/epoch - 2ms/step
+97/97 - 0s - 143ms/epoch - 1ms/step
+97/97 - 0s - 145ms/epoch - 1ms/step
+97/97 - 0s - 149ms/epoch - 2ms/step
+97/97 - 0s - 149ms/epoch - 2ms/step
+97/97 - 0s - 156ms/epoch - 2ms/step
+97/97 - 0s - 148ms/epoch - 2ms/step
+97/97 - 0s - 144ms/epoch - 1ms/step
+97/97 - 0s - 140ms/epoch - 1ms/step
+97/97 - 0s - 147ms/epoch - 2ms/step
+97/97 - 0s - 152ms/epoch - 2ms/step
+97/97 - 0s - 145ms/epoch - 1ms/step
+97/97 - 0s - 149ms/epoch - 2ms/step
+97/97 - 0s - 144ms/epoch - 1ms/step
+97/97 - 0s - 144ms/epoch - 1ms/step
+97/97 - 0s - 151ms/epoch - 2ms/step
+97/97 - 0s - 152ms/epoch - 2ms/step
+97/97 - 0s - 143ms/epoch - 1ms/step
+97/97 - 0s - 142ms/epoch - 1ms/step
+97/97 - 0s - 149ms/epoch - 2ms/step
+97/97 - 0s - 147ms/epoch - 2ms/step
+97/97 - 0s - 152ms/epoch - 2ms/step
+97/97 - 0s - 146ms/epoch - 2ms/step
+97/97 - 0s - 141ms/epoch - 1ms/step
+97/97 - 0s - 146ms/epoch - 2ms/step
+97/97 - 0s - 146ms/epoch - 2ms/step
+97/97 - 0s - 149ms/epoch - 2ms/step
+97/97 - 0s - 152ms/epoch - 2ms/step
+97/97 - 0s - 144ms/epoch - 1ms/step
+97/97 - 0s - 145ms/epoch - 1ms/step
+97/97 - 0s - 147ms/epoch - 2ms/step
+97/97 - 0s - 146ms/epoch - 2ms/step
+97/97 - 0s - 154ms/epoch - 2ms/step
+97/97 - 0s - 145ms/epoch - 1ms/step
+97/97 - 0s - 159ms/epoch - 2ms/step
+97/97 - 0s - 142ms/epoch - 1ms/step
+97/97 - 0s - 147ms/epoch - 2ms/step
+97/97 - 0s - 150ms/epoch - 2ms/step
+97/97 - 0s - 162ms/epoch - 2ms/step
+97/97 - 0s - 149ms/epoch - 2ms/step
+97/97 - 0s - 146ms/epoch - 2ms/step
+97/97 - 0s - 143ms/epoch - 1ms/step
+97/97 - 0s - 154ms/epoch - 2ms/step
+97/97 - 0s - 154ms/epoch - 2ms/step
+97/97 - 0s - 154ms/epoch - 2ms/step
+97/97 - 0s - 157ms/epoch - 2ms/step
+97/97 - 0s - 146ms/epoch - 2ms/step
+97/97 - 0s - 141ms/epoch - 1ms/step
+97/97 - 0s - 149ms/epoch - 2ms/step
+97/97 - 0s - 155ms/epoch - 2ms/step
+97/97 - 0s - 145ms/epoch - 1ms/step
+97/97 - 0s - 159ms/epoch - 2ms/step
+97/97 - 0s - 148ms/epoch - 2ms/step
+97/97 - 0s - 148ms/epoch - 2ms/step
+97/97 - 0s - 159ms/epoch - 2ms/step
+97/97 - 0s - 145ms/epoch - 1ms/step
+97/97 - 0s - 142ms/epoch - 1ms/step
+97/97 - 0s - 149ms/epoch - 2ms/step
+97/97 - 0s - 147ms/epoch - 2ms/step
+97/97 - 1s - 565ms/epoch - 6ms/step
+97/97 - 0s - 224ms/epoch - 2ms/step
+97/97 - 0s - 201ms/epoch - 2ms/step
+97/97 - 0s - 179ms/epoch - 2ms/step
+97/97 - 0s - 181ms/epoch - 2ms/step
+97/97 - 0s - 187ms/epoch - 2ms/step
+97/97 - 0s - 202ms/epoch - 2ms/step
+97/97 - 0s - 182ms/epoch - 2ms/step
+97/97 - 0s - 168ms/epoch - 2ms/step
+97/97 - 0s - 158ms/epoch - 2ms/step
+97/97 - 0s - 151ms/epoch - 2ms/step
+97/97 - 0s - 150ms/epoch - 2ms/step
+97/97 - 0s - 153ms/epoch - 2ms/step
+97/97 - 0s - 187ms/epoch - 2ms/step
+97/97 - 0s - 189ms/epoch - 2ms/step
+97/97 - 0s - 150ms/epoch - 2ms/step
+97/97 - 0s - 146ms/epoch - 2ms/step
+97/97 - 0s - 144ms/epoch - 1ms/step
+97/97 - 0s - 151ms/epoch - 2ms/step
+97/97 - 0s - 149ms/epoch - 2ms/step
+97/97 - 0s - 148ms/epoch - 2ms/step
+97/97 - 0s - 189ms/epoch - 2ms/step
+97/97 - 0s - 147ms/epoch - 2ms/step
+97/97 - 0s - 144ms/epoch - 1ms/step
+97/97 - 0s - 160ms/epoch - 2ms/step
+97/97 - 0s - 153ms/epoch - 2ms/step
+97/97 - 0s - 145ms/epoch - 1ms/step
+97/97 - 0s - 146ms/epoch - 2ms/step
+97/97 - 0s - 155ms/epoch - 2ms/step
+97/97 - 0s - 189ms/epoch - 2ms/step
+97/97 - 0s - 165ms/epoch - 2ms/step
+97/97 - 0s - 141ms/epoch - 1ms/step
+97/97 - 0s - 158ms/epoch - 2ms/step
+97/97 - 0s - 166ms/epoch - 2ms/step
+97/97 - 0s - 187ms/epoch - 2ms/step
+97/97 - 0s - 174ms/epoch - 2ms/step
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{p\_exp\_sv }\OtherTok{\textless{}{-}} \FunctionTok{shapviz}\NormalTok{(p\_explain)}
+\NormalTok{p\_exp\_gentoo }\OtherTok{\textless{}{-}}\NormalTok{ p\_exp\_sv}\SpecialCharTok{$}\NormalTok{Class\_3}\SpecialCharTok{$}\NormalTok{S}
+\NormalTok{p\_exp\_gentoo }\OtherTok{\textless{}{-}}\NormalTok{ p\_exp\_gentoo }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{as\_tibble}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{species =}\NormalTok{ p\_train}\SpecialCharTok{$}\NormalTok{species,}
+         \AttributeTok{pspecies =}\NormalTok{ p\_train\_pred\_cat,}
+\NormalTok{  ) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{error =} \FunctionTok{ifelse}\NormalTok{(species }\SpecialCharTok{==}\NormalTok{ pspecies, }\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{))}
+\FunctionTok{library}\NormalTok{(tidyr)}
+\FunctionTok{library}\NormalTok{(ggbeeswarm)}
+\NormalTok{p\_exp\_gentoo }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{pivot\_longer}\NormalTok{(bl}\SpecialCharTok{:}\NormalTok{bm, }\AttributeTok{names\_to=}\StringTok{"var"}\NormalTok{, }\AttributeTok{values\_to=}\StringTok{"shap"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{ggplot}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{species, }\AttributeTok{y=}\NormalTok{shap, }\AttributeTok{colour=}\FunctionTok{factor}\NormalTok{(error))) }\SpecialCharTok{+}
+  \FunctionTok{geom\_quasirandom}\NormalTok{(}\AttributeTok{alpha=}\FloatTok{0.8}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{scale\_colour\_discrete\_divergingx}\NormalTok{(}\AttributeTok{palette=}\StringTok{"Geyser"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{facet\_wrap}\NormalTok{(}\SpecialCharTok{\textasciitilde{}}\NormalTok{var) }\SpecialCharTok{+}
+  \FunctionTok{xlab}\NormalTok{(}\StringTok{""}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+} 
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{legend.position =} \StringTok{"none"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.8\textwidth,height=\textheight]{17-nn_files/figure-pdf/unnamed-chunk-9-1.pdf}
+
+}
+
+\end{figure}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Check position on bl}
+\NormalTok{p\_exp\_gentoo }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{rename}\NormalTok{(}\AttributeTok{shap\_bl =}\NormalTok{ bl, }
+         \AttributeTok{shap\_bd =}\NormalTok{ bd,}
+         \AttributeTok{shap\_fl =}\NormalTok{ fl, }
+         \AttributeTok{shap\_bm =}\NormalTok{ bm) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{bind\_cols}\NormalTok{(}\FunctionTok{as\_tibble}\NormalTok{(p\_train\_x)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{ggplot}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{bm, }\AttributeTok{y=}\NormalTok{bl, }
+             \AttributeTok{colour=}\NormalTok{species, }
+             \AttributeTok{shape=}\FunctionTok{factor}\NormalTok{(error))) }\SpecialCharTok{+}
+    \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{alpha=}\FloatTok{0.8}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{scale\_colour\_discrete\_divergingx}\NormalTok{(}\AttributeTok{palette=}\StringTok{"Zissou 1"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{scale\_shape\_manual}\NormalTok{(}\AttributeTok{values=}\FunctionTok{c}\NormalTok{(}\DecValTok{16}\NormalTok{, }\DecValTok{1}\NormalTok{)) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{() }
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.8\textwidth,height=\textheight]{17-nn_files/figure-pdf/unnamed-chunk-9-2.pdf}
+
+}
+
+\end{figure}
 
 Outline for chapter:
 
@@ -5812,6 +6111,9 @@ misclassifications}\label{exploring-misclassifications}}
 
 \index{classification!misclassification}
 
+\hypertarget{errors-for-a-single-model}{%
+\section{Errors for a single model}\label{errors-for-a-single-model}}
+
 To examine misclassifications, we can create a separate variable that
 identifies the errors or not. Constructing this for each class, and
 exploring in small steps is helpful. Let's do this using the random
@@ -5832,7 +6134,7 @@ other two penguin species.
 
 \begin{verbatim}
           Adelie Chinstrap Gentoo class.error
-Adelie       143         2      1 0.020547945
+Adelie       143         3      0 0.020547945
 Chinstrap      4        64      0 0.058823529
 Gentoo         0         1    118 0.008403361
 \end{verbatim}
@@ -5913,6 +6215,17 @@ the two clusters.}
 
 \infobox{Some errors are reasonable because there is overlap between the class clusters. Some errors are not reasonable because the model used is inadequate.
 }
+
+\hypertarget{comparison-between-lda-and-cnn}{%
+\section{Comparison between LDA and
+CNN}\label{comparison-between-lda-and-cnn}}
+
+\hypertarget{constructing-data-to-diagnose-your-model}{%
+\section{Constructing data to diagnose your
+model}\label{constructing-data-to-diagnose-your-model}}
+
+\hypertarget{explainability}{%
+\section{Explainability}\label{explainability}}
 
 \hypertarget{exercises-11}{%
 \section*{Exercises}\label{exercises-11}}

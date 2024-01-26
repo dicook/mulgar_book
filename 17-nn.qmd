@@ -321,7 +321,55 @@ ggplot() +
   theme(aspect.ratio=1, legend.position="none")
 ```
 
-## Building a diagnostic data set
+## Local interpretations
+
+```{r}
+# Explanations
+# https://www.r-bloggers.com/2022/08/kernel-shap/
+library(kernelshap)
+library(shapviz)
+p_explain <- kernelshap(
+    p_nn_model,
+    p_train_x, 
+    bg_X = p_train_x,
+    verbose = FALSE
+  )
+p_exp_sv <- shapviz(p_explain)
+p_exp_gentoo <- p_exp_sv$Class_3$S
+p_exp_gentoo <- p_exp_gentoo %>%
+  as_tibble() %>%
+  mutate(species = p_train$species,
+         pspecies = p_train_pred_cat,
+  ) %>%
+  mutate(error = ifelse(species == pspecies, 0, 1))
+library(tidyr)
+library(ggbeeswarm)
+p_exp_gentoo %>%
+  pivot_longer(bl:bm, names_to="var", values_to="shap") %>%
+  ggplot(aes(x=species, y=shap, colour=factor(error))) +
+  geom_quasirandom(alpha=0.8) +
+  scale_colour_discrete_divergingx(palette="Geyser") +
+  facet_wrap(~var) +
+  xlab("") +
+  theme_minimal() + 
+  theme(legend.position = "none")
+
+# Check position on bl
+p_exp_gentoo %>%
+  rename(shap_bl = bl, 
+         shap_bd = bd,
+         shap_fl = fl, 
+         shap_bm = bm) %>%
+  bind_cols(as_tibble(p_train_x)) %>%
+  ggplot(aes(x=bm, y=bl, 
+             colour=species, 
+             shape=factor(error))) +
+    geom_point(alpha=0.8) +
+  scale_colour_discrete_divergingx(palette="Zissou 1") +
+  scale_shape_manual(values=c(16, 1)) +
+  theme_minimal() 
+```
+
 
 <!--
 This chapter will likely include:
@@ -536,14 +584,15 @@ ggplot() +
 # Explanations
 # https://www.r-bloggers.com/2022/08/kernel-shap/
 library(kernelshap)
+library(shapviz)
 p_explain <- kernelshap(
     model2,
     p_train_x, 
     bg_X = p_train_x
   )
 p_exp_sv <- shapviz(p_explain)
-sv_waterfall(p_exp_sv, 1)
-sv_importance(p_exp_sv, "both")
+#sv_waterfall(p_exp_sv, 1)
+#sv_importance(p_exp_sv, "both")
 ```
 
 ```{r}
