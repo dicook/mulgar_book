@@ -261,11 +261,11 @@
 
 \title{Interactively exploring high-dimensional data and models in R}
 \author{Dianne Cook and Ursula Laa}
-\date{2024-01-21}
+\date{2024-01-26}
 
 \begin{document}
 \maketitle
-\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[breakable, borderline west={3pt}{0pt}{shadecolor}, interior hidden, boxrule=0pt, sharp corners, frame hidden, enhanced]}{\end{tcolorbox}}\fi
+\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[breakable, boxrule=0pt, interior hidden, enhanced, frame hidden, sharp corners, borderline west={3pt}{0pt}{shadecolor}]}{\end{tcolorbox}}\fi
 
 \renewcommand*\contentsname{Table of contents}
 {
@@ -5322,12 +5322,12 @@ a neural network as
 w_{0h}\phi(a_h+\sum_{i=1}^{p} w_{ih}x_i))
 \] where \(s\) indicates the number of nodes in the hidden (middle
 layer), and \(\phi\) is a choice of activation function. In a simple
-situation where \(p=3\), \(s=2\) and \(\phi\) is linear, in theory, the
-model could be written as:
+situation where \(p=3\), \(s=2\), and linear output layer, the model
+could be written as:
 
 \[
-\hat{y} = a_0+w_{01}(a_1+w_{11}x_1+w_{21}x_2+w_{31}x_3) +\\
-w_{02}(a_2+w_{12}x_1+w_{22}x_2+w_{32}x_3)
+\hat{y} = a_0+w_{01}\phi(a_1+w_{11}x_1+w_{21}x_2+w_{31}x_3) +\\
+w_{02}\phi(a_2+w_{12}x_1+w_{22}x_2+w_{32}x_3)
 \] In practice, there are often many nodes, and several hidden layers, a
 variety of activation functions, and regularisation modifications. One
 of the dangers with applying neural networks, is using overly complex
@@ -5363,6 +5363,7 @@ using linear activation (``relu'') will also be sufficient.
 \begin{Shaded}
 \begin{Highlighting}[]
 \FunctionTok{library}\NormalTok{(keras)}
+\NormalTok{tensorflow}\SpecialCharTok{::}\FunctionTok{set\_random\_seed}\NormalTok{(}\DecValTok{211}\NormalTok{)}
 
 \CommentTok{\# Define model}
 \NormalTok{p\_nn\_model }\OtherTok{\textless{}{-}} \FunctionTok{keras\_model\_sequential}\NormalTok{()}
@@ -5371,27 +5372,9 @@ using linear activation (``relu'') will also be sufficient.
               \AttributeTok{input\_shape =} \DecValTok{4}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} 
   \FunctionTok{layer\_dense}\NormalTok{(}\AttributeTok{units =} \DecValTok{3}\NormalTok{, }\AttributeTok{activation =} \StringTok{\textquotesingle{}softmax\textquotesingle{}}\NormalTok{)}
 \NormalTok{p\_nn\_model }\SpecialCharTok{\%\textgreater{}\%}\NormalTok{ summary}
-\end{Highlighting}
-\end{Shaded}
 
-\begin{verbatim}
-Model: "sequential"
-______________________________________________________________
- Layer (type)              Output Shape             Param #   
-==============================================================
- dense_1 (Dense)           (None, 2)                10        
- dense (Dense)             (None, 3)                9         
-==============================================================
-Total params: 19 (76.00 Byte)
-Trainable params: 19 (76.00 Byte)
-Non-trainable params: 0 (0.00 Byte)
-______________________________________________________________
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
 \NormalTok{loss\_fn }\OtherTok{\textless{}{-}} \FunctionTok{loss\_sparse\_categorical\_crossentropy}\NormalTok{(}
-  \AttributeTok{from\_logits =} \ConstantTok{TRUE}\NormalTok{)}
+  \AttributeTok{from\_logits =} \ConstantTok{FALSE}\NormalTok{)}
 
 \NormalTok{p\_nn\_model }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{compile}\NormalTok{(}
   \AttributeTok{optimizer =} \StringTok{"adam"}\NormalTok{,}
@@ -5504,7 +5487,6 @@ them.}
 \begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{\# Fit model}
-\FunctionTok{set.seed}\NormalTok{(}\DecValTok{211}\NormalTok{)}
 \NormalTok{p\_nn\_fit }\OtherTok{\textless{}{-}}\NormalTok{ p\_nn\_model }\SpecialCharTok{\%\textgreater{}\%}\NormalTok{ keras}\SpecialCharTok{::}\FunctionTok{fit}\NormalTok{(}
   \AttributeTok{x =}\NormalTok{ p\_train\_x, }
   \AttributeTok{y =}\NormalTok{ p\_train\_y,}
@@ -5514,32 +5496,12 @@ them.}
 
 \CommentTok{\# Check}
 \NormalTok{p\_nn\_model }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{evaluate}\NormalTok{(p\_test\_x, p\_test\_y, }\AttributeTok{verbose =} \DecValTok{0}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-     loss  accuracy 
-0.2109162 0.9375000 
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
 \FunctionTok{plot}\NormalTok{(p\_nn\_fit)}
-\end{Highlighting}
-\end{Shaded}
 
-\begin{figure}[H]
+\NormalTok{keras}\SpecialCharTok{::}\FunctionTok{get\_weights}\NormalTok{(p\_nn\_model, }\AttributeTok{trainable=}\ConstantTok{TRUE}\NormalTok{)}
 
-{\centering \includegraphics[width=0.8\textwidth,height=\textheight]{17-nn_files/figure-pdf/unnamed-chunk-6-1.pdf}
-
-}
-
-\end{figure}
-
-\begin{Shaded}
-\begin{Highlighting}[]
 \CommentTok{\# Save model: does not work!}
-\CommentTok{\# save\_model\_tf(p\_nn\_model, "data/penguins\_cnn")}
+\FunctionTok{save\_model\_tf}\NormalTok{(p\_nn\_model, }\StringTok{"data/penguins\_cnn"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -5557,9 +5519,23 @@ between classes.
 
 \begin{Shaded}
 \begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(keras)}
 \FunctionTok{library}\NormalTok{(ggplot2)}
 \FunctionTok{library}\NormalTok{(colorspace)}
 
+\CommentTok{\# load fitted model}
+\NormalTok{p\_nn\_model }\OtherTok{\textless{}{-}} \FunctionTok{load\_model\_tf}\NormalTok{(}\StringTok{"data/penguins\_cnn"}\NormalTok{)}
+\NormalTok{p\_nn\_model }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{evaluate}\NormalTok{(p\_test\_x, p\_test\_y, }\AttributeTok{verbose =} \DecValTok{0}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+     loss  accuracy 
+0.2563850 0.9553571 
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
 \CommentTok{\# Extract hidden layer model weights}
 \NormalTok{p\_nn\_wgts }\OtherTok{\textless{}{-}}\NormalTok{ keras}\SpecialCharTok{::}\FunctionTok{get\_weights}\NormalTok{(p\_nn\_model, }\AttributeTok{trainable=}\ConstantTok{TRUE}\NormalTok{)}
 \NormalTok{p\_nn\_wgts }
@@ -5568,22 +5544,22 @@ between classes.
 
 \begin{verbatim}
 [[1]]
-           [,1]       [,2]
-[1,]  0.2706964  0.9599816
-[2,] -1.1342078  0.5203390
-[3,]  0.2714159 -0.4919693
-[4,]  0.7671224  0.1536695
+           [,1]        [,2]
+[1,]  0.6216676  1.33304155
+[2,]  0.1851478 -0.01596385
+[3,] -0.1680396 -0.30432791
+[4,] -0.8867414 -0.36627045
 
 [[2]]
-[1]  0.5250872 -0.0965992
+[1]  0.12708087 -0.09466381
 
 [[3]]
-          [,1]       [,2]      [,3]
-[1,] -1.243448 0.08659787 1.6951888
-[2,] -1.157857 0.56848991 0.1315699
+           [,1]     [,2]       [,3]
+[1,] -0.1646167 1.527644 -1.9215064
+[2,] -0.7547278 1.555889  0.3210194
 
 [[4]]
-[1]  0.2671503  0.1900631 -0.6711022
+[1]  0.4554813 -0.9371488  0.3577386
 \end{verbatim}
 
 \begin{Shaded}

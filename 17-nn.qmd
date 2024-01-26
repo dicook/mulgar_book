@@ -7,11 +7,11 @@ $$
 \hat{y} = f(x) = \phi(a_0+\sum_{h=1}^{s}
 w_{0h}\phi(a_h+\sum_{i=1}^{p} w_{ih}x_i))
 $$
-where $s$ indicates the number of nodes in the hidden (middle layer), and $\phi$ is a choice of activation function. In a simple situation where $p=3$, $s=2$ and $\phi$ is linear, in theory, the model could be written as:
+where $s$ indicates the number of nodes in the hidden (middle layer), and $\phi$ is a choice of activation function. In a simple situation where $p=3$, $s=2$, and linear output layer, the model could be written as:
 
 $$
-\hat{y} = a_0+w_{01}(a_1+w_{11}x_1+w_{21}x_2+w_{31}x_3) +\\
-w_{02}(a_2+w_{12}x_1+w_{22}x_2+w_{32}x_3)
+\hat{y} = a_0+w_{01}\phi(a_1+w_{11}x_1+w_{21}x_2+w_{31}x_3) +\\
+w_{02}\phi(a_2+w_{12}x_1+w_{22}x_2+w_{32}x_3)
 $$
 In practice, there are often many nodes, and several hidden layers, a variety of activation functions, and regularisation modifications. One of the dangers with applying neural networks, is using overly complex construction which is over-parameterised. Although, the fitting procedures have vastly improved, providing more stable solutions, it is important to keep in mind that choices made in the model definition are important.
 
@@ -24,7 +24,9 @@ penguins classification, we have seen that it contains three elliptically shaped
 
 ```{r}
 #| echo: true
+#| eval: false
 library(keras)
+tensorflow::set_random_seed(211)
 
 # Define model
 p_nn_model <- keras_model_sequential()
@@ -35,7 +37,7 @@ p_nn_model %>%
 p_nn_model %>% summary
 
 loss_fn <- loss_sparse_categorical_crossentropy(
-  from_logits = TRUE)
+  from_logits = FALSE)
 
 p_nn_model %>% compile(
   optimizer = "adam",
@@ -186,9 +188,8 @@ p_test_y <- p_test_y-1 # Needs to be 0, 1, 2
 
 ```{r}
 #| message: false
-#| eval: true
+#| eval: false
 # Fit model
-set.seed(211)
 p_nn_fit <- p_nn_model %>% keras::fit(
   x = p_train_x, 
   y = p_train_y,
@@ -200,8 +201,10 @@ p_nn_fit <- p_nn_model %>% keras::fit(
 p_nn_model %>% evaluate(p_test_x, p_test_y, verbose = 0)
 plot(p_nn_fit)
 
+keras::get_weights(p_nn_model, trainable=TRUE)
+
 # Save model: does not work!
-# save_model_tf(p_nn_model, "data/penguins_cnn")
+save_model_tf(p_nn_model, "data/penguins_cnn")
 ```
 
 
@@ -213,8 +216,13 @@ plot(p_nn_fit)
 Because nodes in the hidden layers of neural networks are themselves (relatively simple regression) models, it can be helpful to examine them to understand the overall model. Most software will allow the coefficients for the models at these nodes to be extracted. For the penguins example there are two nodes, so we can extract the coefficients and plot the resulting two linear combinations to examine the separation between classes.
 
 ```{r}
+library(keras)
 library(ggplot2)
 library(colorspace)
+
+# load fitted model
+p_nn_model <- load_model_tf("data/penguins_cnn")
+p_nn_model %>% evaluate(p_test_x, p_test_y, verbose = 0)
 
 # Extract hidden layer model weights
 p_nn_wgts <- keras::get_weights(p_nn_model, trainable=TRUE)
