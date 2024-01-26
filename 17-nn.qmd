@@ -227,20 +227,22 @@ p_nn_model %>% evaluate(p_test_x, p_test_y, verbose = 0)
 # Extract hidden layer model weights
 p_nn_wgts <- keras::get_weights(p_nn_model, trainable=TRUE)
 p_nn_wgts 
+p_nn_wgts_on <- tourr::orthonormalise(p_nn_wgts[[1]])
+p_nn_wgts_on
 
 # Hidden layer
 p_train_m <- p_train %>%
   mutate(nn1 = as.matrix(p_train[,1:4]) %*%
-           as.matrix(p_nn_wgts[[1]][,1], ncol=1),
+           as.matrix(p_nn_wgts_on[,1], ncol=1),
          nn2 = as.matrix(p_train[,1:4]) %*%
-           matrix(p_nn_wgts[[1]][,2], ncol=1))
+           matrix(p_nn_wgts_on[,2], ncol=1))
 
 # Now add the test points on.
 p_test_m <- p_test %>%
   mutate(nn1 = as.matrix(p_test[,1:4]) %*%
-           as.matrix(p_nn_wgts[[1]][,1], ncol=1),
+           as.matrix(p_nn_wgts_on[,1], ncol=1),
          nn2 = as.matrix(p_test[,1:4]) %*%
-           matrix(p_nn_wgts[[1]][,2], ncol=1))
+           matrix(p_nn_wgts_on[,2], ncol=1))
 p_train_m <- p_train_m %>%
   mutate(set = "train")
 p_test_m <- p_test_m %>%
@@ -257,6 +259,67 @@ ggplot(p_all_m, aes(x=nn1, y=nn2,
 
 ## Examining predictive probabilities
 \index{classification!predictive probabilities}
+
+```{r}
+library(ggthemes)
+# Predict training and test set
+p_train_pred <- p_nn_model %>% predict(p_train_x)
+p_train_pred_cat <- levels(p_train$species)[apply(p_train_pred, 1, which.max)]
+p_train_pred_cat <- factor(p_train_pred_cat,
+                          levels=levels(p_train$species))
+table(p_train$species, p_train_pred_cat)
+
+p_test_pred <- p_nn_model %>% predict(p_test_x)
+p_test_pred_cat <- levels(p_test$species)[apply(p_test_pred, 1, which.max)]
+p_test_pred_cat <- factor(p_test_pred_cat,
+                      levels=levels(p_test$species))
+table(p_test$species, p_test_pred_cat)
+
+# Join data sets
+colnames(p_train_pred) <- c("Adelie", "Chinstrap", "Gentoo")
+colnames(p_test_pred) <- c("Adelie", "Chinstrap", "Gentoo")
+p_train_pred <- as_tibble(p_train_pred)
+p_train_m <- p_train %>%
+  mutate(pspecies = p_train_pred_cat) %>%
+  bind_cols(p_train_pred) %>%
+  mutate(set = "train")
+p_test_pred <- as_tibble(p_test_pred)
+p_test_m <- p_test %>%
+  mutate(pspecies = p_test_pred_cat) %>%
+  bind_cols(p_test_pred) %>%
+  mutate(set = "test")
+p_all_m <- bind_rows(p_train_m, p_test_m)
+
+# Add simplex to make ternary
+library(geozoo)
+proj <- t(geozoo::f_helmert(3)[-1,])
+p_nn_v_p <- as.matrix(p_all_m[,7:9]) %*% proj
+colnames(p_nn_v_p) <- c("x1", "x2")
+p_nn_v_p <- p_nn_v_p %>%
+  as.data.frame() %>%
+  mutate(species = p_all_m$species,
+         set = p_all_m$set)
+
+simp <- geozoo::simplex(p=2)
+sp <- data.frame(cbind(simp$points), simp$points[c(2,3,1),])
+colnames(sp) <- c("x1", "x2", "x3", "x4")
+sp$species = sort(unique(penguins_sub$species))
+
+# Plot it
+ggplot() +
+  geom_segment(data=sp, aes(x=x1, y=x2, xend=x3, yend=x4)) +
+  geom_text(data=sp, aes(x=x1, y=x2, label=species),
+            nudge_x=c(-0.06, 0.07, 0),
+            nudge_y=c(0.05, 0.05, -0.05)) +
+  geom_point(data=p_nn_v_p, aes(x=x1, y=x2, 
+                                colour=species,
+                                shape=set), 
+             size=2, alpha=0.5) +
+  scale_color_discrete_divergingx(palette="Zissou 1") +
+  scale_shape_manual(values=c(16, 1)) +
+  theme_map() +
+  theme(aspect.ratio=1, legend.position="none")
+```
 
 ## Building a diagnostic data set
 
