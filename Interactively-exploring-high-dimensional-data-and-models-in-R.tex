@@ -261,11 +261,11 @@
 
 \title{Interactively exploring high-dimensional data and models in R}
 \author{Dianne Cook and Ursula Laa}
-\date{2024-01-26}
+\date{2024-01-30}
 
 \begin{document}
 \maketitle
-\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[interior hidden, enhanced, sharp corners, borderline west={3pt}{0pt}{shadecolor}, frame hidden, breakable, boxrule=0pt]}{\end{tcolorbox}}\fi
+\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[breakable, interior hidden, frame hidden, enhanced, sharp corners, boxrule=0pt, borderline west={3pt}{0pt}{shadecolor}]}{\end{tcolorbox}}\fi
 
 \renewcommand*\contentsname{Table of contents}
 {
@@ -5311,11 +5311,15 @@ Neural networks can be considered to be nested additive (or even
 ensemble) models where explanatory variables are combined, and
 transformed through an activation function like a logistic, added to
 other combinations of explanatory variables recursively to yield class
-predictions. They are considered to be the supreme black box models.
-Although as their complexity grows with difficult classification tasks
-which make it unappealing to understand, there is a growing demand for
-interpretability. In the simplest form, we might write the equation for
-a neural network as
+predictions. They are considered to be the black box models, but there
+is a growing demand for interpretability. Although interpretability is
+possible, it can be unappealing to understand a complex model
+constructed to tackle a difficult classification task. Nevertheless,
+this is the motivation for the explanation of visualisation for neural
+network models in this chapter.
+
+In the simplest form, we might write the equation for a neural network
+as
 
 \[
 \hat{y} = f(x) = \phi(a_0+\sum_{h=1}^{s}
@@ -5326,15 +5330,23 @@ situation where \(p=3\), \(s=2\), and linear output layer, the model
 could be written as:
 
 \[
-\hat{y} = a_0+w_{01}\phi(a_1+w_{11}x_1+w_{21}x_2+w_{31}x_3) +\\
-w_{02}\phi(a_2+w_{12}x_1+w_{22}x_2+w_{32}x_3)
-\] In practice, there are often many nodes, and several hidden layers, a
+\begin{aligned}
+\hat{y} = a_0+ & w_{01}\phi(a_1+w_{11}x_1+w_{21}x_2+w_{31}x_3) +\\
+ & w_{02}\phi(a_2+w_{12}x_1+w_{22}x_2+w_{32}x_3)
+\end{aligned}
+\] which is a combination of two (linear) models, each of which could be
+examined for their role in making predictions.
+
+In practice, a model may have many nodes, and several hidden layers, a
 variety of activation functions, and regularisation modifications. One
-of the dangers with applying neural networks, is using overly complex
-construction which is over-parameterised. Although, the fitting
-procedures have vastly improved, providing more stable solutions, it is
-important to keep in mind that choices made in the model definition are
-important.
+should keep in mind the principle of parsimony is important when
+applying neural networks, because it is tempting to make an overly
+complex, and thus over-parameterised, construction. Fitting neural
+networks is still problematic. One would hope that fitting produces a
+stable result, whatever the starting seed the same parameter estimates
+are returned. However, this is not the case, and different, sometimes
+radically different, results are routinely obtained after each attempted
+fit (Wickham et al., 2015).
 
 For these examples we use the software \texttt{keras} (Allaire \&
 Chollet, 2023) following the installation and tutorial details at
@@ -5344,9 +5356,9 @@ the example code should be possible to convert to use \texttt{nnet}
 (Venables \& Ripley, 2002a) or \texttt{neuralnet} (Fritsch et al.,
 2019). We will use the penguins data to illustrate the fitting, because
 it makes it easier to understand the procedures and the fit. However, a
-neural network is like using a jackhammer instead of a trowel on a pot
-plat, more complicated than necessary to build a good classification
-model.
+neural network is like using a jackhammer instead of a trowel to plant a
+seedling, more complicated than necessary to build a good classification
+model for this data.
 
 \hypertarget{setting-up-the-model}{%
 \section{Setting up the model}\label{setting-up-the-model}}
@@ -5358,7 +5370,8 @@ class clusters. For the penguins classification, we have seen that it
 contains three elliptically shaped clusters of roughly the same size.
 This suggests two nodes in the hidden layer would be sufficient to
 separate three clusters. Because the shapes of the clusters are convex,
-using linear activation (``relu'') will also be sufficient.
+using linear activation (``relu'') will also be sufficient. The model
+specification is as follows:
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -5374,7 +5387,7 @@ using linear activation (``relu'') will also be sufficient.
 \NormalTok{p\_nn\_model }\SpecialCharTok{\%\textgreater{}\%}\NormalTok{ summary}
 
 \NormalTok{loss\_fn }\OtherTok{\textless{}{-}} \FunctionTok{loss\_sparse\_categorical\_crossentropy}\NormalTok{(}
-  \AttributeTok{from\_logits =} \ConstantTok{FALSE}\NormalTok{)}
+  \AttributeTok{from\_logits =} \ConstantTok{TRUE}\NormalTok{)}
 
 \NormalTok{p\_nn\_model }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{compile}\NormalTok{(}
   \AttributeTok{optimizer =} \StringTok{"adam"}\NormalTok{,}
@@ -5383,6 +5396,13 @@ using linear activation (``relu'') will also be sufficient.
 \NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
+
+Note that \texttt{tensorflow::set\_random\_seed(211)} sets the seed for
+the model fitting so that we can obtain the same result to discuss
+later. The model will also saved in order to diagnose and make
+predictions.
+
+Network diagram here
 
 \hypertarget{checking-the-trainingtest-split}{%
 \section{Checking the training/test
@@ -5630,7 +5650,7 @@ probabilities}\label{examining-predictive-probabilities}}
 \end{Shaded}
 
 \begin{verbatim}
-7/7 - 0s - 65ms/epoch - 9ms/step
+7/7 - 0s - 56ms/epoch - 8ms/step
 \end{verbatim}
 
 \begin{Shaded}
@@ -5657,7 +5677,7 @@ probabilities}\label{examining-predictive-probabilities}}
 \end{Shaded}
 
 \begin{verbatim}
-4/4 - 0s - 21ms/epoch - 5ms/step
+4/4 - 0s - 18ms/epoch - 5ms/step
 \end{verbatim}
 
 \begin{Shaded}
@@ -5728,9 +5748,18 @@ probabilities}\label{examining-predictive-probabilities}}
 
 \begin{figure}[H]
 
-{\centering \includegraphics[width=0.8\textwidth,height=\textheight]{17-nn_files/figure-pdf/unnamed-chunk-8-1.pdf}
+{\centering \includegraphics[width=0.5\textwidth,height=\textheight]{17-nn_files/figure-pdf/unnamed-chunk-8-1.pdf}
 
 }
+
+\caption{Ternary diagram for the three groups of the predictive
+probabilities of both training ans test sets. From what we already know
+about the penguins data this fit is not good. Both Chinstrap and Gentoo
+penguins are confused with Adelie, or at risk of it. Gentoo is very
+well-separated from the other two species when several variables are
+used, and this fitted model is blind to it. One useful finding is that
+there is little difference between training and test sets, so the model
+has not been over-fitted.}
 
 \end{figure}
 
@@ -5767,12 +5796,14 @@ probabilities}\label{examining-predictive-probabilities}}
 \FunctionTok{library}\NormalTok{(tidyr)}
 \FunctionTok{library}\NormalTok{(ggbeeswarm)}
 \NormalTok{p\_exp\_gentoo }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(species }\SpecialCharTok{==} \StringTok{"Gentoo"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
   \FunctionTok{pivot\_longer}\NormalTok{(bl}\SpecialCharTok{:}\NormalTok{bm, }\AttributeTok{names\_to=}\StringTok{"var"}\NormalTok{, }\AttributeTok{values\_to=}\StringTok{"shap"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{ggplot}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{species, }\AttributeTok{y=}\NormalTok{shap, }\AttributeTok{colour=}\FunctionTok{factor}\NormalTok{(error))) }\SpecialCharTok{+}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{var =} \FunctionTok{factor}\NormalTok{(var, }\AttributeTok{levels=}\FunctionTok{c}\NormalTok{(}\StringTok{"bl"}\NormalTok{, }\StringTok{"bd"}\NormalTok{, }\StringTok{"fl"}\NormalTok{, }\StringTok{"bm"}\NormalTok{))) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{ggplot}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{var, }\AttributeTok{y=}\NormalTok{shap, }\AttributeTok{colour=}\FunctionTok{factor}\NormalTok{(error))) }\SpecialCharTok{+}
   \FunctionTok{geom\_quasirandom}\NormalTok{(}\AttributeTok{alpha=}\FloatTok{0.8}\NormalTok{) }\SpecialCharTok{+}
   \FunctionTok{scale\_colour\_discrete\_divergingx}\NormalTok{(}\AttributeTok{palette=}\StringTok{"Geyser"}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{facet\_wrap}\NormalTok{(}\SpecialCharTok{\textasciitilde{}}\NormalTok{var) }\SpecialCharTok{+}
-  \FunctionTok{xlab}\NormalTok{(}\StringTok{""}\NormalTok{) }\SpecialCharTok{+}
+  \CommentTok{\#facet\_wrap(\textasciitilde{}var) +}
+  \FunctionTok{xlab}\NormalTok{(}\StringTok{""}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{ylab}\NormalTok{(}\StringTok{"SHAP"}\NormalTok{) }\SpecialCharTok{+}
   \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+} 
   \FunctionTok{theme}\NormalTok{(}\AttributeTok{legend.position =} \StringTok{"none"}\NormalTok{)}
 \end{Highlighting}
@@ -5780,36 +5811,95 @@ probabilities}\label{examining-predictive-probabilities}}
 
 \begin{figure}[H]
 
-{\centering \includegraphics[width=0.8\textwidth,height=\textheight]{17-nn_files/figure-pdf/unnamed-chunk-10-1.pdf}
+{\centering \includegraphics[width=1\textwidth,height=\textheight]{17-nn_files/figure-pdf/unnamed-chunk-10-1.pdf}
 
 }
+
+\caption{SHAP values focused on Gentoo class, for each variable. The one
+misclassified penguin (orange) has a much lower value for body mass,
+suggesting that this variable is used differently for the prediction
+than for other penguins.}
 
 \end{figure}
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{\# Check position on bl}
+\FunctionTok{library}\NormalTok{(ggpcp)}
 \NormalTok{p\_exp\_gentoo }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{rename}\NormalTok{(}\AttributeTok{shap\_bl =}\NormalTok{ bl, }
-         \AttributeTok{shap\_bd =}\NormalTok{ bd,}
-         \AttributeTok{shap\_fl =}\NormalTok{ fl, }
-         \AttributeTok{shap\_bm =}\NormalTok{ bm) }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{bind\_cols}\NormalTok{(}\FunctionTok{as\_tibble}\NormalTok{(p\_train\_x)) }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{ggplot}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{bm, }\AttributeTok{y=}\NormalTok{bl, }
-             \AttributeTok{colour=}\NormalTok{species, }
-             \AttributeTok{shape=}\FunctionTok{factor}\NormalTok{(error))) }\SpecialCharTok{+}
-    \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{alpha=}\FloatTok{0.8}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{scale\_colour\_discrete\_divergingx}\NormalTok{(}\AttributeTok{palette=}\StringTok{"Zissou 1"}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{scale\_shape\_manual}\NormalTok{(}\AttributeTok{values=}\FunctionTok{c}\NormalTok{(}\DecValTok{16}\NormalTok{, }\DecValTok{1}\NormalTok{)) }\SpecialCharTok{+}
-  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+} \FunctionTok{theme}\NormalTok{(}\AttributeTok{aspect.ratio=}\DecValTok{1}\NormalTok{)}
+  \FunctionTok{filter}\NormalTok{(species }\SpecialCharTok{==} \StringTok{"Gentoo"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{pcp\_select}\NormalTok{(}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{ggplot}\NormalTok{(}\FunctionTok{aes\_pcp}\NormalTok{()) }\SpecialCharTok{+}
+    \FunctionTok{geom\_pcp\_axes}\NormalTok{() }\SpecialCharTok{+} 
+    \FunctionTok{geom\_pcp\_boxes}\NormalTok{(}\AttributeTok{fill=}\StringTok{"grey80"}\NormalTok{) }\SpecialCharTok{+} 
+    \FunctionTok{geom\_pcp}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{colour =} \FunctionTok{factor}\NormalTok{(error)), }
+             \AttributeTok{size =} \DecValTok{2}\NormalTok{, }\AttributeTok{alpha=}\FloatTok{0.5}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{scale\_colour\_discrete\_divergingx}\NormalTok{(}\AttributeTok{palette=}\StringTok{"Geyser"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{xlab}\NormalTok{(}\StringTok{""}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{ylab}\NormalTok{(}\StringTok{"SHAP"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+} 
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{legend.position =} \StringTok{"none"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
 \begin{figure}[H]
 
-{\centering \includegraphics[width=0.8\textwidth,height=\textheight]{17-nn_files/figure-pdf/unnamed-chunk-10-2.pdf}
+{\centering \includegraphics[width=1\textwidth,height=\textheight]{17-nn_files/figure-pdf/unnamed-chunk-11-1.pdf}
 
 }
+
+\caption{SHAP values focused on Gentoo class, for each variable. The one
+misclassified penguin (orange) has a much lower value for body mass,
+suggesting that this variable is used differently for the prediction
+than for other penguins.}
+
+\end{figure}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(patchwork)}
+\CommentTok{\# Check position on bm}
+\NormalTok{shap\_proj }\OtherTok{\textless{}{-}}\NormalTok{ p\_exp\_gentoo }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(species }\SpecialCharTok{==} \StringTok{"Gentoo"}\NormalTok{, error }\SpecialCharTok{==} \DecValTok{1}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{(bl}\SpecialCharTok{:}\NormalTok{bm)}
+\NormalTok{shap\_proj }\OtherTok{\textless{}{-}} \FunctionTok{as.matrix}\NormalTok{(shap\_proj}\SpecialCharTok{/}\FunctionTok{sqrt}\NormalTok{(}\FunctionTok{sum}\NormalTok{(shap\_proj}\SpecialCharTok{\^{}}\DecValTok{2}\NormalTok{)))}
+\NormalTok{p\_exp\_gentoo\_proj }\OtherTok{\textless{}{-}}\NormalTok{ p\_exp\_gentoo }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{rename}\NormalTok{(}\AttributeTok{shap\_bl =}\NormalTok{ bl, }
+         \AttributeTok{shap\_bd =}\NormalTok{ bd,}
+         \AttributeTok{shap\_fl =}\NormalTok{ fl, }
+         \AttributeTok{shap\_bm =}\NormalTok{ bm) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{bind\_cols}\NormalTok{(}\FunctionTok{as\_tibble}\NormalTok{(p\_train\_x)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{shap1 =}\NormalTok{ shap\_proj[}\DecValTok{1}\NormalTok{]}\SpecialCharTok{*}\NormalTok{bl}\SpecialCharTok{+}
+\NormalTok{           shap\_proj[}\DecValTok{2}\NormalTok{]}\SpecialCharTok{*}\NormalTok{bd}\SpecialCharTok{+}
+\NormalTok{           shap\_proj[}\DecValTok{3}\NormalTok{]}\SpecialCharTok{*}\NormalTok{fl}\SpecialCharTok{+}
+\NormalTok{           shap\_proj[}\DecValTok{4}\NormalTok{]}\SpecialCharTok{*}\NormalTok{bm)}
+\NormalTok{sp1 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(p\_exp\_gentoo\_proj, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{bm, }\AttributeTok{y=}\NormalTok{bd, }
+             \AttributeTok{colour=}\NormalTok{species, }
+             \AttributeTok{shape=}\FunctionTok{factor}\NormalTok{(error))) }\SpecialCharTok{+}
+    \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{alpha=}\FloatTok{0.8}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{scale\_colour\_discrete\_divergingx}\NormalTok{(}\AttributeTok{palette=}\StringTok{"Zissou 1"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{scale\_shape\_manual}\NormalTok{(}\StringTok{"Error"}\NormalTok{, }\AttributeTok{values=}\FunctionTok{c}\NormalTok{(}\DecValTok{16}\NormalTok{, }\DecValTok{1}\NormalTok{)) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+} 
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{aspect.ratio=}\DecValTok{1}\NormalTok{, }\AttributeTok{legend.position=}\StringTok{"bottom"}\NormalTok{)}
+\NormalTok{sp2 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(p\_exp\_gentoo\_proj, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{bm, }\AttributeTok{y=}\NormalTok{shap1, }
+             \AttributeTok{colour=}\NormalTok{species, }
+             \AttributeTok{shape=}\FunctionTok{factor}\NormalTok{(error))) }\SpecialCharTok{+}
+    \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{alpha=}\FloatTok{0.8}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{scale\_colour\_discrete\_divergingx}\NormalTok{(}\AttributeTok{palette=}\StringTok{"Zissou 1"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{scale\_shape\_manual}\NormalTok{(}\StringTok{"error"}\NormalTok{, }\AttributeTok{values=}\FunctionTok{c}\NormalTok{(}\DecValTok{16}\NormalTok{, }\DecValTok{1}\NormalTok{)) }\SpecialCharTok{+}
+  \FunctionTok{ylab}\NormalTok{(}\StringTok{"SHAP"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+} 
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{aspect.ratio=}\DecValTok{1}\NormalTok{, }\AttributeTok{legend.position=}\StringTok{"bottom"}\NormalTok{)}
+\NormalTok{sp1 }\SpecialCharTok{+}\NormalTok{ sp2 }\SpecialCharTok{+} \FunctionTok{plot\_layout}\NormalTok{(}\AttributeTok{ncol=}\DecValTok{2}\NormalTok{, }\AttributeTok{guides =} \StringTok{"collect"}\NormalTok{) }\SpecialCharTok{\&}
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{legend.position=}\StringTok{\textquotesingle{}bottom\textquotesingle{}}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.8\textwidth,height=\textheight]{17-nn_files/figure-pdf/unnamed-chunk-12-1.pdf}
+
+}
+
+\caption{Plot of variables.}
 
 \end{figure}
 
@@ -5818,6 +5908,12 @@ probabilities}\label{examining-predictive-probabilities}}
 
 Check against LDA, suspect that \texttt{bm} is used too much in CNN
 model.
+
+\begin{verbatim}
+313/313 - 0s - 463ms/epoch - 1ms/step
+\end{verbatim}
+
+\includegraphics[width=0.8\textwidth,height=\textheight]{17-nn_files/figure-pdf/unnamed-chunk-13-1.pdf}
 
 Outline for chapter:
 

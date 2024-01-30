@@ -1,7 +1,9 @@
 # Neural networks and deep learning
 \index{classification!neural networks}
 
-Neural networks can be considered to be nested additive (or even ensemble) models where explanatory variables are combined, and transformed through an activation function like a logistic, added to other combinations of explanatory variables recursively to yield class predictions. They are considered to be the supreme black box models. Although as their complexity grows with difficult classification tasks which make it unappealing to understand, there is a growing demand for interpretability. In the simplest form, we might write the equation for a neural network as
+Neural networks can be considered to be nested additive (or even ensemble) models where explanatory variables are combined, and transformed through an activation function like a logistic, added to other combinations of explanatory variables recursively to yield class predictions. They are considered to be the black box models, but there is a growing demand for interpretability. Although interpretability is possible, it can be unappealing to understand a complex model constructed to tackle a difficult classification task. Nevertheless, this is the motivation for the explanation of visualisation for neural network models in this chapter. 
+
+In the simplest form, we might write the equation for a neural network as
 
 $$
 \hat{y} = f(x) = \phi(a_0+\sum_{h=1}^{s}
@@ -10,17 +12,21 @@ $$
 where $s$ indicates the number of nodes in the hidden (middle layer), and $\phi$ is a choice of activation function. In a simple situation where $p=3$, $s=2$, and linear output layer, the model could be written as:
 
 $$
-\hat{y} = a_0+w_{01}\phi(a_1+w_{11}x_1+w_{21}x_2+w_{31}x_3) +\\
-w_{02}\phi(a_2+w_{12}x_1+w_{22}x_2+w_{32}x_3)
+\begin{aligned}
+\hat{y} = a_0+ & w_{01}\phi(a_1+w_{11}x_1+w_{21}x_2+w_{31}x_3) +\\
+ & w_{02}\phi(a_2+w_{12}x_1+w_{22}x_2+w_{32}x_3)
+\end{aligned}
 $$
-In practice, there are often many nodes, and several hidden layers, a variety of activation functions, and regularisation modifications. One of the dangers with applying neural networks, is using overly complex construction which is over-parameterised. Although, the fitting procedures have vastly improved, providing more stable solutions, it is important to keep in mind that choices made in the model definition are important.
+which is a combination of two (linear) models, each of which could be examined for their role in making predictions. 
 
-For these examples we use the software `keras` [@keras] following the installation and tutorial details at [https://tensorflow.rstudio.com/tutorials/](https://tensorflow.rstudio.com/tutorials/). Because it is an interface to python it can be tricky to install. If this is a problem, the example code should be possible to convert to use `nnet` [@VR02] or `neuralnet` [@neuralnet]. We will use the penguins data to illustrate the fitting, because it makes it easier to understand the procedures and the fit. However, a neural network is like using a jackhammer instead of a trowel on a pot plat, more complicated than necessary to build a good classification model.
+In practice, a model may have many nodes, and several hidden layers, a variety of activation functions, and regularisation modifications. One should keep in mind the principle of parsimony is important when applying neural networks, because it is tempting to make an overly complex, and thus over-parameterised, construction.  Fitting neural networks is still problematic. One would hope that fitting produces a stable result, whatever the starting seed the same parameter estimates are returned. However, this is not the case, and different, sometimes radically different, results are routinely obtained after each attempted fit [@wickham2015]. 
+
+For these examples we use the software `keras` [@keras] following the installation and tutorial details at [https://tensorflow.rstudio.com/tutorials/](https://tensorflow.rstudio.com/tutorials/). Because it is an interface to python it can be tricky to install. If this is a problem, the example code should be possible to convert to use `nnet` [@VR02] or `neuralnet` [@neuralnet]. We will use the penguins data to illustrate the fitting, because it makes it easier to understand the procedures and the fit. However, a neural network is like using a jackhammer instead of a trowel to plant a seedling, more complicated than necessary to build a good classification model for this data.
 
 ## Setting up the model 
 
 A first step is to decide how many nodes the neural network architecture should have, and and what activation function should be used. To make these decisions, ideally you already has some knowledge of the shapes of class clusters. For the 
-penguins classification, we have seen that it contains three elliptically shaped clusters of roughly the same size. This suggests two nodes in the hidden layer would be sufficient to separate three clusters. Because the shapes of the clusters are convex, using linear activation ("relu") will also be sufficient.
+penguins classification, we have seen that it contains three elliptically shaped clusters of roughly the same size. This suggests two nodes in the hidden layer would be sufficient to separate three clusters. Because the shapes of the clusters are convex, using linear activation ("relu") will also be sufficient. The model specification is as follows:
 
 ```{r}
 #| echo: true
@@ -37,7 +43,7 @@ p_nn_model %>%
 p_nn_model %>% summary
 
 loss_fn <- loss_sparse_categorical_crossentropy(
-  from_logits = FALSE)
+  from_logits = TRUE)
 
 p_nn_model %>% compile(
   optimizer = "adam",
@@ -45,6 +51,10 @@ p_nn_model %>% compile(
   metrics   = c('accuracy')
 )
 ```
+
+Note that `tensorflow::set_random_seed(211)` sets the seed for the model fitting so that we can obtain the same result to discuss later. The model will also saved in order to diagnose and make predictions. 
+
+Network diagram here
 
 ```{r}
 #| echo: false
@@ -261,6 +271,10 @@ ggplot(p_all_m, aes(x=nn1, y=nn2,
 \index{classification!predictive probabilities}
 
 ```{r}
+#| fig-width: 4
+#| fig-height: 4
+#| out-width: 50%
+#| fig-cap: "Ternary diagram for the three groups of the predictive probabilities of both training ans test sets. From what we already know about the penguins data this fit is not good. Both Chinstrap and Gentoo penguins are confused with Adelie, or at risk of it. Gentoo is very well-separated from the other two species when several variables are used, and this fitted model is blind to it. One useful finding is that there is little difference between training and test sets, so the model has not been over-fitted."
 library(ggthemes)
 # Predict training and test set
 p_train_pred <- p_nn_model %>% predict(p_train_x)
@@ -340,6 +354,11 @@ save(p_exp_sv, file="data/p_exp_sv.rda")
 ```
 
 ```{r}
+#| fig-width: 4
+#| fig-height: 3
+#| out-width: 100%
+#| fig-cap: "SHAP values focused on Gentoo class, for each variable. The one misclassified penguin (orange) has a much lower value for body mass, suggesting that this variable is used differently for the prediction than for other penguins." 
+#| fig-alt: FIXME
 load("data/p_exp_sv.rda")
 p_exp_gentoo <- p_exp_sv$Class_3$S
 p_exp_gentoo <- p_exp_gentoo %>%
@@ -351,34 +370,117 @@ p_exp_gentoo <- p_exp_gentoo %>%
 library(tidyr)
 library(ggbeeswarm)
 p_exp_gentoo %>%
+  filter(species == "Gentoo") %>%
   pivot_longer(bl:bm, names_to="var", values_to="shap") %>%
-  ggplot(aes(x=species, y=shap, colour=factor(error))) +
+  mutate(var = factor(var, levels=c("bl", "bd", "fl", "bm"))) %>%
+  ggplot(aes(x=var, y=shap, colour=factor(error))) +
   geom_quasirandom(alpha=0.8) +
   scale_colour_discrete_divergingx(palette="Geyser") +
-  facet_wrap(~var) +
-  xlab("") +
+  #facet_wrap(~var) +
+  xlab("") + ylab("SHAP") +
+  theme_minimal() + 
+  theme(legend.position = "none")
+```
+
+
+```{r}
+#| fig-width: 4
+#| fig-height: 3
+#| out-width: 100%
+#| fig-cap: "SHAP values focused on Gentoo class, for each variable. The one misclassified penguin (orange) has a much lower value for body mass, suggesting that this variable is used differently for the prediction than for other penguins." 
+#| fig-alt: FIXME
+library(ggpcp)
+p_exp_gentoo %>%
+  filter(species == "Gentoo") %>%
+  pcp_select(1:4) %>%
+  ggplot(aes_pcp()) +
+    geom_pcp_axes() + 
+    geom_pcp_boxes(fill="grey80") + 
+    geom_pcp(aes(colour = factor(error)), 
+             size = 2, alpha=0.5) +
+  scale_colour_discrete_divergingx(palette="Geyser") +
+  xlab("") + ylab("SHAP") +
   theme_minimal() + 
   theme(legend.position = "none")
 
-# Check position on bl
-p_exp_gentoo %>%
+```
+
+```{r}
+#| fig-width: 8
+#| fig-height: 4
+#| fig-cap: "Plot of variables." 
+#| fig-alt: FIXME
+library(patchwork)
+# Check position on bm
+shap_proj <- p_exp_gentoo %>%
+  filter(species == "Gentoo", error == 1) %>%
+  select(bl:bm)
+shap_proj <- as.matrix(shap_proj/sqrt(sum(shap_proj^2)))
+p_exp_gentoo_proj <- p_exp_gentoo %>%
   rename(shap_bl = bl, 
          shap_bd = bd,
          shap_fl = fl, 
          shap_bm = bm) %>%
   bind_cols(as_tibble(p_train_x)) %>%
-  ggplot(aes(x=bm, y=bl, 
+  mutate(shap1 = shap_proj[1]*bl+
+           shap_proj[2]*bd+
+           shap_proj[3]*fl+
+           shap_proj[4]*bm)
+sp1 <- ggplot(p_exp_gentoo_proj, aes(x=bm, y=bd, 
              colour=species, 
              shape=factor(error))) +
     geom_point(alpha=0.8) +
   scale_colour_discrete_divergingx(palette="Zissou 1") +
-  scale_shape_manual(values=c(16, 1)) +
-  theme_minimal() + theme(aspect.ratio=1)
+  scale_shape_manual("Error", values=c(16, 1)) +
+  theme_minimal() + 
+  theme(aspect.ratio=1, legend.position="bottom")
+sp2 <- ggplot(p_exp_gentoo_proj, aes(x=bm, y=shap1, 
+             colour=species, 
+             shape=factor(error))) +
+    geom_point(alpha=0.8) +
+  scale_colour_discrete_divergingx(palette="Zissou 1") +
+  scale_shape_manual("error", values=c(16, 1)) +
+  ylab("SHAP") +
+  theme_minimal() + 
+  theme(aspect.ratio=1, legend.position="bottom")
+sp1 + sp2 + plot_layout(ncol=2, guides = "collect") &
+  theme(legend.position='bottom')
 ```
 
 ## Examining boundaries
 
 Check against LDA, suspect that `bm` is used too much in CNN model.
+
+```{r}
+#| echo: false
+# Generate grid over explanatory variables
+p_grid <- tibble(
+  bl = runif(10000, min(penguins_sub$bl), max(penguins_sub$bl)),
+  bd = runif(10000, min(penguins_sub$bd), max(penguins_sub$bd)),
+  fl = runif(10000, min(penguins_sub$fl), max(penguins_sub$fl)),
+  bm = runif(10000, min(penguins_sub$bm), max(penguins_sub$bm))
+)
+# Predict grid
+p_grid_pred <- p_nn_model %>% predict(as.matrix(p_grid))
+p_grid_pred_cat <- levels(p_train$species)[apply(p_grid_pred, 1, which.max)]
+p_grid_pred_cat <- factor(p_grid_pred_cat,
+                          levels=levels(p_train$species))
+
+# Project into weights from the two nodes
+p_grid_proj <- as.matrix(p_grid) %*% p_nn_wgts_on
+colnames(p_grid_proj) <- c("nn1", "nn2")
+p_grid_proj <- p_grid_proj %>% 
+  as_tibble() %>%
+  mutate(pspecies = p_grid_pred_cat)
+
+# Plot
+ggplot(p_grid_proj, aes(x=nn1, y=nn2, 
+                     colour=pspecies)) + 
+  geom_point(alpha=0.5) +
+  scale_colour_discrete_divergingx(palette="Zissou 1") +
+  theme_minimal() +
+  theme(aspect.ratio=1)
+```
 
 <!--
 This chapter will likely include:
