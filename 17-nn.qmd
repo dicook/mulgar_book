@@ -25,12 +25,10 @@ For these examples we use the software `keras` [@keras] following the installati
 
 ## Setting up the model 
 
-A first step is to decide how many nodes the neural network architecture should have, and and what activation function should be used. To make these decisions, ideally you already has some knowledge of the shapes of class clusters. For the 
-penguins classification, we have seen that it contains three elliptically shaped clusters of roughly the same size. This suggests two nodes in the hidden layer would be sufficient to separate three clusters. Because the shapes of the clusters are convex, using linear activation ("relu") will also be sufficient. The model specification is as follows:
+A first step is to decide how many nodes the neural network architecture should have, and and what activation function should be used. To make these decisions, ideally you already has some knowledge of the shapes of class clusters. For the penguins classification, we have seen that it contains three elliptically shaped clusters of roughly the same size. This suggests two nodes in the hidden layer would be sufficient to separate three clusters [@nn-diagram]. Because the shapes of the clusters are convex, using linear activation ("relu") will also be sufficient. The model specification is as follows:
 
-```{r}
+```{r eval=FALSE}
 #| echo: true
-#| eval: false
 library(keras)
 tensorflow::set_random_seed(211)
 
@@ -52,13 +50,12 @@ p_nn_model %>% compile(
 )
 ```
 
-Note that `tensorflow::set_random_seed(211)` sets the seed for the model fitting so that we can obtain the same result to discuss later. The model will also saved in order to diagnose and make predictions. 
+Note that `tensorflow::set_random_seed(211)` sets the seed for the model fitting so that we can obtain the same result to discuss later. It needs to be set before the model is defined in the code. The model will also saved in order to diagnose and make predictions. 
 
-Network diagram here
+![Network architecture for the model on the penguins data.](images/nn-diagram.png){#nn-diagram align="center"}
 
-```{r}
+```{r eval=FALSE}
 #| echo: false
-#| eval: false
 # tidymodels approach does not allow extracting weights
 library(keras)
 library(tidymodels)
@@ -98,12 +95,12 @@ p_nn_wgts <- keras::get_weights(p_nn_model, trainable=TRUE)
 
 Splitting the data into training and test is an essential way to protect against overfitting, for most classifiers, but especially so for the copiously parameterised neural networks. The model specified for the penguins data with only two nodes is unlikely to be overfitted, but it is nevertheless good practice to use a training set for building and a test set for evaluation. 
 
-`r ifelse(knitr::is_html_output(), '@fig-p-split-html', '@fig-p-split-pdf')` shows the tour being used to examine the split into training and test samples for the penguins data. Using random sampling, particularly stratified by group, should result in similar samples, as can be seen here. It does happen that several observations in the test set are on the extremes of their class cluster, so it could be that the model makes errors here.
+`r ifelse(knitr::is_html_output(), '@fig-p-split-html', '@fig-p-split-pdf')` shows the tour being used to examine the split into training and test samples for the penguins data. Using random sampling, particularly stratified by group, should result the two sets being very similar, as can be seen here. It does happen that several observations in the test set are on the extremes of their class cluster, so it could be that the model makes errors in these neightbourhoods.
 
-```{r}
-#| echo: true
+```{r echo=knitr::is_html_output()}
 #| message: false
 # Split the data intro training and testing
+library(ggthemes)
 library(dplyr)
 library(rsample)
 load("data/penguins_sub.rda") # from mulgar book
@@ -123,8 +120,7 @@ p_split_check <- bind_rows(
   mutate(type = factor(type))
 ```
 
-```{r echo=knitr::is_html_output()}
-#| eval: false
+```{r echo=knitr::is_html_output(), eval=FALSE}
 #| code-fold: true
 #| code-summary: "Code to run tours"
 animate_xy(p_split_check[,1:4], 
@@ -165,7 +161,7 @@ render_gif(p_split_check[,1:4],
 
 ![Guided tour](gifs/p_split_guided.gif){#fig-split-guided fig-alt="FIX ME" width=300}
 
-Evaluating the training/test split. The two samples should roughly match, like they do here. There are a few observations in the test set that are on the outer edges of the clusters, which will likely result in the model making an error for them.
+Evaluating the training/test split, where we expect that the two samples should roughly match. There are a few observations in the test set that are on the outer edges of the clusters, which will likely result in the model making an error in these regions. However, the two samples roughly match.
 :::
 :::
 
@@ -176,11 +172,13 @@ Evaluating the training/test split. The two samples should roughly match, like t
 
 ![Guided tour](images/p_split_guided.png){#fig-split-guided fig-alt="FIX ME" width=220}
 
-Evaluating the training/test split. The two samples should roughly match, like they do here. There are a few observations in the test set that are on the outer edges of the clusters, which will likely result in the model making an error for them.
+Evaluating the training/test split, where we expect that the two samples should roughly match. There are a few observations in the test set that are on the outer edges of the clusters, which will likely result in the model making an error in these regions. However, the two samples roughly match.
 :::
 :::
 
 ## Fit the model
+
+The data needs to be specially formatted for the model fitted using `keras`. The explanatory variables need to be provided as a `matrix`, and the categorical response needs to be separate, and specified as a `numeric` variable, beginning with 0. 
 
 ```{r}
 # Data needs to be matrix, and response needs to be numeric
@@ -196,9 +194,18 @@ p_test_y <- p_test %>% pull(species) %>% as.numeric()
 p_test_y <- p_test_y-1 # Needs to be 0, 1, 2
 ```
 
-```{r}
+The specified model is reasonably simple, four input variables, two nodes in the hidden layer and a three column binary matrix for output. This corresponds to 5+5+3+3+3=19 parameters. 
+
+```{r echo=FALSE}
 #| message: false
-#| eval: false
+library(keras)
+p_nn_model <- load_model_tf("data/penguins_cnn")
+p_nn_model
+```
+
+
+```{r eval=FALSE}
+#| message: false
 # Fit model
 p_nn_fit <- p_nn_model %>% keras::fit(
   x = p_train_x, 
@@ -207,17 +214,19 @@ p_nn_fit <- p_nn_model %>% keras::fit(
   verbose = 0
 )
 
+# Save model: does not work!
+save_model_tf(p_nn_model, "data/penguins_cnn")
+```
+
+```{r eval=FALSE, echo=FALSE}
 # Check
 p_nn_model %>% evaluate(p_test_x, p_test_y, verbose = 0)
 plot(p_nn_fit)
 
 keras::get_weights(p_nn_model, trainable=TRUE)
-
-# Save model: does not work!
-save_model_tf(p_nn_model, "data/penguins_cnn")
 ```
 
-
+Because we set the random number seed we will get the same fit each time the code provided here is run. However, if the model is re-fit without setting the seed, there is a surprising amount of variability in the fits. One expects that `keras` is reasonably stable so one would not expect the huge array of fits as observed in @wickham2015 using `nnet`. That this can happen with the simple model used here reinforces the notion that fitting of neural network models is fiddly, and great care needs to be taken to validate and diagnose the fit. 
 
 ## Extracting model components
 
@@ -271,11 +280,10 @@ ggplot(p_all_m, aes(x=nn1, y=nn2,
 \index{classification!predictive probabilities}
 
 ```{r}
-#| fig-width: 4
-#| fig-height: 4
+#| fig-width: 3
+#| fig-height: 3
 #| out-width: 50%
 #| fig-cap: "Ternary diagram for the three groups of the predictive probabilities of both training ans test sets. From what we already know about the penguins data this fit is not good. Both Chinstrap and Gentoo penguins are confused with Adelie, or at risk of it. Gentoo is very well-separated from the other two species when several variables are used, and this fitted model is blind to it. One useful finding is that there is little difference between training and test sets, so the model has not been over-fitted."
-library(ggthemes)
 # Predict training and test set
 p_train_pred <- p_nn_model %>% predict(p_train_x)
 p_train_pred_cat <- levels(p_train$species)[apply(p_train_pred, 1, which.max)]
@@ -293,12 +301,12 @@ table(p_test$species, p_test_pred_cat)
 colnames(p_train_pred) <- c("Adelie", "Chinstrap", "Gentoo")
 colnames(p_test_pred) <- c("Adelie", "Chinstrap", "Gentoo")
 p_train_pred <- as_tibble(p_train_pred)
-p_train_m <- p_train %>%
+p_train_m <- p_train_m %>%
   mutate(pspecies = p_train_pred_cat) %>%
   bind_cols(p_train_pred) %>%
   mutate(set = "train")
 p_test_pred <- as_tibble(p_test_pred)
-p_test_m <- p_test %>%
+p_test_m <- p_test_m %>%
   mutate(pspecies = p_test_pred_cat) %>%
   bind_cols(p_test_pred) %>%
   mutate(set = "test")
@@ -307,7 +315,7 @@ p_all_m <- bind_rows(p_train_m, p_test_m)
 # Add simplex to make ternary
 library(geozoo)
 proj <- t(geozoo::f_helmert(3)[-1,])
-p_nn_v_p <- as.matrix(p_all_m[,7:9]) %*% proj
+p_nn_v_p <- as.matrix(p_all_m[,c("Adelie", "Chinstrap", "Gentoo")]) %*% proj
 colnames(p_nn_v_p) <- c("x1", "x2")
 p_nn_v_p <- p_nn_v_p %>%
   as.data.frame() %>%
@@ -337,8 +345,7 @@ ggplot() +
 
 ## Local interpretations
 
-```{r}
-#| eval: false
+```{r eval=FALSE}
 # Explanations
 # https://www.r-bloggers.com/2022/08/kernel-shap/
 library(kernelshap)
@@ -451,8 +458,8 @@ sp1 + sp2 + plot_layout(ncol=2, guides = "collect") &
 
 Check against LDA, suspect that `bm` is used too much in CNN model.
 
-```{r}
-#| echo: false
+```{r echo=knitr::is_html_output()}
+#| code-fold: true
 # Generate grid over explanatory variables
 p_grid <- tibble(
   bl = runif(10000, min(penguins_sub$bl), max(penguins_sub$bl)),
@@ -477,7 +484,12 @@ p_grid_proj <- p_grid_proj %>%
 ggplot(p_grid_proj, aes(x=nn1, y=nn2, 
                      colour=pspecies)) + 
   geom_point(alpha=0.5) +
+  geom_point(data=p_all_m, aes(x=nn1, 
+                               y=nn2, 
+                               shape=species),
+             inherit.aes = FALSE) +
   scale_colour_discrete_divergingx(palette="Zissou 1") +
+  scale_shape_manual(values=c(1, 2, 3)) +
   theme_minimal() +
   theme(aspect.ratio=1)
 ```
@@ -517,8 +529,7 @@ Bushfires
     
 Sketches as an example  
 
-```{r}
-#| eval: false
+```{r eval=FALSE}
 #| echo: false
 # Penguins example
 # You need to install python and tensorflow, following
@@ -583,8 +594,7 @@ score <- model %>% evaluate(p_test_x, p_test_y, verbose = 0)
 save_model_tf(model, "data/penguins_cnn")
 ```
 
-```{r}
-#| eval: false
+```{r eval=FALSE}
 #| echo: false
 # Checking dimensions of weights matrix
 # Define model
@@ -706,8 +716,7 @@ p_exp_sv <- shapviz(p_explain)
 #sv_importance(p_exp_sv, "both")
 ```
 
-```{r}
-#| eval: false
+```{r eval=FALSE}
 #| echo: false
 # Load model
 load_model_tf()
@@ -761,8 +770,7 @@ Comparison of the boundaries produced by the LDA (a) and the CNN (b) model, usin
 
 \index{tour!slice} 
 
-```{r}
-#| eval: false
+```{r eval=FALSE}
 #| echo: false
 # Explore misclassifications
 # Predict
@@ -811,8 +819,7 @@ render_gif(p_all[,1:4],
 # Explore probabilistic predictions like vote matrix
 ```
 
-```{r}
-#| eval: false
+```{r eval=FALSE}
 #| echo: false
 # Models at the nodes
 layer1 <- get_layer(model, index=1)
@@ -825,8 +832,7 @@ l1_wgts <- keras::get_weights(model, trainable=TRUE)
 # Now look at interpretability metrics
 ```
 
-```{r}
-#| eval: false
+```{r eval=FALSE}
 #| echo: false
 # Following https://parsnip.tidymodels.org/articles/Examples.html
 library(nnet)
