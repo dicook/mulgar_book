@@ -25,7 +25,7 @@ For these examples we use the software `keras` [@keras] following the installati
 
 ## Setting up the model 
 
-A first step is to decide how many nodes the neural network architecture should have, and and what activation function should be used. To make these decisions, ideally you already has some knowledge of the shapes of class clusters. For the penguins classification, we have seen that it contains three elliptically shaped clusters of roughly the same size. This suggests two nodes in the hidden layer would be sufficient to separate three clusters [@nn-diagram]. Because the shapes of the clusters are convex, using linear activation ("relu") will also be sufficient. The model specification is as follows:
+A first step is to decide how many nodes the neural network architecture should have, and and what activation function should be used. To make these decisions, ideally you already has some knowledge of the shapes of class clusters. For the penguins classification, we have seen that it contains three elliptically shaped clusters of roughly the same size. This suggests two nodes in the hidden layer would be sufficient to separate three clusters (@fig-nn-diagram). Because the shapes of the clusters are convex, using linear activation ("relu") will also be sufficient. The model specification is as follows:
 
 ```{r eval=FALSE}
 #| echo: true
@@ -52,7 +52,7 @@ p_nn_model %>% compile(
 
 Note that `tensorflow::set_random_seed(211)` sets the seed for the model fitting so that we can obtain the same result to discuss later. It needs to be set before the model is defined in the code. The model will also saved in order to diagnose and make predictions. 
 
-![Network architecture for the model on the penguins data.](images/nn-diagram.png){#nn-diagram align="center"}
+![Network architecture for the model on the penguins data.](images/nn-diagram.png){#fig-nn-diagram align="center"}
 
 ```{r eval=FALSE}
 #| echo: false
@@ -226,29 +226,81 @@ plot(p_nn_fit)
 keras::get_weights(p_nn_model, trainable=TRUE)
 ```
 
-Because we set the random number seed we will get the same fit each time the code provided here is run. However, if the model is re-fit without setting the seed, there is a surprising amount of variability in the fits. One expects that `keras` is reasonably stable so one would not expect the huge array of fits as observed in @wickham2015 using `nnet`. That this can happen with the simple model used here reinforces the notion that fitting of neural network models is fiddly, and great care needs to be taken to validate and diagnose the fit. 
+Because we set the random number seed we will get the same fit each time the code provided here is run. However, if the model is re-fit without setting the seed, you will see that there is a surprising amount of variability in the fits. Setting `epochs = 200` helps to usually get a good fit. One expects that `keras` is reasonably stable so one would not expect the huge array of fits as observed in @wickham2015 using `nnet`. That this can happen with the simple model used here reinforces the notion that fitting of neural network models is fiddly, and great care needs to be taken to validate and diagnose the fit. 
 
-## Extracting model components
+::: {.content-visible when-format="html"}
+::: info
+Fitting neural network models is fiddly, and very different fitted models can result from restarts, parameter choices, and architecture. 
+:::
+:::
 
-<!-- Weights, and plotting nodes: reference Removing the blindfold-->
+::: {.content-visible when-format="pdf"}
+\infobox{Fitting neural network models is fiddly, and very different fitted models can result from restarts, parameter choices, and architecture.  
+}
+:::
 
-Because nodes in the hidden layers of neural networks are themselves (relatively simple regression) models, it can be helpful to examine them to understand the overall model. Most software will allow the coefficients for the models at these nodes to be extracted. For the penguins example there are two nodes, so we can extract the coefficients and plot the resulting two linear combinations to examine the separation between classes.
-
-```{r}
+```{r echo=knitr::is_html_output()}
+#| code-fold: true
 library(keras)
 library(ggplot2)
 library(colorspace)
 
 # load fitted model
 p_nn_model <- load_model_tf("data/penguins_cnn")
-p_nn_model %>% evaluate(p_test_x, p_test_y, verbose = 0)
+```
 
+The fitted model that we have chosen as the final one has reasonably small loss and high accuracy. Plots of loss and accuracy across epochs showing the change during  fitting can be plotted, but we don't show them here, because they are generally not very interesting.
+
+```{r}
+p_nn_model %>% evaluate(p_test_x, p_test_y, verbose = 0)
+```
+
+The model object can be saved for later use with:
+
+```{r eval=FALSE}
+# Save model: does not work!
+save_model_tf(p_nn_model, "data/penguins_cnn")
+```
+
+## Extracting model components
+
+::: {.content-visible when-format="html"}
+::: info
+View the individual node models to understand how they combine to produce the overall model.
+:::
+:::
+
+::: {.content-visible when-format="pdf"}
+\infobox{View the individual node models to understand how they combine to produce the overall model.
+}
+:::
+
+Because nodes in the hidden layers of neural networks are themselves (relatively simple regression) models, it can be interesting to examine these to understand how the model is making it's predictions. Although it's rarely easy, most software will allow the coefficients for the models at these nodes to be extracted. With the penguins CNN model there are two nodes, so we can extract the coefficients and plot the resulting two linear combinations to examine the separation between classes.
+
+```{r}
 # Extract hidden layer model weights
 p_nn_wgts <- keras::get_weights(p_nn_model, trainable=TRUE)
 p_nn_wgts 
+```
+
+The linear coefficients for the first node in the model are `r round(p_nn_wgts[[1]][,1], 2)`, and the second node in the model are `r round(p_nn_wgts[[1]][,2], 2)`. We can use these like we used the linear discriminants in LDA to make a 2D view of the data, where the model is separating the three species. The constants `r round(p_nn_wgts[[2]], 2)` are not important for this. They are only useful for drawing the location of the boundaries between classes produced by the model.
+
+These two sets of model coefficients provide linear combinations of the original variables. Together, they define a plane on which the data is projected to view the classification produced by the model. Ideally, though this plane should be defined using an orthonormal basis otherwise the shape of the data distribution might be warped. So we orthonormalise this matrix before computing the data projection.
+
+```{r}
+# Orthonormalise the weights to make 2D projection
 p_nn_wgts_on <- tourr::orthonormalise(p_nn_wgts[[1]])
 p_nn_wgts_on
+```
 
+```{r echo=knitr::is_html_output()}
+#| code-fold: false
+#| label: fig-hidden-layer
+#| fig-cap: "Plot of the data in the linear combinations from the two nodes in the hidden layer. The three species are clearly different. It is missing the big gap between Gentoo and the other species, which suggest this fit is sub-optimal."
+#| fig-alt: FIXME
+#| fig-width: 5
+#| fig-height: 4
+#| out-width: 80%
 # Hidden layer
 p_train_m <- p_train %>%
   mutate(nn1 = as.matrix(p_train[,1:4]) %*%
@@ -275,6 +327,12 @@ ggplot(p_all_m, aes(x=nn1, y=nn2,
   theme_minimal() +
   theme(aspect.ratio=1)
 ```
+
+@fig-hidden-layer shows the data projected into the plane determined by the two linear combinations of the two nodes in the hidden layer. Training and test sets are indicated by empty and solid circles. The three species are clearly different but there is some overlap or confusion for a few penguins. The most interesting aspect to learn is that there is no big gap between the Gentoo and other species, which we know exists in the data. The model has not found this gap, and thus is likely to unfortunately and erroneously confuse some Gentoo penguins, particularly with Adelie.
+
+What we have shown here is a process to use the models at the nodes of the hidden layer to produce a reduced dimensional space where the classes are best separated, at least as determined by the model. The process will work in higher dimensions also. 
+
+When there are more nodes in the hidden layer than the number of original variables it means that the space is extended to achieve useful classifications that need more complicated non-linear boundaries. The extra nodes describe the non-linearity. @wickham2015 provides a good illustration of this in 2D. The process of examining each of the node models can be useful for understanding this non-linear separation.
 
 ## Examining predictive probabilities
 \index{classification!predictive probabilities}

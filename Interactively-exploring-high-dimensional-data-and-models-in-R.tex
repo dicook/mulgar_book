@@ -265,7 +265,7 @@
 
 \begin{document}
 \maketitle
-\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[interior hidden, enhanced, sharp corners, frame hidden, breakable, borderline west={3pt}{0pt}{shadecolor}, boxrule=0pt]}{\end{tcolorbox}}\fi
+\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[sharp corners, enhanced, boxrule=0pt, frame hidden, breakable, interior hidden, borderline west={3pt}{0pt}{shadecolor}]}{\end{tcolorbox}}\fi
 
 \renewcommand*\contentsname{Table of contents}
 {
@@ -5369,9 +5369,9 @@ these decisions, ideally you already has some knowledge of the shapes of
 class clusters. For the penguins classification, we have seen that it
 contains three elliptically shaped clusters of roughly the same size.
 This suggests two nodes in the hidden layer would be sufficient to
-separate three clusters (\textbf{nn-diagram?}). Because the shapes of
-the clusters are convex, using linear activation (``relu'') will also be
-sufficient. The model specification is as follows:
+separate three clusters (Figure~\ref{fig-nn-diagram}). Because the
+shapes of the clusters are convex, using linear activation (``relu'')
+will also be sufficient. The model specification is as follows:
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -5408,7 +5408,8 @@ model will also saved in order to diagnose and make predictions.
 
 }
 
-\caption{Network architecture for the model on the penguins data.}
+\caption{\label{fig-nn-diagram}Network architecture for the model on the
+penguins data.}
 
 \end{figure}
 
@@ -5529,34 +5530,25 @@ ______________________________________________________________
 
 Because we set the random number seed we will get the same fit each time
 the code provided here is run. However, if the model is re-fit without
-setting the seed, there is a surprising amount of variability in the
-fits. One expects that \texttt{keras} is reasonably stable so one would
-not expect the huge array of fits as observed in Wickham et al. (2015)
-using \texttt{nnet}. That this can happen with the simple model used
-here reinforces the notion that fitting of neural network models is
-fiddly, and great care needs to be taken to validate and diagnose the
-fit.
+setting the seed, you will see that there is a surprising amount of
+variability in the fits. Setting \texttt{epochs\ =\ 200} helps to
+usually get a good fit. One expects that \texttt{keras} is reasonably
+stable so one would not expect the huge array of fits as observed in
+Wickham et al. (2015) using \texttt{nnet}. That this can happen with the
+simple model used here reinforces the notion that fitting of neural
+network models is fiddly, and great care needs to be taken to validate
+and diagnose the fit.
 
-\hypertarget{extracting-model-components}{%
-\section{Extracting model
-components}\label{extracting-model-components}}
+\infobox{Fitting neural network models is fiddly, and very different fitted models can result from restarts, parameter choices, and architecture.  
+}
 
-Because nodes in the hidden layers of neural networks are themselves
-(relatively simple regression) models, it can be helpful to examine them
-to understand the overall model. Most software will allow the
-coefficients for the models at these nodes to be extracted. For the
-penguins example there are two nodes, so we can extract the coefficients
-and plot the resulting two linear combinations to examine the separation
-between classes.
+The fitted model that we have chosen as the final one has reasonably
+small loss and high accuracy. Plots of loss and accuracy across epochs
+showing the change during fitting can be plotted, but we don't show them
+here, because they are generally not very interesting.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\FunctionTok{library}\NormalTok{(keras)}
-\FunctionTok{library}\NormalTok{(ggplot2)}
-\FunctionTok{library}\NormalTok{(colorspace)}
-
-\CommentTok{\# load fitted model}
-\NormalTok{p\_nn\_model }\OtherTok{\textless{}{-}} \FunctionTok{load\_model\_tf}\NormalTok{(}\StringTok{"data/penguins\_cnn"}\NormalTok{)}
 \NormalTok{p\_nn\_model }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{evaluate}\NormalTok{(p\_test\_x, p\_test\_y, }\AttributeTok{verbose =} \DecValTok{0}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
@@ -5565,6 +5557,30 @@ between classes.
      loss  accuracy 
 0.2563850 0.9553571 
 \end{verbatim}
+
+The model object can be saved for later use with:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Save model: does not work!}
+\FunctionTok{save\_model\_tf}\NormalTok{(p\_nn\_model, }\StringTok{"data/penguins\_cnn"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{extracting-model-components}{%
+\section{Extracting model
+components}\label{extracting-model-components}}
+
+\infobox{View the individual node models to understand how they combine to produce the overall model.
+}
+
+Because nodes in the hidden layers of neural networks are themselves
+(relatively simple regression) models, it can be interesting to examine
+these to understand how the model is making it's predictions. Although
+it's rarely easy, most software will allow the coefficients for the
+models at these nodes to be extracted. With the penguins CNN model there
+are two nodes, so we can extract the coefficients and plot the resulting
+two linear combinations to examine the separation between classes.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -5594,8 +5610,24 @@ between classes.
 [1]  0.4554813 -0.9371488  0.3577386
 \end{verbatim}
 
+The linear coefficients for the first node in the model are 0.62, 0.19,
+-0.17, -0.89, and the second node in the model are 1.33, -0.02, -0.3,
+-0.37. We can use these like we used the linear discriminants in LDA to
+make a 2D view of the data, where the model is separating the three
+species. The constants 0.13, -0.09 are not important for this. They are
+only useful for drawing the location of the boundaries between classes
+produced by the model.
+
+These two sets of model coefficients provide linear combinations of the
+original variables. Together, they define a plane on which the data is
+projected to view the classification produced by the model. Ideally,
+though this plane should be defined using an orthonormal basis otherwise
+the shape of the data distribution might be warped. So we orthonormalise
+this matrix before computing the data projection.
+
 \begin{Shaded}
 \begin{Highlighting}[]
+\CommentTok{\# Orthonormalise the weights to make 2D projection}
 \NormalTok{p\_nn\_wgts\_on }\OtherTok{\textless{}{-}}\NormalTok{ tourr}\SpecialCharTok{::}\FunctionTok{orthonormalise}\NormalTok{(p\_nn\_wgts[[}\DecValTok{1}\NormalTok{]])}
 \NormalTok{p\_nn\_wgts\_on}
 \end{Highlighting}
@@ -5609,43 +5641,40 @@ between classes.
 [4,] -0.7978314  0.5431528
 \end{verbatim}
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\# Hidden layer}
-\NormalTok{p\_train\_m }\OtherTok{\textless{}{-}}\NormalTok{ p\_train }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{nn1 =} \FunctionTok{as.matrix}\NormalTok{(p\_train[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{]) }\SpecialCharTok{\%*\%}
-           \FunctionTok{as.matrix}\NormalTok{(p\_nn\_wgts\_on[,}\DecValTok{1}\NormalTok{], }\AttributeTok{ncol=}\DecValTok{1}\NormalTok{),}
-         \AttributeTok{nn2 =} \FunctionTok{as.matrix}\NormalTok{(p\_train[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{]) }\SpecialCharTok{\%*\%}
-           \FunctionTok{matrix}\NormalTok{(p\_nn\_wgts\_on[,}\DecValTok{2}\NormalTok{], }\AttributeTok{ncol=}\DecValTok{1}\NormalTok{))}
+\begin{figure}
 
-\CommentTok{\# Now add the test points on.}
-\NormalTok{p\_test\_m }\OtherTok{\textless{}{-}}\NormalTok{ p\_test }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{nn1 =} \FunctionTok{as.matrix}\NormalTok{(p\_test[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{]) }\SpecialCharTok{\%*\%}
-           \FunctionTok{as.matrix}\NormalTok{(p\_nn\_wgts\_on[,}\DecValTok{1}\NormalTok{], }\AttributeTok{ncol=}\DecValTok{1}\NormalTok{),}
-         \AttributeTok{nn2 =} \FunctionTok{as.matrix}\NormalTok{(p\_test[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{]) }\SpecialCharTok{\%*\%}
-           \FunctionTok{matrix}\NormalTok{(p\_nn\_wgts\_on[,}\DecValTok{2}\NormalTok{], }\AttributeTok{ncol=}\DecValTok{1}\NormalTok{))}
-\NormalTok{p\_train\_m }\OtherTok{\textless{}{-}}\NormalTok{ p\_train\_m }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{set =} \StringTok{"train"}\NormalTok{)}
-\NormalTok{p\_test\_m }\OtherTok{\textless{}{-}}\NormalTok{ p\_test\_m }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{set =} \StringTok{"test"}\NormalTok{)}
-\NormalTok{p\_all\_m }\OtherTok{\textless{}{-}} \FunctionTok{bind\_rows}\NormalTok{(p\_train\_m, p\_test\_m)}
-\FunctionTok{ggplot}\NormalTok{(p\_all\_m, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{nn1, }\AttributeTok{y=}\NormalTok{nn2, }
-                     \AttributeTok{colour=}\NormalTok{species, }\AttributeTok{shape=}\NormalTok{set)) }\SpecialCharTok{+} 
-  \FunctionTok{geom\_point}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{scale\_colour\_discrete\_divergingx}\NormalTok{(}\AttributeTok{palette=}\StringTok{"Zissou 1"}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{scale\_shape\_manual}\NormalTok{(}\AttributeTok{values=}\FunctionTok{c}\NormalTok{(}\DecValTok{16}\NormalTok{, }\DecValTok{1}\NormalTok{)) }\SpecialCharTok{+}
-  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{theme}\NormalTok{(}\AttributeTok{aspect.ratio=}\DecValTok{1}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{figure}[H]
-
-{\centering \includegraphics[width=0.8\textwidth,height=\textheight]{17-nn_files/figure-pdf/unnamed-chunk-9-1.pdf}
+{\centering \includegraphics[width=0.8\textwidth,height=\textheight]{17-nn_files/figure-pdf/fig-hidden-layer-1.pdf}
 
 }
 
+\caption{\label{fig-hidden-layer}Plot of the data in the linear
+combinations from the two nodes in the hidden layer. The three species
+are clearly different. It is missing the big gap between Gentoo and the
+other species, which suggest this fit is sub-optimal.}
+
 \end{figure}
+
+Figure~\ref{fig-hidden-layer} shows the data projected into the plane
+determined by the two linear combinations of the two nodes in the hidden
+layer. Training and test sets are indicated by empty and solid circles.
+The three species are clearly different but there is some overlap or
+confusion for a few penguins. The most interesting aspect to learn is
+that there is no big gap between the Gentoo and other species, which we
+know exists in the data. The model has not found this gap, and thus is
+likely to unfortunately and erroneously confuse some Gentoo penguins,
+particularly with Adelie.
+
+What we have shown here is a process to use the models at the nodes of
+the hidden layer to produce a reduced dimensional space where the
+classes are best separated, at least as determined by the model. The
+process will work in higher dimensions also.
+
+When there are more nodes in the hidden layer than the number of
+original variables it means that the space is extended to achieve useful
+classifications that need more complicated non-linear boundaries. The
+extra nodes describe the non-linearity. Wickham et al. (2015) provides a
+good illustration of this in 2D. The process of examining each of the
+node models can be useful for understanding this non-linear separation.
 
 \hypertarget{examining-predictive-probabilities}{%
 \section{Examining predictive
@@ -5661,7 +5690,7 @@ probabilities}\label{examining-predictive-probabilities}}
 \end{Shaded}
 
 \begin{verbatim}
-7/7 - 0s - 113ms/epoch - 16ms/step
+7/7 - 0s - 138ms/epoch - 20ms/step
 \end{verbatim}
 
 \begin{Shaded}
@@ -5688,7 +5717,7 @@ probabilities}\label{examining-predictive-probabilities}}
 \end{Shaded}
 
 \begin{verbatim}
-4/4 - 0s - 17ms/epoch - 4ms/step
+4/4 - 0s - 21ms/epoch - 5ms/step
 \end{verbatim}
 
 \begin{Shaded}
@@ -5759,7 +5788,7 @@ probabilities}\label{examining-predictive-probabilities}}
 
 \begin{figure}[H]
 
-{\centering \includegraphics[width=0.5\textwidth,height=\textheight]{17-nn_files/figure-pdf/unnamed-chunk-10-1.pdf}
+{\centering \includegraphics[width=0.5\textwidth,height=\textheight]{17-nn_files/figure-pdf/unnamed-chunk-15-1.pdf}
 
 }
 
@@ -5822,7 +5851,7 @@ has not been over-fitted.}
 
 \begin{figure}[H]
 
-{\centering \includegraphics[width=1\textwidth,height=\textheight]{17-nn_files/figure-pdf/unnamed-chunk-12-1.pdf}
+{\centering \includegraphics[width=1\textwidth,height=\textheight]{17-nn_files/figure-pdf/unnamed-chunk-17-1.pdf}
 
 }
 
@@ -5853,7 +5882,7 @@ than for other penguins.}
 
 \begin{figure}[H]
 
-{\centering \includegraphics[width=1\textwidth,height=\textheight]{17-nn_files/figure-pdf/unnamed-chunk-13-1.pdf}
+{\centering \includegraphics[width=1\textwidth,height=\textheight]{17-nn_files/figure-pdf/unnamed-chunk-18-1.pdf}
 
 }
 
@@ -5906,7 +5935,7 @@ than for other penguins.}
 
 \begin{figure}[H]
 
-{\centering \includegraphics[width=0.8\textwidth,height=\textheight]{17-nn_files/figure-pdf/unnamed-chunk-14-1.pdf}
+{\centering \includegraphics[width=0.8\textwidth,height=\textheight]{17-nn_files/figure-pdf/unnamed-chunk-19-1.pdf}
 
 }
 
@@ -5921,10 +5950,10 @@ Check against LDA, suspect that \texttt{bm} is used too much in CNN
 model.
 
 \begin{verbatim}
-313/313 - 0s - 432ms/epoch - 1ms/step
+313/313 - 0s - 398ms/epoch - 1ms/step
 \end{verbatim}
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{17-nn_files/figure-pdf/unnamed-chunk-15-1.pdf}
+\includegraphics[width=0.8\textwidth,height=\textheight]{17-nn_files/figure-pdf/unnamed-chunk-20-1.pdf}
 
 Outline for chapter:
 
