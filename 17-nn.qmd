@@ -24,6 +24,7 @@ In practice, a model may have many nodes, and several hidden layers, a variety o
 For these examples we use the software `keras` [@keras] following the installation and tutorial details at [https://tensorflow.rstudio.com/tutorials/](https://tensorflow.rstudio.com/tutorials/). Because it is an interface to python it can be tricky to install. If this is a problem, the example code should be possible to convert to use `nnet` [@VR02] or `neuralnet` [@neuralnet]. We will use the penguins data to illustrate the fitting, because it makes it easier to understand the procedures and the fit. However, a neural network is like using a jackhammer instead of a trowel to plant a seedling, more complicated than necessary to build a good classification model for this data.
 
 ## Setting up the model 
+\index{classification!ANN architecture}
 
 A first step is to decide how many nodes the neural network architecture should have, and and what activation function should be used. To make these decisions, ideally you already has some knowledge of the shapes of class clusters. For the penguins classification, we have seen that it contains three elliptically shaped clusters of roughly the same size. This suggests two nodes in the hidden layer would be sufficient to separate three clusters (@fig-nn-diagram). Because the shapes of the clusters are convex, using linear activation ("relu") will also be sufficient. The model specification is as follows:
 
@@ -92,17 +93,21 @@ p_nn_wgts <- keras::get_weights(p_nn_model, trainable=TRUE)
 ```
 
 ## Checking the training/test split
+\index{classification!training/test split}
 
 Splitting the data into training and test is an essential way to protect against overfitting, for most classifiers, but especially so for the copiously parameterised neural networks. The model specified for the penguins data with only two nodes is unlikely to be overfitted, but it is nevertheless good practice to use a training set for building and a test set for evaluation. 
 
-`r ifelse(knitr::is_html_output(), '@fig-p-split-html', '@fig-p-split-pdf')` shows the tour being used to examine the split into training and test samples for the penguins data. Using random sampling, particularly stratified by group, should result the two sets being very similar, as can be seen here. It does happen that several observations in the test set are on the extremes of their class cluster, so it could be that the model makes errors in these neightbourhoods.
+`r ifelse(knitr::is_html_output(), '@fig-p-split-html', '@fig-p-split-pdf')` shows the tour being used to examine the split into training and test samples for the penguins data. Using random sampling, particularly stratified by group, should result the two sets being very similar, as can be seen here. It does happen that several observations in the test set are on the extremes of their class cluster, so it could be that the model makes errors in the neighbourhoods of these points.
 
 ```{r echo=knitr::is_html_output()}
 #| message: false
 # Split the data intro training and testing
 library(ggthemes)
 library(dplyr)
+library(tidyr)
 library(rsample)
+library(ggbeeswarm)
+
 load("data/penguins_sub.rda") # from mulgar book
 
 set.seed(821)
@@ -177,6 +182,7 @@ Evaluating the training/test split, where we expect that the two samples should 
 :::
 
 ## Fit the model
+\index{classification!Fitting a CNN}
 
 The data needs to be specially formatted for the model fitted using `keras`. The explanatory variables need to be provided as a `matrix`, and the categorical response needs to be separate, and specified as a `numeric` variable, beginning with 0. 
 
@@ -263,6 +269,7 @@ save_model_tf(p_nn_model, "data/penguins_cnn")
 ```
 
 ## Extracting model components
+\index{classification!hidden layers}
 
 ::: {.content-visible when-format="html"}
 ::: info
@@ -296,7 +303,7 @@ p_nn_wgts_on
 ```{r echo=knitr::is_html_output()}
 #| code-fold: false
 #| label: fig-hidden-layer
-#| fig-cap: "Plot of the data in the linear combinations from the two nodes in the hidden layer. The three species are clearly different. It is missing the big gap between Gentoo and the other species, which suggest this fit is sub-optimal."
+#| fig-cap: "Plot of the data in the linear combinations from the two nodes in the hidden layer. The three species are clearly different, although with some overlap between all three. A main issue to notice is that there isn't a big gap between Gentoo and the other species, which we know is there based on our data exploration done in other chapters. This suggests this fitted model is sub-optimal."
 #| fig-alt: FIXME
 #| fig-width: 5
 #| fig-height: 4
@@ -337,24 +344,34 @@ When there are more nodes in the hidden layer than the number of original variab
 ## Examining predictive probabilities
 \index{classification!predictive probabilities}
 
+When the predictive probabilities are returned by a model, as is done by this CNN, we can use a ternary diagram for three class problems, or high-dimensional simplex when there are more classes to examine the strength of the classification. This done in the same way that was used for the votes matrix from a random forest in @sec-votes. 
+
 ```{r}
-#| fig-width: 3
-#| fig-height: 3
-#| out-width: 50%
-#| fig-cap: "Ternary diagram for the three groups of the predictive probabilities of both training ans test sets. From what we already know about the penguins data this fit is not good. Both Chinstrap and Gentoo penguins are confused with Adelie, or at risk of it. Gentoo is very well-separated from the other two species when several variables are used, and this fitted model is blind to it. One useful finding is that there is little difference between training and test sets, so the model has not been over-fitted."
 # Predict training and test set
-p_train_pred <- p_nn_model %>% predict(p_train_x)
-p_train_pred_cat <- levels(p_train$species)[apply(p_train_pred, 1, which.max)]
-p_train_pred_cat <- factor(p_train_pred_cat,
-                          levels=levels(p_train$species))
+p_train_pred <- p_nn_model %>% 
+  predict(p_train_x, verbose = 0)
+p_train_pred_cat <- levels(p_train$species)[
+  apply(p_train_pred, 1,
+        which.max)]
+p_train_pred_cat <- factor(
+  p_train_pred_cat,
+  levels=levels(p_train$species))
 table(p_train$species, p_train_pred_cat)
 
-p_test_pred <- p_nn_model %>% predict(p_test_x)
-p_test_pred_cat <- levels(p_test$species)[apply(p_test_pred, 1, which.max)]
-p_test_pred_cat <- factor(p_test_pred_cat,
-                      levels=levels(p_test$species))
+p_test_pred <- p_nn_model %>% 
+  predict(p_test_x, verbose = 0)
+p_test_pred_cat <- levels(p_test$species)[
+  apply(p_test_pred, 1, 
+        which.max)]
+p_test_pred_cat <- factor(
+  p_test_pred_cat,
+  levels=levels(p_test$species))
 table(p_test$species, p_test_pred_cat)
+```
 
+```{r echo=knitr::is_html_output()}
+#| code-fold: true
+# Set up the data to make the ternary diagram
 # Join data sets
 colnames(p_train_pred) <- c("Adelie", "Chinstrap", "Gentoo")
 colnames(p_test_pred) <- c("Adelie", "Chinstrap", "Gentoo")
@@ -384,24 +401,47 @@ simp <- geozoo::simplex(p=2)
 sp <- data.frame(cbind(simp$points), simp$points[c(2,3,1),])
 colnames(sp) <- c("x1", "x2", "x3", "x4")
 sp$species = sort(unique(penguins_sub$species))
+```
 
+```{r echo=knitr::is_html_output()}
+#| code-fold: true
+#| fig-width: 4
+#| fig-height: 3
+#| out-width: 70%
+#| fig-cap: "Ternary diagram for the three groups of the predictive probabilities of both training ans test sets. From what we already know about the penguins data this fit is not good. Both Chinstrap and Gentoo penguins are confused with Adelie, or at risk of it. Gentoo is very well-separated from the other two species when several variables are used, and this fitted model is blind to it. One useful finding is that there is little difference between training and test sets, so the model has not been over-fitted."
 # Plot it
 ggplot() +
   geom_segment(data=sp, aes(x=x1, y=x2, xend=x3, yend=x4)) +
   geom_text(data=sp, aes(x=x1, y=x2, label=species),
-            nudge_x=c(-0.06, 0.07, 0),
+            nudge_x=c(-0.1, 0.15, 0),
             nudge_y=c(0.05, 0.05, -0.05)) +
   geom_point(data=p_nn_v_p, aes(x=x1, y=x2, 
                                 colour=species,
                                 shape=set), 
              size=2, alpha=0.5) +
   scale_color_discrete_divergingx(palette="Zissou 1") +
-  scale_shape_manual(values=c(16, 1)) +
+  scale_shape_manual(values=c(19, 1)) +
   theme_map() +
-  theme(aspect.ratio=1, legend.position="none")
+  theme(aspect.ratio=1, legend.position = "right")
 ```
 
-## Local interpretations
+
+::: {.content-visible when-format="html"}
+::: info
+If the training and test sets look similar when plotted in the model space then the model is not suffering from over-fitting.
+:::
+:::
+
+::: {.content-visible when-format="pdf"}
+\infobox{If the training and test sets look similar when plotted in the model space then the model is not suffering from over-fitting. 
+}
+:::
+
+## Local explanations
+\index{classification!local explanations}
+\index{classification!XAI}
+
+It especially important to be able to interpret or explain a model, even more so when the model is complex or black-box'y. A good resource for learning about the range of methods is @iml. Local explanations provide some information about variables that are important for making the prediction for a particular observation. The method that we use here is Shapley value, as computed using the `kernelshap` package [@kernelshap]. 
 
 ```{r eval=FALSE}
 # Explanations
@@ -418,12 +458,14 @@ p_exp_sv <- shapviz(p_explain)
 save(p_exp_sv, file="data/p_exp_sv.rda")
 ```
 
-```{r}
-#| fig-width: 4
-#| fig-height: 3
-#| out-width: 100%
-#| fig-cap: "SHAP values focused on Gentoo class, for each variable. The one misclassified penguin (orange) has a much lower value for body mass, suggesting that this variable is used differently for the prediction than for other penguins." 
-#| fig-alt: FIXME
+A Shapley value for an observation indicates how the variable contributes to the model prediction for that observation, relative to other variables. It is an average, computed from the change in prediction when all combinations of presence or absence of other variables. In the computation, for each combination, the prediction is computed by substituting absent variables with their average value, like one might do when imputing missing values. 
+
+@fig-shapley-pcp shows the Shapley values for Gentoo observations (both training and test sets) in the penguins data, as a parallel coordinate plot. The values for the single misclassified Gentoo penguin (in the training set) is coloured orange. Overall, the Shapley values don't vary much on `bl`, `bd` and `fl` but they do on `bm`. The effect of other variables is seems to be only important for `bm`. 
+
+For the misclassified penguin, the effect of `bm` for all combinations of other variables leads to a decline in predicted value, thus less confidence in it being a Gentoo. In contrast, for this same penguin when considering the effect of `bl` the predicted value increases on average. 
+
+```{r echo=knitr::is_html_output()}
+#| code-fold: true
 load("data/p_exp_sv.rda")
 p_exp_gentoo <- p_exp_sv$Class_3$S
 p_exp_gentoo <- p_exp_gentoo %>%
@@ -432,8 +474,17 @@ p_exp_gentoo <- p_exp_gentoo %>%
          pspecies = p_train_pred_cat,
   ) %>%
   mutate(error = ifelse(species == pspecies, 0, 1))
-library(tidyr)
-library(ggbeeswarm)
+```
+
+```{r echo=knitr::is_html_output()}
+#| eval: false
+#| code-fold: true
+#| label: fig-shapley-dot
+#| fig-width: 4
+#| fig-height: 3
+#| out-width: 80%
+#| fig-cap: "SHAP values focused on Gentoo class, for each variable. The one misclassified penguin (orange) has a much lower value for body mass, suggesting that this variable is used differently for the prediction than for other penguins." 
+#| fig-alt: FIXME
 p_exp_gentoo %>%
   filter(species == "Gentoo") %>%
   pivot_longer(bl:bm, names_to="var", values_to="shap") %>%
@@ -447,11 +498,12 @@ p_exp_gentoo %>%
   theme(legend.position = "none")
 ```
 
-
-```{r}
+```{r echo=knitr::is_html_output()}
+#| code-fold: true
+#| label: fig-shapley-pcp
 #| fig-width: 4
 #| fig-height: 3
-#| out-width: 100%
+#| out-width: 80%
 #| fig-cap: "SHAP values focused on Gentoo class, for each variable. The one misclassified penguin (orange) has a much lower value for body mass, suggesting that this variable is used differently for the prediction than for other penguins." 
 #| fig-alt: FIXME
 library(ggpcp)
@@ -462,7 +514,7 @@ p_exp_gentoo %>%
     geom_pcp_axes() + 
     geom_pcp_boxes(fill="grey80") + 
     geom_pcp(aes(colour = factor(error)), 
-             size = 2, alpha=0.5) +
+             linewidth = 2, alpha=0.3) +
   scale_colour_discrete_divergingx(palette="Geyser") +
   xlab("") + ylab("SHAP") +
   theme_minimal() + 
@@ -470,10 +522,16 @@ p_exp_gentoo %>%
 
 ```
 
-```{r}
-#| fig-width: 8
-#| fig-height: 4
-#| fig-cap: "Plot of variables." 
+If we examine the data [@fig-penguins-bl-bm-bd] the explanation makes some sense. The misclassified penguin has an unusually small value on `bm`. That the SHAP value for `bm` was quite different pointed to this being a potential issue with the model, particularly for this penguin. This penguin's prediction is negatively impacted by `bm` being in the model.
+
+
+```{r echo=knitr::is_html_output()}
+#| label: fig-penguins-bl-bm-bd
+#| code-fold: true
+#| fig-width: 6
+#| fig-height: 6
+#| out-width: 100%
+#| fig-cap: "Plots of the data to help understand what the SHAP values indicate. The misclassified Gentoo penguin has an unusually low body mass value which makes it appear to be more like an Adelie penguin, particularly when considered in relation to it's bill length." 
 #| fig-alt: FIXME
 library(patchwork)
 # Check position on bm
@@ -491,32 +549,53 @@ p_exp_gentoo_proj <- p_exp_gentoo %>%
            shap_proj[2]*bd+
            shap_proj[3]*fl+
            shap_proj[4]*bm)
-sp1 <- ggplot(p_exp_gentoo_proj, aes(x=bm, y=bd, 
+sp1 <- ggplot(p_exp_gentoo_proj, aes(x=bm, y=bl, 
              colour=species, 
-             shape=factor(error))) +
+             shape=factor(1-error))) +
     geom_point(alpha=0.8) +
   scale_colour_discrete_divergingx(palette="Zissou 1") +
-  scale_shape_manual("Error", values=c(16, 1)) +
+  scale_shape_manual("error", values=c(19, 1)) +
   theme_minimal() + 
   theme(aspect.ratio=1, legend.position="bottom")
 sp2 <- ggplot(p_exp_gentoo_proj, aes(x=bm, y=shap1, 
              colour=species, 
-             shape=factor(error))) +
+             shape=factor(1-error))) +
     geom_point(alpha=0.8) +
   scale_colour_discrete_divergingx(palette="Zissou 1") +
-  scale_shape_manual("error", values=c(16, 1)) +
+  scale_shape_manual("error", values=c(19, 1)) +
   ylab("SHAP") +
   theme_minimal() + 
   theme(aspect.ratio=1, legend.position="bottom")
+sp2 <- ggplot(p_exp_gentoo_proj, aes(x=shap1, 
+             fill=species, colour=species)) +
+  geom_density(alpha=0.5) +
+  geom_vline(xintercept = p_exp_gentoo_proj$shap1[
+    p_exp_gentoo_proj$species=="Gentoo" &
+    p_exp_gentoo_proj$error==1], colour="black") +
+  scale_fill_discrete_divergingx(palette="Zissou 1") +
+  scale_colour_discrete_divergingx(palette="Zissou 1") +
+  theme_minimal() + 
+  theme(aspect.ratio=1, legend.position="bottom")
+sp2 <- ggplot(p_exp_gentoo_proj, aes(x=bm, y=bd, 
+             colour=species, 
+             shape=factor(1-error))) +
+    geom_point(alpha=0.8) +
+  scale_colour_discrete_divergingx(palette="Zissou 1") +
+  scale_shape_manual("error", values=c(19, 1)) +
+  theme_minimal() + 
+  theme(aspect.ratio=1, legend.position="bottom")
 sp1 + sp2 + plot_layout(ncol=2, guides = "collect") &
-  theme(legend.position='bottom')
+  theme(legend.position="bottom",
+        legend.direction="vertical")
 ```
 
 ## Examining boundaries
 
-Check against LDA, suspect that `bm` is used too much in CNN model.
+<!-- Check against LDA, suspect that `bm` is used too much in CNN model.-->
+@fig-penguins-lda-nn shows the boundaries for this CNN model along with those of the LDA model. 
 
-```{r echo=knitr::is_html_output()}
+```{r echo=knitr::is_html_output(), eval=FALSE}
+#| label: fig-penguins-nn-boundaries
 #| code-fold: true
 # Generate grid over explanatory variables
 p_grid <- tibble(
@@ -526,7 +605,8 @@ p_grid <- tibble(
   bm = runif(10000, min(penguins_sub$bm), max(penguins_sub$bm))
 )
 # Predict grid
-p_grid_pred <- p_nn_model %>% predict(as.matrix(p_grid))
+p_grid_pred <- p_nn_model %>%
+  predict(as.matrix(p_grid), verbose=0)
 p_grid_pred_cat <- levels(p_train$species)[apply(p_grid_pred, 1, which.max)]
 p_grid_pred_cat <- factor(p_grid_pred_cat,
                           levels=levels(p_train$species))
@@ -536,11 +616,11 @@ p_grid_proj <- as.matrix(p_grid) %*% p_nn_wgts_on
 colnames(p_grid_proj) <- c("nn1", "nn2")
 p_grid_proj <- p_grid_proj %>% 
   as_tibble() %>%
-  mutate(pspecies = p_grid_pred_cat)
+  mutate(species = p_grid_pred_cat)
 
 # Plot
 ggplot(p_grid_proj, aes(x=nn1, y=nn2, 
-                     colour=pspecies)) + 
+                     colour=species)) + 
   geom_point(alpha=0.5) +
   geom_point(data=p_all_m, aes(x=nn1, 
                                y=nn2, 
@@ -549,8 +629,35 @@ ggplot(p_grid_proj, aes(x=nn1, y=nn2,
   scale_colour_discrete_divergingx(palette="Zissou 1") +
   scale_shape_manual(values=c(1, 2, 3)) +
   theme_minimal() +
-  theme(aspect.ratio=1)
+  theme(aspect.ratio=1, 
+        legend.position = "bottom",
+        legend.title = element_blank())
 ```
+
+
+::: {.content-visible when-format="html"}
+
+::: {#fig-penguins-lda-nn-html layout-ncol=2}
+
+![LDA model](gifs/penguins_lda_boundaries.gif){#fig-lda-boundary fig-alt="FIX ME" width=300}
+
+![NN model](gifs/penguins_nn_boundaries.gif){#fig-tree-boundary fig-alt="FIX ME" width=300}
+
+Comparison of the boundaries produced by the LDA (a) and the CNN (b) model, using a slice tour. 
+:::
+:::
+
+::: {#fig-penguins-lda-nn layout-ncol=2}
+
+![LDA model](images/fig-lda-2D-boundaries-1.png){#fig-lda-boundary2 fig-alt="FIX ME" width=200}
+
+![NN model](images/penguins-nn-boundaries-1.png){#fig-nn-boundary fig-alt="FIX ME" width=290}
+
+Comparison of the boundaries produced by the LDA (a) and the CNN (b) model, using a slice tour. 
+:::
+
+\index{tour!slice} 
+
 
 <!--
 This chapter will likely include:
@@ -565,7 +672,7 @@ This chapter will likely include:
 NOTE: Results might vary with different knits 
 
 References keras/tensorflow book, tidymodels, interpretable machine learning, and removing the blindfold
--->
+
 
 Outline for chapter:
 
@@ -586,570 +693,6 @@ Bushfires
     - Overfitting
     
 Sketches as an example  
-
-```{r eval=FALSE}
-#| echo: false
-# Penguins example
-# You need to install python and tensorflow, following
-# instructions at https://tensorflow.rstudio.com/install/
-library(mulgar)
-load("data/penguins_sub.rda") # from mulgar book
-
-library(ggplot2)
-library(dplyr)
-library(keras)
-library(tidymodels)
-library(tourr)
-library(classifly)
-
-# Create training and test split - absolutely vital now
-set.seed(1210)
-p_split <- initial_split(penguins_sub[,1:5])
-p_train <- training(p_split)
-p_test <- testing(p_split)
-p_train_x <- p_train[,1:4] %>% as.matrix()
-p_train_y <- p_train %>% pull(species) %>% as.numeric() 
-p_train_y <- p_train_y-1 # Needs to be 0, 1, 2
-p_test_x <- p_test[,1:4] %>% as.matrix()
-p_test_y <- p_test %>% pull(species) %>% as.numeric() 
-p_test_y <- p_test_y-1
-
-# Check training and test split
-p_split_check <- bind_rows(
-  bind_cols(p_train, type = "train"), 
-  bind_cols(p_test, type = "test")) %>%
-  mutate(type = factor(type))
-animate_xy(p_split_check[,1:4], 
-           col=p_split_check$species,
-           pch=p_split_check$type)
-
-# Define model
-model <- keras_model_sequential()
-model %>% 
-  layer_dense(units = 4, activation = 'relu', input_shape = 4) %>% 
-  layer_dense(units = 3, activation = 'softmax')
-model %>% summary
-
-loss_fn <- loss_sparse_categorical_crossentropy(from_logits = TRUE)
-
-model %>% compile(
-  optimizer = "adam",
-  loss      = loss_fn,
-  metrics   = c('accuracy')
-)
-
-# Fit model
-fit <- model %>% fit(
-  x = p_train_x, y = p_train_y,
-  epochs           = 50
-)
-plot(fit)
-
-# Check accuracy
-score <- model %>% evaluate(p_test_x, p_test_y, verbose = 0)
-
-# Save model
-save_model_tf(model, "data/penguins_cnn")
-```
-
-```{r eval=FALSE}
-#| echo: false
-# Checking dimensions of weights matrix
-# Define model
-model2 <- keras_model_sequential()
-model2 %>% 
-  layer_dense(units = 2, activation = 'relu', input_shape = 4) %>% 
-  layer_dense(units = 3, activation = 'softmax')
-model2 %>% summary
-
-loss_fn <- loss_sparse_categorical_crossentropy(from_logits = TRUE)
-
-model2 %>% compile(
-  optimizer = "adam",
-  loss      = loss_fn,
-  metrics   = c('accuracy')
-)
-
-# Fit model
-fit2 <- model2 %>% fit(
-  x = p_train_x, y = p_train_y,
-  epochs           = 100
-)
-plot(fit2)
-
-# Check accuracy
-score <- model2 %>% evaluate(p_test_x, p_test_y, verbose = 0)
-
-# Weights
-l1_wgts <- keras::get_weights(model2, trainable=TRUE)
-
-# Hidden layer
-p_train_m2 <- p_train %>%
-  mutate(nn1 = as.matrix(p_train[,1:4]) %*% as.matrix(l1_wgts[[1]][,1], ncol=1) + l1_wgts[[2]][1],
-         nn2 = as.matrix(p_train[,1:4]) %*% matrix(l1_wgts[[1]][,2], ncol=1))
-
-ggplot(p_train_m2, aes(x=nn1, y=nn2, colour=species)) + 
-  geom_point() +
-  scale_colour_discrete_divergingx(palette="Zissou 1") +
-  theme_minimal() +
-  theme(aspect.ratio=1)
-
-# Now add the test points on.
-p_test_m2 <- p_test %>%
-  mutate(nn1 = as.matrix(p_test[,1:4]) %*% as.matrix(l1_wgts[[1]][,1], ncol=1) + l1_wgts[[2]][1],
-         nn2 = as.matrix(p_test[,1:4]) %*% matrix(l1_wgts[[1]][,2], ncol=1))
-p_train_m2 <- p_train_m2 %>%
-  mutate(set = "train")
-p_test_m2 <- p_test_m2 %>%
-  mutate(set = "test")
-p_all_m2 <- bind_rows(p_train_m2, p_test_m2)
-ggplot(p_all_m2, aes(x=nn1, y=nn2, 
-                     colour=species, shape=set)) + 
-  geom_point() +
-  scale_colour_discrete_divergingx(palette="Zissou 1") +
-  scale_shape_manual(values=c(16, 1)) +
-  theme_minimal() +
-  theme(aspect.ratio=1)
-
-# Check misclassifications
-p_test_pred <- model2 %>% predict(p_test_x)
-p_test_pred_cat <- levels(p_test$species)[apply(p_test_pred, 1, which.max)]
-p_test_pred_cat <- factor(p_test_pred_cat,
-                          levels=levels(p_test$species))
-table(p_test$species, p_test_pred_cat)
-
-# Set up data set for full examination
-p_train_pred <- model2 %>% predict(p_train_x)
-p_train_pred_cat <- levels(p_train$species)[apply(p_train_pred, 1, which.max)]
-p_train_pred_cat <- factor(p_train_pred_cat,
-                          levels=levels(p_train$species))
-colnames(p_train_pred) <- c("Adelie", "Chinstrap", "Gentoo")
-p_train_pred <- as_tibble(p_train_pred)
-p_train_m2 <- p_train_m2 %>%
-  mutate(pred = p_train_pred_cat) %>%
-  bind_cols(p_train_pred)
-colnames(p_test_pred) <- c("Adelie", "Chinstrap", "Gentoo")
-p_test_pred <- as_tibble(p_test_pred)
-p_test_m2 <- p_test_m2 %>%
-  mutate(pred = p_test_pred_cat) %>%
-  bind_cols(p_test_pred)
-p_all_m2 <- bind_rows(p_train_m2, p_test_m2)
-
-# predictive probabilities
-library(geozoo)
-proj <- t(geozoo::f_helmert(3)[-1,])
-p_nn_v_p <- as.matrix(p_all_m2[,10:12]) %*% proj
-colnames(p_nn_v_p) <- c("x1", "x2")
-p_nn_v_p <- p_nn_v_p %>%
-  as.data.frame() %>%
-  mutate(species = p_all_m2$species)
-
-simp <- geozoo::simplex(p=2)
-sp <- data.frame(cbind(simp$points), simp$points[c(2,3,1),])
-colnames(sp) <- c("x1", "x2", "x3", "x4")
-sp$species = sort(unique(penguins_sub$species))
-ggplot() +
-  geom_segment(data=sp, aes(x=x1, y=x2, xend=x3, yend=x4)) +
-  geom_text(data=sp, aes(x=x1, y=x2, label=species),
-            nudge_x=c(-0.06, 0.07, 0),
-            nudge_y=c(0.05, 0.05, -0.05)) +
-  geom_point(data=p_nn_v_p, aes(x=x1, y=x2, 
-                                colour=species), 
-             size=2, alpha=0.5) +
-  scale_color_discrete_divergingx(palette="Zissou 1") +
-  theme_map() +
-  theme(aspect.ratio=1, legend.position="none")
-
-# Explanations
-# https://www.r-bloggers.com/2022/08/kernel-shap/
-library(kernelshap)
-library(shapviz)
-p_explain <- kernelshap(
-    model2,
-    p_train_x, 
-    bg_X = p_train_x
-  )
-p_exp_sv <- shapviz(p_explain)
-#sv_waterfall(p_exp_sv, 1)
-#sv_importance(p_exp_sv, "both")
-```
-
-```{r eval=FALSE}
-#| echo: false
-# Load model
-load_model_tf()
-
-# Predict
-predictions <- model %>% predict(p_test_x)
-predictions_cat <- levels(p_test$species)[apply(predictions, 1, which.max)]
-predictions_cat <- factor(predictions_cat, levels=levels(p_test$species))
-table(p_test$species, predictions_cat)
-
-# Examine boundaries
-# p_nn_boundaries <- explore(model, penguins_sub)
-p_grid <- tibble(bl = runif(10000, -2.2, 2.9),
-                 bd = runif(10000, -2.1, 2.2),
-                 fl = runif(10000, -2.1, 2.15),
-                 bm = runif(10000, -1.9, 2.6))
-p_grid_x <- p_grid %>% as.matrix()
-p_grid_pred <- model %>% predict(p_grid_x)
-p_pred_cat <- levels(p_test$species)[apply(p_grid_pred, 1, which.max)]
-p_pred_cat <- factor(p_pred_cat, levels=levels(p_test$species))
-
-p_grid <- p_grid %>%
-  mutate(species = p_pred_cat)
-
-animate_slice(p_grid[,1:4], col=p_grid$species)
-
-# Tour using same sequence as LDA boundaries
-load("data/penguins_tour_path.rda")
-render_gif(p_grid[,1:4],
-           planned_tour(pt1),
-           display_slice(v_rel=0.3, 
-             col=p_grid$species, 
-             axes="bottomleft"),                     gif_file="gifs/penguins_nn_boundaries.gif",
-           frames=500,
-           loop=FALSE
-           )
-
-```
-
-::: {.content-visible when-format="html"}
-
-::: {#fig-penguins-lda-tree-html layout-ncol=2}
-
-![LDA model](gifs/penguins_lda_boundaries.gif){#fig-lda-boundary fig-alt="FIX ME" width=300}
-
-![NN model](gifs/penguins_nn_boundaries.gif){#fig-tree-boundary fig-alt="FIX ME" width=300}
-
-Comparison of the boundaries produced by the LDA (a) and the CNN (b) model, using a slice tour. 
-:::
-:::
-
-\index{tour!slice} 
-
-```{r eval=FALSE}
-#| echo: false
-# Explore misclassifications
-# Predict
-p_test <- p_test %>% 
-  mutate(pred = predictions_cat)
-pred_tr <- model %>% predict(p_train_x)
-pred_tr_cat <- levels(p_train$species)[apply(pred_tr, 1, which.max)]
-pred_tr_cat <- factor(pred_tr_cat, levels=levels(p_train$species))
-p_train <- p_train %>% 
-  mutate(pred = pred_tr_cat)
-p_all <- bind_rows(p_train, p_test)
-p_all <- p_all %>% 
-  mutate(err = ifelse(p_all$pred !=
-                        p_all$species, 1, 0))
-
-symbols <- c(1, 16)
-p_pch <- symbols[p_all$err+1]
-p_cex <- rep(1, length(p_pch))
-p_cex[p_all$err==1] <- 2
-animate_xy(p_all[,1:4],
-           col=p_all$species,
-           pch=p_pch, cex=p_cex)
-render_gif(p_all[,1:4],
-           grand_tour(),
-           display_xy(col=p_all$species,
-                      pch=p_pch, cex=p_cex),
-           gif_file="gifs/p_nn_errors.gif",
-           frames=500,
-           width=400,
-           height=400)
-animate_xy(p_all[,1:4], 
-           guided_tour(lda_pp(p_all$species)),
-           col=p_all$species,
-           pch=p_pch, cex=p_cex)
-render_gif(p_all[,1:4],
-           guided_tour(lda_pp(p_all$species)),
-           display_xy(col=p_all$species,
-                      pch=p_pch, cex=p_cex),
-           gif_file="gifs/p_nn_errors_guided.gif",
-           frames=500,
-           width=400,
-           height=400)
-```
-
-```{r}
-# Explore probabilistic predictions like vote matrix
-```
-
-```{r eval=FALSE}
-#| echo: false
-# Models at the nodes
-layer1 <- get_layer(model, index=1)
-layer2 <- get_layer(model, index=2)
-layer1$weights
-l1_wgts <- keras::get_weights(model, trainable=TRUE)
-```
-
-```{r}
-# Now look at interpretability metrics
-```
-
-```{r eval=FALSE}
-#| echo: false
-# Following https://parsnip.tidymodels.org/articles/Examples.html
-library(nnet)
-library(mulgar)
-library(tidymodels)
-tidymodels_prefer()
-
-data(sketches_train)
-sketches_sub <- sketches_train %>%
-  #filter(word %in% c("crab", "flip flops")) %>%
-  #mutate(word = factor(word)) %>% 
-  select(-id)
-
-set.seed(423)
-sketches_split <- initial_split(sketches_sub)
-sk_tr <- training(sketches_split)
-sk_ts <- testing(sketches_split)
-
-mlp_cls_spec <- 
-    mlp(hidden_units = 12, 
-        penalty = 0.1, 
-        epochs = 1000) %>% 
-    set_mode("classification") %>% 
-    set_engine("nnet", MaxNWts = 10000)
-sk_wf <- workflow() %>%
-  add_model(mlp_cls_spec) %>%
-  add_formula(word ~ .)
-sk_grid <- grid_regular(dials::hidden_units(),
-                        dials::penalty(), 
-                        levels=3)
-  
-  #expand_grid(hidden_units = c(6, 10, 12), epochs = c(500, 1000), penalty=c(0, 0.1))
-sk_folds <- vfold_cv(sk_tr, v = 5)
-sk_res <- 
-  sk_wf %>% 
-  tune_grid(
-    resamples = sk_folds, 
-    grid = sk_grid
-    )
-sk_res %>% 
-  collect_metrics()
-sk_res %>%
-  show_best("accuracy")
-
-mlp_cls_fit <- mlp_cls_spec %>% 
-    fit(word ~ ., data = sk_tr)
-#mlp_cls_fit
-sk_pred <- bind_cols(sk_ts,
-    predict(mlp_cls_fit, sk_ts),
-    predict(mlp_cls_fit, sk_ts, type = "prob")
-  )
-bal_accuracy(sk_pred, word, .pred_class)
-
-sk_pred %>% count(word, .pred_class) %>%
-  pivot_wider(names_from = `.pred_class`, values_from = n)
-
-
-```
-
-<!--
-Neural networks for classification can be thought of as additive
-models where explanatory variables are transformed, usually through a
-logistic function, added to other explanatory variables, transformed
-again, and added again to yield class predictions. Aside from the data
-mining literature, mentioned earlier, a good comprehensive and
-accessible description for statisticians can be found in
-\citeasnoun{CT94}. The model can be formulated as:
-
-\[
-\hat{y} = f(x) = \phi(\alpha+\sum_{h=1}^{s}
-w_{h}\phi(\alpha_h+\sum_{i=1}^{p} w_{ih}x_i))
-\]
-
-\index{R package!\RPackage{nnet}}
-
-\noindent where $x$ is the vector of explanatory variable values, $y$
-is the target value, $p$ is the number of variables, $s$ is the number
-of nodes in the single hidden layer, and $\phi$ is a fixed function,
-usually a linear or logistic function. This model has a single hidden
-layer and univariate output values.  The model is fit by minimizing
-the sum of squared differences between observed values and fitted
-values, and the minimization does not always converge. A neural
-network is a black box that accepts inputs, computes, and spits out
-predictions.  With graphics, some insight into the black box can be
-gained. We use the feed-forward neural network provided in the {\tt
-nnet} package of R \cite{VR02} to illustrate.
-
-We continue to work with \Data{Olive Oils}, and we look at the
-performance of the neural network in classifying the oils in the four
-areas of the South, a difficult challenge. Because the software
-does not include a method for computing the predictive error, we break
-the data into training and test samples so we can better estimate the
-predictive error.  (We could tweak the neural network to perfectly fit
-all the data, but then we could not estimate how well it would perform
-with new data.)
-
-\begin{verbatim}
-> indx.tst <- c(1,7,12,15,16,22,27,32,34,35,36,41,50,54,61,
- 68,70,75,76,80,95,101,102,105,106,110,116,118,119,122,134,
- 137,140,147,148,150,151,156,165,175,177,182,183,185,186,
- 187,190,192,194,201,202,211,213,217,218,219,225,227,241,
- 242,246,257,259,263,266,274,280,284,289,291,292,297,305,
- 310,313,314,323,330,333,338,341,342,347,351,352,356,358,
- 359,369,374,375,376,386,392,405,406,415,416,418,420,421,
- 423,426,428,435,440,451,458,460,462,466,468,470,474,476,
- 480,481,482,487,492,493,500,501,509,519,522,530,532,541,
- 543,545,546,551,559,567,570)
-> d.olive.train <- d.olive[-indx.tst,]
-> d.olive.test <- d.olive[indx.tst,]
-> d.olive.sth.train <- subset(d.olive.train, region==1, 
-   select=area:eicosenoic)
-> d.olive.sth.test <- subset(d.olive.test, region==1, 
-   select=area:eicosenoic)
-\end{verbatim}
-
-% this may need a few more words
-
-After trying several values for $s$, the number of nodes in the hidden
-layer, we chose $s=4$; we also chose a linear $\phi$, $decay=0.005$,
-and $range=0.06$. We fit the model using many different random
-starting values, rejecting the results until it eventually converged
-to a solution with a reasonably low error:
-
-\begin{verbatim}
-> library(nnet)
-> olive.nn <- nnet(as.factor(area)~., d.olive.sth.train, 
-  size=4, linout=T, decay=0.005, range=0.06, maxit=1000)
-> targetr <- class.ind(d.olive.sth.train[,1])
-> targets <- class.ind(d.olive.sth.test[,1])
-> test.cl <- function(true, pred){
-    true <- max.col(true)
-    cres <- max.col(pred)
-    table(true, cres)
-  }
-> test.cl(targetr, predict(olive.nn, 
-  d.olive.sth.train[,-1]))
-    cres
-true   1   2   3   4
-   1  16   0   1   2
-   2   0  42   0   0
-   3   0   1 155   2
-   4   1   1   1  24
-\end{verbatim}
-\newpage  % Insert page break to avoid breaking the R output.
-\begin{verbatim}
-> test.cl(targets, predict(olive.nn, d.olive.sth.test[,-1]))
-    cres
-true  1  2  3  4
-   1  3  2  0  1
-   2  0 12  2  0
-   3  0  2 45  1
-   4  1  2  1  5
-> parea <- c(max.col(predict(olive.nn, 
-   d.olive.sth.train[,-1])),
-   max.col(predict(olive.nn, d.olive.sth.test[,-1])))
-> d.olive.nn <- cbind(rbind(d.olive.sth.train, 
-    d.olive.sth.test), parea)
-> gd <- ggobi(d.olive.nn)[1]
-> glyph_color(gd) <- c(6,3,2,9)[d.olive.nn$area]
-\end{verbatim}
-
-Below are the misclassification tables for the training and test
-samples.
-
-\bigskip
-\emph{Training:}
-\begin{center}
-\begin{tabular}{l@{\hspace{.3in}}r@{\hspace{1em}}r@{\hspace{1em}}r@{\hspace{1em}}r@{\hspace{1.5em}}r@{\hspace{2em}}r}
-\B & & \multicolumn{4}{c}{Predicted \Vbl{area}} & Error \\
-
-\T & & \multicolumn{1}{c}{North}  & \multicolumn{1}{c}{Calabria} & \multicolumn{1}{c}{South}  & \multicolumn{1}{c}{Sicily} &  \\
-\B & & \multicolumn{1}{c}{Apulia} &  & \multicolumn{1}{c}{Apulia} & & \\ \cline{3-7}
-
-\T         & North Apulia & 16 & 0 & {\bf 1} & {\bf 2} & 0.158\\
-\Vbl{area} & Calabria & 0 & 42 & 0 &  0 & 0.000\\
-           & South Apulia & 0 & {\bf 1} & 155 & {\bf 2} & 0.019\\
-\B         & Sicily & {\bf 1} & {\bf 1} & {\bf 1} & 24 & 0.111\\ \cline{3-7}
-\T         &        &         &         &         &    & 0.037
-\end{tabular}
-\end{center}
-
-\bigskip
-
-\emph{Test:}
-\begin{center}
-\begin{tabular}{l@{\hspace{.3in}}r@{\hspace{1em}}r@{\hspace{1em}}r@{\hspace{1em}}r@{\hspace{1.5em}}r@{\hspace{2em}}r}
-\B & & \multicolumn{4}{c}{Predicted \Vbl{area}} & Error \\
-
-\T & & \multicolumn{1}{c}{North}  & \multicolumn{1}{c}{Calabria} & \multicolumn{1}{c}{South}  & \multicolumn{1}{c}{Sicily} &  \\
-\B & & \multicolumn{1}{c}{Apulia} &  & \multicolumn{1}{c}{Apulia} & & \\  \cline{3-7}
-
-\T         & North Apulia & 3 & {\bf 2} & 0 & {\bf 1} & 0.333\\
-\Vbl{area} & Calabria & 0 & 12 & {\bf 2} &  0 & 0.143\\
-           & South Apulia & 0 & {\bf 2} & 45 & {\bf 1} & 0.063\\
-\B         & Sicily & {\bf 1} & {\bf 2} & {\bf 1} & 5 & 0.444\\  \cline{3-7}
-\T         &        &         &         &         &    & 0.156
-\end{tabular}
-\end{center}
-
-\bigskip
-
-\noindent The training error is $9/246=0.037$, and the test error is
-$12/77=0.156$.  The overall errors, as in the random forest model, are
-not uniform across classes.  This is particularly obvious in the test
-error table: The error in classifying North Apulian oils is close to a
-third, and it is even worse for Sicilian oils, which have an almost
-even chance of being misclassified.
-
-Our exploration of the misclassifications is shown in
-Fig.~\ref{olive-nn}.  (The troublesome Sicilian oils have been
-excluded from all plots in this figure.)  Consider first the plots in
-the top row.  The left-hand plot shows the misclassification table.
-Two samples of oils from North Apulia (orange $+$) have been
-incorrectly classified as South Apulian (pink $\times$), and these two
-points have been brushed as filled orange circles.  Note where these
-points fall in the next two plots, which are linked 2D tour
-projections. \index{brushing!linked}\index{tour!grand} One of the two
-misclassified points is on the edge of the cluster of North Apulian
-points, close to the Calabrian cluster. It is understandable that
-there might be some confusion about this case. The other sample is on
-the outer edge of the North Apulian cluster, but it is far from the
-Calabrian cluster ~---~ this should not have been confused.
-
-% Figure 13
-\begin{figure*}[htbp]
-\centerline{
- {\includegraphics[width=1.5in]{chap-class/olive-nn1.pdf}}
- {\includegraphics[width=1.5in]{chap-class/olive-nn2.pdf}}
- {\includegraphics[width=1.5in]{chap-class/olive-nn8.pdf}}}
-\smallskip
-\centerline{
- {\includegraphics[width=1.5in]{chap-class/olive-nn3.pdf}}
- {\includegraphics[width=1.5in]{chap-class/olive-nn4.pdf}}
- {\includegraphics[width=1.5in]{chap-class/olive-nn6.pdf}}}
-\caption[Misclassifications of a feed-forward neural network
-classifying the oils from the South]{Misclassifications of a
-feed-forward neural network classifying the oils from the South by
-\Vbl{area}. A representation of the misclassification table {\bf (left
-column)} is linked to projections viewed in a 2D tour. Different
-misclassifications are examined in the top and bottom rows. (The
-Sicilian oils, which would have appeared in the top row of the
-misclassification tables, have been removed from all plots.)  }
-\label{olive-nn}
-\end{figure*}
-
-In the bottom row of plots, we follow the same procedure to examine
-the single North Apulian sample misclassified as South Apulian. It is
-painted as a filled orange circle in the misclassification plot and
-viewed in a \index{tour!grand} tour. This point is on the outer edge
-of the North Apulian cluster, but it is closer to the Calabrian cluster
-than the South Apulian cluster. It would be understandable for it to
-be misclassified as Calabrian, so it is puzzling that it is
-misclassified as South Apulian.
-
-In summary, a neural network is a black box method for tackling tough
-classification problems. It will generate different solutions each
-time the net is fit, some much better than others. When numerical
-measures suggest that a reasonable model has been found, graphics can
-be used to inspect the model in more detail.
 -->
 
 ## Exercises {-}
