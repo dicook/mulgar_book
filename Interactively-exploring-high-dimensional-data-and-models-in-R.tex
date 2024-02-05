@@ -265,7 +265,7 @@
 
 \begin{document}
 \maketitle
-\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[boxrule=0pt, sharp corners, breakable, interior hidden, borderline west={3pt}{0pt}{shadecolor}, enhanced, frame hidden]}{\end{tcolorbox}}\fi
+\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[interior hidden, frame hidden, sharp corners, borderline west={3pt}{0pt}{shadecolor}, breakable, enhanced, boxrule=0pt]}{\end{tcolorbox}}\fi
 
 \renewcommand*\contentsname{Table of contents}
 {
@@ -5303,7 +5303,7 @@ learning}\label{neural-networks-and-deep-learning}}
 
 \index{classification!neural networks}
 
-Neural networks can be considered to be nested additive (or even
+Neural networks (NN) can be considered to be nested additive (or even
 ensemble) models where explanatory variables are combined, and
 transformed through an activation function like a logistic, added to
 other combinations of explanatory variables recursively to yield class
@@ -5311,11 +5311,10 @@ predictions. They are considered to be black box models, but there is a
 growing demand for interpretability. Although interpretability is
 possible, it can be unappealing to understand a complex model
 constructed to tackle a difficult classification task. Nevertheless,
-this is the motivation for the explanation of visualisation for neural
-network models in this chapter.
+this is the motivation for the explanation of visualisation for NN
+models in this chapter.
 
-In the simplest form, we might write the equation for a neural network
-as
+In the simplest form, we might write the equation for a NN as
 
 \[
 \hat{y} = f(x) = \phi(a_0+\sum_{h=1}^{s}
@@ -5336,13 +5335,12 @@ examined for their role in making predictions.
 In practice, a model may have many nodes, and several hidden layers, a
 variety of activation functions, and regularisation modifications. One
 should keep in mind the principle of parsimony is important when
-applying neural networks, because it is tempting to make an overly
-complex, and thus over-parameterised, construction. Fitting neural
-networks is still problematic. One would hope that fitting produces a
-stable result, whatever the starting seed the same parameter estimates
-are returned. However, this is not the case, and different, sometimes
-radically different, results are routinely obtained after each attempted
-fit (Wickham et al., 2015).
+applying NNs, because it is tempting to make an overly complex, and thus
+over-parameterised, construction. Fitting NNs is still problematic. One
+would hope that fitting produces a stable result, whatever the starting
+seed the same parameter estimates are returned. However, this is not the
+case, and different, sometimes radically different, results are
+routinely obtained after each attempted fit (Wickham et al., 2015).
 
 For these examples we use the software \texttt{keras} (Allaire \&
 Chollet, 2023) following the installation and tutorial details at
@@ -5352,17 +5350,17 @@ the example code should be possible to convert to use \texttt{nnet}
 (Venables \& Ripley, 2002a) or \texttt{neuralnet} (Fritsch et al.,
 2019). We will use the penguins data to illustrate the fitting, because
 it makes it easier to understand the procedures and the fit. However, a
-neural network is like using a jackhammer instead of a trowel to plant a
-seedling, more complicated than necessary to build a good classification
-model for this data.
+NN is like using a jackhammer instead of a trowel to plant a seedling,
+more complicated than necessary to build a good classification model for
+this data.
 
 \hypertarget{setting-up-the-model}{%
 \section{Setting up the model}\label{setting-up-the-model}}
 
 \index{classification!ANN architecture}
 
-A first step is to decide how many nodes the neural network architecture
-should have, and what activation function should be used. To make these
+A first step is to decide how many nodes the NN architecture should
+have, and what activation function should be used. To make these
 decisions, ideally you already have some knowledge of the shapes of
 class clusters. For the penguins classification, we have seen that it
 contains three elliptically shaped clusters of roughly the same size.
@@ -5419,10 +5417,10 @@ split}\label{checking-the-trainingtest-split}}
 
 Splitting the data into training and test is an essential way to protect
 against overfitting, for most classifiers, but especially so for the
-copiously parameterised neural networks. The model specified for the
-penguins data with only two nodes is unlikely to be overfitted, but it
-is nevertheless good practice to use a training set for building and a
-test set for evaluation.
+copiously parameterised NNs. The model specified for the penguins data
+with only two nodes is unlikely to be overfitted, but it is nevertheless
+good practice to use a training set for building and a test set for
+evaluation.
 
 Figure~\ref{fig-p-split-pdf} shows the tour being used to examine the
 split into training and test samples for the penguins data. Using random
@@ -5475,7 +5473,7 @@ regions. However, the two samples roughly match.}
 \hypertarget{fit-the-model}{%
 \section{Fit the model}\label{fit-the-model}}
 
-\index{classification!Fitting a neural network}
+\index{classification!Fitting a NN}
 
 The data needs to be specially formatted for the model fitted using
 \texttt{keras}. The explanatory variables need to be provided as a
@@ -5538,11 +5536,11 @@ variability in the fits. Setting \texttt{epochs\ =\ 200} helps to
 usually get a good fit. One expects that \texttt{keras} is reasonably
 stable so one would not expect the huge array of fits as observed in
 Wickham et al. (2015) using \texttt{nnet}. That this can happen with the
-simple model used here reinforces the notion that fitting of neural
-network models is fiddly, and great care needs to be taken to validate
-and diagnose the fit.
+simple model used here reinforces the notion that fitting of NN models
+is fiddly, and great care needs to be taken to validate and diagnose the
+fit.
 
-\infobox{Fitting neural network models is fiddly, and very different fitted models can result from restarts, parameter choices, and architecture.  
+\infobox{Fitting NN models is fiddly, and very different fitted models can result from restarts, parameter choices, and architecture.  
 }
 
 The fitted model that we have chosen as the final one has reasonably
@@ -5579,14 +5577,13 @@ components}\label{extracting-model-components}}
 \infobox{View the individual node models to understand how they combine to produce the overall model.
 }
 
-Because nodes in the hidden layers of neural networks are themselves
-(relatively simple regression) models, it can be interesting to examine
-these to understand how the model is making it's predictions. Although
-it's rarely easy, most software will allow the coefficients for the
-models at these nodes to be extracted. With the penguins neural network
-model there are two nodes, so we can extract the coefficients and plot
-the resulting two linear combinations to examine the separation between
-classes.
+Because nodes in the hidden layers of NNs are themselves (relatively
+simple regression) models, it can be interesting to examine these to
+understand how the model is making it's predictions. Although it's
+rarely easy, most software will allow the coefficients for the models at
+these nodes to be extracted. With the penguins NN model there are two
+nodes, so we can extract the coefficients and plot the resulting two
+linear combinations to examine the separation between classes.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -5692,11 +5689,10 @@ probabilities}\label{examining-predictive-probabilities}}
 \index{classification!predictive probabilities}
 
 When the predictive probabilities are returned by a model, as is done by
-this neural network, we can use a ternary diagram for three class
-problems, or high-dimensional simplex when there are more classes to
-examine the strength of the classification. This done in the same way
-that was used for the votes matrix from a random forest in
-Section~\ref{sec-votes}.
+this NN, we can use a ternary diagram for three class problems, or
+high-dimensional simplex when there are more classes to examine the
+strength of the classification. This done in the same way that was used
+for the votes matrix from a random forest in Section~\ref{sec-votes}.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -5852,8 +5848,8 @@ it's bill length.}
 \hypertarget{examining-boundaries}{%
 \section{Examining boundaries}\label{examining-boundaries}}
 
-Figure~\ref{fig-penguins-lda-nn} shows the boundaries for this neural
-network model along with those of the LDA model.
+Figure~\ref{fig-penguins-lda-nn} shows the boundaries for this NN model
+along with those of the LDA model.
 
 \begin{figure}
 
@@ -5888,8 +5884,7 @@ network model along with those of the LDA model.
 \end{minipage}%
 
 \caption{\label{fig-penguins-lda-nn}Comparison of the boundaries
-produced by the LDA (a) and the neural network (b) model, using a slice
-tour.}
+produced by the LDA (a) and the NN (b) model, using a slice tour.}
 
 \end{figure}
 

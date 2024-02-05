@@ -1,9 +1,9 @@
 # Neural networks and deep learning
 \index{classification!neural networks}
 
-Neural networks can be considered to be nested additive (or even ensemble) models where explanatory variables are combined, and transformed through an activation function like a logistic, added to other combinations of explanatory variables recursively to yield class predictions. They are considered to be black box models, but there is a growing demand for interpretability. Although interpretability is possible, it can be unappealing to understand a complex model constructed to tackle a difficult classification task. Nevertheless, this is the motivation for the explanation of visualisation for neural network models in this chapter. 
+Neural networks (NN) can be considered to be nested additive (or even ensemble) models where explanatory variables are combined, and transformed through an activation function like a logistic, added to other combinations of explanatory variables recursively to yield class predictions. They are considered to be black box models, but there is a growing demand for interpretability. Although interpretability is possible, it can be unappealing to understand a complex model constructed to tackle a difficult classification task. Nevertheless, this is the motivation for the explanation of visualisation for NN models in this chapter. 
 
-In the simplest form, we might write the equation for a neural network as
+In the simplest form, we might write the equation for a NN as
 
 $$
 \hat{y} = f(x) = \phi(a_0+\sum_{h=1}^{s}
@@ -19,14 +19,14 @@ $$
 $$
 which is a combination of two (linear) models, each of which could be examined for their role in making predictions. 
 
-In practice, a model may have many nodes, and several hidden layers, a variety of activation functions, and regularisation modifications. One should keep in mind the principle of parsimony is important when applying neural networks, because it is tempting to make an overly complex, and thus over-parameterised, construction.  Fitting neural networks is still problematic. One would hope that fitting produces a stable result, whatever the starting seed the same parameter estimates are returned. However, this is not the case, and different, sometimes radically different, results are routinely obtained after each attempted fit [@wickham2015]. 
+In practice, a model may have many nodes, and several hidden layers, a variety of activation functions, and regularisation modifications. One should keep in mind the principle of parsimony is important when applying NNs, because it is tempting to make an overly complex, and thus over-parameterised, construction.  Fitting NNs is still problematic. One would hope that fitting produces a stable result, whatever the starting seed the same parameter estimates are returned. However, this is not the case, and different, sometimes radically different, results are routinely obtained after each attempted fit [@wickham2015]. 
 
-For these examples we use the software `keras` [@keras] following the installation and tutorial details at [https://tensorflow.rstudio.com/tutorials/](https://tensorflow.rstudio.com/tutorials/). Because it is an interface to python it can be tricky to install. If this is a problem, the example code should be possible to convert to use `nnet` [@VR02] or `neuralnet` [@neuralnet]. We will use the penguins data to illustrate the fitting, because it makes it easier to understand the procedures and the fit. However, a neural network is like using a jackhammer instead of a trowel to plant a seedling, more complicated than necessary to build a good classification model for this data.
+For these examples we use the software `keras` [@keras] following the installation and tutorial details at [https://tensorflow.rstudio.com/tutorials/](https://tensorflow.rstudio.com/tutorials/). Because it is an interface to python it can be tricky to install. If this is a problem, the example code should be possible to convert to use `nnet` [@VR02] or `neuralnet` [@neuralnet]. We will use the penguins data to illustrate the fitting, because it makes it easier to understand the procedures and the fit. However, a NN is like using a jackhammer instead of a trowel to plant a seedling, more complicated than necessary to build a good classification model for this data.
 
 ## Setting up the model 
 \index{classification!ANN architecture}
 
-A first step is to decide how many nodes the neural network architecture should have, and what activation function should be used. To make these decisions, ideally you already have some knowledge of the shapes of class clusters. For the penguins classification, we have seen that it contains three elliptically shaped clusters of roughly the same size. This suggests two nodes in the hidden layer would be sufficient to separate three clusters (@fig-nn-diagram). Because the shapes of the clusters are convex, using linear activation ("relu") will also be sufficient. The model specification is as follows:
+A first step is to decide how many nodes the NN architecture should have, and what activation function should be used. To make these decisions, ideally you already have some knowledge of the shapes of class clusters. For the penguins classification, we have seen that it contains three elliptically shaped clusters of roughly the same size. This suggests two nodes in the hidden layer would be sufficient to separate three clusters (@fig-nn-diagram). Because the shapes of the clusters are convex, using linear activation ("relu") will also be sufficient. The model specification is as follows:
 
 ```{r eval=FALSE}
 #| echo: true
@@ -95,7 +95,7 @@ p_nn_wgts <- keras::get_weights(p_nn_model, trainable=TRUE)
 ## Checking the training/test split
 \index{classification!training/test split}
 
-Splitting the data into training and test is an essential way to protect against overfitting, for most classifiers, but especially so for the copiously parameterised neural networks. The model specified for the penguins data with only two nodes is unlikely to be overfitted, but it is nevertheless good practice to use a training set for building and a test set for evaluation. 
+Splitting the data into training and test is an essential way to protect against overfitting, for most classifiers, but especially so for the copiously parameterised NNs. The model specified for the penguins data with only two nodes is unlikely to be overfitted, but it is nevertheless good practice to use a training set for building and a test set for evaluation. 
 
 `r ifelse(knitr::is_html_output(), '@fig-p-split-html', '@fig-p-split-pdf')` shows the tour being used to examine the split into training and test samples for the penguins data. Using random sampling, particularly stratified by group, should result the two sets being very similar, as can be seen here. It does happen that several observations in the test set are on the extremes of their class cluster, so it could be that the model makes errors in the neighbourhoods of these points.
 
@@ -182,7 +182,7 @@ Evaluating the training/test split, where we expect that the two samples should 
 :::
 
 ## Fit the model
-\index{classification!Fitting a neural network}
+\index{classification!Fitting a NN}
 
 The data needs to be specially formatted for the model fitted using `keras`. The explanatory variables need to be provided as a `matrix`, and the categorical response needs to be separate, and specified as a `numeric` variable, beginning with 0. 
 
@@ -232,16 +232,16 @@ plot(p_nn_fit)
 keras::get_weights(p_nn_model, trainable=TRUE)
 ```
 
-Because we set the random number seed we will get the same fit each time the code provided here is run. However, if the model is re-fit without setting the seed, you will see that there is a surprising amount of variability in the fits. Setting `epochs = 200` helps to usually get a good fit. One expects that `keras` is reasonably stable so one would not expect the huge array of fits as observed in @wickham2015 using `nnet`. That this can happen with the simple model used here reinforces the notion that fitting of neural network models is fiddly, and great care needs to be taken to validate and diagnose the fit. 
+Because we set the random number seed we will get the same fit each time the code provided here is run. However, if the model is re-fit without setting the seed, you will see that there is a surprising amount of variability in the fits. Setting `epochs = 200` helps to usually get a good fit. One expects that `keras` is reasonably stable so one would not expect the huge array of fits as observed in @wickham2015 using `nnet`. That this can happen with the simple model used here reinforces the notion that fitting of NN models is fiddly, and great care needs to be taken to validate and diagnose the fit. 
 
 ::: {.content-visible when-format="html"}
 ::: info
-Fitting neural network models is fiddly, and very different fitted models can result from restarts, parameter choices, and architecture. 
+Fitting NN models is fiddly, and very different fitted models can result from restarts, parameter choices, and architecture. 
 :::
 :::
 
 ::: {.content-visible when-format="pdf"}
-\infobox{Fitting neural network models is fiddly, and very different fitted models can result from restarts, parameter choices, and architecture.  
+\infobox{Fitting NN models is fiddly, and very different fitted models can result from restarts, parameter choices, and architecture.  
 }
 :::
 
@@ -282,7 +282,7 @@ View the individual node models to understand how they combine to produce the ov
 }
 :::
 
-Because nodes in the hidden layers of neural networks are themselves (relatively simple regression) models, it can be interesting to examine these to understand how the model is making it's predictions. Although it's rarely easy, most software will allow the coefficients for the models at these nodes to be extracted. With the penguins neural network model there are two nodes, so we can extract the coefficients and plot the resulting two linear combinations to examine the separation between classes.
+Because nodes in the hidden layers of NNs are themselves (relatively simple regression) models, it can be interesting to examine these to understand how the model is making it's predictions. Although it's rarely easy, most software will allow the coefficients for the models at these nodes to be extracted. With the penguins NN model there are two nodes, so we can extract the coefficients and plot the resulting two linear combinations to examine the separation between classes.
 
 ```{r}
 # Extract hidden layer model weights
@@ -344,7 +344,7 @@ When there are more nodes in the hidden layer than the number of original variab
 ## Examining predictive probabilities
 \index{classification!predictive probabilities}
 
-When the predictive probabilities are returned by a model, as is done by this neural network, we can use a ternary diagram for three class problems, or high-dimensional simplex when there are more classes to examine the strength of the classification. This done in the same way that was used for the votes matrix from a random forest in @sec-votes. 
+When the predictive probabilities are returned by a model, as is done by this NN, we can use a ternary diagram for three class problems, or high-dimensional simplex when there are more classes to examine the strength of the classification. This done in the same way that was used for the votes matrix from a random forest in @sec-votes. 
 
 ```{r}
 # Predict training and test set
@@ -592,7 +592,7 @@ sp1 + sp2 + plot_layout(ncol=2, guides = "collect") &
 ## Examining boundaries
 
 <!-- Check against LDA, suspect that `bm` is used too much in CNN model.-->
-@fig-penguins-lda-nn shows the boundaries for this neural network model along with those of the LDA model. 
+@fig-penguins-lda-nn shows the boundaries for this NN model along with those of the LDA model. 
 
 ```{r echo=knitr::is_html_output(), eval=FALSE}
 #| label: fig-penguins-nn-boundaries
@@ -643,7 +643,7 @@ ggplot(p_grid_proj, aes(x=nn1, y=nn2,
 
 ![NN model](gifs/penguins_nn_boundaries.gif){#fig-tree-boundary fig-alt="FIX ME" width=300}
 
-Comparison of the boundaries produced by the LDA (a) and the neural network (b) model, using a slice tour. 
+Comparison of the boundaries produced by the LDA (a) and the NN (b) model, using a slice tour. 
 :::
 :::
 
@@ -653,7 +653,7 @@ Comparison of the boundaries produced by the LDA (a) and the neural network (b) 
 
 ![NN model](images/penguins-nn-boundaries-1.png){#fig-nn-boundary fig-alt="FIX ME" width=290}
 
-Comparison of the boundaries produced by the LDA (a) and the neural network (b) model, using a slice tour. 
+Comparison of the boundaries produced by the LDA (a) and the NN (b) model, using a slice tour. 
 :::
 
 \index{tour!slice} 
