@@ -135,18 +135,16 @@ pisa_pca <- prcomp(pisa_std)
 pisa_scree <- ggscree(pisa_pca, q = 15) + theme_minimal()
 ```
 
-The scree plot in @fig-pisa-scree shows a big drop from one to two PCs in the amount of variance explained. A grand tour on the 30 variables can be run using `animate_xy()`: 
+The scree plot in `r ifelse(knitr::is_html_output(), '@fig-pisa-pca-html', '@fig-pisa-pca-pdf')` shows a big drop from one to two PCs in the amount of variance explained. A grand tour on the 30 variables can be run using `animate_xy()`: 
 
-```{r}
-#| eval: FALSE
+```{r eval=FALSE}
 #| code-fold: false
 animate_xy(pisa_std, half_range=1)
 ```
 
 or rendered as an animated gif using `render_gif()`:
 
-```{r}
-#| eval: FALSE
+```{r eval=FALSE}
 #| code-fold: false
 render_gif(pisa_std, 
            grand_tour(), 
@@ -161,10 +159,9 @@ render_gif(pisa_std,
 and we can see that the data is elliptical in most projections, sometimes shrinking to be a small circle. This pattern strongly indicates that there is one primary direction of variation in the data, with only small variation in any direction away from it. Shrinking to the small circle is analogous to to how *a pencil or cigar or water bottle in 3D looks from some angles*.
 
 ::: {.content-visible when-format="html"}
-::: {#fig-pisa-pca  fig-align="center" layout-ncol=2}
+::: {#fig-pisa-pca-html  fig-align="center" layout-ncol=2}
 
 ```{r}
-#| label: fig-pisa-scree
 #| eval: true
 #| message: false
 #| warning: false
@@ -177,6 +174,27 @@ pisa_scree
 ```
 
 ![Grand tour of the pisa data.](gifs/pisa_gt.gif){#fig-pisa-gt fig-alt="Tour showing lots of linear projections of the pisa data. You can see strong linear dependence." fig.align="center"}
+
+Scree plot and tour of the `pisa` data, with 30 variables being the plausible scores for Australian students.
+:::
+:::
+
+::: {.content-visible when-format="pdf"}
+::: {#fig-pisa-pca-pdf  fig-align="center" layout-ncol=2}
+
+```{r}
+#| eval: true
+#| message: false
+#| warning: false
+#| fig-cap: "Scree plot for the PCA on the pisa data suggests that the data is 1D."
+#| fig-width: 6
+#| fig-height: 4
+#| out-width: 80%
+#| echo: false
+pisa_scree
+```
+
+![Grand tour of the pisa data.](){#fig-pisa-gt fig-alt="Tour showing lots of linear projections of the pisa data. You can see strong linear dependence." fig.align="center"}
 
 Scree plot and tour of the `pisa` data, with 30 variables being the plausible scores for Australian students.
 :::
@@ -219,7 +237,7 @@ aflw_std <- aflw %>%
       sd(x, na.rm=TRUE))
 ```
 
-To look at all of the `r ncol(aflw_std[,7:35])` player statistics in a grand tour.
+To look at all of the `r ncol(aflw_std[,7:35])` player statistics in a grand tour in `r ifelse(knitr::is_html_output(), '@fig-aflw-gt-html', '@fig-aflw-gt-pdf')`.
 
 ```{r}
 #| label: aflw-gt
@@ -235,9 +253,18 @@ render_gif(aflw_std[,7:35],
 ```
 
 ::: {.content-visible when-format="html"}
-::: {#fig-aflw-gt}
+::: {#fig-aflw-gt-html}
 
 ![](gifs/aflw_gt.gif){fig-alt="Tour showing lots of linear projections of the aflw data. You can see linear dependence, and some outliers." fig.align="center"}
+
+Grand tour of the AFLW player statistics.
+:::
+:::
+
+::: {.content-visible when-format="pdf"}
+::: {#fig-aflw-gt-pdf}
+
+![](){fig-alt="Tour showing lots of linear projections of the aflw data. You can see linear dependence, and some outliers." fig.align="center"}
 
 Grand tour of the AFLW player statistics.
 :::
@@ -423,7 +450,7 @@ The tour verifies that PCA on the `aflw` data is complicated and doesn't capture
 :::
 :::
 
-::: {.content-visible when-format="html"}
+::: {.content-visible when-format="pdf"}
 \insightbox{The tour verifies that PCA on the `aflw` data is complicated and doesn't capture all of the variation. However, it does provide useful insights. It detected outstanding players, and indicated the different skills sets of top goal scorers and top defensive players.}
 :::
 
@@ -460,7 +487,7 @@ pl1 + pl2
 
 It can be useful to examine this model using the tour. The model is simply a plane in high dimensions. This would be considered to be the model in the data space. The reason to do this is to check how well the model fits the data. The plane corresponding to the model should be oriented along the main direction of the points, and the spread of points around the plane should be small. We should also be able to see if there has been any strong non-linear relationship missed by the model, or outliers and clusters.
 
-The function `pca_model()` from the `mulgar` package can be used to represent the model as a $k$-D wire-frame plane. @fig-plane-box-model shows the models for the `plane` and `box` data, 2D and 3D respectively.
+The function `pca_model()` from the `mulgar` package can be used to represent the model as a $k$-D wire-frame plane. `r ifelse(knitr::is_html_output(), '@fig-plane-box-model-html', '@fig-plane-box-model-pdf')` shows the models for the `plane` and `box` data, 2D and 3D respectively.
 
 ::: {.content-visible when-format="html"}
 ::: info
@@ -510,8 +537,9 @@ render_gif(box_m_d,
            loop=FALSE)
 ```
 
+
 ::: {.content-visible when-format="html"}
-::: {#fig-plane-box-model  fig-align="center" layout-ncol=2}
+::: {#fig-plane-box-model-html  fig-align="center" layout-ncol=2}
 
 ![Model for the 2D in 5D data.](gifs/plane_model.gif){#fig-plane-model fig-alt="FIX ME." fig.align="center"}
 
@@ -521,9 +549,20 @@ PCA model overlaid on the data for the 2D in 5D, and 3D in 5D simulated data.
 :::
 :::
 
+::: {.content-visible when-format="pdf"}
+::: {#fig-plane-box-model-pdf  fig-align="center" layout-ncol=2}
+
+![Model for the 2D in 5D data.](){#fig-plane-model fig-alt="FIX ME." fig.align="center"}
+
+![Model for the 3D in 5D data.](){#fig-box-model fig-alt="FIX ME." fig.align="center"}
+
+PCA model overlaid on the data for the 2D in 5D, and 3D in 5D simulated data. 
+:::
+:::
+
 ### Example: pisa
 
-The model for the `pisa` data is a 1D vector, shown in @fig-pisa-model. 
+The model for the `pisa` data is a 1D vector, shown in `r ifelse(knitr::is_html_output(), '@fig-pisa-model-html', '@fig-pisa-model-pdf')`. 
 
 ```{r}
 #| eval: FALSE
@@ -547,9 +586,18 @@ render_gif(pisa_all,
 ```
 
 ::: {.content-visible when-format="html"}
-::: {#fig-pisa-model}
+::: {#fig-pisa-model-html}
 
 ![](gifs/pisa_model.gif){fig-alt="Something here" fig.align="center"}
+
+PCA model of the `pisa` data. The 1D model captures the primary variation in the data and there is a small amount of spread in all directions away from the model. 
+:::
+:::
+
+::: {.content-visible when-format="pdf"}
+::: {#fig-pisa-model-pdf}
+
+![](){fig-alt="Something here" fig.align="center"}
 
 PCA model of the `pisa` data. The 1D model captures the primary variation in the data and there is a small amount of spread in all directions away from the model. 
 :::
@@ -567,7 +615,7 @@ The `pisa` data fits fairly closely to the 1D PCA model. The variance of points 
 
 ### Example: aflw
 
-It is less useful to examine the PCA model for the `aflw` data, because the main patterns that were of interest were the exceptional players. However, we will do it anyway! @fig-aflw-model shows the 4D PCA model overlain on the data. Even though the distribution of points is not as symmetric and balanced as the other examples, we can see that the cube structure mirrors the variation. We can see that the relationships between variables are not strictly linear, because the spread extends unevenly away from the box. 
+It is less useful to examine the PCA model for the `aflw` data, because the main patterns that were of interest were the exceptional players. However, we will do it anyway! `r ifelse(knitr::is_html_output(), '@fig-aflw-model-html', '@fig-aflw-model-pdf')` shows the 4D PCA model overlain on the data. Even though the distribution of points is not as symmetric and balanced as the other examples, we can see that the cube structure mirrors the variation. We can see that the relationships between variables are not strictly linear, because the spread extends unevenly away from the box. 
 
 ```{r}
 #| eval: FALSE
@@ -595,9 +643,18 @@ render_gif(aflw_all,
 ```
 
 ::: {.content-visible when-format="html"}
-::: {#fig-aflw-model}
+::: {#fig-aflw-model-html}
 
 ![](gifs/aflw_model.gif){ fig-alt="Something here" fig.align="center"}
+
+PCA model of the `aflw` data. The linear model is not ideal for this data, which has other patterns like outliers, and some branching. However, the model roughly captures the linear associations, and leaves unequal variation in different directions.
+:::
+:::
+
+::: {.content-visible when-format="pdf"}
+::: {#fig-aflw-model-pdf}
+
+![](){ fig-alt="Something here" fig.align="center"}
 
 PCA model of the `aflw` data. The linear model is not ideal for this data, which has other patterns like outliers, and some branching. However, the model roughly captures the linear associations, and leaves unequal variation in different directions.
 :::
@@ -617,7 +674,7 @@ From the tour we see that the 4D model leaves substantial variation unexplained.
 
 ### Example: outliers
 
-@fig-plane-n-o-scree shows the scree plot for the planar data with noise and outliers. It is very similar to the scree plot on the data without the outliers (@fig-plane-noise-scree). However, what we see from @fig-p-o-pca is that PCA loses the outliers. The animation in (a) shows the full data, and the outliers marked by colour and labels 1, 2, are clearly unusual in some projections. When we examine the tour of the first four PCs (as suggested by the scree plot) the outliers are not unusual. They are almost contained in the point cloud. The reason is clear when all the PCs are plotted, and the outliers can be seen to be clearly detected only in PC5, PC6 and PC7. 
+@fig-plane-n-o-scree shows the scree plot for the planar data with noise and outliers. It is very similar to the scree plot on the data without the outliers (@fig-plane-noise-scree). However, what we see from `r ifelse(knitr::is_html_output(), '@fig-p-o-pca-html', '@fig-p-o-pca-pdf')` is that PCA loses the outliers. The animation in (a) shows the full data, and the outliers marked by colour and labels 1, 2, are clearly unusual in some projections. When we examine the tour of the first four PCs (as suggested by the scree plot) the outliers are not unusual. They are almost contained in the point cloud. The reason is clear when all the PCs are plotted, and the outliers can be seen to be clearly detected only in PC5, PC6 and PC7. 
 
 ```{r}
 #| echo: false
@@ -673,11 +730,22 @@ render_gif(plane_n_o_pca$x[,1:4],
 ```
 
 ::: {.content-visible when-format="html"}
-::: {#fig-p-o-pca fig-align="center" layout-ncol=2}
+::: {#fig-p-o-pca-html fig-align="center" layout-ncol=2}
 
 ![Outliers clearly visible.](gifs/plane_n_o_clr.gif){#fig-plane_n_o_clr width=250}
 
 ![Outliers not clearly visible in PC1-4.](gifs/plane_n_o_pca.gif){#fig-plane_n_o_pca width=250}
+
+Examining the handling of outliers in the PCA of the planar data with noise variables and two outliers. PCA has lost these two extreme values.
+:::
+:::
+
+::: {.content-visible when-format="pdf"}
+::: {#fig-p-o-pca-pdf fig-align="center" layout-ncol=2}
+
+![Outliers clearly visible.](){#fig-plane_n_o_clr width=250}
+
+![Outliers not clearly visible in PC1-4.](){#fig-plane_n_o_pca width=250}
 
 Examining the handling of outliers in the PCA of the planar data with noise variables and two outliers. PCA has lost these two extreme values.
 :::
@@ -698,7 +766,7 @@ ggscatmat(plane_n_o_pca$x) + theme_minimal()
 
 ### Example: Non-linear associations
 
-@fig-plane-nonlin shows the tour of the full 5D data containing non-linear relationships in comparison with a tour of the first three PCs, as recommended by the scree plot (@fig-plane-nonlin-scree). The PCs capture some clear and very clean non-linear relationship, but it looks like it has missed some of the complexities of the relationships. The scatterplot matrix of all 5 PCs (@fig-plane-nonlin-pairs) shows that PC4 and PC5 contain interesting features: more non-linearity, and curiously an outlier.
+`r ifelse(knitr::is_html_output(), '@fig-plane-nonlin-html', '@fig-plane-nonlin-pdf')` shows the tour of the full 5D data containing non-linear relationships in comparison with a tour of the first three PCs, as recommended by the scree plot (@fig-plane-nonlin-scree). The PCs capture some clear and very clean non-linear relationship, but it looks like it has missed some of the complexities of the relationships. The scatterplot matrix of all 5 PCs (@fig-plane-nonlin-pairs) shows that PC4 and PC5 contain interesting features: more non-linearity, and curiously an outlier.
  
 ```{r}
 #| label: fig-plane-nonlin-scree
@@ -727,11 +795,22 @@ render_gif(plane_nonlin_pca$x[,1:3],
 ```
 
 ::: {.content-visible when-format="html"}
-::: {#fig-plane-nonlin fig-align="center" layout-ncol=2}
+::: {#fig-plane-nonlin-html fig-align="center" layout-ncol=2}
 
 ![Non-linear relationship between several variables seen in a tour on all five variables.](gifs/plane_nonlin.gif){#fig-nonlinear2  width=250}
 
 ![The first three principal components reveal a strong non-linear relationship.](gifs/plane_nonlin_pca.gif){#fig-plane_nonlin_pca width=250}
+
+Comparison of the full data and first three principal components. Some of the non-linearity is clearly visible in the reduced dimension space, but the full data has more complexities.
+:::
+:::
+
+::: {.content-visible when-format="pdf"}
+::: {#fig-plane-nonlin-pdf fig-align="center" layout-ncol=2}
+
+![Non-linear relationship between several variables seen in a tour on all five variables.](){#fig-nonlinear2  width=250}
+
+![The first three principal components reveal a strong non-linear relationship.](){#fig-plane_nonlin_pca width=250}
 
 Comparison of the full data and first three principal components. Some of the non-linearity is clearly visible in the reduced dimension space, but the full data has more complexities.
 :::
