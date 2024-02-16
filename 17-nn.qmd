@@ -658,6 +658,103 @@ Comparison of the boundaries produced by the LDA (a) and the NN (b) model, using
 
 \index{tour!slice} 
 
+## Application to a large dataset
+
+To see how these methods apply in the setting where we have a large number of variables, observations and classes we will look at a neural network that predicts the category for the fashion MNIST data. The code for designing and fitting the model is following the tutorial available from https://tensorflow.rstudio.com/tutorials/keras/classification and you can find additional information there. Below we only replicate the steps needed to build the model from scratch.
+
+```{r eval=FALSE}
+library(keras)
+
+# download the data
+fashion_mnist <- dataset_fashion_mnist()
+
+# split into input variables and response
+c(train_images, train_labels) %<-% fashion_mnist$train
+c(test_images, test_labels) %<-% fashion_mnist$test
+
+# for interpretation we also define the category names
+class_names = c('T-shirt/top',
+                'Trouser',
+                'Pullover',
+                'Dress',
+                'Coat',
+                'Sandal',
+                'Shirt',
+                'Sneaker',
+                'Bag',
+                'Ankle boot')
+
+# rescaling to the range (0,1)
+train_images <- train_images / 255
+test_images <- test_images / 255
+
+# defining the model
+model_fashion_mnist <- keras_model_sequential()
+model_fashion_mnist %>%
+  # flatten the image data into a long vector
+  layer_flatten(input_shape = c(28, 28)) %>%
+  # hidden layer with 128 units
+  layer_dense(units = 128, activation = 'relu') %>%
+  # output layer for 10 categories
+  layer_dense(units = 10, activation = 'softmax')
+
+model_fashion_mnist %>% compile(
+  optimizer = 'adam',
+  loss = 'sparse_categorical_crossentropy',
+  metrics = c('accuracy')
+)
+
+# fitting the model, if we did not know the model yet we
+# would add a validation split to diagnose the training
+model_fashion_mnist %>% fit(train_images,
+              train_labels,
+              epochs = 5)
+
+# check model performance on the test data
+model_fashion_mnist %>% evaluate(test_images, test_labels)
+
+fashion_nn_wgts <- get_weights(model_fashion_mnist, trainable=TRUE)
+
+```
+
+
+```{r eval=FALSE}
+# calculate activation for the hidden layer
+activations_model_fashion <- keras_model(
+  inputs = model_fashion_mnist$input,
+  outputs = model_fashion_mnist$layers[[2]]$output
+)
+activations_fashion <- predict(
+  activations_model_fashion,
+  train_images)
+
+# to look at this new feature space we first reduce
+# dimensionality with PCA
+
+activations_pca <- prcomp(activations_fashion)
+# the first two components are clearly most important
+activations_pcs <- as.data.frame(activations_pca$x)
+
+train_tags <- class_names[train_labels + 1]
+
+ggplot(activations_pcs,
+       aes(PC1, PC2, color = train_tags)) +
+  geom_point(shape = ".")
+
+# instead what if we tour on the first 5 PCs
+animate_xy(activations_pcs[,1:5], col = train_tags,
+        pch = ".")
+
+# too slow when animating like this, maybe better with
+# detourr or other implementation?
+# might be nice to have double view of this and
+# the output layer showing the probabilities, and have
+# linked brushing between the two?
+# might be a good idea to just look at a sample from
+# the test data instead, maybe pick difficult points to
+# investigate like this?
+# next step shap?
+```
 
 <!--
 This chapter will likely include:
