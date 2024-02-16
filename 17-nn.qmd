@@ -719,6 +719,9 @@ fashion_nn_wgts <- get_weights(model_fashion_mnist, trainable=TRUE)
 
 
 ```{r eval=FALSE}
+
+train_tags <- class_names[train_labels + 1]
+
 # calculate activation for the hidden layer
 activations_model_fashion <- keras_model(
   inputs = model_fashion_mnist$input,
@@ -726,7 +729,7 @@ activations_model_fashion <- keras_model(
 )
 activations_fashion <- predict(
   activations_model_fashion,
-  train_images)
+  test_images)
 
 # to look at this new feature space we first reduce
 # dimensionality with PCA
@@ -735,18 +738,15 @@ activations_pca <- prcomp(activations_fashion)
 # the first two components are clearly most important
 activations_pcs <- as.data.frame(activations_pca$x)
 
-train_tags <- class_names[train_labels + 1]
-
 ggplot(activations_pcs,
-       aes(PC1, PC2, color = train_tags)) +
+       aes(PC1, PC2, color = test_tags)) +
   geom_point(shape = ".")
 
 # instead what if we tour on the first 5 PCs
-animate_xy(activations_pcs[,1:5], col = train_tags,
+# using sage display works nicely for this
+animate_sage(activations_pcs[,1:5], col = test_tags,
         pch = ".")
 
-# too slow when animating like this, maybe better with
-# detourr or other implementation?
 # might be nice to have double view of this and
 # the output layer showing the probabilities, and have
 # linked brushing between the two?
@@ -776,11 +776,14 @@ colnames(sp) <- c("x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8", "x9")
 sp$class = ""
 f_nn_v_p_s <- bind_rows(sp, f_nn_v_p) %>%
   mutate(class = factor(class))
+# nicely shows confusion between certain classes is common
 animate_xy(f_nn_v_p_s[,1:9], col = f_nn_v_p_s$class, 
            axes = "off", pch = ".",
            edges = as.matrix(simp$edges),
            palette = "Viridis")
 ```
+
+Sketches as example for overfitting? What would we look for? 
 
 <!--
 This chapter will likely include:
