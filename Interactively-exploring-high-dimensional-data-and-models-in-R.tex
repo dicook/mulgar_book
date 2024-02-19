@@ -8009,6 +8009,141 @@ produced by the LDA (a) and the NN (b) model, using a slice tour.}
 
 \index{tour!slice}
 
+\section{Application to a large
+dataset}\label{application-to-a-large-dataset}
+
+To see how these methods apply in the setting where we have a large
+number of variables, observations and classes we will look at a neural
+network that predicts the category for the fashion MNIST data. The code
+for designing and fitting the model is following the tutorial available
+from https://tensorflow.rstudio.com/tutorials/keras/classification and
+you can find additional information there. Below we only replicate the
+steps needed to build the model from scratch.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(keras)}
+
+\CommentTok{\# download the data}
+\NormalTok{fashion\_mnist }\OtherTok{\textless{}{-}} \FunctionTok{dataset\_fashion\_mnist}\NormalTok{()}
+
+\CommentTok{\# split into input variables and response}
+\FunctionTok{c}\NormalTok{(train\_images, train\_labels) }\SpecialCharTok{\%\textless{}{-}\%}\NormalTok{ fashion\_mnist}\SpecialCharTok{$}\NormalTok{train}
+\FunctionTok{c}\NormalTok{(test\_images, test\_labels) }\SpecialCharTok{\%\textless{}{-}\%}\NormalTok{ fashion\_mnist}\SpecialCharTok{$}\NormalTok{test}
+
+\CommentTok{\# for interpretation we also define the category names}
+\NormalTok{class\_names }\OtherTok{=} \FunctionTok{c}\NormalTok{(}\StringTok{\textquotesingle{}T{-}shirt/top\textquotesingle{}}\NormalTok{,}
+                \StringTok{\textquotesingle{}Trouser\textquotesingle{}}\NormalTok{,}
+                \StringTok{\textquotesingle{}Pullover\textquotesingle{}}\NormalTok{,}
+                \StringTok{\textquotesingle{}Dress\textquotesingle{}}\NormalTok{,}
+                \StringTok{\textquotesingle{}Coat\textquotesingle{}}\NormalTok{,}
+                \StringTok{\textquotesingle{}Sandal\textquotesingle{}}\NormalTok{,}
+                \StringTok{\textquotesingle{}Shirt\textquotesingle{}}\NormalTok{,}
+                \StringTok{\textquotesingle{}Sneaker\textquotesingle{}}\NormalTok{,}
+                \StringTok{\textquotesingle{}Bag\textquotesingle{}}\NormalTok{,}
+                \StringTok{\textquotesingle{}Ankle boot\textquotesingle{}}\NormalTok{)}
+
+\CommentTok{\# rescaling to the range (0,1)}
+\NormalTok{train\_images }\OtherTok{\textless{}{-}}\NormalTok{ train\_images }\SpecialCharTok{/} \DecValTok{255}
+\NormalTok{test\_images }\OtherTok{\textless{}{-}}\NormalTok{ test\_images }\SpecialCharTok{/} \DecValTok{255}
+
+\CommentTok{\# defining the model}
+\NormalTok{model\_fashion\_mnist }\OtherTok{\textless{}{-}} \FunctionTok{keras\_model\_sequential}\NormalTok{()}
+\NormalTok{model\_fashion\_mnist }\SpecialCharTok{\%\textgreater{}\%}
+  \CommentTok{\# flatten the image data into a long vector}
+  \FunctionTok{layer\_flatten}\NormalTok{(}\AttributeTok{input\_shape =} \FunctionTok{c}\NormalTok{(}\DecValTok{28}\NormalTok{, }\DecValTok{28}\NormalTok{)) }\SpecialCharTok{\%\textgreater{}\%}
+  \CommentTok{\# hidden layer with 128 units}
+  \FunctionTok{layer\_dense}\NormalTok{(}\AttributeTok{units =} \DecValTok{128}\NormalTok{, }\AttributeTok{activation =} \StringTok{\textquotesingle{}relu\textquotesingle{}}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \CommentTok{\# output layer for 10 categories}
+  \FunctionTok{layer\_dense}\NormalTok{(}\AttributeTok{units =} \DecValTok{10}\NormalTok{, }\AttributeTok{activation =} \StringTok{\textquotesingle{}softmax\textquotesingle{}}\NormalTok{)}
+
+\NormalTok{model\_fashion\_mnist }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{compile}\NormalTok{(}
+  \AttributeTok{optimizer =} \StringTok{\textquotesingle{}adam\textquotesingle{}}\NormalTok{,}
+  \AttributeTok{loss =} \StringTok{\textquotesingle{}sparse\_categorical\_crossentropy\textquotesingle{}}\NormalTok{,}
+  \AttributeTok{metrics =} \FunctionTok{c}\NormalTok{(}\StringTok{\textquotesingle{}accuracy\textquotesingle{}}\NormalTok{)}
+\NormalTok{)}
+
+\CommentTok{\# fitting the model, if we did not know the model yet we}
+\CommentTok{\# would add a validation split to diagnose the training}
+\NormalTok{model\_fashion\_mnist }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{fit}\NormalTok{(train\_images,}
+\NormalTok{              train\_labels,}
+              \AttributeTok{epochs =} \DecValTok{5}\NormalTok{)}
+
+\CommentTok{\# check model performance on the test data}
+\NormalTok{model\_fashion\_mnist }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{evaluate}\NormalTok{(test\_images, test\_labels)}
+
+\NormalTok{fashion\_nn\_wgts }\OtherTok{\textless{}{-}} \FunctionTok{get\_weights}\NormalTok{(model\_fashion\_mnist, }\AttributeTok{trainable=}\ConstantTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{train\_tags }\OtherTok{\textless{}{-}}\NormalTok{ class\_names[train\_labels }\SpecialCharTok{+} \DecValTok{1}\NormalTok{]}
+
+\CommentTok{\# calculate activation for the hidden layer}
+\NormalTok{activations\_model\_fashion }\OtherTok{\textless{}{-}} \FunctionTok{keras\_model}\NormalTok{(}
+  \AttributeTok{inputs =}\NormalTok{ model\_fashion\_mnist}\SpecialCharTok{$}\NormalTok{input,}
+  \AttributeTok{outputs =}\NormalTok{ model\_fashion\_mnist}\SpecialCharTok{$}\NormalTok{layers[[}\DecValTok{2}\NormalTok{]]}\SpecialCharTok{$}\NormalTok{output}
+\NormalTok{)}
+\NormalTok{activations\_fashion }\OtherTok{\textless{}{-}} \FunctionTok{predict}\NormalTok{(}
+\NormalTok{  activations\_model\_fashion,}
+\NormalTok{  test\_images)}
+
+\CommentTok{\# to look at this new feature space we first reduce}
+\CommentTok{\# dimensionality with PCA}
+
+\NormalTok{activations\_pca }\OtherTok{\textless{}{-}} \FunctionTok{prcomp}\NormalTok{(activations\_fashion)}
+\CommentTok{\# the first two components are clearly most important}
+\NormalTok{activations\_pcs }\OtherTok{\textless{}{-}} \FunctionTok{as.data.frame}\NormalTok{(activations\_pca}\SpecialCharTok{$}\NormalTok{x)}
+
+\FunctionTok{ggplot}\NormalTok{(activations\_pcs,}
+       \FunctionTok{aes}\NormalTok{(PC1, PC2, }\AttributeTok{color =}\NormalTok{ test\_tags)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{shape =} \StringTok{"."}\NormalTok{)}
+
+\CommentTok{\# instead what if we tour on the first 5 PCs}
+\CommentTok{\# using sage display works nicely for this}
+\FunctionTok{animate\_sage}\NormalTok{(activations\_pcs[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{5}\NormalTok{], }\AttributeTok{col =}\NormalTok{ test\_tags,}
+        \AttributeTok{pch =} \StringTok{"."}\NormalTok{)}
+
+\CommentTok{\# might be nice to have double view of this and}
+\CommentTok{\# the output layer showing the probabilities, and have}
+\CommentTok{\# linked brushing between the two?}
+\CommentTok{\# might be a good idea to just look at a sample from}
+\CommentTok{\# the test data instead, maybe pick difficult points to}
+\CommentTok{\# investigate like this?}
+\CommentTok{\# next step shap?}
+
+
+\CommentTok{\# getting the probabilities from the output layer}
+\NormalTok{fashion\_test\_pred }\OtherTok{\textless{}{-}} \FunctionTok{predict}\NormalTok{(model\_fashion\_mnist,}
+\NormalTok{                             test\_images)}
+
+\CommentTok{\# copying this from RF fake tree vote matrix}
+\NormalTok{proj }\OtherTok{\textless{}{-}} \FunctionTok{t}\NormalTok{(geozoo}\SpecialCharTok{::}\FunctionTok{f\_helmert}\NormalTok{(}\DecValTok{10}\NormalTok{)[}\SpecialCharTok{{-}}\DecValTok{1}\NormalTok{,])}
+\NormalTok{f\_nn\_v\_p }\OtherTok{\textless{}{-}} \FunctionTok{as.matrix}\NormalTok{(fashion\_test\_pred) }\SpecialCharTok{\%*\%}\NormalTok{ proj}
+\FunctionTok{colnames}\NormalTok{(f\_nn\_v\_p) }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"x1"}\NormalTok{, }\StringTok{"x2"}\NormalTok{, }\StringTok{"x3"}\NormalTok{, }\StringTok{"x4"}\NormalTok{, }\StringTok{"x5"}\NormalTok{, }\StringTok{"x6"}\NormalTok{, }\StringTok{"x7"}\NormalTok{, }\StringTok{"x8"}\NormalTok{, }\StringTok{"x9"}\NormalTok{)}
+\NormalTok{test\_tags }\OtherTok{\textless{}{-}}\NormalTok{ class\_names[test\_labels }\SpecialCharTok{+} \DecValTok{1}\NormalTok{]}
+
+\NormalTok{f\_nn\_v\_p }\OtherTok{\textless{}{-}}\NormalTok{ f\_nn\_v\_p }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{as.data.frame}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{class =}\NormalTok{ test\_tags)}
+
+\NormalTok{simp }\OtherTok{\textless{}{-}}\NormalTok{ geozoo}\SpecialCharTok{::}\FunctionTok{simplex}\NormalTok{(}\AttributeTok{p=}\DecValTok{9}\NormalTok{)}
+\NormalTok{sp }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(simp}\SpecialCharTok{$}\NormalTok{points)}
+\FunctionTok{colnames}\NormalTok{(sp) }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"x1"}\NormalTok{, }\StringTok{"x2"}\NormalTok{, }\StringTok{"x3"}\NormalTok{, }\StringTok{"x4"}\NormalTok{, }\StringTok{"x5"}\NormalTok{, }\StringTok{"x6"}\NormalTok{, }\StringTok{"x7"}\NormalTok{, }\StringTok{"x8"}\NormalTok{, }\StringTok{"x9"}\NormalTok{)}
+\NormalTok{sp}\SpecialCharTok{$}\NormalTok{class }\OtherTok{=} \StringTok{""}
+\NormalTok{f\_nn\_v\_p\_s }\OtherTok{\textless{}{-}} \FunctionTok{bind\_rows}\NormalTok{(sp, f\_nn\_v\_p) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{class =} \FunctionTok{factor}\NormalTok{(class))}
+\CommentTok{\# nicely shows confusion between certain classes is common}
+\FunctionTok{animate\_xy}\NormalTok{(f\_nn\_v\_p\_s[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{9}\NormalTok{], }\AttributeTok{col =}\NormalTok{ f\_nn\_v\_p\_s}\SpecialCharTok{$}\NormalTok{class, }
+           \AttributeTok{axes =} \StringTok{"off"}\NormalTok{, }\AttributeTok{pch =} \StringTok{"."}\NormalTok{,}
+           \AttributeTok{edges =} \FunctionTok{as.matrix}\NormalTok{(simp}\SpecialCharTok{$}\NormalTok{edges),}
+           \AttributeTok{palette =} \StringTok{"Viridis"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+Sketches as example for overfitting? What would we look for?
+
 \section*{Exercises}\label{exercises-15}
 \addcontentsline{toc}{section}{Exercises}
 
