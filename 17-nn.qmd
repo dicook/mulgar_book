@@ -709,18 +709,13 @@ model_fashion_mnist %>% compile(
 model_fashion_mnist %>% fit(train_images,
               train_labels,
               epochs = 5)
-
-# check model performance on the test data
-model_fashion_mnist %>% evaluate(test_images, test_labels)
-
-fashion_nn_wgts <- get_weights(model_fashion_mnist, trainable=TRUE)
-
 ```
 
+We have defined a flat neural network with a single hidden layer with 128 nodes. To investigate the model we can start by comparing the activations to the original input data distribution. Since both the input space and the space of activations is large, and they are of different dimensionality, we will first use principal component analysis. This simplifies the analysis, and in general we do not need the original pixel or hidden node information for the interpretation here. We first look at the first two principal components in a scatterplot, and then use the sage tour to visulaize the first five.
 
 ```{r eval=FALSE}
 
-train_tags <- class_names[train_labels + 1]
+test_tags <- class_names[test_labels + 1]
 
 # calculate activation for the hidden layer
 activations_model_fashion <- keras_model(
@@ -731,14 +726,23 @@ activations_fashion <- predict(
   activations_model_fashion,
   test_images)
 
-# to look at this new feature space we first reduce
-# dimensionality with PCA
-
+# PCA for activations
 activations_pca <- prcomp(activations_fashion)
 # the first two components are clearly most important
 activations_pcs <- as.data.frame(activations_pca$x)
 
+# PCA on the original data
+test_images_flat <- test_images
+dim(test_images_flat) <- c(nrow(test_images_flat), 784)
+images_pca <- prcomp(as.data.frame(test_images_flat))
+# the first two components are clearly most important
+images_pcs <- as.data.frame(images_pca$x)
+
 ggplot(activations_pcs,
+       aes(PC1, PC2, color = test_tags)) +
+  geom_point(shape = ".")
+
+ggplot(images_pcs,
        aes(PC1, PC2, color = test_tags)) +
   geom_point(shape = ".")
 
@@ -753,7 +757,6 @@ animate_sage(activations_pcs[,1:5], col = test_tags,
 # might be a good idea to just look at a sample from
 # the test data instead, maybe pick difficult points to
 # investigate like this?
-# next step shap?
 
 
 # getting the probabilities from the output layer
@@ -764,7 +767,6 @@ fashion_test_pred <- predict(model_fashion_mnist,
 proj <- t(geozoo::f_helmert(10)[-1,])
 f_nn_v_p <- as.matrix(fashion_test_pred) %*% proj
 colnames(f_nn_v_p) <- c("x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8", "x9")
-test_tags <- class_names[test_labels + 1]
 
 f_nn_v_p <- f_nn_v_p %>%
   as.data.frame() %>%
@@ -781,9 +783,15 @@ animate_xy(f_nn_v_p_s[,1:9], col = f_nn_v_p_s$class,
            axes = "off", pch = ".",
            edges = as.matrix(simp$edges),
            palette = "Viridis")
+
+# can I make the lines thinner with the current implementation?
 ```
 
-Sketches as example for overfitting? What would we look for? 
+XXX why not shap? heatmap that people make for image recognition - is this easy in keras? show example of class wise and missclassified images
+
+Sketches as example for overfitting? What would we look for? Make challenge excercise: can you do better than the random forest for this data?
+
+Fake trees think about how many nodes?
 
 <!--
 This chapter will likely include:
@@ -803,7 +811,7 @@ References keras/tensorflow book, tidymodels, interpretable machine learning, an
 Outline for chapter:
 
 - Penguins data
-    - Setting up with the CNN with keras
+    - Setting up with the NN with keras
     - Splitting training and test, checking
     - Specifying model, choices of layers
     - Making predictions
@@ -823,4 +831,7 @@ Sketches as an example
 
 ## Exercises {-}
 
-1. The problem with the NN model fitted to the penguins is that the Gentoo are poorly classified, when they should be perfectly predictable due to the big gap between class clusters. Re-fit the NN to the penguins data, to find a better model that appropriately perfectly predicts Gentoo penguins. Support this by plotting the model (using the hiddne layer), and the predictive probabilities as a ternary plot. Do the SHAP values also support that `bd` plays a stronger role in your best model? (`bd` is the main variable for distinguishing Gentoo's from the other species, particularly when used with `fl` or `bl`.)
+1. The problem with the NN model fitted to the penguins is that the Gentoo are poorly classified, when they should be perfectly predictable due to the big gap between class clusters. Re-fit the NN to the penguins data, to find a better model that appropriately perfectly predicts Gentoo penguins. Support this by plotting the model (using the hidden layer), and the predictive probabilities as a ternary plot. Do the SHAP values also support that `bd` plays a stronger role in your best model? (`bd` is the main variable for distinguishing Gentoo's from the other species, particularly when used with `fl` or `bl`.)
+
+
+
