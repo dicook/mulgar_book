@@ -660,9 +660,11 @@ Comparison of the boundaries produced by the LDA (a) and the NN (b) model, using
 
 ## Application to a large dataset
 
-To see how these methods apply in the setting where we have a large number of variables, observations and classes we will look at a neural network that predicts the category for the fashion MNIST data. The code for designing and fitting the model is following the tutorial available from https://tensorflow.rstudio.com/tutorials/keras/classification and you can find additional information there. Below we only replicate the steps needed to build the model from scratch.
+To see how these methods apply in the setting where we have a large number of variables, observations and classes we will look at a neural network that predicts the category for the fashion MNIST data. The code for designing and fitting the model is following the tutorial available from https://tensorflow.rstudio.com/tutorials/keras/classification and you can find additional information there. Below we only replicate the steps needed to build the model from scratch. We also note that a similar investigation was presented in @li2020visualizing, with a focus on investigating the model at different epochs during the training.
 
-```{r eval=FALSE}
+The first step is to download and prepare the data. Here we scale the observations to range between zero and one, and we define the label names.
+
+```{r}
 library(keras)
 
 # download the data
@@ -687,7 +689,11 @@ class_names = c('T-shirt/top',
 # rescaling to the range (0,1)
 train_images <- train_images / 255
 test_images <- test_images / 255
+```
 
+In the next step we define the neural network and train the model. Note that because we have many observations, even a very simple structure returns a good model. And because this example is well-known, we do not need to tune the model or check the validation accuracy.
+
+```{r eval=FALSE}
 # defining the model
 model_fashion_mnist <- keras_model_sequential()
 model_fashion_mnist %>%
@@ -709,15 +715,20 @@ model_fashion_mnist %>% compile(
 model_fashion_mnist %>% fit(train_images,
               train_labels,
               epochs = 5)
+save_model_tf(model_fashion_mnist, "data/fashion_nn")
 ```
 
-We have defined a flat neural network with a single hidden layer with 128 nodes. To investigate the model we can start by comparing the activations to the original input data distribution. Since both the input space and the space of activations is large, and they are of different dimensionality, we will first use principal component analysis. This simplifies the analysis, and in general we do not need the original pixel or hidden node information for the interpretation here. We first look at the first two principal components in a scatterplot, and then use the sage tour to visulaize the first five.
+We have defined a flat neural network with a single hidden layer with 128 nodes. To investigate the model we can start by comparing the activations to the original input data distribution. Since both the input space and the space of activations is large, and they are of different dimensionality, we will first use principal component analysis. This simplifies the analysis, and in general we do not need the original pixel or hidden node information for the interpretation here. The comparison is using the test-subset of the data.
 
-```{r eval=FALSE}
+```{r fig.format='png'}
+# get the fitted model
+model_fashion_mnist <- load_model_tf("data/fashion_nn")
+# observed response labels in the test set
+test_tags <- factor(class_names[test_labels + 1],
+                    levels = class_names)
 
-test_tags <- class_names[test_labels + 1]
-
-# calculate activation for the hidden layer
+# calculate activation for the hidden layer, this can be done
+# within the keras framework
 activations_model_fashion <- keras_model(
   inputs = model_fashion_mnist$input,
   outputs = model_fashion_mnist$layers[[2]]$output
@@ -728,37 +739,74 @@ activations_fashion <- predict(
 
 # PCA for activations
 activations_pca <- prcomp(activations_fashion)
-# the first two components are clearly most important
-activations_pcs <- as.data.frame(activations_pca$x)
+activations_pc <- as.data.frame(activations_pca$x)
 
 # PCA on the original data
+# we first need to flatten the image input
 test_images_flat <- test_images
 dim(test_images_flat) <- c(nrow(test_images_flat), 784)
 images_pca <- prcomp(as.data.frame(test_images_flat))
-# the first two components are clearly most important
-images_pcs <- as.data.frame(images_pca$x)
+images_pc <- as.data.frame(images_pca$x)
 
-ggplot(activations_pcs,
+p2 <- ggplot(activations_pc,
        aes(PC1, PC2, color = test_tags)) +
-  geom_point(shape = ".")
+  geom_point(size = 0.1) +
+  ggtitle("Activations") +
+  scale_color_brewer(palette = "Set3") +
+  theme_bw() +
+  theme(legend.position = "none", aspect.ratio = 1)
 
-ggplot(images_pcs,
+p1 <- ggplot(images_pc,
        aes(PC1, PC2, color = test_tags)) +
-  geom_point(shape = ".")
+  geom_point(size = 0.1) +
+  ggtitle("Input space") +
+  scale_color_brewer(palette = "Set3") +
+  theme_bw() +
+  theme(legend.position = "none", aspect.ratio = 1)
 
-# instead what if we tour on the first 5 PCs
-# using sage display works nicely for this
-animate_sage(activations_pcs[,1:5], col = test_tags,
-        pch = ".")
+legend_labels <- cowplot::get_legend(
+  p1 + 
+    guides(color = guide_legend(nrow = 1)) +
+    theme(legend.position = "bottom",
+          legend.title = element_blank()) +
+    guides(color = guide_legend(override.aes = list(size = 1))) 
+)
 
-# might be nice to have double view of this and
-# the output layer showing the probabilities, and have
-# linked brushing between the two?
-# might be a good idea to just look at a sample from
-# the test data instead, maybe pick difficult points to
-# investigate like this?
+cowplot::plot_grid(cowplot::plot_grid(p1, p2), legend_labels,
+                   rel_heights = c(1, .3), nrow = 2)
+```
 
+Looking only at the first two principal components we note some clear differences from the transformation in the hidden layer. The observations seem to be more evenly spread in the input space, while in the activations space we notice grouping along specific directions. In particular the category "Bag" appears to be most different from all other classes, and the non-linear transformation in the activations space shows that they are clearly different from the shoe categories, while in the input space we could note some overlap in the linear projection. To better identify differences between other groups we will use the tour on the first five principal components.
 
+```{r eval=FALSE}
+# this is not using the selected palette it seems?
+animate_sage(images_pc[,1:5], col = test_tags,
+        pch = ".", palette = "Set3")
+
+animate_sage(activations_pc[,1:5], col = test_tags,
+        pch = ".", palette = "Set3")
+
+```
+
+As with the first two principal components we get a much more spread out distribution in the original space. Nevertheless we can see differences between the classes, and that some groups are varying along specific directions in that space. Overall the activations space shows tighter clusters as expected after including the ReLU activation function, but the picture is not as neat as the first two principal components would suggest. While certain groups appear very compact even in this larger subspace, others vary quite a bit within part of the space. For example, images of XXX appear to be spanning a plane in this space.
+
+Finally we will investigate the model performance through the missclassifications and uncertainty between classes. We start with the error matrix for the test observations.
+
+```{r}
+fashion_test_pred <- predict(model_fashion_mnist,
+                             test_images)
+fashion_test_pred_cat <- levels(test_tags)[
+  apply(fashion_test_pred, 1,
+        which.max)]
+fashion_test_pred_cat <- factor(
+  fashion_test_pred_cat,
+  levels=levels(test_tags))
+table(test_tags, fashion_test_pred_cat)
+```
+
+From this we see that the model mainly confuses certain categories with each other, and within expected groups (e.g. different types of shoes can be confused with each other, or different types of shirts). We can further investigate this by visualizing the full probability matrix for the test observations, to see which categories the model is uncertain about.
+
+```{r eval=FALSE}
 # getting the probabilities from the output layer
 fashion_test_pred <- predict(model_fashion_mnist,
                              test_images)
@@ -782,9 +830,9 @@ f_nn_v_p_s <- bind_rows(sp, f_nn_v_p) %>%
 animate_xy(f_nn_v_p_s[,1:9], col = f_nn_v_p_s$class, 
            axes = "off", pch = ".",
            edges = as.matrix(simp$edges),
+           edges.width = 0.05,
            palette = "Viridis")
 
-# can I make the lines thinner with the current implementation?
 ```
 
 XXX why not shap? heatmap that people make for image recognition - is this easy in keras? show example of class wise and missclassified images
