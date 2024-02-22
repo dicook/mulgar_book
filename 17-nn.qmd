@@ -942,5 +942,123 @@ Sketches as an example
 4. The sketches data could also be considered a classic image classification problem, and we have seen that we can get a reasonable accuracy with a random forest model. Because we only have a smaller number of observations (compared to the fashion MNIST data) when fitting a neural network we need to be very careful not to overfit the training data. Try fitting a flat neural network (similar to what we did for the fashion MNIST data) and check the test accuracy of the model.
 5. Challenge: try to design a more accurate neural network for the sketches data. Here you can investigate using a convolutional neural network in combination with data augmentation. In addition, using batch normalization should improve the model performance.
 
+```{r}
+#| eval: false
+#| echo: false
+library(mulgar)
+library(keras)
+library(liminal)
+
+
+tree_branch <- keras::to_categorical(fake_trees$branches, num_classes = 10)
+tree_input <- scale(fake_trees[,1:100])
+
+ft_nn <- keras_model_sequential() 
+ft_nn %>% 
+  layer_dense(units = 128, activation = 'relu', input_shape = c(100)) %>%
+  layer_dropout(0.2) %>%
+  layer_dense(units = 64, activation = 'relu') %>%
+  layer_dropout(0.2) %>%
+  layer_dense(units = 10, activation = 'softmax')
+ft_nn %>% compile(
+  loss = 'categorical_crossentropy',
+  optimizer = optimizer_adam(learning_rate = 5*10E-7), 
+  metrics = c('accuracy')
+)
+history_ft <- ft_nn %>% fit(
+  tree_input, tree_branch, 
+  epochs = 100, batch_size = 128, 
+  validation_split = 0.2
+)
+
+
+```
+
+```{r}
+#| eval: false
+#| echo: false
+library(mulgar)
+library(dplyr)
+
+data("sketches_train")
+load("data/sketches_test_labelled.rda")
+library(keras)
+classes <- unique(sketches_train$word)
+formatData <- function(data, flat = TRUE){
+  # extracting the label and convert to one-hot encoding
+  # first map to integer numbers, starting from 0
+  data_y <- sapply(data$word, function(x) which(x == classes)-1)
+  data_y <- keras::to_categorical(data_y, num_classes = 6)
+  # format predictors as matrix and normalize
+  data_x <- as.matrix(data[, 1:(ncol(data)-2)])
+  data_x = data_x / 255.
+  if(flat != TRUE){
+    dim(data_x) <- c(nrow(data), 28, 28, 1)
+  }
+  return(list(x = data_x, y = data_y))
+}
+sketches_flat <- formatData(sketches_train)
+sketches_img <- formatData(sketches_train, flat = FALSE)
+
+# with a flat NN the validation error is large
+model_flat <- keras_model_sequential() 
+model_flat %>% 
+  layer_dense(units = 64, activation = 'relu', input_shape = c(784)) %>% 
+  layer_dense(units = 32, activation = 'relu') %>% 
+  layer_dense(units = 6, activation = 'softmax')
+model_flat %>% compile(
+  loss = 'categorical_crossentropy',
+  optimizer = optimizer_adam(), # could pass in learning rate here
+  metrics = c('accuracy')
+)
+history_flat <- model_flat %>% fit(
+  sketches_flat$x, sketches_flat$y, 
+  epochs = 100, batch_size = 128, 
+  validation_split = 0.2
+)
+
+# with quite a bit of work we can get something better (but still not great)
+data_augmentation <-
+  keras_model_sequential() %>%
+  layer_random_flip("horizontal") %>%
+  layer_random_rotation(0.1) %>%
+  layer_random_zoom(0.1)
+
+library(tfdatasets)
+
+# Create a tf_dataset pipeline of augmented images (and their labels)
+train_dataset <- tensor_slices_dataset(list(sketches_img$x, sketches_img$y)) %>%
+  dataset_batch(32) %>%
+  dataset_map( ~ list(data_augmentation(.x), .y)) # see ?purrr::map to learn about ~ notation
+
+model_cnn <- keras_model_sequential() 
+model_cnn %>%
+  layer_conv_2d(32, kernel_size= c(3, 3),
+                activation='relu',
+                input_shape = dim(sketches_img$x)[-1]) %>%
+  layer_max_pooling_2d(2, 2) %>% # 
+  layer_batch_normalization() %>%
+  layer_conv_2d(16, c(3, 3), activation='relu') %>%
+  layer_max_pooling_2d(2, 2) %>%
+  layer_batch_normalization() %>%
+  layer_flatten() %>%
+  layer_dense(128, activation='relu') %>%
+  layer_dropout(0.2) %>%
+  layer_dense(6, activation='softmax') %>%
+  compile(
+    loss = 'categorical_crossentropy',
+    optimizer = optimizer_adam(),
+    metrics = c('accuracy')
+  )
+
+# cannot have validation split in this setup, better to get test set
+history_cnn <- model_cnn %>% fit(
+  train_dataset,
+  epochs = 200
+)
+
+sketches_img_test <- formatData(sketches_test, flat = FALSE)
+evaluate(model_cnn, x = sketches_img_test$x, y = sketches_img_test$y)
+```
 
 
