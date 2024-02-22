@@ -220,7 +220,6 @@ p_nn_fit <- p_nn_model %>% keras::fit(
   verbose = 0
 )
 
-# Save model: does not work!
 save_model_tf(p_nn_model, "data/penguins_cnn")
 ```
 
@@ -264,7 +263,6 @@ p_nn_model %>% evaluate(p_test_x, p_test_y, verbose = 0)
 The model object can be saved for later use with:
 
 ```{r eval=FALSE}
-# Save model: does not work!
 save_model_tf(p_nn_model, "data/penguins_cnn")
 ```
 
@@ -720,7 +718,7 @@ save_model_tf(model_fashion_mnist, "data/fashion_nn")
 
 We have defined a flat neural network with a single hidden layer with 128 nodes. To investigate the model we can start by comparing the activations to the original input data distribution. Since both the input space and the space of activations is large, and they are of different dimensionality, we will first use principal component analysis. This simplifies the analysis, and in general we do not need the original pixel or hidden node information for the interpretation here. The comparison is using the test-subset of the data.
 
-```{r fig.format='png'}
+```{r}
 # get the fitted model
 model_fashion_mnist <- load_model_tf("data/fashion_nn")
 # observed response labels in the test set
@@ -735,7 +733,7 @@ activations_model_fashion <- keras_model(
 )
 activations_fashion <- predict(
   activations_model_fashion,
-  test_images)
+  test_images, verbose = 0)
 
 # PCA for activations
 activations_pca <- prcomp(activations_fashion)
@@ -747,12 +745,16 @@ test_images_flat <- test_images
 dim(test_images_flat) <- c(nrow(test_images_flat), 784)
 images_pca <- prcomp(as.data.frame(test_images_flat))
 images_pc <- as.data.frame(images_pca$x)
+```
 
+```{r echo=knitr::is_html_output(), fig.format='png'}
+#| code-fold: true
+#| code-summary: "Code to run tours"
 p2 <- ggplot(activations_pc,
        aes(PC1, PC2, color = test_tags)) +
   geom_point(size = 0.1) +
   ggtitle("Activations") +
-  scale_color_brewer(palette = "Set3") +
+  scale_color_discrete_qualitative(palette = "Dynamic") +
   theme_bw() +
   theme(legend.position = "none", aspect.ratio = 1)
 
@@ -760,7 +762,7 @@ p1 <- ggplot(images_pc,
        aes(PC1, PC2, color = test_tags)) +
   geom_point(size = 0.1) +
   ggtitle("Input space") +
-  scale_color_brewer(palette = "Set3") +
+  scale_color_discrete_qualitative(palette = "Dynamic") +
   theme_bw() +
   theme(legend.position = "none", aspect.ratio = 1)
 
@@ -771,45 +773,95 @@ legend_labels <- cowplot::get_legend(
           legend.title = element_blank()) +
     guides(color = guide_legend(override.aes = list(size = 1))) 
 )
-
+# hide plotting code
 cowplot::plot_grid(cowplot::plot_grid(p1, p2), legend_labels,
                    rel_heights = c(1, .3), nrow = 2)
 ```
 
 Looking only at the first two principal components we note some clear differences from the transformation in the hidden layer. The observations seem to be more evenly spread in the input space, while in the activations space we notice grouping along specific directions. In particular the category "Bag" appears to be most different from all other classes, and the non-linear transformation in the activations space shows that they are clearly different from the shoe categories, while in the input space we could note some overlap in the linear projection. To better identify differences between other groups we will use the tour on the first five principal components.
 
-```{r eval=FALSE}
-# this is not using the selected palette it seems?
-animate_sage(images_pc[,1:5], col = test_tags,
-        pch = ".", palette = "Set3")
 
-animate_sage(activations_pc[,1:5], col = test_tags,
-        pch = ".", palette = "Set3")
+```{r echo=knitr::is_html_output(), eval=FALSE}
+#| code-fold: true
+#| code-summary: "Code to run tours"
+animate_xy(images_pc[,1:5], col = test_tags,
+        cex=0.2, palette = "Dynamic")
+animate_xy(activations_pc[,1:5], col = test_tags,
+        cex=0.2, palette = "Dynamic")
 
+render_gif(images_pc[,1:5],
+           grand_tour(),
+           display_xy( 
+             col=test_tags, 
+             cex=0.2,
+             palette = "Dynamic",
+             axes="bottomleft"), 
+           gif_file="gifs/fashion_images_gt.gif",
+           frames=500,
+           loop=FALSE
+)
+render_gif(activations_pc[,1:5],
+           grand_tour(),
+           display_xy( 
+             col=test_tags, 
+             cex=0.2,
+             palette = "Dynamic",
+             axes="bottomleft"), 
+           gif_file="gifs/fashion_activations_gt.gif",
+           frames=500,
+           loop=FALSE
+)
 ```
 
-As with the first two principal components we get a much more spread out distribution in the original space. Nevertheless we can see differences between the classes, and that some groups are varying along specific directions in that space. Overall the activations space shows tighter clusters as expected after including the ReLU activation function, but the picture is not as neat as the first two principal components would suggest. While certain groups appear very compact even in this larger subspace, others vary quite a bit within part of the space. For example, images of XXX appear to be spanning a plane in this space.
+::: {.content-visible when-format="html"}
+::: {#fig-fashion-gt-html layout-ncol=2}
 
-Finally we will investigate the model performance through the missclassifications and uncertainty between classes. We start with the error matrix for the test observations.
+![Input space](gifs/fashion_images_gt.gif){#fig-fashion-input fig-alt="FIX ME" width=200}
+
+![Activations](gifs/fashion_activations_gt.gif){#fig-fashion-activation fig-alt="FIX ME" width=200}
+
+Comparison of the test observations in the first five principal components of the input space (left) and in the hidden layer activations (right). The activation function results in more clearly defined grouping of the different classes.
+:::
+:::
+
+
+::: {.content-visible when-format="pdf"}
+::: {#fig-p-split-pdf layout-ncol=2}
+
+![Input space](images/fashion_images_gt_36.png){#fig-fashion-input fig-alt="FIX ME" width=200}
+
+![Activations](images/fashion_activation_gt_126.png){#fig-fashion-activation fig-alt="FIX ME" width=200}
+
+Comparison of the test observations in the first five principal components of the input space (left) and in the hidden layer activations (right). The activation function results in more clearly defined grouping of the different classes.
+:::
+:::
+
+As with the first two principal components we get a much more spread out distribution in the original space. Nevertheless we can see differences between the classes, and that some groups are varying along specific directions in that space. Overall the activations space shows tighter clusters as expected after including the ReLU activation function, but the picture is not as neat as the first two principal components would suggest. While certain groups appear very compact even in this larger subspace, others vary quite a bit within part of the space. For example we can clearly see the "Bag" observations as different from all other images, but also notice that there is a large variation within this class along certain directions.
+
+Finally we will investigate the model performance through the missclassifications and uncertainty between classes. We start with the error matrix for the test observations. To fit the error matrix we use the numeric labels, the ordering is as defined above for the labels.
 
 ```{r}
 fashion_test_pred <- predict(model_fashion_mnist,
-                             test_images)
+                             test_images, verbose = 0)
 fashion_test_pred_cat <- levels(test_tags)[
   apply(fashion_test_pred, 1,
         which.max)]
-fashion_test_pred_cat <- factor(
+predicted <- factor(
   fashion_test_pred_cat,
-  levels=levels(test_tags))
-table(test_tags, fashion_test_pred_cat)
+  levels=levels(test_tags)) %>%
+  as.numeric() - 1
+observed <- as.numeric(test_tags) -1
+table(observed, predicted)
 ```
 
 From this we see that the model mainly confuses certain categories with each other, and within expected groups (e.g. different types of shoes can be confused with each other, or different types of shirts). We can further investigate this by visualizing the full probability matrix for the test observations, to see which categories the model is uncertain about.
 
-```{r eval=FALSE}
+```{r echo=knitr::is_html_output(), eval=FALSE}
+#| code-fold: true
+#| code-summary: "Code to visualize probabilities"
 # getting the probabilities from the output layer
 fashion_test_pred <- predict(model_fashion_mnist,
-                             test_images)
+                             test_images, verbose = 0)
 
 # copying this from RF fake tree vote matrix
 proj <- t(geozoo::f_helmert(10)[-1,])
@@ -825,17 +877,25 @@ sp <- data.frame(simp$points)
 colnames(sp) <- c("x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8", "x9")
 sp$class = ""
 f_nn_v_p_s <- bind_rows(sp, f_nn_v_p) %>%
-  mutate(class = factor(class))
+  mutate(class = ifelse(class %in% c("T-shirt/top",
+                                     "Pullover",
+                                     "Shirt",
+                                     "Coat"), class, "Other")) %>%
+  mutate(class = factor(class, levels=c("Other",
+                                        "T-shirt/top",
+                                        "Pullover",
+                                        "Shirt",
+                                        "Coat"))) 
 # nicely shows confusion between certain classes is common
 animate_xy(f_nn_v_p_s[,1:9], col = f_nn_v_p_s$class, 
            axes = "off", pch = ".",
            edges = as.matrix(simp$edges),
            edges.width = 0.05,
-           palette = "Viridis")
+           palette = "Lajolla")
 
 ```
 
-XXX why not shap? heatmap that people make for image recognition - is this easy in keras? show example of class wise and missclassified images -> I think this is easy in python but not R? Maybe not something to show but just to mention?
+For this data using explainers like SHAP is not so interesting, since the individual pixel contribution to a prediction are typically not of interest. With image classification a next step might be to further investigate which part of the image is important for a prediction, and this can be visualized as a heat map placed over the original image. This is especially interesting in the case of difficult or missclassified images. This however is beyond the scope of this book.
 
 
 <!--
