@@ -1,22 +1,53 @@
 # Data {#data}
 
-This chapter describes the datasets used throughout the book, one possibility is that this could be moved to an appendix and in the online version of the book any mention of the dataset in the main text could be cross-linked to its description. One thing that I really liked in the first edition is the emphasis on analysis
-question of interest and the little notes about the data. I believe the original layout was to put the data in order of appearance of the book, which naturally clusters them by technique.
+This chapter describes the datasets used throughout the book as listed in `r ifelse(knitr::is_html_output(), '@tbl-datalist-html', '@tbl-datalist-pdf')`. 
 
 ```{r}
 #| message: false
 #| echo: false
+library(readr)
+library(dplyr)
+
+datasets <- read_csv("misc/datasets.csv") |> 
+  dplyr::select(-`Other Notes`)
+```
+
+::: {.content-visible when-format="html"}
+
+```{r}
+#| message: false
+#| echo: false
+#| label: tbl-datalist-html
+#| tbl-cap: "List of data sets and their sources used in the book examples."
 library(gt)
 library(gtExtras)
 library(gtsummary)
-library(readr)
-datasets <- read_csv("misc/datasets.csv") %>% select(-`Other Notes`)
-datasets %>% gt() %>% cols_width(Name~px(150), 
-                                 Description~px(250),
-                                 Source~px(100), 
-                                 Analysis~px(100))
+datasets |> gt() |> 
+  cols_width(Name~px(150), 
+             Description~px(250),
+             Source~px(100), 
+             Analysis~px(100))
 ```
+:::
 
+::: {.content-visible when-format="pdf"}
+
+```{r}
+#| message: false
+#| echo: false
+#| label: tbl-datalist-pdf
+#| tbl-cap: "List of data sets and their sources used in the book examples."
+library(kableExtra)
+datasets |>
+  dplyr::select(Name, Description, Analysis) |>
+  knitr::kable(format="latex", booktabs = T) |>
+  kable_paper(full_width = F) |>
+  kable_styling() |>
+  column_spec(1, width = "2cm") |>
+  column_spec(2, width = "5cm") |>
+  column_spec(3, width = "5cm") 
+```
+:::
 
 ## Australian Football League Women
 
@@ -247,7 +278,8 @@ It is typically useful to pre-process this data into principal components. This 
 #| fig-cap: One of the sketches in the subset of training data.
 #| fig-width: 1
 #| fig-height: 1
-#| fig-align: left
+#| out-width: 20%
+#| fig-align: center
 library(mulgar)
 library(ggplot2)
 data("sketches_train")
@@ -258,26 +290,91 @@ xm <- data.frame(gry=t(as.matrix(x[,1:784])),
         y=rep(28:1, rep(28, 28)))
 ggplot(xm, aes(x=x, y=y, fill=gry)) +
   geom_tile() +
-  scale_fill_gradientn(colors = gray.colors(256, start = 0, end = 1, rev = TRUE )) +
+  scale_fill_gradientn(colors = gray.colors(256, 
+                                     start = 0, 
+                                     end = 1, 
+                                     rev = TRUE )) +
   ggtitle(x$word) +
   theme_void() + 
     theme(legend.position="none")
 ```
 
-## Links to additional data used in the book
+## Multicluster
+
+```{r}
+library(mulgar)
+data("multicluster")
+```
+
+### Description {-}
+
+This data measure four physical characteristics of three species of penguins.  
+
+### Variables {-}
+
+|Name      | Description     |
+|:---------|:----------------|
+|`group`   | cluster label |
+|`x1-x10`  | numeric variables |
+
+### Purpose {-}
+
+The primary goal is to find the different clusters. 
+
+### Source {-}
+
+This data is originally from http://ifs.tuwien.ac.at/dm/download/multiChallenge-matrix.txt, and provided as a challenge for non-linear dimension reduction.It was used as an example in Lee, Laa, Cook (2023) https://doi.org/10.52933/jdssv.v2i3.
+
+
+## Additional data used in the book
+
+`r ifelse(knitr::is_html_output(), '@tbl-datalinks-html', '@tbl-datalinks-pdf')` lists additional data available on the book web site at https://dicook.github.io/mulgar_book/data. 
 
 ```{r}
 #| message: false
 #| echo: false
 #| warning: false
+library(readr)
+book_data <- read_csv("misc/book_data.csv") 
+```
+
+::: {.content-visible when-format="html"}
+
+```{r}
+#| message: false
+#| echo: false
+#| warning: false
+#| label: tbl-datalinks-html
+#| tbl-cap: "Links to other data sets used on the book."
 library(gt)
 library(gtExtras)
 library(gtsummary)
-library(readr)
-book_data <- read_csv("misc/book_data.csv") 
-book_data %>% gt() %>% cols_width(Name~px(200), 
-                                 Link~px(400))
+book_data |> 
+  dplyr::select(Description, Link) |>
+  gt() |>
+  cols_width(Description~px(200), 
+             Link~px(400))
 ```
+:::
+
+::: {.content-visible when-format="pdf"}
+```{r}
+#| message: false
+#| echo: false
+#| warning: false
+#| label: tbl-datalinks-pdf
+#| tbl-cap: "Links to other data sets used on the book."
+library(kableExtra)
+book_data |> 
+  dplyr::select(Filename, Description, Chapter) |>
+  knitr::kable(format="latex", booktabs = T) |>
+  kable_paper(full_width = F) |>
+  kable_styling() |>
+  column_spec(1, width = "4cm", monospace=TRUE) |>
+  column_spec(2, width = "5cm") |>
+  column_spec(3, width = "2cm")
+```
+:::
 
 <!--
 

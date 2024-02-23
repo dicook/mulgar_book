@@ -1,10 +1,13 @@
 ## Non-linear dimension reduction
 
-## Background
+## Explanation of NLDR methods
 
 Non-linear dimension reduction (NLDR) aims to find a low-dimensional representation of the high-dimensional data that shows the main features of the data. In statistics, it dates back to @Kr64a's work on multidimensional scaling (MDS). Some techniques only require an interpoint similarity or distance matrix as the main ingredient, rather than the full data. We'll focus on when the full data is available here, so we can also compare structure perceived using the tour on the high-dimensional space, relative to structure revealed in the low-dimensional embedding.
 
 There are many methods available for generating non-linear low dimensional representations of the data. MDS is a classical technique that minimises the difference between two interpoint distance matrices, the distance between points in the high-dimensions, and in the low-dimensional representations. A good resource for learning about MDS is @BG05.
+
+\index{dimension reduction!t-SNE}
+\index{dimension reduction!UMAP}
 
 ```{r}
 #| label: fig-nldr-clusters
@@ -74,11 +77,12 @@ The full 4D data is shown with a grand tour in `r ifelse(knitr::is_html_output()
 NLDR can provide useful low-dimensional summaries of high-dimensional structure but you need to check whether it is a sensible and accurate representation by comparing with what is perceivd from a tour.
 :::
 
-## Linking NLDR representation with tour view
+## Assessing reliability of the NLDR representation 
 
 NLDR can produce useful low-dimensional summaries of structure in high-dimensional data, like those shown in @fig-nldr-clusters. However, there are numerous pitfalls. The fitting procedure can produce very different representations depending on the parameter choices, and even the random number seeding the fit. (You can check this by changing the `set.seed` in the code above, and by changing from the default parameters.) Also, it may not be possible to represent the high-dimensional structures faithfully low dimensions. For these reasons, one needs to connect the NLDR view with a tour of the data, to help assess its usefulness and accuracy. For example, with this data, we would want to know which of the two curved clusters in the UMAP representation correspond to the sine wave cluster. 
 
 ### Using `liminal`
+\index{liminal}
 
 @fig-liminal-clusters-nonlin shows how the NLDR plot can be linked to a tour view, using the `liminal` package, to better understand how well the structure of the data is represented. Here we see learn that the smile in the UMAP embedding is the small bent rod cluster, and that the unibrow is the sine wave. 
 
@@ -107,6 +111,7 @@ Two screenshots from liminal showing which clusters match between the UMAP repre
 :::
 
 ### Using `detourr`
+\index{detourr}
 
 @fig-detourr-clusters-nonlin shows how the linking is achieved using `detourr`. It uses a shared data object, as made possible by the `crosstalk` package, and the UMAP view is made interactive using `plotly`. 
 
@@ -150,6 +155,7 @@ bscols(
 ![Screenshot from detourr showing which clusters match between the UMAP representation and the tour animation. The smile corresponds to the small bent rod cluster.](images/detourr-clusters-nonlin.png){#fig-detourr-clusters-nonlin}
 
 ## Example: `fake_trees`
+\index{data!fake trees}
 
 @fig-liminal-trees shows a more complex example, using the `fake_trees` data. We know that the 10D data has a main branch, and 9 branches (clusters) attached to it, absed on our explorations in the earlier chapters. The t-SNE view, where points are coloured by the known branch ids, is very helpful for seeing the linear branch structure. 
 
@@ -198,9 +204,9 @@ The t-SNE representation clearly shows the linear structures of the data, but vi
 
 1. Using the `penguins_sub` data generate a 2D representation using t-SNE. Plot the points mapping the colour to species. What is most surprising? (Hint: Are the three species represented by three distinct clusters?)
 2. Re-do the t-SNE representation with different parameter choices. Are the results different each time, or could they be considered to be equivalent?
-3. Use `liminal` to link the t-SNE representation to a tour of the penguins. Highlight the points that have been placed in an awkward position by t-SNE from others in their species. Watch them relative to the others in their species in the tour view, and think about whether there is any rationale for the awkward placement.
-4. Use UMAP to make the 2D representation, and use `liminal` to link with a tour to explore the result.
-5. Repeat 1-4 using `detourr`. 
+3. Use `liminal` or `detourr` to link the t-SNE representation to a tour of the penguins. Highlight the points that have been placed in an awkward position by t-SNE from others in their species. Watch them relative to the others in their species in the tour view, and think about whether there is any rationale for the awkward placement.
+4. Use UMAP to make the 2D representation, and use `liminal` or  `detourr` to link with a tour to explore the result.
+5. Conduct your best t-SNE and UMAP representations of the `aflw` data. Compare and contrast what is learned relative to a tour on the principal component analysis. 
 
 ```{r}
 #| label: penguins-tsne
