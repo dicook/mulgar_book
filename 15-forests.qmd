@@ -7,7 +7,7 @@ The tree algorithm [@BFOS84] is a simple and versatile algorithmic method for su
 tailored to the sample.  When applying tree methods, exploring the effects of the input parameters on the tree is instructive; for example, it helps us to assess the stability of the tree model.
 
 Although algorithmic models do not depend on distributional assumptions, that does not mean that every algorithm is suitable for all data.  For example, the tree model works best when all variables are independent within each class, because it does not take such dependencies into account.  Visualization can help us to determine whether a particular model should be applied.  In classification problems, it is useful to explore the cluster structure, comparing the clusters with the classes and looking for evidence of correlation within each class. 
-The plots in @fig-lda-assumptions1 and @fig-penguins-lda-ellipses-pdf shows a strong correlation between the variables within each species, which indicates that the tree model may not give good results for the penguins data. We'll show how this is the case with two variables initially, and then extend to the four variables.
+The plots in @fig-lda-assumptions1 and `r ifelse(knitr::is_html_output(), '@fig-penguins-lda-ellipses-html', '@fig-penguins-lda-ellipses-pdf')` shows a strong correlation between the variables within each species, which indicates that the tree model may not give good results for the penguins data. We'll show how this is the case with two variables initially, and then extend to the four variables.
 
 ```{r echo=knitr::is_html_output()}
 #| message: false
@@ -357,7 +357,7 @@ render_gif(f_rf_v_p_s[,1:9],
 
 ::: {.content-visible when-format="html"}
 
-::: {#fig-ft-votes layout-ncol=2}
+::: {#fig-ft-votes-html layout-ncol=2}
 
 ![The 9D votes matrix for the 10 class fake_trees data in a tour.](gifs/ft_votes.gif){#fig-ft-votes-tour fig-alt="FIX ME" width=300}
 
@@ -383,7 +383,7 @@ The votes matrix is 9D, due to the 9 groups. With this many dimensions, if the c
 Points concentrate at the vertices, which means that most are confidently predicted to be their true class. The most spread of points is along single edges, between pairs of vertices. This means that when there is confusion it is mostly with just one other group. One vertex (0) which has connections to all other vertexes. That is, there are points stretching from this vertex to every other. It means that some observations in every other class can be confused with class 0, and class 0 observations can be confused with every other class. This information suggests that cluster 0 is central to all the other clusters. 
 
 
-Some of this information could also be inferred from the confusion matrix for the model. However visualising the votes matrix provides more intricate details. Here we have seen that the points spread out from a vertex, with fewer and fewer the further one gets. It allows us to see the distribution of points, which is not possible from the confusion matrix alone. The same misclaassification rate could be due to a variety of distributions. The visual pattern in the votes matrix is striking, and gives additional information about how the clustering distribution, and shapes of clusters, matches the class labels. It reinforces the clusters are linear extending into different dimensions in the 100D space, but really only into about 8D (as we'll see from the variable importance explanation below). We also see that nine of the clusters are all connected to a single cluster.
+Some of this information could also be inferred from the confusion matrix for the model. However visualising the votes matrix provides more intricate details. Here we have seen that the points spread out from a vertex, with fewer and fewer the further one gets. It allows us to see the distribution of points, which is not possible from the confusion matrix alone. The same misclassification rate could be due to a variety of distributions. The visual pattern in the votes matrix is striking, and gives additional information about how the clustering distribution, and shapes of clusters, matches the class labels. It reinforces the clusters are linear extending into different dimensions in the 100D space, but really only into about 8D (as we'll see from the variable importance explanation below). We also see that nine of the clusters are all connected to a single cluster.
 
 ::: {.content-visible when-format="html"}
 ::: insight
@@ -434,7 +434,7 @@ Class-wise variable importance helps to find a subspace on which to tour to exam
 \infobox{Class-wise variable importance helps to find a subspace on which to tour to examine how this class cluster differs from the others.}
 :::
 
-We can use the accuracy information to choose variables to provide to the tour. Overall, one would sequentially add the variables into a tour based on their accuracy or Gini value. Here it is simply starting with the first three PCs, and then sequentially adding the PCs to examine how distinct the clusters are with ot without the extra variable. It can be helpful to focus on a single class against all the others. To do this create a new binary class variable, indicating that the observation belongs to class $k$ or not, as follows: 
+We can use the accuracy information to choose variables to provide to the tour. Overall, one would sequentially add the variables into a tour based on their accuracy or Gini value. Here it is simply starting with the first three PCs, and then sequentially adding the PCs to examine how distinct the clusters are with and without the extra variable. It can be helpful to focus on a single class against all the others. To do this create a new binary class variable, indicating that the observation belongs to class $k$ or not, as follows: 
 
 ```{r}
 #| code-fold: false
