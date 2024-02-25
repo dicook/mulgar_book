@@ -12,7 +12,7 @@
 
 The key elements for summarising cluster results are the centres of the clusters and the within-cluster variability of the observations. Adding cluster means to any plot, including tour plots, is easy. You add the additional rows, or a new data set, and set the point shape to be distinct. 
 
-Summarising the variability is difficult. For model-based clustering, the shape of the clusters is assumed to be elliptical, so $p$-dimensional ellipses can be used to show the solution, as done in @sec-mclust. Generally, it is common to plot a convex hull of the clusters, as in @fig-penguin-hull-2D. This can also be done in high-dimensions, using the R package `cxhull` to compute the $p$-D convex hull.
+Summarising the variability is difficult. For model-based clustering, the shape of the clusters is assumed to be elliptical, so $p$-dimensional ellipses can be used to show the solution, as done in @sec-mclust. Generally, it is common to plot a convex hull of the clusters, as in `r ifelse(knitr::is_html_output(), '@fig-penguins-chull-html', '@fig-penguins-chull-pdf')`. This can also be done in high-dimensions, using the R package `cxhull` to compute the $p$-D convex hull.
 
 ```{r}
 #| message: false
@@ -167,10 +167,13 @@ sph_phull <- cxhull(sph)$edges
 animate_xy(as.data.frame(sph), edges=sph_phull)
 ```
 
-::: {#fig-penguins-chull layout-ncol=2}
+
+::: {.content-visible when-format="html"}
+
+::: {#fig-penguins-chull-html layout-ncol=2}
 
 ```{r}
-#| label: fig-penguin-hull-2D
+#| label: fig-penguin-hull-2D-html
 #| echo: false
 #| fig-width: 4
 #| fig-height: 4
@@ -178,12 +181,23 @@ animate_xy(as.data.frame(sph), edges=sph_phull)
 p_chull2D 
 ```
 
-::: {.content-hidden when-format="pdf"}
-
 ![4D](gifs/penguins_chull.gif){#fig-penguins-chull-pD}
 :::
 
 Convex hulls summarising the extent of Wards linkage clustering in 2D and 4D.
+:::
+
+::: {.content-visible when-format="pdf"}
+
+::: {#fig-penguins-chull-pdf layout-ncol=2}
+
+
+![2D](images/fig-penguin-hull-2D-1.png){#fig-penguins-chull-2D-pdf}
+
+![4D](images/penguins_chull_105.png){#fig-penguins-chull-pD}
+
+Convex hulls summarising the extent of Wards linkage clustering in 2D and 4D.
+:::
 :::
 
 ## Comparing two clusterings
@@ -234,7 +248,7 @@ limn_tour_link(
 
 ## Project {-}
 
-Most of the time your data will not neatly separate into clusters, but partitioning it into groups of similar observations can still be useful. In this case our toolbox will be useful in comparing and contrasting different methods, understanding to what extend a cluster mean can describe the observations in the cluster, and also how the boundaries between clusters have been drawn. To explore this we will use survey data that examines the risk taking behavior of tourists. The data was collected in Australia in 2015 [@risk-survey] and includes six types of risks (recreational, health, career, financial, safety and social) with responses on a scale from 1 (never) to 5 (very often). You can download the data from <a href='https://dicook.github.io/mulgar_book/data/risk_MSA.rds'> risk_MSA.rds </a>.
+Most of the time your data will not neatly separate into clusters, but partitioning it into groups of similar observations can still be useful. In this case our toolbox will be useful in comparing and contrasting different methods, understanding to what extend a cluster mean can describe the observations in the cluster, and also how the boundaries between clusters have been drawn. To explore this we will use survey data that examines the risk taking behavior of tourists. The data was collected in Australia in 2015 [@risk-survey] and includes six types of risks (recreational, health, career, financial, safety and social) with responses on a scale from 1 (never) to 5 (very often). The data is available in `risk_MSA.rds` from the book web site.
 
 1. We first examine the data in a grand tour. Do you notice that each variable was measured on a discrete scale?
 2. Next we explore different solutions from hierarchical clustering of the data. For comparison we will keep the number of clusters fixed to 6 and we will perform the hierarchical clustering with different combinations of distance functions (Manhattan distance and Euclidean distance) and linkage (single, complete and Ward linkage). Which combinations make sense based on what we know about the method and the data?

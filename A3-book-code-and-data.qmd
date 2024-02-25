@@ -1,0 +1,106 @@
+# Links to Book Code and Additional Data {#book-data}
+
+The code and data and an RStudio project can be downloaded with 
+
+```{r}
+#| code-fold: false
+#| eval: false
+usethis::use_zip(url="https://dicook.github.io/mulgar_book/code_and_data.zip")
+```
+
+Alternatively, individual files can be downloaded from the links below.
+
+## Additional data
+
+`r ifelse(knitr::is_html_output(), '@tbl-datalinks-html', '@tbl-datalinks-pdf')` lists additional data available on the book web site at https://dicook.github.io/mulgar_book/data. 
+
+```{r}
+#| message: false
+#| echo: false
+#| warning: false
+library(readr)
+book_data <- read_csv("misc/book_data.csv") 
+```
+
+::: {.content-visible when-format="html"}
+
+```{r}
+#| message: false
+#| echo: false
+#| warning: false
+#| label: tbl-datalinks-html
+#| tbl-cap: "Links to other data sets used on the book."
+library(gt)
+library(gtExtras)
+library(gtsummary)
+book_data |> 
+  dplyr::select(Description, Link) |>
+  gt() |>
+  cols_width(Description~px(200), 
+             Link~px(400))
+```
+:::
+
+::: {.content-visible when-format="pdf"}
+```{r}
+#| message: false
+#| echo: false
+#| warning: false
+#| label: tbl-datalinks-pdf
+#| tbl-cap: "Links to other data sets used on the book."
+library(kableExtra)
+book_data |> 
+  dplyr::select(Filename, Description, Chapter) |>
+  knitr::kable(format="latex", booktabs = T) |>
+  kable_paper(full_width = F) |>
+  kable_styling() |>
+  column_spec(1, width = "4cm", monospace=TRUE) |>
+  column_spec(2, width = "5cm") |>
+  column_spec(3, width = "2cm")
+```
+:::
+
+## Code files
+
+`r ifelse(knitr::is_html_output(), '@tbl-codelinks-html', '@tbl-codelinks-pdf')` lists additional data available on the book web site at https://dicook.github.io/mulgar_book/code. 
+
+```{r}
+#| message: false
+#| echo: false
+book_code <- read_csv("misc/book_code.csv") 
+```
+
+::: {.content-visible when-format="html"}
+
+```{r}
+#| message: false
+#| echo: false
+#| warning: false
+#| label: tbl-codelinks-html
+#| tbl-cap: "Links to code used on the book."
+book_code %>% 
+  mutate(Link = purrr::map(Link, gt::html)) %>% 
+  gt() %>% 
+  cols_width(Chapter~px(300), Link~px(300)) %>%
+  cols_align( align = c("left"), columns = everything())
+```
+
+:::
+
+::: {.content-visible when-format="pdf"}
+```{r}
+#| message: false
+#| echo: false
+#| warning: false
+#| label: tbl-codelinks-pdf
+#| tbl-cap: "Links to code used on the book."
+library(kableExtra)
+book_code |> 
+  dplyr::select(Filename, Chapter) |>
+  knitr::kable(format="latex", booktabs = T) |>
+  kable_paper(full_width = F) |>
+  kable_styling() |>
+  column_spec(1, width = "4cm", monospace=TRUE) |>
+  column_spec(2, width = "5cm") 
+```
+:::

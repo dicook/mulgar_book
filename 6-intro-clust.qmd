@@ -1,4 +1,4 @@
-# Overview
+# Introduction to clustering 
 
 Unsupervised classification, or cluster analysis, organizes observations into similar groups. Cluster analysis is a commonly used, appealing, and conceptually intuitive statistical method. Some of its uses include market segmentation, where customers are grouped into clusters with similar attributes for targeted marketing; gene expression analysis, where genes with similar expression patterns are grouped together; and the creation of taxonomies for animals, insects, or plants. Clustering can be used as a way of reducing a massive amount of data because observations within a cluster can be summarized by its centre. Also, clustering effectively subsets the data thus simplifying analysis because observations in each cluster can be analyzed separately.
 
@@ -6,9 +6,16 @@ Unsupervised classification, or cluster analysis, organizes observations into si
 
 Organizing objects into groups is a common task to help make sense of the world around us. Perhaps this is why it is an appealing method of data analysis. However, cluster analysis is more complex than it initially appears. Many people imagine that it will produce neatly separated clusters like those in @fig-ideal-clusters(a), but it almost never does. Such ideal clusters are rarely encountered in real data, so we often need to modify our objective from *find the natural clusters in this data*. Instead, we need to organize the *cases into groups that are similar in some way*. Even though this may seem disappointing when compared with the ideal, it is still often an effective means of simplifying and understanding a dataset.
 
+::: {.content-visible when-format="html"}
 ::: info
 Knowing what shapes are in your data helps to decide on the best method and to diagnose the result. For example, if the clusters are elliptical model-based clustering is recommended.
 :::
+:::
+
+::: {.content-visible when-format="pdf"}
+\infobox{Knowing what shapes are in your data helps to decide on the best method and to diagnose the result. For example, if the clusters are elliptical model-based clustering is recommended.}
+:::
+
 
 ```{r}
 #| label: fig-ideal-clusters
@@ -99,13 +106,13 @@ p4 <- ggplot(d_odd_shapes, aes(x=x1, y=x2)) +
 print(p1 + p2 + p3 + p4 + plot_layout(ncol=2))
 ```
 
-At the heart of the clustering process is the work of discovering which variables are most important for defining the groups. It is often true that we only require a subset of the variables for finding clusters, whereas another subset (called \Term{nuisance variables}) has no impact. In the bottom left plot of @fig-ideal-clusters, it is clear that the variable plotted horizontally is important for splitting this data into two clusters, whereas the variable plotted vertically is a nuisance variable. Nuisance is an apt term for these variables, because they can radically change the interpoint distances and impair the clustering
+At the heart of the clustering process is the work of discovering which variables are most important for defining the groups. It is often true that we only require a subset of the variables for finding clusters, whereas another subset (called *nuisance variables*) has no impact. In the bottom left plot of @fig-ideal-clusters, it is clear that the variable plotted horizontally is important for splitting this data into two clusters, whereas the variable plotted vertically is a nuisance variable. Nuisance is an apt term for these variables, because they can radically change the interpoint distances and impair the clustering
 process. \index{cluster analysis!interpoint distance}
 \index{cluster analysis!nuisance variable}
 
 Dynamic graphical methods help us to find and understand the cluster structure in high dimensions. With the tools in our toolbox, primarily tours, along with linked scatterplots and parallel coordinate plots, we can see clusters in high-dimensional spaces. We can detect gaps between clusters, the shape and relative positions of clusters, and the presence of nuisance variables. We can even find unusually shaped clusters, like those in the bottom right plot in @fig-ideal-clusters. In simple
 situations we can use graphics alone to group observations into clusters, using a "spin and brush" method. In more difficult data problems, we can assess and refine numerical solutions using graphics.\index{brushing!persistent}
-\index{cluster analysis!spin and brush}
+\index{cluster analysis!spin-and-brush}
 
 This part of the book discusses the use of interactive and dynamic graphics in the clustering of data. @sec-clust-bg introduces cluster analysis, focusing on interpoint distance measures. @sec-clust-graphics describes an example of a purely graphical approach to cluster analysis, the spin and brush method. In the example shown in that section, we were able to find simplifications of the data that had not been found using numerical clustering methods, and to find a variety of structures in high-dimensional space. @sec-hclust describes methods for reducing the interpoint distance matrix to an intercluster distance matrix using hierarchical algorithms, @sec-mclust covers model-based clustering, and @sec-som described clustering with self-organising maps. Each of these chapters shows how graphical tools can be used to assess the results of numerical methods. @sec-clust-compare summarizes the chapter and revisits the data analysis strategies used in the examples. Additional references that provide good companions to the material presented in these chapters are @VR02, @HOML, @hennig, @giordani, @kassambara, and the CRAN Task View [@ctv-clustering]. @sec-clust-compare summarizes the chapter and revisits the data analysis strategies used in the examples.
 
@@ -114,13 +121,6 @@ This part of the book discusses the use of interactive and dynamic graphics in t
 Before we can begin finding groups of cases that are similar[^3], we need to decide how to define or measure whether they are close together or far apart. Consider a dataset with three cases $(a_1, a_2, a_3)$ and four variables $(V_1, V_2, V_3, V_4)$, described in matrix format as
 
 [^3]: Both *similarity* and *dissimilarity* measures are used for defining how similar cases are. It can be confusing! They measure similar in opposite directions. With a dissimilarity measure, a smaller number means the cases are closer, as in a distance metric. A similarity measure usually ranges between 0 and 1, with 1 indicating that the cases are closer, for example, correlation.
-
-::: {.hidden}
-$$
-\require{mathtools}
-\definecolor{grey}{RGB}{192, 192, 192}
-$$
-:::
 
 \begin{align*}
 X = \begin{bmatrix}
@@ -135,7 +135,6 @@ X = \begin{bmatrix}
 {\color{grey} a_2} | & 7.4 & 7.2 & 7.3 & 7.2 \\
 {\color{grey} a_3} | & 4.1 & 4.6 & 4.6 & 4.8 
 \end{bmatrix}
-
 \end{align*}
 
 
@@ -158,6 +157,16 @@ d_{\rm Euc}(a_1,a_2) &= \sqrt{(7.3-7.4)^2+(7.6-7.2)^2+ (7.7-7.3)^2+(8.0-7.2)^2} 
 
 \noindent For the three cases, the interpoint Euclidean distance matrix is
 
+::: {.content-visible when-format="html"}
+::: {.hidden}
+ $$
+ \require{mathtools}
+ \definecolor{grey}{RGB}{192, 192, 192}
+ $$
+:::
+:::
+
+
 \begin{align*}
 d_{\rm Euc} = \begin{bmatrix}
 & {\color{grey} a_1} & {\color{grey} a_2} & {\color{grey} a_3} \\\hline
@@ -169,13 +178,13 @@ d_{\rm Euc} = \begin{bmatrix}
 
 ::: {#fig-similarity1 layout-ncol=2}
 
-```{r}
+```{r echo=knitr::is_html_output()}
 #| message: FALSE
 #| warning: false
 #| fig-width: 4
 #| fig-height: 4
-#| fig-align: center
 #| code-summary: "Code for plot"
+
 x <- data.frame(V1 = c(7.3, 7.4, 4.1),
                     V2 = c(7.6, 7.2, 4.6),
                     V3 = c(7.7, 7.3, 4.6),
@@ -196,7 +205,8 @@ pscat <- ggpairs(x, columns=1:4,
     theme(aspect.ratio=1)
 pscat
 ```
-```{r}
+
+```{r echo=knitr::is_html_output()}
 #| fig-width: 3
 #| fig-height: 3.4
 #| code-summary: "Code for plot"
@@ -258,8 +268,14 @@ Note that these interpoint distances differ dramatically from those for Euclidea
 
 After a distance metric has been chosen and a cluster analysis has been performed, the analyst must evaluate the results, and this is actually a difficult task. A cluster analysis does not generate $p$-values or other numerical criteria, and the process tends to produce hypotheses rather than testing them. Even the most determined attempts to produce the "best" results using modeling and validation techniques may result in clusters that, although seemingly significant, are useless for practical purposes. As a result, cluster analysis is best thought of as an exploratory technique, and it can be quite useful despite the lack of formal validation because of its power in data simplification.
 
+::: {.content-visible when-format="html"}
 ::: info
 Defining an appropriate distance metric from the context of the problem is a most important decision. For example, if your variables are all numeric, and on the same scale then Euclidean distance might be best. If your variables are categorical, you might need to use something like Hamming distance.
+:::
+:::
+
+::: {.content-visible when-format="pdf"}
+\infobox{Defining an appropriate distance metric from the context of the problem is a most important decision. For example, if your variables are all numeric, and on the same scale then Euclidean distance might be best. If your variables are categorical, you might need to use something like Hamming distance.}
 :::
 
 The context in which the data arises is the key to assessing the results. If the clusters can be characterized in a sensible manner, and they increase our knowledge of the data, then we are on the right track. To use an even more pragmatic criterion, if a company can gain an economic advantage by using a particular clustering method to carve up their customer database, then that is the method they should use.

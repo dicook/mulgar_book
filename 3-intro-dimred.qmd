@@ -1,22 +1,29 @@
-# Overview {#sec-dimension-overview}
+# Dimension reduction overview {#sec-dimension-overview}
 
-This chapter will focus on methods for reducing dimension, and how the tour can be used to assist with the common methods such as principal component analysis (PCA), multidimensional scaling (MDS), t-stochastic neighbour embedding (t-SNE), and factor analysis.
+This chapter will focus on methods for reducing dimension, and how the tour[^tour-link] can be used to assist with the common methods such as principal component analysis (PCA), multidimensional scaling (MDS), t-stochastic neighbour embedding (t-SNE), and factor analysis. 
+
+[^tour-link]: Note that the animated tours from this chapter can be viewed at [https://dicook.github.io/mulgar_book/3-intro-dimred.html](https://dicook.github.io/mulgar_book/3-intro-dimred.html).
 
 Dimension is perceived in a tour using the spread of points. When the points are spread far apart, then the data is filling the space. Conversely when the points "collapse" into a sub-region then the data is only partially filling the space, and some dimension reduction to reduce to this smaller dimensional space may be worthwhile. 
 
+::: {.content-visible when-format="html"}
 ::: info
 When points do not fill the plotting canvas fully, it means that it lives in a lower dimension. This low-dimensional space might be linear or non-linear, with the latter being much harder to define and capture.
 :::
+:::
 
-Let's start with some 2D examples. You need at least two variables to be able to talk about association between variables. @fig-2D shows three plots of two variables. Plot (a) shows two variables that are strongly linearly associated[^5], because when `x1` is low, `x2` is low also, and conversely when `x1` is high, `x2` is also high. This can also be seen by the reducton in spread of points (or "collapse") in one direction making the data fill less than the full square of the plot. *So from this we can conclude that the data is not fully 2D.* The second step is to infer which variables contribute to this reduction in dimension. The axes for `x1` and `x2` are drawn extending from $(0,0)$ and because they both extend out of the cloud of points, in the direction away from the collapse of points we can say that they are jointly responsible for the dimension reduction. 
+::: {.content-visible when-format="pdf"}
+\infobox{When points do not fill the plotting canvas fully, it means that it lives in a lower dimension. This low-dimensional space might be linear or non-linear, with the latter being much harder to define and capture.}
+:::
 
-@fig-2D-2 shows a pair of variables that are **not** linearly associated. Variable `x1` is more varied than `x3` but knowing the value on `x1` tells us nothing about possible values on `x3`. Before running a tour all variables are typically scaled to have equal spread. The purpose of the tour is to capture association and relationships between the variables, so any univariate differences should be removed ahead of time. @fig-2D-3 shows what this would look like when `x3` is scaled - the points are fully spread in the full square of the plot. 
+Let's start with some 2D examples. You need at least two variables to be able to talk about association between variables. @fig-2D shows three plots of two variables. Plot (a) shows two variables that are strongly linearly associated[^correlation], because when `x1` is low, `x2` is low also, and conversely when `x1` is high, `x2` is also high. This can also be seen by the reduction in spread of points (or "collapse") in one direction making the data fill less than the full square of the plot. *So from this we can conclude that the data is not fully 2D.* The second step is to infer which variables contribute to this reduction in dimension. The axes for `x1` and `x2` are drawn extending from $(0,0)$ and because they both extend out of the cloud of points, in the direction away from the collapse of points we can say that they are jointly responsible for the dimension reduction. 
 
-[^5]: It is generally better to use *associated*  than *correlated*. Correlated is a statistical quantity, measuring linear association. The term *associated* can be prefaced with the type of association, such as *linear* or *non-linear*. 
+@fig-2D (b) shows a pair of variables that are **not** linearly associated. Variable `x1` is more varied than `x3` but knowing the value on `x1` tells us nothing about possible values on `x3`. Before running a tour all variables are typically scaled to have equal spread. The purpose of the tour is to capture association and relationships between the variables, so any univariate differences should be removed ahead of time. @fig-2D (c) shows what this would look like when `x3` is scaled - the points are fully spread in the full square of the plot. 
+
+[^correlation]: It is generally better to use *associated*  than *correlated*. Correlation is a statistical quantity, measuring linear association. The term *associated* can be prefaced with the type of association, such as *linear* or *non-linear*. 
 
 ```{r}
 #| code-summary: "Code to produce 2D data examples"
-library(ggplot2)
 library(tibble)
 set.seed(6045)
 x1 <- runif(123)
@@ -26,72 +33,69 @@ df <- tibble(x1 = (x1-mean(x1))/sd(x1),
              x2 = (x2-mean(x2))/sd(x2),
              x3, 
              x3scaled = (x3-mean(x3))/sd(x3))
+```
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+library(ggplot2)
+library(patchwork)
 dp1 <- ggplot(df) + 
   geom_point(aes(x=x1, y=x2)) +
   xlim(-2.5, 2.5) + ylim(-2.5, 2.5) +
   annotate("segment", x=0, xend=2, y=0, yend=0) +
   annotate("segment", x=0, xend=0, y=0, yend=2) +
-  annotate("text", x=2.1, y=0, label="x1") +
-  annotate("text", x=0, y=2.1, label="x2") +
+  annotate("text", x=2.3, y=0, label="x1") +
+  annotate("text", x=0, y=2.3, label="x2") +
+  ggtitle("(a) Reduced dimension") +
   theme_minimal() +
-  theme(aspect.ratio=1)
+  theme(aspect.ratio=1,
+        axis.title = element_blank(),
+        axis.text = element_blank(),
+        panel.border = element_rect(colour="black", fill=NA))
 dp2 <- ggplot(df) + 
   geom_point(aes(x=x1, y=x3)) +
   xlim(-2.5, 2.5) + ylim(-2.5, 2.5) +
   annotate("segment", x=0, xend=2, y=0, yend=0) +
   annotate("segment", x=0, xend=0, y=0, yend=2) +
-  annotate("text", x=2.1, y=0, label="x1") +
-  annotate("text", x=0, y=2.1, label="x3") +
+  annotate("text", x=2.3, y=0, label="x1") +
+  annotate("text", x=0, y=2.3, label="x3") +
+  ggtitle("(b) Reduced variance") +
   theme_minimal() +
-  theme(aspect.ratio=1)
+  theme(aspect.ratio=1,
+        axis.title = element_blank(),
+        axis.text = element_blank(),
+        panel.border = element_rect(colour="black", fill=NA))
 dp3 <- ggplot(df) + 
   geom_point(aes(x=x1, y=x3scaled)) +
-  xlim(-2.5, 2.5) + ylim(-2.5, 2.5) +
+  xlim(-2.5, 2.5) + ylim(-3.5, 3.5) +
   annotate("segment", x=0, xend=2, y=0, yend=0) +
-  annotate("segment", x=0, xend=0, y=0, yend=2) +
-  annotate("text", x=2.1, y=0, label="x1") +
-  annotate("text", x=0, y=2.1, label="x3") +
+  annotate("segment", x=0, xend=0, y=0, yend=3) +
+  annotate("text", x=2.3, y=0, label="x1") +
+  annotate("text", x=0, y=3.3, label="x3") +
+  ggtitle("(c) No reduced dimension") +
   theme_minimal() +
-  theme(aspect.ratio=1)
+  theme(aspect.ratio=1,
+        axis.title = element_blank(),
+        axis.text = element_blank(),
+        panel.border = element_rect(colour="black", fill=NA))
 ```
 
-::: {#fig-2D  fig-align="center" layout-ncol=3}
-
 ```{r}
-#| label: fig-2D-1
+#| label: fig-2D
 #| echo: false
-#| fig-width: 3
+#| fig-width: 9
 #| fig-height: 3
-#| fig-cap: Reduced dimension
-dp1
+#| out-width: 100%
+#| fig-cap: "Explanation of how dimension reduction is perceived in 2D, relative to variables: (a) Two variables with strong linear association. Both variables contribute to the association, as indicated by their axes extending out from the 'collapsed' direction of the points; (b) Two variables with no linear association. But x3 has less variation, so points collapse in this direction; (c) The situation in plot (b) does not arise in a tour because all variables are (usually) scaled.  When an axes extends out of a direction where the points are collapsed, it means that this variable is partially responsible for the reduced dimension."
+#| fig-alt: "Three scatterplots: (a) points lie close to a straight line in the x=y direction, (b) points lie close to a horizontal line, (c) points spread out in the full plot region. There are no axis labels or scales."
+dp1 + dp2 + dp3 + plot_layout(ncol=3)
 ```
 
-```{r}
-#| label: fig-2D-2
-#| echo: false
-#| fig-width: 3
-#| fig-height: 3
-#| fig-cap: Reduced variance
-dp2
-```
+Now let's think about what this looks like with five variables. `r ifelse(knitr::is_html_output(), '@fig-dimension-html', '@fig-dimension-pdf')` shows a grand tour on five variables, with (a) data that is primarily 2D, (b) data that is primarily 3D and (c) fully 5D data.  You can see that both (a) and (b) the spread of points collapse in some projections, with it happening more in (a). In (c) the data is always spread out in the square, although it does seem to concentrate or pile in the centre. This piling is typical when projecting from high dimensions to low dimensions. The sage tour [@sagetour] makes a correction for this. 
 
-```{r}
-#| label: fig-2D-3
-#| echo: false
-#| fig-width: 3
-#| fig-height: 3
-#| message: false
-#| warning: false
-#| fig-cap: No reduced dimension
-dp3
-```
-
-Explanation of how dimension reduction is perceived in 2D, relative to variables: (a) Two variables with strong linear association. Both variables contribute to the association, as indicated by their axes extending out from the "collapsed" direction of the points; (b) Two variables with no linear association. But x3 has less variation, so points collapse in this direction; (c) The situation in plot (b) does not arise in a tour because all variables are (usually) scaled.  When an axes extends out of a direction where the points are collapsed, it means that this variable is partially responsible for the reduced dimension.
-:::
-
-Now let's think about what this looks like with five variables. @fig-dimension shows a grand tour on five variables, with (a) showing data that is primarily 2D, (b) has data that is primarily 3D and (c) is fully 5D.  You can see that both (a) and (b) the spread of points collapse in some projections, with it happening more in (a). In (c) the data is always spread out in the square, although it does seem to concentrate or pile in the centre. This piling is typical when projecting from high dimensions to low dimensions. The sage tour [@sagetour] makes a correction for this. 
-
-```{r}
+```{r echo=knitr::is_html_output()}
 #| eval: false
 #| code-summary: "Code to make animated gifs"
 library(mulgar)
@@ -125,64 +129,85 @@ render_gif(cube5d,
            height=200)
 ```
 
+::: {.content-visible when-format="html"}
 
-::: {#fig-dimension fig-align="center" layout-ncol=3}
+::: {#fig-dimension-html fig-align="center" layout-ncol=3}
 
-::: {.content-hidden when-format="pdf"}
+![2D plane in 5D](gifs/plane.gif){#fig-plane width=180 fig-alt="Animation of sequences of 2D projections shown as scatterplots. You can see points collapsing into a thick straight line in various projections. A circle with line segments indicates the projection coefficients for each variable for all projections viewed."}
 
-![2D plane in 5D](gifs/plane.gif){width=180}
-:::
+![3D plane in 5D](gifs/box.gif){#fig-box width=180 fig-alt="Animation of sequences of 2D projections shown as scatterplots. You can see points collapsing into a thick straight line in various projections, but not as often as in the animation in (a). A circle with line segments indicates the projection coefficients for each variable for all projections viewed."}
 
-::: {.content-hidden when-format="pdf"}
-
-![3D plane in 5D](gifs/box.gif){width=180}
-:::
-
-::: {.content-hidden when-format="pdf"}
-
-![5D plane in 5D](gifs/cube5d.gif){width=180}
-:::
+![5D plane in 5D](gifs/cube5d.gif){#fig-cube5 width=180 fig-alt="Animation of sequences of 2D projections shown as scatterplots. You can see points are always spread out fully in the plot space, in all projections. A circle with line segments indicates the projection coefficients for each variable for all projections viewed."}
 
 Different dimensional planes - 2D, 3D, 5D - displayed in a grand tour projecting into 2D. Notice that the 5D in 5D always fills out the box (although it does concentrate some in the middle which is typical when projecting from high to low dimensions). Also you can see that the 2D in 5D, concentrates into a line more than the 3D in 5D. This suggests that it is lower dimensional. 
 :::
+:::
 
-The next step is to determine which variables contribute. In the examples just provided, all variables are linearly associated in the 2D and 2D data. You can check this by making a scatterplot matrix.
+::: {.content-visible when-format="pdf"}
+
+::: {#fig-dimension-pdf layout-ncol=3}
+
+![2D plane in 5D](images/plane.png){#fig-plane width=160}
+
+![3D plane in 5D](images/box.png){#fig-box width=160}
+
+![5D plane in 5D](images/cube5d.png){#fig-cube5 width=160}
+
+Single frames from different dimensional planes - 2D, 3D, 5D - displayed in a grand tour projecting into 2D. Notice that the 5D in 5D always fills out the box (although it does concentrate some in the middle which is typical when projecting from high to low dimensions). Also you can see that the 2D in 5D, concentrates into a line more than the 3D in 5D. This suggests that it is lower dimensional. (Animations can be viewed [here](https://dicook.github.io/mulgar_book/3-intro-dimred.html).)
+:::
+:::
+
+The next step is to determine which variables contribute. In the examples just provided, all variables are linearly associated in the 2D and 3D data. You can check this by making a scatterplot matrix, @fig-plane-scatmat.
 
 ```{r}
-#| label: fig-plane-scatma
-#| fig-cap: Scatterplot matrix of plane data. You can see that x1-x3 are strongly linearly associated, and also x4 and x5. When you watch the tour of this data, any time the data collapses into a line you should see only (x1, x2, x3) or (x4, x5). When combinations of x1 and x4 or x5 show, the data should be spread out. 
+#| label: fig-plane-scatmat
+#| fig-cap: "Scatterplot matrix of plane data. You can see that x1-x3 are strongly linearly associated, and also x4 and x5. When you watch the tour of this data, any time the data collapses into a line you should see only (x1, x2, x3) or (x4, x5). When combinations of x1 and x4 or x5 show, the data should be spread out." 
+#| fig-alt: "A five-by-five scatterplot matrix, with scatterplots in the lower triangle, correlaton printed in the upper triangle and density plots shown on the diagonal. Plots of x1 vs x2, x1 vs x3, x2 vs x3, and x4 vs x5 have strong positive or negative correlation. The remaining pairs of variables have no association."
+#| fig-width: 6
+#| fig-height: 6
+#| out-width: 80%
 #| message: false
 #| warning: false
 #| code-summary: Code for scatterplot matrix
 library(GGally)
 library(mulgar)
 data(plane)
-ggscatmat(plane)
+ggscatmat(plane) +
+  theme(panel.background = 
+          element_rect(colour="black", fill=NA),
+    axis.text = element_blank(),
+    axis.ticks = element_blank())
 ```
 
 To make an example where not all variables contribute, we have added two additional variables to the `plane` data set, which are purely noise.
 
 ```{r}
 #| label: fig-plane-noise-scatter
-#| fig-cap: Additional noise variables are not associated with any of the first five variables. 
+#| fig-cap: "Scatterplots showing two additional noise variables that are not associated with any of the first five variables."
+#| fig-alt: "Two rows of scatterplots showing x6 and x7 against x1-x5. The points are spread out in the full plotting region, although x6 has one point with an unusually low value."
 #| code-fold: false
-#| fig-height: 4
-#| fig-width: 8
+#| fig-height: 3
+#| fig-width: 6
 # Add two pure noise dimensions to the plane
 plane_noise <- plane
 plane_noise$x6 <- rnorm(100)
 plane_noise$x7 <- rnorm(100)
-plane_noise <- data.frame(apply(plane_noise, 2, function(x) (x-mean(x))/sd(x)))
+plane_noise <- data.frame(apply(plane_noise, 2, 
+    function(x) (x-mean(x))/sd(x)))
 ggduo(plane_noise, columnsX = 1:5, columnsY = 6:7, 
-      types = list(continuous = "points")) +
-  theme(aspect.ratio=1, axis.text = element_blank())
+    types = list(continuous = "points")) +
+  theme(aspect.ratio=1,
+    panel.background = 
+          element_rect(colour="black", fill=NA),
+    axis.text = element_blank(),
+    axis.ticks = element_blank())
 ```
 
 Now we have 2D structure in 7D, but only five of the variables contribute to the 2D structure, that is, five of the variables are linearly related with each other. The other two variables (x6, x7) are not linearly related to any of the others. 
 
-We can still see the concentration of points along a line in some dimensions, which tells us that the data is not fully 7D. Then if you look closely at the variable axes you will see that the collapsing to a line only occurs when any of x1-x5 contribute strongly in the direction orthogonal to this. This does not happen when x6 or x7 contribute strongly to a projection - the data is always expanded to fill much of the space. That tells us that x6 and x7 don't substantially contribute to the dimension reduction, that is, they are not linearly related to the other variables.
+The data is viewed with a grand tour in `r ifelse(knitr::is_html_output(), '@fig-plane-noise-html', '@fig-plane-noise-pdf')`. We can still see the concentration of points along a line in some dimensions, which tells us that the data is not fully 7D. Then if you look closely at the variable axes you will see that the collapsing to a line only occurs when any of x1-x5 contribute strongly in the direction orthogonal to this. This does not happen when x6 or x7 contribute strongly to a projection - the data is always expanded to fill much of the space. That tells us that x6 and x7 don't substantially contribute to the dimension reduction, that is, they are not linearly related to the other variables.
 
-```{r}
+```{r echo=knitr::is_html_output()}
 #| label: plane-plotly
 #| eval: false
 #| code-fold: true
@@ -240,26 +265,47 @@ htmlwidgets::saveWidget(pn_tour,
           selfcontained = TRUE)
 ```
 
-::: {#fig-plane-noise}
+::: {.content-visible when-format="html"}
+::: {#fig-plane-noise-html}
 
-<iframe width="750" height="550" src="html/plane_noise.html" title="Grand tour of the plane with two additional dimensions of pure noise. "></iframe>
+<iframe width="750" height="550" src="html/plane_noise.html" title="Grand tour of the plane with two additional dimensions of pure noise. "> fig-alt="Animation with a scrollbar control to allow user to step through the sequence of projections. Scatterplots of the projections are shown. A circle with line segments indicates the projection coefficients for each variable for all projections." </iframe>
 
-Grand tour of the plane with two additional dimensions of pure noise. The collapsing of the points indicates that this is not fully 7D. This only happens when any of x1-x5 are contributing strongly (frame 49 x4, x5; frame 79 x1; frame 115 x2, x3). If x6 or x7 are contributing strongly the data is spread out fully. This tells us that x6 and x7 are not linearly associated, but other variables are.
+Grand tour of the plane with two additional dimensions of pure noise. The collapsing of the points indicates that this is not fully 7D. This only happens when any of x1-x5 are contributing strongly (frame 49 x4, x5; frame 79 x1; frame 115 x2, x3). If x6 or x7 are contributing strongly the data is spread out fully (frames 27, 96). This tells us that x6 and x7 are not linearly associated, but other variables are.
+:::
 :::
 
+::: {.content-visible when-format="pdf"}
+::: {#fig-plane-noise-pdf layout-ncol=2}
+
+![](images/plane_noise1.png){width=200 fig-align="center"}
+
+![](images/plane_noise2.png){width=200 fig-align="center"}
+
+Two frames from a grand tour of the plane with two additional dimensions of pure noise. The collapsing of the points indicates that this is not fully 7D. This only happens when any of x1-x5 are contributing strongly (frame 49 x4, x5; frame 79 x1; frame 115 x2, x3). If x6 or x7 are contributing strongly the data is spread out fully (frames 27, 96). This tells us that x6 and x7 are not linearly associated, but other variables are. 
+:::
+:::
+
+::: {.content-visible when-format="html"}
 ::: info
 To determine which variables are responsible for the reduced dimension look for the axes that extend out of the point cloud. These contribute to smaller variation in the observations, and thus indicate dimension reduction.
+:::
+:::
+
+::: {.content-visible when-format="pdf"}
+\infobox{To determine which variables are responsible for the reduced dimension look for the axes that extend out of the point cloud. These contribute to smaller variation in the observations, and thus indicate dimension reduction.}
 :::
 
 The simulated data here is very simple, and what we have learned from the tour could also be learned from principal component analysis. However, if there are small complications, such as outliers or nonlinear relationships, that might not be visible from principal component analysis, the tour can help you to see them.
 
-@fig-plane-noise-outlier and @fig-outlier show example data with an outlier and @fig-nonlinear shows data with non-linear relationships. 
+@fig-plane-noise-outlier and `r ifelse(knitr::is_html_output(), '@fig-outlier-nonlin-html', '@fig-outlier-nonlin-pdf')`(a) show example data with an outlier and `r ifelse(knitr::is_html_output(), '@fig-outlier-nonlin-html', '@fig-outlier-nonlin-pdf')`(b) shows data with non-linear relationships. 
 
 ```{r}
 #| label: fig-plane-noise-outlier
-#| fig-cap: Outliers added to the plane with noise data. 
-#| fig-height: 4
-#| fig-width: 8
+#| fig-cap: "Scatterplot matrix of the plane with noise data, with two added outliers in variables with strong correlation."
+#| fig-alt: "A five-by-five scatterplot matrix, with scatterplots in the lower triangle, correlaton printed in the upper triangle and density plots shown on the diagonal. Plots of x1 vs x2, x1 vs x3, x2 vs x3, and x4 vs x5 have strong positive or negative correlation, with an outlier in the corner of the plot. The remaining pairs of variables have no association, and thus also no outliers."
+#| fig-height: 6
+#| fig-width: 6
+#| out-width: 80%
 #| code-summary: "Code for scatterplot matrix"
 # Add several outliers to the plane_noise data
 plane_noise_outliers <- plane_noise
@@ -267,10 +313,14 @@ plane_noise_outliers[101,] <- c(2, 2, -2, 0, 0, 0, 0)
 plane_noise_outliers[102,] <- c(0, 0, 0,-2, -2, 0, 0)
 
 ggscatmat(plane_noise_outliers, columns = 1:5) +
-  theme(aspect.ratio=1, axis.text = element_blank())
+  theme(aspect.ratio=1,
+    panel.background = 
+          element_rect(colour="black", fill=NA),
+    axis.text = element_blank(),
+    axis.ticks = element_blank())
 ```
 
-```{r}
+```{r echo=knitr::is_html_output()}
 #| eval: false
 #| code-summary: "Code to generate animated gif"
 render_gif(plane_noise_outliers,          
@@ -291,19 +341,29 @@ render_gif(plane_nonlin,
            height=200)
 ```
 
-::: {#fig-outlier-nonlin fig-align="center" layout-ncol=2}
 
-::: {.content-hidden when-format="pdf"}
+::: {.content-visible when-format="html"}
 
-![Outliers](gifs/pn_outliers.gif){#fig-outlier width=180}
+::: {#fig-outlier-nonlin-html fig-align="center" layout-ncol=2}
+
+![Outliers](gifs/pn_outliers.gif){#fig-outlier width=200 fig-alt="Animation showing scatterplots of 2D projections from 5D. The points sometimes appear to be a plane viewed from the side, with two single points futher away. A circle with line segments indicates the projection coefficients for each variable for all projections viewed."}
+
+![Non-linear relationship](gifs/plane_nonlin.gif){#fig-nonlinear width=200200 fig-alt="Animation showing scatterplots of 2D projections from 5D. The points sometimes appear to be lying on a curve in various projections. A circle with line segments indicates the projection coefficients for each variable for all projections viewed."}
+
+Examples of different types of dimensionality issues: outliers (a) and non-linearity (b). In (a) you can see two points far from the others in some projections. Also the two can be seen with different movement patterns -- moving faster and different directions than the other points during the tour. Outliers will affect detection of reduced dimension, but they can be ignored when assessing dimensionality with the tour. In (b) there is a non-linear relationship between several variables, primarily with x3. Non-linear relationships may not be easily captured by other techniques but are often visible with the tour.
+:::
 :::
 
-::: {.content-hidden when-format="pdf"}
+::: {.content-visible when-format="pdf"}
 
-![Non-linear relationship](gifs/plane_nonlin.gif){#fig-nonlinear width=180}
+::: {#fig-outlier-nonlin-pdf fig-align="center" layout-ncol=2}
+
+![Outliers](images/pn_outliers.png){#fig-outlier width=200}
+
+![Non-linear relationship](images/plane_nonlin.png){#fig-nonlinear width=200}
+
+Two frames from tours of examples of different types of dimensionality issues: outliers (a) and non-linearity (b). In (a) you can see two points far from the others in the projection. During a tour the two can be seen with different movement patterns -- moving faster and in different directions than other points. Outliers will affect detection of reduced dimension, but they can be ignored when assessing dimensionality with the tour. In (b) there is a non-linear relationship between several variables, primarily with x3. Non-linear relationships may not be easily captured by other techniques but are often visible with the tour. 
 :::
-
-Examples of different types of dimensionality issues: outliers (a) and non-linearity (b). In (a) you can see two points far from the others in some projections. Also the two can be seen with different movement patterns, moving faster that other points during the tour. Outliers will affect detection of reduced dimension, but it is easy to ignore with the tour. In (b) there is a non-linear relationship between several variables, primarily with x3. Non-linear relationships may not be captured by other techniques but are visible with the tour.
 :::
 
 ```{r}
@@ -367,6 +427,28 @@ htmlwidgets::saveWidget(pn_tour,
 ## Exercises {-}
 
 1. Multicollinearity is when the predictors for a model are strongly linearly associated. It can adversely affect the fitting of most models, because many possible models may be equally as good. Variable importance might be masked by correlated variables, and confidence intervals generated for linear models might be too wide. Check the for multicollinearity or other associations between the predictors in:
-a. 2001 Australian election data
-b. 2016 Australian election data
+    a. 2001 Australian election data
+    b. 2016 Australian election data
 2. Examine 5D multivariate normal samples drawn from populations with a range of variance-covariance matrices.  (You can use the `mvtnorm` package to do the sampling, for example.) Examine the data using a grand tour. What changes when you change the correlation from close to zero to close to 1?  Can you see a difference between strong positive correlation and strong negative correlation?
+3. The following code shows how to hide a point in a four-dimensional space, so that it is not visible in any of the plots of two variables. Generate both `d` and `d_r` and confirm that the point is visible in a scatterplot matrix of `d`, but not in the scatterplot matrix of `d_r`. Also confirm that it is visible in both data sets when you use a tour.
+
+```{r eval=FALSE}
+library(tidyverse)
+library(tourr)
+library(GGally)
+set.seed(946)
+d <- tibble(x1=runif(200, -1, 1), 
+            x2=runif(200, -1, 1), 
+            x3=runif(200, -1, 1))
+d <- d %>%
+  mutate(x4 = x3 + runif(200, -0.1, 0.1))
+# outlier is visible in d
+d <- bind_rows(d, c(x1=0, x2=0, x3=-0.5, x4=0.5))
+
+# Point is hiding in d_r
+d_r <- d %>%
+  mutate(x1 = cos(pi/6)*x1 + sin(pi/6)*x3,
+         x3 = -sin(pi/6)*x1 + cos(pi/6)*x3,
+         x2 = cos(pi/6)*x2 + sin(pi/6)*x4,
+         x4 = -sin(pi/6)*x2 + cos(pi/6)*x4)
+```

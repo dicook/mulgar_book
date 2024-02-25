@@ -2,7 +2,7 @@
 
 \index{cluster analysis!model-based} 
 
-Model-based clustering @FR02 fits a multivariate normal mixture model to the data. It uses the EM algorithm to fit the parameters for the mean, variance--covariance of each population, and the mixing proportion. The variance-covariance matrix is re-parametrized using an eigen-decomposition
+Model-based clustering @FR02 fits a multivariate normal mixture model to the data. It uses the EM algorithm to fit the parameters for the mean, variance--covariance of each population, and the mixing proportion. The variance-covariance matrix is re-parameterised using an eigen-decomposition
 
 $$
 \Sigma_k = \lambda_kD_kA_kD_k^\top, ~~~k=1, \dots, g ~~\mbox{(number of clusters)}
@@ -10,7 +10,7 @@ $$
 
 \noindent resulting in several model choices, ranging from simple to complex, as shown in @tbl-covariances.
 
-```{r}
+```{r echo=knitr::is_html_output()}
 #| label: mc-libraries
 #| message: FALSE
 #| code-summary: "Load libraries"
@@ -38,13 +38,13 @@ readr::read_csv('misc/mclust-covariances.csv') %>%
 
 \index{Bayes Information Criterion (BIC)}
 
-The models are typically scored using the Bayes Information Criterion (BIC), which is based on the log likelihood, number of variables, and number of mixture components. They should also be assessed using graphical methods, as we demonstrate using the \Data{penguins} data. 
+The models are typically scored using the Bayes Information Criterion (BIC), which is based on the log likelihood, number of variables, and number of mixture components. They should also be assessed using graphical methods, as we demonstrate using the penguins data. 
 
 ## Examining the model in 2D
 
 We start with two of the four real-valued variables (`bl`, `fl`) and the three `species`. The goal is to determine whether model-based methods can discover clusters that closely correspond to the three species. Based on the scatterplot in @fig-penguins-bl-fl we would expect it to do well, and suggest an elliptical variance-covariance of roughly equal sizes as the model.
 
-```{r}
+```{r echo=knitr::is_html_output()}
 #| label: fig-penguins-bl-fl
 #| fig-cap: "Scatterplot of flipper length by bill length of the penguins data."
 #| fig-width: 5
@@ -66,6 +66,7 @@ ggplot(penguins_sub, aes(x=bl,
 #| code-fold: false
 #| fig-width: 8
 #| fig-height: 4
+#| out-width: 100%
 #| fig-cap: "Summary plots from model-based clustering: (a) BIC values for clusters 2-9 of top four models, (b) variance-covariance ellipses and cluster means (+) corresponding to the best model. The best model is three-cluster EVE, which has differently shaped variance-covariances albeit the same volume and orientation."
 penguins_BIC <- mclustBIC(penguins_sub[,c(1,3)])
 ggmc <- ggmcbic(penguins_BIC, cl=2:9, top=4) + 
@@ -97,9 +98,9 @@ ggmc + ggell + plot_layout(ncol=2)
 
 @fig-penguins-bl-fl-mc summarises the results. All models agree that three clusters is the best. The different variance-covariance models for three clusters have similar BIC values with EVE (different shape, same volume and orientation) being slightly higher. These plots are made from the `mclust` package output using the `ggmcbic` and `mc_ellipse` functions fro the `mulgar` package.
 
-## Extending to higher dimensions
+## Examining the model in high dimensions
 
-Now we will examine how model-based clustering will group the penguins data using all four variables. 
+Now we will examine how model-based clustering will group the penguins data using all four variables. @fig-penguins-bic shows the summary of different models, of which we would choose the four-cluster VEE, if we strictly followed the BIC choice. `r ifelse(knitr::is_html_output(), '@fig-penguins-mc-html', '@fig-penguins-mc-pdf')` shows this model in a tour, and the best three-cluster model. You can see that the four-cluster result is inadequate, in various ways. One of the species (Chinstrap) does have a bimodal density, due to the two species, and we would expect that a four cluster solution might detect this. The tour shows that the three-cluster solution is the best match to the data shape.
 
 ```{r}
 #| label: fig-penguins-bic
@@ -134,7 +135,7 @@ penguins_mc_data <- penguins_cl %>%
   mutate(type = factor(type))
 ```
 
-```{r}
+```{r echo=knitr::is_html_output()}
 #| eval: FALSE
 #| label: simpler-mclust
 #| code-summary: "Code to make animated gifs"
@@ -189,21 +190,36 @@ render_gif(penguins_mc_data[,1:4],
            loop=FALSE)
 ```
 
-::: {#fig-penguins-mc layout-ncol=2}
+::: {.content-visible when-format="html"}
+::: {#fig-penguins-mc-html layout-ncol=2}
 
-::: {.content-hidden when-format="pdf"}
-![Best model: four-cluster VEE](gifs/penguins_best_mc.gif){#fig-penguins-best_mc fig-alt="FIX ME" fig.align="center"}
-:::
+![Four-cluster VEE](gifs/penguins_best_mc.gif){#fig-penguins-best_mc fig-alt="FIX ME" fig.align="center"}
 
-::: {.content-hidden when-format="pdf"}
 ![Three-cluster EEE](gifs/penguins_simpler_mc.gif){#fig-penguins-simpler_mc fig-alt="FIX ME" fig.align="center"}
-:::
 
 Examining the model-based clustering results for the penguins data: (a) best model according to BIC value, (b) simpler three-cluster model. Dots are ellipse points, and "x" are data points. It is important to note that the three cluster solution fits the data better, even though it has a lower BIC. 
 :::
+:::
 
+::: {.content-visible when-format="pdf"}
+::: {#fig-penguins-mc-pdf layout-ncol=2}
+
+![Four-cluster VEE](images/penguins_best_mc_60.png){#fig-penguins-best-mc fig-alt="FIX ME" fig.align="center"}
+
+![Three-cluster EEE](images/penguins_simpler_mc_60.png){#fig-penguins-simpler-mc fig-alt="FIX ME" fig.align="center"}
+
+Examining the model-based clustering results for the penguins data: (a) best model according to BIC value, (b) simpler three-cluster model. Dots are ellipse points, and "x" are data points. It is important to note that the three cluster solution fits the data better, even though it has a lower BIC. 
+:::
+:::
+
+::: {.content-visible when-format="html"}
 ::: info
 Using the tour to visualise the final choices of models with similarly high BIC values helps to choose which best fits the data. It may not be the one with the highest BIC value. 
+:::
+:::
+
+::: {.content-visible when-format="pdf"}
+\infobox{Using the tour to visualise the final choices of models with similarly high BIC values helps to choose which best fits the data. It may not be the one with the highest BIC value.}
 :::
 
 ```{r}
