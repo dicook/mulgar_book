@@ -261,7 +261,7 @@
 
 \title{Interactively exploring high-dimensional data and models in R}
 \author{Dianne Cook and Ursula Laa}
-\date{2024-02-25}
+\date{2024-02-26}
 
 \begin{document}
 \maketitle
@@ -1546,6 +1546,30 @@ supports that the data are 2D, 3D and 5D respectively.
 
 \index{dimension reduction!scree plot}
 
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Conduct PCA and make the scree plot for }
+\CommentTok{\# the 2{-}, 3{-} and 5{-}D planar data}
+\FunctionTok{library}\NormalTok{(dplyr)}
+\FunctionTok{library}\NormalTok{(ggplot2)}
+\FunctionTok{library}\NormalTok{(mulgar)}
+\FunctionTok{data}\NormalTok{(plane)}
+\FunctionTok{data}\NormalTok{(box)}
+\FunctionTok{library}\NormalTok{(geozoo)}
+\NormalTok{cube5d }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\FunctionTok{cube.solid.random}\NormalTok{(}\AttributeTok{p=}\DecValTok{5}\NormalTok{, }\AttributeTok{n=}\DecValTok{300}\NormalTok{)}\SpecialCharTok{$}\NormalTok{points)}
+\FunctionTok{colnames}\NormalTok{(cube5d) }\OtherTok{\textless{}{-}} \FunctionTok{paste0}\NormalTok{(}\StringTok{"x"}\NormalTok{, }\DecValTok{1}\SpecialCharTok{:}\DecValTok{5}\NormalTok{)}
+\NormalTok{cube5d }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\FunctionTok{apply}\NormalTok{(cube5d, }\DecValTok{2}\NormalTok{, }
+                           \ControlFlowTok{function}\NormalTok{(x) (x}\SpecialCharTok{{-}}\FunctionTok{mean}\NormalTok{(x))}\SpecialCharTok{/}\FunctionTok{sd}\NormalTok{(x)))}
+\NormalTok{p\_pca }\OtherTok{\textless{}{-}} \FunctionTok{prcomp}\NormalTok{(plane)}
+\NormalTok{b\_pca }\OtherTok{\textless{}{-}} \FunctionTok{prcomp}\NormalTok{(box)}
+\NormalTok{c\_pca }\OtherTok{\textless{}{-}} \FunctionTok{prcomp}\NormalTok{(cube5d)}
+\NormalTok{p\_scree }\OtherTok{\textless{}{-}} \FunctionTok{ggscree}\NormalTok{(p\_pca, }\AttributeTok{q =} \DecValTok{5}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{theme\_minimal}\NormalTok{()}
+
+\NormalTok{b\_scree }\OtherTok{\textless{}{-}} \FunctionTok{ggscree}\NormalTok{(b\_pca, }\AttributeTok{q =} \DecValTok{5}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{theme\_minimal}\NormalTok{()}
+\NormalTok{c\_scree }\OtherTok{\textless{}{-}} \FunctionTok{ggscree}\NormalTok{(c\_pca, }\AttributeTok{q =} \DecValTok{5}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{theme\_minimal}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
 \begin{figure}
 
 \centering{
@@ -1717,7 +1741,16 @@ bottle in 3D looks from some angles}.
 \begin{figure}
 
 \begin{minipage}{0.50\linewidth}
-\includegraphics{images/fig-pisa-scree-1.png}\end{minipage}%
+
+\centering{
+
+\includegraphics{images/fig-pisa-scree-1.png}
+
+}
+
+\subcaption{\label{fig-pisa-scree-pdf}Scree plot}
+
+\end{minipage}%
 %
 \begin{minipage}{0.50\linewidth}
 
@@ -1727,13 +1760,14 @@ bottle in 3D looks from some angles}.
 
 }
 
-\subcaption{\label{fig-pisa-gt}Grand tour of the pisa data.}
+\subcaption{\label{fig-pisa-gt}Grand tour frame}
 
 \end{minipage}%
 
-\caption{\label{fig-pisa-pca-pdf}Scree plot and tour of the
-\texttt{pisa} data, with 30 variables being the plausible scores for
-Australian students.}
+\caption{\label{fig-pisa-pca-pdf}Scree plot and a frame from a tour of
+the \texttt{pisa} data, with 30 variables being the plausible scores for
+Australian students. In combination, these suggest that the data is
+effectively 1D.}
 
 \end{figure}%
 
@@ -1809,14 +1843,17 @@ Figure~\ref{fig-aflw-gt-pdf}.
 
 \begin{figure}
 
-\centering{
+\begin{minipage}{0.50\linewidth}
+\includegraphics[width=2.375in,height=\textheight]{images/aflw_gt_70.png}\end{minipage}%
+%
+\begin{minipage}{0.50\linewidth}
+\includegraphics[width=2.375in,height=\textheight]{images/aflw_gt_329.png}\end{minipage}%
 
-\includegraphics{images/aflw_gt_70.png}
-
-}
-
-\caption{\label{fig-aflw-gt-pdf}Grand tour of the AFLW player
-statistics.}
+\caption{\label{fig-aflw-gt-pdf}Two frames from a grand tour of the AFLW
+player statistics. Most player statistics concentrate near the centre,
+indicating most players are ``average''! There are a few outliers
+appearing in different combinations of the skills, which one would
+expect to be the star players for particular skill sets.}
 
 \end{figure}%
 
@@ -1952,10 +1989,36 @@ attention to the first four.)
 
 Ideally, when we tour the four PCs, we'd like to be able to stop and
 identify players. This involves creating a pre-computed animation, with
-additional mouse-over. This is only feasible with a small number of
-observations, like the \texttt{aflw} data, because all of the animation
-frames are constructed in a single object and passed to \texttt{plotly}.
-This object gets large very quickly!
+additional mouse-over, made possible by \texttt{plotly}. This is only
+feasible with a small number of observations, like the \texttt{aflw}
+data, because all of the animation frames are constructed in a single
+object. This object gets large very quickly!
+
+The code to make this animation, and the interactive plot is in the
+online version of the book.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=0.8\textwidth,height=\textheight]{4-pca_files/figure-pdf/fig-aflw-pcaplots-pdf-1.pdf}
+
+}
+
+\caption{\label{fig-aflw-pcaplots-pdf}Frame 18 re-plotted so that
+players can be identified, ideally using on mouse-over. Here some points
+are labelled.}
+
+\end{figure}%
+
+For any particular frame, like 18 re-plotted in
+Figure~\ref{fig-aflw-pcaplots-pdf}, we can investigate further. Here
+there is a branching pattern, where the branch points in the direction
+of PC 1. Mouse-over the players at the tip of this branch and we find
+players like Alyce Parker, Brittany Bonnici, Dana Hooker, Kiara Bowers.
+If you look up the bios of these players you'll find they all have
+generally good player descriptions like ``elite disposals'', ``powerful
+left foot'', ``hard-running midfielder'', ``best and fairest''.
 
 In the direction of PC 2, you'll find players like Lauren Ahrens, Stacey
 Livingstone who are star defenders. Players in this end of PC 1, have
@@ -2012,7 +2075,7 @@ see their contribution to the PCs.
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{4-pca_files/figure-pdf/fig-plane-biplot-1.pdf}
+\includegraphics[width=1\textwidth,height=\textheight]{4-pca_files/figure-pdf/fig-plane-biplot-1.pdf}
 
 }
 
@@ -2084,7 +2147,7 @@ Figure~\ref{fig-pisa-model-pdf}.
 
 \centering{
 
-\includegraphics{images/pisa_model_17.png}
+\includegraphics[width=3.125in,height=\textheight]{images/pisa_model_17.png}
 
 }
 
@@ -2111,14 +2174,14 @@ linear, because the spread extends unevenly away from the box.
 
 \centering{
 
-\includegraphics{images/aflw_model_70.png}
+\includegraphics[width=3.125in,height=\textheight]{images/aflw_model_70.png}
 
 }
 
 \caption{\label{fig-aflw-model-pdf}PCA model of the \texttt{aflw} data.
 The linear model is not ideal for this data, which has other patterns
 like outliers, and some branching. However, the model roughly captures
-the linear associations, and leaves unequal variation in different
+the linear associations, and leaves unexplained variation in different
 directions.}
 
 \end{figure}%
@@ -2171,11 +2234,11 @@ outliers.}
 
 \centering{
 
-\includegraphics[width=2.60417in,height=\textheight]{images/plane_n_o_clr_181.png}
+\includegraphics[width=2.39583in,height=\textheight]{images/plane_n_o_clr_181.png}
 
 }
 
-\subcaption{\label{fig-plane-n-o-clr}Outliers clearly visible.}
+\subcaption{\label{fig-plane-n-o-clr}Outliers clearly visible}
 
 \end{minipage}%
 %
@@ -2183,12 +2246,12 @@ outliers.}
 
 \centering{
 
-\includegraphics[width=2.60417in,height=\textheight]{images/plane_n_o_pca_181.png}
+\includegraphics[width=2.39583in,height=\textheight]{images/plane_n_o_pca_181.png}
 
 }
 
 \subcaption{\label{fig-plane-n-o-pca}Outliers not clearly visible in
-PC1-4.}
+PC1-4}
 
 \end{minipage}%
 
@@ -2251,8 +2314,7 @@ suggests three PCs.}
 
 }
 
-\subcaption{\label{fig-nonlinear2}Non-linear relationship between
-several variables seen in a tour on all five variables.}
+\subcaption{\label{fig-nonlinear2}All five variables}
 
 \end{minipage}%
 %
@@ -2264,15 +2326,16 @@ several variables seen in a tour on all five variables.}
 
 }
 
-\subcaption{\label{fig-plane-nonlin-pca}The first three principal
-components reveal a strong non-linear relationship.}
+\subcaption{\label{fig-plane-nonlin-pca}First three PCs}
 
 \end{minipage}%
 
 \caption{\label{fig-plane-nonlin-pdf}Comparison of the full data and
-first three principal components. Some of the non-linearity is clearly
-visible in the reduced dimension space, but the full data has more
-complexities.}
+first three principal components. Non-linear relationships between
+several variables can be seen in a tour on all five variables. The first
+three principal components reveal a strong non-linear relationship. Some
+of the non-linearity is clearly visible in the reduced dimension space,
+but the full data has more complexities.}
 
 \end{figure}%
 
