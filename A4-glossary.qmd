@@ -1,14 +1,45 @@
 # Glossary {#glossary}
 
+<!-- `r ifelse(knitr::is_html_output(), '@tbl-glossary-html', '@tbl-glossary-pdf')` describes the common terms used throughout the book and their synonyms which might be used elsewhere.--> 
+
 ```{r}
 #| message: false
 #| echo: false
+library(readr)
+glossary <- read_csv("misc/glossary.csv") 
+```
+
+::: {.content-visible when-format="html"}
+
+```{r}
+#| message: false
+#| echo: false
+#| label: tbl-glossary-html
+#| tbl-cap: "List of common terms used in the book and their synonyms used elsewhere."
 library(gt)
 library(gtExtras)
 library(gtsummary)
-library(readr)
-glossary <- read_csv("misc/glossary.csv") 
 glossary %>% gt() %>% cols_width(Term~px(100), 
                                  Synonyms~px(200),
                                  Description~px(150))
 ```
+
+:::
+
+::: {.content-visible when-format="pdf"}
+
+```{r}
+#| message: false
+#| echo: false
+library(kableExtra)
+glossary |>
+  knitr::kable(format="latex", booktabs = T) |>
+  kable_paper(full_width = F) |>
+  kable_styling() |>
+  column_spec(1, width = "2cm") |>
+  column_spec(2, width = "4cm") |>
+  column_spec(3, width = "6cm") |>
+  row_spec(1:9, hline_after = TRUE)
+```
+
+:::

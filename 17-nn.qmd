@@ -219,8 +219,6 @@ p_nn_fit <- p_nn_model %>% keras::fit(
   epochs = 200,
   verbose = 0
 )
-
-save_model_tf(p_nn_model, "data/penguins_cnn")
 ```
 
 ```{r eval=FALSE, echo=FALSE}
@@ -659,6 +657,7 @@ Comparison of the boundaries produced by the LDA (a) and the NN (b) model, using
 ## Application to a large dataset
 
 To see how these methods apply in the setting where we have a large number of variables, observations and classes we will look at a neural network that predicts the category for the fashion MNIST data. The code for designing and fitting the model is following the tutorial available from https://tensorflow.rstudio.com/tutorials/keras/classification and you can find additional information there. Below we only replicate the steps needed to build the model from scratch. We also note that a similar investigation was presented in @li2020visualizing, with a focus on investigating the model at different epochs during the training.
+\index{data!fashion MNIST}
 
 The first step is to download and prepare the data. Here we scale the observations to range between zero and one, and we define the label names.
 
@@ -838,7 +837,7 @@ Comparison of the test observations in the first five principal components of th
 
 As with the first two principal components we get a much more spread out distribution in the original space. Nevertheless we can see differences between the classes, and that some groups are varying along specific directions in that space. Overall the activations space shows tighter clusters as expected after including the ReLU activation function, but the picture is not as neat as the first two principal components would suggest. While certain groups appear very compact even in this larger subspace, others vary quite a bit within part of the space. For example we can clearly see the "Bag" observations as different from all other images, but also notice that there is a large variation within this class along certain directions.
 
-Finally we will investigate the model performance through the missclassifications and uncertainty between classes. We start with the error matrix for the test observations. To fit the error matrix we use the numeric labels, the ordering is as defined above for the labels.
+Finally we will investigate the model performance through the misclassifications and uncertainty between classes. We start with the error matrix for the test observations. To fit the error matrix we use the numeric labels, the ordering is as defined above for the labels.
 
 ```{r}
 fashion_test_pred <- predict(model_fashion_mnist,
@@ -895,7 +894,7 @@ animate_xy(f_nn_v_p_s[,1:9], col = f_nn_v_p_s$class,
 
 ```
 
-For this data using explainers like SHAP is not so interesting, since the individual pixel contribution to a prediction are typically not of interest. With image classification a next step might be to further investigate which part of the image is important for a prediction, and this can be visualized as a heat map placed over the original image. This is especially interesting in the case of difficult or missclassified images. This however is beyond the scope of this book.
+For this data using explainers like SHAP is not so interesting, since the individual pixel contribution to a prediction are typically not of interest. With image classification a next step might be to further investigate which part of the image is important for a prediction, and this can be visualized as a heat map placed over the original image. This is especially interesting in the case of difficult or misclassified images. This however is beyond the scope of this book.
 
 
 <!--

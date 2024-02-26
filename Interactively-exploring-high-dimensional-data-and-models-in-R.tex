@@ -196,6 +196,8 @@
 \definecolor{grey}{RGB}{192, 192, 192}
 \usepackage{imakeidx}
 \makeindex
+\usepackage{float}
+\floatplacement{table}{H}
 \makeatletter
 \@ifpackageloaded{bookmark}{}{\usepackage{bookmark}}
 \makeatother
@@ -259,23 +261,20 @@
 
 \title{Interactively exploring high-dimensional data and models in R}
 \author{Dianne Cook and Ursula Laa}
-
-\date{2/22/24}
+\date{2024-02-26}
 
 \begin{document}
 \maketitle
-\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[borderline west={3pt}{0pt}{shadecolor}, frame hidden, interior hidden, breakable, enhanced, boxrule=0pt, sharp corners]}{\end{tcolorbox}}\fi
 
-\renewcommand*\contentsname{Table of contents}
+\renewcommand*\contentsname{Contents}
 {
 \hypersetup{linkcolor=}
-\setcounter{tocdepth}{2}
+\setcounter{tocdepth}{1}
 \tableofcontents
 }
 \bookmarksetup{startatroot}
 
 \chapter*{Preface}\label{preface}
-\addcontentsline{toc}{chapter}{Preface}
 
 \markboth{Preface}{Preface}
 
@@ -475,7 +474,7 @@ these components:
   copy of the error message that was generated
 \end{itemize}
 
-\part{Introduction}
+\bookmarksetup{startatroot}
 
 \chapter{Picturing high dimensions}\label{intro}
 
@@ -779,7 +778,7 @@ high-dimensional data, including:
   check for potential problems in modeling such as multicollinearity
   among predictors.
 \item
-  checking assumptions required for probabilties calculated for
+  checking assumptions required for probabilities calculated for
   statistical hypothesis testing to be valid.
 \item
   diagnosing the fit of multivariate models.
@@ -820,7 +819,7 @@ dimensional data, and these are documented in S. Lee et al. (2022).
 This book is an evolution from Cook \& Swayne (2007). One of the
 difficulties in working on interactive and dynamic graphics research has
 been the rapid change in technology. Programming languages have changed
-a little (fortran to C to java to python) but graphics toolkits and
+a little (FORTRAN to C to java to python) but graphics toolkits and
 display devices have changed a lot! The tour software used in this book
 evolved from XGobi, which was written in C and used the X Window System,
 which was then rewritten in GGobi using gtk. The video library has
@@ -864,6 +863,8 @@ element of data analysis.
   from the \texttt{mulgar} package, use the grand tour to view and try
   to identify structure (outliers, clusters, non-linear relationships).
 \end{enumerate}
+
+\bookmarksetup{startatroot}
 
 \chapter{Notation conventions and R
 objects}\label{notation-conventions-and-r-objects}
@@ -1084,9 +1085,9 @@ matrix
   in this view?
 \end{enumerate}
 
-\part{Dimension reduction}
+\bookmarksetup{startatroot}
 
-\chapter{Overview}\label{sec-dimension-overview}
+\chapter{Dimension reduction overview}\label{sec-dimension-overview}
 
 This chapter will focus on methods for reducing dimension, and how the
 tour\footnote{Note that the animated tours from this chapter can be
@@ -1482,8 +1483,12 @@ techniques but are often visible with the tour.}
 \end{Highlighting}
 \end{Shaded}
 
+\bookmarksetup{startatroot}
+
 \chapter{Principal component
 analysis}\label{principal-component-analysis}
+
+\index{dimension reduction!principal component analysis (PCA)}
 
 Reducing dimensionality using principal component analysis (PCA) dates
 back to Pearson (1901) and Hotelling (1933), and Jolliffe \& Cadima
@@ -1506,7 +1511,8 @@ given by the first eigenvector) where the data is most varied, and then
 find the second most varied direction, and so on. The eigenvectors
 define the combination of the original variables, and the eigenvalues
 define the amount of variance explained by the reduced number of
-variables.
+variables. \index{dimension reduction!eigenvalue}
+\index{dimension reduction!eigenvector}
 
 PCA is very broadly useful for summarising linear association by using
 combinations of variables that are highly correlated. However, high
@@ -1538,8 +1544,12 @@ We'll start be showing PCA on the simulated data from
 Chapter~\ref{sec-dimension-overview}. The scree plots show that PCA
 supports that the data are 2D, 3D and 5D respectively.
 
+\index{dimension reduction!scree plot}
+
 \begin{Shaded}
 \begin{Highlighting}[]
+\CommentTok{\# Conduct PCA and make the scree plot for }
+\CommentTok{\# the 2{-}, 3{-} and 5{-}D planar data}
 \FunctionTok{library}\NormalTok{(dplyr)}
 \FunctionTok{library}\NormalTok{(ggplot2)}
 \FunctionTok{library}\NormalTok{(mulgar)}
@@ -1548,7 +1558,8 @@ supports that the data are 2D, 3D and 5D respectively.
 \FunctionTok{library}\NormalTok{(geozoo)}
 \NormalTok{cube5d }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\FunctionTok{cube.solid.random}\NormalTok{(}\AttributeTok{p=}\DecValTok{5}\NormalTok{, }\AttributeTok{n=}\DecValTok{300}\NormalTok{)}\SpecialCharTok{$}\NormalTok{points)}
 \FunctionTok{colnames}\NormalTok{(cube5d) }\OtherTok{\textless{}{-}} \FunctionTok{paste0}\NormalTok{(}\StringTok{"x"}\NormalTok{, }\DecValTok{1}\SpecialCharTok{:}\DecValTok{5}\NormalTok{)}
-\NormalTok{cube5d }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\FunctionTok{apply}\NormalTok{(cube5d, }\DecValTok{2}\NormalTok{, }\ControlFlowTok{function}\NormalTok{(x) (x}\SpecialCharTok{{-}}\FunctionTok{mean}\NormalTok{(x))}\SpecialCharTok{/}\FunctionTok{sd}\NormalTok{(x)))}
+\NormalTok{cube5d }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\FunctionTok{apply}\NormalTok{(cube5d, }\DecValTok{2}\NormalTok{, }
+                           \ControlFlowTok{function}\NormalTok{(x) (x}\SpecialCharTok{{-}}\FunctionTok{mean}\NormalTok{(x))}\SpecialCharTok{/}\FunctionTok{sd}\NormalTok{(x)))}
 \NormalTok{p\_pca }\OtherTok{\textless{}{-}} \FunctionTok{prcomp}\NormalTok{(plane)}
 \NormalTok{b\_pca }\OtherTok{\textless{}{-}} \FunctionTok{prcomp}\NormalTok{(box)}
 \NormalTok{c\_pca }\OtherTok{\textless{}{-}} \FunctionTok{prcomp}\NormalTok{(cube5d)}
@@ -1588,16 +1599,8 @@ Variables \texttt{x1}, \texttt{x2}, \texttt{x3} contribute strongly to
 \texttt{x3} and variables \texttt{x4} and \texttt{x5} contribute
 strongly to \texttt{PC3}.
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{library}\NormalTok{(gt)}
-\NormalTok{p\_pca}\SpecialCharTok{$}\NormalTok{rotation[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{2}\NormalTok{] }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{as\_tibble}\NormalTok{(}\AttributeTok{rownames=}\StringTok{"Variable"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} 
-  \FunctionTok{gt}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{fmt\_number}\NormalTok{(}\AttributeTok{columns =} \FunctionTok{c}\NormalTok{(PC1, PC2),}
-             \AttributeTok{decimals =} \DecValTok{2}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
+\index{dimension reduction!coefficients}
+\index{dimension reduction!principal components}
 
 \begin{longtable}{lrr}
 
@@ -1617,16 +1620,6 @@ x5 & $-0.29$ & $-0.62$ \\
 \bottomrule
 
 \end{longtable}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{b\_pca}\SpecialCharTok{$}\NormalTok{rotation[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{3}\NormalTok{] }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{as\_tibble}\NormalTok{(}\AttributeTok{rownames=}\StringTok{"Variable"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} 
-  \FunctionTok{gt}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{fmt\_number}\NormalTok{(}\AttributeTok{columns =} \FunctionTok{c}\NormalTok{(PC1, PC2, PC3),}
-             \AttributeTok{decimals =} \DecValTok{2}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
 
 \begin{longtable}{lrrr}
 
@@ -1657,20 +1650,7 @@ main variables being (\texttt{x1}, \texttt{x2}, \texttt{x3}) and
 (\texttt{x4}, \texttt{x5}) respectively. \texttt{PC3} and \texttt{PC4}
 are both \texttt{x6} and \texttt{x7}.
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{set.seed}\NormalTok{(}\DecValTok{5143}\NormalTok{)}
-\NormalTok{plane\_noise }\OtherTok{\textless{}{-}}\NormalTok{ plane}
-\NormalTok{plane\_noise}\SpecialCharTok{$}\NormalTok{x6 }\OtherTok{\textless{}{-}} \FunctionTok{rnorm}\NormalTok{(}\DecValTok{100}\NormalTok{)}
-\NormalTok{plane\_noise}\SpecialCharTok{$}\NormalTok{x7 }\OtherTok{\textless{}{-}} \FunctionTok{rnorm}\NormalTok{(}\DecValTok{100}\NormalTok{)}
-\NormalTok{plane\_noise }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\FunctionTok{apply}\NormalTok{(plane\_noise, }\DecValTok{2}\NormalTok{, }\ControlFlowTok{function}\NormalTok{(x) (x}\SpecialCharTok{{-}}\FunctionTok{mean}\NormalTok{(x))}\SpecialCharTok{/}\FunctionTok{sd}\NormalTok{(x)))}
-
-\NormalTok{pn\_pca }\OtherTok{\textless{}{-}} \FunctionTok{prcomp}\NormalTok{(plane\_noise)}
-\FunctionTok{ggscree}\NormalTok{(pn\_pca, }\AttributeTok{q =} \DecValTok{7}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{theme\_minimal}\NormalTok{()}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{figure}[H]
+\begin{figure}
 
 \centering{
 
@@ -1682,16 +1662,6 @@ are both \texttt{x6} and \texttt{x7}.
 the data to 4D.}
 
 \end{figure}%
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{pn\_pca}\SpecialCharTok{$}\NormalTok{rotation[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{] }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{as\_tibble}\NormalTok{(}\AttributeTok{rownames=}\StringTok{"Variable"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} 
-  \FunctionTok{gt}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{fmt\_number}\NormalTok{(}\AttributeTok{columns =} \FunctionTok{c}\NormalTok{(PC1, PC2, PC3, PC4),}
-             \AttributeTok{decimals =} \DecValTok{2}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
 
 \begin{longtable}{lrrrr}
 
@@ -1715,6 +1685,8 @@ x7 & $-0.02$ & $-0.08$ & $-0.81$ & $-0.58$ \\
 \end{longtable}
 
 \subsection{Example: pisa}\label{example-pisa}
+
+\index{data!pisa}
 
 The \texttt{pisa} data contains simulated data from math, reading and
 science scores, totalling 30 variables. PCA is used here to examine the
@@ -1769,7 +1741,16 @@ bottle in 3D looks from some angles}.
 \begin{figure}
 
 \begin{minipage}{0.50\linewidth}
-\includegraphics{images/fig-pisa-scree-1.png}\end{minipage}%
+
+\centering{
+
+\includegraphics{images/fig-pisa-scree-1.png}
+
+}
+
+\subcaption{\label{fig-pisa-scree-pdf}Scree plot}
+
+\end{minipage}%
 %
 \begin{minipage}{0.50\linewidth}
 
@@ -1779,13 +1760,14 @@ bottle in 3D looks from some angles}.
 
 }
 
-\subcaption{\label{fig-pisa-gt}Grand tour of the pisa data.}
+\subcaption{\label{fig-pisa-gt}Grand tour frame}
 
 \end{minipage}%
 
-\caption{\label{fig-pisa-pca-pdf}Scree plot and tour of the
-\texttt{pisa} data, with 30 variables being the plausible scores for
-Australian students.}
+\caption{\label{fig-pisa-pca-pdf}Scree plot and a frame from a tour of
+the \texttt{pisa} data, with 30 variables being the plausible scores for
+Australian students. In combination, these suggest that the data is
+effectively 1D.}
 
 \end{figure}%
 
@@ -1819,6 +1801,8 @@ and pointing the other way.
 \insightbox{The tour verifies that the `pisa` data is primarily 1D, indicating that a student who scores well in math, probably scores well in reading and science, too. More interestingly, the regular shape of the data strongly indicates that it is "synthetic", simulated rather than observed.}
 
 \subsection{Example: aflw}\label{example-aflw}
+
+\index{data!aflw}
 
 This data has player statistics for all the matches in the 2021 season.
 We would be interested to know which variables contain similar
@@ -1859,14 +1843,17 @@ Figure~\ref{fig-aflw-gt-pdf}.
 
 \begin{figure}
 
-\centering{
+\begin{minipage}{0.50\linewidth}
+\includegraphics[width=2.375in,height=\textheight]{images/aflw_gt_70.png}\end{minipage}%
+%
+\begin{minipage}{0.50\linewidth}
+\includegraphics[width=2.375in,height=\textheight]{images/aflw_gt_329.png}\end{minipage}%
 
-\includegraphics{images/aflw_gt_70.png}
-
-}
-
-\caption{\label{fig-aflw-gt-pdf}Grand tour of the AFLW player
-statistics.}
+\caption{\label{fig-aflw-gt-pdf}Two frames from a grand tour of the AFLW
+player statistics. Most player statistics concentrate near the centre,
+indicating most players are ``average''! There are a few outliers
+appearing in different combinations of the skills, which one would
+expect to be the star players for particular skill sets.}
 
 \end{figure}%
 
@@ -1909,23 +1896,13 @@ PCs.}
 
 \end{figure}%
 
+\index{dimension reduction!scree plot}
+
 From the scree plot in Figure~\ref{fig-aflw-pca}, we see a sharp drop
 from one to two, two to three and then smaller drops. After four PCs the
 variance drops again at six PCs and then gradually decays. We will
 choose four PCs to examine more closely. This explains 67.2\% of the
 variance.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{library}\NormalTok{(gt)}
-\NormalTok{aflw\_pca}\SpecialCharTok{$}\NormalTok{rotation[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{] }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{as\_tibble}\NormalTok{(}\AttributeTok{rownames=}\StringTok{"Variable"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} 
-  \FunctionTok{arrange}\NormalTok{(}\FunctionTok{desc}\NormalTok{(PC1), }\FunctionTok{desc}\NormalTok{(PC2), }\FunctionTok{desc}\NormalTok{(PC3)) }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{gt}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{fmt\_number}\NormalTok{(}\AttributeTok{columns =} \FunctionTok{c}\NormalTok{(PC1, PC2, PC3, PC4),}
-             \AttributeTok{decimals =} \DecValTok{2}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
 
 \begin{longtable}{lrrrr}
 
@@ -1994,6 +1971,8 @@ coefficients are primary offensive skills and the positive coefficients
 are defensive skills. This PC is reasonable measure of the offensive vs
 defensive skills of a player.
 
+\index{dimension reduction!interpretation}
+
 We would continue to interpret each PC by examining large coefficients
 to help decide how many PCs are a suitable summary of the information in
 the data. Briefly, PC 3 is a measure of worth of the player because
@@ -2010,94 +1989,36 @@ attention to the first four.)
 
 Ideally, when we tour the four PCs, we'd like to be able to stop and
 identify players. This involves creating a pre-computed animation, with
-additional mouse-over. This is only feasible with a small number of
-observations, like the \texttt{aflw} data, because all of the animation
-frames are constructed in a single object and passed to \texttt{plotly}.
-This object gets large very quickly!
+additional mouse-over, made possible by \texttt{plotly}. This is only
+feasible with a small number of observations, like the \texttt{aflw}
+data, because all of the animation frames are constructed in a single
+object. This object gets large very quickly!
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{library}\NormalTok{(plotly)}
-\FunctionTok{library}\NormalTok{(htmlwidgets)}
-\FunctionTok{set.seed}\NormalTok{(}\DecValTok{20}\NormalTok{)}
-\NormalTok{b }\OtherTok{\textless{}{-}} \FunctionTok{basis\_random}\NormalTok{(}\DecValTok{4}\NormalTok{, }\DecValTok{2}\NormalTok{)}
-\NormalTok{aflw\_pct }\OtherTok{\textless{}{-}}\NormalTok{ tourr}\SpecialCharTok{::}\FunctionTok{save\_history}\NormalTok{(aflw\_pca}\SpecialCharTok{$}\NormalTok{x[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{], }
-                    \AttributeTok{tour\_path =} \FunctionTok{grand\_tour}\NormalTok{(),}
-                    \AttributeTok{start =}\NormalTok{ b,}
-                    \AttributeTok{max\_bases =} \DecValTok{5}\NormalTok{)}
-\CommentTok{\# To reconstruct projected data plots, later}
-\FunctionTok{save}\NormalTok{(aflw\_pct, }\AttributeTok{file=}\StringTok{"data/aflw\_pct.rda"}\NormalTok{) }
-\NormalTok{aflw\_pcti }\OtherTok{\textless{}{-}} \FunctionTok{interpolate}\NormalTok{(aflw\_pct, }\FloatTok{0.1}\NormalTok{)}
-\NormalTok{aflw\_anim }\OtherTok{\textless{}{-}} \FunctionTok{render\_anim}\NormalTok{(aflw\_pca}\SpecialCharTok{$}\NormalTok{x[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{],}
-                         \AttributeTok{frames=}\NormalTok{aflw\_pcti, }
-             \AttributeTok{obs\_labels=}\FunctionTok{paste0}\NormalTok{(aflw}\SpecialCharTok{$}\NormalTok{surname,}
-\NormalTok{                               aflw}\SpecialCharTok{$}\NormalTok{given\_name))}
+The code to make this animation, and the interactive plot is in the
+online version of the book.
 
-\NormalTok{aflw\_gp }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{() }\SpecialCharTok{+}
-     \FunctionTok{geom\_path}\NormalTok{(}\AttributeTok{data=}\NormalTok{aflw\_anim}\SpecialCharTok{$}\NormalTok{circle, }
-               \FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{c1, }\AttributeTok{y=}\NormalTok{c2,}
-                   \AttributeTok{frame=}\NormalTok{frame), }\AttributeTok{linewidth=}\FloatTok{0.1}\NormalTok{) }\SpecialCharTok{+}
-     \FunctionTok{geom\_segment}\NormalTok{(}\AttributeTok{data=}\NormalTok{aflw\_anim}\SpecialCharTok{$}\NormalTok{axes, }
-                  \FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{x1, }\AttributeTok{y=}\NormalTok{y1, }
-                      \AttributeTok{xend=}\NormalTok{x2, }\AttributeTok{yend=}\NormalTok{y2, }
-                      \AttributeTok{frame=}\NormalTok{frame), }
-                  \AttributeTok{linewidth=}\FloatTok{0.1}\NormalTok{) }\SpecialCharTok{+}
-     \FunctionTok{geom\_text}\NormalTok{(}\AttributeTok{data=}\NormalTok{aflw\_anim}\SpecialCharTok{$}\NormalTok{axes, }
-               \FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{x2, }\AttributeTok{y=}\NormalTok{y2, }
-                   \AttributeTok{frame=}\NormalTok{frame, }
-                   \AttributeTok{label=}\NormalTok{axis\_labels), }
-               \AttributeTok{size=}\DecValTok{5}\NormalTok{) }\SpecialCharTok{+}
-     \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{data=}\NormalTok{aflw\_anim}\SpecialCharTok{$}\NormalTok{frames, }
-                \FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{P1, }\AttributeTok{y=}\NormalTok{P2, }
-                    \AttributeTok{frame=}\NormalTok{frame, }
-                    \AttributeTok{label=}\NormalTok{obs\_labels), }
-                \AttributeTok{alpha=}\FloatTok{0.8}\NormalTok{) }\SpecialCharTok{+}
-     \FunctionTok{xlim}\NormalTok{(}\SpecialCharTok{{-}}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{ylim}\NormalTok{(}\SpecialCharTok{{-}}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{) }\SpecialCharTok{+}
-     \FunctionTok{coord\_equal}\NormalTok{() }\SpecialCharTok{+}
-     \FunctionTok{theme\_bw}\NormalTok{() }\SpecialCharTok{+}
-     \FunctionTok{theme}\NormalTok{(}\AttributeTok{axis.text=}\FunctionTok{element\_blank}\NormalTok{(),}
-         \AttributeTok{axis.title=}\FunctionTok{element\_blank}\NormalTok{(),}
-         \AttributeTok{axis.ticks=}\FunctionTok{element\_blank}\NormalTok{(),}
-         \AttributeTok{panel.grid=}\FunctionTok{element\_blank}\NormalTok{())}
-\NormalTok{aflw\_pctour }\OtherTok{\textless{}{-}} \FunctionTok{ggplotly}\NormalTok{(aflw\_gp,}
-                        \AttributeTok{width=}\DecValTok{500}\NormalTok{,}
-                        \AttributeTok{height=}\DecValTok{550}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
-       \FunctionTok{animation\_button}\NormalTok{(}\AttributeTok{label=}\StringTok{"Go"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
-       \FunctionTok{animation\_slider}\NormalTok{(}\AttributeTok{len=}\FloatTok{0.8}\NormalTok{, }\AttributeTok{x=}\FloatTok{0.5}\NormalTok{,}
-                        \AttributeTok{xanchor=}\StringTok{"center"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
-       \FunctionTok{animation\_opts}\NormalTok{(}\AttributeTok{easing=}\StringTok{"linear"}\NormalTok{, }\AttributeTok{transition =} \DecValTok{0}\NormalTok{)}
+\begin{figure}
 
-\NormalTok{htmlwidgets}\SpecialCharTok{::}\FunctionTok{saveWidget}\NormalTok{(aflw\_pctour,}
-          \AttributeTok{file=}\StringTok{"html/aflw\_pca.html"}\NormalTok{,}
-          \AttributeTok{selfcontained =} \ConstantTok{TRUE}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
+\centering{
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{library}\NormalTok{(plotly)}
-\FunctionTok{load}\NormalTok{(}\StringTok{"data/aflw\_pct.rda"}\NormalTok{)}
-\NormalTok{aflw\_pcti }\OtherTok{\textless{}{-}} \FunctionTok{interpolate}\NormalTok{(aflw\_pct, }\FloatTok{0.1}\NormalTok{)}
-\NormalTok{f18 }\OtherTok{\textless{}{-}} \FunctionTok{matrix}\NormalTok{(aflw\_pcti[,,}\DecValTok{18}\NormalTok{], }\AttributeTok{ncol=}\DecValTok{2}\NormalTok{)}
-\NormalTok{p18 }\OtherTok{\textless{}{-}} \FunctionTok{render\_proj}\NormalTok{(aflw\_pca}\SpecialCharTok{$}\NormalTok{x[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{], f18, }
-                   \AttributeTok{obs\_labels=}\FunctionTok{paste0}\NormalTok{(aflw}\SpecialCharTok{$}\NormalTok{surname,}
-\NormalTok{                               aflw}\SpecialCharTok{$}\NormalTok{given\_name))}
-\NormalTok{pg18 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{geom\_path}\NormalTok{(}\AttributeTok{data=}\NormalTok{p18}\SpecialCharTok{$}\NormalTok{circle, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{c1, }\AttributeTok{y=}\NormalTok{c2)) }\SpecialCharTok{+}
-  \FunctionTok{geom\_segment}\NormalTok{(}\AttributeTok{data=}\NormalTok{p18}\SpecialCharTok{$}\NormalTok{axes, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{x1, }\AttributeTok{y=}\NormalTok{y1, }\AttributeTok{xend=}\NormalTok{x2, }\AttributeTok{yend=}\NormalTok{y2)) }\SpecialCharTok{+}
-  \FunctionTok{geom\_text}\NormalTok{(}\AttributeTok{data=}\NormalTok{p18}\SpecialCharTok{$}\NormalTok{axes, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{x2, }\AttributeTok{y=}\NormalTok{y2, }\AttributeTok{label=}\FunctionTok{rownames}\NormalTok{(p18}\SpecialCharTok{$}\NormalTok{axes))) }\SpecialCharTok{+}
-  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{data=}\NormalTok{p18}\SpecialCharTok{$}\NormalTok{data\_prj, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{P1, }\AttributeTok{y=}\NormalTok{P2, }\AttributeTok{label=}\NormalTok{obs\_labels)) }\SpecialCharTok{+}
-  \FunctionTok{xlim}\NormalTok{(}\SpecialCharTok{{-}}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{ylim}\NormalTok{(}\SpecialCharTok{{-}}\DecValTok{1}\NormalTok{, }\DecValTok{1}\NormalTok{) }\SpecialCharTok{+}
-  \CommentTok{\#ggtitle("Frame 18") +}
-  \FunctionTok{theme\_bw}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{theme}\NormalTok{(}
-    \AttributeTok{axis.text=}\FunctionTok{element\_blank}\NormalTok{(),}
-    \AttributeTok{axis.title=}\FunctionTok{element\_blank}\NormalTok{(),}
-    \AttributeTok{axis.ticks=}\FunctionTok{element\_blank}\NormalTok{(),}
-    \AttributeTok{panel.grid=}\FunctionTok{element\_blank}\NormalTok{())}
-\FunctionTok{ggplotly}\NormalTok{(pg18, }\AttributeTok{width=}\DecValTok{500}\NormalTok{, }\AttributeTok{height=}\DecValTok{500}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
+\includegraphics[width=0.8\textwidth,height=\textheight]{4-pca_files/figure-pdf/fig-aflw-pcaplots-pdf-1.pdf}
+
+}
+
+\caption{\label{fig-aflw-pcaplots-pdf}Frame 18 re-plotted so that
+players can be identified, ideally using on mouse-over. Here some points
+are labelled.}
+
+\end{figure}%
+
+For any particular frame, like 18 re-plotted in
+Figure~\ref{fig-aflw-pcaplots-pdf}, we can investigate further. Here
+there is a branching pattern, where the branch points in the direction
+of PC 1. Mouse-over the players at the tip of this branch and we find
+players like Alyce Parker, Brittany Bonnici, Dana Hooker, Kiara Bowers.
+If you look up the bios of these players you'll find they all have
+generally good player descriptions like ``elite disposals'', ``powerful
+left foot'', ``hard-running midfielder'', ``best and fairest''.
 
 In the direction of PC 2, you'll find players like Lauren Ahrens, Stacey
 Livingstone who are star defenders. Players in this end of PC 1, have
@@ -2128,6 +2049,8 @@ explaining an analysis easier.
 \section{Examining the PCA model in the data
 space}\label{examining-the-pca-model-in-the-data-space}
 
+\index{model-in-the-data-space}
+
 When you choose a smaller number of PCs \((k)\) than the number of
 original variables, this is essentially producing a model for the data.
 The model is the lower dimensional \(k\)-D space. It is analogous to a
@@ -2148,31 +2071,11 @@ PC \(k\) also. With the \texttt{pca\_tour()} function in the
 the \(k\) PCs with the axes displaying the original variables, and thus
 see their contribution to the PCs.
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{library}\NormalTok{(ggfortify)}
-\FunctionTok{library}\NormalTok{(patchwork)}
-\NormalTok{plane\_pca }\OtherTok{\textless{}{-}} \FunctionTok{prcomp}\NormalTok{(plane)}
-\NormalTok{pl1 }\OtherTok{\textless{}{-}} \FunctionTok{autoplot}\NormalTok{(plane\_pca, }\AttributeTok{loadings =} \ConstantTok{TRUE}\NormalTok{, }
-         \AttributeTok{loadings.label =} \ConstantTok{TRUE}\NormalTok{) }\SpecialCharTok{+} 
-  \FunctionTok{ggtitle}\NormalTok{(}\StringTok{"(a)"}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+} 
-  \FunctionTok{theme}\NormalTok{(}\AttributeTok{aspect.ratio=}\DecValTok{1}\NormalTok{)}
-\NormalTok{plane\_noise\_pca }\OtherTok{\textless{}{-}} \FunctionTok{prcomp}\NormalTok{(plane\_noise)}
-\NormalTok{pl2 }\OtherTok{\textless{}{-}} \FunctionTok{autoplot}\NormalTok{(plane\_noise\_pca, }\AttributeTok{loadings =} \ConstantTok{TRUE}\NormalTok{, }
-         \AttributeTok{loadings.label =} \ConstantTok{TRUE}\NormalTok{) }\SpecialCharTok{+} 
-  \FunctionTok{ggtitle}\NormalTok{(}\StringTok{"(b)"}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+} 
-  \FunctionTok{theme}\NormalTok{(}\AttributeTok{aspect.ratio=}\DecValTok{1}\NormalTok{)}
-\NormalTok{pl1 }\SpecialCharTok{+}\NormalTok{ pl2}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{figure}[H]
+\begin{figure}
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{4-pca_files/figure-pdf/fig-plane-biplot-1.pdf}
+\includegraphics[width=1\textwidth,height=\textheight]{4-pca_files/figure-pdf/fig-plane-biplot-1.pdf}
 
 }
 
@@ -2201,44 +2104,6 @@ Figure~\ref{fig-plane-box-model-pdf} shows the models for the
 \texttt{plane} and \texttt{box} data, 2D and 3D respectively.
 
 \infobox{We look at the model in the data space to check how well the model fits the data. If it fits well, the points will cluster tightly around the model representation, with little spread in other directions.}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{plane\_m }\OtherTok{\textless{}{-}} \FunctionTok{pca\_model}\NormalTok{(plane\_pca)}
-\NormalTok{plane\_m\_d }\OtherTok{\textless{}{-}} \FunctionTok{rbind}\NormalTok{(plane\_m}\SpecialCharTok{$}\NormalTok{points, plane)}
-\FunctionTok{animate\_xy}\NormalTok{(plane\_m\_d, }\AttributeTok{edges=}\NormalTok{plane\_m}\SpecialCharTok{$}\NormalTok{edges,}
-           \AttributeTok{axes=}\StringTok{"bottomleft"}\NormalTok{,}
-           \AttributeTok{edges.col=}\StringTok{"\#E7950F"}\NormalTok{,}
-           \AttributeTok{edges.width=}\DecValTok{3}\NormalTok{)}
-\FunctionTok{render\_gif}\NormalTok{(plane\_m\_d, }
-           \FunctionTok{grand\_tour}\NormalTok{(), }
-           \FunctionTok{display\_xy}\NormalTok{(}\AttributeTok{half\_range=}\FloatTok{0.9}\NormalTok{,}
-                      \AttributeTok{edges=}\NormalTok{plane\_m}\SpecialCharTok{$}\NormalTok{edges, }
-                      \AttributeTok{edges.col=}\StringTok{"\#E7950F"}\NormalTok{,}
-                      \AttributeTok{edges.width=}\DecValTok{3}\NormalTok{),}
-           \AttributeTok{gif\_file=}\StringTok{"gifs/plane\_model.gif"}\NormalTok{,}
-           \AttributeTok{frames=}\DecValTok{500}\NormalTok{,}
-           \AttributeTok{width=}\DecValTok{400}\NormalTok{,}
-           \AttributeTok{height=}\DecValTok{400}\NormalTok{,}
-           \AttributeTok{loop=}\ConstantTok{FALSE}\NormalTok{)}
-\NormalTok{box\_pca }\OtherTok{\textless{}{-}} \FunctionTok{prcomp}\NormalTok{(box)}
-\NormalTok{box\_m }\OtherTok{\textless{}{-}} \FunctionTok{pca\_model}\NormalTok{(box\_pca, }\AttributeTok{d=}\DecValTok{3}\NormalTok{)}
-\NormalTok{box\_m\_d }\OtherTok{\textless{}{-}} \FunctionTok{rbind}\NormalTok{(box\_m}\SpecialCharTok{$}\NormalTok{points, box)}
-\FunctionTok{animate\_xy}\NormalTok{(box\_m\_d, }\AttributeTok{edges=}\NormalTok{box\_m}\SpecialCharTok{$}\NormalTok{edges, }
-           \AttributeTok{axes=}\StringTok{"bottomleft"}\NormalTok{, }\AttributeTok{edges.col=}\StringTok{"\#E7950F"}\NormalTok{, }\AttributeTok{edges.width=}\DecValTok{3}\NormalTok{)}
-\FunctionTok{render\_gif}\NormalTok{(box\_m\_d, }
-           \FunctionTok{grand\_tour}\NormalTok{(), }
-           \FunctionTok{display\_xy}\NormalTok{(}\AttributeTok{half\_range=}\FloatTok{0.9}\NormalTok{,}
-                      \AttributeTok{edges=}\NormalTok{box\_m}\SpecialCharTok{$}\NormalTok{edges, }
-                      \AttributeTok{edges.col=}\StringTok{"\#E7950F"}\NormalTok{,}
-                      \AttributeTok{edges.width=}\DecValTok{3}\NormalTok{),}
-           \AttributeTok{gif\_file=}\StringTok{"gifs/box\_model.gif"}\NormalTok{,}
-           \AttributeTok{frames=}\DecValTok{500}\NormalTok{,}
-           \AttributeTok{width=}\DecValTok{400}\NormalTok{,}
-           \AttributeTok{height=}\DecValTok{400}\NormalTok{,}
-           \AttributeTok{loop=}\ConstantTok{FALSE}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
 
 \begin{figure}
 
@@ -2273,35 +2138,16 @@ for the 2D in 5D, and 3D in 5D simulated data.}
 
 \subsection{Example: pisa}\label{example-pisa-1}
 
+\index{data!pisa}
+
 The model for the \texttt{pisa} data is a 1D vector, shown in
 Figure~\ref{fig-pisa-model-pdf}.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{pisa\_model }\OtherTok{\textless{}{-}} \FunctionTok{pca\_model}\NormalTok{(pisa\_pca, }\AttributeTok{d=}\DecValTok{1}\NormalTok{, }\AttributeTok{s=}\DecValTok{2}\NormalTok{)}
-
-\NormalTok{pisa\_all }\OtherTok{\textless{}{-}} \FunctionTok{rbind}\NormalTok{(pisa\_model}\SpecialCharTok{$}\NormalTok{points, pisa\_std)}
-\FunctionTok{animate\_xy}\NormalTok{(pisa\_all, }\AttributeTok{edges=}\NormalTok{pisa\_model}\SpecialCharTok{$}\NormalTok{edges,}
-           \AttributeTok{edges.col=}\StringTok{"\#E7950F"}\NormalTok{, }\AttributeTok{edges.width=}\DecValTok{3}\NormalTok{)}
-\FunctionTok{render\_gif}\NormalTok{(pisa\_all, }
-           \FunctionTok{grand\_tour}\NormalTok{(), }
-           \FunctionTok{display\_xy}\NormalTok{(}\AttributeTok{half\_range=}\FloatTok{0.9}\NormalTok{,}
-                      \AttributeTok{edges=}\NormalTok{pisa\_model}\SpecialCharTok{$}\NormalTok{edges, }
-                      \AttributeTok{edges.col=}\StringTok{"\#E7950F"}\NormalTok{, }
-                      \AttributeTok{edges.width=}\DecValTok{5}\NormalTok{),}
-           \AttributeTok{gif\_file=}\StringTok{"gifs/pisa\_model.gif"}\NormalTok{,}
-           \AttributeTok{frames=}\DecValTok{500}\NormalTok{,}
-           \AttributeTok{width=}\DecValTok{400}\NormalTok{,}
-           \AttributeTok{height=}\DecValTok{400}\NormalTok{,}
-           \AttributeTok{loop=}\ConstantTok{FALSE}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
 
 \begin{figure}
 
 \centering{
 
-\includegraphics{images/pisa_model_17.png}
+\includegraphics[width=3.125in,height=\textheight]{images/pisa_model_17.png}
 
 }
 
@@ -2313,6 +2159,8 @@ small amount of spread in all directions away from the model.}
 
 \subsection{Example: aflw}\label{example-aflw-1}
 
+\index{data!aflw}
+
 It is less useful to examine the PCA model for the \texttt{aflw} data,
 because the main patterns that were of interest were the exceptional
 players. However, we will do it anyway! Figure~\ref{fig-aflw-model-pdf}
@@ -2322,43 +2170,18 @@ examples, we can see that the cube structure mirrors the variation. We
 can see that the relationships between variables are not strictly
 linear, because the spread extends unevenly away from the box.
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{aflw\_model }\OtherTok{\textless{}{-}} \FunctionTok{pca\_model}\NormalTok{(aflw\_pca, }\AttributeTok{d=}\DecValTok{4}\NormalTok{, }\AttributeTok{s=}\DecValTok{1}\NormalTok{)}
-
-\NormalTok{aflw\_all }\OtherTok{\textless{}{-}} \FunctionTok{rbind}\NormalTok{(aflw\_model}\SpecialCharTok{$}\NormalTok{points, aflw\_std[,}\DecValTok{7}\SpecialCharTok{:}\DecValTok{35}\NormalTok{])}
-\FunctionTok{animate\_xy}\NormalTok{(aflw\_all, }\AttributeTok{edges=}\NormalTok{aflw\_model}\SpecialCharTok{$}\NormalTok{edges,}
-           \AttributeTok{edges.col=}\StringTok{"\#E7950F"}\NormalTok{, }
-           \AttributeTok{edges.width=}\DecValTok{3}\NormalTok{, }
-           \AttributeTok{half\_range=}\FloatTok{0.8}\NormalTok{, }
-           \AttributeTok{axes=}\StringTok{"off"}\NormalTok{)}
-\FunctionTok{render\_gif}\NormalTok{(aflw\_all, }
-           \FunctionTok{grand\_tour}\NormalTok{(), }
-           \FunctionTok{display\_xy}\NormalTok{(}\AttributeTok{half\_range=}\FloatTok{0.8}\NormalTok{,}
-                      \AttributeTok{edges=}\NormalTok{aflw\_model}\SpecialCharTok{$}\NormalTok{edges, }
-                      \AttributeTok{edges.col=}\StringTok{"\#E7950F"}\NormalTok{, }
-                      \AttributeTok{edges.width=}\DecValTok{3}\NormalTok{, }
-                      \AttributeTok{axes=}\StringTok{"off"}\NormalTok{),}
-           \AttributeTok{gif\_file=}\StringTok{"gifs/aflw\_model.gif"}\NormalTok{,}
-           \AttributeTok{frames=}\DecValTok{500}\NormalTok{,}
-           \AttributeTok{width=}\DecValTok{400}\NormalTok{,}
-           \AttributeTok{height=}\DecValTok{400}\NormalTok{,}
-           \AttributeTok{loop=}\ConstantTok{FALSE}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
 \begin{figure}
 
 \centering{
 
-\includegraphics{images/aflw_model_70.png}
+\includegraphics[width=3.125in,height=\textheight]{images/aflw_model_70.png}
 
 }
 
 \caption{\label{fig-aflw-model-pdf}PCA model of the \texttt{aflw} data.
 The linear model is not ideal for this data, which has other patterns
 like outliers, and some branching. However, the model roughly captures
-the linear associations, and leaves unequal variation in different
+the linear associations, and leaves unexplained variation in different
 directions.}
 
 \end{figure}%
@@ -2369,6 +2192,8 @@ directions.}
 linear}\label{when-relationships-are-not-linear}
 
 \subsection{Example: outliers}\label{example-outliers}
+
+\index{outliers}
 
 Figure~\ref{fig-plane-n-o-scree} shows the scree plot for the planar
 data with noise and outliers. It is very similar to the scree plot on
@@ -2403,52 +2228,17 @@ outliers.}
 
 \end{figure}%
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{clrs }\OtherTok{\textless{}{-}} \FunctionTok{hcl.colors}\NormalTok{(}\DecValTok{12}\NormalTok{, }\StringTok{"Zissou 1"}\NormalTok{)}
-\NormalTok{p\_col }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\FunctionTok{rep}\NormalTok{(}\StringTok{"black"}\NormalTok{, }\DecValTok{100}\NormalTok{), clrs[}\DecValTok{11}\NormalTok{], clrs[}\DecValTok{11}\NormalTok{])}
-\NormalTok{p\_obs\_labels }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\FunctionTok{rep}\NormalTok{(}\StringTok{""}\NormalTok{, }\DecValTok{100}\NormalTok{), }\StringTok{"1"}\NormalTok{, }\StringTok{"2"}\NormalTok{)}
-
-\FunctionTok{animate\_xy}\NormalTok{(plane\_n\_o\_pca}\SpecialCharTok{$}\NormalTok{x[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{],}
-           \AttributeTok{col=}\NormalTok{p\_col,}
-           \AttributeTok{obs\_labels=}\NormalTok{p\_obs\_labels)}
-\FunctionTok{animate\_xy}\NormalTok{(plane\_noise\_outliers,}
-           \AttributeTok{col=}\NormalTok{p\_col,}
-           \AttributeTok{obs\_labels=}\NormalTok{p\_obs\_labels)}
-\FunctionTok{render\_gif}\NormalTok{(plane\_noise\_outliers, }
-           \FunctionTok{grand\_tour}\NormalTok{(), }
-           \FunctionTok{display\_xy}\NormalTok{(}\AttributeTok{half\_range=}\FloatTok{0.8}\NormalTok{,}
-                      \AttributeTok{col=}\NormalTok{p\_col,}
-             \AttributeTok{obs\_labels=}\NormalTok{p\_obs\_labels),}
-           \AttributeTok{gif\_file=}\StringTok{"gifs/plane\_n\_o\_clr.gif"}\NormalTok{,}
-           \AttributeTok{frames=}\DecValTok{500}\NormalTok{,}
-           \AttributeTok{width=}\DecValTok{200}\NormalTok{,}
-           \AttributeTok{height=}\DecValTok{200}\NormalTok{,}
-           \AttributeTok{loop=}\ConstantTok{FALSE}\NormalTok{)}
-\FunctionTok{render\_gif}\NormalTok{(plane\_n\_o\_pca}\SpecialCharTok{$}\NormalTok{x[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{], }
-           \FunctionTok{grand\_tour}\NormalTok{(), }
-           \FunctionTok{display\_xy}\NormalTok{(}\AttributeTok{half\_range=}\FloatTok{0.8}\NormalTok{,}
-                      \AttributeTok{col=}\NormalTok{p\_col,}
-             \AttributeTok{obs\_labels=}\NormalTok{p\_obs\_labels),}
-           \AttributeTok{gif\_file=}\StringTok{"gifs/plane\_n\_o\_pca.gif"}\NormalTok{,}
-           \AttributeTok{frames=}\DecValTok{500}\NormalTok{,}
-           \AttributeTok{width=}\DecValTok{200}\NormalTok{,}
-           \AttributeTok{height=}\DecValTok{200}\NormalTok{,}
-           \AttributeTok{loop=}\ConstantTok{FALSE}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
 \begin{figure}
 
 \begin{minipage}{0.50\linewidth}
 
 \centering{
 
-\includegraphics[width=2.60417in,height=\textheight]{images/plane_n_o_clr_181.png}
+\includegraphics[width=2.39583in,height=\textheight]{images/plane_n_o_clr_181.png}
 
 }
 
-\subcaption{\label{fig-plane-n-o-clr}Outliers clearly visible.}
+\subcaption{\label{fig-plane-n-o-clr}Outliers clearly visible}
 
 \end{minipage}%
 %
@@ -2456,12 +2246,12 @@ outliers.}
 
 \centering{
 
-\includegraphics[width=2.60417in,height=\textheight]{images/plane_n_o_pca_181.png}
+\includegraphics[width=2.39583in,height=\textheight]{images/plane_n_o_pca_181.png}
 
 }
 
 \subcaption{\label{fig-plane-n-o-pca}Outliers not clearly visible in
-PC1-4.}
+PC1-4}
 
 \end{minipage}%
 
@@ -2471,14 +2261,7 @@ has lost these two extreme values.}
 
 \end{figure}%
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{library}\NormalTok{(GGally)}
-\FunctionTok{ggscatmat}\NormalTok{(plane\_n\_o\_pca}\SpecialCharTok{$}\NormalTok{x) }\SpecialCharTok{+} \FunctionTok{theme\_minimal}\NormalTok{()}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{figure}[H]
+\begin{figure}
 
 \centering{
 
@@ -2496,6 +2279,8 @@ some important characteristics in the data.}
 \subsection{Example: Non-linear
 associations}\label{example-non-linear-associations}
 
+\index{nonlinearity}
+
 Figure~\ref{fig-plane-nonlin-pdf} shows the tour of the full 5D data
 containing non-linear relationships in comparison with a tour of the
 first three PCs, as recommended by the scree plot
@@ -2506,15 +2291,7 @@ of the complexities of the relationships. The scatterplot matrix of all
 contain interesting features: more non-linearity, and curiously an
 outlier.
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{data}\NormalTok{(plane\_nonlin)}
-\NormalTok{plane\_nonlin\_pca }\OtherTok{\textless{}{-}} \FunctionTok{prcomp}\NormalTok{(plane\_nonlin)}
-\FunctionTok{ggscree}\NormalTok{(plane\_nonlin\_pca, }\AttributeTok{q =} \DecValTok{5}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{theme\_minimal}\NormalTok{()}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{figure}[H]
+\begin{figure}
 
 \centering{
 
@@ -2527,19 +2304,6 @@ suggests three PCs.}
 
 \end{figure}%
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{animate\_xy}\NormalTok{(plane\_nonlin\_pca}\SpecialCharTok{$}\NormalTok{x[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{3}\NormalTok{])}
-\FunctionTok{render\_gif}\NormalTok{(plane\_nonlin\_pca}\SpecialCharTok{$}\NormalTok{x[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{3}\NormalTok{], }
-           \FunctionTok{grand\_tour}\NormalTok{(), }
-           \FunctionTok{display\_xy}\NormalTok{(}\AttributeTok{half\_range=}\FloatTok{0.8}\NormalTok{),}
-           \AttributeTok{gif\_file=}\StringTok{"gifs/plane\_nonlin\_pca.gif"}\NormalTok{,}
-           \AttributeTok{frames=}\DecValTok{500}\NormalTok{,}
-           \AttributeTok{width=}\DecValTok{200}\NormalTok{,}
-           \AttributeTok{height=}\DecValTok{200}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
 \begin{figure}
 
 \begin{minipage}{0.50\linewidth}
@@ -2550,8 +2314,7 @@ suggests three PCs.}
 
 }
 
-\subcaption{\label{fig-nonlinear2}Non-linear relationship between
-several variables seen in a tour on all five variables.}
+\subcaption{\label{fig-nonlinear2}All five variables}
 
 \end{minipage}%
 %
@@ -2563,25 +2326,20 @@ several variables seen in a tour on all five variables.}
 
 }
 
-\subcaption{\label{fig-plane-nonlin-pca}The first three principal
-components reveal a strong non-linear relationship.}
+\subcaption{\label{fig-plane-nonlin-pca}First three PCs}
 
 \end{minipage}%
 
 \caption{\label{fig-plane-nonlin-pdf}Comparison of the full data and
-first three principal components. Some of the non-linearity is clearly
-visible in the reduced dimension space, but the full data has more
-complexities.}
+first three principal components. Non-linear relationships between
+several variables can be seen in a tour on all five variables. The first
+three principal components reveal a strong non-linear relationship. Some
+of the non-linearity is clearly visible in the reduced dimension space,
+but the full data has more complexities.}
 
 \end{figure}%
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{ggscatmat}\NormalTok{(plane\_nonlin\_pca}\SpecialCharTok{$}\NormalTok{x)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{figure}[H]
+\begin{figure}
 
 \centering{
 
@@ -2671,10 +2429,12 @@ components.)
   3. How does it compare to the previous solution?
 \end{enumerate}
 
+\bookmarksetup{startatroot}
+
 \chapter{Non-linear dimension
 reduction}\label{non-linear-dimension-reduction}
 
-\section{Background}\label{background}
+\section{Explanation of NLDR methods}\label{explanation-of-nldr-methods}
 
 Non-linear dimension reduction (NLDR) aims to find a low-dimensional
 representation of the high-dimensional data that shows the main features
@@ -2692,6 +2452,8 @@ that minimises the difference between two interpoint distance matrices,
 the distance between points in the high-dimensions, and in the
 low-dimensional representations. A good resource for learning about MDS
 is Borg \& Groenen (2005).
+
+\index{dimension reduction!t-SNE} \index{dimension reduction!UMAP}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -2753,8 +2515,6 @@ al., 2019).
 \end{Highlighting}
 \end{Shaded}
 
-::: \{.content-visible when-format=``pdf''\}
-
 \begin{figure}
 
 \begin{minipage}{0.50\linewidth}
@@ -2782,10 +2542,10 @@ seen in the tour.
 
 NLDR can provide useful low-dimensional summaries of high-dimensional
 structure but you need to check whether it is a sensible and accurate
-representation by comparing with what is perceivd from a tour.
+representation by comparing with what is perceived from a tour.
 
-\section{Linking NLDR representation with tour
-view}\label{linking-nldr-representation-with-tour-view}
+\section{Assessing reliability of the NLDR
+representation}\label{assessing-reliability-of-the-nldr-representation}
 
 NLDR can produce useful low-dimensional summaries of structure in
 high-dimensional data, like those shown in
@@ -2802,6 +2562,8 @@ clusters in the UMAP representation correspond to the sine wave cluster.
 
 \subsection{\texorpdfstring{Using
 \texttt{liminal}}{Using liminal}}\label{using-liminal}
+
+\index{liminal}
 
 Figure~\ref{fig-liminal-clusters-nonlin} shows how the NLDR plot can be
 linked to a tour view, using the \texttt{liminal} package, to better
@@ -2857,6 +2619,8 @@ unibrow matches to the sine wave cluster.}
 
 \subsection{\texorpdfstring{Using
 \texttt{detourr}}{Using detourr}}\label{using-detourr}
+
+\index{detourr}
 
 Figure~\ref{fig-detourr-clusters-nonlin} shows how the linking is
 achieved using \texttt{detourr}. It uses a shared data object, as made
@@ -2915,9 +2679,11 @@ tour animation. The smile corresponds to the small bent rod cluster.}
 \section{\texorpdfstring{Example:
 \texttt{fake\_trees}}{Example: fake\_trees}}\label{example-fake_trees}
 
+\index{data!fake trees}
+
 Figure~\ref{fig-liminal-trees} shows a more complex example, using the
 \texttt{fake\_trees} data. We know that the 10D data has a main branch,
-and 9 branches (clusters) attached to it, absed on our explorations in
+and 9 branches (clusters) attached to it, based on our explorations in
 the earlier chapters. The t-SNE view, where points are coloured by the
 known branch ids, is very helpful for seeing the linear branch
 structure.
@@ -2935,7 +2701,9 @@ into three pieces by t-SNE.
 \FunctionTok{library}\NormalTok{(Rtsne)}
 \FunctionTok{data}\NormalTok{(fake\_trees)}
 \FunctionTok{set.seed}\NormalTok{(}\DecValTok{2020}\NormalTok{)}
-\NormalTok{tsne }\OtherTok{\textless{}{-}}\NormalTok{ Rtsne}\SpecialCharTok{::}\FunctionTok{Rtsne}\NormalTok{(dplyr}\SpecialCharTok{::}\FunctionTok{select}\NormalTok{(fake\_trees, dplyr}\SpecialCharTok{::}\FunctionTok{starts\_with}\NormalTok{(}\StringTok{"dim"}\NormalTok{)))}
+\NormalTok{tsne }\OtherTok{\textless{}{-}}\NormalTok{ Rtsne}\SpecialCharTok{::}\FunctionTok{Rtsne}\NormalTok{(}
+\NormalTok{  dplyr}\SpecialCharTok{::}\FunctionTok{select}\NormalTok{(fake\_trees,}
+\NormalTok{                dplyr}\SpecialCharTok{::}\FunctionTok{starts\_with}\NormalTok{(}\StringTok{"dim"}\NormalTok{)))}
 \NormalTok{tsne\_df }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\AttributeTok{tsneX =}\NormalTok{ tsne}\SpecialCharTok{$}\NormalTok{Y[, }\DecValTok{1}\NormalTok{],}
                       \AttributeTok{tsneY =}\NormalTok{ tsne}\SpecialCharTok{$}\NormalTok{Y[, }\DecValTok{2}\NormalTok{])}
 \FunctionTok{limn\_tour\_link}\NormalTok{(}
@@ -3022,21 +2790,24 @@ several inaccurate breaks of some of the branches.
   the results different each time, or could they be considered to be
   equivalent?
 \item
-  Use \texttt{liminal} to link the t-SNE representation to a tour of the
-  penguins. Highlight the points that have been placed in an awkward
-  position by t-SNE from others in their species. Watch them relative to
-  the others in their species in the tour view, and think about whether
-  there is any rationale for the awkward placement.
+  Use \texttt{liminal} or \texttt{detourr} to link the t-SNE
+  representation to a tour of the penguins. Highlight the points that
+  have been placed in an awkward position by t-SNE from others in their
+  species. Watch them relative to the others in their species in the
+  tour view, and think about whether there is any rationale for the
+  awkward placement.
 \item
-  Use UMAP to make the 2D representation, and use \texttt{liminal} to
-  link with a tour to explore the result.
+  Use UMAP to make the 2D representation, and use \texttt{liminal} or
+  \texttt{detourr} to link with a tour to explore the result.
 \item
-  Repeat 1-4 using \texttt{detourr}.
+  Conduct your best t-SNE and UMAP representations of the \texttt{aflw}
+  data. Compare and contrast what is learned relative to a tour on the
+  principal component analysis.
 \end{enumerate}
 
-\part{Cluster analysis}
+\bookmarksetup{startatroot}
 
-\chapter{Overview}\label{overview}
+\chapter{Introduction to clustering}\label{introduction-to-clustering}
 
 Unsupervised classification, or cluster analysis, organizes observations
 into similar groups. Cluster analysis is a commonly used, appealing, and
@@ -3354,6 +3125,8 @@ this gives distance between each case and the mean vector.)
   cases are from each other.
 \end{enumerate}
 
+\bookmarksetup{startatroot}
+
 \chapter{Spin-and-brush approach}\label{sec-clust-graphics}
 
 \index{brushing!persistent} \index{tour}
@@ -3540,10 +3313,7 @@ Most of the Chinstrap species were recovered also (labelled as
 \tightlist
 \item
   Use the spin-and-brush technique to identify the branches of the
-  \texttt{fake\_trees} data available in the \texttt{liminal} package
-  (originally from
-  \href{https://phate.readthedocs.io/en/stable/}{PHATE}). The result
-  should look something like this:
+  \texttt{fake\_trees} data. The result should look something like this:
 \end{enumerate}
 
 \begin{figure}
@@ -3555,7 +3325,7 @@ Most of the Chinstrap species were recovered also (labelled as
 }
 
 \caption{\label{fig-fake-trees-sb}Example solution after spin-and-brush
-on fake\_trees data.}
+on fake trees data.}
 
 \end{figure}%
 
@@ -3564,6 +3334,8 @@ Tabulate the \texttt{branches} id variable in the original data with the
 \texttt{colour} groups created from brushing, to see how closely you
 have recovered the original classes.
 
+\bookmarksetup{startatroot}
+
 \chapter{Hierarchical clustering}\label{sec-hclust}
 
 \index{cluster analysis!algorithms}
@@ -3571,7 +3343,7 @@ have recovered the original classes.
 \index{cluster analysis!hierarchical}
 \index{cluster analysis!intercluster distance (linkage)}
 
-\section{Overview}\label{overview-1}
+\section{Overview}\label{overview}
 
 Hierarchical cluster algorithms sequentially fuse neighboring points to
 form ever-larger clusters, starting from a full interpoint distance
@@ -4075,9 +3847,9 @@ The first step with any clustering with high dimensional data is also to
 check the data. You typically don't know whether there are clusters, or
 what shape they might be, or if there are nuisance observations or
 variables. A pairs plot like in Figure~\ref{fig-penguins-pairs} is a
-nice complement to using the tour (\textbf{?@fig-penguins-gt}) for this.
-Here you can see three elliptical clusters, with one is further from the
-others.
+nice complement to using the tour (Figure~\ref{fig-penguins-gt-pdf}) for
+this. Here you can see three elliptical clusters, with one is further
+from the others.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -4128,6 +3900,22 @@ observations.}
            \AttributeTok{loop=}\ConstantTok{FALSE}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
+
+\begin{figure}
+
+\centering{
+
+\includegraphics{images/penguins_gt_59.png}
+
+}
+
+\caption{\label{fig-penguins-gt-pdf}One frame from a grand tour being
+used to check for clusters, the shape of clusters and for nuisance
+observations and variables. Here the penguins data looks like it has
+possibly three elliptical clusters, one more separated than the other
+two, with some nuisance observations.}
+
+\end{figure}%
 
 The process is the same as for the simpler example. We compute and draw
 the dendrogram in 2D, compute it in \(p\)-D and view with a tour. Here
@@ -4242,15 +4030,14 @@ linkage and wards linkage clustering.
 
 Figure~\ref{fig-penguins-ddw} and Figure~\ref{fig-penguins-hfly-pdf}
 show results for single linkage and wards linkage clustering of the
-penguins data. fig-penguins-ddw shows the 2D dendrograms. The 2D
-dendrograms are very different. Wards linkage produces a clearer
-indication of clusters, with a suggestion of three, or possibly four or
-five clusters. The dendrogram for single linkage suggests two clusters,
-and has the classical waterfall appearance that is often seen with this
-type of linkage. (If you look carefully, though, you will see it is
-actually a three cluster solution. At the very top of the dendrogram
-there is another branch connecting one observation to the other two
-clusters.)
+penguins data. The 2D dendrograms are very different. Wards linkage
+produces a clearer indication of clusters, with a suggestion of three,
+or possibly four or five clusters. The dendrogram for single linkage
+suggests two clusters, and has the classical waterfall appearance that
+is often seen with this type of linkage. (If you look carefully, though,
+you will see it is actually a three cluster solution. At the very top of
+the dendrogram there is another branch connecting one observation to the
+other two clusters.)
 
 Figure~\ref{fig-penguins-hfly-pdf} (a) and (b) show the dendrograms in
 4D overlaid on the data. The two are starkly different. The single
@@ -4263,7 +4050,7 @@ two big clusters, and the singleton cluster. Although the Wards linkage
 produces the best result, single linkage does provide some interesting
 and useful information about the data. That singleton cluster is an
 outlier, an unusually-sized penguin. We can see it as an outlier just
-from the tour in \textbf{?@fig-penguins-gt} but single linkage
+from the tour in Figure~\ref{fig-penguins-gt-pdf} but single linkage
 emphasizes it, bringing it more strongly to our attention.
 
 \begin{figure}
@@ -4469,6 +4256,8 @@ the three-cluster solution of each.}
   method to cluster each data set, and summarise how well it performed
   in detecting the clusters that you have seen.
 \end{enumerate}
+
+\bookmarksetup{startatroot}
 
 \chapter{\texorpdfstring{\(k\)-means
 clustering}{k-means clustering}}\label{sec-kmeans}
@@ -4682,6 +4471,8 @@ to the scree plot for PCA.
   detected or not.
 \end{enumerate}
 
+\bookmarksetup{startatroot}
+
 \chapter{Model-based clustering}\label{sec-mclust}
 
 \index{cluster analysis!model-based}
@@ -4689,8 +4480,8 @@ to the scree plot for PCA.
 Model-based clustering Fraley \& Raftery (2002) fits a multivariate
 normal mixture model to the data. It uses the EM algorithm to fit the
 parameters for the mean, variance--covariance of each population, and
-the mixing proportion. The variance-covariance matrix is re-parametrized
-using an eigen-decomposition
+the mixing proportion. The variance-covariance matrix is
+re-parameterised using an eigen-decomposition
 
 \[
 \Sigma_k = \lambda_kD_kA_kD_k^\top, ~~~k=1, \dots, g ~~\mbox{(number of clusters)}
@@ -4698,19 +4489,6 @@ using an eigen-decomposition
 
 \noindent resulting in several model choices, ranging from simple to
 complex, as shown in Table~\ref{tbl-covariances}.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{library}\NormalTok{(dplyr)}
-\FunctionTok{library}\NormalTok{(kableExtra)}
-\FunctionTok{library}\NormalTok{(ggplot2)}
-\FunctionTok{library}\NormalTok{(mclust)}
-\FunctionTok{library}\NormalTok{(mulgar)}
-\FunctionTok{library}\NormalTok{(patchwork)}
-\FunctionTok{library}\NormalTok{(colorspace)}
-\FunctionTok{library}\NormalTok{(tourr)}
-\end{Highlighting}
-\end{Shaded}
 
 \begin{table}
 
@@ -4784,20 +4562,7 @@ Figure~\ref{fig-penguins-bl-fl} we would expect it to do well, and
 suggest an elliptical variance-covariance of roughly equal sizes as the
 model.
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{load}\NormalTok{(}\StringTok{"data/penguins\_sub.rda"}\NormalTok{)}
-\FunctionTok{ggplot}\NormalTok{(penguins\_sub, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{bl, }
-                         \AttributeTok{y=}\NormalTok{fl)) }\SpecialCharTok{+} \CommentTok{\#, }
-                         \CommentTok{\#colour=species)) +}
-  \FunctionTok{geom\_point}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{geom\_density2d}\NormalTok{(}\AttributeTok{colour=}\StringTok{"\#3B99B1"}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{theme}\NormalTok{(}\AttributeTok{aspect.ratio =} \DecValTok{1}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{figure}[H]
+\begin{figure}
 
 \centering{
 
@@ -4845,7 +4610,7 @@ length of the penguins data.}
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{10-model-based_files/figure-pdf/fig-penguins-bl-fl-mc-1.pdf}
+\includegraphics[width=1\textwidth,height=\textheight]{10-model-based_files/figure-pdf/fig-penguins-bl-fl-mc-1.pdf}
 
 }
 
@@ -4865,11 +4630,19 @@ are made from the \texttt{mclust} package output using the
 \texttt{ggmcbic} and \texttt{mc\_ellipse} functions fro the
 \texttt{mulgar} package.
 
-\section{Extending to higher
-dimensions}\label{extending-to-higher-dimensions}
+\section{Examining the model in high
+dimensions}\label{examining-the-model-in-high-dimensions}
 
 Now we will examine how model-based clustering will group the penguins
-data using all four variables.
+data using all four variables. Figure~\ref{fig-penguins-bic} shows the
+summary of different models, of which we would choose the four-cluster
+VEE, if we strictly followed the BIC choice.
+Figure~\ref{fig-penguins-mc-pdf} shows this model in a tour, and the
+best three-cluster model. You can see that the four-cluster result is
+inadequate, in various ways. One of the species (Chinstrap) does have a
+bimodal density, due to the two species, and we would expect that a four
+cluster solution might detect this. The tour shows that the
+three-cluster solution is the best match to the data shape.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -4915,71 +4688,33 @@ equally as good, but the very best model is the four-cluster VEE.}
 \end{Highlighting}
 \end{Shaded}
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{animate\_xy}\NormalTok{(penguins\_mc\_data[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{],}
-           \AttributeTok{col=}\NormalTok{penguins\_mc\_data}\SpecialCharTok{$}\NormalTok{cl,}
-           \AttributeTok{pch=}\FunctionTok{c}\NormalTok{(}\DecValTok{4}\NormalTok{, }\DecValTok{20}\NormalTok{ )[}\FunctionTok{as.numeric}\NormalTok{(penguins\_mc\_data}\SpecialCharTok{$}\NormalTok{type)], }
-           \AttributeTok{axes=}\StringTok{"off"}\NormalTok{)}
-
-\FunctionTok{load}\NormalTok{(}\StringTok{"data/penguins\_tour\_path.rda"}\NormalTok{)}
-\FunctionTok{render\_gif}\NormalTok{(penguins\_mc\_data[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{], }
-           \FunctionTok{planned\_tour}\NormalTok{(pt1), }
-           \FunctionTok{display\_xy}\NormalTok{(}\AttributeTok{col=}\NormalTok{penguins\_mc\_data}\SpecialCharTok{$}\NormalTok{cl,}
-               \AttributeTok{pch=}\FunctionTok{c}\NormalTok{(}\DecValTok{4}\NormalTok{, }\DecValTok{20}\NormalTok{)[}
-                 \FunctionTok{as.numeric}\NormalTok{(penguins\_mc\_data}\SpecialCharTok{$}\NormalTok{type)], }
-                      \AttributeTok{axes=}\StringTok{"off"}\NormalTok{,}
-               \AttributeTok{half\_range =} \FloatTok{0.7}\NormalTok{),}
-           \AttributeTok{gif\_file=}\StringTok{"gifs/penguins\_best\_mc.gif"}\NormalTok{,}
-           \AttributeTok{frames=}\DecValTok{500}\NormalTok{,}
-           \AttributeTok{loop=}\ConstantTok{FALSE}\NormalTok{)}
-
-\NormalTok{penguins\_mc }\OtherTok{\textless{}{-}} \FunctionTok{Mclust}\NormalTok{(penguins\_sub[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{], }
-                      \AttributeTok{G=}\DecValTok{3}\NormalTok{, }
-                      \AttributeTok{modelNames =} \StringTok{"EEE"}\NormalTok{)}
-\NormalTok{penguins\_mce }\OtherTok{\textless{}{-}} \FunctionTok{mc\_ellipse}\NormalTok{(penguins\_mc)}
-\NormalTok{penguins\_cl }\OtherTok{\textless{}{-}}\NormalTok{ penguins\_sub}
-\NormalTok{penguins\_cl}\SpecialCharTok{$}\NormalTok{cl }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(penguins\_mc}\SpecialCharTok{$}\NormalTok{classification)}
-
-\NormalTok{penguins\_mc\_data }\OtherTok{\textless{}{-}}\NormalTok{ penguins\_cl }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{select}\NormalTok{(bl}\SpecialCharTok{:}\NormalTok{bm, cl) }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{type =} \StringTok{"data"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{bind\_rows}\NormalTok{(}\FunctionTok{bind\_cols}\NormalTok{(penguins\_mce}\SpecialCharTok{$}\NormalTok{ell,}
-                      \AttributeTok{type=}\FunctionTok{rep}\NormalTok{(}\StringTok{"ellipse"}\NormalTok{,}
-                               \FunctionTok{nrow}\NormalTok{(penguins\_mce}\SpecialCharTok{$}\NormalTok{ell)))) }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{type =} \FunctionTok{factor}\NormalTok{(type))}
-
-\FunctionTok{animate\_xy}\NormalTok{(penguins\_mc\_data[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{],}
-           \AttributeTok{col=}\NormalTok{penguins\_mc\_data}\SpecialCharTok{$}\NormalTok{cl,}
-           \AttributeTok{pch=}\FunctionTok{c}\NormalTok{(}\DecValTok{4}\NormalTok{, }\DecValTok{20}\NormalTok{)[}\FunctionTok{as.numeric}\NormalTok{(penguins\_mc\_data}\SpecialCharTok{$}\NormalTok{type)], }
-           \AttributeTok{axes=}\StringTok{"off"}\NormalTok{)}
-
-\CommentTok{\# Save the animated gif}
-\FunctionTok{load}\NormalTok{(}\StringTok{"data/penguins\_tour\_path.rda"}\NormalTok{)}
-\FunctionTok{render\_gif}\NormalTok{(penguins\_mc\_data[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{], }
-           \FunctionTok{planned\_tour}\NormalTok{(pt1), }
-           \FunctionTok{display\_xy}\NormalTok{(}\AttributeTok{col=}\NormalTok{penguins\_mc\_data}\SpecialCharTok{$}\NormalTok{cl,}
-               \AttributeTok{pch=}\FunctionTok{c}\NormalTok{(}\DecValTok{4}\NormalTok{, }\DecValTok{20}\NormalTok{)[}
-                 \FunctionTok{as.numeric}\NormalTok{(penguins\_mc\_data}\SpecialCharTok{$}\NormalTok{type)], }
-                      \AttributeTok{axes=}\StringTok{"off"}\NormalTok{,}
-               \AttributeTok{half\_range =} \FloatTok{0.7}\NormalTok{),}
-           \AttributeTok{gif\_file=}\StringTok{"gifs/penguins\_simpler\_mc.gif"}\NormalTok{,}
-           \AttributeTok{frames=}\DecValTok{500}\NormalTok{,}
-           \AttributeTok{loop=}\ConstantTok{FALSE}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
 \begin{figure}
 
 \begin{minipage}{0.50\linewidth}
+
+\centering{
+
+\includegraphics{images/penguins_best_mc_60.png}
+
+}
+
+\subcaption{\label{fig-penguins-best-mc}Four-cluster VEE}
 
 \end{minipage}%
 %
 \begin{minipage}{0.50\linewidth}
 
+\centering{
+
+\includegraphics{images/penguins_simpler_mc_60.png}
+
+}
+
+\subcaption{\label{fig-penguins-simpler-mc}Three-cluster EEE}
+
 \end{minipage}%
 
-\caption{\label{fig-penguins-mc}Examining the model-based clustering
+\caption{\label{fig-penguins-mc-pdf}Examining the model-based clustering
 results for the penguins data: (a) best model according to BIC value,
 (b) simpler three-cluster model. Dots are ellipse points, and ``x'' are
 data points. It is important to note that the three cluster solution
@@ -5023,6 +4758,8 @@ fits the data better, even though it has a lower BIC.}
   \texttt{c1}-\texttt{c7} from the \texttt{mulgar} package. Explain why
   or why not the best model fits the cluster structure or not.
 \end{enumerate}
+
+\bookmarksetup{startatroot}
 
 \chapter{Self-organizing maps}\label{sec-som}
 
@@ -5222,6 +4959,8 @@ direction of \texttt{map\ 1}.
   for each? Explain why or why not the model fits the cluster structure
   of each or not.
 \end{enumerate}
+
+\bookmarksetup{startatroot}
 
 \chapter{Summarising and comparing clustering
 results}\label{sec-clust-compare}
@@ -5438,12 +5177,12 @@ methods.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{longtable*}{>{\raggedleft\arraybackslash}p{60px}>{\raggedleft\arraybackslash}p{60px}>{\raggedleft\arraybackslash}p{60px}>{\raggedleft\arraybackslash}p{60px}}
+\begin{longtable*}{rrrr}
 \toprule
  & \multicolumn{3}{c}{cl\_mc} \\ 
 \cmidrule(lr){2-4}
 cl\_w & 2 & 3 & 1 \\ 
-\midrule\addlinespace[2.5pt]
+\midrule
 1 & 8 & 0 & 149 \\ 
 2 & 0 & 119 & 0 \\ 
 3 & 57 & 0 & 0 \\ 
@@ -5545,8 +5284,8 @@ between clusters have been drawn. To explore this we will use survey
 data that examines the risk taking behavior of tourists. The data was
 collected in Australia in 2015 (Hajibaba et al., 2016) and includes six
 types of risks (recreational, health, career, financial, safety and
-social) with responses on a scale from 1 (never) to 5 (very often). You
-can download the data from risk\_MSA.rds .
+social) with responses on a scale from 1 (never) to 5 (very often). The
+data is available in \texttt{risk\_MSA.rds} from the book web site.
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -5610,9 +5349,10 @@ can download the data from risk\_MSA.rds .
   space, it means that the optimisation wasn't successful.
 \end{enumerate}
 
-\part{Supervised classification}
+\bookmarksetup{startatroot}
 
-\chapter{Overview}\label{overview-2}
+\chapter{Introduction to supervised
+classification}\label{introduction-to-supervised-classification}
 
 Methods for supervised classification originated in the field of
 Statistics in the early nineteenth century, under the moniker
@@ -5696,6 +5436,8 @@ each of b, c, d it is likely that some observations would be
 misclassified. Identifying these cases, and inspecting where they are in
 the data space is important for understanding the model's future
 performance.
+
+\bookmarksetup{startatroot}
 
 \chapter{Linear discriminant analysis}\label{sec-lda}
 
@@ -6195,7 +5937,7 @@ boundaries in this neighbourhood. As the tour progresses we see a thin
 slice through the centre of the data, parallel with the projection
 plane. In most projections there is some small overlap of points between
 groups, which happens because we are examining a 4D object with 2D. The
-slice helps ot alleviate this, allowing a focus on the boundaries in the
+slice helps to alleviate this, allowing a focus on the boundaries in the
 centre of the cube. In all projections the boundaries between groups is
 linear, as would be expected when using LDA. We can also see that the
 model roughly divides the cube into three relatively equally-sized
@@ -6301,6 +6043,8 @@ they are orthogonal to these two dimensions.}
   the priors are equal for all groups. How does the boundary between
   lightning caused fires and the other groups change?
 \end{enumerate}
+
+\bookmarksetup{startatroot}
 
 \chapter{Trees and forests}\label{sec-trees-forests}
 
@@ -6476,11 +6220,11 @@ the random forest model object. The first five rows are:
 
 \begin{verbatim}
   Adelie Chinstrap Gentoo
-1 0.9942   0.00578      0
-2 0.9637   0.03627      0
-3 0.9722   0.02778      0
-4 1.0000   0.00000      0
-5 1.0000   0.00000      0
+1 0.9860  0.014019      0
+2 0.9641  0.035897      0
+3 0.9951  0.004878      0
+4 1.0000  0.000000      0
+5 0.9946  0.005376      0
 \end{verbatim}
 
 This has three columns corresponding to the three species, but because
@@ -6606,12 +6350,13 @@ boxy than the LDA models. \index{classification!vote matrix}
 \infobox{By visualising the votes matrix we can understand which observations are harder to classify, which of the classes are more easily confused with each other.}
 
 To examine a vote matrix for a problem with more classes, we will
-examine the 10 class fake\_trees data example. The full data has 100
-variables, and we have seen from Chapter~\ref{sec-clust-graphics} that
-reducing to 10 principal components allows the linear branching
-structure in the data to be seen. Given that the branches correspond to
-the classes, it will be interesting to see how well the random forest
-model performs.
+examine the 10 class \texttt{fake\_trees} data example. The full data
+has 100 variables, and we have seen from
+Chapter~\ref{sec-clust-graphics} that reducing to 10 principal
+components allows the linear branching structure in the data to be seen.
+Given that the branches correspond to the classes, it will be
+interesting to see how well the random forest model performs.
+\index{data!fake trees}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -6635,12 +6380,12 @@ model performs.
 \end{Shaded}
 
 \begin{verbatim}
-    0     1    2    3     4     5 6 7     8    9
-1 0.8 0.000 0.03 0.00 0.011 0.119 0 0 0.000 0.00
-2 0.6 0.000 0.02 0.00 0.005 0.335 0 0 0.000 0.00
-3 0.8 0.000 0.03 0.02 0.124 0.006 0 0 0.000 0.02
-4 0.9 0.000 0.02 0.00 0.006 0.079 0 0 0.000 0.00
-5 0.6 0.005 0.08 0.02 0.015 0.272 0 0 0.005 0.00
+    0     1    2    3     4    5 6 7     8     9
+1 0.9 0.000 0.03 0.00 0.011 0.09 0 0 0.000 0.000
+2 0.6 0.000 0.03 0.00 0.005 0.32 0 0 0.000 0.000
+3 0.8 0.000 0.07 0.02 0.118 0.03 0 0 0.000 0.011
+4 0.9 0.000 0.02 0.00 0.000 0.06 0 0 0.000 0.000
+5 0.6 0.006 0.05 0.01 0.035 0.25 0 0 0.006 0.006
 \end{verbatim}
 
 \begin{figure}
@@ -6685,7 +6430,7 @@ matrix for the model. However visualising the votes matrix provides more
 intricate details. Here we have seen that the points spread out from a
 vertex, with fewer and fewer the further one gets. It allows us to see
 the distribution of points, which is not possible from the confusion
-matrix alone. The same misclaassification rate could be due to a variety
+matrix alone. The same misclassification rate could be due to a variety
 of distributions. The visual pattern in the votes matrix is striking,
 and gives additional information about how the clustering distribution,
 and shapes of clusters, matches the class labels. It reinforces the
@@ -6709,7 +6454,7 @@ difference between importance for some classes.
 \begin{longtable}{lrrrrrrrrrrrr}
 
 \caption{\label{tbl-ft-importance}Variable importance from the random
-forest fit to the fake\_trees data, for each of the 9 classes, and using
+forest fit to the fake trees data, for each of the 9 classes, and using
 the accuracy and Gini metrics.}
 
 \tabularnewline
@@ -6717,16 +6462,16 @@ the accuracy and Gini metrics.}
 \toprule
 Var & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & Acc & Gini \\ 
 \midrule
-PC1 & $0.1$ & $0.3$ & $0.5$ & $0.3$ & $0.2$ & $0.5$ & $0.4$ & $0.2$ & $0.3$ & $0.3$ & $0.30$ & $472$ \\ 
-PC2 & $0.1$ & $0.2$ & $0.2$ & $0.5$ & $0.3$ & $0.3$ & $0.2$ & $0.4$ & $0.2$ & $0.3$ & $0.28$ & $377$ \\ 
-PC3 & $0.1$ & $0.1$ & $0.1$ & $0.1$ & $0.5$ & $0.1$ & $0.1$ & $0.1$ & $0.2$ & $0.2$ & $0.16$ & $311$ \\ 
-PC4 & $0.1$ & $0.4$ & $0.1$ & $0.0$ & $0.1$ & $0.0$ & $0.4$ & $0.2$ & $0.1$ & $0.1$ & $0.15$ & $354$ \\ 
-PC5 & $0.1$ & $0.1$ & $0.4$ & $0.1$ & $0.2$ & $0.2$ & $0.1$ & $0.1$ & $0.3$ & $0.2$ & $0.18$ & $342$ \\ 
-PC6 & $0.1$ & $0.2$ & $0.3$ & $0.2$ & $0.0$ & $0.1$ & $0.0$ & $0.3$ & $0.1$ & $0.2$ & $0.16$ & $279$ \\ 
-PC7 & $0.1$ & $0.0$ & $0.2$ & $0.0$ & $0.0$ & $0.1$ & $0.1$ & $0.3$ & $0.1$ & $0.1$ & $0.11$ & $243$ \\ 
-PC8 & $0.0$ & $0.1$ & $0.0$ & $0.2$ & $0.1$ & $0.1$ & $0.0$ & $0.0$ & $0.1$ & $0.3$ & $0.09$ & $218$ \\ 
-PC9 & $0.1$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.1$ & $0.0$ & $0.02$ & $59$ \\ 
-PC10 & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.01$ & $46$ \\ 
+PC1 & $0.1$ & $0.4$ & $0.5$ & $0.3$ & $0.2$ & $0.5$ & $0.4$ & $0.2$ & $0.3$ & $0.3$ & $0.30$ & $473$ \\ 
+PC2 & $0.1$ & $0.2$ & $0.2$ & $0.5$ & $0.3$ & $0.3$ & $0.2$ & $0.4$ & $0.2$ & $0.3$ & $0.27$ & $381$ \\ 
+PC3 & $0.1$ & $0.1$ & $0.1$ & $0.1$ & $0.5$ & $0.2$ & $0.1$ & $0.1$ & $0.2$ & $0.2$ & $0.17$ & $311$ \\ 
+PC4 & $0.1$ & $0.5$ & $0.1$ & $0.0$ & $0.1$ & $0.0$ & $0.4$ & $0.1$ & $0.1$ & $0.1$ & $0.15$ & $335$ \\ 
+PC5 & $0.1$ & $0.1$ & $0.3$ & $0.1$ & $0.2$ & $0.2$ & $0.1$ & $0.1$ & $0.3$ & $0.2$ & $0.18$ & $333$ \\ 
+PC6 & $0.1$ & $0.2$ & $0.2$ & $0.2$ & $0.0$ & $0.1$ & $0.0$ & $0.3$ & $0.2$ & $0.2$ & $0.16$ & $281$ \\ 
+PC7 & $0.1$ & $0.0$ & $0.1$ & $0.0$ & $0.0$ & $0.1$ & $0.1$ & $0.3$ & $0.1$ & $0.1$ & $0.11$ & $254$ \\ 
+PC8 & $0.1$ & $0.1$ & $0.0$ & $0.2$ & $0.1$ & $0.1$ & $0.0$ & $0.0$ & $0.1$ & $0.3$ & $0.09$ & $228$ \\ 
+PC9 & $0.1$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.1$ & $0.0$ & $0.02$ & $57$ \\ 
+PC10 & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.01$ & $45$ \\ 
 \bottomrule
 
 \end{longtable}
@@ -6747,7 +6492,7 @@ We can use the accuracy information to choose variables to provide to
 the tour. Overall, one would sequentially add the variables into a tour
 based on their accuracy or Gini value. Here it is simply starting with
 the first three PCs, and then sequentially adding the PCs to examine how
-distinct the clusters are with ot without the extra variable. It can be
+distinct the clusters are with and without the extra variable. It can be
 helpful to focus on a single class against all the others. To do this
 create a new binary class variable, indicating that the observation
 belongs to class \(k\) or not, as follows:
@@ -6777,10 +6522,10 @@ and PC4.
 \begin{minipage}{0.50\linewidth}
 \includegraphics{images/fig-ft-cl1-pc-1.png}\end{minipage}%
 
-\caption{\label{fig-ft-cl-pdf}Focusing on class 1 in the fake\_trees
-data. The most important variables were PC1 and PC4. A combination of
-PC2 and PC4 reveals the difference between cluster 1 and all the other
-clusters.}
+\caption{\label{fig-ft-cl-pdf}Focusing on class 1 in the
+\texttt{fake\_trees} data. The most important variables were PC1 and
+PC4. A combination of PC2 and PC4 reveals the difference between cluster
+1 and all the other clusters.}
 
 \end{figure}%
 
@@ -6806,16 +6551,16 @@ not each other.
 
 \begin{verbatim}
     0   1   2   3   4   5   6   7   8   9 class.error
-0 262   6   3   2   3   4   5   4   7   4       0.127
-1  11 289   0   0   0   0   0   0   0   0       0.037
-2   8   0 290   0   2   0   0   0   0   0       0.033
-3   6   0   0 288   0   0   0   4   0   2       0.040
+0 263   4   3   4   3   4   6   2   8   3       0.123
+1  13 287   0   0   0   0   0   0   0   0       0.043
+2  10   0 288   0   2   0   0   0   0   0       0.040
+3   6   0   0 290   0   0   0   3   0   1       0.033
 4  12   0   0   0 288   0   0   0   0   0       0.040
-5  12   0   0   0   0 288   0   0   0   0       0.040
+5  11   0   0   0   0 289   0   0   0   0       0.037
 6  14   0   0   0   0   0 285   0   1   0       0.050
-7   5   0   0   5   0   0   0 289   0   1       0.037
-8   9   0   0   0   0   0   0   0 291   0       0.030
-9   5   0   0   0   0   0   0   0   0 295       0.017
+7   6   0   0   4   0   0   0 290   0   0       0.033
+8   5   0   0   0   0   0   0   0 295   0       0.017
+9   6   0   0   0   0   0   0   1   0 293       0.023
 \end{verbatim}
 
 From the tour in Figure~\ref{fig-ft-cl2} we can see that clusters 1, 6,
@@ -6832,11 +6577,11 @@ points, but it is clearer if more variables are used.
 \begin{minipage}{0.50\linewidth}
 \includegraphics{images/fig-ft-cl8-pc-1.png}\end{minipage}%
 
-\caption{\label{fig-ft-cl2}Focusing on class 8 in the fake\_trees data
-using a tour (left) reveals that it shares an end of cluster 0 with
-clusters 1 and 6. A combination of PC1 and PC5 reveals that there is a
-difference between the observations in class 8 relative to 6, 1 and 0 is
-largely due to PC5 (right).}
+\caption{\label{fig-ft-cl2}Focusing on class 8 in the
+\texttt{fake\_trees} data using a tour (left) reveals that it shares an
+end of cluster 0 with clusters 1 and 6. A combination of PC1 and PC5
+reveals that there is a difference between the observations in class 8
+relative to 6, 1 and 0 is largely due to PC5 (right).}
 
 \end{figure}%
 
@@ -6874,13 +6619,15 @@ largely due to PC5 (right).}
   Fit a forest model to the first 21 PCs of the \texttt{sketches} data.
   Explore the 5D votes matrix. Why does it look star-shaped?
 \item
-  Choose a cluster (or group of clusters) from the fake\_trees data (2,
-  3, 4, 5, 7, 9) to explore in detail like done in
+  Choose a cluster (or group of clusters) from the \texttt{fake\_trees}
+  data (2, 3, 4, 5, 7, 9) to explore in detail like done in
   Section~\ref{sec-forest-var-imp}. Be sure to choose which PCs are the
   most useful using a tour, and follow-up by making a scatterplot
   showing the best distinction between your chosen cluster and the other
   observations.
 \end{enumerate}
+
+\bookmarksetup{startatroot}
 
 \chapter{Support vector machines}\label{support-vector-machines}
 
@@ -7323,8 +7070,7 @@ forcing some coefficients to zero.
   class banana or boomerang For this subset use PCA to find the first 5
   PCs. Fit two SVM models: once with linear kernel and once with radial
   kernel and default value for the gamma parameter. Compare the number
-  of missclassified observations in the training data for the two
-  models.
+  of misclassified observations in the training data for the two models.
 \item
   Compute the model predictions and compare the decision boundaries
   between the linear and radial SVM using a slice tour. Does the shape
@@ -7339,6 +7085,8 @@ forcing some coefficients to zero.
   together with the slice tour to do this. You can use different kernels
   and compare the resulting decision boundaries.
 \end{enumerate}
+
+\bookmarksetup{startatroot}
 
 \chapter{Neural networks and deep
 learning}\label{neural-networks-and-deep-learning}
@@ -7562,8 +7310,6 @@ ______________________________________________________________
   \AttributeTok{epochs =} \DecValTok{200}\NormalTok{,}
   \AttributeTok{verbose =} \DecValTok{0}
 \NormalTok{)}
-
-\FunctionTok{save\_model\_tf}\NormalTok{(p\_nn\_model, }\StringTok{"data/penguins\_cnn"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -7934,6 +7680,7 @@ you can find additional information there. Below we only replicate the
 steps needed to build the model from scratch. We also note that a
 similar investigation was presented in Li et al. (2020), with a focus on
 investigating the model at different epochs during the training.
+\index{data!fashion MNIST}
 
 The first step is to download and prepare the data. Here we scale the
 observations to range between zero and one, and we define the label
@@ -8025,12 +7772,7 @@ here. The comparison is using the test-subset of the data.
 \NormalTok{)}
 \NormalTok{activations\_fashion }\OtherTok{\textless{}{-}} \FunctionTok{predict}\NormalTok{(}
 \NormalTok{  activations\_model\_fashion,}
-
-\NormalTok{  test\_images)}
-\end{Highlighting}
-\end{Shaded}
-
-
+\NormalTok{  test\_images, }\AttributeTok{verbose =} \DecValTok{0}\NormalTok{)}
 
 \CommentTok{\# PCA for activations}
 \NormalTok{activations\_pca }\OtherTok{\textless{}{-}} \FunctionTok{prcomp}\NormalTok{(activations\_fashion)}
@@ -8045,8 +7787,7 @@ here. The comparison is using the test-subset of the data.
 \end{Highlighting}
 \end{Shaded}
 
-
-\includegraphics[width=0.8\textwidth,height=\textheight]{17-nn_files/figure-pdf/unnamed-chunk-26-1.pdf}
+\includegraphics[width=0.8\textwidth,height=\textheight]{17-nn_files/figure-pdf/unnamed-chunk-27-1.pdf}
 
 Looking only at the first two principal components we note some clear
 differences from the transformation in the hidden layer. The
@@ -8061,34 +7802,28 @@ use the tour on the first five principal components.
 
 \begin{figure}
 
-\begin{minipage}[t]{0.50\linewidth}
+\begin{minipage}{0.50\linewidth}
 
-{\centering 
+\centering{
 
-\raisebox{-\height}{
-
-\includegraphics[width=2.08333in,height=\textheight]{./images/fashion_images_gt_36.png}
-
-}
+\includegraphics[width=2.08333in,height=\textheight]{images/fashion_images_gt_36.png}
 
 }
 
 \subcaption{\label{fig-fashion-input}Input space}
+
 \end{minipage}%
 %
-\begin{minipage}[t]{0.50\linewidth}
+\begin{minipage}{0.50\linewidth}
 
-{\centering 
+\centering{
 
-\raisebox{-\height}{
-
-\includegraphics[width=2.08333in,height=\textheight]{./images/fashion_activation_gt_126.png}
-
-}
+\includegraphics[width=2.08333in,height=\textheight]{images/fashion_activation_gt_126.png}
 
 }
 
 \subcaption{\label{fig-fashion-activation}Activations}
+
 \end{minipage}%
 
 \caption{\label{fig-p-split-pdf}Comparison of the test observations in
@@ -8096,7 +7831,7 @@ the first five principal components of the input space (left) and in the
 hidden layer activations (right). The activation function results in
 more clearly defined grouping of the different classes.}
 
-\end{figure}
+\end{figure}%
 
 As with the first two principal components we get a much more spread out
 distribution in the original space. Nevertheless we can see differences
@@ -8111,17 +7846,14 @@ images, but also notice that there is a large variation within this
 class along certain directions.
 
 Finally we will investigate the model performance through the
-missclassifications and uncertainty between classes. We start with the
+misclassifications and uncertainty between classes. We start with the
 error matrix for the test observations. To fit the error matrix we use
 the numeric labels, the ordering is as defined above for the labels.
 
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{fashion\_test\_pred }\OtherTok{\textless{}{-}} \FunctionTok{predict}\NormalTok{(model\_fashion\_mnist,}
-
 \NormalTok{                             test\_images, }\AttributeTok{verbose =} \DecValTok{0}\NormalTok{)}
-
-
 \NormalTok{fashion\_test\_pred\_cat }\OtherTok{\textless{}{-}} \FunctionTok{levels}\NormalTok{(test\_tags)[}
   \FunctionTok{apply}\NormalTok{(fashion\_test\_pred, }\DecValTok{1}\NormalTok{,}
 \NormalTok{        which.max)]}
@@ -8136,19 +7868,17 @@ the numeric labels, the ordering is as defined above for the labels.
 
 \begin{verbatim}
         predicted
-observed   0   1   2   3   4   5   6   7   8   9
-       0 797   1   8  51   4   2 123   0  14   0
-       1   5 954   1  30   4   0   3   0   3   0
-       2  12   0 734  16 142   1  89   0   6   0
-       3  20   1   6 916  32   0  20   0   5   0
-       4   0   0  83  36 842   0  33   0   6   0
-       5   0   0   0   1   0 952   0  31   2  14
-       6 119   0  75  47  94   0 646   0  19   0
-       7   0   0   0   0   0  15   0 958   1  26
-       8   2   0   1   5   3   2   2   3 982   0
-       9   0   0   0   0   0  12   1  40   0 947
-
-
+observed    0    1    2    3    4    5    6    7    8    9
+       0  128    0   84  719   10    0   51    7    1    0
+       1    0   42   15  941    0    0    0    2    0    0
+       2    6    0  824   38  121    0    3    8    0    0
+       3    1    0   14  976    8    0    1    0    0    0
+       4    1    0  205  181  605    0    0    8    0    0
+       5    1    0    0    2    0   77    0  902    1   17
+       6   24    0  231  282  405    0   44   12    2    0
+       7    0    0    0    0    0    0    0 1000    0    0
+       8   17    1   78  102   49    0    5  730   16    2
+       9    0    0    0    2    0    0    0  947    0   51
 \end{verbatim}
 
 From this we see that the model mainly confuses certain categories with
@@ -8158,19 +7888,15 @@ further investigate this by visualizing the full probability matrix for
 the test observations, to see which categories the model is uncertain
 about.
 
-
 For this data using explainers like SHAP is not so interesting, since
 the individual pixel contribution to a prediction are typically not of
 interest. With image classification a next step might be to further
 investigate which part of the image is important for a prediction, and
 this can be visualized as a heat map placed over the original image.
-This is especially interesting in the case of difficult or
-missclassified images. This however is beyond the scope of this book.
+This is especially interesting in the case of difficult or misclassified
+images. This however is beyond the scope of this book.
 
-\hypertarget{exercises-15}{%
-\section*{Exercises}\label{exercises-15}}
-
-
+\section*{Exercises}\label{exercises-15}
 \addcontentsline{toc}{section}{Exercises}
 
 \markright{Exercises}
@@ -8213,6 +7939,8 @@ missclassified images. This however is beyond the scope of this book.
   network in combination with data augmentation. In addition, using
   batch normalization should improve the model performance.
 \end{enumerate}
+
+\bookmarksetup{startatroot}
 
 \chapter{Exploring
 misclassifications}\label{exploring-misclassifications}
@@ -8375,7 +8103,6 @@ model}\label{constructing-data-to-diagnose-your-model}
 \bookmarksetup{startatroot}
 
 \chapter*{References}\label{references}
-\addcontentsline{toc}{chapter}{References}
 
 \markboth{References}{References}
 
@@ -10116,11 +9843,11 @@ values are outside the domain of the complete cases.
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{A1-toolbox_files/figure-pdf/fig-missings-below-2D-pdf-1.pdf}
+\includegraphics[width=0.4\textwidth,height=\textheight]{images/fig-missings-below-2D-pdf-1.png}
 
 }
 
-\subcaption{\label{fig-missings-below-2D-pdf}Missings below in 2D}
+\subcaption{\label{fig-below-2D-pdf}Missings below in 2-D}
 
 \end{minipage}%
 %
@@ -10140,11 +9867,11 @@ values are outside the domain of the complete cases.
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{A1-toolbox_files/figure-pdf/fig-missings-mean-2D-pdf-1.pdf}
+\includegraphics[width=0.4\textwidth,height=\textheight]{images/fig-missings-mean-2D-pdf-1.png}
 
 }
 
-\subcaption{\label{fig-missings-mean-2D-pdf}Missings imputed in 2D}
+\subcaption{\label{fig-mean-2D-pdf}Missings imputed in 2-D}
 
 \end{minipage}%
 %
@@ -10240,24 +9967,849 @@ variable \texttt{.ADVANTAGE} gives an indication of the confidence with
 which an observation is predicted, so can also be used to select
 simulated points near the boundary.
 
+\chapter{Data}\label{data}
+
+This chapter describes the datasets used throughout the book as listed
+in Table~\ref{tbl-datalist-pdf}.
+
+\begin{table}
+
+\caption{\label{tbl-datalist-pdf}List of data sets and their sources
+used in the book examples.}
+
+\centering{
+
+\centering
+\begin{tabular}{>{\raggedright\arraybackslash}p{2cm}>{\raggedright\arraybackslash}p{5cm}>{\raggedright\arraybackslash}p{5cm}}
+\toprule
+Name & Description & Analysis\\
+\midrule
+aflw & Player statistics from the AFLW & clustering, dimension reduction\\
+bushfires & Multivariate spatio-temporal data for locations of bushfires & clustering, classification with RF\\
+Australian election data & Socioecenomic characteristics of Australian electorates & dimension reduction, multicollinearity\\
+penguins & Measure four physical characteristics of three species of penguins & classification, and clustering\\
+pisa & OECD programme for international student assessment data & dimension reduction, regression\\
+\addlinespace
+sketches & Google's Quickdraw data & neural networks, classification\\
+multicluster & Simulated data used to show various cluster examples & clustering\\
+fake trees & Simulated data showing branching structure & clustering, dimension reduction\\
+plane and box & Simulated data showing hyper-planes & dimension reduction\\
+clusters, clusters\_nonlin, simple\_clusters & Simulated data with various clustering & clustering\\
+\addlinespace
+c1-c7 & Simulated data with various clustering, challenge data & clustering\\
+fashion MNIST & Collection of apparel images & classification\\
+\bottomrule
+\end{tabular}
+
+}
+
+\end{table}%
+
+\section{Australian Football League
+Women}\label{australian-football-league-women}
+
+\subsection*{Description}\label{description}
+\addcontentsline{toc}{subsection}{Description}
+
+The \texttt{aflw} data is from the 2021 Women's Australian Football
+League. These are average player statistics across the season, with game
+statistics provided by the
+\href{https://jimmyday12.github.io/fitzRoy/}{fitzRoy} package. If you
+are new to the game of AFL, there is a nice explanation on
+\href{https://en.wikipedia.org/wiki/Women\%27s_Australian_rules_football}{Wikipedia}.
+
+\subsection*{Variables}\label{variables}
+\addcontentsline{toc}{subsection}{Variables}
+
+\begin{verbatim}
+Rows: 381
+Columns: 35
+$ id              <chr> "CD_I1001678", "CD_I1001679", "CD_I1~
+$ given_name      <chr> "Jordan", "Brianna", "Jodie", "Ebony~
+$ surname         <chr> "Zanchetta", "Green", "Hicks", "Anto~
+$ number          <int> 2, 3, 5, 12, 60, 21, 22, 23, 35, 14,~
+$ team            <chr> "Brisbane Lions", "West Coast Eagles~
+$ position        <chr> "INT", "INT", "HFFR", "WL", "RK", "B~
+$ time_pct        <dbl> 63.00000, 61.25000, 76.50000, 74.900~
+$ goals           <dbl> 0.0000000, 0.0000000, 0.0000000, 0.1~
+$ behinds         <dbl> 0.0000000, 0.0000000, 0.5000000, 0.4~
+$ kicks           <dbl> 5.000000, 2.500000, 3.750000, 8.8000~
+$ handballs       <dbl> 2.500000, 3.750000, 3.000000, 3.6000~
+$ disposals       <dbl> 7.500000, 6.250000, 6.750000, 12.400~
+$ marks           <dbl> 1.5000000, 0.2500000, 1.0000000, 3.7~
+$ bounces         <dbl> 0.0000000, 0.0000000, 0.0000000, 0.6~
+$ tackles         <dbl> 3.000000, 2.250000, 2.250000, 3.9000~
+$ contested       <dbl> 3.500000, 2.250000, 3.500000, 5.7000~
+$ uncontested     <dbl> 3.500000, 4.500000, 3.000000, 7.0000~
+$ possessions     <dbl> 7.000000, 6.750000, 6.500000, 12.700~
+$ marks_in50      <dbl> 1.0000000, 0.0000000, 0.2500000, 0.5~
+$ contested_marks <dbl> 1.0000000, 0.0000000, 0.0000000, 0.4~
+$ hitouts         <dbl> 0.000000, 0.000000, 0.000000, 0.0000~
+$ one_pct         <dbl> 0.0000000, 1.5000000, 0.5000000, 1.2~
+$ disposal        <dbl> 60.25000, 67.15000, 37.20000, 65.960~
+$ clangers        <dbl> 2.000000, 0.500000, 2.500000, 3.1000~
+$ frees_for       <dbl> 1.0000000, 0.5000000, 0.2500000, 2.5~
+$ frees_against   <dbl> 1.0000000, 0.5000000, 1.2500000, 1.3~
+$ rebounds_in50   <dbl> 0.0000000, 0.5000000, 0.2500000, 1.1~
+$ assists         <dbl> 0.00000000, 0.00000000, 0.00000000, ~
+$ accuracy        <dbl> 0.00000, 0.00000, 0.00000, 5.00000, ~
+$ turnovers       <dbl> 1.500000, 1.000000, 2.500000, 4.0000~
+$ intercepts      <dbl> 2.0000000, 2.0000000, 0.5000000, 5.3~
+$ tackles_in50    <dbl> 0.5000000, 0.0000000, 0.7500000, 0.5~
+$ shots           <dbl> 0.5000000, 0.0000000, 0.7500000, 1.0~
+$ metres          <dbl> 72.50000, 58.50000, 76.00000, 225.90~
+$ clearances      <dbl> 0.5000000, 0.2500000, 1.2500000, 0.4~
+\end{verbatim}
+
+\subsection*{Purpose}\label{purpose}
+\addcontentsline{toc}{subsection}{Purpose}
+
+The primary analysis is to summarise the variation using principal
+component analysis, which gives information about relationships between
+the statistics or skills sets common in players. One also might be
+tempted to cluster the players, but there are no obvious clusters so it
+could be frustrating. At best one could partition the players into
+groups, while recognising there are no absolutely distinct and separated
+groups.
+
+\subsection*{Source}\label{source}
+\addcontentsline{toc}{subsection}{Source}
+
+See the information provided with the
+\href{https://jimmyday12.github.io/fitzRoy/}{fitzRoy} package.
+
+\subsection*{Pre-processing}\label{pre-processing}
+\addcontentsline{toc}{subsection}{Pre-processing}
+
+The code for downloading and pre-processing the data is available at the
+\href{https://dicook.github.io/mulgar/}{mulgar} website in the
+\texttt{data-raw} folder. The data provided by the fitzRoy package was
+pre-processed to reduce the variables to only those that relate to
+player skills and performance. It is possible that using some
+transformations on the variables would be useful to make them less
+skewed.
+
+\section{Bushfires}\label{bushfires}
+
+\subsection*{Description}\label{description-1}
+\addcontentsline{toc}{subsection}{Description}
+
+This data was collated by Weihao (Patrick) Li as part of his Honours
+research at Monash University. It contains fire ignitions as detected
+from satellite hotspots, and processed using the
+\href{https://tengmcing.github.io/spotoroo/}{spotoroo} package,
+augmented with measurements on weather, vegetation, proximity to human
+activity. The cause variable is predicted based on historical fire
+ignition data collected by County Fire Authority personnel.
+
+\subsection*{Variables}\label{variables-1}
+\addcontentsline{toc}{subsection}{Variables}
+
+\begin{verbatim}
+Rows: 1,021
+Columns: 60
+$ id            <dbl> 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,~
+$ lon           <dbl> 141.1300, 141.3000, 141.4800, 147.1600~
+$ lat           <dbl> -37.13000, -37.65000, -37.35000, -37.8~
+$ time          <date> 2019-10-01, 2019-10-01, 2019-10-02, 2~
+$ FOR_CODE      <dbl> 41, 41, 91, 44, 0, 44, 0, 102, 0, 91, ~
+$ FOR_TYPE      <chr> "Eucalypt Medium Woodland", "Eucalypt ~
+$ FOR_CAT       <chr> "Native forest", "Native forest", "Com~
+$ COVER         <dbl> 1, 1, 4, 2, 6, 2, 6, 5, 6, 4, 2, 1, 2,~
+$ HEIGHT        <dbl> 2, 2, 4, 2, 6, 2, 6, 5, 6, 4, 3, 2, 3,~
+$ FOREST        <dbl> 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1,~
+$ rf            <dbl> 0.0, 0.0, 15.4, 4.8, 6.0, 11.6, 11.6, ~
+$ arf7          <dbl> 5.0857143, 2.4000000, 2.4000000, 0.714~
+$ arf14         <dbl> 2.8142857, 1.7428571, 1.8000000, 1.671~
+$ arf28         <dbl> 1.9785714, 1.5357143, 1.5357143, 3.785~
+$ arf60         <dbl> 2.3033333, 1.7966667, 1.7966667, 4.000~
+$ arf90         <dbl> 1.2566667, 1.0150000, 1.0150000, 2.960~
+$ arf180        <dbl> 0.9355556, 0.8444444, 0.8444444, 2.358~
+$ arf360        <dbl> 1.3644444, 1.5255556, 1.5255556, 1.727~
+$ arf720        <dbl> 1.3011111, 1.5213889, 1.5213889, 1.711~
+$ se            <dbl> 3.8, 4.6, 14.2, 23.7, 23.8, 16.8, 18.0~
+$ ase7          <dbl> 18.02857, 18.50000, 21.41429, 23.08571~
+$ ase14         <dbl> 17.03571, 17.44286, 18.03571, 19.17143~
+$ ase28         <dbl> 19.32857, 18.47500, 19.33929, 18.23571~
+$ ase60         <dbl> 20.38644, 19.99153, 20.39492, 19.90847~
+$ ase90         <dbl> 22.54118, 21.93193, 22.04370, 20.59328~
+$ ase180        <dbl> 20.79106, 19.93966, 19.99385, 19.11006~
+$ ase360        <dbl> 15.55153, 14.83259, 14.87883, 14.69276~
+$ ase720        <dbl> 15.52350, 14.75049, 14.77427, 14.53463~
+$ maxt          <dbl> 21.3, 17.8, 15.4, 20.8, 19.8, 15.8, 19~
+$ amaxt7        <dbl> 22.38571, 20.44286, 22.21429, 24.21429~
+$ amaxt14       <dbl> 21.42857, 19.72857, 19.86429, 21.80000~
+$ amaxt28       <dbl> 20.71071, 19.10000, 19.18929, 19.75000~
+$ amaxt60       <dbl> 24.02667, 22.28000, 22.38667, 22.93167~
+$ amaxt90       <dbl> 27.07750, 25.77667, 25.89833, 24.93667~
+$ amaxt180      <dbl> 26.92000, 25.92722, 25.98500, 24.84056~
+$ amaxt360      <dbl> 21.55389, 20.79778, 20.81333, 20.21972~
+$ amaxt720      <dbl> 21.47750, 20.57222, 20.57694, 20.13153~
+$ mint          <dbl> 9.6, 9.0, 7.3, 7.7, 8.3, 8.3, 6.1, 5.9~
+$ amint7        <dbl> 9.042857, 7.971429, 9.171429, 10.32857~
+$ amint14       <dbl> 9.928571, 9.235714, 9.421429, 10.00714~
+$ amint28       <dbl> 8.417857, 7.560714, 7.353571, 8.671429~
+$ amint60       <dbl> 11.156667, 9.903333, 9.971667, 10.9716~
+$ amint90       <dbl> 11.96667, 10.81250, 10.87833, 12.49000~
+$ amint180      <dbl> 11.96778, 11.01056, 11.02000, 12.41944~
+$ amint360      <dbl> 9.130556, 8.459722, 8.448333, 9.588611~
+$ amint720      <dbl> 8.854861, 8.266250, 8.254028, 9.674861~
+$ dist_cfa      <dbl> 9442.206, 6322.438, 7957.374, 7790.785~
+$ dist_camp     <dbl> 50966.485, 6592.893, 31767.235, 8816.2~
+$ ws            <dbl> 1.263783, 1.263783, 1.456564, 5.424445~
+$ aws_m0        <dbl> 2.644795, 2.644795, 2.644795, 5.008369~
+$ aws_m1        <dbl> 2.559202, 2.559202, 2.559202, 5.229680~
+$ aws_m3        <dbl> 2.446211, 2.446211, 2.446211, 5.386005~
+$ aws_m6        <dbl> 2.144843, 2.144843, 2.144843, 5.132617~
+$ aws_m12       <dbl> 2.545008, 2.545008, 2.548953, 5.045297~
+$ aws_m24       <dbl> 2.580671, 2.580671, 2.584047, 5.081100~
+$ dist_road     <dbl> 498.75145, 102.22032, 1217.22446, 281.~
+$ log_dist_cfa  <dbl> 9.152945, 8.751860, 8.981854, 8.960697~
+$ log_dist_camp <dbl> 10.838924, 8.793748, 10.366191, 9.0843~
+$ log_dist_road <dbl> 6.212108, 4.627130, 7.104329, 5.640813~
+$ cause         <chr> "lightning", "lightning", "lightning",~
+\end{verbatim}
+
+\subsection*{Purpose}\label{purpose-1}
+\addcontentsline{toc}{subsection}{Purpose}
+
+The primary goal is to predict the cause of the bushfire using the
+weather and distance from human activity variables provided.
+
+\subsection*{Source}\label{source-1}
+\addcontentsline{toc}{subsection}{Source}
+
+Collated data was part of Weihao Li's Honours thesis, which is not
+publicly available. The hotspots data was collected from P-Tree System
+(2020), climate data was taken from the Australian Bureau of Meteorology
+using the \texttt{bomrang} package (Sparks et al., 2020), wind data from
+McVicar (2011) and Iowa State University (2020), vegetation data from
+Australian Bureau of Agricultural and Resource Economics and Sciences
+(2018), distance from roads calculated using OpenStreetMap contributors
+(2020), CFA stations from Department of Environment, Land, Water \&
+Planning (2020a), and campsites from Department of Environment, Land,
+Water \& Planning (2020b). The cause was predicted from training data
+provided by Department of Environment, Land, Water \& Planning (2019).
+
+\subsection*{Pre-processing}\label{pre-processing-1}
+\addcontentsline{toc}{subsection}{Pre-processing}
+
+The 60 variables are too many to view with a tour, so it should be
+pre-processed using principal component analysis. The categorical
+variables of FOR\_TYPE and FOR\_CAT are removed. It would be possible to
+keep these if they are converted to dummy (binary variables).
+
+\section{Australian election data}\label{australian-election-data}
+
+\subsection*{Description}\label{description-2}
+\addcontentsline{toc}{subsection}{Description}
+
+This is data from a study on the relationship between voting patterns
+and socio-demographic characteristics of Australian electorates reported
+in Forbes et al. (2020). These are the predictor variables upon which
+voting percentages are modelled. There are two years of data in
+\texttt{oz\_election\_2001} and \texttt{oz\_election\_2016}.
+
+\subsection*{Variables}\label{variables-2}
+\addcontentsline{toc}{subsection}{Variables}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{load}\NormalTok{(}\StringTok{"data/oz\_election\_2001.rda"}\NormalTok{)}
+\FunctionTok{load}\NormalTok{(}\StringTok{"data/oz\_election\_2016.rda"}\NormalTok{)}
+\FunctionTok{glimpse}\NormalTok{(oz\_election\_2001)}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection*{Purpose}\label{purpose-2}
+\addcontentsline{toc}{subsection}{Purpose}
+
+The tour is used to check for multicollinearity between predictors, that
+might adversely affect the linear model fit.
+
+\subsection*{Source}\label{source-2}
+\addcontentsline{toc}{subsection}{Source}
+
+The data was compiled from Australian Electoral Commission (AEC) and the
+Australian 38 Bureau of Statistics (ABS). Code to construct the data,
+and the original data are available at
+https://github.com/jforbes14/eechidna-paper.
+
+\subsection*{Pre-processing}\label{pre-processing-2}
+\addcontentsline{toc}{subsection}{Pre-processing}
+
+Considerable pre-processing was done to produce these data sets. The
+original data was wrangled into tidy form, some variables were log
+transformed to reduce skewness, and a subset of variables was chosen.
+
+\section{Palmer penguins}\label{palmer-penguins}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(palmerpenguins)}
+\NormalTok{penguins }\OtherTok{\textless{}{-}}\NormalTok{ penguins }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{na.omit}\NormalTok{() }\CommentTok{\# 11 observations out of 344 removed}
+\CommentTok{\# use only vars of interest, and standardise}
+\CommentTok{\# them for easier interpretation}
+\NormalTok{penguins\_sub }\OtherTok{\textless{}{-}}\NormalTok{ penguins }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{select}\NormalTok{(bill\_length\_mm,}
+\NormalTok{         bill\_depth\_mm,}
+\NormalTok{         flipper\_length\_mm,}
+\NormalTok{         body\_mass\_g,}
+\NormalTok{         species, }
+\NormalTok{         sex) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{mutate}\NormalTok{(}\FunctionTok{across}\NormalTok{(}\FunctionTok{where}\NormalTok{(is.numeric),  }\SpecialCharTok{\textasciitilde{}} \FunctionTok{scale}\NormalTok{(.)[,}\DecValTok{1}\NormalTok{])) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{rename}\NormalTok{(}\AttributeTok{bl =}\NormalTok{ bill\_length\_mm,}
+         \AttributeTok{bd =}\NormalTok{ bill\_depth\_mm,}
+         \AttributeTok{fl =}\NormalTok{ flipper\_length\_mm,}
+         \AttributeTok{bm =}\NormalTok{ body\_mass\_g)}
+\FunctionTok{save}\NormalTok{(penguins\_sub, }\AttributeTok{file=}\StringTok{"data/penguins\_sub.rda"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection*{Description}\label{description-3}
+\addcontentsline{toc}{subsection}{Description}
+
+This data measure four physical characteristics of three species of
+penguins.
+
+\subsection*{Variables}\label{variables-3}
+\addcontentsline{toc}{subsection}{Variables}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.3704}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.6296}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Name
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Description
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{bl} & a number denoting bill length (millimeters) \\
+\texttt{bd} & a number denoting bill depth (millimeters) \\
+\texttt{fl} & an integer denoting flipper length (millimeters) \\
+\texttt{bm} & an integer denoting body mass (grams) \\
+\texttt{species} & a factor denoting penguin species (Adélie, Chinstrap
+and Gentoo) \\
+\end{longtable}
+
+\subsection*{Purpose}\label{purpose-3}
+\addcontentsline{toc}{subsection}{Purpose}
+
+The primary goal is to find a combination of the four variables where
+the three species are distinct. This is also a useful data set to
+illustrate cluster analysis.
+
+\subsection*{Source}\label{source-3}
+\addcontentsline{toc}{subsection}{Source}
+
+Details of the penguins data can be found at
+\url{https://allisonhorst.github.io/palmerpenguins/}, and Horst et al.
+(2022) is the package source.
+
+\subsection*{Pre-processing}\label{pre-processing-3}
+\addcontentsline{toc}{subsection}{Pre-processing}
+
+The data is loaded from the \texttt{palmerpenguins} package. The four
+physical measurement variables and the species are selected, and the
+penguins with missing values are removed. Variables are standardised,
+and their names are shortened.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(palmerpenguins)}
+\NormalTok{penguins }\OtherTok{\textless{}{-}}\NormalTok{ penguins }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{na.omit}\NormalTok{() }\CommentTok{\# 11 observations out of 344 removed}
+\CommentTok{\# use only vars of interest, and standardise}
+\CommentTok{\# them for easier interpretation}
+\NormalTok{penguins\_sub }\OtherTok{\textless{}{-}}\NormalTok{ penguins[,}\FunctionTok{c}\NormalTok{(}\DecValTok{3}\SpecialCharTok{:}\DecValTok{6}\NormalTok{, }\DecValTok{1}\NormalTok{)] }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{mutate}\NormalTok{(}\FunctionTok{across}\NormalTok{(}\FunctionTok{where}\NormalTok{(is.numeric),  }\SpecialCharTok{\textasciitilde{}} \FunctionTok{scale}\NormalTok{(.)[,}\DecValTok{1}\NormalTok{])) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{rename}\NormalTok{(}\AttributeTok{bl =}\NormalTok{ bill\_length\_mm,}
+         \AttributeTok{bd =}\NormalTok{ bill\_depth\_mm,}
+         \AttributeTok{fl =}\NormalTok{ flipper\_length\_mm,}
+         \AttributeTok{bm =}\NormalTok{ body\_mass\_g) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{as.data.frame}\NormalTok{()}
+\FunctionTok{save}\NormalTok{(penguins\_sub, }\AttributeTok{file=}\StringTok{"data/penguins\_sub.rda"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\section{Program for International Student
+Assessment}\label{program-for-international-student-assessment}
+
+\subsection*{Description}\label{description-4}
+\addcontentsline{toc}{subsection}{Description}
+
+The \texttt{pisa} data contains plausible scores for math, reading and
+science of Australian and Indonesian students from the 2018 testing
+cycle. The plausible scores are simulated from a model fitted to the
+original data, to preserve privacy of the students.
+
+\subsection*{Variables}\label{variables-4}
+\addcontentsline{toc}{subsection}{Variables}
+
+\begin{longtable}[]{@{}ll@{}}
+\toprule\noalign{}
+Name & Description \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{CNT} & country, either AUS for Australia or IDN for Indonesia \\
+\texttt{PV1MATH}-\texttt{PV10MATH} & plausible scores for math \\
+\texttt{PV1READ}-\texttt{PV10READ} & plausible scores for reading \\
+\texttt{PV1SCIE}-\texttt{PV10SCIE} & plausible scores for science \\
+\end{longtable}
+
+\subsection*{Purpose}\label{purpose-4}
+\addcontentsline{toc}{subsection}{Purpose}
+
+Primarily this data is useful as an example for dimension reduction.
+
+\subsection*{Source}\label{source-4}
+\addcontentsline{toc}{subsection}{Source}
+
+The full data is available from https://www.oecd.org/pisa/. There are
+records of the student test scores, along with survey data from the
+students, their households and their schools.
+
+\subsection*{Pre-processing}\label{pre-processing-4}
+\addcontentsline{toc}{subsection}{Pre-processing}
+
+The data was reduced to country and the plausible scores, and filtered
+to the two countries. It may be helpful to know that the SPSS format
+data was used, and was read into R using the \texttt{read\_sav()}
+function in the \texttt{haven} package.
+
+\section{Sketches}\label{sketches}
+
+\subsection*{Description}\label{description-5}
+\addcontentsline{toc}{subsection}{Description}
+
+This data is a subset of images from https://quickdraw.withgoogle.com.
+The subset was created using the quickdraw R package at
+https://huizezhang-sherry.github.io/quickdraw/. It has 6 different
+groups: banana, boomerang, cactus, flip flops, kangaroo. Each image is
+28x28 pixels. The \texttt{sketches\_train} data would be used to train a
+classification model, and the unlabelled \texttt{sketches\_test} can be
+used for prediction.
+
+\subsection*{Variables}\label{variables-5}
+\addcontentsline{toc}{subsection}{Variables}
+
+\begin{longtable}[]{@{}ll@{}}
+\toprule\noalign{}
+Name & Description \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{V1-V784} & grey scale 0-255 \\
+\texttt{word} & what the person was asked to draw, NA in the test
+data \\
+\texttt{id} & unique id for each sketch \\
+\end{longtable}
+
+\subsection*{Purpose}\label{purpose-5}
+\addcontentsline{toc}{subsection}{Purpose}
+
+Primarily this data is useful as an example for supervised
+classification, and also dimension reduction.
+
+\subsection*{Source}\label{source-5}
+\addcontentsline{toc}{subsection}{Source}
+
+The full data is available from https://quickdraw.withgoogle.com.
+
+\subsection*{Pre-processing}\label{pre-processing-5}
+\addcontentsline{toc}{subsection}{Pre-processing}
+
+It is typically useful to pre-process this data into principal
+components. This code can also be useful for plotting one of the
+sketches in a recognisable form:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(mulgar)}
+\FunctionTok{library}\NormalTok{(ggplot2)}
+\FunctionTok{data}\NormalTok{(}\StringTok{"sketches\_train"}\NormalTok{)}
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{77}\NormalTok{)}
+\NormalTok{x }\OtherTok{\textless{}{-}}\NormalTok{ sketches\_train[}\FunctionTok{sample}\NormalTok{(}\DecValTok{1}\SpecialCharTok{:}\FunctionTok{nrow}\NormalTok{(sketches\_train), }\DecValTok{1}\NormalTok{), ]}
+\NormalTok{xm }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\AttributeTok{gry=}\FunctionTok{t}\NormalTok{(}\FunctionTok{as.matrix}\NormalTok{(x[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{784}\NormalTok{])),}
+        \AttributeTok{x=}\FunctionTok{rep}\NormalTok{(}\DecValTok{1}\SpecialCharTok{:}\DecValTok{28}\NormalTok{, }\DecValTok{28}\NormalTok{),}
+        \AttributeTok{y=}\FunctionTok{rep}\NormalTok{(}\DecValTok{28}\SpecialCharTok{:}\DecValTok{1}\NormalTok{, }\FunctionTok{rep}\NormalTok{(}\DecValTok{28}\NormalTok{, }\DecValTok{28}\NormalTok{)))}
+\FunctionTok{ggplot}\NormalTok{(xm, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{x, }\AttributeTok{y=}\NormalTok{y, }\AttributeTok{fill=}\NormalTok{gry)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_tile}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{scale\_fill\_gradientn}\NormalTok{(}\AttributeTok{colors =} \FunctionTok{gray.colors}\NormalTok{(}\DecValTok{256}\NormalTok{, }
+                                     \AttributeTok{start =} \DecValTok{0}\NormalTok{, }
+                                     \AttributeTok{end =} \DecValTok{1}\NormalTok{, }
+                                     \AttributeTok{rev =} \ConstantTok{TRUE}\NormalTok{ )) }\SpecialCharTok{+}
+  \FunctionTok{ggtitle}\NormalTok{(x}\SpecialCharTok{$}\NormalTok{word) }\SpecialCharTok{+}
+  \FunctionTok{theme\_void}\NormalTok{() }\SpecialCharTok{+} 
+    \FunctionTok{theme}\NormalTok{(}\AttributeTok{legend.position=}\StringTok{"none"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[H]
+
+\centering{
+
+\includegraphics[width=0.2\textwidth,height=\textheight]{A2-data_files/figure-pdf/fig-sketches-1.pdf}
+
+}
+
+\caption{\label{fig-sketches}One of the sketches in the subset of
+training data.}
+
+\end{figure}%
+
+\section{\texorpdfstring{\texttt{multicluster}}{multicluster}}\label{multicluster}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(mulgar)}
+\FunctionTok{data}\NormalTok{(}\StringTok{"multicluster"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection*{Description}\label{description-6}
+\addcontentsline{toc}{subsection}{Description}
+
+This data has 10 numeric variables, and a class variable labelling
+groups.
+
+\subsection*{Variables}\label{variables-6}
+\addcontentsline{toc}{subsection}{Variables}
+
+\begin{longtable}[]{@{}ll@{}}
+\toprule\noalign{}
+Name & Description \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{group} & cluster label \\
+\texttt{x1-x10} & numeric variables \\
+\end{longtable}
+
+\subsection*{Purpose}\label{purpose-6}
+\addcontentsline{toc}{subsection}{Purpose}
+
+The primary goal is to find the different clusters.
+
+\subsection*{Source}\label{source-6}
+\addcontentsline{toc}{subsection}{Source}
+
+This data is originally from
+http://ifs.tuwien.ac.at/dm/download/multiChallenge-matrix.txt, and
+provided as a challenge for non-linear dimension reduction.It was used
+as an example in Lee, Laa, Cook (2023)
+https://doi.org/10.52933/jdssv.v2i3.
+
+\section{\texorpdfstring{\texttt{clusters}, \texttt{clusters\_nonlin},
+\texttt{simple\_clusters}}{clusters, clusters\_nonlin, simple\_clusters}}\label{clusters-clusters_nonlin-simple_clusters}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(mulgar)}
+\FunctionTok{data}\NormalTok{(}\StringTok{"clusters"}\NormalTok{)}
+\FunctionTok{data}\NormalTok{(}\StringTok{"clusters\_nonlin"}\NormalTok{)}
+\FunctionTok{data}\NormalTok{(}\StringTok{"simple\_clusters"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection*{Description}\label{description-7}
+\addcontentsline{toc}{subsection}{Description}
+
+This data has a various number of numeric variables, and a class
+variable labelling the clusters.
+
+\subsection*{Variables}\label{variables-7}
+\addcontentsline{toc}{subsection}{Variables}
+
+\begin{longtable}[]{@{}ll@{}}
+\toprule\noalign{}
+Name & Description \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{x1-x5} & numeric variables \\
+\texttt{cl} & cluster label \\
+\end{longtable}
+
+\subsection*{Purpose}\label{purpose-7}
+\addcontentsline{toc}{subsection}{Purpose}
+
+The primary goal is to find the different clusters.
+
+\subsection*{Source}\label{source-7}
+\addcontentsline{toc}{subsection}{Source}
+
+Simulated using the code in the \texttt{simulate.R} file of the
+\texttt{data-raw} directory of the \texttt{mulgar} package.
+
+\section{\texorpdfstring{\texttt{plane}, \texttt{plane\_nonlin},
+\texttt{box}}{plane, plane\_nonlin, box}}\label{plane-plane_nonlin-box}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(mulgar)}
+\FunctionTok{data}\NormalTok{(}\StringTok{"plane"}\NormalTok{)}
+\FunctionTok{data}\NormalTok{(}\StringTok{"plane\_nonlin"}\NormalTok{)}
+\FunctionTok{data}\NormalTok{(}\StringTok{"box"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection*{Description}\label{description-8}
+\addcontentsline{toc}{subsection}{Description}
+
+This data has a various number of numeric variables.
+
+\subsection*{Variables}\label{variables-8}
+\addcontentsline{toc}{subsection}{Variables}
+
+\begin{longtable}[]{@{}ll@{}}
+\toprule\noalign{}
+Name & Description \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{x1-x5} & numeric variables \\
+\end{longtable}
+
+\subsection*{Purpose}\label{purpose-8}
+\addcontentsline{toc}{subsection}{Purpose}
+
+The primary goal is to understand how many dimensions the data spreads
+out.
+
+\subsection*{Source}\label{source-8}
+\addcontentsline{toc}{subsection}{Source}
+
+Simulated using the code in the \texttt{simulate.R} file of the
+\texttt{data-raw} directory of the \texttt{mulgar} package.
+
+\section{\texorpdfstring{\texttt{c1} -
+\texttt{c7}}{c1 - c7}}\label{c1---c7}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(mulgar)}
+\FunctionTok{data}\NormalTok{(}\StringTok{"c1"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Warning in data("c1"): data set 'c1' not found
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Load others similarly}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection*{Description}\label{description-9}
+\addcontentsline{toc}{subsection}{Description}
+
+This data has a various number of numeric variables, and a variety of
+cluster shapes.
+
+\subsection*{Variables}\label{variables-9}
+\addcontentsline{toc}{subsection}{Variables}
+
+\begin{longtable}[]{@{}ll@{}}
+\toprule\noalign{}
+Name & Description \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{x1}, \texttt{x2}, \ldots{} & numeric variables \\
+\end{longtable}
+
+\subsection*{Purpose}\label{purpose-9}
+\addcontentsline{toc}{subsection}{Purpose}
+
+The primary goal is to detect the different clusters.
+
+\subsection*{Source}\label{source-9}
+\addcontentsline{toc}{subsection}{Source}
+
+These are challenge data sets, so the code to simulate them is not made
+available.
+
+\section{Fashion MNIST}\label{fashion-mnist}
+
+\subsection*{Description}\label{description-10}
+\addcontentsline{toc}{subsection}{Description}
+
+This data is a subset of images from
+https://github.com/zalandoresearch/fashion-mnist. Each image is 28x28
+grayscale image. The training set has 60,000 images, and the test set
+has 10,000 images.
+
+\subsection*{Variables}\label{variables-10}
+\addcontentsline{toc}{subsection}{Variables}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.3704}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.6296}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Name
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Description
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{x} & arrays of grey scale values 0-255 \\
+\texttt{y} & label 0-9, corresponding to T-shirt/top, Trouser, Pullover,
+Dress, Coat, Sandal, Shirt, Sneaker, Bag, Ankle boot \\
+\end{longtable}
+
+\subsection*{Purpose}\label{purpose-10}
+\addcontentsline{toc}{subsection}{Purpose}
+
+Primarily this data is useful as an example for neural network modeling,
+following the tutorial at
+https://tensorflow.rstudio.com/tutorials/keras/classification.
+
+\subsection*{Source}\label{source-10}
+\addcontentsline{toc}{subsection}{Source}
+
+The data is available from
+https://github.com/zalandoresearch/fashion-mnist.
+
+\chapter{Links to Book Code and Additional Data}\label{book-data}
+
+The code and data and an RStudio project can be downloaded with
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{usethis}\SpecialCharTok{::}\FunctionTok{use\_zip}\NormalTok{(}\AttributeTok{url=}\StringTok{"https://dicook.github.io/mulgar\_book/code\_and\_data.zip"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+Alternatively, individual files can be downloaded from the links below.
+
+\section{Additional data}\label{additional-data}
+
+Table~\ref{tbl-datalinks-pdf} lists additional data available on the
+book web site at https://dicook.github.io/mulgar\_book/data.
+
+\begin{table}
+
+\caption{\label{tbl-datalinks-pdf}Links to other data sets used on the
+book.}
+
+\centering{
+
+\centering
+\begin{tabular}{>{\raggedright\arraybackslash}p{4cm}>{\raggedright\arraybackslash}p{5cm}>{\raggedright\arraybackslash}p{2cm}}
+\toprule
+Filename & Description & Chapter\\
+\midrule
+\ttfamily{aflw\_pct.rda} & Saved 2D tour path for the aflw data & 4\\
+\ttfamily{detourr\_penguins.csv} & Saved clusters of the penguins data from detourr & 7\\
+\ttfamily{fake\_trees\_sb.csv} & Saved clusters of the fake trees data from detourr & 7\\
+\ttfamily{penguins\_sub.rda} & Tidied penguins data & 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17\\
+\ttfamily{penguins\_tour\_path.rda} & Saved 2D tour path for penguins data & 1, 8, 10, 13, 14, 15\\
+\addlinespace
+\ttfamily{risk\_MSA.rds} & risk survey & 12\\
+\ttfamily{penguins\_cnn} & penguins NN model & 17\\
+\ttfamily{fashion\_cnn} & fashion MNST NN model & 17\\
+\ttfamily{p\_exp\_sv.rda} & penguins SHAP values & 17\\
+\bottomrule
+\end{tabular}
+
+}
+
+\end{table}%
+
+\section{Code files}\label{code-files}
+
+Table~\ref{tbl-codelinks-pdf} lists additional data available on the
+book web site at https://dicook.github.io/mulgar\_book/code.
+
+\begin{table}
+
+\caption{\label{tbl-codelinks-pdf}Links to code used on the book.}
+
+\centering{
+
+\centering
+\begin{tabular}{>{\raggedright\arraybackslash}p{4cm}>{\raggedright\arraybackslash}p{5cm}}
+\toprule
+Filename & Chapter\\
+\midrule
+\ttfamily{1-intro.R} & 1 Picturing high dimensions\\
+\ttfamily{2-notation.R} & 2 Notation conventions and R objects\\
+\ttfamily{3-overview-dimred.R} & 3 Overview of dimension reduction\\
+\ttfamily{4-pca.R} & 4 Principal component analysis\\
+\ttfamily{5-nldr.R} & 5 Non-linear dimension reduction\\
+\addlinespace
+\ttfamily{6-overview-clust.R} & 6 Overview of clustering\\
+\ttfamily{7-spin-and-brush.R} & 7 Spin-and-brush approach\\
+\ttfamily{8-hierarchical.R} & 8 Hierarchical clustering\\
+\ttfamily{9-kmeans.R} & 9 k-means clustering\\
+\ttfamily{10-model-based.R} & 10 Model-based clustering\\
+\addlinespace
+\ttfamily{11-som.R} & 11 Self-organizing maps\\
+\ttfamily{12-summary-clust.R} & 12 Summarising and comparing clustering results\\
+\ttfamily{13-intro-class.R} & 13 Overview of supervised classification\\
+\ttfamily{14-lda.R} & 14 Linear discriminant analysis\\
+\ttfamily{15-forests.R} & 15 Trees and forests\\
+\addlinespace
+\ttfamily{16-svm.R} & 16 Support vector machines\\
+\ttfamily{17-nn.R} & 17 Neural networks and deep learning\\
+\ttfamily{18-summary-class.R} & 18 Exploring misclassifications\\
+\ttfamily{NA} & A Toolbox\\
+\bottomrule
+\end{tabular}
+
+}
+
+\end{table}%
+
 \chapter{Glossary}\label{glossary}
 
-\begin{longtable*}{lll}
+\begin{table}
+\centering
+\begin{tabular}{>{\raggedright\arraybackslash}p{2cm}>{\raggedright\arraybackslash}p{4cm}>{\raggedright\arraybackslash}p{6cm}}
 \toprule
-Term & Synonyms & Description \\ 
+Term & Synonyms & Description\\
 \midrule
-variable & feature, attribute & a characteristic, number or quantity that can be measured \\ 
-observations & cases, items, experimental units, observational units, records, statistical units, instances, examples & individuals on which the observations are made \\ 
-data set & - & collection of observations made on one or more variables \\ 
-response & target & variable that one wishes to predict \\ 
-predictor & independent variable, feature & variables used to produce a mode to predict the response \\ 
-similarity & correlation & a measure ranging between 0 and 1, with 1 indicating that the cases are closer \\ 
-dissimilarity & distance & a measure where a smaller number means the cases are closer \\ 
-PCA & - & principal component analysis \\ 
-LDA & - & linear discriminant analysis \\ 
-SOM & - & self-organising map \\ 
+variable & feature, attribute & a characteristic, number or quantity that can be measured\\
+\midrule
+observations & cases, items, experimental units, observational units, records, statistical units, instances, examples & individuals on which the observations are made\\
+\midrule
+data set & data, file & collection of observations made on one or more variables\\
+\midrule
+response & target & variable that one wishes to predict\\
+\midrule
+predictor & independent variable, feature & variables used to produce a mode to predict the response\\
+\midrule
+\addlinespace
+similarity & correlation & a measure ranging between 0 and 1, with 1 indicating that the cases are closer\\
+\midrule
+dissimilarity & distance & a measure where a smaller number means the cases are closer\\
+\midrule
+principal component analysis (PCA) & empirical orthogonal functions, eigenvalue decomposition & summarise a high-dimensional variance-covariance using an orthonormal matrix and set of variances. Related methods include factor analysis, multidimensional scaling.\\
+\midrule
+linear discriminant analysis (LDA) & Fisher's linear discriminant & reduce the dimension to the space where the classes are most separated relative to the class means and pooled variance-covariance.\\
+\midrule
+self-organising map (SOM) & Kohonen map & use a grid-constrained set of means to cluster high-dimensional data, and also provide a 2D view of the clusters\\
 \bottomrule
-\end{longtable*}
+\end{tabular}
+\end{table}
 
 
 
