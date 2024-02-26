@@ -324,8 +324,6 @@ Thus the second PC might be the more interesting. PC 2 is primarily a combinatio
 
 We would continue to interpret each PC by examining large coefficients to help decide how many PCs are a suitable summary of the information in the data. Briefly, PC 3 is a measure of worth of the player because `time_pct` has a large coefficient, so players that are on the field longer will contribute strongly to this new variable. It also has large (and opposite) contributions from `clearances`, `tackles`, `contested_marks`. PC 4 appears to be related to aggressive play with `clangers`, `turnovers`, `bounces` and `frees_against` featuring. So all four PCs have useful information. (Note, if we had continued to examine large coefficients on PC 5 we would find that all variables already have had reasonably large coefficients on PC 1-4, which supports restricting attention to the first four.)
 
-<!-- We might then use a PCA tour to examine the reduced dimension data, with the original variable axes. This is high-dimensional version of a 2D biplot, as shown below. -->
-
 Ideally, when we tour the four PCs, we'd like to be able to stop and identify players. This involves creating a pre-computed animation, with additional mouse-over, made possible by `plotly`. This is only feasible with a small number of observations, like the `aflw` data, because all of the animation frames are constructed in a single object. This object gets large very quickly!
 
 ::: {.content-visible when-format="html"}
@@ -341,7 +339,6 @@ The code to make this animation, and the interactive plot is in the online versi
 ```{r echo=knitr::is_html_output()}
 #| label: aflw-plotly
 #| eval: false
-#| code-fold: true
 #| code-summary: "Code to make tour animation"
 library(plotly)
 library(htmlwidgets)
@@ -410,7 +407,6 @@ Animation of four PCs of the aflw data with interactive labelling.
 ```{r}
 #| eval: false
 #| echo: false
-#| code-fold: false
 animate_pca(aflw_pca$x[,1:5], 
              pc_coefs = aflw_pca$rotation[,1:5],
              col = "orange",
@@ -513,7 +509,7 @@ It is common to show the model, that is the data projected into the $k$-D model 
 ```{r echo=knitr::is_html_output()}
 #| label: fig-plane-biplot
 #| fig-cap: "Biplots of the plane (a) and plane + noise (b) data. All five variables contribute strongly to the two principal components in (a): PC1 is primarily `x1`, `x2` and `x3` and PC2 is primarily `x4` and `x5`. In (b) the same four variables contribute in almost the same way, with variables `x6` and `x7` contributing very little. The data was constructed this way, that these two dimensions were purely noise."
-#| code-fold: false
+#| code-summary: Code for biplots
 #| fig-width: 8
 #| fig-height: 4
 #| out-width: 100%
@@ -551,7 +547,7 @@ We look at the model in the data space to check how well the model fits the data
 
 ```{r echo=knitr::is_html_output()}
 #| eval: false
-#| code-fold: false
+#| code-summary: Code for model-in-the-data
 plane_m <- pca_model(plane_pca)
 plane_m_d <- rbind(plane_m$points, plane)
 animate_xy(plane_m_d, edges=plane_m$edges,
@@ -617,7 +613,7 @@ The model for the `pisa` data is a 1D vector, shown in `r ifelse(knitr::is_html_
 
 ```{r echo=knitr::is_html_output()}
 #| eval: FALSE
-#| code-fold: false
+#| code-summary: Code for model-in-the-data
 pisa_model <- pca_model(pisa_pca, d=1, s=2)
 
 pisa_all <- rbind(pisa_model$points, pisa_std)
@@ -671,7 +667,7 @@ It is less useful to examine the PCA model for the `aflw` data, because the main
 
 ```{r echo=knitr::is_html_output()}
 #| eval: FALSE
-#| code-fold: false
+#| code-summary: Code for model-in-the-data
 aflw_model <- pca_model(aflw_pca, d=4, s=1)
 
 aflw_all <- rbind(aflw_model$points, aflw_std[,7:35])
@@ -738,7 +734,7 @@ plane_noise_outliers[102,] <- c(0, 0, 0,-2, -2, 0, 0)
 
 ```{r}
 #| label: fig-plane-n-o-scree
-#| code-fold: false
+#| code-summary: Code for screeplot
 #| fig-cap: "Scree plot of the planar data with noise and an outlier. It is almost the same as the data without the outliers." 
 #| fig-width: 6
 #| fig-height: 4
@@ -749,7 +745,7 @@ ggscree(plane_n_o_pca, q = 7) + theme_minimal()
 
 ```{r echo=knitr::is_html_output()}
 #| eval: false
-#| #| code-summary: "Code to generate tours"
+#| code-summary: "Code to generate tours"
 clrs <- hcl.colors(12, "Zissou 1")
 p_col <- c(rep("black", 100), clrs[11], clrs[11])
 p_obs_labels <- c(rep("", 100), "1", "2")
@@ -826,7 +822,7 @@ ggscatmat(plane_n_o_pca$x) + theme_minimal() +
  
 ```{r echo=knitr::is_html_output()}
 #| label: fig-plane-nonlin-scree
-#| code-fold: false
+#| code-summary: Code for screeplot
 #| fig-cap: "Scree plot of the non-linear data suggests three PCs." 
 #| fig-width: 6
 #| fig-height: 4
