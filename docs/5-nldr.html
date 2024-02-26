@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.3.433">
+<meta name="generator" content="quarto-1.4.549">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <title>Interactively exploring high-dimensional data and models in R - 5&nbsp; Non-linear dimension reduction</title>
 <style>
@@ -19,7 +19,7 @@ ul.task-list li input[type="checkbox"] {
 }
 /* CSS for syntax highlighting */
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -55,6 +55,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 div.csl-bib-body { }
 div.csl-entry {
   clear: both;
+  margin-bottom: 0em;
 }
 .hanging-indent div.csl-entry {
   margin-left:2em;
@@ -96,7 +97,13 @@ div.csl-indent {
   "collapse-after": 3,
   "panel-placement": "start",
   "type": "textbox",
-  "limit": 20,
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
   "language": {
     "search-no-results-text": "No results",
     "search-matching-documents-text": "matching documents",
@@ -105,33 +112,59 @@ div.csl-indent {
     "search-more-match-text": "more match in this document",
     "search-more-matches-text": "more matches in this document",
     "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
     "search-detached-cancel-button-title": "Cancel",
     "search-submit-button-title": "Submit",
     "search-label": "Search"
   }
-}</script><script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+}</script><script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script><script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 </head>
 <body class="nav-sidebar floating">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top"><nav class="quarto-secondary-nav"><div class="container-fluid d-flex">
-      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./3-intro-dimred.html">Dimension reduction</a></li><li class="breadcrumb-item"><a href="./5-nldr.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Non-linear dimension reduction</span></a></li></ol></nav>
-      <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-      </a>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./5-nldr.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Non-linear dimension reduction</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
         <i class="bi bi-search"></i>
       </button>
     </div>
   </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto"><div class="pt-lg-2 mt-2 text-left sidebar-header">
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
       <a href="./">Interactively exploring high-dimensional data and models in R</a> 
         <div class="sidebar-tools-main">
-    <a href="https://github.com/dicook/mulgar_book" rel="" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+    <a href="https://github.com/dicook/mulgar_book" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
 </div>
     </div>
       </div>
@@ -148,174 +181,113 @@ div.csl-indent {
  <span class="menu-text">Preface</span></a>
   </div>
 </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
- <span class="menu-text">Introduction</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">
-<li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./1-intro.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Picturing high dimensions</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./2-notation.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Notation conventions and R objects</span></span></a>
   </div>
 </li>
-      </ul>
-</li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
- <span class="menu-text">Dimension reduction</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">
-<li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./3-intro-dimred.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Overview</span></span></a>
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Dimension reduction overview</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./4-pca.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Principal component analysis</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./5-nldr.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Non-linear dimension reduction</span></span></a>
   </div>
 </li>
-      </ul>
-</li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">
- <span class="menu-text">Cluster analysis</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">
-<li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./6-intro-clust.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Overview</span></span></a>
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Introduction to clustering</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./7-spin-and-brush.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Spin-and-brush approach</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./8-hierarchical.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Hierarchical clustering</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./9-kmeans.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title"><span class="math inline">\(k\)</span>-means clustering</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./10-model-based.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Model-based clustering</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./11-som.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Self-organizing maps</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./12-summary-clust.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Summarising and comparing clustering results</span></span></a>
   </div>
 </li>
-      </ul>
-</li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true">
- <span class="menu-text">Supervised classification</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">
-<li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./13-intro-class.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Overview</span></span></a>
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Introduction to supervised classification</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./14-lda.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Linear discriminant analysis</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./15-forests.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Trees and forests</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./16-svm.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Support vector machines</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./17-nn.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Neural networks and deep learning</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./18-summary-class.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Exploring misclassifications</span></span></a>
   </div>
-</li>
-      </ul>
-</li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true">
- <span class="menu-text">Miscellaneous</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">
-<li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./19-mv-time-series.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Multivariate and multiple time series</span></span></a>
-  </div>
-</li>
-      </ul>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
@@ -325,13 +297,13 @@ div.csl-indent {
 </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-expanded="true">
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
  <span class="menu-text">Appendices</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-expanded="true" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">
 <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./A1-toolbox.html" class="sidebar-item-text sidebar-link">
@@ -346,7 +318,7 @@ div.csl-indent {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./A3-book_code_and_data.html" class="sidebar-item-text sidebar-link">
+  <a href="./A3-book-code-and-data.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Links to Book Code and Additional Data</span></span></a>
   </div>
 </li>
@@ -360,15 +332,15 @@ div.csl-indent {
 </li>
     </ul>
 </div>
-</nav><div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Table of contents</h2>
    
   <ul>
-<li><a href="#background" id="toc-background" class="nav-link active" data-scroll-target="#background"><span class="header-section-number">5.1</span> Background</a></li>
+<li><a href="#explanation-of-nldr-methods" id="toc-explanation-of-nldr-methods" class="nav-link active" data-scroll-target="#explanation-of-nldr-methods"><span class="header-section-number">5.1</span> Explanation of NLDR methods</a></li>
   <li>
-<a href="#linking-nldr-representation-with-tour-view" id="toc-linking-nldr-representation-with-tour-view" class="nav-link" data-scroll-target="#linking-nldr-representation-with-tour-view"><span class="header-section-number">5.2</span> Linking NLDR representation with tour view</a>
+<a href="#assessing-reliability-of-the-nldr-representation" id="toc-assessing-reliability-of-the-nldr-representation" class="nav-link" data-scroll-target="#assessing-reliability-of-the-nldr-representation"><span class="header-section-number">5.2</span> Assessing reliability of the NLDR representation</a>
   <ul class="collapse">
 <li><a href="#using-liminal" id="toc-using-liminal" class="nav-link" data-scroll-target="#using-liminal"><span class="header-section-number">5.2.1</span> Using <code>liminal</code></a></li>
   <li><a href="#using-detourr" id="toc-using-detourr" class="nav-link" data-scroll-target="#using-detourr"><span class="header-section-number">5.2.2</span> Using <code>detourr</code></a></li>
@@ -376,7 +348,7 @@ div.csl-indent {
 </li>
   <li><a href="#example-fake_trees" id="toc-example-fake_trees" class="nav-link" data-scroll-target="#example-fake_trees"><span class="header-section-number">5.3</span> Example: <code>fake_trees</code></a></li>
   <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises">Exercises</a></li>
-  </ul><div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/dicook/mulgar_book/edit/master/5-nldr.qmd" class="toc-action">Edit this page</a></p><p><a href="https://github.com/dicook/mulgar_book/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
+  </ul><div class="toc-actions"><ul><li><a href="https://github.com/dicook/mulgar_book/edit/master/5-nldr.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/dicook/mulgar_book/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
@@ -395,12 +367,14 @@ div.csl-indent {
   </div>
   
 
-</header><section id="background" class="level2" data-number="5.1"><h2 data-number="5.1" class="anchored" data-anchor-id="background">
-<span class="header-section-number">5.1</span> Background</h2>
+
+</header><section id="explanation-of-nldr-methods" class="level2" data-number="5.1"><h2 data-number="5.1" class="anchored" data-anchor-id="explanation-of-nldr-methods">
+<span class="header-section-number">5.1</span> Explanation of NLDR methods</h2>
 <p>Non-linear dimension reduction (NLDR) aims to find a low-dimensional representation of the high-dimensional data that shows the main features of the data. In statistics, it dates back to <span class="citation" data-cites="Kr64a">Kruskal (<a href="references.html#ref-Kr64a" role="doc-biblioref">1964a</a>)</span>’s work on multidimensional scaling (MDS). Some techniques only require an interpoint similarity or distance matrix as the main ingredient, rather than the full data. We’ll focus on when the full data is available here, so we can also compare structure perceived using the tour on the high-dimensional space, relative to structure revealed in the low-dimensional embedding.</p>
 <p>There are many methods available for generating non-linear low dimensional representations of the data. MDS is a classical technique that minimises the difference between two interpoint distance matrices, the distance between points in the high-dimensions, and in the low-dimensional representations. A good resource for learning about MDS is <span class="citation" data-cites="BG05">Borg &amp; Groenen (<a href="references.html#ref-BG05" role="doc-biblioref">2005</a>)</span>.</p>
+<p> </p>
 <div class="cell">
-<details><summary>Code to generate the 2D non-linear representation</summary><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dicook.github.io/mulgar/">mulgar</a></span><span class="op">)</span></span>
+<details class="code-fold"><summary>Code to generate the 2D non-linear representation</summary><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dicook.github.io/mulgar/">mulgar</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jkrijthe/Rtsne">Rtsne</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jlmelville/uwot">uwot</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></span>
@@ -420,15 +394,19 @@ div.csl-indent {
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>aspect.ratio<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">n1</span> <span class="op">+</span> <span class="va">n2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
-<div id="fig-nldr-clusters" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure"><p><img src="5-nldr_files/figure-html/fig-nldr-clusters-1.png" class="img-fluid figure-img" width="768"></p>
-<figcaption class="figure-caption">Figure&nbsp;5.1: Two non-linear embeddings of the non-linear clusters data: (a) t-SNE, (b) UMAP. Both suggest four clusters, with two being non-linear in some form.</figcaption></figure>
+<div id="fig-nldr-clusters" class="quarto-figure quarto-figure-center quarto-float anchored" alt="FIXME">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-nldr-clusters-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="5-nldr_files/figure-html/fig-nldr-clusters-1.png" class="img-fluid figure-img" alt="FIXME" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-nldr-clusters-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.1: Two non-linear embeddings of the non-linear clusters data: (a) t-SNE, (b) UMAP. Both suggest four clusters, with two being non-linear in some form.
+</figcaption></figure>
 </div>
 </div>
 </div>
-<p><a href="#fig-nldr-clusters">Figure&nbsp;<span>5.1</span></a> show two NLDR views of the <code>clusters_nonlin</code> data set from the <code>mulgar</code> package. Both suggest that there are four clusters, and that some clusters are non-linearly shaped. They disagree on the type of non-linear pattern, where t-SNE represents one cluster as a wavy-shape and UMAP both have a simple parabolic shape. Popular methods in current use include t-SNE <span class="citation" data-cites="Maaten2008">(<a href="references.html#ref-Maaten2008" role="doc-biblioref">Maaten &amp; Hinton, 2008</a>)</span>, UMAP <span class="citation" data-cites="McInnes2018">(<a href="references.html#ref-McInnes2018" role="doc-biblioref">McInnes et al., 2018</a>)</span> and PHATE <span class="citation" data-cites="Moon2019">(<a href="references.html#ref-Moon2019" role="doc-biblioref">Moon et al., 2019</a>)</span>.</p>
+<p><a href="#fig-nldr-clusters" class="quarto-xref">Figure&nbsp;<span>5.1</span></a> show two NLDR views of the <code>clusters_nonlin</code> data set from the <code>mulgar</code> package. Both suggest that there are four clusters, and that some clusters are non-linearly shaped. They disagree on the type of non-linear pattern, where t-SNE represents one cluster as a wavy-shape and UMAP both have a simple parabolic shape. Popular methods in current use include t-SNE <span class="citation" data-cites="Maaten2008">(<a href="references.html#ref-Maaten2008" role="doc-biblioref">Maaten &amp; Hinton, 2008</a>)</span>, UMAP <span class="citation" data-cites="McInnes2018">(<a href="references.html#ref-McInnes2018" role="doc-biblioref">McInnes et al., 2018</a>)</span> and PHATE <span class="citation" data-cites="Moon2019">(<a href="references.html#ref-Moon2019" role="doc-biblioref">Moon et al., 2019</a>)</span>.</p>
 <div class="cell">
-<details><summary>Code to create animated gif</summary><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/ggobi/tourr">tourr</a></span><span class="op">)</span></span>
+<details class="code-fold"><summary>Code to create animated gif</summary><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/ggobi/tourr">tourr</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/tourr/man/render_gif.html">render_gif</a></span><span class="op">(</span><span class="va">clusters_nonlin</span>, </span>
 <span>           <span class="fu"><a href="https://rdrr.io/pkg/tourr/man/grand_tour.html">grand_tour</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>           <span class="fu"><a href="https://rdrr.io/pkg/tourr/man/display_xy.html">display_xy</a></span><span class="op">(</span><span class="op">)</span>,</span>
@@ -438,21 +416,42 @@ div.csl-indent {
 <span>           height <span class="op">=</span> <span class="fl">300</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div id="fig-clusters-nonlin" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure"><p><img src="gifs/clusters_nonlin.gif" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption">Figure&nbsp;5.2: Grand tour of the nonlinear clusters data set, shows four clusters. Two are very small and spherical in shape. One is large, and has a sine wave shape, and the other is fairly small with a bent rod shape.</figcaption></figure>
+<div id="fig-clusters-nonlin-html" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-clusters-nonlin-html-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="gifs/clusters_nonlin.gif" class="img-fluid figure-img">
 </div>
-<p>The full 4D data is shown with a grand tour in <a href="#fig-clusters-nonlin">Figure&nbsp;<span>5.2</span></a>. The four clusters suggested by the NLDR methods can be seen. We also get a better sense of the relative size and proximity of the clusters. There are two small spherical clusters, one quite close to the end of the large sine wave cluster. The fourth cluster is relatively small, and has a slight curve, like a bent rod. The t-SNE representation is slightly more accurate than the UMAP representation. We would expect that the wavy cluster is the sine wave seen in the tour.</p>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-clusters-nonlin-html-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.2: Grand tour of the nonlinear clusters data set, shows four clusters. Two are very small and spherical in shape. One is large, and has a sine wave shape, and the other is fairly small with a bent rod shape.
+</figcaption></figure>
+</div>
+<p>::: {.content-visible when-format=“pdf”}</p>
+<div id="fig-clusters-nonlin-pdf" class="quarto-layout-panel">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-clusters-nonlin-pdf-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="images/clusters_nonlin_60.png" class="img-fluid figure-img" width="250"></p>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="images/clusters_nonlin_233.png" class="img-fluid figure-img" width="250"></p>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-clusters-nonlin-pdf-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.3: Two frames from a grand tour of the nonlinear clusters data set, shows four clusters. Two are very small and spherical in shape. One is large, and has a sine wave shape, and the other is fairly small with a bent rod shape.
+</figcaption></figure>
+</div>
+<p>The full 4D data is shown with a grand tour in <a href="#fig-clusters-nonlin-html" class="quarto-xref">Figure&nbsp;<span>5.2</span></a> @. The four clusters suggested by the NLDR methods can be seen. We also get a better sense of the relative size and proximity of the clusters. There are two small spherical clusters, one quite close to the end of the large sine wave cluster. The fourth cluster is relatively small, and has a slight curve, like a bent rod. The t-SNE representation is slightly more accurate than the UMAP representation. We would expect that the wavy cluster is the sine wave seen in the tour.</p>
 <div class="info">
-<p>NLDR can provide useful low-dimensional summaries of high-dimensional structure but you need to check whether it is a sensible and accurate representation by comparing with what is perceivd from a tour.</p>
+<p>NLDR can provide useful low-dimensional summaries of high-dimensional structure but you need to check whether it is a sensible and accurate representation by comparing with what is perceived from a tour.</p>
 </div>
-</section><section id="linking-nldr-representation-with-tour-view" class="level2" data-number="5.2"><h2 data-number="5.2" class="anchored" data-anchor-id="linking-nldr-representation-with-tour-view">
-<span class="header-section-number">5.2</span> Linking NLDR representation with tour view</h2>
-<p>NLDR can produce useful low-dimensional summaries of structure in high-dimensional data, like those shown in <a href="#fig-nldr-clusters">Figure&nbsp;<span>5.1</span></a>. However, there are numerous pitfalls. The fitting procedure can produce very different representations depending on the parameter choices, and even the random number seeding the fit. (You can check this by changing the <code>set.seed</code> in the code above, and by changing from the default parameters.) Also, it may not be possible to represent the high-dimensional structures faithfully low dimensions. For these reasons, one needs to connect the NLDR view with a tour of the data, to help assess its usefulness and accuracy. For example, with this data, we would want to know which of the two curved clusters in the UMAP representation correspond to the sine wave cluster.</p>
+</section><section id="assessing-reliability-of-the-nldr-representation" class="level2" data-number="5.2"><h2 data-number="5.2" class="anchored" data-anchor-id="assessing-reliability-of-the-nldr-representation">
+<span class="header-section-number">5.2</span> Assessing reliability of the NLDR representation</h2>
+<p>NLDR can produce useful low-dimensional summaries of structure in high-dimensional data, like those shown in <a href="#fig-nldr-clusters" class="quarto-xref">Figure&nbsp;<span>5.1</span></a>. However, there are numerous pitfalls. The fitting procedure can produce very different representations depending on the parameter choices, and even the random number seeding the fit. (You can check this by changing the <code>set.seed</code> in the code above, and by changing from the default parameters.) Also, it may not be possible to represent the high-dimensional structures faithfully low dimensions. For these reasons, one needs to connect the NLDR view with a tour of the data, to help assess its usefulness and accuracy. For example, with this data, we would want to know which of the two curved clusters in the UMAP representation correspond to the sine wave cluster.</p>
 <section id="using-liminal" class="level3" data-number="5.2.1"><h3 data-number="5.2.1" class="anchored" data-anchor-id="using-liminal">
 <span class="header-section-number">5.2.1</span> Using <code>liminal</code>
 </h3>
-<p><a href="#fig-liminal-clusters-nonlin">Figure&nbsp;<span>5.3</span></a> shows how the NLDR plot can be linked to a tour view, using the <code>liminal</code> package, to better understand how well the structure of the data is represented. Here we see learn that the smile in the UMAP embedding is the small bent rod cluster, and that the unibrow is the sine wave.</p>
+<p></p>
+<p><a href="#fig-liminal-clusters-nonlin" class="quarto-xref">Figure&nbsp;<span>5.4</span></a> shows how the NLDR plot can be linked to a tour view, using the <code>liminal</code> package, to better understand how well the structure of the data is represented. Here we see learn that the smile in the UMAP embedding is the small bent rod cluster, and that the unibrow is the sine wave.</p>
 <div class="cell">
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sa-lee/liminal/">liminal</a></span><span class="op">)</span></span>
 <span><span class="va">umap_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>umapX <span class="op">=</span> <span class="va">cnl_umap</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span>,</span>
@@ -463,21 +462,42 @@ div.csl-indent {
 <span>  cols <span class="op">=</span> <span class="va">x1</span><span class="op">:</span><span class="va">x4</span></span>
 <span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="fig-liminal-clusters-nonlin" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure"><div id="fig-smile" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure"><p><img src="images/liminal-clusters-nonlin1.png" class="img-fluid figure-img" data-ref-parent="fig-liminal-clusters-nonlin"></p>
-<figcaption class="figure-caption">(a) Smile matches bent rod.</figcaption></figure>
+<div id="fig-liminal-clusters-nonlin" class="quarto-layout-panel">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-liminal-clusters-nonlin-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-liminal-clusters-nonlin" style="flex-basis: 100.0%;justify-content: flex-start;">
+<div id="fig-smile" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-subfloat-fig figure"><div aria-describedby="fig-smile-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/liminal-clusters-nonlin1.png" class="img-fluid figure-img" data-ref-parent="fig-liminal-clusters-nonlin">
 </div>
-<div id="fig-unibrow" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure"><p><img src="images/liminal-clusters-nonlin2.png" class="img-fluid figure-img" data-ref-parent="fig-liminal-clusters-nonlin"></p>
-<figcaption class="figure-caption">(b) Unibrow matches sine wave.</figcaption></figure>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-smile-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(a) Smile matches bent rod.
+</figcaption></figure>
 </div>
-<figcaption class="figure-caption">Figure&nbsp;5.3: Two screenshots from liminal showing which clusters match between the UMAP representation and the tour animation. The smile corresponds to the small bent rod cluster. The unibrow matches to the sine wave cluster.</figcaption></figure>
+</div>
+</div>
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-liminal-clusters-nonlin" style="flex-basis: 100.0%;justify-content: flex-start;">
+<div id="fig-unibrow" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-subfloat-fig figure"><div aria-describedby="fig-unibrow-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/liminal-clusters-nonlin2.png" class="img-fluid figure-img" data-ref-parent="fig-liminal-clusters-nonlin">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-unibrow-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(b) Unibrow matches sine wave.
+</figcaption></figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-liminal-clusters-nonlin-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.4: Two screenshots from liminal showing which clusters match between the UMAP representation and the tour animation. The smile corresponds to the small bent rod cluster. The unibrow matches to the sine wave cluster.
+</figcaption></figure>
 </div>
 </section><section id="using-detourr" class="level3" data-number="5.2.2"><h3 data-number="5.2.2" class="anchored" data-anchor-id="using-detourr">
 <span class="header-section-number">5.2.2</span> Using <code>detourr</code>
 </h3>
-<p><a href="#fig-detourr-clusters-nonlin">Figure&nbsp;<span>5.4</span></a> shows how the linking is achieved using <code>detourr</code>. It uses a shared data object, as made possible by the <code>crosstalk</code> package, and the UMAP view is made interactive using <code>plotly</code>.</p>
+<p></p>
+<p><a href="#fig-detourr-clusters-nonlin" class="quarto-xref">Figure&nbsp;<span>5.5</span></a> shows how the linking is achieved using <code>detourr</code>. It uses a shared data object, as made possible by the <code>crosstalk</code> package, and the UMAP view is made interactive using <code>plotly</code>.</p>
 <div class="cell">
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://casperhart.github.io/detourr/">detourr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span></span>
@@ -510,17 +530,22 @@ div.csl-indent {
 <span>     widths <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">6</span><span class="op">)</span></span>
 <span> <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="fig-detourr-clusters-nonlin" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure"><p><img src="images/detourr-clusters-nonlin.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption">Figure&nbsp;5.4: Screenshot from detourr showing which clusters match between the UMAP representation and the tour animation. The smile corresponds to the small bent rod cluster.</figcaption></figure>
+<div id="fig-detourr-clusters-nonlin" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-detourr-clusters-nonlin-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/detourr-clusters-nonlin.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-detourr-clusters-nonlin-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.5: Screenshot from detourr showing which clusters match between the UMAP representation and the tour animation. The smile corresponds to the small bent rod cluster.
+</figcaption></figure>
 </div>
 </section></section><section id="example-fake_trees" class="level2" data-number="5.3"><h2 data-number="5.3" class="anchored" data-anchor-id="example-fake_trees">
 <span class="header-section-number">5.3</span> Example: <code>fake_trees</code>
 </h2>
-<p><a href="#fig-liminal-trees">Figure&nbsp;<span>5.5</span></a> shows a more complex example, using the <code>fake_trees</code> data. We know that the 10D data has a main branch, and 9 branches (clusters) attached to it, absed on our explorations in the earlier chapters. The t-SNE view, where points are coloured by the known branch ids, is very helpful for seeing the linear branch structure.</p>
-<p>What we can’t tell is that there is a main branch from which all of the others extend. We also can’t tell which of the clusters corresponds to this branch. Linking the plot with a tour helps with this. Although, not shown in the sequence of snapshots in <a href="#fig-liminal-trees">Figure&nbsp;<span>5.5</span></a>, the main branch is actually the dark blue cluster, which is separated into three pieces by t-SNE.</p>
+<p></p>
+<p><a href="#fig-liminal-trees" class="quarto-xref">Figure&nbsp;<span>5.6</span></a> shows a more complex example, using the <code>fake_trees</code> data. We know that the 10D data has a main branch, and 9 branches (clusters) attached to it, based on our explorations in the earlier chapters. The t-SNE view, where points are coloured by the known branch ids, is very helpful for seeing the linear branch structure.</p>
+<p>What we can’t tell is that there is a main branch from which all of the others extend. We also can’t tell which of the clusters corresponds to this branch. Linking the plot with a tour helps with this. Although, not shown in the sequence of snapshots in <a href="#fig-liminal-trees" class="quarto-xref">Figure&nbsp;<span>5.6</span></a>, the main branch is actually the dark blue cluster, which is separated into three pieces by t-SNE.</p>
 <div class="cell">
-<details><summary>Code to run liminal on the fake trees data</summary><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sa-lee/liminal/">liminal</a></span><span class="op">)</span></span>
+<details class="code-fold"><summary>Code to run liminal on the fake trees data</summary><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sa-lee/liminal/">liminal</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jkrijthe/Rtsne">Rtsne</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="va">fake_trees</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">2020</span><span class="op">)</span></span>
@@ -535,20 +560,48 @@ div.csl-indent {
 <span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div id="fig-liminal-trees" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure"><div id="fig-trees1" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure"><p><img src="images/fake_trees1.png" class="img-fluid figure-img" data-ref-parent="fig-liminal-trees"></p>
-<figcaption class="figure-caption">(a) Linked views of t-SNE dimension reduction with a tour of the fake trees data. The t-SNE view clearly shows ten 1D non-linear clusters, while the tour of the full 100 variables suggests a lot more variation in the data, and less difference between clusters.</figcaption></figure>
+<div id="fig-liminal-trees" class="quarto-layout-panel">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-liminal-trees-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-liminal-trees" style="flex-basis: 100.0%;justify-content: flex-start;">
+<div id="fig-trees1" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-subfloat-fig figure"><div aria-describedby="fig-trees1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/fake_trees1.png" class="img-fluid figure-img" data-ref-parent="fig-liminal-trees">
 </div>
-<div id="fig-trees2" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure"><p><img src="images/fake_trees2.png" class="img-fluid figure-img" data-ref-parent="fig-liminal-trees"></p>
-<figcaption class="figure-caption">(b) Focus on the green cluster which is split by t-SNE. The shape as viewed in many linear projections shown by the tour shows that it is a single curved cluster. The split is an artifact of the t-SNE mapping.</figcaption></figure>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-trees1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(a) Linked views of t-SNE dimension reduction with a tour of the fake trees data. The t-SNE view clearly shows ten 1D non-linear clusters, while the tour of the full 100 variables suggests a lot more variation in the data, and less difference between clusters.
+</figcaption></figure>
 </div>
-<div id="fig-trees3" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure"><p><img src="images/fake_trees3.png" class="img-fluid figure-img" data-ref-parent="fig-liminal-trees"></p>
-<figcaption class="figure-caption">(c) Focus on the purple cluster which splits the green cluster in the t-SNE view. The tour shows that these two clusters are distinct, but are close in one neighbourhood of the 100D space. The close proximity in the t-SNE view is reasonable, though.</figcaption></figure>
 </div>
-<figcaption class="figure-caption">Figure&nbsp;5.5: Three snapshots of using the <code>liminal</code> linked views to explore how t-SNE has summarised the <code>fake_trees</code> data in 2D.</figcaption></figure>
+</div>
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-liminal-trees" style="flex-basis: 100.0%;justify-content: flex-start;">
+<div id="fig-trees2" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-subfloat-fig figure"><div aria-describedby="fig-trees2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/fake_trees2.png" class="img-fluid figure-img" data-ref-parent="fig-liminal-trees">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-trees2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(b) Focus on the green cluster which is split by t-SNE. The shape as viewed in many linear projections shown by the tour shows that it is a single curved cluster. The split is an artifact of the t-SNE mapping.
+</figcaption></figure>
+</div>
+</div>
+</div>
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-liminal-trees" style="flex-basis: 100.0%;justify-content: flex-start;">
+<div id="fig-trees3" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-subfloat-fig figure"><div aria-describedby="fig-trees3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/fake_trees3.png" class="img-fluid figure-img" data-ref-parent="fig-liminal-trees">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-trees3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(c) Focus on the purple cluster which splits the green cluster in the t-SNE view. The tour shows that these two clusters are distinct, but are close in one neighbourhood of the 100D space. The close proximity in the t-SNE view is reasonable, though.
+</figcaption></figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-liminal-trees-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.6: Three snapshots of using the <code>liminal</code> linked views to explore how t-SNE has summarised the <code>fake_trees</code> data in 2D.
+</figcaption></figure>
 </div>
 <div class="insight">
 <p>The t-SNE representation clearly shows the linear structures of the data, but viewing this 10D data with the tour shows that t-SNE makes several inaccurate breaks of some of the branches.</p>
@@ -557,20 +610,23 @@ div.csl-indent {
 <ol type="1">
 <li>Using the <code>penguins_sub</code> data generate a 2D representation using t-SNE. Plot the points mapping the colour to species. What is most surprising? (Hint: Are the three species represented by three distinct clusters?)</li>
 <li>Re-do the t-SNE representation with different parameter choices. Are the results different each time, or could they be considered to be equivalent?</li>
-<li>Use <code>liminal</code> to link the t-SNE representation to a tour of the penguins. Highlight the points that have been placed in an awkward position by t-SNE from others in their species. Watch them relative to the others in their species in the tour view, and think about whether there is any rationale for the awkward placement.</li>
-<li>Use UMAP to make the 2D representation, and use <code>liminal</code> to link with a tour to explore the result.</li>
-<li>Repeat 1-4 using <code>detourr</code>.</li>
+<li>Use <code>liminal</code> or <code>detourr</code> to link the t-SNE representation to a tour of the penguins. Highlight the points that have been placed in an awkward position by t-SNE from others in their species. Watch them relative to the others in their species in the tour view, and think about whether there is any rationale for the awkward placement.</li>
+<li>Use UMAP to make the 2D representation, and use <code>liminal</code> or <code>detourr</code> to link with a tour to explore the result.</li>
+<li>Conduct your best t-SNE and UMAP representations of the <code>aflw</code> data. Compare and contrast what is learned relative to a tour on the principal component analysis.</li>
 </ol>
 <!--
 ![The t-SNE mapping of the penguins data inaccurately splits one of the clusters. The three clusters are clearly distinct when viewed with the tour.](images/penguins-tsne.png){#fig-penguins-tsne}
 -->
 
-<div id="refs" class="references csl-bib-body hanging-indent" data-line-spacing="2" role="list" style="display: none">
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list" style="display: none">
 <div id="ref-Ab1884" class="csl-entry" role="listitem">
 Abbott, E. (1884). <em>Flatland: A romance of many dimensions</em>. Dover Publications.
 </div>
 <div id="ref-AWS91" class="csl-entry" role="listitem">
 Ahlberg, C., Williamson, C., &amp; Shneiderman, B. (1991). Dynamic <span>Q</span>ueries for <span>I</span>nformation <span>E</span>xploration: <span>A</span>n <span>I</span>mplementation and <span>E</span>valuation. <em>ACM CHI ‘92 Conference Proceedings</em>, 619–626.
+</div>
+<div id="ref-keras" class="csl-entry" role="listitem">
+Allaire, J., &amp; Chollet, F. (2023). <em>Keras: R interface to ’keras’</em>. <a href="https://CRAN.R-project.org/package=keras">https://CRAN.R-project.org/package=keras</a>
 </div>
 <div id="ref-An57" class="csl-entry" role="listitem">
 Anderson, E. (1957). A <span>S</span>emigraphical <span>M</span>ethod for the <span>A</span>nalysis of <span>C</span>omplex <span>P</span>roblems. <em>Proceedings of the National Academy of Science, 13</em>, 923–927.
@@ -634,9 +690,6 @@ Borg, I., &amp; Groenen, P. J. F. (2005). <em>Modern <span>M</span>ultidimension
 </div>
 <div id="ref-Br01" class="csl-entry" role="listitem">
 Breiman, L. (2001). Random <span>F</span>orests. <em>Machine Learning</em>, <em>45</em>(1), 5–32.
-</div>
-<div id="ref-Cu04" class="csl-entry" role="listitem">
-Breiman, L., &amp; Cutler, A. (2004). <em>Random <span>F</span>orests</em>. <span><code>http://www.math.usu.edu/</code><span class="math inline">\(\sim\)</span><code>adele/forests/cc_home.htm</code></span>.
 </div>
 <div id="ref-R-randomForest" class="csl-entry" role="listitem">
 Breiman, L., Cutler, A., Liaw, A., &amp; Wiener, M. (2022). <em>randomForest: Breiman and cutler’s random forests for classification and regression</em>. <a href="https://www.stat.berkeley.edu/~breiman/RandomForests/">https://www.stat.berkeley.edu/~breiman/RandomForests/</a>
@@ -723,7 +776,7 @@ Cook, D., Buja, A., Cabrera, J., &amp; Hurley, C. (1995a). Grand <span>T</span>o
 Cook, D., Hofmann, H., Lee, E.-K., Yang, H., Nikolau, B., &amp; Wurtele, E. (2007). Exploring <span>G</span>ene <span>E</span>xpression <span>D</span>ata, <span>U</span>sing <span>P</span>lots. <em>Journal of Data Science</em>, <em>5</em>(2), 151–182.
 </div>
 <div id="ref-R-mulgar" class="csl-entry" role="listitem">
-Cook, D., &amp; Laa, U. (2023). <em>Mulgar: Functions for pre-processing data for multivariate data visualisation using tours</em>.
+Cook, D., &amp; Laa, U. (2023). <em>Mulgar: Functions for pre-processing data for multivariate data visualisation using tours</em>. <a href="https://dicook.github.io/mulgar/">https://dicook.github.io/mulgar/</a>
 </div>
 <div id="ref-CLBW06" class="csl-entry" role="listitem">
 Cook, D., Lee, E.-K., Buja, A., &amp; Wickham, H. (2006). <span>G</span>rand <span>T</span>ours, <span>P</span>rojection <span>P</span>ursuit <span>G</span>uided <span>T</span>ours and <span>M</span>anual <span>C</span>ontrols. In C.-H. Chen, W. Härdle, &amp; A. Unwin (Eds.), <em>Handbook of <span>D</span>ata <span>V</span>isualization</em>. Springer.
@@ -813,10 +866,10 @@ Friedman, J. H. (1987). <span>E</span>xploratory <span>P</span>rojection <span>P
 Friedman, J. H., &amp; Tukey, J. W. (1974). <span>A</span> <span>P</span>rojection <span>P</span>ursuit <span>A</span>lgorithm for <span>E</span>xploratory <span>D</span>ata <span>A</span>nalysis. <em>IEEE Transactions on Computing C</em>, <em>23</em>, 881–889.
 </div>
 <div id="ref-FD04" class="csl-entry" role="listitem">
-Friendly, M., &amp; Denis, D. J. (2004). <em>Milestones in the history of thematic cartography, statistical graphics, and data visualization</em>.<span><code> http://www.math.yorku.ca/SCS/Gallery/milestone/</code></span>.
+Friendly, M., &amp; Denis, D. J. (2004). <em>Milestones in the history of thematic cartography, statistical graphics, and data visualization</em>. http://www.math.yorku.ca/SCS/Gallery/milestone/.
 </div>
-<div id="ref-FrDe" class="csl-entry" role="listitem">
-Friendly, M., &amp; Denis, D. J. (2006). <em><span>G</span>raphical <span>M</span>ilestones</em>. <span><code>http://www.math.yorku.ca/SCS/Gallery/milestone</code></span>.
+<div id="ref-neuralnet" class="csl-entry" role="listitem">
+Fritsch, S., Guenther, F., &amp; Wright, M. N. (2019). <em>Neuralnet: Training of neural networks</em>. <a href="https://CRAN.R-project.org/package=neuralnet">https://CRAN.R-project.org/package=neuralnet</a>
 </div>
 <div id="ref-FB94" class="csl-entry" role="listitem">
 Furnas, G. W., &amp; Buja, A. (1994). Prosection <span>V</span>iews: <span>D</span>imensional <span>I</span>nference <span>T</span>hrough <span>S</span>ections and <span>P</span>rojections. <em>Journal of Computational and Graphical Statistics</em>, <em>3</em>(4), 323–385.
@@ -846,7 +899,10 @@ Hajibaba, H., Karlsson, L., &amp; Dolnicar, S. (2016). Residents open their home
 Hansen, C., &amp; Johnson, C. R. (2004). <em>Visualization handbook</em>. Academic Press.
 </div>
 <div id="ref-R-langevitour" class="csl-entry" role="listitem">
-Harrison, P. (2022). <em>Langevitour: Langevin tour</em>. <a href="https://logarithmic.net/langevitour/">https://logarithmic.net/langevitour/</a>
+Harrison, P. (2023a). <em>Langevitour: Langevin tour</em>. <a href="https://logarithmic.net/langevitour/">https://logarithmic.net/langevitour/</a>
+</div>
+<div id="ref-langevitour2023" class="csl-entry" role="listitem">
+Harrison, P. (2023b). Langevitour: Smooth interactive touring of high dimensions, demonstrated with scRNA-seq data. <em>The R Journal</em>, <em>15</em>(2), 206–219. <a href="https://doi.org/10.32614/RJ-2023-046">https://doi.org/10.32614/RJ-2023-046</a>
 </div>
 <div id="ref-R-detourr" class="csl-entry" role="listitem">
 Hart, C., &amp; Wang, E. (2022). <em>Detourr: Portable and performant tour animations</em>. <a href="https://casperhart.github.io/detourr/">https://casperhart.github.io/detourr/</a>
@@ -951,6 +1007,9 @@ Kuhn, M., &amp; Wickham, H. (2020). <em>Tidymodels: A collection of packages for
 Kuhn, M., &amp; Wickham, H. (2023). <em>Tidymodels: Easily install and load the tidymodels packages</em>. <a href="https://CRAN.R-project.org/package=tidymodels">https://CRAN.R-project.org/package=tidymodels</a>
 </div>
 <div id="ref-sagetour" class="csl-entry" role="listitem">
+Laa, U., Cook, D., &amp; Lee, S. (2022). Burning sage: Reversing the curse of dimensionality in the visualization of high-dimensional data. <em>Journal of Computational and Graphical Statistics</em>, <em>31</em>(1), 40–49. <a href="https://doi.org/10.1080/10618600.2021.1963264">https://doi.org/10.1080/10618600.2021.1963264</a>
+</div>
+<div id="ref-slicetour" class="csl-entry" role="listitem">
 Laa, U., Cook, D., &amp; Valencia, G. (2020a). A slice tour for finding hollowness in high-dimensional data. <em>Journal of Computational and Graphical Statistics</em>, <em>29</em>(3), 681–687. <a href="https://doi.org/10.1080/10618600.2020.1777140">https://doi.org/10.1080/10618600.2020.1777140</a>
 </div>
 <div id="ref-tourr2020" class="csl-entry" role="listitem">
@@ -962,9 +1021,6 @@ Lancaster, H. O. (1965). The helmert matrices. <em>The American Mathematical Mon
 <div id="ref-R-cxhull" class="csl-entry" role="listitem">
 Laurent, S. (2023). <em>Cxhull: Convex hull</em>. <a href="https://github.com/stla/cxhull">https://github.com/stla/cxhull</a>
 </div>
-<div id="ref-LCKL04" class="csl-entry" role="listitem">
-Lee, E. K., Cook, D., Klinke, S., &amp; Lumley, T. (2005a). Projection <span>P</span>ursuit for <span>E</span>xploratory <span>S</span>upervised <span>C</span>lassification. <em>Journal of Computational and Graphical Statistics</em>, <em>14</em>(4), 831–846.
-</div>
 <div id="ref-Lee2018" class="csl-entry" role="listitem">
 Lee, E.-K. (2018). PPtreeViz: An r package for visualizing projection pursuit classification trees. <em>Journal of Statistical Software</em>, <em>83</em>(8), 1–30. <a href="https://doi.org/10.18637/jss.v083.i08">https://doi.org/10.18637/jss.v083.i08</a>
 </div>
@@ -972,7 +1028,7 @@ Lee, E.-K. (2018). PPtreeViz: An r package for visualizing projection pursuit cl
 Lee, E.-K., &amp; Cook, D. (2009). A projection pursuit index for large <span class="math inline">\(p\)</span> small <span class="math inline">\(n\)</span> data. <em>Statistics and Computing</em>, <em>20</em>, 381–392. <a href="https://doi.org/10.1007/s11222-009-9131-1">https://doi.org/10.1007/s11222-009-9131-1</a>
 </div>
 <div id="ref-LCKL05" class="csl-entry" role="listitem">
-Lee, E.-K., Cook, D., Klinke, S., &amp; Lumley, T. (2005b). <span>P</span>rojection <span>P</span>ursuit for <span>E</span>xploratory <span>S</span>upervised <span>C</span>lassification. <em>Journal of Computational and Graphical Statistics</em>, <em>14</em>(4), 831–846.
+Lee, E.-K., Cook, D., Klinke, S., &amp; Lumley, T. (2005). <span>P</span>rojection <span>P</span>ursuit for <span>E</span>xploratory <span>S</span>upervised <span>C</span>lassification. <em>Journal of Computational and Graphical Statistics</em>, <em>14</em>(4), 831–846.
 </div>
 <div id="ref-R-liminal" class="csl-entry" role="listitem">
 Lee, S. (2021). <em>Liminal: Multivariate data visualization with tours and embeddings</em>. <a href="https://CRAN.R-project.org/package=liminal">https://CRAN.R-project.org/package=liminal</a>
@@ -988,6 +1044,9 @@ Leisch, F., &amp; Gruen, B. (2023). <em>CRAN task view: Cluster analysis &amp; f
 </div>
 <div id="ref-R-MSA" class="csl-entry" role="listitem">
 Leisch, F., &amp; Grün, B. (2020). <em>MSA: Market segmentation analysis</em>.
+</div>
+<div id="ref-li2020visualizing" class="csl-entry" role="listitem">
+Li, M., Zhao, Z., &amp; Scheidegger, C. (2020). Visualizing neural networks with the grand tour. <em>Distill</em>. <a href="https://doi.org/10.23915/distill.00025">https://doi.org/10.23915/distill.00025</a>
 </div>
 <div id="ref-randomForest2002" class="csl-entry" role="listitem">
 Liaw, A., &amp; Wiener, M. (2002). Classification and regression by randomForest. <em>R News</em>, <em>2</em>(3), 18–22. <a href="https://CRAN.R-project.org/doc/Rnews/">https://CRAN.R-project.org/doc/Rnews/</a>
@@ -1016,6 +1075,9 @@ Maindonald, J., &amp; Braun, J. (2003). <em>Data analysis and graphics using r -
 <div id="ref-Ma65" class="csl-entry" role="listitem">
 Martin, E. (1965). <em>Flatland</em>. http://www.der.org/films/flatland.html.
 </div>
+<div id="ref-kernelshap" class="csl-entry" role="listitem">
+Mayer, M., &amp; Watson, D. (2023). <em>Kernelshap: Kernel SHAP</em>. <a href="https://CRAN.R-project.org/package=kernelshap">https://CRAN.R-project.org/package=kernelshap</a>
+</div>
 <div id="ref-MY94" class="csl-entry" role="listitem">
 McFarlane, M., &amp; Young, F. W. (1994). Graphical <span>S</span>ensitivity <span>A</span>nalysis for <span>M</span>ultidimensional <span>S</span>caling. <em>Journal of Computational and Graphical Statistics</em>, <em>3</em>, 23–33.
 </div>
@@ -1037,6 +1099,9 @@ Milborrow, S. (2022). <em>Rpart.plot: Plot rpart models: An enhanced version of 
 <div id="ref-R-gtExtras" class="csl-entry" role="listitem">
 Mock, T. (2022). <em>gtExtras: Extending gt for beautiful HTML tables</em>. <a href="https://CRAN.R-project.org/package=gtExtras">https://CRAN.R-project.org/package=gtExtras</a>
 </div>
+<div id="ref-iml" class="csl-entry" role="listitem">
+Molnar, C. (2022). <em>Interpretable machine learning: A guide for making black box models explainable (2nd ed)</em>. https://christophm.github.io/interpretable-ml-book/.
+</div>
 <div id="ref-Moon2019" class="csl-entry" role="listitem">
 Moon, K. R., Dijk, D. van, Wang, Z., Gigante, S., Burkhardt, D. B., Chen, W. S., Yim, K., Elzen, A. van den, Hirn, M. J., Coifman, R. R., Ivanova, N. B., Wolf, G., &amp; Krishnaswamy, S. (2019). Visualizing structure and transitions for biological data exploration. <em>Nature Biotechnology</em>, <em>37</em>, 1482–1492. <a href="https://doi.org/10.1038/s41587-019-0336-3">https://doi.org/10.1038/s41587-019-0336-3</a>
 </div>
@@ -1050,7 +1115,7 @@ OpenStreetMap contributors. (2020). <em><span class="nocase">Planet dump retriev
 Pearson, K. (1901). LIII. On lines and planes of closest fit to systems of points in space. <em>The London, Edinburgh, and Dublin Philosophical Magazine and Journal of Science</em>, <em>2</em>(11), 559–572. <a href="https://doi.org/10.1080/14786440109462720">https://doi.org/10.1080/14786440109462720</a>
 </div>
 <div id="ref-R-patchwork" class="csl-entry" role="listitem">
-Pedersen, T. L. (2022). <em>Patchwork: The composer of plots</em>. <a href="https://CRAN.R-project.org/package=patchwork">https://CRAN.R-project.org/package=patchwork</a>
+Pedersen, T. L. (2023). <em>Patchwork: The composer of plots</em>. <a href="https://CRAN.R-project.org/package=patchwork">https://CRAN.R-project.org/package=patchwork</a>
 </div>
 <div id="ref-perisic2009" class="csl-entry" role="listitem">
 Perisic, I., &amp; Posse, C. (2005). Projection pursuit indices based on the empirical distribution function. <em>Journal of Computational and Graphical Statistics</em>, <em>14</em>(3), 700–715. <a href="https://doi.org/10.1198/106186005X69440">https://doi.org/10.1198/106186005X69440</a>
@@ -1095,7 +1160,7 @@ Rothkopf, E. Z. (1957). A <span>M</span>easure of <span>S</span>timulus <span>S<
 Schloerke, B. (2016). <em>Geozoo: Zoo of geometric objects</em>. <a href="https://CRAN.R-project.org/package=geozoo">https://CRAN.R-project.org/package=geozoo</a>
 </div>
 <div id="ref-R-GGally" class="csl-entry" role="listitem">
-Schloerke, B., Cook, D., Larmarange, J., Briatte, F., Marbach, M., Thoen, E., Elberg, A., &amp; Crowley, J. (2023). <em>GGally: Extension to ggplot2</em>.
+Schloerke, B., Cook, D., Larmarange, J., Briatte, F., Marbach, M., Thoen, E., Elberg, A., &amp; Crowley, J. (2023). <em>GGally: Extension to ggplot2</em>. <a href="https://ggobi.github.io/ggally/">https://ggobi.github.io/ggally/</a>
 </div>
 <div id="ref-mclust2016" class="csl-entry" role="listitem">
 Scrucca, L., Fop, M., Murphy, T. B., &amp; Raftery, A. E. (2016). <span class="nocase">mclust</span> 5: Clustering, classification and density estimation using <span>G</span>aussian finite mixture models. <em>The <span>R</span> Journal</em>, <em>8</em>(1), 289–317. <a href="https://doi.org/10.32614/RJ-2016-021">https://doi.org/10.32614/RJ-2016-021</a>
@@ -1170,7 +1235,7 @@ Tarpey, T., Li, L., &amp; Flury, B. (1995). Principal points and self–consiste
 Temple Lang, D., Swayne, D., Wickham, H., &amp; Lawrence, M. (2006). <em><span><code>rggobi</code></span>: <span>A</span>n <span>I</span>nterface between <span>R</span> and <span>GG</span>obi</em>.<span><code> http://www.R-project.org</code></span>.
 </div>
 <div id="ref-R-rpart" class="csl-entry" role="listitem">
-Therneau, T., &amp; Atkinson, B. (2022). <em>Rpart: Recursive partitioning and regression trees</em>. <a href="https://CRAN.R-project.org/package=rpart">https://CRAN.R-project.org/package=rpart</a>
+Therneau, T., &amp; Atkinson, B. (2023). <em>Rpart: Recursive partitioning and regression trees</em>. <a href="https://CRAN.R-project.org/package=rpart">https://CRAN.R-project.org/package=rpart</a>
 </div>
 <div id="ref-Theus02" class="csl-entry" role="listitem">
 Theus, M. (2002). Interactive <span>D</span>ata <span>V</span>isualization <span>U</span>sing <span>M</span>ondrian. <em>Journal of Statistical Software</em>, <em>7</em>(11), http://www.jstatsoft.org.
@@ -1287,7 +1352,7 @@ Wickham, H. (2022). <em>Classifly: Explore classification models in high dimensi
 Wickham, H., Chang, W., Henry, L., Pedersen, T. L., Takahashi, K., Wilke, C., Woo, K., Yutani, H., &amp; Dunnington, D. (2023). <em>ggplot2: Create elegant data visualisations using the grammar of graphics</em>. <a href="https://CRAN.R-project.org/package=ggplot2">https://CRAN.R-project.org/package=ggplot2</a>
 </div>
 <div id="ref-R-tourr" class="csl-entry" role="listitem">
-Wickham, H., &amp; Cook, D. (2023). <em>Tourr: Tour methods for multivariate data visualisation</em>. <a href="https://github.com/ggobi/tourr">https://github.com/ggobi/tourr</a>
+Wickham, H., &amp; Cook, D. (2024). <em>Tourr: Tour methods for multivariate data visualisation</em>. <a href="https://github.com/ggobi/tourr">https://github.com/ggobi/tourr</a>
 </div>
 <div id="ref-wickham2015" class="csl-entry" role="listitem">
 Wickham, H., Cook, D., &amp; Hofmann, H. (2015). Visualizing statistical models: Removing the blindfold. <em>Statistical Analysis and Data Mining: The ASA Data Science Journal</em>, <em>8</em>(4), 203–225. <a href="https://doi.org/10.1002/sam.11271">https://doi.org/10.1002/sam.11271</a>
@@ -1417,10 +1482,9 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     // clear code selection
     e.clearSelection();
   });
-  function tippyHover(el, contentFn) {
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
     const config = {
       allowHTML: true,
-      content: contentFn,
       maxWidth: 500,
       delay: 100,
       arrow: false,
@@ -1430,8 +1494,17 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       interactive: true,
       interactiveBorder: 10,
       theme: 'quarto',
-      placement: 'bottom-start'
+      placement: 'bottom-start',
     };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
     window.tippy(el, config); 
   }
   const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
@@ -1444,6 +1517,125 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
       return note.innerHTML;
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
     });
   }
       let selectedAnnoteEl;
@@ -1487,6 +1679,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             }
             div.style.top = top - 2 + "px";
             div.style.height = height + 4 + "px";
+            div.style.left = 0;
             let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
             if (gutterDiv === null) {
               gutterDiv = window.document.createElement("div");
@@ -1512,6 +1705,32 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         });
         selectedAnnoteEl = undefined;
       };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
       // Attach click handler to the DT
       const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
       for (const annoteDlNode of annoteDls) {
@@ -1571,23 +1790,27 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
 });
 </script><nav class="page-navigation"><div class="nav-page nav-page-previous">
-      <a href="./4-pca.html" class="pagination-link">
+      <a href="./4-pca.html" class="pagination-link  aria-label=" component="" analysis="">
         <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Principal component analysis</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./6-intro-clust.html" class="pagination-link">
-        <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Overview</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./6-intro-clust.html" class="pagination-link" aria-label="<span class='chapter-number'>6</span>&nbsp; <span class='chapter-title'>Introduction to clustering</span>">
+        <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Introduction to clustering</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
 </div> <!-- /content -->
 <footer class="footer"><div class="nav-footer">
-    <div class="nav-footer-left">Interactively exploring high-dimensional data and models in R was written by Dianne Cook and Ursula Laa.</div>   
+    <div class="nav-footer-left">
+<p>Interactively exploring high-dimensional data and models in R was written by Dianne Cook and Ursula Laa.</p>
+</div>   
     <div class="nav-footer-center">
       &nbsp;
-    </div>
-    <div class="nav-footer-right">This book was built with <a href="https://quarto.org/">Quarto</a>.</div>
+    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/dicook/mulgar_book/edit/master/5-nldr.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/dicook/mulgar_book/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+    <div class="nav-footer-right">
+<p>This book was built with <a href="https://quarto.org/">Quarto</a>.</p>
+</div>
   </div>
 </footer>
 

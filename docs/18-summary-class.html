@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.3.433">
+<meta name="generator" content="quarto-1.4.549">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <title>Interactively exploring high-dimensional data and models in R - 18&nbsp; Exploring misclassifications</title>
 <style>
@@ -19,7 +19,7 @@ ul.task-list li input[type="checkbox"] {
 }
 /* CSS for syntax highlighting */
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -55,6 +55,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 div.csl-bib-body { }
 div.csl-entry {
   clear: both;
+  margin-bottom: 0em;
 }
 .hanging-indent div.csl-entry {
   margin-left:2em;
@@ -79,7 +80,7 @@ div.csl-indent {
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./19-mv-time-series.html" rel="next">
+<link href="./references.html" rel="next">
 <link href="./17-nn.html" rel="prev">
 <link href="./cover.png" rel="icon" type="image/png">
 <script src="site_libs/quarto-html/quarto.js"></script>
@@ -96,7 +97,13 @@ div.csl-indent {
   "collapse-after": 3,
   "panel-placement": "start",
   "type": "textbox",
-  "limit": 20,
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
   "language": {
     "search-no-results-text": "No results",
     "search-matching-documents-text": "matching documents",
@@ -105,33 +112,59 @@ div.csl-indent {
     "search-more-match-text": "more match in this document",
     "search-more-matches-text": "more matches in this document",
     "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
     "search-detached-cancel-button-title": "Cancel",
     "search-submit-button-title": "Submit",
     "search-label": "Search"
   }
-}</script><script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+}</script><script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script><script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 </head>
 <body class="nav-sidebar floating">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top"><nav class="quarto-secondary-nav"><div class="container-fluid d-flex">
-      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./13-intro-class.html">Supervised classification</a></li><li class="breadcrumb-item"><a href="./18-summary-class.html"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Exploring misclassifications</span></a></li></ol></nav>
-      <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-      </a>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./18-summary-class.html"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Exploring misclassifications</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
         <i class="bi bi-search"></i>
       </button>
     </div>
   </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto"><div class="pt-lg-2 mt-2 text-left sidebar-header">
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
       <a href="./">Interactively exploring high-dimensional data and models in R</a> 
         <div class="sidebar-tools-main">
-    <a href="https://github.com/dicook/mulgar_book" rel="" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+    <a href="https://github.com/dicook/mulgar_book" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
 </div>
     </div>
       </div>
@@ -148,174 +181,113 @@ div.csl-indent {
  <span class="menu-text">Preface</span></a>
   </div>
 </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
- <span class="menu-text">Introduction</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">
-<li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./1-intro.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Picturing high dimensions</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./2-notation.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Notation conventions and R objects</span></span></a>
   </div>
 </li>
-      </ul>
-</li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
- <span class="menu-text">Dimension reduction</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">
-<li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./3-intro-dimred.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Overview</span></span></a>
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Dimension reduction overview</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./4-pca.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Principal component analysis</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./5-nldr.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Non-linear dimension reduction</span></span></a>
   </div>
 </li>
-      </ul>
-</li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">
- <span class="menu-text">Cluster analysis</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">
-<li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./6-intro-clust.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Overview</span></span></a>
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Introduction to clustering</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./7-spin-and-brush.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Spin-and-brush approach</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./8-hierarchical.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Hierarchical clustering</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./9-kmeans.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title"><span class="math inline">\(k\)</span>-means clustering</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./10-model-based.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Model-based clustering</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./11-som.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Self-organizing maps</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./12-summary-clust.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Summarising and comparing results</span></span></a>
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Summarising and comparing clustering results</span></span></a>
   </div>
 </li>
-      </ul>
-</li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true">
- <span class="menu-text">Supervised classification</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">
-<li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./13-intro-class.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Overview</span></span></a>
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Introduction to supervised classification</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./14-lda.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Linear discriminant analysis</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./15-forests.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Trees and forests</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./16-svm.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Support vector machines</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./17-nn.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Neural networks and deep learning</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./18-summary-class.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Exploring misclassifications</span></span></a>
   </div>
-</li>
-      </ul>
-</li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true">
- <span class="menu-text">Miscellaneous</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">
-<li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./19-mv-time-series.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Multiple time series</span></span></a>
-  </div>
-</li>
-      </ul>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
@@ -325,13 +297,13 @@ div.csl-indent {
 </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-expanded="true">
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
  <span class="menu-text">Appendices</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-expanded="true" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">
 <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./A1-toolbox.html" class="sidebar-item-text sidebar-link">
@@ -346,7 +318,7 @@ div.csl-indent {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./A3-book_code_and_data.html" class="sidebar-item-text sidebar-link">
+  <a href="./A3-book-code-and-data.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Links to Book Code and Additional Data</span></span></a>
   </div>
 </li>
@@ -360,14 +332,18 @@ div.csl-indent {
 </li>
     </ul>
 </div>
-</nav><div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Table of contents</h2>
    
   <ul>
-<li><a href="#exercises" id="toc-exercises" class="nav-link active" data-scroll-target="#exercises">Exercises</a></li>
-  </ul><div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/dicook/mulgar_book/edit/master/18-summary-class.qmd" class="toc-action">Edit this page</a></p><p><a href="https://github.com/dicook/mulgar_book/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
+<li><a href="#errors-for-a-single-model" id="toc-errors-for-a-single-model" class="nav-link active" data-scroll-target="#errors-for-a-single-model"><span class="header-section-number">18.1</span> Errors for a single model</a></li>
+  <li><a href="#comparison-between-lda-and-cnn" id="toc-comparison-between-lda-and-cnn" class="nav-link" data-scroll-target="#comparison-between-lda-and-cnn"><span class="header-section-number">18.2</span> Comparison between LDA and CNN</a></li>
+  <li><a href="#constructing-data-to-diagnose-your-model" id="toc-constructing-data-to-diagnose-your-model" class="nav-link" data-scroll-target="#constructing-data-to-diagnose-your-model"><span class="header-section-number">18.3</span> Constructing data to diagnose your model</a></li>
+  <li><a href="#explainability" id="toc-explainability" class="nav-link" data-scroll-target="#explainability"><span class="header-section-number">18.4</span> Explainability</a></li>
+  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises">Exercises</a></li>
+  </ul><div class="toc-actions"><ul><li><a href="https://github.com/dicook/mulgar_book/edit/master/18-summary-class.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/dicook/mulgar_book/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
@@ -386,38 +362,36 @@ div.csl-indent {
   </div>
   
 
-</header><p>To examine misclassifications, we can create a separate variable that identifies the errors or not. Constructing this for each class, and exploring in small steps is helpful. Let’s do this using the random forest model for the penguins fit. The random forest fit has only a few misclassifications. There are four Adelie penguins confused with Chinstrap, and similarly four Chinstrap confused with Adelie. There is one Gentoo penguin confused with a Chinstrap. This is interesting, because the Gentoo cluster is well separated from the clusters of the other two penguin species.</p>
+
+</header><p></p>
+<section id="errors-for-a-single-model" class="level2" data-number="18.1"><h2 data-number="18.1" class="anchored" data-anchor-id="errors-for-a-single-model">
+<span class="header-section-number">18.1</span> Errors for a single model</h2>
+<p>To examine misclassifications, we can create a separate variable that identifies the errors or not. Constructing this for each class, and exploring in small steps is helpful. Let’s do this using the random forest model for the penguins fit. The random forest fit has only a few misclassifications. There are four Adelie penguins confused with Chinstrap, and similarly four Chinstrap confused with Adelie. There is one Gentoo penguin confused with a Chinstrap. This is interesting, because the Gentoo cluster is well separated from the clusters of the other two penguin species.</p>
 <div class="cell">
-<details><summary>Code to fit forest</summary><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://www.stat.berkeley.edu/~breiman/RandomForests/">randomForest</a></span><span class="op">)</span></span>
+<details class="code-fold"><summary>Code to fit forest</summary><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://www.stat.berkeley.edu/~breiman/RandomForests/">randomForest</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"data/penguins_sub.rda"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">penguins_rf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/randomForest/man/randomForest.html">randomForest</a></span><span class="op">(</span><span class="va">species</span><span class="op">~</span><span class="va">.</span>,</span>
 <span>                             data<span class="op">=</span><span class="va">penguins_sub</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>,</span>
-<span>                             importance<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="va">penguins_rf</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details><div class="cell-output cell-output-stdout">
-<pre><code>
-Call:
- randomForest(formula = species ~ ., data = penguins_sub[, 1:5],      importance = TRUE) 
-               Type of random forest: classification
-                     Number of trees: 500
-No. of variables tried at each split: 2
-
-        OOB estimate of  error rate: 2.4%
-Confusion matrix:
-          Adelie Chinstrap Gentoo class.error
-Adelie       143         3      0 0.020547945
+<span>                             importance<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p></p>
+<div class="cell">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">penguins_rf</span><span class="op">$</span><span class="va">confusion</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>          Adelie Chinstrap Gentoo class.error
+Adelie       142         4      0 0.027397260
 Chinstrap      4        64      0 0.058823529
 Gentoo         0         1    118 0.008403361</code></pre>
 </div>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">penguins_errors</span> <span class="op">&lt;-</span> <span class="va">penguins_sub</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>err <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span><span class="op">(</span><span class="va">penguins_rf</span><span class="op">$</span><span class="va">predicted</span> <span class="op">!=</span></span>
+<span>                        <span class="va">penguins_rf</span><span class="op">$</span><span class="va">y</span>, <span class="fl">1</span>, <span class="fl">0</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">penguins_errors</span> <span class="op">&lt;-</span> <span class="va">penguins_sub</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>err <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span><span class="op">(</span><span class="va">penguins_rf</span><span class="op">$</span><span class="va">predicted</span> <span class="op">!=</span> <span class="va">penguins_rf</span><span class="op">$</span><span class="va">y</span>, <span class="fl">1</span>, <span class="fl">0</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div class="cell">
-<details><summary>Code to make animated gifs</summary><div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/ggobi/tourr">tourr</a></span><span class="op">)</span></span>
+<details class="code-fold"><summary>Code to make animated gifs</summary><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/ggobi/tourr">tourr</a></span><span class="op">)</span></span>
 <span><span class="va">symbols</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">16</span><span class="op">)</span></span>
 <span><span class="va">p_pch</span> <span class="op">&lt;-</span> <span class="va">symbols</span><span class="op">[</span><span class="va">penguins_errors</span><span class="op">$</span><span class="va">err</span><span class="op">+</span><span class="fl">1</span><span class="op">]</span></span>
 <span><span class="va">p_cex</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">p_pch</span><span class="op">)</span><span class="op">)</span></span>
@@ -450,38 +424,73 @@ Gentoo         0         1    118 0.008403361</code></pre>
 <span>           loop<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<p><a href="#fig-p-errors">Figure&nbsp;<span>18.1</span></a> shows a grand tour, and a guided tour, of the penguins data, where the misclassifications are marked by an asterisk. (If these gifs are too small to see the different glyphs, zoom in to make the figures larger.) It can be seen that the one Gentoo penguin that is mistaken for a Chinstrap by the forest model is always moving with its other Gentoo (yellow) family. It can occasionally be seen to be on the edge of the group, closer to the Chinstraps, in some projections in the grand tour. But in the final projection from the guided tour it is hiding well among the other Gentoos. This is an observation where a mistake has been made because of the inadequacies of the forest algorithm. Forests are only as good as the trees they are constructed from, and we have seen from <a href="15-forests.html#sec-trees"><span>Section&nbsp;15.1</span></a> that the splits only on single variables done by trees does not adequately utilise the covariance structure in each class. They make mistakes based on the boxy nature of the boundaries. This can carry through to the forests model. Even though many trees are combined to generate smoother boundaries, forests do not effectively utilise covariance in clusters either. The other mistakes, where Chinstrap are predicted to be Adelie, and vice versa, are more sensible. These mistaken observations can be seen to lie in the border region between the two clusters, and reflect genuine uncertainty about the classification of penguins in these two species.</p>
-<div id="fig-p-errors" class="quarto-layout-panel">
-<figure class="figure"><div class="quarto-layout-row quarto-layout-valign-top">
-<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
-<div id="fig-rf-errors" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure"><p><img src="gifs/p_rf_errors.gif" class="img-fluid figure-img" alt="FIX ME" data-ref-parent="fig-p-errors" width="300"></p>
-<figcaption class="figure-caption">(a) Exploring misclassifications using a grand tour.</figcaption></figure>
+<p><a href="#fig-p-errors-html" class="quarto-xref">Figure&nbsp;<span>18.1</span></a> shows a grand tour, and a guided tour, of the penguins data, where the misclassifications are marked by an asterisk. (If the gifs are too small to see the different glyphs, you can zoom in to make the figures larger.) It can be seen that the one Gentoo penguin that is mistaken for a Chinstrap by the forest model is always moving with its other Gentoo (yellow) family. It can occasionally be seen to be on the edge of the group, closer to the Chinstraps, in some projections in the grand tour. But in the final projection from the guided tour it is hiding well among the other Gentoos. This is an observation where a mistake has been made because of the inadequacies of the forest algorithm. Forests are only as good as the trees they are constructed from, and we have seen from <a href="15-forests.html#sec-trees" class="quarto-xref"><span>Section 15.1</span></a> that the splits only on single variables done by trees does not adequately utilise the covariance structure in each class. They make mistakes based on the boxy nature of the boundaries. This can carry through to the forests model. Even though many trees are combined to generate smoother boundaries, forests do not effectively utilise covariance in clusters either. The other mistakes, where Chinstrap are predicted to be Adelie, and vice versa, are more sensible. These mistaken observations can be seen to lie in the border region between the two clusters, and reflect genuine uncertainty about the classification of penguins in these two species.</p>
+<div id="fig-p-errors-html" class="quarto-layout-panel">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-p-errors-html-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-p-errors-html" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-rf-errors" class="quarto-figure quarto-figure-center quarto-float anchored" alt="FIX ME">
+<figure class="quarto-float quarto-subfloat-fig figure"><div aria-describedby="fig-rf-errors-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="gifs/p_rf_errors.gif" class="img-fluid figure-img" data-ref-parent="fig-p-errors-html" alt="FIX ME" width="300">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-rf-errors-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(a) Grand tour
+</figcaption></figure>
 </div>
 </div>
-<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
-<div id="fig-rf-errors-guided" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure"><p><img src="gifs/p_rf_errors_guided.gif" class="img-fluid figure-img" alt="FIX ME" data-ref-parent="fig-p-errors" width="300"></p>
-<figcaption class="figure-caption">(b) Exploring misclassifications using a guided tour.</figcaption></figure>
+<div class="quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-p-errors-html" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-rf-errors-guided" class="quarto-figure quarto-figure-center quarto-float anchored" alt="FIX ME">
+<figure class="quarto-float quarto-subfloat-fig figure"><div aria-describedby="fig-rf-errors-guided-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="gifs/p_rf_errors_guided.gif" class="img-fluid figure-img" data-ref-parent="fig-p-errors-html" alt="FIX ME" width="300">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-rf-errors-guided-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(b) Guided tour
+</figcaption></figure>
 </div>
 </div>
 </div>
-<p></p><figcaption class="figure-caption">Figure&nbsp;18.1: Examining the misclassified cases (marked as asterisks) from a random forest fit to the penguins data. The one Gentoo penguin mistaken for a Chinstrap is a mistake made because the forest method suffers from the same problems as trees - cutting on single variables rather than effectively using covariance structure. The mistakes between the Adelie and Chinstrap penguins are more sensible because all of these observations lie is the bordering regions between the two clusters.</figcaption><p></p>
-</figure>
 </div>
-<section id="exercises" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="exercises">Exercises</h2>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-p-errors-html-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;18.1: Examining the misclassified cases (marked as solid circles) from a random forest fit to the penguins data. The one Gentoo penguin mistaken for a Chinstrap is a mistake made because the forest method suffers from the same problems as trees - cutting on single variables rather than effectively using covariance structure. The mistakes between the Adelie and Chinstrap penguins are more sensible because all of these observations lie is the bordering regions between the two clusters.
+</figcaption></figure>
+</div>
+<div class="info">
+<p>Some errors are reasonable because there is overlap between the class clusters. Some errors are not reasonable because the model used is inadequate.</p>
+</div>
+</section><section id="comparison-between-lda-and-cnn" class="level2" data-number="18.2"><h2 data-number="18.2" class="anchored" data-anchor-id="comparison-between-lda-and-cnn">
+<span class="header-section-number">18.2</span> Comparison between LDA and CNN</h2>
+</section><section id="constructing-data-to-diagnose-your-model" class="level2" data-number="18.3"><h2 data-number="18.3" class="anchored" data-anchor-id="constructing-data-to-diagnose-your-model">
+<span class="header-section-number">18.3</span> Constructing data to diagnose your model</h2>
+</section><section id="explainability" class="level2" data-number="18.4"><h2 data-number="18.4" class="anchored" data-anchor-id="explainability">
+<span class="header-section-number">18.4</span> Explainability</h2>
+</section><section id="exercises" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="exercises">Exercises</h2>
 <ol type="1">
-<li>Examine misclassifications for the fake_trees data between cluster 1 and 0, using the votes matrix instead of the principal components. Describe where these errors fall in the simplex.</li>
-<li>Examine the misclassifications for the sketches data, focusing on cactus sketches that were mistaken for bananas. Follow up by plotting the images of these errors, and describe whether the classifier is correct that these sketches are so poor their true cactus identity cannot be determined.</li>
+<li>Examine misclassifications from a random forest model for the fake_trees data between cluster 1 and 0, using the
+<ol type="a">
+<li>principal components</li>
+<li>votes matrix. Describe where these errors relative to their true and predicted class clusters. When examining the simplex, are the misclassifications the points that are furthest from any vertices?</li>
+</ol>
+</li>
+<li>Examine the misclassifications for the random forest model on the sketches data, focusing on cactus sketches that were mistaken for bananas. Follow up by plotting the images of these errors, and describe whether the classifier is correct that these sketches are so poor their true cactus or banana identity cannot be determined.</li>
+<li>How do the errors from the random forest model compare with those of your best fitting CNN model? Are the the corresponding images poor sketches of cacti or bananas?</li>
+<li>Now examine the misclassifications of the sketches data in the
+<ol type="a">
+<li>votes matrix from the random forest model</li>
+<li>predictive probability distribution from the CNN model, using the simplex approach. Are they as expected, points lying in the middle or along an edge of the simplex?</li>
+</ol>
+</li>
 </ol>
 
 
-<div id="refs" class="references csl-bib-body hanging-indent" data-line-spacing="2" role="list" style="display: none">
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list" style="display: none">
 <div id="ref-Ab1884" class="csl-entry" role="listitem">
 Abbott, E. (1884). <em>Flatland: A romance of many dimensions</em>. Dover Publications.
 </div>
 <div id="ref-AWS91" class="csl-entry" role="listitem">
 Ahlberg, C., Williamson, C., &amp; Shneiderman, B. (1991). Dynamic <span>Q</span>ueries for <span>I</span>nformation <span>E</span>xploration: <span>A</span>n <span>I</span>mplementation and <span>E</span>valuation. <em>ACM CHI ‘92 Conference Proceedings</em>, 619–626.
+</div>
+<div id="ref-keras" class="csl-entry" role="listitem">
+Allaire, J., &amp; Chollet, F. (2023). <em>Keras: R interface to ’keras’</em>. <a href="https://CRAN.R-project.org/package=keras">https://CRAN.R-project.org/package=keras</a>
 </div>
 <div id="ref-An57" class="csl-entry" role="listitem">
 Anderson, E. (1957). A <span>S</span>emigraphical <span>M</span>ethod for the <span>A</span>nalysis of <span>C</span>omplex <span>P</span>roblems. <em>Proceedings of the National Academy of Science, 13</em>, 923–927.
@@ -545,9 +554,6 @@ Borg, I., &amp; Groenen, P. J. F. (2005). <em>Modern <span>M</span>ultidimension
 </div>
 <div id="ref-Br01" class="csl-entry" role="listitem">
 Breiman, L. (2001). Random <span>F</span>orests. <em>Machine Learning</em>, <em>45</em>(1), 5–32.
-</div>
-<div id="ref-Cu04" class="csl-entry" role="listitem">
-Breiman, L., &amp; Cutler, A. (2004). <em>Random <span>F</span>orests</em>. <span><code>http://www.math.usu.edu/</code><span class="math inline">\(\sim\)</span><code>adele/forests/cc_home.htm</code></span>.
 </div>
 <div id="ref-R-randomForest" class="csl-entry" role="listitem">
 Breiman, L., Cutler, A., Liaw, A., &amp; Wiener, M. (2022). <em>randomForest: Breiman and cutler’s random forests for classification and regression</em>. <a href="https://www.stat.berkeley.edu/~breiman/RandomForests/">https://www.stat.berkeley.edu/~breiman/RandomForests/</a>
@@ -634,7 +640,7 @@ Cook, D., Buja, A., Cabrera, J., &amp; Hurley, C. (1995a). Grand <span>T</span>o
 Cook, D., Hofmann, H., Lee, E.-K., Yang, H., Nikolau, B., &amp; Wurtele, E. (2007). Exploring <span>G</span>ene <span>E</span>xpression <span>D</span>ata, <span>U</span>sing <span>P</span>lots. <em>Journal of Data Science</em>, <em>5</em>(2), 151–182.
 </div>
 <div id="ref-R-mulgar" class="csl-entry" role="listitem">
-Cook, D., &amp; Laa, U. (2023). <em>Mulgar: Functions for pre-processing data for multivariate data visualisation using tours</em>.
+Cook, D., &amp; Laa, U. (2023). <em>Mulgar: Functions for pre-processing data for multivariate data visualisation using tours</em>. <a href="https://dicook.github.io/mulgar/">https://dicook.github.io/mulgar/</a>
 </div>
 <div id="ref-CLBW06" class="csl-entry" role="listitem">
 Cook, D., Lee, E.-K., Buja, A., &amp; Wickham, H. (2006). <span>G</span>rand <span>T</span>ours, <span>P</span>rojection <span>P</span>ursuit <span>G</span>uided <span>T</span>ours and <span>M</span>anual <span>C</span>ontrols. In C.-H. Chen, W. Härdle, &amp; A. Unwin (Eds.), <em>Handbook of <span>D</span>ata <span>V</span>isualization</em>. Springer.
@@ -724,10 +730,10 @@ Friedman, J. H. (1987). <span>E</span>xploratory <span>P</span>rojection <span>P
 Friedman, J. H., &amp; Tukey, J. W. (1974). <span>A</span> <span>P</span>rojection <span>P</span>ursuit <span>A</span>lgorithm for <span>E</span>xploratory <span>D</span>ata <span>A</span>nalysis. <em>IEEE Transactions on Computing C</em>, <em>23</em>, 881–889.
 </div>
 <div id="ref-FD04" class="csl-entry" role="listitem">
-Friendly, M., &amp; Denis, D. J. (2004). <em>Milestones in the history of thematic cartography, statistical graphics, and data visualization</em>.<span><code> http://www.math.yorku.ca/SCS/Gallery/milestone/</code></span>.
+Friendly, M., &amp; Denis, D. J. (2004). <em>Milestones in the history of thematic cartography, statistical graphics, and data visualization</em>. http://www.math.yorku.ca/SCS/Gallery/milestone/.
 </div>
-<div id="ref-FrDe" class="csl-entry" role="listitem">
-Friendly, M., &amp; Denis, D. J. (2006). <em><span>G</span>raphical <span>M</span>ilestones</em>. <span><code>http://www.math.yorku.ca/SCS/Gallery/milestone</code></span>.
+<div id="ref-neuralnet" class="csl-entry" role="listitem">
+Fritsch, S., Guenther, F., &amp; Wright, M. N. (2019). <em>Neuralnet: Training of neural networks</em>. <a href="https://CRAN.R-project.org/package=neuralnet">https://CRAN.R-project.org/package=neuralnet</a>
 </div>
 <div id="ref-FB94" class="csl-entry" role="listitem">
 Furnas, G. W., &amp; Buja, A. (1994). Prosection <span>V</span>iews: <span>D</span>imensional <span>I</span>nference <span>T</span>hrough <span>S</span>ections and <span>P</span>rojections. <em>Journal of Computational and Graphical Statistics</em>, <em>3</em>(4), 323–385.
@@ -757,7 +763,10 @@ Hajibaba, H., Karlsson, L., &amp; Dolnicar, S. (2016). Residents open their home
 Hansen, C., &amp; Johnson, C. R. (2004). <em>Visualization handbook</em>. Academic Press.
 </div>
 <div id="ref-R-langevitour" class="csl-entry" role="listitem">
-Harrison, P. (2022). <em>Langevitour: Langevin tour</em>. <a href="https://logarithmic.net/langevitour/">https://logarithmic.net/langevitour/</a>
+Harrison, P. (2023a). <em>Langevitour: Langevin tour</em>. <a href="https://logarithmic.net/langevitour/">https://logarithmic.net/langevitour/</a>
+</div>
+<div id="ref-langevitour2023" class="csl-entry" role="listitem">
+Harrison, P. (2023b). Langevitour: Smooth interactive touring of high dimensions, demonstrated with scRNA-seq data. <em>The R Journal</em>, <em>15</em>(2), 206–219. <a href="https://doi.org/10.32614/RJ-2023-046">https://doi.org/10.32614/RJ-2023-046</a>
 </div>
 <div id="ref-R-detourr" class="csl-entry" role="listitem">
 Hart, C., &amp; Wang, E. (2022). <em>Detourr: Portable and performant tour animations</em>. <a href="https://casperhart.github.io/detourr/">https://casperhart.github.io/detourr/</a>
@@ -862,6 +871,9 @@ Kuhn, M., &amp; Wickham, H. (2020). <em>Tidymodels: A collection of packages for
 Kuhn, M., &amp; Wickham, H. (2023). <em>Tidymodels: Easily install and load the tidymodels packages</em>. <a href="https://CRAN.R-project.org/package=tidymodels">https://CRAN.R-project.org/package=tidymodels</a>
 </div>
 <div id="ref-sagetour" class="csl-entry" role="listitem">
+Laa, U., Cook, D., &amp; Lee, S. (2022). Burning sage: Reversing the curse of dimensionality in the visualization of high-dimensional data. <em>Journal of Computational and Graphical Statistics</em>, <em>31</em>(1), 40–49. <a href="https://doi.org/10.1080/10618600.2021.1963264">https://doi.org/10.1080/10618600.2021.1963264</a>
+</div>
+<div id="ref-slicetour" class="csl-entry" role="listitem">
 Laa, U., Cook, D., &amp; Valencia, G. (2020a). A slice tour for finding hollowness in high-dimensional data. <em>Journal of Computational and Graphical Statistics</em>, <em>29</em>(3), 681–687. <a href="https://doi.org/10.1080/10618600.2020.1777140">https://doi.org/10.1080/10618600.2020.1777140</a>
 </div>
 <div id="ref-tourr2020" class="csl-entry" role="listitem">
@@ -873,9 +885,6 @@ Lancaster, H. O. (1965). The helmert matrices. <em>The American Mathematical Mon
 <div id="ref-R-cxhull" class="csl-entry" role="listitem">
 Laurent, S. (2023). <em>Cxhull: Convex hull</em>. <a href="https://github.com/stla/cxhull">https://github.com/stla/cxhull</a>
 </div>
-<div id="ref-LCKL04" class="csl-entry" role="listitem">
-Lee, E. K., Cook, D., Klinke, S., &amp; Lumley, T. (2005a). Projection <span>P</span>ursuit for <span>E</span>xploratory <span>S</span>upervised <span>C</span>lassification. <em>Journal of Computational and Graphical Statistics</em>, <em>14</em>(4), 831–846.
-</div>
 <div id="ref-Lee2018" class="csl-entry" role="listitem">
 Lee, E.-K. (2018). PPtreeViz: An r package for visualizing projection pursuit classification trees. <em>Journal of Statistical Software</em>, <em>83</em>(8), 1–30. <a href="https://doi.org/10.18637/jss.v083.i08">https://doi.org/10.18637/jss.v083.i08</a>
 </div>
@@ -883,7 +892,7 @@ Lee, E.-K. (2018). PPtreeViz: An r package for visualizing projection pursuit cl
 Lee, E.-K., &amp; Cook, D. (2009). A projection pursuit index for large <span class="math inline">\(p\)</span> small <span class="math inline">\(n\)</span> data. <em>Statistics and Computing</em>, <em>20</em>, 381–392. <a href="https://doi.org/10.1007/s11222-009-9131-1">https://doi.org/10.1007/s11222-009-9131-1</a>
 </div>
 <div id="ref-LCKL05" class="csl-entry" role="listitem">
-Lee, E.-K., Cook, D., Klinke, S., &amp; Lumley, T. (2005b). <span>P</span>rojection <span>P</span>ursuit for <span>E</span>xploratory <span>S</span>upervised <span>C</span>lassification. <em>Journal of Computational and Graphical Statistics</em>, <em>14</em>(4), 831–846.
+Lee, E.-K., Cook, D., Klinke, S., &amp; Lumley, T. (2005). <span>P</span>rojection <span>P</span>ursuit for <span>E</span>xploratory <span>S</span>upervised <span>C</span>lassification. <em>Journal of Computational and Graphical Statistics</em>, <em>14</em>(4), 831–846.
 </div>
 <div id="ref-R-liminal" class="csl-entry" role="listitem">
 Lee, S. (2021). <em>Liminal: Multivariate data visualization with tours and embeddings</em>. <a href="https://CRAN.R-project.org/package=liminal">https://CRAN.R-project.org/package=liminal</a>
@@ -899,6 +908,9 @@ Leisch, F., &amp; Gruen, B. (2023). <em>CRAN task view: Cluster analysis &amp; f
 </div>
 <div id="ref-R-MSA" class="csl-entry" role="listitem">
 Leisch, F., &amp; Grün, B. (2020). <em>MSA: Market segmentation analysis</em>.
+</div>
+<div id="ref-li2020visualizing" class="csl-entry" role="listitem">
+Li, M., Zhao, Z., &amp; Scheidegger, C. (2020). Visualizing neural networks with the grand tour. <em>Distill</em>. <a href="https://doi.org/10.23915/distill.00025">https://doi.org/10.23915/distill.00025</a>
 </div>
 <div id="ref-randomForest2002" class="csl-entry" role="listitem">
 Liaw, A., &amp; Wiener, M. (2002). Classification and regression by randomForest. <em>R News</em>, <em>2</em>(3), 18–22. <a href="https://CRAN.R-project.org/doc/Rnews/">https://CRAN.R-project.org/doc/Rnews/</a>
@@ -927,6 +939,9 @@ Maindonald, J., &amp; Braun, J. (2003). <em>Data analysis and graphics using r -
 <div id="ref-Ma65" class="csl-entry" role="listitem">
 Martin, E. (1965). <em>Flatland</em>. http://www.der.org/films/flatland.html.
 </div>
+<div id="ref-kernelshap" class="csl-entry" role="listitem">
+Mayer, M., &amp; Watson, D. (2023). <em>Kernelshap: Kernel SHAP</em>. <a href="https://CRAN.R-project.org/package=kernelshap">https://CRAN.R-project.org/package=kernelshap</a>
+</div>
 <div id="ref-MY94" class="csl-entry" role="listitem">
 McFarlane, M., &amp; Young, F. W. (1994). Graphical <span>S</span>ensitivity <span>A</span>nalysis for <span>M</span>ultidimensional <span>S</span>caling. <em>Journal of Computational and Graphical Statistics</em>, <em>3</em>, 23–33.
 </div>
@@ -948,6 +963,9 @@ Milborrow, S. (2022). <em>Rpart.plot: Plot rpart models: An enhanced version of 
 <div id="ref-R-gtExtras" class="csl-entry" role="listitem">
 Mock, T. (2022). <em>gtExtras: Extending gt for beautiful HTML tables</em>. <a href="https://CRAN.R-project.org/package=gtExtras">https://CRAN.R-project.org/package=gtExtras</a>
 </div>
+<div id="ref-iml" class="csl-entry" role="listitem">
+Molnar, C. (2022). <em>Interpretable machine learning: A guide for making black box models explainable (2nd ed)</em>. https://christophm.github.io/interpretable-ml-book/.
+</div>
 <div id="ref-Moon2019" class="csl-entry" role="listitem">
 Moon, K. R., Dijk, D. van, Wang, Z., Gigante, S., Burkhardt, D. B., Chen, W. S., Yim, K., Elzen, A. van den, Hirn, M. J., Coifman, R. R., Ivanova, N. B., Wolf, G., &amp; Krishnaswamy, S. (2019). Visualizing structure and transitions for biological data exploration. <em>Nature Biotechnology</em>, <em>37</em>, 1482–1492. <a href="https://doi.org/10.1038/s41587-019-0336-3">https://doi.org/10.1038/s41587-019-0336-3</a>
 </div>
@@ -961,7 +979,7 @@ OpenStreetMap contributors. (2020). <em><span class="nocase">Planet dump retriev
 Pearson, K. (1901). LIII. On lines and planes of closest fit to systems of points in space. <em>The London, Edinburgh, and Dublin Philosophical Magazine and Journal of Science</em>, <em>2</em>(11), 559–572. <a href="https://doi.org/10.1080/14786440109462720">https://doi.org/10.1080/14786440109462720</a>
 </div>
 <div id="ref-R-patchwork" class="csl-entry" role="listitem">
-Pedersen, T. L. (2022). <em>Patchwork: The composer of plots</em>. <a href="https://CRAN.R-project.org/package=patchwork">https://CRAN.R-project.org/package=patchwork</a>
+Pedersen, T. L. (2023). <em>Patchwork: The composer of plots</em>. <a href="https://CRAN.R-project.org/package=patchwork">https://CRAN.R-project.org/package=patchwork</a>
 </div>
 <div id="ref-perisic2009" class="csl-entry" role="listitem">
 Perisic, I., &amp; Posse, C. (2005). Projection pursuit indices based on the empirical distribution function. <em>Journal of Computational and Graphical Statistics</em>, <em>14</em>(3), 700–715. <a href="https://doi.org/10.1198/106186005X69440">https://doi.org/10.1198/106186005X69440</a>
@@ -1006,7 +1024,7 @@ Rothkopf, E. Z. (1957). A <span>M</span>easure of <span>S</span>timulus <span>S<
 Schloerke, B. (2016). <em>Geozoo: Zoo of geometric objects</em>. <a href="https://CRAN.R-project.org/package=geozoo">https://CRAN.R-project.org/package=geozoo</a>
 </div>
 <div id="ref-R-GGally" class="csl-entry" role="listitem">
-Schloerke, B., Cook, D., Larmarange, J., Briatte, F., Marbach, M., Thoen, E., Elberg, A., &amp; Crowley, J. (2023). <em>GGally: Extension to ggplot2</em>.
+Schloerke, B., Cook, D., Larmarange, J., Briatte, F., Marbach, M., Thoen, E., Elberg, A., &amp; Crowley, J. (2023). <em>GGally: Extension to ggplot2</em>. <a href="https://ggobi.github.io/ggally/">https://ggobi.github.io/ggally/</a>
 </div>
 <div id="ref-mclust2016" class="csl-entry" role="listitem">
 Scrucca, L., Fop, M., Murphy, T. B., &amp; Raftery, A. E. (2016). <span class="nocase">mclust</span> 5: Clustering, classification and density estimation using <span>G</span>aussian finite mixture models. <em>The <span>R</span> Journal</em>, <em>8</em>(1), 289–317. <a href="https://doi.org/10.32614/RJ-2016-021">https://doi.org/10.32614/RJ-2016-021</a>
@@ -1081,7 +1099,7 @@ Tarpey, T., Li, L., &amp; Flury, B. (1995). Principal points and self–consiste
 Temple Lang, D., Swayne, D., Wickham, H., &amp; Lawrence, M. (2006). <em><span><code>rggobi</code></span>: <span>A</span>n <span>I</span>nterface between <span>R</span> and <span>GG</span>obi</em>.<span><code> http://www.R-project.org</code></span>.
 </div>
 <div id="ref-R-rpart" class="csl-entry" role="listitem">
-Therneau, T., &amp; Atkinson, B. (2022). <em>Rpart: Recursive partitioning and regression trees</em>. <a href="https://CRAN.R-project.org/package=rpart">https://CRAN.R-project.org/package=rpart</a>
+Therneau, T., &amp; Atkinson, B. (2023). <em>Rpart: Recursive partitioning and regression trees</em>. <a href="https://CRAN.R-project.org/package=rpart">https://CRAN.R-project.org/package=rpart</a>
 </div>
 <div id="ref-Theus02" class="csl-entry" role="listitem">
 Theus, M. (2002). Interactive <span>D</span>ata <span>V</span>isualization <span>U</span>sing <span>M</span>ondrian. <em>Journal of Statistical Software</em>, <em>7</em>(11), http://www.jstatsoft.org.
@@ -1198,7 +1216,7 @@ Wickham, H. (2022). <em>Classifly: Explore classification models in high dimensi
 Wickham, H., Chang, W., Henry, L., Pedersen, T. L., Takahashi, K., Wilke, C., Woo, K., Yutani, H., &amp; Dunnington, D. (2023). <em>ggplot2: Create elegant data visualisations using the grammar of graphics</em>. <a href="https://CRAN.R-project.org/package=ggplot2">https://CRAN.R-project.org/package=ggplot2</a>
 </div>
 <div id="ref-R-tourr" class="csl-entry" role="listitem">
-Wickham, H., &amp; Cook, D. (2023). <em>Tourr: Tour methods for multivariate data visualisation</em>. <a href="https://github.com/ggobi/tourr">https://github.com/ggobi/tourr</a>
+Wickham, H., &amp; Cook, D. (2024). <em>Tourr: Tour methods for multivariate data visualisation</em>. <a href="https://github.com/ggobi/tourr">https://github.com/ggobi/tourr</a>
 </div>
 <div id="ref-wickham2015" class="csl-entry" role="listitem">
 Wickham, H., Cook, D., &amp; Hofmann, H. (2015). Visualizing statistical models: Removing the blindfold. <em>Statistical Analysis and Data Mining: The ASA Data Science Journal</em>, <em>8</em>(4), 203–225. <a href="https://doi.org/10.1002/sam.11271">https://doi.org/10.1002/sam.11271</a>
@@ -1328,10 +1346,9 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     // clear code selection
     e.clearSelection();
   });
-  function tippyHover(el, contentFn) {
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
     const config = {
       allowHTML: true,
-      content: contentFn,
       maxWidth: 500,
       delay: 100,
       arrow: false,
@@ -1341,8 +1358,17 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       interactive: true,
       interactiveBorder: 10,
       theme: 'quarto',
-      placement: 'bottom-start'
+      placement: 'bottom-start',
     };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
     window.tippy(el, config); 
   }
   const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
@@ -1355,6 +1381,125 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
       return note.innerHTML;
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
     });
   }
       let selectedAnnoteEl;
@@ -1398,6 +1543,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             }
             div.style.top = top - 2 + "px";
             div.style.height = height + 4 + "px";
+            div.style.left = 0;
             let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
             if (gutterDiv === null) {
               gutterDiv = window.document.createElement("div");
@@ -1423,6 +1569,32 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         });
         selectedAnnoteEl = undefined;
       };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
       // Attach click handler to the DT
       const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
       for (const annoteDlNode of annoteDls) {
@@ -1482,23 +1654,27 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
 });
 </script><nav class="page-navigation"><div class="nav-page nav-page-previous">
-      <a href="./17-nn.html" class="pagination-link">
+      <a href="./17-nn.html" class="pagination-link  aria-label=" networks="" and="" deep="" learning="">
         <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Neural networks and deep learning</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./19-mv-time-series.html" class="pagination-link">
-        <span class="nav-page-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Multiple time series</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./references.html" class="pagination-link" aria-label="References">
+        <span class="nav-page-text">References</span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
 </div> <!-- /content -->
 <footer class="footer"><div class="nav-footer">
-    <div class="nav-footer-left">Interactively exploring high-dimensional data and models in R was written by Dianne Cook and Ursula Laa.</div>   
+    <div class="nav-footer-left">
+<p>Interactively exploring high-dimensional data and models in R was written by Dianne Cook and Ursula Laa.</p>
+</div>   
     <div class="nav-footer-center">
       &nbsp;
-    </div>
-    <div class="nav-footer-right">This book was built with <a href="https://quarto.org/">Quarto</a>.</div>
+    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/dicook/mulgar_book/edit/master/18-summary-class.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/dicook/mulgar_book/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+    <div class="nav-footer-right">
+<p>This book was built with <a href="https://quarto.org/">Quarto</a>.</p>
+</div>
   </div>
 </footer>
 

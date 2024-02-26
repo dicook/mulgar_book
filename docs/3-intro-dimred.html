@@ -2,9 +2,9 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.3.433">
+<meta name="generator" content="quarto-1.4.549">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>Interactively exploring high-dimensional data and models in R - 3&nbsp; Overview</title>
+<title>Interactively exploring high-dimensional data and models in R - 3&nbsp; Dimension reduction overview</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -19,7 +19,7 @@ ul.task-list li input[type="checkbox"] {
 }
 /* CSS for syntax highlighting */
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -55,6 +55,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 div.csl-bib-body { }
 div.csl-entry {
   clear: both;
+  margin-bottom: 0em;
 }
 .hanging-indent div.csl-entry {
   margin-left:2em;
@@ -96,7 +97,13 @@ div.csl-indent {
   "collapse-after": 3,
   "panel-placement": "start",
   "type": "textbox",
-  "limit": 20,
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
   "language": {
     "search-no-results-text": "No results",
     "search-matching-documents-text": "matching documents",
@@ -105,33 +112,59 @@ div.csl-indent {
     "search-more-match-text": "more match in this document",
     "search-more-matches-text": "more matches in this document",
     "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
     "search-detached-cancel-button-title": "Cancel",
     "search-submit-button-title": "Submit",
     "search-label": "Search"
   }
-}</script><script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+}</script><script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script><script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 </head>
 <body class="nav-sidebar floating">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top"><nav class="quarto-secondary-nav"><div class="container-fluid d-flex">
-      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./3-intro-dimred.html">Dimension reduction</a></li><li class="breadcrumb-item"><a href="./3-intro-dimred.html"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Overview</span></a></li></ol></nav>
-      <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-      </a>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./3-intro-dimred.html"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Dimension reduction overview</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
         <i class="bi bi-search"></i>
       </button>
     </div>
   </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto"><div class="pt-lg-2 mt-2 text-left sidebar-header">
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
       <a href="./">Interactively exploring high-dimensional data and models in R</a> 
         <div class="sidebar-tools-main">
-    <a href="https://github.com/dicook/mulgar_book" rel="" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+    <a href="https://github.com/dicook/mulgar_book" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
 </div>
     </div>
       </div>
@@ -148,174 +181,113 @@ div.csl-indent {
  <span class="menu-text">Preface</span></a>
   </div>
 </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
- <span class="menu-text">Introduction</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">
-<li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./1-intro.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Picturing high dimensions</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./2-notation.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Notation conventions and R objects</span></span></a>
   </div>
 </li>
-      </ul>
-</li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
- <span class="menu-text">Dimension reduction</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">
-<li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./3-intro-dimred.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Overview</span></span></a>
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Dimension reduction overview</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./4-pca.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Principal component analysis</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./5-nldr.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Non-linear dimension reduction</span></span></a>
   </div>
 </li>
-      </ul>
-</li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">
- <span class="menu-text">Cluster analysis</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">
-<li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./6-intro-clust.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Overview</span></span></a>
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Introduction to clustering</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./7-spin-and-brush.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Spin-and-brush approach</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./8-hierarchical.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Hierarchical clustering</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./9-kmeans.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title"><span class="math inline">\(k\)</span>-means clustering</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./10-model-based.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Model-based clustering</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./11-som.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Self-organizing maps</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./12-summary-clust.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Summarising and comparing results</span></span></a>
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Summarising and comparing clustering results</span></span></a>
   </div>
 </li>
-      </ul>
-</li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true">
- <span class="menu-text">Supervised classification</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">
-<li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./13-intro-class.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Overview</span></span></a>
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Introduction to supervised classification</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./14-lda.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Linear discriminant analysis</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./15-forests.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Trees and forests</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./16-svm.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Support vector machines</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./17-nn.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Neural networks and deep learning</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./18-summary-class.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Exploring misclassifications</span></span></a>
   </div>
-</li>
-      </ul>
-</li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true">
- <span class="menu-text">Miscellaneous</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">
-<li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./19-mv-time-series.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Multiple time series</span></span></a>
-  </div>
-</li>
-      </ul>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
@@ -325,13 +297,13 @@ div.csl-indent {
 </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-expanded="true">
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
  <span class="menu-text">Appendices</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-expanded="true" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">
 <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./A1-toolbox.html" class="sidebar-item-text sidebar-link">
@@ -346,7 +318,7 @@ div.csl-indent {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./A3-book_code_and_data.html" class="sidebar-item-text sidebar-link">
+  <a href="./A3-book-code-and-data.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Links to Book Code and Additional Data</span></span></a>
   </div>
 </li>
@@ -360,18 +332,18 @@ div.csl-indent {
 </li>
     </ul>
 </div>
-</nav><div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Table of contents</h2>
    
   <ul>
 <li><a href="#exercises" id="toc-exercises" class="nav-link active" data-scroll-target="#exercises">Exercises</a></li>
-  </ul><div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/dicook/mulgar_book/edit/master/3-intro-dimred.qmd" class="toc-action">Edit this page</a></p><p><a href="https://github.com/dicook/mulgar_book/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
+  </ul><div class="toc-actions"><ul><li><a href="https://github.com/dicook/mulgar_book/edit/master/3-intro-dimred.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/dicook/mulgar_book/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
-<h1 class="title"><span id="sec-dimension-overview" class="quarto-section-identifier"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Overview</span></span></h1>
+<h1 class="title"><span id="sec-dimension-overview" class="quarto-section-identifier"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Dimension reduction overview</span></span></h1>
 </div>
 
 
@@ -384,16 +356,16 @@ div.csl-indent {
   </div>
   
 
-</header><p>This chapter will focus on methods for reducing dimension, and how the tour can be used to assist with the common methods such as principal component analysis (PCA), multidimensional scaling (MDS), t-stochastic neighbour embedding (t-SNE), and factor analysis.</p>
+
+</header><p>This chapter will focus on methods for reducing dimension, and how the tour<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> can be used to assist with the common methods such as principal component analysis (PCA), multidimensional scaling (MDS), t-stochastic neighbour embedding (t-SNE), and factor analysis.</p>
 <p>Dimension is perceived in a tour using the spread of points. When the points are spread far apart, then the data is filling the space. Conversely when the points “collapse” into a sub-region then the data is only partially filling the space, and some dimension reduction to reduce to this smaller dimensional space may be worthwhile.</p>
 <div class="info">
 <p>When points do not fill the plotting canvas fully, it means that it lives in a lower dimension. This low-dimensional space might be linear or non-linear, with the latter being much harder to define and capture.</p>
 </div>
-<p>Let’s start with some 2D examples. You need at least two variables to be able to talk about association between variables. <a href="#fig-2D">Figure&nbsp;<span>3.1</span></a> shows three plots of two variables. Plot (a) shows two variables that are strongly linearly associated<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>, because when <code>x1</code> is low, <code>x2</code> is low also, and conversely when <code>x1</code> is high, <code>x2</code> is also high. This can also be seen by the reducton in spread of points (or “collapse”) in one direction making the data fill less than the full square of the plot. <em>So from this we can conclude that the data is not fully 2D.</em> The second step is to infer which variables contribute to this reduction in dimension. The axes for <code>x1</code> and <code>x2</code> are drawn extending from <span class="math inline">\((0,0)\)</span> and because they both extend out of the cloud of points, in the direction away from the collapse of points we can say that they are jointly responsible for the dimension reduction.</p>
-<p><a href="#fig-2D-2">Figure&nbsp;<span>3.1 (b)</span></a> shows a pair of variables that are <strong>not</strong> linearly associated. Variable <code>x1</code> is more varied than <code>x3</code> but knowing the value on <code>x1</code> tells us nothing about possible values on <code>x3</code>. Before running a tour all variables are typically scaled to have equal spread. The purpose of the tour is to capture association and relationships between the variables, so any univariate differences should be removed ahead of time. <a href="#fig-2D-3">Figure&nbsp;<span>3.1 (c)</span></a> shows what this would look like when <code>x3</code> is scaled - the points are fully spread in the full square of the plot.</p>
+<p>Let’s start with some 2D examples. You need at least two variables to be able to talk about association between variables. <a href="#fig-2D" class="quarto-xref">Figure&nbsp;<span>3.1</span></a> shows three plots of two variables. Plot (a) shows two variables that are strongly linearly associated<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>, because when <code>x1</code> is low, <code>x2</code> is low also, and conversely when <code>x1</code> is high, <code>x2</code> is also high. This can also be seen by the reduction in spread of points (or “collapse”) in one direction making the data fill less than the full square of the plot. <em>So from this we can conclude that the data is not fully 2D.</em> The second step is to infer which variables contribute to this reduction in dimension. The axes for <code>x1</code> and <code>x2</code> are drawn extending from <span class="math inline">\((0,0)\)</span> and because they both extend out of the cloud of points, in the direction away from the collapse of points we can say that they are jointly responsible for the dimension reduction.</p>
+<p><a href="#fig-2D" class="quarto-xref">Figure&nbsp;<span>3.1</span></a> (b) shows a pair of variables that are <strong>not</strong> linearly associated. Variable <code>x1</code> is more varied than <code>x3</code> but knowing the value on <code>x1</code> tells us nothing about possible values on <code>x3</code>. Before running a tour all variables are typically scaled to have equal spread. The purpose of the tour is to capture association and relationships between the variables, so any univariate differences should be removed ahead of time. <a href="#fig-2D" class="quarto-xref">Figure&nbsp;<span>3.1</span></a> (c) shows what this would look like when <code>x3</code> is scaled - the points are fully spread in the full square of the plot.</p>
 <div class="cell">
-<details><summary>Code to produce 2D data examples</summary><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tibble.tidyverse.org/">tibble</a></span><span class="op">)</span></span>
+<details class="code-fold"><summary>Code to produce 2D data examples</summary><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tibble.tidyverse.org/">tibble</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">6045</span><span class="op">)</span></span>
 <span><span class="va">x1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html">runif</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
 <span><span class="va">x2</span> <span class="op">&lt;-</span> <span class="va">x1</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span><span class="op">(</span><span class="fl">123</span>, sd<span class="op">=</span><span class="fl">0.1</span><span class="op">)</span></span>
@@ -401,69 +373,24 @@ div.csl-indent {
 <span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html">tibble</a></span><span class="op">(</span>x1 <span class="op">=</span> <span class="op">(</span><span class="va">x1</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">x1</span><span class="op">)</span><span class="op">)</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/stats/sd.html">sd</a></span><span class="op">(</span><span class="va">x1</span><span class="op">)</span>, </span>
 <span>             x2 <span class="op">=</span> <span class="op">(</span><span class="va">x2</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">x2</span><span class="op">)</span><span class="op">)</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/stats/sd.html">sd</a></span><span class="op">(</span><span class="va">x2</span><span class="op">)</span>,</span>
 <span>             <span class="va">x3</span>, </span>
-<span>             x3scaled <span class="op">=</span> <span class="op">(</span><span class="va">x3</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">x3</span><span class="op">)</span><span class="op">)</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/stats/sd.html">sd</a></span><span class="op">(</span><span class="va">x3</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">dp1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">x1</span>, y<span class="op">=</span><span class="va">x2</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/lims.html">xlim</a></span><span class="op">(</span><span class="op">-</span><span class="fl">2.5</span>, <span class="fl">2.5</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/lims.html">ylim</a></span><span class="op">(</span><span class="op">-</span><span class="fl">2.5</span>, <span class="fl">2.5</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html">annotate</a></span><span class="op">(</span><span class="st">"segment"</span>, x<span class="op">=</span><span class="fl">0</span>, xend<span class="op">=</span><span class="fl">2</span>, y<span class="op">=</span><span class="fl">0</span>, yend<span class="op">=</span><span class="fl">0</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html">annotate</a></span><span class="op">(</span><span class="st">"segment"</span>, x<span class="op">=</span><span class="fl">0</span>, xend<span class="op">=</span><span class="fl">0</span>, y<span class="op">=</span><span class="fl">0</span>, yend<span class="op">=</span><span class="fl">2</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html">annotate</a></span><span class="op">(</span><span class="st">"text"</span>, x<span class="op">=</span><span class="fl">2.1</span>, y<span class="op">=</span><span class="fl">0</span>, label<span class="op">=</span><span class="st">"x1"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html">annotate</a></span><span class="op">(</span><span class="st">"text"</span>, x<span class="op">=</span><span class="fl">0</span>, y<span class="op">=</span><span class="fl">2.1</span>, label<span class="op">=</span><span class="st">"x2"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>aspect.ratio<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span>
-<span><span class="va">dp2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">x1</span>, y<span class="op">=</span><span class="va">x3</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/lims.html">xlim</a></span><span class="op">(</span><span class="op">-</span><span class="fl">2.5</span>, <span class="fl">2.5</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/lims.html">ylim</a></span><span class="op">(</span><span class="op">-</span><span class="fl">2.5</span>, <span class="fl">2.5</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html">annotate</a></span><span class="op">(</span><span class="st">"segment"</span>, x<span class="op">=</span><span class="fl">0</span>, xend<span class="op">=</span><span class="fl">2</span>, y<span class="op">=</span><span class="fl">0</span>, yend<span class="op">=</span><span class="fl">0</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html">annotate</a></span><span class="op">(</span><span class="st">"segment"</span>, x<span class="op">=</span><span class="fl">0</span>, xend<span class="op">=</span><span class="fl">0</span>, y<span class="op">=</span><span class="fl">0</span>, yend<span class="op">=</span><span class="fl">2</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html">annotate</a></span><span class="op">(</span><span class="st">"text"</span>, x<span class="op">=</span><span class="fl">2.1</span>, y<span class="op">=</span><span class="fl">0</span>, label<span class="op">=</span><span class="st">"x1"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html">annotate</a></span><span class="op">(</span><span class="st">"text"</span>, x<span class="op">=</span><span class="fl">0</span>, y<span class="op">=</span><span class="fl">2.1</span>, label<span class="op">=</span><span class="st">"x3"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>aspect.ratio<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span>
-<span><span class="va">dp3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">x1</span>, y<span class="op">=</span><span class="va">x3scaled</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/lims.html">xlim</a></span><span class="op">(</span><span class="op">-</span><span class="fl">2.5</span>, <span class="fl">2.5</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/lims.html">ylim</a></span><span class="op">(</span><span class="op">-</span><span class="fl">2.5</span>, <span class="fl">2.5</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html">annotate</a></span><span class="op">(</span><span class="st">"segment"</span>, x<span class="op">=</span><span class="fl">0</span>, xend<span class="op">=</span><span class="fl">2</span>, y<span class="op">=</span><span class="fl">0</span>, yend<span class="op">=</span><span class="fl">0</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html">annotate</a></span><span class="op">(</span><span class="st">"segment"</span>, x<span class="op">=</span><span class="fl">0</span>, xend<span class="op">=</span><span class="fl">0</span>, y<span class="op">=</span><span class="fl">0</span>, yend<span class="op">=</span><span class="fl">2</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html">annotate</a></span><span class="op">(</span><span class="st">"text"</span>, x<span class="op">=</span><span class="fl">2.1</span>, y<span class="op">=</span><span class="fl">0</span>, label<span class="op">=</span><span class="st">"x1"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html">annotate</a></span><span class="op">(</span><span class="st">"text"</span>, x<span class="op">=</span><span class="fl">0</span>, y<span class="op">=</span><span class="fl">2.1</span>, label<span class="op">=</span><span class="st">"x3"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>aspect.ratio<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span>             x3scaled <span class="op">=</span> <span class="op">(</span><span class="va">x3</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">x3</span><span class="op">)</span><span class="op">)</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/stats/sd.html">sd</a></span><span class="op">(</span><span class="va">x3</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div id="fig-2D" class="quarto-layout-panel" data-fig-align="center">
-<figure class="figure"><div class="quarto-layout-row quarto-layout-valign-top">
-<div class="cell quarto-layout-cell" style="flex-basis: 33.3%;justify-content: center;">
-<div class="cell-output-display">
-<div id="fig-2D-1" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure"><p><img src="3-intro-dimred_files/figure-html/fig-2D-1-1.png" class="img-fluid figure-img" data-ref-parent="fig-2D" width="288"></p>
-<figcaption class="figure-caption">(a) Reduced dimension</figcaption></figure>
-</div>
-</div>
-</div>
-<div class="cell quarto-layout-cell" style="flex-basis: 33.3%;justify-content: center;">
-<div class="cell-output-display">
-<div id="fig-2D-2" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure"><p><img src="3-intro-dimred_files/figure-html/fig-2D-2-1.png" class="img-fluid figure-img" data-ref-parent="fig-2D" width="288"></p>
-<figcaption class="figure-caption">(b) Reduced variance</figcaption></figure>
-</div>
-</div>
-</div>
-<div class="cell quarto-layout-cell" style="flex-basis: 33.3%;justify-content: center;">
-<div class="cell-output-display">
-<div id="fig-2D-3" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure"><p><img src="3-intro-dimred_files/figure-html/fig-2D-3-1.png" class="img-fluid figure-img" data-ref-parent="fig-2D" width="288"></p>
-<figcaption class="figure-caption">(c) No reduced dimension</figcaption></figure>
-</div>
-</div>
-</div>
-</div>
-<p></p><figcaption class="figure-caption">Figure&nbsp;3.1: Explanation of how dimension reduction is perceived in 2D, relative to variables: (a) Two variables with strong linear association. Both variables contribute to the association, as indicated by their axes extending out from the “collapsed” direction of the points; (b) Two variables with no linear association. But x3 has less variation, so points collapse in this direction; (c) The situation in plot (b) does not arise in a tour because all variables are (usually) scaled. When an axes extends out of a direction where the points are collapsed, it means that this variable is partially responsible for the reduced dimension.</figcaption><p></p>
-</figure>
-</div>
-<p>Now let’s think about what this looks like with five variables. <a href="#fig-dimension">Figure&nbsp;<span>3.2</span></a> shows a grand tour on five variables, with (a) showing data that is primarily 2D, (b) has data that is primarily 3D and (c) is fully 5D. You can see that both (a) and (b) the spread of points collapse in some projections, with it happening more in (a). In (c) the data is always spread out in the square, although it does seem to concentrate or pile in the centre. This piling is typical when projecting from high dimensions to low dimensions. The sage tour <span class="citation" data-cites="sagetour">(<a href="references.html#ref-sagetour" role="doc-biblioref">Laa et al., 2020a</a>)</span> makes a correction for this.</p>
 <div class="cell">
-<details><summary>Code to make animated gifs</summary><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dicook.github.io/mulgar/">mulgar</a></span><span class="op">)</span></span>
+<div class="cell-output-display">
+<div id="fig-2D" class="quarto-figure quarto-figure-center quarto-float anchored" alt="Three scatterplots: (a) points lie close to a straight line in the x=y direction, (b) points lie close to a horizontal line, (c) points spread out in the full plot region. There are no axis labels or scales.">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-2D-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="3-intro-dimred_files/figure-html/fig-2D-1.png" class="img-fluid figure-img" style="width:100.0%" alt="Three scatterplots: (a) points lie close to a straight line in the x=y direction, (b) points lie close to a horizontal line, (c) points spread out in the full plot region. There are no axis labels or scales.">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-2D-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3.1: Explanation of how dimension reduction is perceived in 2D, relative to variables: (a) Two variables with strong linear association. Both variables contribute to the association, as indicated by their axes extending out from the ‘collapsed’ direction of the points; (b) Two variables with no linear association. But x3 has less variation, so points collapse in this direction; (c) The situation in plot (b) does not arise in a tour because all variables are (usually) scaled. When an axes extends out of a direction where the points are collapsed, it means that this variable is partially responsible for the reduced dimension.
+</figcaption></figure>
+</div>
+</div>
+</div>
+<p>Now let’s think about what this looks like with five variables. <a href="#fig-dimension-html" class="quarto-xref">Figure&nbsp;<span>3.2</span></a> shows a grand tour on five variables, with (a) data that is primarily 2D, (b) data that is primarily 3D and (c) fully 5D data. You can see that both (a) and (b) the spread of points collapse in some projections, with it happening more in (a). In (c) the data is always spread out in the square, although it does seem to concentrate or pile in the centre. This piling is typical when projecting from high dimensions to low dimensions. The sage tour <span class="citation" data-cites="sagetour">(<a href="references.html#ref-sagetour" role="doc-biblioref">Laa et al., 2022</a>)</span> makes a correction for this.</p>
+<div class="cell">
+<details class="code-fold"><summary>Code to make animated gifs</summary><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dicook.github.io/mulgar/">mulgar</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="va">plane</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="va">box</span><span class="op">)</span></span>
 <span><span class="fu">render_gif</span><span class="op">(</span><span class="va">plane</span>,</span>
@@ -494,40 +421,63 @@ div.csl-indent {
 <span>           height<span class="op">=</span><span class="fl">200</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div id="fig-dimension" class="quarto-layout-panel" data-fig-align="center">
-<figure class="figure"><div class="quarto-layout-row quarto-layout-valign-top">
-<div class="quarto-layout-cell" style="flex-basis: 33.3%;justify-content: center;">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure"><p><img src="gifs/plane.gif" class="img-fluid figure-img" width="180"></p>
-<figcaption class="figure-caption">2D plane in 5D</figcaption></figure>
+<div id="fig-dimension-html" class="quarto-layout-panel">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-dimension-html-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-dimension-html" style="flex-basis: 33.3%;justify-content: flex-start;">
+<div id="fig-plane" class="quarto-figure quarto-figure-center quarto-float anchored" alt="Animation of sequences of 2D projections shown as scatterplots. You can see points collapsing into a thick straight line in various projections. A circle with line segments indicates the projection coefficients for each variable for all projections viewed.">
+<figure class="quarto-float quarto-subfloat-fig figure"><div aria-describedby="fig-plane-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="gifs/plane.gif" class="img-fluid figure-img" data-ref-parent="fig-dimension-html" alt="Animation of sequences of 2D projections shown as scatterplots. You can see points collapsing into a thick straight line in various projections. A circle with line segments indicates the projection coefficients for each variable for all projections viewed." width="180">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-plane-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(a) 2D plane in 5D
+</figcaption></figure>
 </div>
 </div>
-<div class="quarto-layout-cell" style="flex-basis: 33.3%;justify-content: center;">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure"><p><img src="gifs/box.gif" class="img-fluid figure-img" width="180"></p>
-<figcaption class="figure-caption">3D plane in 5D</figcaption></figure>
+<div class="quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-dimension-html" style="flex-basis: 33.3%;justify-content: flex-start;">
+<div id="fig-box" class="quarto-figure quarto-figure-center quarto-float anchored" alt="Animation of sequences of 2D projections shown as scatterplots. You can see points collapsing into a thick straight line in various projections, but not as often as in the animation in (a). A circle with line segments indicates the projection coefficients for each variable for all projections viewed.">
+<figure class="quarto-float quarto-subfloat-fig figure"><div aria-describedby="fig-box-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="gifs/box.gif" class="img-fluid figure-img" data-ref-parent="fig-dimension-html" alt="Animation of sequences of 2D projections shown as scatterplots. You can see points collapsing into a thick straight line in various projections, but not as often as in the animation in (a). A circle with line segments indicates the projection coefficients for each variable for all projections viewed." width="180">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-box-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(b) 3D plane in 5D
+</figcaption></figure>
 </div>
 </div>
-<div class="quarto-layout-cell" style="flex-basis: 33.3%;justify-content: center;">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure"><p><img src="gifs/cube5d.gif" class="img-fluid figure-img" width="180"></p>
-<figcaption class="figure-caption">5D plane in 5D</figcaption></figure>
+<div class="quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-dimension-html" style="flex-basis: 33.3%;justify-content: flex-start;">
+<div id="fig-cube5" class="quarto-figure quarto-figure-center quarto-float anchored" alt="Animation of sequences of 2D projections shown as scatterplots. You can see points are always spread out fully in the plot space, in all projections. A circle with line segments indicates the projection coefficients for each variable for all projections viewed.">
+<figure class="quarto-float quarto-subfloat-fig figure"><div aria-describedby="fig-cube5-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="gifs/cube5d.gif" class="img-fluid figure-img" data-ref-parent="fig-dimension-html" alt="Animation of sequences of 2D projections shown as scatterplots. You can see points are always spread out fully in the plot space, in all projections. A circle with line segments indicates the projection coefficients for each variable for all projections viewed." width="180">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-cube5-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(c) 5D plane in 5D
+</figcaption></figure>
 </div>
 </div>
 </div>
-<p></p><figcaption class="figure-caption">Figure&nbsp;3.2: Different dimensional planes - 2D, 3D, 5D - displayed in a grand tour projecting into 2D. Notice that the 5D in 5D always fills out the box (although it does concentrate some in the middle which is typical when projecting from high to low dimensions). Also you can see that the 2D in 5D, concentrates into a line more than the 3D in 5D. This suggests that it is lower dimensional.</figcaption><p></p>
-</figure>
 </div>
-<p>The next step is to determine which variables contribute. In the examples just provided, all variables are linearly associated in the 2D and 2D data. You can check this by making a scatterplot matrix.</p>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-dimension-html-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3.2: Different dimensional planes - 2D, 3D, 5D - displayed in a grand tour projecting into 2D. Notice that the 5D in 5D always fills out the box (although it does concentrate some in the middle which is typical when projecting from high to low dimensions). Also you can see that the 2D in 5D, concentrates into a line more than the 3D in 5D. This suggests that it is lower dimensional.
+</figcaption></figure>
+</div>
+<p>The next step is to determine which variables contribute. In the examples just provided, all variables are linearly associated in the 2D and 3D data. You can check this by making a scatterplot matrix, <a href="#fig-plane-scatmat" class="quarto-xref">Figure&nbsp;<span>3.3</span></a>.</p>
 <div class="cell">
-<details><summary>Code for scatterplot matrix</summary><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggobi.github.io/ggally/">GGally</a></span><span class="op">)</span></span>
+<details class="code-fold"><summary>Code for scatterplot matrix</summary><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggobi.github.io/ggally/">GGally</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dicook.github.io/mulgar/">mulgar</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="va">plane</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://ggobi.github.io/ggally/reference/ggscatmat.html">ggscatmat</a></span><span class="op">(</span><span class="va">plane</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="fu"><a href="https://ggobi.github.io/ggally/reference/ggscatmat.html">ggscatmat</a></span><span class="op">(</span><span class="va">plane</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>panel.background <span class="op">=</span> </span>
+<span>          <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_rect</a></span><span class="op">(</span>colour<span class="op">=</span><span class="st">"black"</span>, fill<span class="op">=</span><span class="cn">NA</span><span class="op">)</span>,</span>
+<span>    axis.text <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_blank</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>    axis.ticks <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_blank</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
-<div id="fig-plane-scatma" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure"><p><img src="3-intro-dimred_files/figure-html/fig-plane-scatma-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption class="figure-caption">Figure&nbsp;3.3: Scatterplot matrix of plane data. You can see that x1-x3 are strongly linearly associated, and also x4 and x5. When you watch the tour of this data, any time the data collapses into a line you should see only (x1, x2, x3) or (x4, x5). When combinations of x1 and x4 or x5 show, the data should be spread out.</figcaption></figure>
+<div id="fig-plane-scatmat" class="quarto-figure quarto-figure-center quarto-float anchored" alt="A five-by-five scatterplot matrix, with scatterplots in the lower triangle, correlaton printed in the upper triangle and density plots shown on the diagonal. Plots of x1 vs x2, x1 vs x3, x2 vs x3, and x4 vs x5 have strong positive or negative correlation. The remaining pairs of variables have no association.">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-plane-scatmat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="3-intro-dimred_files/figure-html/fig-plane-scatmat-1.png" class="img-fluid figure-img" style="width:80.0%" alt="A five-by-five scatterplot matrix, with scatterplots in the lower triangle, correlaton printed in the upper triangle and density plots shown on the diagonal. Plots of x1 vs x2, x1 vs x3, x2 vs x3, and x4 vs x5 have strong positive or negative correlation. The remaining pairs of variables have no association.">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-plane-scatmat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3.3: Scatterplot matrix of plane data. You can see that x1-x3 are strongly linearly associated, and also x4 and x5. When you watch the tour of this data, any time the data collapses into a line you should see only (x1, x2, x3) or (x4, x5). When combinations of x1 and x4 or x5 show, the data should be spread out.
+</figcaption></figure>
 </div>
 </div>
 </div>
@@ -537,21 +487,30 @@ div.csl-indent {
 <span><span class="va">plane_noise</span> <span class="op">&lt;-</span> <span class="va">plane</span></span>
 <span><span class="va">plane_noise</span><span class="op">$</span><span class="va">x6</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span></span>
 <span><span class="va">plane_noise</span><span class="op">$</span><span class="va">x7</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span></span>
-<span><span class="va">plane_noise</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/apply.html">apply</a></span><span class="op">(</span><span class="va">plane_noise</span>, <span class="fl">2</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">(</span><span class="va">x</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/stats/sd.html">sd</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">plane_noise</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/apply.html">apply</a></span><span class="op">(</span><span class="va">plane_noise</span>, <span class="fl">2</span>, </span>
+<span>    <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">(</span><span class="va">x</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/stats/sd.html">sd</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://ggobi.github.io/ggally/reference/ggduo.html">ggduo</a></span><span class="op">(</span><span class="va">plane_noise</span>, columnsX <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, columnsY <span class="op">=</span> <span class="fl">6</span><span class="op">:</span><span class="fl">7</span>, </span>
-<span>      types <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>continuous <span class="op">=</span> <span class="st">"points"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>aspect.ratio<span class="op">=</span><span class="fl">1</span>, axis.text <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_blank</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span>    types <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>continuous <span class="op">=</span> <span class="st">"points"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>aspect.ratio<span class="op">=</span><span class="fl">1</span>,</span>
+<span>    panel.background <span class="op">=</span> </span>
+<span>          <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_rect</a></span><span class="op">(</span>colour<span class="op">=</span><span class="st">"black"</span>, fill<span class="op">=</span><span class="cn">NA</span><span class="op">)</span>,</span>
+<span>    axis.text <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_blank</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>    axis.ticks <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_blank</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<div id="fig-plane-noise-scatter" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure"><p><img src="3-intro-dimred_files/figure-html/fig-plane-noise-scatter-1.png" class="img-fluid figure-img" width="768"></p>
-<figcaption class="figure-caption">Figure&nbsp;3.4: Additional noise variables are not associated with any of the first five variables.</figcaption></figure>
+<div id="fig-plane-noise-scatter" class="quarto-figure quarto-figure-center quarto-float anchored" alt="Two rows of scatterplots showing x6 and x7 against x1-x5. The points are spread out in the full plotting region, although x6 has one point with an unusually low value.">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-plane-noise-scatter-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="3-intro-dimred_files/figure-html/fig-plane-noise-scatter-1.png" class="img-fluid figure-img" alt="Two rows of scatterplots showing x6 and x7 against x1-x5. The points are spread out in the full plotting region, although x6 has one point with an unusually low value." width="576">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-plane-noise-scatter-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3.4: Scatterplots showing two additional noise variables that are not associated with any of the first five variables.
+</figcaption></figure>
 </div>
 </div>
 </div>
 <p>Now we have 2D structure in 7D, but only five of the variables contribute to the 2D structure, that is, five of the variables are linearly related with each other. The other two variables (x6, x7) are not linearly related to any of the others.</p>
-<p>We can still see the concentration of points along a line in some dimensions, which tells us that the data is not fully 7D. Then if you look closely at the variable axes you will see that the collapsing to a line only occurs when any of x1-x5 contribute strongly in the direction orthogonal to this. This does not happen when x6 or x7 contribute strongly to a projection - the data is always expanded to fill much of the space. That tells us that x6 and x7 don’t substantially contribute to the dimension reduction, that is, they are not linearly related to the other variables.</p>
+<p>The data is viewed with a grand tour in <a href="#fig-plane-noise-html" class="quarto-xref">Figure&nbsp;<span>3.5</span></a>. We can still see the concentration of points along a line in some dimensions, which tells us that the data is not fully 7D. Then if you look closely at the variable axes you will see that the collapsing to a line only occurs when any of x1-x5 contribute strongly in the direction orthogonal to this. This does not happen when x6 or x7 contribute strongly to a projection - the data is always expanded to fill much of the space. That tells us that x6 and x7 don’t substantially contribute to the dimension reduction, that is, they are not linearly related to the other variables.</p>
 <div class="cell">
-<details><summary>Code to generate animation</summary><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></span>
+<details class="code-fold"><summary>Code to generate animation</summary><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://plotly-r.com">plotly</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/ramnathv/htmlwidgets">htmlwidgets</a></span><span class="op">)</span></span>
 <span></span>
@@ -604,33 +563,46 @@ div.csl-indent {
 <span>          selfcontained <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div id="fig-plane-noise" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure"><iframe width="750" height="550" src="html/plane_noise.html" title="Grand tour of the plane with two additional dimensions of pure noise. ">
+<div id="fig-plane-noise-html" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-plane-noise-html-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<iframe width="750" height="550" src="html/plane_noise.html" title="Grand tour of the plane with two additional dimensions of pure noise. ">
+fig-alt=“Animation with a scrollbar control to allow user to step through the sequence of projections. Scatterplots of the projections are shown. A circle with line segments indicates the projection coefficients for each variable for all projections.”
 </iframe>
-<figcaption class="figure-caption">Figure&nbsp;3.5: Grand tour of the plane with two additional dimensions of pure noise. The collapsing of the points indicates that this is not fully 7D. This only happens when any of x1-x5 are contributing strongly (frame 49 x4, x5; frame 79 x1; frame 115 x2, x3). If x6 or x7 are contributing strongly the data is spread out fully. This tells us that x6 and x7 are not linearly associated, but other variables are.</figcaption></figure>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-plane-noise-html-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3.5: Grand tour of the plane with two additional dimensions of pure noise. The collapsing of the points indicates that this is not fully 7D. This only happens when any of x1-x5 are contributing strongly (frame 49 x4, x5; frame 79 x1; frame 115 x2, x3). If x6 or x7 are contributing strongly the data is spread out fully (frames 27, 96). This tells us that x6 and x7 are not linearly associated, but other variables are.
+</figcaption></figure>
 </div>
 <div class="info">
 <p>To determine which variables are responsible for the reduced dimension look for the axes that extend out of the point cloud. These contribute to smaller variation in the observations, and thus indicate dimension reduction.</p>
 </div>
 <p>The simulated data here is very simple, and what we have learned from the tour could also be learned from principal component analysis. However, if there are small complications, such as outliers or nonlinear relationships, that might not be visible from principal component analysis, the tour can help you to see them.</p>
-<p><a href="#fig-plane-noise-outlier">Figure&nbsp;<span>3.6</span></a> and <a href="#fig-outlier">Figure&nbsp;<span>3.7 (a)</span></a> show example data with an outlier and <a href="#fig-nonlinear">Figure&nbsp;<span>3.7 (b)</span></a> shows data with non-linear relationships.</p>
+<p><a href="#fig-plane-noise-outlier" class="quarto-xref">Figure&nbsp;<span>3.6</span></a> and <a href="#fig-outlier-nonlin-html" class="quarto-xref">Figure&nbsp;<span>3.7</span></a>(a) show example data with an outlier and <a href="#fig-outlier-nonlin-html" class="quarto-xref">Figure&nbsp;<span>3.7</span></a>(b) shows data with non-linear relationships.</p>
 <div class="cell">
-<details><summary>Code for scatterplot matrix</summary><div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Add several outliers to the plane_noise data</span></span>
+<details class="code-fold"><summary>Code for scatterplot matrix</summary><div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Add several outliers to the plane_noise data</span></span>
 <span><span class="va">plane_noise_outliers</span> <span class="op">&lt;-</span> <span class="va">plane_noise</span></span>
 <span><span class="va">plane_noise_outliers</span><span class="op">[</span><span class="fl">101</span>,<span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">2</span>, <span class="op">-</span><span class="fl">2</span>, <span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">0</span><span class="op">)</span></span>
 <span><span class="va">plane_noise_outliers</span><span class="op">[</span><span class="fl">102</span>,<span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">0</span>,<span class="op">-</span><span class="fl">2</span>, <span class="op">-</span><span class="fl">2</span>, <span class="fl">0</span>, <span class="fl">0</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://ggobi.github.io/ggally/reference/ggscatmat.html">ggscatmat</a></span><span class="op">(</span><span class="va">plane_noise_outliers</span>, columns <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>aspect.ratio<span class="op">=</span><span class="fl">1</span>, axis.text <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_blank</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>aspect.ratio<span class="op">=</span><span class="fl">1</span>,</span>
+<span>    panel.background <span class="op">=</span> </span>
+<span>          <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_rect</a></span><span class="op">(</span>colour<span class="op">=</span><span class="st">"black"</span>, fill<span class="op">=</span><span class="cn">NA</span><span class="op">)</span>,</span>
+<span>    axis.text <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_blank</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>    axis.ticks <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_blank</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
-<div id="fig-plane-noise-outlier" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure"><p><img src="3-intro-dimred_files/figure-html/fig-plane-noise-outlier-1.png" class="img-fluid figure-img" width="768"></p>
-<figcaption class="figure-caption">Figure&nbsp;3.6: Outliers added to the plane with noise data.</figcaption></figure>
+<div id="fig-plane-noise-outlier" class="quarto-figure quarto-figure-center quarto-float anchored" alt="A five-by-five scatterplot matrix, with scatterplots in the lower triangle, correlaton printed in the upper triangle and density plots shown on the diagonal. Plots of x1 vs x2, x1 vs x3, x2 vs x3, and x4 vs x5 have strong positive or negative correlation, with an outlier in the corner of the plot. The remaining pairs of variables have no association, and thus also no outliers.">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-plane-noise-outlier-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="3-intro-dimred_files/figure-html/fig-plane-noise-outlier-1.png" class="img-fluid figure-img" style="width:80.0%" alt="A five-by-five scatterplot matrix, with scatterplots in the lower triangle, correlaton printed in the upper triangle and density plots shown on the diagonal. Plots of x1 vs x2, x1 vs x3, x2 vs x3, and x4 vs x5 have strong positive or negative correlation, with an outlier in the corner of the plot. The remaining pairs of variables have no association, and thus also no outliers.">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-plane-noise-outlier-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3.6: Scatterplot matrix of the plane with noise data, with two added outliers in variables with strong correlation.
+</figcaption></figure>
 </div>
 </div>
 </div>
 <div class="cell">
-<details><summary>Code to generate animated gif</summary><div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">render_gif</span><span class="op">(</span><span class="va">plane_noise_outliers</span>,          </span>
+<details class="code-fold"><summary>Code to generate animated gif</summary><div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">render_gif</span><span class="op">(</span><span class="va">plane_noise_outliers</span>,          </span>
 <span>           <span class="fu">grand_tour</span><span class="op">(</span><span class="op">)</span>, </span>
 <span>           <span class="fu">display_xy</span><span class="op">(</span><span class="op">)</span>,</span>
 <span>           gif_file<span class="op">=</span><span class="st">"gifs/pn_outliers.gif"</span>,</span>
@@ -648,43 +620,78 @@ div.csl-indent {
 <span>           height<span class="op">=</span><span class="fl">200</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div id="fig-outlier-nonlin" class="quarto-layout-panel" data-fig-align="center">
-<figure class="figure"><div class="quarto-layout-row quarto-layout-valign-top">
-<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
-<div id="fig-outlier" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure"><p><img src="gifs/pn_outliers.gif" class="img-fluid figure-img" data-ref-parent="fig-outlier-nonlin" width="180"></p>
-<figcaption class="figure-caption">(a) Outliers</figcaption></figure>
+<div id="fig-outlier-nonlin-html" class="quarto-layout-panel">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-outlier-nonlin-html-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-outlier-nonlin-html" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-outlier" class="quarto-figure quarto-figure-center quarto-float anchored" alt="Animation showing scatterplots of 2D projections from 5D. The points sometimes appear to be a plane viewed from the side, with two single points futher away. A circle with line segments indicates the projection coefficients for each variable for all projections viewed.">
+<figure class="quarto-float quarto-subfloat-fig figure"><div aria-describedby="fig-outlier-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="gifs/pn_outliers.gif" class="img-fluid figure-img" data-ref-parent="fig-outlier-nonlin-html" alt="Animation showing scatterplots of 2D projections from 5D. The points sometimes appear to be a plane viewed from the side, with two single points futher away. A circle with line segments indicates the projection coefficients for each variable for all projections viewed." width="200">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-outlier-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(a) Outliers
+</figcaption></figure>
 </div>
 </div>
-<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
-<div id="fig-nonlinear" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure"><p><img src="gifs/plane_nonlin.gif" class="img-fluid figure-img" data-ref-parent="fig-outlier-nonlin" width="180"></p>
-<figcaption class="figure-caption">(b) Non-linear relationship</figcaption></figure>
+<div class="quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-outlier-nonlin-html" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-nonlinear" class="quarto-figure quarto-figure-center quarto-float anchored" alt="Animation showing scatterplots of 2D projections from 5D. The points sometimes appear to be lying on a curve in various projections. A circle with line segments indicates the projection coefficients for each variable for all projections viewed.">
+<figure class="quarto-float quarto-subfloat-fig figure"><div aria-describedby="fig-nonlinear-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="gifs/plane_nonlin.gif" class="img-fluid figure-img" data-ref-parent="fig-outlier-nonlin-html" alt="Animation showing scatterplots of 2D projections from 5D. The points sometimes appear to be lying on a curve in various projections. A circle with line segments indicates the projection coefficients for each variable for all projections viewed." width="200200">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-nonlinear-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(b) Non-linear relationship
+</figcaption></figure>
 </div>
 </div>
 </div>
-<p></p><figcaption class="figure-caption">Figure&nbsp;3.7: Examples of different types of dimensionality issues: outliers (a) and non-linearity (b). In (a) you can see two points far from the others in some projections. Also the two can be seen with different movement patterns, moving faster that other points during the tour. Outliers will affect detection of reduced dimension, but it is easy to ignore with the tour. In (b) there is a non-linear relationship between several variables, primarily with x3. Non-linear relationships may not be captured by other techniques but are visible with the tour.</figcaption><p></p>
-</figure>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-outlier-nonlin-html-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3.7: Examples of different types of dimensionality issues: outliers (a) and non-linearity (b). In (a) you can see two points far from the others in some projections. Also the two can be seen with different movement patterns – moving faster and different directions than the other points during the tour. Outliers will affect detection of reduced dimension, but they can be ignored when assessing dimensionality with the tour. In (b) there is a non-linear relationship between several variables, primarily with x3. Non-linear relationships may not be easily captured by other techniques but are often visible with the tour.
+</figcaption></figure>
 </div>
 <section id="exercises" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="exercises">Exercises</h2>
 <ol type="1">
-<li>Multicollinearity is when the predictors for a model are strongly linearly associated. It can adversely affect the fitting of most models, because many possible models may be equally as good. Variable importance might be masked by correlated variables, and confidence intervals generated for linear models might be too wide. Check the for multicollinearity or other associations between the predictors in:</li>
-</ol>
+<li>Multicollinearity is when the predictors for a model are strongly linearly associated. It can adversely affect the fitting of most models, because many possible models may be equally as good. Variable importance might be masked by correlated variables, and confidence intervals generated for linear models might be too wide. Check the for multicollinearity or other associations between the predictors in:
 <ol type="a">
 <li>2001 Australian election data</li>
 <li>2016 Australian election data</li>
 </ol>
-<ol start="2" type="1">
+</li>
 <li>Examine 5D multivariate normal samples drawn from populations with a range of variance-covariance matrices. (You can use the <code>mvtnorm</code> package to do the sampling, for example.) Examine the data using a grand tour. What changes when you change the correlation from close to zero to close to 1? Can you see a difference between strong positive correlation and strong negative correlation?</li>
+<li>The following code shows how to hide a point in a four-dimensional space, so that it is not visible in any of the plots of two variables. Generate both <code>d</code> and <code>d_r</code> and confirm that the point is visible in a scatterplot matrix of <code>d</code>, but not in the scatterplot matrix of <code>d_r</code>. Also confirm that it is visible in both data sets when you use a tour.</li>
 </ol>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org">tidyverse</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/ggobi/tourr">tourr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggobi.github.io/ggally/">GGally</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">946</span><span class="op">)</span></span>
+<span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html">tibble</a></span><span class="op">(</span>x1<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html">runif</a></span><span class="op">(</span><span class="fl">200</span>, <span class="op">-</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>, </span>
+<span>            x2<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html">runif</a></span><span class="op">(</span><span class="fl">200</span>, <span class="op">-</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>, </span>
+<span>            x3<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html">runif</a></span><span class="op">(</span><span class="fl">200</span>, <span class="op">-</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">d</span> <span class="op">&lt;-</span> <span class="va">d</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>x4 <span class="op">=</span> <span class="va">x3</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html">runif</a></span><span class="op">(</span><span class="fl">200</span>, <span class="op">-</span><span class="fl">0.1</span>, <span class="fl">0.1</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co"># outlier is visible in d</span></span>
+<span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html">bind_rows</a></span><span class="op">(</span><span class="va">d</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span>x1<span class="op">=</span><span class="fl">0</span>, x2<span class="op">=</span><span class="fl">0</span>, x3<span class="op">=</span><span class="op">-</span><span class="fl">0.5</span>, x4<span class="op">=</span><span class="fl">0.5</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Point is hiding in d_r</span></span>
+<span><span class="va">d_r</span> <span class="op">&lt;-</span> <span class="va">d</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>x1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html">cos</a></span><span class="op">(</span><span class="va">pi</span><span class="op">/</span><span class="fl">6</span><span class="op">)</span><span class="op">*</span><span class="va">x1</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html">sin</a></span><span class="op">(</span><span class="va">pi</span><span class="op">/</span><span class="fl">6</span><span class="op">)</span><span class="op">*</span><span class="va">x3</span>,</span>
+<span>         x3 <span class="op">=</span> <span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/Trig.html">sin</a></span><span class="op">(</span><span class="va">pi</span><span class="op">/</span><span class="fl">6</span><span class="op">)</span><span class="op">*</span><span class="va">x1</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html">cos</a></span><span class="op">(</span><span class="va">pi</span><span class="op">/</span><span class="fl">6</span><span class="op">)</span><span class="op">*</span><span class="va">x3</span>,</span>
+<span>         x2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html">cos</a></span><span class="op">(</span><span class="va">pi</span><span class="op">/</span><span class="fl">6</span><span class="op">)</span><span class="op">*</span><span class="va">x2</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html">sin</a></span><span class="op">(</span><span class="va">pi</span><span class="op">/</span><span class="fl">6</span><span class="op">)</span><span class="op">*</span><span class="va">x4</span>,</span>
+<span>         x4 <span class="op">=</span> <span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/Trig.html">sin</a></span><span class="op">(</span><span class="va">pi</span><span class="op">/</span><span class="fl">6</span><span class="op">)</span><span class="op">*</span><span class="va">x2</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html">cos</a></span><span class="op">(</span><span class="va">pi</span><span class="op">/</span><span class="fl">6</span><span class="op">)</span><span class="op">*</span><span class="va">x4</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
 
 
-<div id="refs" class="references csl-bib-body hanging-indent" data-line-spacing="2" role="list" style="display: none">
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list" style="display: none">
 <div id="ref-Ab1884" class="csl-entry" role="listitem">
 Abbott, E. (1884). <em>Flatland: A romance of many dimensions</em>. Dover Publications.
 </div>
 <div id="ref-AWS91" class="csl-entry" role="listitem">
 Ahlberg, C., Williamson, C., &amp; Shneiderman, B. (1991). Dynamic <span>Q</span>ueries for <span>I</span>nformation <span>E</span>xploration: <span>A</span>n <span>I</span>mplementation and <span>E</span>valuation. <em>ACM CHI ‘92 Conference Proceedings</em>, 619–626.
+</div>
+<div id="ref-keras" class="csl-entry" role="listitem">
+Allaire, J., &amp; Chollet, F. (2023). <em>Keras: R interface to ’keras’</em>. <a href="https://CRAN.R-project.org/package=keras">https://CRAN.R-project.org/package=keras</a>
 </div>
 <div id="ref-An57" class="csl-entry" role="listitem">
 Anderson, E. (1957). A <span>S</span>emigraphical <span>M</span>ethod for the <span>A</span>nalysis of <span>C</span>omplex <span>P</span>roblems. <em>Proceedings of the National Academy of Science, 13</em>, 923–927.
@@ -748,9 +755,6 @@ Borg, I., &amp; Groenen, P. J. F. (2005). <em>Modern <span>M</span>ultidimension
 </div>
 <div id="ref-Br01" class="csl-entry" role="listitem">
 Breiman, L. (2001). Random <span>F</span>orests. <em>Machine Learning</em>, <em>45</em>(1), 5–32.
-</div>
-<div id="ref-Cu04" class="csl-entry" role="listitem">
-Breiman, L., &amp; Cutler, A. (2004). <em>Random <span>F</span>orests</em>. <span><code>http://www.math.usu.edu/</code><span class="math inline">\(\sim\)</span><code>adele/forests/cc_home.htm</code></span>.
 </div>
 <div id="ref-R-randomForest" class="csl-entry" role="listitem">
 Breiman, L., Cutler, A., Liaw, A., &amp; Wiener, M. (2022). <em>randomForest: Breiman and cutler’s random forests for classification and regression</em>. <a href="https://www.stat.berkeley.edu/~breiman/RandomForests/">https://www.stat.berkeley.edu/~breiman/RandomForests/</a>
@@ -837,7 +841,7 @@ Cook, D., Buja, A., Cabrera, J., &amp; Hurley, C. (1995a). Grand <span>T</span>o
 Cook, D., Hofmann, H., Lee, E.-K., Yang, H., Nikolau, B., &amp; Wurtele, E. (2007). Exploring <span>G</span>ene <span>E</span>xpression <span>D</span>ata, <span>U</span>sing <span>P</span>lots. <em>Journal of Data Science</em>, <em>5</em>(2), 151–182.
 </div>
 <div id="ref-R-mulgar" class="csl-entry" role="listitem">
-Cook, D., &amp; Laa, U. (2023). <em>Mulgar: Functions for pre-processing data for multivariate data visualisation using tours</em>.
+Cook, D., &amp; Laa, U. (2023). <em>Mulgar: Functions for pre-processing data for multivariate data visualisation using tours</em>. <a href="https://dicook.github.io/mulgar/">https://dicook.github.io/mulgar/</a>
 </div>
 <div id="ref-CLBW06" class="csl-entry" role="listitem">
 Cook, D., Lee, E.-K., Buja, A., &amp; Wickham, H. (2006). <span>G</span>rand <span>T</span>ours, <span>P</span>rojection <span>P</span>ursuit <span>G</span>uided <span>T</span>ours and <span>M</span>anual <span>C</span>ontrols. In C.-H. Chen, W. Härdle, &amp; A. Unwin (Eds.), <em>Handbook of <span>D</span>ata <span>V</span>isualization</em>. Springer.
@@ -927,10 +931,10 @@ Friedman, J. H. (1987). <span>E</span>xploratory <span>P</span>rojection <span>P
 Friedman, J. H., &amp; Tukey, J. W. (1974). <span>A</span> <span>P</span>rojection <span>P</span>ursuit <span>A</span>lgorithm for <span>E</span>xploratory <span>D</span>ata <span>A</span>nalysis. <em>IEEE Transactions on Computing C</em>, <em>23</em>, 881–889.
 </div>
 <div id="ref-FD04" class="csl-entry" role="listitem">
-Friendly, M., &amp; Denis, D. J. (2004). <em>Milestones in the history of thematic cartography, statistical graphics, and data visualization</em>.<span><code> http://www.math.yorku.ca/SCS/Gallery/milestone/</code></span>.
+Friendly, M., &amp; Denis, D. J. (2004). <em>Milestones in the history of thematic cartography, statistical graphics, and data visualization</em>. http://www.math.yorku.ca/SCS/Gallery/milestone/.
 </div>
-<div id="ref-FrDe" class="csl-entry" role="listitem">
-Friendly, M., &amp; Denis, D. J. (2006). <em><span>G</span>raphical <span>M</span>ilestones</em>. <span><code>http://www.math.yorku.ca/SCS/Gallery/milestone</code></span>.
+<div id="ref-neuralnet" class="csl-entry" role="listitem">
+Fritsch, S., Guenther, F., &amp; Wright, M. N. (2019). <em>Neuralnet: Training of neural networks</em>. <a href="https://CRAN.R-project.org/package=neuralnet">https://CRAN.R-project.org/package=neuralnet</a>
 </div>
 <div id="ref-FB94" class="csl-entry" role="listitem">
 Furnas, G. W., &amp; Buja, A. (1994). Prosection <span>V</span>iews: <span>D</span>imensional <span>I</span>nference <span>T</span>hrough <span>S</span>ections and <span>P</span>rojections. <em>Journal of Computational and Graphical Statistics</em>, <em>3</em>(4), 323–385.
@@ -960,7 +964,10 @@ Hajibaba, H., Karlsson, L., &amp; Dolnicar, S. (2016). Residents open their home
 Hansen, C., &amp; Johnson, C. R. (2004). <em>Visualization handbook</em>. Academic Press.
 </div>
 <div id="ref-R-langevitour" class="csl-entry" role="listitem">
-Harrison, P. (2022). <em>Langevitour: Langevin tour</em>. <a href="https://logarithmic.net/langevitour/">https://logarithmic.net/langevitour/</a>
+Harrison, P. (2023a). <em>Langevitour: Langevin tour</em>. <a href="https://logarithmic.net/langevitour/">https://logarithmic.net/langevitour/</a>
+</div>
+<div id="ref-langevitour2023" class="csl-entry" role="listitem">
+Harrison, P. (2023b). Langevitour: Smooth interactive touring of high dimensions, demonstrated with scRNA-seq data. <em>The R Journal</em>, <em>15</em>(2), 206–219. <a href="https://doi.org/10.32614/RJ-2023-046">https://doi.org/10.32614/RJ-2023-046</a>
 </div>
 <div id="ref-R-detourr" class="csl-entry" role="listitem">
 Hart, C., &amp; Wang, E. (2022). <em>Detourr: Portable and performant tour animations</em>. <a href="https://casperhart.github.io/detourr/">https://casperhart.github.io/detourr/</a>
@@ -1065,6 +1072,9 @@ Kuhn, M., &amp; Wickham, H. (2020). <em>Tidymodels: A collection of packages for
 Kuhn, M., &amp; Wickham, H. (2023). <em>Tidymodels: Easily install and load the tidymodels packages</em>. <a href="https://CRAN.R-project.org/package=tidymodels">https://CRAN.R-project.org/package=tidymodels</a>
 </div>
 <div id="ref-sagetour" class="csl-entry" role="listitem">
+Laa, U., Cook, D., &amp; Lee, S. (2022). Burning sage: Reversing the curse of dimensionality in the visualization of high-dimensional data. <em>Journal of Computational and Graphical Statistics</em>, <em>31</em>(1), 40–49. <a href="https://doi.org/10.1080/10618600.2021.1963264">https://doi.org/10.1080/10618600.2021.1963264</a>
+</div>
+<div id="ref-slicetour" class="csl-entry" role="listitem">
 Laa, U., Cook, D., &amp; Valencia, G. (2020a). A slice tour for finding hollowness in high-dimensional data. <em>Journal of Computational and Graphical Statistics</em>, <em>29</em>(3), 681–687. <a href="https://doi.org/10.1080/10618600.2020.1777140">https://doi.org/10.1080/10618600.2020.1777140</a>
 </div>
 <div id="ref-tourr2020" class="csl-entry" role="listitem">
@@ -1076,9 +1086,6 @@ Lancaster, H. O. (1965). The helmert matrices. <em>The American Mathematical Mon
 <div id="ref-R-cxhull" class="csl-entry" role="listitem">
 Laurent, S. (2023). <em>Cxhull: Convex hull</em>. <a href="https://github.com/stla/cxhull">https://github.com/stla/cxhull</a>
 </div>
-<div id="ref-LCKL04" class="csl-entry" role="listitem">
-Lee, E. K., Cook, D., Klinke, S., &amp; Lumley, T. (2005a). Projection <span>P</span>ursuit for <span>E</span>xploratory <span>S</span>upervised <span>C</span>lassification. <em>Journal of Computational and Graphical Statistics</em>, <em>14</em>(4), 831–846.
-</div>
 <div id="ref-Lee2018" class="csl-entry" role="listitem">
 Lee, E.-K. (2018). PPtreeViz: An r package for visualizing projection pursuit classification trees. <em>Journal of Statistical Software</em>, <em>83</em>(8), 1–30. <a href="https://doi.org/10.18637/jss.v083.i08">https://doi.org/10.18637/jss.v083.i08</a>
 </div>
@@ -1086,7 +1093,7 @@ Lee, E.-K. (2018). PPtreeViz: An r package for visualizing projection pursuit cl
 Lee, E.-K., &amp; Cook, D. (2009). A projection pursuit index for large <span class="math inline">\(p\)</span> small <span class="math inline">\(n\)</span> data. <em>Statistics and Computing</em>, <em>20</em>, 381–392. <a href="https://doi.org/10.1007/s11222-009-9131-1">https://doi.org/10.1007/s11222-009-9131-1</a>
 </div>
 <div id="ref-LCKL05" class="csl-entry" role="listitem">
-Lee, E.-K., Cook, D., Klinke, S., &amp; Lumley, T. (2005b). <span>P</span>rojection <span>P</span>ursuit for <span>E</span>xploratory <span>S</span>upervised <span>C</span>lassification. <em>Journal of Computational and Graphical Statistics</em>, <em>14</em>(4), 831–846.
+Lee, E.-K., Cook, D., Klinke, S., &amp; Lumley, T. (2005). <span>P</span>rojection <span>P</span>ursuit for <span>E</span>xploratory <span>S</span>upervised <span>C</span>lassification. <em>Journal of Computational and Graphical Statistics</em>, <em>14</em>(4), 831–846.
 </div>
 <div id="ref-R-liminal" class="csl-entry" role="listitem">
 Lee, S. (2021). <em>Liminal: Multivariate data visualization with tours and embeddings</em>. <a href="https://CRAN.R-project.org/package=liminal">https://CRAN.R-project.org/package=liminal</a>
@@ -1102,6 +1109,9 @@ Leisch, F., &amp; Gruen, B. (2023). <em>CRAN task view: Cluster analysis &amp; f
 </div>
 <div id="ref-R-MSA" class="csl-entry" role="listitem">
 Leisch, F., &amp; Grün, B. (2020). <em>MSA: Market segmentation analysis</em>.
+</div>
+<div id="ref-li2020visualizing" class="csl-entry" role="listitem">
+Li, M., Zhao, Z., &amp; Scheidegger, C. (2020). Visualizing neural networks with the grand tour. <em>Distill</em>. <a href="https://doi.org/10.23915/distill.00025">https://doi.org/10.23915/distill.00025</a>
 </div>
 <div id="ref-randomForest2002" class="csl-entry" role="listitem">
 Liaw, A., &amp; Wiener, M. (2002). Classification and regression by randomForest. <em>R News</em>, <em>2</em>(3), 18–22. <a href="https://CRAN.R-project.org/doc/Rnews/">https://CRAN.R-project.org/doc/Rnews/</a>
@@ -1130,6 +1140,9 @@ Maindonald, J., &amp; Braun, J. (2003). <em>Data analysis and graphics using r -
 <div id="ref-Ma65" class="csl-entry" role="listitem">
 Martin, E. (1965). <em>Flatland</em>. http://www.der.org/films/flatland.html.
 </div>
+<div id="ref-kernelshap" class="csl-entry" role="listitem">
+Mayer, M., &amp; Watson, D. (2023). <em>Kernelshap: Kernel SHAP</em>. <a href="https://CRAN.R-project.org/package=kernelshap">https://CRAN.R-project.org/package=kernelshap</a>
+</div>
 <div id="ref-MY94" class="csl-entry" role="listitem">
 McFarlane, M., &amp; Young, F. W. (1994). Graphical <span>S</span>ensitivity <span>A</span>nalysis for <span>M</span>ultidimensional <span>S</span>caling. <em>Journal of Computational and Graphical Statistics</em>, <em>3</em>, 23–33.
 </div>
@@ -1151,6 +1164,9 @@ Milborrow, S. (2022). <em>Rpart.plot: Plot rpart models: An enhanced version of 
 <div id="ref-R-gtExtras" class="csl-entry" role="listitem">
 Mock, T. (2022). <em>gtExtras: Extending gt for beautiful HTML tables</em>. <a href="https://CRAN.R-project.org/package=gtExtras">https://CRAN.R-project.org/package=gtExtras</a>
 </div>
+<div id="ref-iml" class="csl-entry" role="listitem">
+Molnar, C. (2022). <em>Interpretable machine learning: A guide for making black box models explainable (2nd ed)</em>. https://christophm.github.io/interpretable-ml-book/.
+</div>
 <div id="ref-Moon2019" class="csl-entry" role="listitem">
 Moon, K. R., Dijk, D. van, Wang, Z., Gigante, S., Burkhardt, D. B., Chen, W. S., Yim, K., Elzen, A. van den, Hirn, M. J., Coifman, R. R., Ivanova, N. B., Wolf, G., &amp; Krishnaswamy, S. (2019). Visualizing structure and transitions for biological data exploration. <em>Nature Biotechnology</em>, <em>37</em>, 1482–1492. <a href="https://doi.org/10.1038/s41587-019-0336-3">https://doi.org/10.1038/s41587-019-0336-3</a>
 </div>
@@ -1164,7 +1180,7 @@ OpenStreetMap contributors. (2020). <em><span class="nocase">Planet dump retriev
 Pearson, K. (1901). LIII. On lines and planes of closest fit to systems of points in space. <em>The London, Edinburgh, and Dublin Philosophical Magazine and Journal of Science</em>, <em>2</em>(11), 559–572. <a href="https://doi.org/10.1080/14786440109462720">https://doi.org/10.1080/14786440109462720</a>
 </div>
 <div id="ref-R-patchwork" class="csl-entry" role="listitem">
-Pedersen, T. L. (2022). <em>Patchwork: The composer of plots</em>. <a href="https://CRAN.R-project.org/package=patchwork">https://CRAN.R-project.org/package=patchwork</a>
+Pedersen, T. L. (2023). <em>Patchwork: The composer of plots</em>. <a href="https://CRAN.R-project.org/package=patchwork">https://CRAN.R-project.org/package=patchwork</a>
 </div>
 <div id="ref-perisic2009" class="csl-entry" role="listitem">
 Perisic, I., &amp; Posse, C. (2005). Projection pursuit indices based on the empirical distribution function. <em>Journal of Computational and Graphical Statistics</em>, <em>14</em>(3), 700–715. <a href="https://doi.org/10.1198/106186005X69440">https://doi.org/10.1198/106186005X69440</a>
@@ -1209,7 +1225,7 @@ Rothkopf, E. Z. (1957). A <span>M</span>easure of <span>S</span>timulus <span>S<
 Schloerke, B. (2016). <em>Geozoo: Zoo of geometric objects</em>. <a href="https://CRAN.R-project.org/package=geozoo">https://CRAN.R-project.org/package=geozoo</a>
 </div>
 <div id="ref-R-GGally" class="csl-entry" role="listitem">
-Schloerke, B., Cook, D., Larmarange, J., Briatte, F., Marbach, M., Thoen, E., Elberg, A., &amp; Crowley, J. (2023). <em>GGally: Extension to ggplot2</em>.
+Schloerke, B., Cook, D., Larmarange, J., Briatte, F., Marbach, M., Thoen, E., Elberg, A., &amp; Crowley, J. (2023). <em>GGally: Extension to ggplot2</em>. <a href="https://ggobi.github.io/ggally/">https://ggobi.github.io/ggally/</a>
 </div>
 <div id="ref-mclust2016" class="csl-entry" role="listitem">
 Scrucca, L., Fop, M., Murphy, T. B., &amp; Raftery, A. E. (2016). <span class="nocase">mclust</span> 5: Clustering, classification and density estimation using <span>G</span>aussian finite mixture models. <em>The <span>R</span> Journal</em>, <em>8</em>(1), 289–317. <a href="https://doi.org/10.32614/RJ-2016-021">https://doi.org/10.32614/RJ-2016-021</a>
@@ -1284,7 +1300,7 @@ Tarpey, T., Li, L., &amp; Flury, B. (1995). Principal points and self–consiste
 Temple Lang, D., Swayne, D., Wickham, H., &amp; Lawrence, M. (2006). <em><span><code>rggobi</code></span>: <span>A</span>n <span>I</span>nterface between <span>R</span> and <span>GG</span>obi</em>.<span><code> http://www.R-project.org</code></span>.
 </div>
 <div id="ref-R-rpart" class="csl-entry" role="listitem">
-Therneau, T., &amp; Atkinson, B. (2022). <em>Rpart: Recursive partitioning and regression trees</em>. <a href="https://CRAN.R-project.org/package=rpart">https://CRAN.R-project.org/package=rpart</a>
+Therneau, T., &amp; Atkinson, B. (2023). <em>Rpart: Recursive partitioning and regression trees</em>. <a href="https://CRAN.R-project.org/package=rpart">https://CRAN.R-project.org/package=rpart</a>
 </div>
 <div id="ref-Theus02" class="csl-entry" role="listitem">
 Theus, M. (2002). Interactive <span>D</span>ata <span>V</span>isualization <span>U</span>sing <span>M</span>ondrian. <em>Journal of Statistical Software</em>, <em>7</em>(11), http://www.jstatsoft.org.
@@ -1401,7 +1417,7 @@ Wickham, H. (2022). <em>Classifly: Explore classification models in high dimensi
 Wickham, H., Chang, W., Henry, L., Pedersen, T. L., Takahashi, K., Wilke, C., Woo, K., Yutani, H., &amp; Dunnington, D. (2023). <em>ggplot2: Create elegant data visualisations using the grammar of graphics</em>. <a href="https://CRAN.R-project.org/package=ggplot2">https://CRAN.R-project.org/package=ggplot2</a>
 </div>
 <div id="ref-R-tourr" class="csl-entry" role="listitem">
-Wickham, H., &amp; Cook, D. (2023). <em>Tourr: Tour methods for multivariate data visualisation</em>. <a href="https://github.com/ggobi/tourr">https://github.com/ggobi/tourr</a>
+Wickham, H., &amp; Cook, D. (2024). <em>Tourr: Tour methods for multivariate data visualisation</em>. <a href="https://github.com/ggobi/tourr">https://github.com/ggobi/tourr</a>
 </div>
 <div id="ref-wickham2015" class="csl-entry" role="listitem">
 Wickham, H., Cook, D., &amp; Hofmann, H. (2015). Visualizing statistical models: Removing the blindfold. <em>Statistical Analysis and Data Mining: The ASA Data Science Journal</em>, <em>8</em>(4), 203–225. <a href="https://doi.org/10.1002/sam.11271">https://doi.org/10.1002/sam.11271</a>
@@ -1454,7 +1470,8 @@ Zhu, H. (2021). <em>kableExtra: Construct complex table with kable and pipe synt
 </div>
 </section><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><hr>
 <ol>
-<li id="fn1"><p>It is generally better to use <em>associated</em> than <em>correlated</em>. Correlated is a statistical quantity, measuring linear association. The term <em>associated</em> can be prefaced with the type of association, such as <em>linear</em> or <em>non-linear</em>.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn1"><p>Note that the animated tours from this chapter can be viewed at <a href="https://dicook.github.io/mulgar_book/3-intro-dimred.html">https://dicook.github.io/mulgar_book/3-intro-dimred.html</a>.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>It is generally better to use <em>associated</em> than <em>correlated</em>. Correlation is a statistical quantity, measuring linear association. The term <em>associated</em> can be prefaced with the type of association, such as <em>linear</em> or <em>non-linear</em>.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol></section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
@@ -1534,10 +1551,9 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     // clear code selection
     e.clearSelection();
   });
-  function tippyHover(el, contentFn) {
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
     const config = {
       allowHTML: true,
-      content: contentFn,
       maxWidth: 500,
       delay: 100,
       arrow: false,
@@ -1547,8 +1563,17 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       interactive: true,
       interactiveBorder: 10,
       theme: 'quarto',
-      placement: 'bottom-start'
+      placement: 'bottom-start',
     };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
     window.tippy(el, config); 
   }
   const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
@@ -1561,6 +1586,125 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
       return note.innerHTML;
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
     });
   }
       let selectedAnnoteEl;
@@ -1604,6 +1748,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             }
             div.style.top = top - 2 + "px";
             div.style.height = height + 4 + "px";
+            div.style.left = 0;
             let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
             if (gutterDiv === null) {
               gutterDiv = window.document.createElement("div");
@@ -1629,6 +1774,32 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         });
         selectedAnnoteEl = undefined;
       };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
       // Attach click handler to the DT
       const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
       for (const annoteDlNode of annoteDls) {
@@ -1688,23 +1859,27 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
 });
 </script><nav class="page-navigation"><div class="nav-page nav-page-previous">
-      <a href="./2-notation.html" class="pagination-link">
+      <a href="./2-notation.html" class="pagination-link  aria-label=" conventions="" and="" r="" objects="">
         <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Notation conventions and R objects</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./4-pca.html" class="pagination-link">
+      <a href="./4-pca.html" class="pagination-link" aria-label="<span class='chapter-number'>4</span>&nbsp; <span class='chapter-title'>Principal component analysis</span>">
         <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Principal component analysis</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
 </div> <!-- /content -->
 <footer class="footer"><div class="nav-footer">
-    <div class="nav-footer-left">Interactively exploring high-dimensional data and models in R was written by Dianne Cook and Ursula Laa.</div>   
+    <div class="nav-footer-left">
+<p>Interactively exploring high-dimensional data and models in R was written by Dianne Cook and Ursula Laa.</p>
+</div>   
     <div class="nav-footer-center">
       &nbsp;
-    </div>
-    <div class="nav-footer-right">This book was built with <a href="https://quarto.org/">Quarto</a>.</div>
+    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/dicook/mulgar_book/edit/master/3-intro-dimred.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/dicook/mulgar_book/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+    <div class="nav-footer-right">
+<p>This book was built with <a href="https://quarto.org/">Quarto</a>.</p>
+</div>
   </div>
 </footer>
 

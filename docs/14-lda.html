@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.3.433">
+<meta name="generator" content="quarto-1.4.549">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <title>Interactively exploring high-dimensional data and models in R - 14&nbsp; Linear discriminant analysis</title>
 <style>
@@ -19,7 +19,7 @@ ul.task-list li input[type="checkbox"] {
 }
 /* CSS for syntax highlighting */
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -55,6 +55,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 div.csl-bib-body { }
 div.csl-entry {
   clear: both;
+  margin-bottom: 0em;
 }
 .hanging-indent div.csl-entry {
   margin-left:2em;
@@ -96,7 +97,13 @@ div.csl-indent {
   "collapse-after": 3,
   "panel-placement": "start",
   "type": "textbox",
-  "limit": 20,
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
   "language": {
     "search-no-results-text": "No results",
     "search-matching-documents-text": "matching documents",
@@ -105,33 +112,59 @@ div.csl-indent {
     "search-more-match-text": "more match in this document",
     "search-more-matches-text": "more matches in this document",
     "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
     "search-detached-cancel-button-title": "Cancel",
     "search-submit-button-title": "Submit",
     "search-label": "Search"
   }
-}</script><script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+}</script><script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script><script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 </head>
 <body class="nav-sidebar floating">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top"><nav class="quarto-secondary-nav"><div class="container-fluid d-flex">
-      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./13-intro-class.html">Supervised classification</a></li><li class="breadcrumb-item"><a href="./14-lda.html"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Linear discriminant analysis</span></a></li></ol></nav>
-      <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-      </a>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./14-lda.html"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Linear discriminant analysis</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
         <i class="bi bi-search"></i>
       </button>
     </div>
   </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto"><div class="pt-lg-2 mt-2 text-left sidebar-header">
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
       <a href="./">Interactively exploring high-dimensional data and models in R</a> 
         <div class="sidebar-tools-main">
-    <a href="https://github.com/dicook/mulgar_book" rel="" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+    <a href="https://github.com/dicook/mulgar_book" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
 </div>
     </div>
       </div>
@@ -148,174 +181,113 @@ div.csl-indent {
  <span class="menu-text">Preface</span></a>
   </div>
 </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
- <span class="menu-text">Introduction</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">
-<li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./1-intro.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Picturing high dimensions</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./2-notation.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Notation conventions and R objects</span></span></a>
   </div>
 </li>
-      </ul>
-</li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
- <span class="menu-text">Dimension reduction</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">
-<li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./3-intro-dimred.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Overview</span></span></a>
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Dimension reduction overview</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./4-pca.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Principal component analysis</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./5-nldr.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Non-linear dimension reduction</span></span></a>
   </div>
 </li>
-      </ul>
-</li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">
- <span class="menu-text">Cluster analysis</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">
-<li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./6-intro-clust.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Overview</span></span></a>
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Introduction to clustering</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./7-spin-and-brush.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Spin-and-brush approach</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./8-hierarchical.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Hierarchical clustering</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./9-kmeans.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title"><span class="math inline">\(k\)</span>-means clustering</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./10-model-based.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Model-based clustering</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./11-som.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Self-organizing maps</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./12-summary-clust.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Summarising and comparing clustering results</span></span></a>
   </div>
 </li>
-      </ul>
-</li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true">
- <span class="menu-text">Supervised classification</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">
-<li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./13-intro-class.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Overview</span></span></a>
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Introduction to supervised classification</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./14-lda.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Linear discriminant analysis</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./15-forests.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Trees and forests</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./16-svm.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Support vector machines</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./17-nn.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Neural networks and deep learning</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./18-summary-class.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Exploring misclassifications</span></span></a>
   </div>
-</li>
-      </ul>
-</li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true">
- <span class="menu-text">Miscellaneous</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">
-<li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./19-mv-time-series.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Multivariate and multiple time series</span></span></a>
-  </div>
-</li>
-      </ul>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
@@ -325,13 +297,13 @@ div.csl-indent {
 </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-expanded="true">
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
  <span class="menu-text">Appendices</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-expanded="true" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">
 <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./A1-toolbox.html" class="sidebar-item-text sidebar-link">
@@ -346,7 +318,7 @@ div.csl-indent {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./A3-book_code_and_data.html" class="sidebar-item-text sidebar-link">
+  <a href="./A3-book-code-and-data.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Links to Book Code and Additional Data</span></span></a>
   </div>
 </li>
@@ -360,7 +332,7 @@ div.csl-indent {
 </li>
     </ul>
 </div>
-</nav><div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Table of contents</h2>
@@ -370,7 +342,7 @@ div.csl-indent {
   <li><a href="#checking-assumptions" id="toc-checking-assumptions" class="nav-link" data-scroll-target="#checking-assumptions"><span class="header-section-number">14.2</span> Checking assumptions</a></li>
   <li><a href="#examining-results" id="toc-examining-results" class="nav-link" data-scroll-target="#examining-results"><span class="header-section-number">14.3</span> Examining results</a></li>
   <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises">Exercises</a></li>
-  </ul><div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/dicook/mulgar_book/edit/master/14-lda.qmd" class="toc-action">Edit this page</a></p><p><a href="https://github.com/dicook/mulgar_book/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
+  </ul><div class="toc-actions"><ul><li><a href="https://github.com/dicook/mulgar_book/edit/master/14-lda.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/dicook/mulgar_book/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
@@ -387,69 +359,50 @@ div.csl-indent {
   </div>
   
 
-</header><p>Linear discriminant analysis (LDA) dates to the early 1900s. It’s one of the most elegant and simple techniques for both modeling separation between groups, and as an added bonus, producing a low-dimensional representation of the differences between groups. LDA has two strong assumptions: the groups are samples from multivariate normal distributions, and each have the same variance-covariance. If the latter assumption is relaxed, a slightly less elegant solution results from quadratic discriminant analysis.</p>
+
+</header><p></p>
+<p>Linear discriminant analysis (LDA) dates to the early 1900s. It’s one of the most elegant and simple techniques for both modeling separation between groups, and as an added bonus, producing a low-dimensional representation of the differences between groups. LDA has two strong assumptions: the groups are samples from multivariate normal distributions, and each have the same variance-covariance. If the latter assumption is relaxed, a slightly less elegant solution results from quadratic discriminant analysis.</p>
 <p>Useful explanations can be found in <span class="citation" data-cites="VR02">Venables &amp; Ripley (<a href="references.html#ref-VR02" role="doc-biblioref">2002a</a>)</span> and <span class="citation" data-cites="Ri96">Ripley (<a href="references.html#ref-Ri96" role="doc-biblioref">1996</a>)</span>. A good general treatment of parametric methods for supervised classification can be found in <span class="citation" data-cites="JW02">R. A. Johnson &amp; Wichern (<a href="references.html#ref-JW02" role="doc-biblioref">2002</a>)</span> or another similar multivariate analysis textbook. It’s also useful to know that hypothesis testing for the difference in multivariate means using multivariate analysis of variance (MANOVA) has similar assumptions to LDA. Also model-based clustering assumes that each cluster arises from a multivariate normal distribution, and is related to LDA. The methods described here can be used to check these assumptions when applying these methods, too. </p>
 <div class="info">
-<p>Because LDA is a parametric model it is important to check that the assumptions are reasonable:</p>
+<p>Because LDA is a parametric model it is important to check that these assumptions are reasonably satisfied:</p>
 <ul>
-<li>shape of clusters are elliptical</li>
-<li>cluster sizes are the same.</li>
+<li>shape of clusters are elliptical.</li>
+<li>spread of the observations are the same.</li>
 </ul>
 </div>
-
 <!-- Algorithmic methods have overtaken parametric methods in the practice of supervised classification.  A parametric method such as linear discriminant analysis (LDA) yields a set of interpretable output parameters, so it leaves a clear trail helping us to understand what was done to produce the results.  An algorithmic method, on the other hand, is more or less a black box, with various input parameters that are adjusted to tune the algorithm.  The algorithm's input and output parameters do not always correspond in any obvious way to the interpretation of the results.  Because if it's simplicity, if the assumptions (approximately) hold, LDA can provide an elegant classification solution.-->
 <section id="extracting-the-key-elements-of-the-model" class="level2" data-number="14.1"><h2 data-number="14.1" class="anchored" data-anchor-id="extracting-the-key-elements-of-the-model">
 <span class="header-section-number">14.1</span> Extracting the key elements of the model</h2>
 <p>LDA builds the model on the between-group sum-of-square matrix</p>
 <p><span class="math display">\[B=\sum_{k=1}^g n_k(\bar{X}_k-\bar{X})(\bar{X}_k-\bar{X})^\top\]</span> which measures the differences between the class means, compared with the overall data mean <span class="math inline">\(\bar{X}\)</span> and the within-group sum-of-squares matrix,</p>
-<p><span class="math display">\[W =
+<p><span class="math display">\[
+W =
 \sum_{k=1}^g\sum_{i=1}^{n_k}
-(X_{ki}-\bar{X}_k)(X_{ki}-\bar{X}_k)^\top\]</span></p>
-<p>which measures the variation of values around each class mean. The linear discriminant space is generated by computing the eigenvectors (canonical coordinates) of <span class="math inline">\(W^{-1}B\)</span>, and this is the <span class="math inline">\((g-1)\)</span>-D space where the group means are most separated with respect to the pooled variance-covariance. For each class we compute</p>
+(X_{ki}-\bar{X}_k)(X_{ki}-\bar{X}_k)^\top
+\]</span></p>
+<p>which measures the variation of values around each class mean. The linear discriminant space is generated by computing the eigenvectors (canonical coordinates) of <span class="math inline">\(W^{-1}B\)</span>, and this is the <span class="math inline">\((g-1)\)</span>-D space where the group means are most separated with respect to the pooled variance-covariance. For each class we compute </p>
 <p><span class="math display">\[
 \delta_k(x) = (x-\mu_k)^\top W^{-1}\mu_k + \log \pi_k
 \]</span></p>
 <p>where <span class="math inline">\(\pi_k\)</span> is a prior probability for class <span class="math inline">\(k\)</span> that might be based on unequal sample sizes, or cost of misclassification. The LDA classifier rule is to <em>assign a new observation to the class with the largest value</em> of <span class="math inline">\(\delta_k(x)\)</span>.</p>
 <p>We can fit an LDA model using the <code><a href="https://rdrr.io/pkg/MASS/man/lda.html">lda()</a></code> function from the <code>MASS</code> package. Here we have used the <code>penguins</code> data, assuming equal prior probability, to illustrate.</p>
 <div class="cell">
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span></span>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Code to fit the model</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dicook.github.io/mulgar/">mulgar</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://www.stats.ox.ac.uk/pub/MASS4/">MASS</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"data/penguins_sub.rda"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">p_lda</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/MASS/man/lda.html">lda</a></span><span class="op">(</span><span class="va">species</span><span class="op">~</span><span class="va">bl</span><span class="op">+</span><span class="va">bd</span><span class="op">+</span><span class="va">fl</span><span class="op">+</span><span class="va">bm</span>, data<span class="op">=</span><span class="va">penguins_sub</span>, prior<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">/</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">/</span><span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">p_lda</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/MASS/man/lda.html">lda</a></span><span class="op">(</span><span class="va">species</span><span class="op">~</span><span class="va">bl</span><span class="op">+</span><span class="va">bd</span><span class="op">+</span><span class="va">fl</span><span class="op">+</span><span class="va">bm</span>, </span>
+<span>             data<span class="op">=</span><span class="va">penguins_sub</span>,</span>
+<span>             prior<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">/</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">/</span><span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/options.html">options</a></span><span class="op">(</span>digits<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span>
-<span><span class="va">p_lda</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Call:
-lda(species ~ bl + bd + fl + bm, data = penguins_sub, prior = c(1/3, 
-    1/3, 1/3))
-
-Prior probabilities of groups:
-   Adelie Chinstrap    Gentoo 
-     0.33      0.33      0.33 
-
-Group means:
-             bl    bd    fl    bm
-Adelie    -0.95  0.60 -0.78 -0.62
-Chinstrap  0.89  0.64 -0.37 -0.59
-Gentoo     0.65 -1.10  1.16  1.10
-
-Coefficients of linear discriminants:
-     LD1   LD2
-bl -0.24 -2.31
-bd  2.04  0.19
-fl -1.20  0.08
-bm -1.22  1.24
-
-Proportion of trace:
- LD1  LD2 
-0.83 0.17 </code></pre>
-</div>
+<span><span class="co"># p_lda</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Because there are three classes the dimension of the discriminant space is 2D. We can easily extract the group means from the model.</p>
 <div class="cell">
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_lda</span><span class="op">$</span><span class="va">means</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Extract the sample means</span></span>
+<span><span class="va">p_lda</span><span class="op">$</span><span class="va">means</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>             bl    bd    fl    bm
 Adelie    -0.95  0.60 -0.78 -0.62
@@ -459,7 +412,8 @@ Gentoo     0.65 -1.10  1.16  1.10</code></pre>
 </div>
 <p>The coefficients to project the data into the discriminant space, that is the eigenvectors of <span class="math inline">\(W^{-1}B\)</span> are:</p>
 <div class="cell">
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_lda</span><span class="op">$</span><span class="va">scaling</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Extract the discriminant space</span></span>
+<span><span class="va">p_lda</span><span class="op">$</span><span class="va">scaling</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>     LD1   LD2
 bl -0.24 -2.31
@@ -470,13 +424,16 @@ bm -1.22  1.24</code></pre>
 </div>
 <p>and the predicted values, which include class predictions, and coordinates in the discriminant space are generated as:</p>
 <div class="cell">
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_lda_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">p_lda</span>, <span class="va">penguins_sub</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Extract the fitted values</span></span>
+<span><span class="va">p_lda_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">p_lda</span>, <span class="va">penguins_sub</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>The best separation between classes can be viewed from this object, which can be shown to match the original data projected using the <code>scaling</code> component of the model object.</p>
+<p>The best separation between classes can be viewed from this object, which can be shown to match the original data projected using the <code>scaling</code> component of the model object (see <a href="#fig-p-lda" class="quarto-xref">Figure&nbsp;<span>14.1</span></a>).</p>
 <div class="cell">
-<details><summary>Code to generate LDA plots</summary><div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://colorspace.R-Forge.R-project.org/">colorspace</a></span><span class="op">)</span></span>
+<details class="code-fold"><summary>Code to generate LDA plots</summary><div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Check calculations from the fitted model, and equations</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://colorspace.R-Forge.R-project.org/">colorspace</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rpkgs.datanovia.com/ggpubr/">ggpubr</a></span><span class="op">)</span></span>
+<span><span class="co"># Using the predicted values from the model object</span></span>
 <span><span class="va">p_lda_pred_x1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span><span class="va">p_lda_pred</span><span class="op">$</span><span class="va">x</span><span class="op">)</span></span>
 <span><span class="va">p_lda_pred_x1</span><span class="op">$</span><span class="va">species</span> <span class="op">&lt;-</span> <span class="va">penguins_sub</span><span class="op">$</span><span class="va">species</span></span>
 <span><span class="va">p_lda1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">p_lda_pred_x1</span>, </span>
@@ -489,6 +446,7 @@ bm -1.22  1.24</code></pre>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>aspect.ratio <span class="op">=</span> <span class="fl">1</span>, legend.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_blank</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> </span>
 <span></span>
+<span><span class="co"># matches the calculations done manually</span></span>
 <span><span class="va">p_lda_pred_x2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">penguins_sub</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span></span>
 <span>                              <span class="va">p_lda</span><span class="op">$</span><span class="va">scaling</span><span class="op">)</span></span>
 <span><span class="va">p_lda_pred_x2</span><span class="op">$</span><span class="va">species</span> <span class="op">&lt;-</span> <span class="va">penguins_sub</span><span class="op">$</span><span class="va">species</span></span>
@@ -504,15 +462,20 @@ bm -1.22  1.24</code></pre>
 <span><span class="fu"><a href="https://rpkgs.datanovia.com/ggpubr/reference/ggarrange.html">ggarrange</a></span><span class="op">(</span><span class="va">p_lda1</span>, <span class="va">p_lda2</span>, ncol<span class="op">=</span><span class="fl">2</span>, </span>
 <span>          common.legend <span class="op">=</span> <span class="cn">TRUE</span>, legend <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
-<div id="fig-p-lda" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure"><p><img src="14-lda_files/figure-html/fig-p-lda-1.png" class="img-fluid figure-img" width="768"></p>
-<figcaption class="figure-caption">Figure&nbsp;14.1: Penguins projected into the 2D discriminant space, done two ways: (a) using the predicted values, (b) directly projecting using the model component. The scale is not quite the same but the projected data is identical in shape.</figcaption></figure>
+<div id="fig-p-lda" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-p-lda-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="14-lda_files/figure-html/fig-p-lda-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-p-lda-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;14.1: Penguins projected into the 2D discriminant space, done two ways: (a) using the predicted values, (b) directly projecting using the model component. The scale is not quite the same but the projected data is identical in shape.
+</figcaption></figure>
 </div>
 </div>
 </div>
 <p>The <span class="math inline">\(W\)</span> and <span class="math inline">\(B\)</span> matrices cannot be extracted from the model object, so we need to compute these separately. We only need <span class="math inline">\(W\)</span> actually. It is useful to think of this as the pooled variance-covariance matrix. Because the assumption for LDA is that the population group variance-covariances are identical, we estimate this by computing them for each class and then averaging them to get the pooled variance-covariance matrix. It’s laborious, but easy.</p>
 <div class="cell">
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_vc_pool</span> <span class="op">&lt;-</span> <span class="fu">mulgar</span><span class="fu">::</span><span class="fu"><a href="https://dicook.github.io/mulgar/reference/pooled_vc.html">pooled_vc</a></span><span class="op">(</span><span class="va">penguins_sub</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,</span>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Compute pooled variance-covariance</span></span>
+<span><span class="va">p_vc_pool</span> <span class="op">&lt;-</span> <span class="fu">mulgar</span><span class="fu">::</span><span class="fu"><a href="https://dicook.github.io/mulgar/reference/pooled_vc.html">pooled_vc</a></span><span class="op">(</span><span class="va">penguins_sub</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,</span>
 <span>                               <span class="va">penguins_sub</span><span class="op">$</span><span class="va">species</span><span class="op">)</span></span>
 <span><span class="va">p_vc_pool</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -526,9 +489,24 @@ bm 0.18 0.20 0.16 0.31</code></pre>
 <p>This can be used to draw an ellipse corresponding to the pooled variance-covariance that is used by the LDA model.</p>
 </section><section id="checking-assumptions" class="level2" data-number="14.2"><h2 data-number="14.2" class="anchored" data-anchor-id="checking-assumptions">
 <span class="header-section-number">14.2</span> Checking assumptions</h2>
-<p>This LDA approach is widely applicable, but it is useful to check the underlying assumptions on which it depends: (1) that the cluster structure corresponding to each class forms an ellipse, showing that the class is consistent with a sample from a multivariate normal distribution, and (2) that the variance of values around each mean is nearly the same. <a href="#fig-lda-assumptions1">Figure&nbsp;<span>14.2</span></a> and <a href="#fig-lda-assumptions2">Figure&nbsp;<span>14.3</span></a> illustrates two datasets, of which only one is consistent with these assumptions. Other parametric models, such as quadratic discriminant analysis or logistic regression, also depend on assumptions about the data which should be validated. </p>
+<p>This LDA approach is widely applicable, but it is useful to check the underlying assumptions on which it depends: (1) that the cluster structure corresponding to each class forms an ellipse, showing that the class is consistent with a sample from a multivariate normal distribution, and (2) that the variance of values around each mean is nearly the same. <a href="#fig-lda-assumptions1" class="quarto-xref">Figure&nbsp;<span>14.2</span></a> and <a href="#fig-lda-assumptions2" class="quarto-xref">Figure&nbsp;<span>14.3</span></a> illustrates two datasets, of which only one is consistent with these assumptions. Other parametric models, such as quadratic discriminant analysis or logistic regression, also depend on assumptions about the data which should be validated. </p>
+<div class="info">
+<p>To check the equal and elliptical variance-covariance assumption, generate points on the surface of an ellipse corresponding to the variance-covariance for each group. When watching these ellipses in a tour, they should similar in all projections.</p>
+</div>
+<p> </p>
 <div class="cell">
-<details><summary>Code for penguins data and ellipse plots</summary><div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">lda1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">penguins_sub</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">bl</span>, </span>
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Generate ellipses for each group's variance-covariance</span></span>
+<span><span class="va">p_ell</span> <span class="op">&lt;-</span> <span class="cn">NULL</span></span>
+<span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span><span class="op">(</span><span class="va">penguins_sub</span><span class="op">$</span><span class="va">species</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">x</span> <span class="op">&lt;-</span> <span class="va">penguins_sub</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">species</span> <span class="op">==</span> <span class="va">i</span><span class="op">)</span></span>
+<span>  <span class="va">e</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dicook.github.io/mulgar/reference/gen_xvar_ellipse.html">gen_xvar_ellipse</a></span><span class="op">(</span><span class="va">x</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span>, n<span class="op">=</span><span class="fl">150</span>, nstd<span class="op">=</span><span class="fl">1.5</span><span class="op">)</span></span>
+<span>  <span class="va">e</span><span class="op">$</span><span class="va">species</span> <span class="op">&lt;-</span> <span class="va">i</span></span>
+<span>  <span class="va">p_ell</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html">bind_rows</a></span><span class="op">(</span><span class="va">p_ell</span>, <span class="va">e</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold"><summary>Code for penguins data and ellipse plots</summary><div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">lda1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">penguins_sub</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">bl</span>, </span>
 <span>                         y<span class="op">=</span><span class="va">bd</span>, </span>
 <span>                         colour<span class="op">=</span><span class="va">species</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
@@ -537,13 +515,6 @@ bm 0.18 0.20 0.16 0.31</code></pre>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ggtitle</a></span><span class="op">(</span><span class="st">"(a)"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>aspect.ratio <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> </span>
-<span><span class="va">p_ell</span> <span class="op">&lt;-</span> <span class="cn">NULL</span></span>
-<span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span><span class="op">(</span><span class="va">penguins_sub</span><span class="op">$</span><span class="va">species</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">x</span> <span class="op">&lt;-</span> <span class="va">penguins_sub</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">species</span> <span class="op">==</span> <span class="va">i</span><span class="op">)</span></span>
-<span>  <span class="va">e</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dicook.github.io/mulgar/reference/gen_xvar_ellipse.html">gen_xvar_ellipse</a></span><span class="op">(</span><span class="va">x</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span>, n<span class="op">=</span><span class="fl">150</span>, nstd<span class="op">=</span><span class="fl">1.5</span><span class="op">)</span></span>
-<span>  <span class="va">e</span><span class="op">$</span><span class="va">species</span> <span class="op">&lt;-</span> <span class="va">i</span></span>
-<span>  <span class="va">p_ell</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html">bind_rows</a></span><span class="op">(</span><span class="va">p_ell</span>, <span class="va">e</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
 <span><span class="va">lda2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">p_ell</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">bl</span>, </span>
 <span>                         y<span class="op">=</span><span class="va">bd</span>, </span>
 <span>                         colour<span class="op">=</span><span class="va">species</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
@@ -556,14 +527,18 @@ bm 0.18 0.20 0.16 0.31</code></pre>
 <span><span class="fu"><a href="https://rpkgs.datanovia.com/ggpubr/reference/ggarrange.html">ggarrange</a></span><span class="op">(</span><span class="va">lda1</span>, <span class="va">lda2</span>, ncol<span class="op">=</span><span class="fl">2</span>, </span>
 <span>          common.legend <span class="op">=</span> <span class="cn">TRUE</span>, legend <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
-<div id="fig-lda-assumptions1" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure"><p><img src="14-lda_files/figure-html/fig-lda-assumptions1-1.png" class="img-fluid figure-img" width="768"></p>
-<figcaption class="figure-caption">Figure&nbsp;14.2: Scatterplot of flipper length by bill length of the penguins data, and corresponding variance-covariance ellipses. There is a small amount of difference between the ellipses, but they are similar enough to be confident in assuming the population variance-covariances are equal.</figcaption></figure>
+<div id="fig-lda-assumptions1" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-lda-assumptions1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="14-lda_files/figure-html/fig-lda-assumptions1-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-lda-assumptions1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;14.2: Scatterplot of flipper length by bill length of the penguins data, and corresponding variance-covariance ellipses. There is a small amount of difference between the ellipses, but they are similar enough to be confident in assuming the population variance-covariances are equal.
+</figcaption></figure>
 </div>
 </div>
 </div>
 <div class="cell">
-<details><summary>Code for bushfires data and ellipse plots</summary><div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Now repeat for a data set that violates assumptions</span></span>
+<details class="code-fold"><summary>Code for bushfires data and ellipse plots</summary><div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Now repeat for a data set that violates assumptions</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="va">bushfires</span><span class="op">)</span></span>
 <span><span class="va">lda3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">bushfires</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">log_dist_cfa</span>, </span>
 <span>                         y<span class="op">=</span><span class="va">log_dist_road</span>, </span>
@@ -593,18 +568,23 @@ bm 0.18 0.20 0.16 0.31</code></pre>
 <span><span class="fu"><a href="https://rpkgs.datanovia.com/ggpubr/reference/ggarrange.html">ggarrange</a></span><span class="op">(</span><span class="va">lda3</span>, <span class="va">lda4</span>, ncol<span class="op">=</span><span class="fl">2</span>, </span>
 <span>          common.legend <span class="op">=</span> <span class="cn">TRUE</span>, legend <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
-<div id="fig-lda-assumptions2" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure"><p><img src="14-lda_files/figure-html/fig-lda-assumptions2-1.png" class="img-fluid figure-img" width="768"></p>
-<figcaption class="figure-caption">Figure&nbsp;14.3: Scatterplot of distance to cfa and road for the bushfires data, and corresponding variance-covariance ellipses. There is a lot of difference between the ellipses, so it cannot be assumed that the population variance-covariances are equal.</figcaption></figure>
+<div id="fig-lda-assumptions2" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-lda-assumptions2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="14-lda_files/figure-html/fig-lda-assumptions2-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-lda-assumptions2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;14.3: Scatterplot of distance to cfa and road for the bushfires data, and corresponding variance-covariance ellipses. There is a lot of difference between the ellipses, so it cannot be assumed that the population variance-covariances are equal.
+</figcaption></figure>
 </div>
 </div>
 </div>
-<p>This approach extends to any dimension. We would use the same projection sequence to view both the data and the variance-covariance ellipses, as in <a href="#fig-penguins-lda-ellipses">Figure&nbsp;<span>14.5</span></a>. It can be seen that there is some difference in the shape and size of the ellipses in some projections, as there is with the spread of points in the projected data. However,</p>
-<div class="info">
-<p>To visually confirm that we can assume equal variance-covariance matrices for all groups we can can simulate points on the ellipses derived from the pooled estimate and compare them to the data distributions. If there are clear differences the LDA model cannot capture the structure in the data and should not be used.</p>
+<p></p>
+<div class="insight">
+<p>The equal and elliptical variance-covariance assumption is reasonable for the penguins data because the ellipse shapes roughly match the spread of the data. It is not a suitable assumption for the bushfires data, because the spread is not elliptically-shaped and varies in size between groups.</p>
 </div>
+<p>This approach extends to any dimension. We would use the same projection sequence to view both the data and the variance-covariance ellipses, as in <a href="#fig-penguins-lda-ellipses-html" class="quarto-xref">Figure&nbsp;<span>14.4</span></a>. It can be seen that there is some difference in the shape and size of the ellipses between species, in some projections, and also with the spread of points in the projected data. However, it is the differences are small, so it would be safe to assume that the population variance-covariances are equal.</p>
 <div class="cell">
-<details><summary>Code for making animated gifs</summary><div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/ggobi/tourr">tourr</a></span><span class="op">)</span></span>
+<details class="code-fold"><summary>Code for making animated gifs</summary><div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/ggobi/tourr">tourr</a></span><span class="op">)</span></span>
 <span><span class="va">p_ell</span> <span class="op">&lt;-</span> <span class="cn">NULL</span></span>
 <span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span><span class="op">(</span><span class="va">penguins_sub</span><span class="op">$</span><span class="va">species</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">x</span> <span class="op">&lt;-</span> <span class="va">penguins_sub</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">species</span> <span class="op">==</span> <span class="va">i</span><span class="op">)</span></span>
@@ -629,62 +609,77 @@ bm 0.18 0.20 0.16 0.31</code></pre>
 <span>           loop<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div id="fig-penguins-lda-ellipses" class="quarto-layout-panel">
-<figure class="figure"><div class="quarto-layout-row quarto-layout-valign-top">
-<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
-<div id="fig-lda-4D-assumptions1" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure"><p><img src="gifs/penguins_lda1.gif" class="img-fluid figure-img" alt="Tour of penguins data, with colour indicating species" data-ref-parent="fig-penguins-lda-ellipses" width="300"></p>
-<figcaption class="figure-caption">(a) Data</figcaption></figure>
+<div id="fig-penguins-lda-ellipses-html" class="quarto-layout-panel">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-penguins-lda-ellipses-html-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-penguins-lda-ellipses-html" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-lda-4D-assumptions1" class="quarto-figure quarto-figure-center quarto-float anchored" alt="Animation showing a tour of the penguins data, with colour indicating species. The spread of points in each group is reasonably similar regardless of projection.">
+<figure class="quarto-float quarto-subfloat-fig figure"><div aria-describedby="fig-lda-4D-assumptions1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="gifs/penguins_lda1.gif" class="img-fluid figure-img" data-ref-parent="fig-penguins-lda-ellipses-html" alt="Animation showing a tour of the penguins data, with colour indicating species. The spread of points in each group is reasonably similar regardless of projection." width="300">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-lda-4D-assumptions1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(a) Data
+</figcaption></figure>
 </div>
 </div>
-<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
-<div id="fig-lda-4D-assumptions2" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure"><p><img src="gifs/penguins_lda2.gif" class="img-fluid figure-img" alt="Tour of ellipses corresponding to variance-covariance matrices for each species" data-ref-parent="fig-penguins-lda-ellipses" width="300"></p>
-<figcaption class="figure-caption">(b) Variance-covariance ellipses</figcaption></figure>
+<div class="quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-penguins-lda-ellipses-html" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-lda-4D-assumptions2" class="quarto-figure quarto-figure-center quarto-float anchored" alt="Animation showing a tour of the ellipses corresponding to variance-covariance matrices for each species. The shape of the ellipse for each group is reasonably similar regardless of projection.">
+<figure class="quarto-float quarto-subfloat-fig figure"><div aria-describedby="fig-lda-4D-assumptions2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="gifs/penguins_lda2.gif" class="img-fluid figure-img" data-ref-parent="fig-penguins-lda-ellipses-html" alt="Animation showing a tour of the ellipses corresponding to variance-covariance matrices for each species. The shape of the ellipse for each group is reasonably similar regardless of projection." width="300">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-lda-4D-assumptions2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(b) Variance-covariance ellipses
+</figcaption></figure>
 </div>
 </div>
 </div>
-<p></p><figcaption class="figure-caption">Figure&nbsp;14.4: Checking the assumption of equal variance-covariance matrices for the 4D penguins data.</figcaption><p></p>
-</figure>
 </div>
-<p>As a further check, we could generate three ellipses corresponding to the pooled variance-covariance matrix, as would be used in the model, centered at each of the means. Overlay this with the data. Now you will compare the spread of the observations in the data, with the elliptical shape of the pooled variance-covariance. If it matches reasonably we can safely use LDA. This can also be done group by group when multiple groups make it difficult to view all together.</p>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-penguins-lda-ellipses-html-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;14.4: Checking the assumption of equal variance-covariance matrices for the 4D penguins data. Each ellipse corresponds to the sample variance-covariance for each species.
+</figcaption></figure>
+</div>
+<p>As a further check, we could generate three ellipses corresponding to the pooled variance-covariance matrix, as would be used in the model, centered at each of the means. Overlay this with the data, as done in <a href="#fig-penguins-lda-pooled-html" class="quarto-xref">Figure&nbsp;<span>14.5</span></a>. Now you will compare the spread of the observations in the data, with the elliptical shape of the pooled variance-covariance. If it matches reasonably we can safely use LDA. This can also be done group by group when multiple groups make it difficult to view all together.</p>
+<div class="info">
+<p>To check the fit of the equal variance-covariance assumption, simulate points on the ellipse corresponding to the <strong>pooled sample variance-covariance matrix</strong>. Generate one for each group centered at the group mean, and compare with the data.</p>
+</div>
+<p> </p>
 <div class="cell">
-<details><summary>Code for adding ellipses to data</summary><div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/ggobi/tourr">tourr</a></span><span class="op">)</span></span>
-<span><span class="co"># Create an ellipse corresponding to pooled vc</span></span>
-<span><span class="va">pool_ell</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dicook.github.io/mulgar/reference/gen_vc_ellipse.html">gen_vc_ellipse</a></span><span class="op">(</span><span class="va">p_vc_pool</span>, xm<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html">ncol</a></span><span class="op">(</span><span class="va">p_vc_pool</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<details class="code-fold"><summary>Code for adding ellipses to data</summary><div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create an ellipse corresponding to pooled vc</span></span>
+<span><span class="va">pool_ell</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dicook.github.io/mulgar/reference/gen_vc_ellipse.html">gen_vc_ellipse</a></span><span class="op">(</span><span class="va">p_vc_pool</span>, </span>
+<span>                           xm<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html">ncol</a></span><span class="op">(</span><span class="va">p_vc_pool</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Add means to produce ellipses for each species</span></span>
-<span><span class="va">p_lda_pool</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span><span class="op">(</span><span class="va">pool_ell</span> <span class="op">+</span></span>
-<span>                                 <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="va">p_lda</span><span class="op">$</span><span class="va">means</span><span class="op">[</span><span class="fl">1</span>,<span class="op">]</span>,</span>
-<span>                                            each<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">pool_ell</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>                                        ncol<span class="op">=</span><span class="fl">4</span><span class="op">)</span>,</span>
-<span>                        <span class="va">pool_ell</span> <span class="op">+</span></span>
-<span>                                 <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="va">p_lda</span><span class="op">$</span><span class="va">means</span><span class="op">[</span><span class="fl">2</span>,<span class="op">]</span>,</span>
-<span>                                            each<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">pool_ell</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>                                        ncol<span class="op">=</span><span class="fl">4</span><span class="op">)</span>,</span>
-<span>                        <span class="va">pool_ell</span> <span class="op">+</span></span>
-<span>                                 <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="va">p_lda</span><span class="op">$</span><span class="va">means</span><span class="op">[</span><span class="fl">3</span>,<span class="op">]</span>,</span>
-<span>                                            each<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">pool_ell</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>                                        ncol<span class="op">=</span><span class="fl">4</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">p_lda_pool</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span><span class="op">(</span></span>
+<span>  <span class="va">pool_ell</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="va">p_lda</span><span class="op">$</span><span class="va">means</span><span class="op">[</span><span class="fl">1</span>,<span class="op">]</span>,</span>
+<span>      each<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">pool_ell</span><span class="op">)</span><span class="op">)</span>, ncol<span class="op">=</span><span class="fl">4</span><span class="op">)</span>,</span>
+<span>  <span class="va">pool_ell</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="va">p_lda</span><span class="op">$</span><span class="va">means</span><span class="op">[</span><span class="fl">2</span>,<span class="op">]</span>,</span>
+<span>      each<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">pool_ell</span><span class="op">)</span><span class="op">)</span>, ncol<span class="op">=</span><span class="fl">4</span><span class="op">)</span>,</span>
+<span>  <span class="va">pool_ell</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="va">p_lda</span><span class="op">$</span><span class="va">means</span><span class="op">[</span><span class="fl">3</span>,<span class="op">]</span>,</span>
+<span>      each<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">pool_ell</span><span class="op">)</span><span class="op">)</span>, ncol<span class="op">=</span><span class="fl">4</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co"># Create one data set with means, data, ellipses</span></span>
 <span><span class="va">p_lda_pool</span><span class="op">$</span><span class="va">species</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/levels.html">levels</a></span><span class="op">(</span><span class="va">penguins_sub</span><span class="op">$</span><span class="va">species</span><span class="op">)</span>,</span>
 <span>                          <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">pool_ell</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">p_lda_pool</span><span class="op">$</span><span class="va">type</span> <span class="op">&lt;-</span> <span class="st">"ellipse"</span></span>
-<span><span class="va">p_lda_means</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span><span class="va">p_lda</span><span class="op">$</span><span class="va">means</span>,</span>
-<span>                          species<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">p_lda</span><span class="op">$</span><span class="va">means</span><span class="op">)</span><span class="op">)</span>,</span>
+<span><span class="va">p_lda_means</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span></span>
+<span>  <span class="va">p_lda</span><span class="op">$</span><span class="va">means</span>,</span>
+<span>  species<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">p_lda</span><span class="op">$</span><span class="va">means</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>                          type<span class="op">=</span><span class="st">"mean"</span><span class="op">)</span></span>
-<span><span class="va">p_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span><span class="va">penguins_sub</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>, type<span class="op">=</span><span class="st">"data"</span><span class="op">)</span></span>
+<span><span class="va">p_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span><span class="va">penguins_sub</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>, </span>
+<span>                     type<span class="op">=</span><span class="st">"data"</span><span class="op">)</span></span>
 <span><span class="va">p_lda_all</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html">bind_rows</a></span><span class="op">(</span><span class="va">p_lda_means</span>,</span>
 <span>                       <span class="va">p_data</span>,</span>
 <span>                       <span class="va">p_lda_pool</span><span class="op">)</span></span>
 <span><span class="va">p_lda_all</span><span class="op">$</span><span class="va">type</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">p_lda_all</span><span class="op">$</span><span class="va">type</span>, </span>
-<span>                         levels<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"mean"</span>, <span class="st">"data"</span>, <span class="st">"ellipse"</span><span class="op">)</span><span class="op">)</span></span>
+<span>   levels<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"mean"</span>, <span class="st">"data"</span>, <span class="st">"ellipse"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">shapes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">20</span><span class="op">)</span></span>
 <span><span class="va">p_pch</span> <span class="op">&lt;-</span> <span class="va">shapes</span><span class="op">[</span><span class="va">p_lda_all</span><span class="op">$</span><span class="va">type</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell">
-<details><summary>Code to generate animated gifs</summary><div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Code to run the tour</span></span>
+<details class="code-fold"><summary>Code to generate animated gifs</summary><div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Code to run the tour</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/tourr/man/display_xy.html">animate_xy</a></span><span class="op">(</span><span class="va">p_lda_all</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, col<span class="op">=</span><span class="va">p_lda_all</span><span class="op">$</span><span class="va">species</span>, pch<span class="op">=</span><span class="va">p_pch</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"data/penguins_tour_path.rda"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/tourr/man/render_gif.html">render_gif</a></span><span class="op">(</span><span class="va">p_lda_all</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, </span>
@@ -706,23 +701,34 @@ bm 0.18 0.20 0.16 0.31</code></pre>
 <span>           loop<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div id="fig-penguins-lda-ellipses" class="quarto-layout-panel">
-<figure class="figure"><div class="quarto-layout-row quarto-layout-valign-top">
-<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
-<div id="fig-lda-pooled1" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure"><p><img src="gifs/penguins_lda_pooled1.gif" class="img-fluid figure-img" alt="FIX ME" data-ref-parent="fig-penguins-lda-ellipses" width="300"></p>
-<figcaption class="figure-caption">(a) All species</figcaption></figure>
+<div id="fig-penguins-lda-pooled-html" class="quarto-layout-panel">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-penguins-lda-pooled-html-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-penguins-lda-pooled-html" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-lda-pooled1" class="quarto-figure quarto-figure-center quarto-float anchored" alt="Animation showing a tour of the pooled variance-covariance ellipse, computed for each species, overlaid on the data. The shape of the ellipse for each group is reasonably similar to the spread of the points in all projections.">
+<figure class="quarto-float quarto-subfloat-fig figure"><div aria-describedby="fig-lda-pooled1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="gifs/penguins_lda_pooled1.gif" class="img-fluid figure-img" data-ref-parent="fig-penguins-lda-pooled-html" alt="Animation showing a tour of the pooled variance-covariance ellipse, computed for each species, overlaid on the data. The shape of the ellipse for each group is reasonably similar to the spread of the points in all projections." width="300">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-lda-pooled1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(a) All species
+</figcaption></figure>
 </div>
 </div>
-<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
-<div id="fig-lda-pooled1" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure"><p><img src="gifs/penguins_lda_pooled2.gif" class="img-fluid figure-img" alt="FIX ME" data-ref-parent="fig-penguins-lda-ellipses" width="300"></p>
-<figcaption class="figure-caption">(b) Gentoo</figcaption></figure>
+<div class="quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-penguins-lda-pooled-html" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-lda-pooled1" class="quarto-figure quarto-figure-center quarto-float anchored" alt="Animation showing a tour of the pooled variance-covariance ellipse overlaid on the data for the Gentoo penguins (red). The shape of the ellipse is reasonably similar to the spread of the points in all projections.">
+<figure class="quarto-float quarto-subfloat-fig figure"><div aria-describedby="fig-lda-pooled1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="gifs/penguins_lda_pooled2.gif" class="img-fluid figure-img" data-ref-parent="fig-penguins-lda-pooled-html" alt="Animation showing a tour of the pooled variance-covariance ellipse overlaid on the data for the Gentoo penguins (red). The shape of the ellipse is reasonably similar to the spread of the points in all projections." width="300">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-lda-pooled1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(b) Gentoo
+</figcaption></figure>
 </div>
 </div>
 </div>
-<p></p><figcaption class="figure-caption">Figure&nbsp;14.5: Tour of penguins data, pooled variance-covariance ellipse overlaid. We can see that the pooled variance-covariance is a reasonable estimate of the spread of the data.</figcaption><p></p>
-</figure>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-penguins-lda-pooled-html-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;14.5: Checking how the pooled variance-covariance matches the spread of points in each group.
+</figcaption></figure>
 </div>
 <div class="insight">
 <p>From the tour, we can see that the assumption of equal elliptical variance-covariance is a reasonable assumption for the penguins data. In all projections the ellipse is reasonably matching the spread of the observations.</p>
@@ -736,31 +742,53 @@ bm 0.18 0.20 0.16 0.31</code></pre>
 </ol>
 <p>We’ll look at this for 2D using the LDA model fitted to <code>bl</code>, and <code>bd</code> of the <code>penguins</code> data.</p>
 <div class="cell">
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://had.co.nz/classifly">classifly</a></span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"data/penguins_sub.rda"</span><span class="op">)</span></span>
-<span><span class="va">p_bl_bd_lda</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/MASS/man/lda.html">lda</a></span><span class="op">(</span><span class="va">species</span><span class="op">~</span><span class="va">bl</span><span class="op">+</span><span class="va">bd</span>, data<span class="op">=</span><span class="va">penguins_sub</span>, </span>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_bl_bd_lda</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/MASS/man/lda.html">lda</a></span><span class="op">(</span><span class="va">species</span><span class="op">~</span><span class="va">bl</span><span class="op">+</span><span class="va">bd</span>, data<span class="op">=</span><span class="va">penguins_sub</span>, </span>
 <span>                                  prior <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">/</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">/</span><span class="fl">3</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>The fitted model parameters are the means: <span class="math inline">\(\bar{x}_{Adelie} = (\)</span> -0.95, 0.6<span class="math inline">\()^\top\)</span>, <span class="math inline">\(\bar{x}_{Chinstrap} = (\)</span> 0.89, 0.64<span class="math inline">\()^\top\)</span>, and <span class="math inline">\(\bar{x}_{Gentoo} = (\)</span> 0.65, -1.1<span class="math inline">\()^\top\)</span>.</p>
-<p>The boundaries can be examined using the <code><a href="https://rdrr.io/pkg/classifly/man/explore.html">explore()</a></code> function from the <code>classifly</code> package, which generates observations in the range of all values of<code>bl</code> and <code>bd</code> and predicts their class. We can overlay the sample means and an ellipse corresponding to the variance-covariance also, by extracting these from the model object.</p>
+<p>The fitted model means <span class="math inline">\(\bar{x}_{Adelie} = (\)</span> -0.95, 0.6<span class="math inline">\()^\top\)</span>, <span class="math inline">\(\bar{x}_{Chinstrap} = (\)</span> 0.89, 0.64<span class="math inline">\()^\top\)</span>, and <span class="math inline">\(\bar{x}_{Gentoo} = (\)</span> 0.65, -1.1<span class="math inline">\()^\top\)</span> can be added to the plots.</p>
+<p>The boundaries can be examined using the <code><a href="https://rdrr.io/pkg/classifly/man/explore.html">explore()</a></code> function from the <code>classifly</code> package, which generates observations in the range of all values of<code>bl</code> and <code>bd</code> and predicts their class. <a href="#fig-lda-2D-boundary" class="quarto-xref">Figure&nbsp;<span>14.6</span></a> shows the resulting prediction regions, with the observed data and the sample means overlaid.</p>
 <div class="cell">
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_bl_bd_lda_boundaries</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/classifly/man/explore.html">explore</a></span><span class="op">(</span><span class="va">p_bl_bd_lda</span>, <span class="va">penguins_sub</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Compute points in domain of data and predict</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://had.co.nz/classifly">classifly</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">p_bl_bd_lda_boundaries</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/classifly/man/explore.html">explore</a></span><span class="op">(</span><span class="va">p_bl_bd_lda</span>, <span class="va">penguins_sub</span><span class="op">)</span></span>
 <span><span class="va">p_bl_bd_lda_m1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">p_bl_bd_lda_boundaries</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">bl</span>, y<span class="op">=</span><span class="va">bd</span>, colour<span class="op">=</span><span class="va">species</span>, shape<span class="op">=</span><span class="va">.TYPE</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">bl</span>, y<span class="op">=</span><span class="va">bd</span>, </span>
+<span>                 colour<span class="op">=</span><span class="va">species</span>, </span>
+<span>                 shape<span class="op">=</span><span class="va">.TYPE</span><span class="op">)</span>, alpha<span class="op">=</span><span class="fl">0.8</span><span class="op">)</span> <span class="op">+</span> </span>
 <span>  <span class="fu"><a href="https://colorspace.R-Forge.R-project.org/reference/scale_colour_discrete_divergingx.html">scale_color_discrete_divergingx</a></span><span class="op">(</span><span class="st">"Zissou 1"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html">scale_shape_manual</a></span><span class="op">(</span>values<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">46</span>, <span class="fl">16</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>aspect.ratio <span class="op">=</span> <span class="fl">1</span>, legend.position <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">p_bl_bd_lda_means</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span><span class="va">p_bl_bd_lda</span><span class="op">$</span><span class="va">means</span>, species<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">p_bl_bd_lda</span><span class="op">$</span><span class="va">means</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="va">p_bl_bd_lda_means</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span><span class="va">p_bl_bd_lda</span><span class="op">$</span><span class="va">means</span>,</span>
+<span>                        species<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">p_bl_bd_lda</span><span class="op">$</span><span class="va">means</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">p_bl_bd_lda_m1</span> <span class="op">+</span>   </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">p_bl_bd_lda_means</span>, </span>
+<span>             <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">bl</span>, y<span class="op">=</span><span class="va">bd</span><span class="op">)</span>, </span>
+<span>             colour<span class="op">=</span><span class="st">"black"</span>, </span>
+<span>             shape<span class="op">=</span><span class="fl">3</span>,</span>
+<span>             size<span class="op">=</span><span class="fl">3</span><span class="op">)</span> </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div id="fig-lda-2D-boundary" class="quarto-figure quarto-figure-center quarto-float anchored" alt="Square divided into three regions by the coloured points, primarily a wedge of yellow (Chinstrap) extending from the top right divides the other two groups. The regions mostly contain the observed values, with just a few over the boundary in the wrong region.">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-lda-2D-boundary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="14-lda_files/figure-html/fig-lda-2D-boundary-1.png" class="img-fluid figure-img" style="width:70.0%" alt="Square divided into three regions by the coloured points, primarily a wedge of yellow (Chinstrap) extending from the top right divides the other two groups. The regions mostly contain the observed values, with just a few over the boundary in the wrong region.">
 </div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-lda-2D-boundary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;14.6: Prediction regions of the LDA model for two variables of the three species of penguins indicated by the small points. Large points are the observations, and the sample mean of each species is represented by the plus. The boundaries between groups can be seen to be roughly half-way between the means, taking the elliptical spread into account, and mostly distinguishes the three species.
+</figcaption></figure>
+</div>
+</div>
+</div>
+<p> </p>
+<p>This approach can be readily extended to higher dimensions. One first fits the model with all four variables, and uses the <code><a href="https://rdrr.io/pkg/classifly/man/explore.html">explore()</a></code> to generate points in the 4D space with predictions, generating a representation of the prediction regions. <a href="#fig-penguins-lda-boundaries-html" class="quarto-xref">Figure&nbsp;<span>14.7</span></a>(a) shows the results using a slice tour <span class="citation" data-cites="slicetour">(<a href="references.html#ref-slicetour" role="doc-biblioref">Laa et al., 2020a</a>)</span>. Points inside the slice are shown in larger size. The slice is made in the centre of the data, to show the boundaries in this neighbourhood. As the tour progresses we see a thin slice through the centre of the data, parallel with the projection plane. In most projections there is some small overlap of points between groups, which happens because we are examining a 4D object with 2D. The slice helps to alleviate this, allowing a focus on the boundaries in the centre of the cube. In all projections the boundaries between groups is linear, as would be expected when using LDA. We can also see that the model roughly divides the cube into three relatively equally-sized regions.</p>
+<p><a href="#fig-penguins-lda-boundaries-html" class="quarto-xref">Figure&nbsp;<span>14.7</span></a>(b) shows the three prediction regions, represented by points in 4D, projected into the discriminant space. Linear boundaries neatly divide the full space, which is to be expected because the LDA model computes it’s classification rules in this 2D space.<br></p>
 <div class="cell">
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_lda</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/MASS/man/lda.html">lda</a></span><span class="op">(</span><span class="va">species</span> <span class="op">~</span> <span class="va">.</span>, <span class="va">penguins_sub</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>, prior <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">/</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">/</span><span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">p_lda_boundaries</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/classifly/man/explore.html">explore</a></span><span class="op">(</span><span class="va">p_lda</span>, <span class="va">penguins_sub</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<details><summary>Code for generating slice tour</summary><div class="sourceCode" id="cb19"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Code to run the tour</span></span>
+<details class="code-fold"><summary>Code for generating slice tour</summary><div class="sourceCode" id="cb19"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Code to run the tour</span></span>
 <span><span class="va">p_lda_boundaries</span><span class="op">$</span><span class="va">species</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/tourr/man/display_slice.html">animate_slice</a></span><span class="op">(</span><span class="va">p_lda_boundaries</span><span class="op">[</span><span class="va">p_lda_boundaries</span><span class="op">$</span><span class="va">.TYPE</span> <span class="op">==</span> <span class="st">"simulated"</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, col<span class="op">=</span><span class="va">p_lda_boundaries</span><span class="op">$</span><span class="va">species</span><span class="op">[</span><span class="va">p_lda_boundaries</span><span class="op">$</span><span class="va">.TYPE</span> <span class="op">==</span> <span class="st">"simulated"</span><span class="op">]</span>, v_rel<span class="op">=</span><span class="fl">0.02</span>, axes<span class="op">=</span><span class="st">"bottomleft"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/tourr/man/render_gif.html">render_gif</a></span><span class="op">(</span><span class="va">p_lda_boundaries</span><span class="op">[</span><span class="va">p_lda_boundaries</span><span class="op">$</span><span class="va">.TYPE</span> <span class="op">==</span> <span class="st">"simulated"</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,</span>
@@ -774,7 +802,7 @@ bm 0.18 0.20 0.16 0.31</code></pre>
 </details>
 </div>
 <div class="cell">
-<details><summary>Code for projecting into LDA space</summary><div class="sourceCode" id="cb20"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Project the boundaries into the 2D discriminant space</span></span>
+<details class="code-fold"><summary>Code for projecting into LDA space</summary><div class="sourceCode" id="cb20"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Project the boundaries into the 2D discriminant space</span></span>
 <span><span class="va">p_lda_b_sub</span> <span class="op">&lt;-</span> <span class="va">p_lda_boundaries</span><span class="op">[</span></span>
 <span>  <span class="va">p_lda_boundaries</span><span class="op">$</span><span class="va">.TYPE</span> <span class="op">==</span> <span class="st">"simulated"</span>, </span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span>, <span class="fl">6</span><span class="op">)</span><span class="op">]</span></span>
@@ -784,33 +812,49 @@ bm 0.18 0.20 0.16 0.31</code></pre>
 <span><span class="va">p_lda_b_sub_ds_p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">p_lda_b_sub_ds</span>, </span>
 <span>       <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">LD1</span>, y<span class="op">=</span><span class="va">LD2</span>, </span>
 <span>           colour<span class="op">=</span><span class="va">species</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span>alpha<span class="op">=</span><span class="fl">0.2</span><span class="op">)</span> <span class="op">+</span>  </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span>alpha<span class="op">=</span><span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span>  </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">p_lda_pred_x1</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">LD1</span>, </span>
+<span>                               y<span class="op">=</span><span class="va">LD2</span>, </span>
+<span>                               shape<span class="op">=</span><span class="va">species</span><span class="op">)</span>,</span>
+<span>             inherit.aes <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://colorspace.R-Forge.R-project.org/reference/scale_colour_discrete_divergingx.html">scale_color_discrete_divergingx</a></span><span class="op">(</span><span class="st">"Zissou 1"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html">scale_shape_manual</a></span><span class="op">(</span>values<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>aspect.ratio <span class="op">=</span> <span class="fl">1</span>, </span>
 <span>        legend.position <span class="op">=</span> <span class="st">"bottom"</span>,</span>
 <span>        legend.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_blank</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div id="fig-penguins-lda-boundaries" class="quarto-layout-panel">
-<figure class="figure"><div class="quarto-layout-row quarto-layout-valign-top">
-<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
-<div id="fig-lda-4D-boundaries" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure"><p><img src="gifs/penguins_lda_boundaries.gif" class="img-fluid figure-img" alt="Sliced tour to explore the boundaries produced by the LDA classifier on the penguins data." data-ref-parent="fig-penguins-lda-boundaries" width="300"></p>
-<figcaption class="figure-caption">(a) 4D</figcaption></figure>
+<div id="fig-penguins-lda-boundaries-html" class="quarto-layout-panel">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-penguins-lda-boundaries-html-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-penguins-lda-boundaries-html" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-lda-4D-boundaries" class="quarto-figure quarto-figure-center quarto-float anchored" alt="Animation plot, where three groups of coloured points can be seen. They roughly break the square into three regions with linear boundaries, which varies in each projection.">
+<figure class="quarto-float quarto-subfloat-fig figure"><div aria-describedby="fig-lda-4D-boundaries-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="gifs/penguins_lda_boundaries.gif" class="img-fluid figure-img" data-ref-parent="fig-penguins-lda-boundaries-html" alt="Animation plot, where three groups of coloured points can be seen. They roughly break the square into three regions with linear boundaries, which varies in each projection." width="300">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-lda-4D-boundaries-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(a) 4D
+</figcaption></figure>
 </div>
 </div>
-<div class="cell quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
-<div class="cell-output-display">
-<div id="fig-lda-2D-boundaries" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure"><p><img src="14-lda_files/figure-html/fig-lda-2D-boundaries-1.png" class="img-fluid figure-img" data-ref-parent="fig-penguins-lda-boundaries" width="480"></p>
-<figcaption class="figure-caption">(b) Discriminant space</figcaption></figure>
+<div class="cell quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-penguins-lda-boundaries-html" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div class="cell-output-display quarto-layout-cell-subref" data-ref-parent="fig-penguins-lda-boundaries-html">
+<div id="fig-lda-2D-boundaries" class="quarto-figure quarto-figure-center quarto-float anchored" alt="Scatterplot of points divided neatly into three colour groups by linear boundaries. The regions are split at the middle, and with the boundary between blue and red, blue and yellow, and yellow and red, starting near 11, 4, and o'clock, respectively.">
+<figure class="quarto-float quarto-subfloat-fig figure"><div aria-describedby="fig-lda-2D-boundaries-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="14-lda_files/figure-html/fig-lda-2D-boundaries-1.png" class="img-fluid figure-img" data-ref-parent="fig-penguins-lda-boundaries-html" alt="Scatterplot of points divided neatly into three colour groups by linear boundaries. The regions are split at the middle, and with the boundary between blue and red, blue and yellow, and yellow and red, starting near 11, 4, and o'clock, respectively." width="480">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-lda-2D-boundaries-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(b) Discriminant space
+</figcaption></figure>
 </div>
 </div>
 </div>
 </div>
-<p></p><figcaption class="figure-caption">Figure&nbsp;14.6: Examining the boundaries produced by the LDA model in the full 4D with a slice tour and in the discriminant space.</figcaption><p></p>
-</figure>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-penguins-lda-boundaries-html-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;14.7: Examining the boundaries produced by the LDA model in the full 4D with a slice tour (left) and in the discriminant space (right). Large points indicate observations within the slice, and dots are observations outside the slice. Focusing on the within-slice points, there is some overlap of points between regions in most views which represents the occlusion of 4D shapes when examining projections with thin slices. The linear boundaries are seen exactly in the discriminant space, that is they are orthogonal to these two dimensions.
+</figcaption></figure>
 </div>
 <div class="insight">
 <p>From the tour, we can see that the LDA boundaries divide the classes only in the discriminant space. It is not using the space orthogonal to the 2D discriminant space. You can see this because the boundary is sharp in just one 2D projection, while most of the projections show some overlap of regions.</p>
@@ -829,12 +873,15 @@ bm 0.18 0.20 0.16 0.31</code></pre>
 </ol>
 
 
-<div id="refs" class="references csl-bib-body hanging-indent" data-line-spacing="2" role="list" style="display: none">
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list" style="display: none">
 <div id="ref-Ab1884" class="csl-entry" role="listitem">
 Abbott, E. (1884). <em>Flatland: A romance of many dimensions</em>. Dover Publications.
 </div>
 <div id="ref-AWS91" class="csl-entry" role="listitem">
 Ahlberg, C., Williamson, C., &amp; Shneiderman, B. (1991). Dynamic <span>Q</span>ueries for <span>I</span>nformation <span>E</span>xploration: <span>A</span>n <span>I</span>mplementation and <span>E</span>valuation. <em>ACM CHI ‘92 Conference Proceedings</em>, 619–626.
+</div>
+<div id="ref-keras" class="csl-entry" role="listitem">
+Allaire, J., &amp; Chollet, F. (2023). <em>Keras: R interface to ’keras’</em>. <a href="https://CRAN.R-project.org/package=keras">https://CRAN.R-project.org/package=keras</a>
 </div>
 <div id="ref-An57" class="csl-entry" role="listitem">
 Anderson, E. (1957). A <span>S</span>emigraphical <span>M</span>ethod for the <span>A</span>nalysis of <span>C</span>omplex <span>P</span>roblems. <em>Proceedings of the National Academy of Science, 13</em>, 923–927.
@@ -898,9 +945,6 @@ Borg, I., &amp; Groenen, P. J. F. (2005). <em>Modern <span>M</span>ultidimension
 </div>
 <div id="ref-Br01" class="csl-entry" role="listitem">
 Breiman, L. (2001). Random <span>F</span>orests. <em>Machine Learning</em>, <em>45</em>(1), 5–32.
-</div>
-<div id="ref-Cu04" class="csl-entry" role="listitem">
-Breiman, L., &amp; Cutler, A. (2004). <em>Random <span>F</span>orests</em>. <span><code>http://www.math.usu.edu/</code><span class="math inline">\(\sim\)</span><code>adele/forests/cc_home.htm</code></span>.
 </div>
 <div id="ref-R-randomForest" class="csl-entry" role="listitem">
 Breiman, L., Cutler, A., Liaw, A., &amp; Wiener, M. (2022). <em>randomForest: Breiman and cutler’s random forests for classification and regression</em>. <a href="https://www.stat.berkeley.edu/~breiman/RandomForests/">https://www.stat.berkeley.edu/~breiman/RandomForests/</a>
@@ -987,7 +1031,7 @@ Cook, D., Buja, A., Cabrera, J., &amp; Hurley, C. (1995a). Grand <span>T</span>o
 Cook, D., Hofmann, H., Lee, E.-K., Yang, H., Nikolau, B., &amp; Wurtele, E. (2007). Exploring <span>G</span>ene <span>E</span>xpression <span>D</span>ata, <span>U</span>sing <span>P</span>lots. <em>Journal of Data Science</em>, <em>5</em>(2), 151–182.
 </div>
 <div id="ref-R-mulgar" class="csl-entry" role="listitem">
-Cook, D., &amp; Laa, U. (2023). <em>Mulgar: Functions for pre-processing data for multivariate data visualisation using tours</em>.
+Cook, D., &amp; Laa, U. (2023). <em>Mulgar: Functions for pre-processing data for multivariate data visualisation using tours</em>. <a href="https://dicook.github.io/mulgar/">https://dicook.github.io/mulgar/</a>
 </div>
 <div id="ref-CLBW06" class="csl-entry" role="listitem">
 Cook, D., Lee, E.-K., Buja, A., &amp; Wickham, H. (2006). <span>G</span>rand <span>T</span>ours, <span>P</span>rojection <span>P</span>ursuit <span>G</span>uided <span>T</span>ours and <span>M</span>anual <span>C</span>ontrols. In C.-H. Chen, W. Härdle, &amp; A. Unwin (Eds.), <em>Handbook of <span>D</span>ata <span>V</span>isualization</em>. Springer.
@@ -1077,10 +1121,10 @@ Friedman, J. H. (1987). <span>E</span>xploratory <span>P</span>rojection <span>P
 Friedman, J. H., &amp; Tukey, J. W. (1974). <span>A</span> <span>P</span>rojection <span>P</span>ursuit <span>A</span>lgorithm for <span>E</span>xploratory <span>D</span>ata <span>A</span>nalysis. <em>IEEE Transactions on Computing C</em>, <em>23</em>, 881–889.
 </div>
 <div id="ref-FD04" class="csl-entry" role="listitem">
-Friendly, M., &amp; Denis, D. J. (2004). <em>Milestones in the history of thematic cartography, statistical graphics, and data visualization</em>.<span><code> http://www.math.yorku.ca/SCS/Gallery/milestone/</code></span>.
+Friendly, M., &amp; Denis, D. J. (2004). <em>Milestones in the history of thematic cartography, statistical graphics, and data visualization</em>. http://www.math.yorku.ca/SCS/Gallery/milestone/.
 </div>
-<div id="ref-FrDe" class="csl-entry" role="listitem">
-Friendly, M., &amp; Denis, D. J. (2006). <em><span>G</span>raphical <span>M</span>ilestones</em>. <span><code>http://www.math.yorku.ca/SCS/Gallery/milestone</code></span>.
+<div id="ref-neuralnet" class="csl-entry" role="listitem">
+Fritsch, S., Guenther, F., &amp; Wright, M. N. (2019). <em>Neuralnet: Training of neural networks</em>. <a href="https://CRAN.R-project.org/package=neuralnet">https://CRAN.R-project.org/package=neuralnet</a>
 </div>
 <div id="ref-FB94" class="csl-entry" role="listitem">
 Furnas, G. W., &amp; Buja, A. (1994). Prosection <span>V</span>iews: <span>D</span>imensional <span>I</span>nference <span>T</span>hrough <span>S</span>ections and <span>P</span>rojections. <em>Journal of Computational and Graphical Statistics</em>, <em>3</em>(4), 323–385.
@@ -1110,7 +1154,10 @@ Hajibaba, H., Karlsson, L., &amp; Dolnicar, S. (2016). Residents open their home
 Hansen, C., &amp; Johnson, C. R. (2004). <em>Visualization handbook</em>. Academic Press.
 </div>
 <div id="ref-R-langevitour" class="csl-entry" role="listitem">
-Harrison, P. (2022). <em>Langevitour: Langevin tour</em>. <a href="https://logarithmic.net/langevitour/">https://logarithmic.net/langevitour/</a>
+Harrison, P. (2023a). <em>Langevitour: Langevin tour</em>. <a href="https://logarithmic.net/langevitour/">https://logarithmic.net/langevitour/</a>
+</div>
+<div id="ref-langevitour2023" class="csl-entry" role="listitem">
+Harrison, P. (2023b). Langevitour: Smooth interactive touring of high dimensions, demonstrated with scRNA-seq data. <em>The R Journal</em>, <em>15</em>(2), 206–219. <a href="https://doi.org/10.32614/RJ-2023-046">https://doi.org/10.32614/RJ-2023-046</a>
 </div>
 <div id="ref-R-detourr" class="csl-entry" role="listitem">
 Hart, C., &amp; Wang, E. (2022). <em>Detourr: Portable and performant tour animations</em>. <a href="https://casperhart.github.io/detourr/">https://casperhart.github.io/detourr/</a>
@@ -1215,6 +1262,9 @@ Kuhn, M., &amp; Wickham, H. (2020). <em>Tidymodels: A collection of packages for
 Kuhn, M., &amp; Wickham, H. (2023). <em>Tidymodels: Easily install and load the tidymodels packages</em>. <a href="https://CRAN.R-project.org/package=tidymodels">https://CRAN.R-project.org/package=tidymodels</a>
 </div>
 <div id="ref-sagetour" class="csl-entry" role="listitem">
+Laa, U., Cook, D., &amp; Lee, S. (2022). Burning sage: Reversing the curse of dimensionality in the visualization of high-dimensional data. <em>Journal of Computational and Graphical Statistics</em>, <em>31</em>(1), 40–49. <a href="https://doi.org/10.1080/10618600.2021.1963264">https://doi.org/10.1080/10618600.2021.1963264</a>
+</div>
+<div id="ref-slicetour" class="csl-entry" role="listitem">
 Laa, U., Cook, D., &amp; Valencia, G. (2020a). A slice tour for finding hollowness in high-dimensional data. <em>Journal of Computational and Graphical Statistics</em>, <em>29</em>(3), 681–687. <a href="https://doi.org/10.1080/10618600.2020.1777140">https://doi.org/10.1080/10618600.2020.1777140</a>
 </div>
 <div id="ref-tourr2020" class="csl-entry" role="listitem">
@@ -1226,9 +1276,6 @@ Lancaster, H. O. (1965). The helmert matrices. <em>The American Mathematical Mon
 <div id="ref-R-cxhull" class="csl-entry" role="listitem">
 Laurent, S. (2023). <em>Cxhull: Convex hull</em>. <a href="https://github.com/stla/cxhull">https://github.com/stla/cxhull</a>
 </div>
-<div id="ref-LCKL04" class="csl-entry" role="listitem">
-Lee, E. K., Cook, D., Klinke, S., &amp; Lumley, T. (2005a). Projection <span>P</span>ursuit for <span>E</span>xploratory <span>S</span>upervised <span>C</span>lassification. <em>Journal of Computational and Graphical Statistics</em>, <em>14</em>(4), 831–846.
-</div>
 <div id="ref-Lee2018" class="csl-entry" role="listitem">
 Lee, E.-K. (2018). PPtreeViz: An r package for visualizing projection pursuit classification trees. <em>Journal of Statistical Software</em>, <em>83</em>(8), 1–30. <a href="https://doi.org/10.18637/jss.v083.i08">https://doi.org/10.18637/jss.v083.i08</a>
 </div>
@@ -1236,7 +1283,7 @@ Lee, E.-K. (2018). PPtreeViz: An r package for visualizing projection pursuit cl
 Lee, E.-K., &amp; Cook, D. (2009). A projection pursuit index for large <span class="math inline">\(p\)</span> small <span class="math inline">\(n\)</span> data. <em>Statistics and Computing</em>, <em>20</em>, 381–392. <a href="https://doi.org/10.1007/s11222-009-9131-1">https://doi.org/10.1007/s11222-009-9131-1</a>
 </div>
 <div id="ref-LCKL05" class="csl-entry" role="listitem">
-Lee, E.-K., Cook, D., Klinke, S., &amp; Lumley, T. (2005b). <span>P</span>rojection <span>P</span>ursuit for <span>E</span>xploratory <span>S</span>upervised <span>C</span>lassification. <em>Journal of Computational and Graphical Statistics</em>, <em>14</em>(4), 831–846.
+Lee, E.-K., Cook, D., Klinke, S., &amp; Lumley, T. (2005). <span>P</span>rojection <span>P</span>ursuit for <span>E</span>xploratory <span>S</span>upervised <span>C</span>lassification. <em>Journal of Computational and Graphical Statistics</em>, <em>14</em>(4), 831–846.
 </div>
 <div id="ref-R-liminal" class="csl-entry" role="listitem">
 Lee, S. (2021). <em>Liminal: Multivariate data visualization with tours and embeddings</em>. <a href="https://CRAN.R-project.org/package=liminal">https://CRAN.R-project.org/package=liminal</a>
@@ -1252,6 +1299,9 @@ Leisch, F., &amp; Gruen, B. (2023). <em>CRAN task view: Cluster analysis &amp; f
 </div>
 <div id="ref-R-MSA" class="csl-entry" role="listitem">
 Leisch, F., &amp; Grün, B. (2020). <em>MSA: Market segmentation analysis</em>.
+</div>
+<div id="ref-li2020visualizing" class="csl-entry" role="listitem">
+Li, M., Zhao, Z., &amp; Scheidegger, C. (2020). Visualizing neural networks with the grand tour. <em>Distill</em>. <a href="https://doi.org/10.23915/distill.00025">https://doi.org/10.23915/distill.00025</a>
 </div>
 <div id="ref-randomForest2002" class="csl-entry" role="listitem">
 Liaw, A., &amp; Wiener, M. (2002). Classification and regression by randomForest. <em>R News</em>, <em>2</em>(3), 18–22. <a href="https://CRAN.R-project.org/doc/Rnews/">https://CRAN.R-project.org/doc/Rnews/</a>
@@ -1280,6 +1330,9 @@ Maindonald, J., &amp; Braun, J. (2003). <em>Data analysis and graphics using r -
 <div id="ref-Ma65" class="csl-entry" role="listitem">
 Martin, E. (1965). <em>Flatland</em>. http://www.der.org/films/flatland.html.
 </div>
+<div id="ref-kernelshap" class="csl-entry" role="listitem">
+Mayer, M., &amp; Watson, D. (2023). <em>Kernelshap: Kernel SHAP</em>. <a href="https://CRAN.R-project.org/package=kernelshap">https://CRAN.R-project.org/package=kernelshap</a>
+</div>
 <div id="ref-MY94" class="csl-entry" role="listitem">
 McFarlane, M., &amp; Young, F. W. (1994). Graphical <span>S</span>ensitivity <span>A</span>nalysis for <span>M</span>ultidimensional <span>S</span>caling. <em>Journal of Computational and Graphical Statistics</em>, <em>3</em>, 23–33.
 </div>
@@ -1301,6 +1354,9 @@ Milborrow, S. (2022). <em>Rpart.plot: Plot rpart models: An enhanced version of 
 <div id="ref-R-gtExtras" class="csl-entry" role="listitem">
 Mock, T. (2022). <em>gtExtras: Extending gt for beautiful HTML tables</em>. <a href="https://CRAN.R-project.org/package=gtExtras">https://CRAN.R-project.org/package=gtExtras</a>
 </div>
+<div id="ref-iml" class="csl-entry" role="listitem">
+Molnar, C. (2022). <em>Interpretable machine learning: A guide for making black box models explainable (2nd ed)</em>. https://christophm.github.io/interpretable-ml-book/.
+</div>
 <div id="ref-Moon2019" class="csl-entry" role="listitem">
 Moon, K. R., Dijk, D. van, Wang, Z., Gigante, S., Burkhardt, D. B., Chen, W. S., Yim, K., Elzen, A. van den, Hirn, M. J., Coifman, R. R., Ivanova, N. B., Wolf, G., &amp; Krishnaswamy, S. (2019). Visualizing structure and transitions for biological data exploration. <em>Nature Biotechnology</em>, <em>37</em>, 1482–1492. <a href="https://doi.org/10.1038/s41587-019-0336-3">https://doi.org/10.1038/s41587-019-0336-3</a>
 </div>
@@ -1314,7 +1370,7 @@ OpenStreetMap contributors. (2020). <em><span class="nocase">Planet dump retriev
 Pearson, K. (1901). LIII. On lines and planes of closest fit to systems of points in space. <em>The London, Edinburgh, and Dublin Philosophical Magazine and Journal of Science</em>, <em>2</em>(11), 559–572. <a href="https://doi.org/10.1080/14786440109462720">https://doi.org/10.1080/14786440109462720</a>
 </div>
 <div id="ref-R-patchwork" class="csl-entry" role="listitem">
-Pedersen, T. L. (2022). <em>Patchwork: The composer of plots</em>. <a href="https://CRAN.R-project.org/package=patchwork">https://CRAN.R-project.org/package=patchwork</a>
+Pedersen, T. L. (2023). <em>Patchwork: The composer of plots</em>. <a href="https://CRAN.R-project.org/package=patchwork">https://CRAN.R-project.org/package=patchwork</a>
 </div>
 <div id="ref-perisic2009" class="csl-entry" role="listitem">
 Perisic, I., &amp; Posse, C. (2005). Projection pursuit indices based on the empirical distribution function. <em>Journal of Computational and Graphical Statistics</em>, <em>14</em>(3), 700–715. <a href="https://doi.org/10.1198/106186005X69440">https://doi.org/10.1198/106186005X69440</a>
@@ -1359,7 +1415,7 @@ Rothkopf, E. Z. (1957). A <span>M</span>easure of <span>S</span>timulus <span>S<
 Schloerke, B. (2016). <em>Geozoo: Zoo of geometric objects</em>. <a href="https://CRAN.R-project.org/package=geozoo">https://CRAN.R-project.org/package=geozoo</a>
 </div>
 <div id="ref-R-GGally" class="csl-entry" role="listitem">
-Schloerke, B., Cook, D., Larmarange, J., Briatte, F., Marbach, M., Thoen, E., Elberg, A., &amp; Crowley, J. (2023). <em>GGally: Extension to ggplot2</em>.
+Schloerke, B., Cook, D., Larmarange, J., Briatte, F., Marbach, M., Thoen, E., Elberg, A., &amp; Crowley, J. (2023). <em>GGally: Extension to ggplot2</em>. <a href="https://ggobi.github.io/ggally/">https://ggobi.github.io/ggally/</a>
 </div>
 <div id="ref-mclust2016" class="csl-entry" role="listitem">
 Scrucca, L., Fop, M., Murphy, T. B., &amp; Raftery, A. E. (2016). <span class="nocase">mclust</span> 5: Clustering, classification and density estimation using <span>G</span>aussian finite mixture models. <em>The <span>R</span> Journal</em>, <em>8</em>(1), 289–317. <a href="https://doi.org/10.32614/RJ-2016-021">https://doi.org/10.32614/RJ-2016-021</a>
@@ -1434,7 +1490,7 @@ Tarpey, T., Li, L., &amp; Flury, B. (1995). Principal points and self–consiste
 Temple Lang, D., Swayne, D., Wickham, H., &amp; Lawrence, M. (2006). <em><span><code>rggobi</code></span>: <span>A</span>n <span>I</span>nterface between <span>R</span> and <span>GG</span>obi</em>.<span><code> http://www.R-project.org</code></span>.
 </div>
 <div id="ref-R-rpart" class="csl-entry" role="listitem">
-Therneau, T., &amp; Atkinson, B. (2022). <em>Rpart: Recursive partitioning and regression trees</em>. <a href="https://CRAN.R-project.org/package=rpart">https://CRAN.R-project.org/package=rpart</a>
+Therneau, T., &amp; Atkinson, B. (2023). <em>Rpart: Recursive partitioning and regression trees</em>. <a href="https://CRAN.R-project.org/package=rpart">https://CRAN.R-project.org/package=rpart</a>
 </div>
 <div id="ref-Theus02" class="csl-entry" role="listitem">
 Theus, M. (2002). Interactive <span>D</span>ata <span>V</span>isualization <span>U</span>sing <span>M</span>ondrian. <em>Journal of Statistical Software</em>, <em>7</em>(11), http://www.jstatsoft.org.
@@ -1551,7 +1607,7 @@ Wickham, H. (2022). <em>Classifly: Explore classification models in high dimensi
 Wickham, H., Chang, W., Henry, L., Pedersen, T. L., Takahashi, K., Wilke, C., Woo, K., Yutani, H., &amp; Dunnington, D. (2023). <em>ggplot2: Create elegant data visualisations using the grammar of graphics</em>. <a href="https://CRAN.R-project.org/package=ggplot2">https://CRAN.R-project.org/package=ggplot2</a>
 </div>
 <div id="ref-R-tourr" class="csl-entry" role="listitem">
-Wickham, H., &amp; Cook, D. (2023). <em>Tourr: Tour methods for multivariate data visualisation</em>. <a href="https://github.com/ggobi/tourr">https://github.com/ggobi/tourr</a>
+Wickham, H., &amp; Cook, D. (2024). <em>Tourr: Tour methods for multivariate data visualisation</em>. <a href="https://github.com/ggobi/tourr">https://github.com/ggobi/tourr</a>
 </div>
 <div id="ref-wickham2015" class="csl-entry" role="listitem">
 Wickham, H., Cook, D., &amp; Hofmann, H. (2015). Visualizing statistical models: Removing the blindfold. <em>Statistical Analysis and Data Mining: The ASA Data Science Journal</em>, <em>8</em>(4), 203–225. <a href="https://doi.org/10.1002/sam.11271">https://doi.org/10.1002/sam.11271</a>
@@ -1681,10 +1737,9 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     // clear code selection
     e.clearSelection();
   });
-  function tippyHover(el, contentFn) {
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
     const config = {
       allowHTML: true,
-      content: contentFn,
       maxWidth: 500,
       delay: 100,
       arrow: false,
@@ -1694,8 +1749,17 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       interactive: true,
       interactiveBorder: 10,
       theme: 'quarto',
-      placement: 'bottom-start'
+      placement: 'bottom-start',
     };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
     window.tippy(el, config); 
   }
   const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
@@ -1708,6 +1772,125 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
       return note.innerHTML;
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
     });
   }
       let selectedAnnoteEl;
@@ -1751,6 +1934,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             }
             div.style.top = top - 2 + "px";
             div.style.height = height + 4 + "px";
+            div.style.left = 0;
             let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
             if (gutterDiv === null) {
               gutterDiv = window.document.createElement("div");
@@ -1776,6 +1960,32 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         });
         selectedAnnoteEl = undefined;
       };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
       // Attach click handler to the DT
       const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
       for (const annoteDlNode of annoteDls) {
@@ -1835,23 +2045,27 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
 });
 </script><nav class="page-navigation"><div class="nav-page nav-page-previous">
-      <a href="./13-intro-class.html" class="pagination-link">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Overview</span></span>
+      <a href="./13-intro-class.html" class="pagination-link  aria-label=" to="" supervised="" classification="">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Introduction to supervised classification</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./15-forests.html" class="pagination-link">
+      <a href="./15-forests.html" class="pagination-link" aria-label="<span class='chapter-number'>15</span>&nbsp; <span class='chapter-title'>Trees and forests</span>">
         <span class="nav-page-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Trees and forests</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
 </div> <!-- /content -->
 <footer class="footer"><div class="nav-footer">
-    <div class="nav-footer-left">Interactively exploring high-dimensional data and models in R was written by Dianne Cook and Ursula Laa.</div>   
+    <div class="nav-footer-left">
+<p>Interactively exploring high-dimensional data and models in R was written by Dianne Cook and Ursula Laa.</p>
+</div>   
     <div class="nav-footer-center">
       &nbsp;
-    </div>
-    <div class="nav-footer-right">This book was built with <a href="https://quarto.org/">Quarto</a>.</div>
+    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/dicook/mulgar_book/edit/master/14-lda.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/dicook/mulgar_book/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+    <div class="nav-footer-right">
+<p>This book was built with <a href="https://quarto.org/">Quarto</a>.</p>
+</div>
   </div>
 </footer>
 
