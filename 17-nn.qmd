@@ -1,29 +1,29 @@
 # Neural networks and deep learning
+
 \index{classification!neural networks}
 
-Neural networks (NN) can be considered to be nested additive (or even ensemble) models where explanatory variables are combined, and transformed through an activation function like a logistic. These transformed combinations are added recursively to yield class predictions. They are considered to be black box models, but there is a growing demand for interpretability. Although interpretability is possible, it can be unappealing to understand a complex model constructed to tackle a difficult classification task. Nevertheless, this is the motivation for the explanation of visualisation for NN models in this chapter. 
+Neural networks (NN) can be considered to be nested additive (or even ensemble) models where explanatory variables are combined, and transformed through an activation function like a logistic. These transformed combinations are added recursively to yield class predictions. They are considered to be black box models, but there is a growing demand for interpretability. Although interpretability is possible, it can be unappealing to understand a complex model constructed to tackle a difficult classification task. Nevertheless, this is the motivation for the explanation of visualisation for NN models in this chapter.
 
 In the simplest form, we might write the equation for a NN as
 
 $$
 \hat{y} = f(x) = a_0+\sum_{h=1}^{s}
 w_{0h}\phi(a_h+\sum_{i=1}^{p} w_{ih}x_i)
-$$
-where $s$ indicates the number of nodes in the hidden (middle layer), and $\phi$ is a choice of activation function. In a simple situation where $p=3$, $s=2$, and linear output layer, the model could be written as:
+$$ where $s$ indicates the number of nodes in the hidden (middle layer), and $\phi$ is a choice of activation function. In a simple situation where $p=3$, $s=2$, and linear output layer, the model could be written as:
 
 $$
 \begin{aligned}
 \hat{y} = a_0+ & w_{01}\phi(a_1+w_{11}x_1+w_{21}x_2+w_{31}x_3) +\\
  & w_{02}\phi(a_2+w_{12}x_1+w_{22}x_2+w_{32}x_3)
 \end{aligned}
-$$
-which is a combination of two (linear) models, each of which could be examined for their role in making predictions. 
+$$ which is a combination of two (linear) models, each of which could be examined for their role in making predictions.
 
-In practice, a model may have many nodes, and several hidden layers, a variety of activation functions, and regularisation modifications. One should keep in mind the principle of parsimony is important when applying NNs, because it is tempting to make an overly complex, and thus over-parameterised, construction.  Fitting NNs is still problematic. One would hope that fitting produces a stable result, whatever the starting seed the same parameter estimates are returned. However, this is not the case, and different, sometimes radically different, results are routinely obtained after each attempted fit [@wickham2015]. 
+In practice, a model may have many nodes, and several hidden layers, a variety of activation functions, and regularisation modifications. One should keep in mind the principle of parsimony is important when applying NNs, because it is tempting to make an overly complex, and thus over-parameterised, construction. Fitting NNs is still problematic. One would hope that fitting produces a stable result, whatever the starting seed the same parameter estimates are returned. However, this is not the case, and different, sometimes radically different, results are routinely obtained after each attempted fit [@wickham2015].
 
-For these examples we use the software `keras` [@keras] following the installation and tutorial details at [https://tensorflow.rstudio.com/tutorials/](https://tensorflow.rstudio.com/tutorials/). Because it is an interface to python it can be tricky to install. If this is a problem, the example code should be possible to convert to use `nnet` [@VR02] or `neuralnet` [@neuralnet]. We will use the penguins data to illustrate the fitting, because it makes it easier to understand the procedures and the fit. However, a NN is like using a jackhammer instead of a trowel to plant a seedling, more complicated than necessary to build a good classification model for this data.
+For these examples we use the software `keras` [@keras] following the installation and tutorial details at <https://tensorflow.rstudio.com/tutorials/>. Because it is an interface to python it can be tricky to install. If this is a problem, the example code should be possible to convert to use `nnet` [@VR02] or `neuralnet` [@neuralnet]. We will use the penguins data to illustrate the fitting, because it makes it easier to understand the procedures and the fit. However, a NN is like using a jackhammer instead of a trowel to plant a seedling, more complicated than necessary to build a good classification model for this data.
 
-## Setting up the model 
+## Setting up the model
+
 \index{classification!ANN architecture}
 
 A first step is to decide how many nodes the NN architecture should have, and what activation function should be used. To make these decisions, ideally you already have some knowledge of the shapes of class clusters. For the penguins classification, we have seen that it contains three elliptically shaped clusters of roughly the same size. This suggests two nodes in the hidden layer would be sufficient to separate three clusters (@fig-nn-diagram). Because the shapes of the clusters are convex, using linear activation ("relu") will also be sufficient. The model specification is as follows:
@@ -51,9 +51,9 @@ p_nn_model %>% compile(
 )
 ```
 
-Note that `tensorflow::set_random_seed(211)` sets the seed for the model fitting so that we can obtain the same result to discuss later. It needs to be set before the model is defined in the code. The model will also be saved in order to diagnose and make predictions. 
+Note that `tensorflow::set_random_seed(211)` sets the seed for the model fitting so that we can obtain the same result to discuss later. It needs to be set before the model is defined in the code. The model will also be saved in order to diagnose and make predictions.
 
-![Network architecture for the model on the penguins data. The round nodes indicate original or transformed variables, and each arrow connecting these is represented as one of the weights $w_{ih}$ in the definition. The boxes indicate the additive constant entering the nodes, and the corresponding arrows represent the terms $a_h$. ](images/nn-diagram.png){#fig-nn-diagram align="center"}
+![Network architecture for the model on the penguins data. The round nodes indicate original or transformed variables, and each arrow connecting these is represented as one of the weights $w_{ih}$ in the definition. The boxes indicate the additive constant entering the nodes, and the corresponding arrows represent the terms $a_h$.](images/nn-diagram.png){#fig-nn-diagram align="center"}
 
 ```{r eval=FALSE}
 #| echo: false
@@ -93,9 +93,10 @@ p_nn_wgts <- keras::get_weights(p_nn_model, trainable=TRUE)
 ```
 
 ## Checking the training/test split
+
 \index{classification!training/test split}
 
-Splitting the data into training and test is an essential way to protect against overfitting, for most classifiers, but especially so for the copiously parameterised NNs. The model specified for the penguins data with only two nodes is unlikely to be overfitted, but it is nevertheless good practice to use a training set for building and a test set for evaluation. 
+Splitting the data into training and test is an essential way to protect against overfitting, for most classifiers, but especially so for the copiously parameterised NNs. The model specified for the penguins data with only two nodes is unlikely to be overfitted, but it is nevertheless good practice to use a training set for building and a test set for evaluation.
 
 `r ifelse(knitr::is_html_output(), '@fig-p-split-html', '@fig-p-split-pdf')` shows the tour being used to examine the split into training and test samples for the penguins data. Using random sampling, particularly stratified by group, should result the two sets being very similar, as can be seen here. It does happen that several observations in the test set are on the extremes of their class cluster, so it could be that the model makes errors in the neighbourhoods of these points.
 
@@ -160,31 +161,30 @@ render_gif(p_split_check[,1:4],
 ```
 
 ::: {.content-visible when-format="html"}
-::: {#fig-p-split-html layout-ncol=2}
+::: {#fig-p-split-html layout-ncol="2"}
+![Grand tour](gifs/p_split.gif){#fig-split-grand fig-alt="FIX ME" width="300"}
 
-![Grand tour](gifs/p_split.gif){#fig-split-grand fig-alt="FIX ME" width=300}
-
-![Guided tour](gifs/p_split_guided.gif){#fig-split-guided fig-alt="FIX ME" width=300}
+![Guided tour](gifs/p_split_guided.gif){#fig-split-guided fig-alt="FIX ME" width="300"}
 
 Evaluating the training/test split, where we expect that the two samples should roughly match. There are a few observations in the test set that are on the outer edges of the clusters, which will likely result in the model making an error in these regions. However, the two samples roughly match.
 :::
 :::
 
 ::: {.content-visible when-format="pdf"}
-::: {#fig-p-split-pdf layout-ncol=2}
+::: {#fig-p-split-pdf layout-ncol="2"}
+![Grand tour](images/p_split.png){fig-alt="FIX ME" width="220"}
 
-![Grand tour](images/p_split.png){#fig-split-grand fig-alt="FIX ME" width=220}
-
-![Guided tour](images/p_split_guided.png){#fig-split-guided fig-alt="FIX ME" width=220}
+![Guided tour](images/p_split_guided.png){fig-alt="FIX ME" width="220"}
 
 Evaluating the training/test split, where we expect that the two samples should roughly match. There are a few observations in the test set that are on the outer edges of the clusters, which will likely result in the model making an error in these regions. However, the two samples roughly match.
 :::
 :::
 
 ## Fit the model
+
 \index{classification!Fitting a NN}
 
-The data needs to be specially formatted for the model fitted using `keras`. The explanatory variables need to be provided as a `matrix`, and the categorical response needs to be separate, and specified as a `numeric` variable, beginning with 0. 
+The data needs to be specially formatted for the model fitted using `keras`. The explanatory variables need to be provided as a `matrix`, and the categorical response needs to be separate, and specified as a `numeric` variable, beginning with 0.
 
 ```{r}
 # Data needs to be matrix, and response needs to be numeric
@@ -200,7 +200,7 @@ p_test_y <- p_test %>% pull(species) %>% as.numeric()
 p_test_y <- p_test_y-1 # Needs to be 0, 1, 2
 ```
 
-The specified model is reasonably simple, four input variables, two nodes in the hidden layer and a three column binary matrix for output. This corresponds to 5+5+3+3+3=19 parameters. 
+The specified model is reasonably simple, four input variables, two nodes in the hidden layer and a three column binary matrix for output. This corresponds to 5+5+3+3+3=19 parameters.
 
 ```{r echo=FALSE}
 #| message: false
@@ -208,7 +208,6 @@ library(keras)
 p_nn_model <- load_model_tf("data/penguins_cnn")
 p_nn_model
 ```
-
 
 ```{r eval=FALSE}
 #| message: false
@@ -229,17 +228,19 @@ plot(p_nn_fit)
 keras::get_weights(p_nn_model, trainable=TRUE)
 ```
 
-Because we set the random number seed we will get the same fit each time the code provided here is run. However, if the model is re-fit without setting the seed, you will see that there is a surprising amount of variability in the fits. Setting `epochs = 200` helps to usually get a good fit. One expects that `keras` is reasonably stable so one would not expect the huge array of fits as observed in @wickham2015 using `nnet`. That this can happen with the simple model used here reinforces the notion that fitting of NN models is fiddly, and great care needs to be taken to validate and diagnose the fit. 
+Because we set the random number seed we will get the same fit each time the code provided here is run. However, if the model is re-fit without setting the seed, you will see that there is a surprising amount of variability in the fits. Setting `epochs = 200` helps to usually get a good fit. One expects that `keras` is reasonably stable so one would not expect the huge array of fits as observed in @wickham2015 using `nnet`. That this can happen with the simple model used here reinforces the notion that fitting of NN models is fiddly, and great care needs to be taken to validate and diagnose the fit.
 
 ::: {.content-visible when-format="html"}
 ::: info
-Fitting NN models is fiddly, and very different fitted models can result from restarts, parameter choices, and architecture. 
+Fitting NN models is fiddly, and very different fitted models can result from restarts, parameter choices, and architecture.
 :::
 :::
 
 ::: {.content-visible when-format="pdf"}
+```{=tex}
 \infobox{Fitting NN models is fiddly, and very different fitted models can result from restarts, parameter choices, and architecture.  
 }
+```
 :::
 
 ```{r echo=knitr::is_html_output()}
@@ -252,7 +253,7 @@ library(colorspace)
 p_nn_model <- load_model_tf("data/penguins_cnn")
 ```
 
-The fitted model that we have chosen as the final one has reasonably small loss and high accuracy. Plots of loss and accuracy across epochs showing the change during  fitting can be plotted, but we don't show them here, because they are generally not very interesting.
+The fitted model that we have chosen as the final one has reasonably small loss and high accuracy. Plots of loss and accuracy across epochs showing the change during fitting can be plotted, but we don't show them here, because they are generally not very interesting.
 
 ```{r}
 p_nn_model %>% evaluate(p_test_x, p_test_y, verbose = 0)
@@ -265,6 +266,7 @@ save_model_tf(p_nn_model, "data/penguins_cnn")
 ```
 
 ## Extracting model components
+
 \index{classification!hidden layers}
 
 ::: {.content-visible when-format="html"}
@@ -274,8 +276,10 @@ View the individual node models to understand how they combine to produce the ov
 :::
 
 ::: {.content-visible when-format="pdf"}
+```{=tex}
 \infobox{View the individual node models to understand how they combine to produce the overall model.
 }
+```
 :::
 
 Because nodes in the hidden layers of NNs are themselves (relatively simple regression) models, it can be interesting to examine these to understand how the model is making it's predictions. Although it's rarely easy, most software will allow the coefficients for the models at these nodes to be extracted. With the penguins NN model there are two nodes, so we can extract the coefficients and plot the resulting two linear combinations to examine the separation between classes.
@@ -333,14 +337,15 @@ ggplot(p_all_m, aes(x=nn1, y=nn2,
 
 @fig-hidden-layer shows the data projected into the plane determined by the two linear combinations of the two nodes in the hidden layer. Training and test sets are indicated by empty and solid circles. The three species are clearly different but there is some overlap or confusion for a few penguins. The most interesting aspect to learn is that there is no big gap between the Gentoo and other species, which we know exists in the data. The model has not found this gap, and thus is likely to unfortunately and erroneously confuse some Gentoo penguins, particularly with Adelie.
 
-What we have shown here is a process to use the models at the nodes of the hidden layer to produce a reduced dimensional space where the classes are best separated, at least as determined by the model. The process will work in higher dimensions also. 
+What we have shown here is a process to use the models at the nodes of the hidden layer to produce a reduced dimensional space where the classes are best separated, at least as determined by the model. The process will work in higher dimensions also.
 
 When there are more nodes in the hidden layer than the number of original variables it means that the space is extended to achieve useful classifications that need more complicated non-linear boundaries. The extra nodes describe the non-linearity. @wickham2015 provides a good illustration of this in 2D. The process of examining each of the node models can be useful for understanding this non-linear separation, also in high dimensions.
 
 ## Examining predictive probabilities
+
 \index{classification!predictive probabilities}
 
-When the predictive probabilities are returned by a model, as is done by this NN, we can use a ternary diagram for three class problems, or high-dimensional simplex when there are more classes to examine the strength of the classification. This done in the same way that was used for the votes matrix from a random forest in @sec-votes. 
+When the predictive probabilities are returned by a model, as is done by this NN, we can use a ternary diagram for three class problems, or high-dimensional simplex when there are more classes to examine the strength of the classification. This done in the same way that was used for the votes matrix from a random forest in @sec-votes.
 
 ```{r}
 # Predict training and test set
@@ -421,7 +426,6 @@ ggplot() +
   theme(aspect.ratio=1, legend.position = "right")
 ```
 
-
 ::: {.content-visible when-format="html"}
 ::: info
 If the training and test sets look similar when plotted in the model space then the model is not suffering from over-fitting.
@@ -429,15 +433,17 @@ If the training and test sets look similar when plotted in the model space then 
 :::
 
 ::: {.content-visible when-format="pdf"}
+```{=tex}
 \infobox{If the training and test sets look similar when plotted in the model space then the model is not suffering from over-fitting. 
 }
+```
 :::
 
 ## Local explanations
-\index{classification!local explanations}
-\index{classification!XAI}
 
-It especially important to be able to interpret or explain a model, even more so when the model is complex or black-box'y. A good resource for learning about the range of methods is @iml. Local explanations provide some information about variables that are important for making the prediction for a particular observation. The method that we use here is Shapley value, as computed using the `kernelshap` package [@kernelshap]. 
+\index{classification!local explanations} \index{classification!XAI}
+
+It especially important to be able to interpret or explain a model, even more so when the model is complex or black-box'y. A good resource for learning about the range of methods is @iml. Local explanations provide some information about variables that are important for making the prediction for a particular observation. The method that we use here is Shapley value, as computed using the `kernelshap` package [@kernelshap].
 
 ```{r eval=FALSE}
 # Explanations
@@ -454,11 +460,11 @@ p_exp_sv <- shapviz(p_explain)
 save(p_exp_sv, file="data/p_exp_sv.rda")
 ```
 
-A Shapley value for an observation indicates how the variable contributes to the model prediction for that observation, relative to other variables. It is an average, computed from the change in prediction when all combinations of presence or absence of other variables. In the computation, for each combination, the prediction is computed by substituting absent variables with their average value, like one might do when imputing missing values. 
+A Shapley value for an observation indicates how the variable contributes to the model prediction for that observation, relative to other variables. It is an average, computed from the change in prediction when all combinations of presence or absence of other variables. In the computation, for each combination, the prediction is computed by substituting absent variables with their average value, like one might do when imputing missing values.
 
-@fig-shapley-pcp shows the Shapley values for Gentoo observations (both training and test sets) in the penguins data, as a parallel coordinate plot. The values for the single misclassified Gentoo penguin (in the training set) is coloured orange. Overall, the Shapley values don't vary much on `bl`, `bd` and `fl` but they do on `bm`. The effect of other variables is seems to be only important for `bm`. 
+@fig-shapley-pcp shows the Shapley values for Gentoo observations (both training and test sets) in the penguins data, as a parallel coordinate plot. The values for the single misclassified Gentoo penguin (in the training set) is coloured orange. Overall, the Shapley values don't vary much on `bl`, `bd` and `fl` but they do on `bm`. The effect of other variables is seems to be only important for `bm`.
 
-For the misclassified penguin, the effect of `bm` for all combinations of other variables leads to a decline in predicted value, thus less confidence in it being a Gentoo. In contrast, for this same penguin when considering the effect of `bl` the predicted value increases on average. 
+For the misclassified penguin, the effect of `bm` for all combinations of other variables leads to a decline in predicted value, thus less confidence in it being a Gentoo. In contrast, for this same penguin when considering the effect of `bl` the predicted value increases on average.
 
 ```{r echo=knitr::is_html_output()}
 #| code-fold: true
@@ -519,7 +525,6 @@ p_exp_gentoo %>%
 ```
 
 If we examine the data [@fig-penguins-bl-bm-bd] the explanation makes some sense. The misclassified penguin has an unusually small value on `bm`. That the SHAP value for `bm` was quite different pointed to this being a potential issue with the model, particularly for this penguin. This penguin's prediction is negatively impacted by `bm` being in the model.
-
 
 ```{r echo=knitr::is_html_output()}
 #| label: fig-penguins-bl-bm-bd
@@ -588,7 +593,8 @@ sp1 + sp2 + plot_layout(ncol=2, guides = "collect") &
 ## Examining boundaries
 
 <!-- Check against LDA, suspect that `bm` is used too much in CNN model.-->
-@fig-penguins-lda-nn shows the boundaries for this NN model along with those of the LDA model. 
+
+@fig-penguins-lda-nn shows the boundaries for this NN model along with those of the LDA model.
 
 ```{r echo=knitr::is_html_output(), eval=FALSE}
 #| label: fig-penguins-nn-boundaries
@@ -630,34 +636,29 @@ ggplot(p_grid_proj, aes(x=nn1, y=nn2,
         legend.title = element_blank())
 ```
 
-
 ::: {.content-visible when-format="html"}
+::: {#fig-penguins-lda-nn-html layout-ncol="2"}
+![LDA model](gifs/penguins_lda_boundaries.gif){#fig-lda-boundary fig-alt="FIX ME" width="300"}
 
-::: {#fig-penguins-lda-nn-html layout-ncol=2}
+![NN model](gifs/penguins_nn_boundaries.gif){#fig-tree-boundary fig-alt="FIX ME" width="300"}
 
-![LDA model](gifs/penguins_lda_boundaries.gif){#fig-lda-boundary fig-alt="FIX ME" width=300}
-
-![NN model](gifs/penguins_nn_boundaries.gif){#fig-tree-boundary fig-alt="FIX ME" width=300}
-
-Comparison of the boundaries produced by the LDA (a) and the NN (b) model, using a slice tour. 
+Comparison of the boundaries produced by the LDA (a) and the NN (b) model, using a slice tour.
 :::
 :::
 
-::: {#fig-penguins-lda-nn layout-ncol=2}
+::: {#fig-penguins-lda-nn layout-ncol="2"}
+![LDA model](images/fig-lda-2D-boundaries-1.png){#fig-lda-boundary2 fig-alt="FIX ME" width="200"}
 
-![LDA model](images/fig-lda-2D-boundaries-1.png){#fig-lda-boundary2 fig-alt="FIX ME" width=200}
+![NN model](images/penguins-nn-boundaries-1.png){#fig-nn-boundary fig-alt="FIX ME" width="290"}
 
-![NN model](images/penguins-nn-boundaries-1.png){#fig-nn-boundary fig-alt="FIX ME" width=290}
-
-Comparison of the boundaries produced by the LDA (a) and the NN (b) model, using a slice tour. 
+Comparison of the boundaries produced by the LDA (a) and the NN (b) model, using a slice tour.
 :::
 
-\index{tour!slice} 
+\index{tour!slice}
 
 ## Application to a large dataset
 
-To see how these methods apply in the setting where we have a large number of variables, observations and classes we will look at a neural network that predicts the category for the fashion MNIST data. The code for designing and fitting the model is following the tutorial available from https://tensorflow.rstudio.com/tutorials/keras/classification and you can find additional information there. Below we only replicate the steps needed to build the model from scratch. We also note that a similar investigation was presented in @li2020visualizing, with a focus on investigating the model at different epochs during the training.
-\index{data!fashion MNIST}
+To see how these methods apply in the setting where we have a large number of variables, observations and classes we will look at a neural network that predicts the category for the fashion MNIST data. The code for designing and fitting the model is following the tutorial available from https://tensorflow.rstudio.com/tutorials/keras/classification and you can find additional information there. Below we only replicate the steps needed to build the model from scratch. We also note that a similar investigation was presented in @li2020visualizing, with a focus on investigating the model at different epochs during the training. \index{data!fashion MNIST}
 
 The first step is to download and prepare the data. Here we scale the observations to range between zero and one, and we define the label names.
 
@@ -779,7 +780,6 @@ cowplot::plot_grid(cowplot::plot_grid(p1, p2), legend_labels,
 
 Looking only at the first two principal components we note some clear differences from the transformation in the hidden layer. The observations seem to be more evenly spread in the input space, while in the activations space we notice grouping along specific directions. In particular the category "Bag" appears to be most different from all other classes, and the non-linear transformation in the activations space shows that they are clearly different from the shoe categories, while in the input space we could note some overlap in the linear projection. To better identify differences between other groups we will use the tour on the first five principal components.
 
-
 ```{r echo=knitr::is_html_output(), eval=FALSE}
 #| code-fold: true
 #| code-summary: "Code to run tours"
@@ -813,23 +813,20 @@ render_gif(activations_pc[,1:5],
 ```
 
 ::: {.content-visible when-format="html"}
-::: {#fig-fashion-gt-html layout-ncol=2}
+::: {#fig-fashion-gt-html layout-ncol="2"}
+![Input space](gifs/fashion_images_gt.gif){#fig-fashion-input fig-alt="FIX ME" width="200"}
 
-![Input space](gifs/fashion_images_gt.gif){#fig-fashion-input fig-alt="FIX ME" width=200}
-
-![Activations](gifs/fashion_activations_gt.gif){#fig-fashion-activation fig-alt="FIX ME" width=200}
+![Activations](gifs/fashion_activations_gt.gif){#fig-fashion-activation fig-alt="FIX ME" width="200"}
 
 Comparison of the test observations in the first five principal components of the input space (left) and in the hidden layer activations (right). The activation function results in more clearly defined grouping of the different classes.
 :::
 :::
 
-
 ::: {.content-visible when-format="pdf"}
-::: {#fig-p-split-pdf layout-ncol=2}
+::: {layout-ncol="2"}
+![Input space](images/fashion_images_gt_36.png){fig-alt="FIX ME" width="200"}
 
-![Input space](images/fashion_images_gt_36.png){#fig-fashion-input fig-alt="FIX ME" width=200}
-
-![Activations](images/fashion_activation_gt_126.png){#fig-fashion-activation fig-alt="FIX ME" width=200}
+![Activations](images/fashion_activation_gt_126.png){fig-alt="FIX ME" width="200"}
 
 Comparison of the test observations in the first five principal components of the input space (left) and in the hidden layer activations (right). The activation function results in more clearly defined grouping of the different classes.
 :::
@@ -853,6 +850,7 @@ observed <- as.numeric(test_tags) -1
 table(observed, predicted)
 ```
 
+Here the labels are used as 0 - T-shirt/top, 1 - Trouser, 2 - Pullover, 3 - Dress, 4 - Coat, 5 - Sandal, 6 - Shirt, 7 - Sneaker, 8 - Bag, 9 - Ankle boot.
 From this we see that the model mainly confuses certain categories with each other, and within expected groups (e.g. different types of shoes can be confused with each other, or different types of shirts). We can further investigate this by visualizing the full probability matrix for the test observations, to see which categories the model is uncertain about.
 
 ```{r echo=knitr::is_html_output(), eval=FALSE}
@@ -862,7 +860,7 @@ From this we see that the model mainly confuses certain categories with each oth
 fashion_test_pred <- predict(model_fashion_mnist,
                              test_images, verbose = 0)
 
-# copying this from RF fake tree vote matrix
+# this is the same code as was used in the RF chapter
 proj <- t(geozoo::f_helmert(10)[-1,])
 f_nn_v_p <- as.matrix(fashion_test_pred) %*% proj
 colnames(f_nn_v_p) <- c("x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8", "x9")
@@ -880,23 +878,64 @@ f_nn_v_p_s <- bind_rows(sp, f_nn_v_p) %>%
                                      "Pullover",
                                      "Shirt",
                                      "Coat"), class, "Other")) %>%
-  mutate(class = factor(class, levels=c("Other",
-                                        "T-shirt/top",
+  mutate(class = factor(class, levels=c("T-shirt/top",
                                         "Pullover",
                                         "Shirt",
-                                        "Coat"))) 
-# nicely shows confusion between certain classes is common
+                                        "Coat",
+                                        "Other"))) 
+
 animate_xy(f_nn_v_p_s[,1:9], col = f_nn_v_p_s$class, 
-           axes = "off", pch = ".",
+           axes = "off", cex=0.2,
            edges = as.matrix(simp$edges),
            edges.width = 0.05,
-           palette = "Lajolla")
+           palette = "Viridis")
 
+render_gif(f_nn_v_p_s[,1:9],
+           grand_tour(),
+           display_xy( 
+             col=f_nn_v_p_s$class, 
+             cex=0.2,
+             palette = "Viridis",
+             axes="off",
+             edges = as.matrix(simp$edges),
+             edges.width = 0.05), 
+           gif_file="gifs/fashion_confusion_gt.gif",
+           frames=500,
+           loop=FALSE
+)
 ```
+
+::: {.content-visible when-format="html"}
+::: {#fig-fashion-conf-gt-html}
+![Input space](gifs/fashion_confusion_gt.gif){#fig-fashion-confusion fig-alt="FIX ME" width="400"}
+
+A tour of the confusion matrix for the fashion MNIST test observations, focusing on a subset of items. Often observations get confused between two of the classes, this appears as points falling along one of the edges, for example some Shirts look more like T-shirts/tops, while others get confused with Coats. We can also notice that a subset of three other classes not mapped to colors as very separate from this group.
+:::
+:::
+
+::: {.content-visible when-format="pdf"}
+::: {#fig-fashion-confusion-split-pdf layout-ncol="3"}
+![](images/fashion_confustion_gt_36.png){fig-alt="FIX ME" width="130"}
+
+![](images/fashion_confusion_gt_58.png){fig-alt="FIX ME" width="130"}
+
+![](images/fashion_confusion_gt_69.png){fig-alt="FIX ME" width="130"}
+
+![](images/fashion_confusion_gt_161.png){fig-alt="FIX ME" width="130"}
+
+![](images/fashion_confusion_gt_212.png){fig-alt="FIX ME" width="130"}
+
+![](images/fashion_confusion_gt_333.png){fig-alt="FIX ME" width="130"}
+
+A tour of the confusion matrix for the fashion MNIST test observations, focusing on a subset of items. Often observations get confused between two of the classes, this appears as points falling along one of the edges, for example some Shirts look more like T-shirts/tops, while others get confused with Coats. We can also notice that a subset of three other classes not mapped to colors as very separate from this group.
+:::
+:::
+
+The tour of the class probabilities shows that the model is often confused between two classes, this appears as points falling along one edge in the simplex. In particular for the highlighted categories we can notice some interesting patterns, where pairs of classes get confused with each other. We also see some three-way confusions, these are observations that fall on one surface triangle defined via three corners of the simplex, for example between Pullover, Shirt and Coat.
 
 For this data using explainers like SHAP is not so interesting, since the individual pixel contribution to a prediction are typically not of interest. With image classification a next step might be to further investigate which part of the image is important for a prediction, and this can be visualized as a heat map placed over the original image. This is especially interesting in the case of difficult or misclassified images. This however is beyond the scope of this book.
 
-
+```{=html}
 <!--
 This chapter will likely include:
 
@@ -932,15 +971,14 @@ Bushfires
     
 Sketches as an example  
 -->
+```
+## Exercises {.unnumbered}
 
-## Exercises {-}
-
-1. The problem with the NN model fitted to the penguins is that the Gentoo are poorly classified, when they should be perfectly predictable due to the big gap between class clusters. Re-fit the NN to the penguins data, to find a better model that appropriately perfectly predicts Gentoo penguins. Support this by plotting the model (using the hidden layer), and the predictive probabilities as a ternary plot. Do the SHAP values also support that `bd` plays a stronger role in your best model? (`bd` is the main variable for distinguishing Gentoo's from the other species, particularly when used with `fl` or `bl`.)
-2. For the fashion MNIST data we have seen that certain categories are more likely to be confused with each other. Select a subset of the data including only the categories Ankle boot, Sneaker and Sandal and see if you can reproduce the analysis of the penguins data in this chapter with this subset.
-3. Can you fit a neural network that can predict the class in the fake tree data? Because the data is noisy and we do not have that many observations, it can be easy to overfit the data. Once you find a setting that works, think about what aspects of the model might be interesting for visualization. What comparisons with a random forest model could be of interest?
-4. The sketches data could also be considered a classic image classification problem, and we have seen that we can get a reasonable accuracy with a random forest model. Because we only have a smaller number of observations (compared to the fashion MNIST data) when fitting a neural network we need to be very careful not to overfit the training data. Try fitting a flat neural network (similar to what we did for the fashion MNIST data) and check the test accuracy of the model.
-5. Challenge: try to design a more accurate neural network for the sketches data. Here you can investigate using a convolutional neural network in combination with data augmentation. In addition, using batch normalization should improve the model performance.
-
+1.  The problem with the NN model fitted to the penguins is that the Gentoo are poorly classified, when they should be perfectly predictable due to the big gap between class clusters. Re-fit the NN to the penguins data, to find a better model that appropriately perfectly predicts Gentoo penguins. Support this by plotting the model (using the hidden layer), and the predictive probabilities as a ternary plot. Do the SHAP values also support that `bd` plays a stronger role in your best model? (`bd` is the main variable for distinguishing Gentoo's from the other species, particularly when used with `fl` or `bl`.)
+2.  For the fashion MNIST data we have seen that certain categories are more likely to be confused with each other. Select a subset of the data including only the categories Ankle boot, Sneaker and Sandal and see if you can reproduce the analysis of the penguins data in this chapter with this subset.
+3.  Can you fit a neural network that can predict the class in the fake tree data? Because the data is noisy and we do not have that many observations, it can be easy to overfit the data. Once you find a setting that works, think about what aspects of the model might be interesting for visualization. What comparisons with a random forest model could be of interest?
+4.  The sketches data could also be considered a classic image classification problem, and we have seen that we can get a reasonable accuracy with a random forest model. Because we only have a smaller number of observations (compared to the fashion MNIST data) when fitting a neural network we need to be very careful not to overfit the training data. Try fitting a flat neural network (similar to what we did for the fashion MNIST data) and check the test accuracy of the model.
+5.  Challenge: try to design a more accurate neural network for the sketches data. Here you can investigate using a convolutional neural network in combination with data augmentation. In addition, using batch normalization should improve the model performance.
 
 ```{r}
 #| eval: false
@@ -1028,5 +1066,3 @@ history_cnn <- model_cnn %>% fit(
 sketches_img_test <- formatData(sketches_test, flat = FALSE)
 evaluate(model_cnn, x = sketches_img_test$x, y = sketches_img_test$y)
 ```
-
-
