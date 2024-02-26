@@ -938,41 +938,10 @@ Sketches as an example
 
 1. The problem with the NN model fitted to the penguins is that the Gentoo are poorly classified, when they should be perfectly predictable due to the big gap between class clusters. Re-fit the NN to the penguins data, to find a better model that appropriately perfectly predicts Gentoo penguins. Support this by plotting the model (using the hidden layer), and the predictive probabilities as a ternary plot. Do the SHAP values also support that `bd` plays a stronger role in your best model? (`bd` is the main variable for distinguishing Gentoo's from the other species, particularly when used with `fl` or `bl`.)
 2. For the fashion MNIST data we have seen that certain categories are more likely to be confused with each other. Select a subset of the data including only the categories Ankle boot, Sneaker and Sandal and see if you can reproduce the analysis of the penguins data in this chapter with this subset.
-3. XXX fake trees, can we think about the number of nodes and make it work with a simple NN similar to penguins data?
+3. Can you fit a neural network that can predict the class in the fake tree data? Because the data is noisy and we do not have that many observations, it can be easy to overfit the data. Once you find a setting that works, think about what aspects of the model might be interesting for visualization. What comparisons with a random forest model could be of interest?
 4. The sketches data could also be considered a classic image classification problem, and we have seen that we can get a reasonable accuracy with a random forest model. Because we only have a smaller number of observations (compared to the fashion MNIST data) when fitting a neural network we need to be very careful not to overfit the training data. Try fitting a flat neural network (similar to what we did for the fashion MNIST data) and check the test accuracy of the model.
 5. Challenge: try to design a more accurate neural network for the sketches data. Here you can investigate using a convolutional neural network in combination with data augmentation. In addition, using batch normalization should improve the model performance.
 
-```{r}
-#| eval: false
-#| echo: false
-library(mulgar)
-library(keras)
-library(liminal)
-
-
-tree_branch <- keras::to_categorical(fake_trees$branches, num_classes = 10)
-tree_input <- scale(fake_trees[,1:100])
-
-ft_nn <- keras_model_sequential() 
-ft_nn %>% 
-  layer_dense(units = 128, activation = 'relu', input_shape = c(100)) %>%
-  layer_dropout(0.2) %>%
-  layer_dense(units = 64, activation = 'relu') %>%
-  layer_dropout(0.2) %>%
-  layer_dense(units = 10, activation = 'softmax')
-ft_nn %>% compile(
-  loss = 'categorical_crossentropy',
-  optimizer = optimizer_adam(learning_rate = 5*10E-7), 
-  metrics = c('accuracy')
-)
-history_ft <- ft_nn %>% fit(
-  tree_input, tree_branch, 
-  epochs = 100, batch_size = 128, 
-  validation_split = 0.2
-)
-
-
-```
 
 ```{r}
 #| eval: false
