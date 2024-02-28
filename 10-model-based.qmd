@@ -8,7 +8,7 @@ $$
 \Sigma_k = \lambda_kD_kA_kD_k^\top, ~~~k=1, \dots, g ~~\mbox{(number of clusters)}
 $$
 
-\noindent resulting in several model choices, ranging from simple to complex, as shown in @tbl-covariances.
+\noindent resulting in several model choices, ranging from simple to complex, as shown in `r ifelse(knitr::is_html_output(), '@tbl-covariances-html', '@tbl-covariances-pdf')`.
 
 ```{r echo=knitr::is_html_output()}
 #| label: mc-libraries
@@ -24,15 +24,32 @@ library(colorspace)
 library(tourr)
 ```
 
-```{r}
-#| label: tbl-covariances
+::: {.content-visible when-format="html"}
+
+```{r eval=knitr::is_html_output()}
+#| label: tbl-covariances-html
 #| tbl-cap: "Parameterizations of the covariance matrix."
 #| echo: FALSE
 #| message: FALSE
-readr::read_csv('misc/mclust-covariances.csv') %>%
+readr::read_csv('misc/mclust-covariances-html.csv') %>%
   knitr::kable(align = c('c', 'c', 'c', 'c', 'c', 'c')) %>%
   kableExtra::kable_styling(full_width = FALSE)
 ```
+:::
+
+::: {.content-visible when-format="pdf"}
+```{r eval=knitr::is_latex_output()}
+#| label: tbl-covariances-pdf
+#| tbl-cap: "Parameterizations of the covariance matrix."
+#| echo: FALSE
+#| message: FALSE
+readr::read_csv('misc/mclust-covariances-latex.csv') %>%
+  knitr::kable(align = c('c', 'c', 'c', 'c', 'c', 'c'), 
+               format="latex", booktabs = T, 
+               escape = FALSE) %>%
+  kableExtra::kable_styling(full_width = FALSE)
+```
+:::
 
 \noindent Note the distribution descriptions "spherical" and "ellipsoidal". These are descriptions of the shape of the variance-covariance for a multivariate normal distribution. A standard multivariate normal distribution has a variance-covariance matrix with zeros in the off-diagonal elements, which corresponds to spherically shaped data. When the variances (diagonals) are different or the variables are correlated, then the shape of data from a multivariate normal is ellipsoidal.
 
