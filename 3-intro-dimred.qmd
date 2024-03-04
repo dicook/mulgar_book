@@ -432,6 +432,27 @@ htmlwidgets::saveWidget(pn_tour,
 2. Examine 5D multivariate normal samples drawn from populations with a range of variance-covariance matrices.  (You can use the `mvtnorm` package to do the sampling, for example.) Examine the data using a grand tour. What changes when you change the correlation from close to zero to close to 1?  Can you see a difference between strong positive correlation and strong negative correlation?
 3. The following code shows how to hide a point in a four-dimensional space, so that it is not visible in any of the plots of two variables. Generate both `d` and `d_r` and confirm that the point is visible in a scatterplot matrix of `d`, but not in the scatterplot matrix of `d_r`. Also confirm that it is visible in both data sets when you use a tour.
 
+```{r}
+#| eval: false
+#| echo: false
+# Answer to Q2
+library(tourr)
+library(mvtnorm)
+
+s1 <- diag(5)
+s2 <- diag(5)
+s2[3,4] <- 0.7
+s2[4,3] <- 0.7
+s3 <- s2
+s3[1,2] <- -0.7
+s3[2,1] <- -0.7
+
+set.seed(1234)
+d1 <- as.data.frame(rmvnorm(500, sigma = s1))
+d2 <- as.data.frame(rmvnorm(500, sigma = s2))
+d3 <- as.data.frame(rmvnorm(500, sigma = s3))
+```
+
 ```{r eval=FALSE}
 library(tidyverse)
 library(tourr)
