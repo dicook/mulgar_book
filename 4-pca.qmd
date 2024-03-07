@@ -31,7 +31,7 @@ PCA is not very effective when the distribution of the variables is highly skewe
 
 We would start by examining the data using a grand tour. The goal is to check whether there might be potential issues for PCA, such as skewness, outliers or clustering, or even non-linear dependencies.
 
-We'll start be showing PCA on the simulated data from @sec-dimension-overview. The scree plots show that PCA supports that the data are 2D, 3D and 5D respectively.
+We'll start by showing PCA on the simulated data from @sec-dimension-overview. The scree plots show that PCA supports that the data are 2D, 3D and 5D respectively.
 
 \index{dimension reduction!scree plot}
 
@@ -56,7 +56,6 @@ p_pca <- prcomp(plane)
 b_pca <- prcomp(box)
 c_pca <- prcomp(cube5d)
 p_scree <- ggscree(p_pca, q = 5) + theme_minimal()
-
 b_scree <- ggscree(b_pca, q = 5) + theme_minimal()
 c_scree <- ggscree(c_pca, q = 5) + theme_minimal()
 ```
@@ -73,7 +72,7 @@ p_scree + b_scree + c_scree + plot_layout(ncol=3)
 ```
 
 
-The next step is to look at the coefficients for the selected number of PCs. @tbl-plane-pcs shows the coefficients for the first two PCs of the `plane` data. All five variables contribute, with `x1`, `x2`, `x3` contributing more to `PC1`, and `x4`, `x5` contributing more to `PC2`. @tbl-box-pcs shows the coefficients for the first three PCs. Variables `x1`, `x2`, `x3` contribute strongly to `PC1`, `PC2` has contributions from all variables except `x3` and variables `x4` and `x5` contribute strongly to `PC3`. 
+The next step is to look at the coefficients for the selected number of PCs. @tbl-plane-pcs shows the coefficients for the first two PCs of the `plane` data. All five variables contribute, with `x1`, `x2`, `x3` contributing more to `PC1`, and `x4`, `x5` contributing more to `PC2`. @tbl-box-pcs shows the coefficients for the first three PCs of the `box` data. Variables `x1`, `x2`, `x3` contribute strongly to `PC1`, `PC2` has contributions from all variables except `x3` and variables `x4` and `x5` contribute strongly to `PC3`. 
 
 \index{dimension reduction!coefficients}
 \index{dimension reduction!principal components}
@@ -102,11 +101,11 @@ b_pca$rotation[,1:3] %>%
              decimals = 2)
 ```
 
-In each of these simulated data sets, all five variables contributed to the dimension reduction. If we added two purely noise variables to the plane data, as done in @sec-dimension-overview, the scree plot would indicate that the data is now 4D, and we would get a different interpretation of the coefficients from the PCA. We see that `PC1` and `PC2` are approximately the same as before, with main variables being (`x1`, `x2`, `x3`) and (`x4`, `x5`) respectively. `PC3` and `PC4` are both `x6` and `x7`. 
+In each of these simulated data sets, all five variables contributed to the dimension reduction. If we added two purely noise variables to the plane data, as done in @sec-dimension-overview, the scree plot in @fig-plane-noise-scree would indicate that the data is now 4D, and we would get a different interpretation of the coefficients from the PCA, see @tbl-plane-noise-pcs. We see that `PC1` and `PC2` are approximately the same as before, with main variables being (`x1`, `x2`, `x3`) and (`x4`, `x5`) respectively. `PC3` and `PC4` are both `x6` and `x7`. 
 
 ```{r echo=knitr::is_html_output()}
 #| label: fig-plane-noise-scree
-#| fig-cap: Additional noise variables expands the data to 4D. 
+#| fig-cap: Additional noise variables expands the plane data to 4D. 
 #| code-fold: false
 #| fig-width: 6
 #| fig-height: 4
@@ -123,7 +122,7 @@ ggscree(pn_pca, q = 7) + theme_minimal()
 
 ```{r echo=knitr::is_html_output()}
 #| label: tbl-plane-noise-pcs
-#| tbl-cap: "Coefficients for the first four PCs for the box data."
+#| tbl-cap: "Coefficients for the first four PCs for the plane data with two noise variables."
 #| code-summary: "Code to print PC coefficients"
 pn_pca$rotation[,1:4] %>%
   as_tibble(rownames="Variable") %>% 
@@ -200,7 +199,7 @@ Scree plot and tour of the `pisa` data, with 30 variables being the plausible sc
 
 ![Grand tour frame](images/pisa_gt_249.png){#fig-pisa-gt fig-alt="Selected linear projection of the pisa data from a grand tour. You can see strong linear dependence." fig.align="center"}
 
-Scree plot and a frame from a tour of the `pisa` data, with 30 variables being the plausible scores for Australian students. In combination, these suggest that the data is effectively 1D.
+Scree plot and a frame from a tour of the `pisa` data, with 30 variables being the plausible scores for Australian students. In combination, these suggest that the data is effectively 1D. {{< fa caret-right >}}
 :::
 :::
 
@@ -224,7 +223,7 @@ The tour verifies that the `pisa` data is primarily 1D, indicating that a studen
 ### Example: aflw
 \index{data!aflw}
 
-This data has player statistics for all the matches in the 2021 season. We would be interested to know which variables contain similar information, and thus might be combined into single variables. We would expect that many statistics to group into a few small sets, such as offensive and defensive skills. We might also expect that some of the statistics are skewed, most players have low values and just a handful of players are stellar. It is also possible that there are some extreme values. These are interesting features, but they will distract from the main purpose of grouping the statistics. Thus the tour is used to check for potential problems with the data prior to conducting PCA.
+This data has player statistics for all the matches in the 2021 season. We would be interested to know which variables contain similar information, and thus might be combined into single variables. We would expect that many statistics group into a few small sets, such as offensive and defensive skills. We might also expect that some of the statistics are skewed, most players have low values and just a handful of players are stellar. It is also possible that there are some extreme values. These are interesting features, but they will distract from the main purpose of grouping the statistics. Thus the tour is used to check for potential problems with the data prior to conducting PCA.
 
 ```{r}
 #| label: pca-libraries
@@ -273,7 +272,7 @@ Grand tour of the AFLW player statistics. Most player statistics concentrate nea
 
 ![](images/aflw_gt_329.png){width=228}
 
-Two frames from a grand tour of the AFLW player statistics. Most player statistics concentrate near the centre, indicating most players are "average"! There are a few outliers appearing in different combinations of the skills, which one would expect to be the star players for particular skill sets. 
+Two frames from a grand tour of the AFLW player statistics. Most player statistics concentrate near the centre, indicating most players are "average"! There are a few outliers appearing in different combinations of the skills, which one would expect to be the star players for particular skill sets. {{< fa caret-right >}}
 :::
 :::
 
@@ -481,7 +480,7 @@ pg18 + theme(aspect.ratio=1, legend.position="none") +
 
 For any particular frame, like 18 re-plotted in `r ifelse(knitr::is_html_output(), '@fig-aflw-pcaplots-html', '@fig-aflw-pcaplots-pdf')`, we can investigate further. Here there is a branching pattern, where the branch points in the direction of PC 1. Mouse-over the players at the tip of this branch and we find players like Alyce Parker, Brittany Bonnici, Dana Hooker, Kiara Bowers. If you look up the bios of these players you'll find they all have generally good player descriptions like "elite disposals", "powerful left foot", "hard-running midfielder", "best and fairest".
 
-In the direction of PC 2, you'll find players like Lauren Ahrens, Stacey Livingstone who are star defenders. Players in this end of PC 1, have high scores on `intercepts` and `rebounds_in50`.
+In the direction of PC 2, you'll find players like Lauren Ahrens, Stacey Livingstone who are star defenders. Players in this end of PC 2, have high scores on `intercepts` and `rebounds_in50`.
 
 Another interesting frame for inspecting PC 2 is 59. PC 2 at one end has players with high goal scoring skills, and the other good defending skills. So mousing over the other end of PC 2 finds players like Gemma Houghton and Katie Brennan who are known for their goal scoring. The branch pattern is an interesting one, because it tells us there is some combination of skills that are lacking among all players, primarily this appears to be there some distinction between defenders skills and general playing skills. It's not as simple as this because the branching is only visible when PC 1 and PC 2 are examined with PC 3.
 
@@ -502,7 +501,7 @@ The tour verifies that PCA on the `aflw` data is complicated and doesn't capture
 
 When you choose a smaller number of PCs $(k)$ than the number of original variables, this is essentially producing a model for the data. The model is the lower dimensional $k$-D space. It is analogous to a linear regression model, except that the residuals from the model are $(p-k)$-D. 
 
-It is common to show the model, that is the data projected into the $k$-D model space. When $k=2$ this is called a "biplot". For the `plane` and `plane_noise` data the biplots are shown in @fig-plane-biplot. This is useful for checking which variables contribute most to the new principal component variables, and also to check for any problems that might have affected the fit, such as outliers, clusters or non-linearity. Interestingly, biplots are typically only made in 2D, even if the data should be summarised by more than two PCs. Occasionally you will see the biplot made for PC $j$ vs PC $k$ also. With the `pca_tour()` function in the `tourr` package you can view a $k$-D biplot. This will display the $k$ PCs with the axes displaying the original variables, and thus see their contribution to the PCs. 
+It is common to show the model, that is the data projected into the $k$-D model space. When $k=2$ this is called a "biplot". For the `plane` and `plane_noise` data the biplots are shown in @fig-plane-biplot. This is useful for checking which variables contribute most to the new principal component variables, and also to check for any problems that might have affected the fit, such as outliers, clusters or non-linearity. Interestingly, biplots are typically only made in 2D, even if the data should be summarised by more than two PCs. Occasionally you will see the biplot made for PC $j$ vs PC $k$ also. With the `pca_tour()` function in the `tourr` package you can view a $k$-D biplot. This will display the $k$ PCs with the axes displaying the original variables, and thus show their contribution to the PCs. 
 
 
 ```{r echo=knitr::is_html_output()}
@@ -601,14 +600,14 @@ PCA model overlaid on the data for the 2D in 5D, and 3D in 5D simulated data.
 
 ![Model for the 3D in 5D data.](images/box_model_13.png){#fig-box-model fig-alt="FIX ME." fig.align="center"}
 
-PCA model overlaid on the data for the 2D in 5D, and 3D in 5D simulated data. 
+PCA model overlaid on the data for the 2D in 5D, and 3D in 5D simulated data. {{< fa caret-right >}}
 :::
 :::
 
 ### Example: pisa
 \index{data!pisa}
 
-The model for the `pisa` data is a 1D vector, shown in `r ifelse(knitr::is_html_output(), '@fig-pisa-model-html', '@fig-pisa-model-pdf')`. 
+The model for the `pisa` data is a 1D vector, shown in `r ifelse(knitr::is_html_output(), '@fig-pisa-model-html', '@fig-pisa-model-pdf')`. In this example there is a good agreement between the model and the data.
 
 ```{r echo=knitr::is_html_output()}
 #| eval: false
@@ -645,7 +644,7 @@ PCA model of the `pisa` data. The 1D model captures the primary variation in the
 
 ![](images/pisa_model_17.png){width=300}
 
-PCA model of the `pisa` data. The 1D model captures the primary variation in the data and there is a small amount of spread in all directions away from the model. 
+PCA model of the `pisa` data. The 1D model captures the primary variation in the data and there is a small amount of spread in all directions away from the model. {{< fa caret-right >}}
 :::
 :::
 
@@ -655,7 +654,7 @@ The `pisa` data fits fairly closely to the 1D PCA model. The variance of points 
 :::
 :::
 
-::: {.content-visible when-format="html"}
+::: {.content-visible when-format="pdf"}
 \insightbox{The `pisa` data fits fairly closely to the 1D PCA model. The variance of points away from the model is symmetric and relatively small. These suggest the 1D model is a reasonably summary of the test scores.}
 :::
 
@@ -703,7 +702,7 @@ PCA model of the `aflw` data. The linear model is not ideal for this data, which
 
 ![](images/aflw_model_70.png){width=300}
 
-PCA model of the `aflw` data. The linear model is not ideal for this data, which has other patterns like outliers, and some branching. However, the model roughly captures the linear associations, and leaves unexplained variation in different directions.
+PCA model of the `aflw` data. The linear model is not ideal for this data, which has other patterns like outliers, and some branching. However, the model roughly captures the linear associations, and leaves unexplained variation in different directions. {{< fa caret-right >}}
 :::
 :::
 
@@ -795,7 +794,7 @@ Examining the handling of outliers in the PCA of the planar data with noise vari
 
 ![Outliers not clearly visible in PC1-4](images/plane_n_o_pca_181.png){#fig-plane-n-o-pca width=230}
 
-Examining the handling of outliers in the PCA of the planar data with noise variables and two outliers. PCA has lost these two extreme values.
+Examining the handling of outliers in the PCA of the planar data with noise variables and two outliers. PCA has lost these two extreme values. {{< fa caret-right >}}
 :::
 :::
 
@@ -863,7 +862,7 @@ Comparison of the full data and first three principal components. Non-linear rel
 
 ![First three PCs](images/plane_nonlin_pca_129.png){#fig-plane-nonlin-pca width=250}
 
-Comparison of the full data and first three principal components. Non-linear relationships between several variables can be seen in a tour on all five variables. The first three principal components reveal a strong non-linear relationship. Some of the non-linearity is clearly visible in the reduced dimension space, but the full data has more complexities. 
+Comparison of the full data and first three principal components. Non-linear relationships between several variables can be seen in a tour on all five variables. The first three principal components reveal a strong non-linear relationship. Some of the non-linearity is clearly visible in the reduced dimension space, but the full data has more complexities. {{< fa caret-right >}}
 :::
 :::
 
@@ -943,7 +942,7 @@ Linear dimension reduction can optimise for other criteria, and here we will exp
 
 1. Start by looking up the documentation of `dobin::dobin`. How many parameters does the method depend on?
 2. We first apply the function to the `plane_noise_outliers` data using default values for all parameters.
-3. Recall that the outliers were added in rows 101 and 102 of the data. Make a scatter plots showing the projection onto the first, second and third component, using color to highlight the outliers. Are they visible as outliers with three components?
+3. Recall that the outliers were added in rows 101 and 102 of the data. Make a scatter plots showing the projection onto the first, second and third component found by `dobin`, using color to highlight the outliers. Are they visible as outliers with three components?
 4. Adjust the `frac` parameter of the `dobin` function to `frac = 0.99` and repeat the graphical evaluation from point 3. How does it compare to the previous solution?
 
 ```{r}
