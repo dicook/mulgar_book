@@ -242,6 +242,9 @@
 \@ifpackageloaded{caption}{}{\usepackage{caption}}
 \@ifpackageloaded{subcaption}{}{\usepackage{subcaption}}
 \makeatother
+\makeatletter
+\@ifpackageloaded{fontawesome5}{}{\usepackage{fontawesome5}}
+\makeatother
 \ifLuaTeX
   \usepackage{selnolig}  % disable illegal ligatures
 \fi
@@ -261,7 +264,7 @@
 
 \title{Interactively exploring high-dimensional data and models in R}
 \author{Dianne Cook and Ursula Laa}
-\date{2024-03-07}
+\date{2024-03-09}
 
 \begin{document}
 \maketitle
@@ -365,12 +368,17 @@ professionals who work in these areas.
 
 \markright{How to use the book?}
 
-The book is written with explanations accompanied by examples with R
-code. The chapters are organised by types of analysis and focus on how
-to use the high-dimensional visualisation to complement the commonly
-used analytical methods. The toolbox chapter in the Appendix provides an
-overview of the primary high-dimensional visualisation methods discussed
-in the book and how to get started.
+The book provides explanations and plots accompanied by R code. We would
+hope that you run the code to explore the examples as you read the
+explanations. The chapters are organised by types of analysis and focus
+on how to use the high-dimensional visualisation to complement the
+commonly used analytical methods. An overview of the primary
+high-dimensional visualisation methods discussed in the book and how to
+get started is provided in the toolbox chapter in the Appendix.
+
+The PDF version of the book has many static plots replacing the animated
+gifs and interactive plots available in the HTML version. This is
+indicated in the figure caption by the \faIcon{play-circle} symbol.
 
 \section*{What should I know before reading this
 book?}\label{what-should-i-know-before-reading-this-book}
@@ -692,7 +700,8 @@ dimensionality, with different variance or spread in some directions.
 
 \caption{\label{fig-tour-intro-pdf}Frames from 2D tours on two 5D
 datasets, with clusters of points in (a) and two outliers with a plane
-in (b). This figure is best viewed in the HTML version of the book.}
+in (b). This figure is best viewed in the HTML version of the book.
+\faIcon{play-circle}}
 
 \end{figure}%
 
@@ -1103,13 +1112,12 @@ matrix
 
 \chapter{Dimension reduction overview}\label{sec-dimension-overview}
 
-This chapter will focus on methods for reducing dimension, and how the
-tour\footnote{Note that the animated tours from this chapter can be
-  viewed at
-  \url{https://dicook.github.io/mulgar_book/3-intro-dimred.html}.} can
-be used to assist with the common methods such as principal component
-analysis (PCA), multidimensional scaling (MDS), t-stochastic neighbour
-embedding (t-SNE), and factor analysis.
+This chapter sets up the concepts related to methods for reducing
+dimension such as principal component analysis (PCA) and t-stochastic
+neighbour embedding (t-SNE), and how the tour can be used to assist with
+these methods.
+
+\section{The meaning of dimension}\label{the-meaning-of-dimension}
 
 Dimension is perceived in a tour using the spread of points. When the
 points are spread far apart, then the data is filling the space.
@@ -1183,6 +1191,9 @@ reduced dimension.}
 
 \end{figure}%
 
+\section{How to perceive the dimensionality using a
+tour}\label{how-to-perceive-the-dimensionality-using-a-tour}
+
 Now let's think about what this looks like with five variables.
 Figure~\ref{fig-dimension-pdf} shows a grand tour on five variables,
 with (a) data that is primarily 2D, (b) data that is primarily 3D and
@@ -1237,8 +1248,7 @@ into 2D. Notice that the 5D in 5D always fills out the box (although it
 does concentrate some in the middle which is typical when projecting
 from high to low dimensions). Also you can see that the 2D in 5D,
 concentrates into a line more than the 3D in 5D. This suggests that it
-is lower dimensional. (Animations can be viewed
-\href{https://dicook.github.io/mulgar_book/3-intro-dimred.html}{here}.)}
+is lower dimensional. \faIcon{play-circle}}
 
 \end{figure}%
 
@@ -1348,7 +1358,7 @@ the points indicates that this is not fully 7D. This only happens when
 any of x1-x5 are contributing strongly (frame 49 x4, x5; frame 79 x1;
 frame 115 x2, x3). If x6 or x7 are contributing strongly the data is
 spread out fully (frames 27, 96). This tells us that x6 and x7 are not
-linearly associated, but other variables are.}
+linearly associated, but other variables are. \faIcon{play-circle}}
 
 \end{figure}%
 
@@ -1430,7 +1440,7 @@ other points. Outliers will affect detection of reduced dimension, but
 they can be ignored when assessing dimensionality with the tour. In (b)
 there is a non-linear relationship between several variables, primarily
 with x3. Non-linear relationships may not be easily captured by other
-techniques but are often visible with the tour.}
+techniques but are often visible with the tour. \faIcon{play-circle}}
 
 \end{figure}%
 
@@ -1554,7 +1564,7 @@ We would start by examining the data using a grand tour. The goal is to
 check whether there might be potential issues for PCA, such as skewness,
 outliers or clustering, or even non-linear dependencies.
 
-We'll start be showing PCA on the simulated data from
+We'll start by showing PCA on the simulated data from
 Chapter~\ref{sec-dimension-overview}. The scree plots show that PCA
 supports that the data are 2D, 3D and 5D respectively.
 
@@ -1578,7 +1588,6 @@ supports that the data are 2D, 3D and 5D respectively.
 \NormalTok{b\_pca }\OtherTok{\textless{}{-}} \FunctionTok{prcomp}\NormalTok{(box)}
 \NormalTok{c\_pca }\OtherTok{\textless{}{-}} \FunctionTok{prcomp}\NormalTok{(cube5d)}
 \NormalTok{p\_scree }\OtherTok{\textless{}{-}} \FunctionTok{ggscree}\NormalTok{(p\_pca, }\AttributeTok{q =} \DecValTok{5}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{theme\_minimal}\NormalTok{()}
-
 \NormalTok{b\_scree }\OtherTok{\textless{}{-}} \FunctionTok{ggscree}\NormalTok{(b\_pca, }\AttributeTok{q =} \DecValTok{5}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{theme\_minimal}\NormalTok{()}
 \NormalTok{c\_scree }\OtherTok{\textless{}{-}} \FunctionTok{ggscree}\NormalTok{(c\_pca, }\AttributeTok{q =} \DecValTok{5}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{theme\_minimal}\NormalTok{()}
 \end{Highlighting}
@@ -1607,11 +1616,11 @@ PCs. Table~\ref{tbl-plane-pcs} shows the coefficients for the first two
 PCs of the \texttt{plane} data. All five variables contribute, with
 \texttt{x1}, \texttt{x2}, \texttt{x3} contributing more to \texttt{PC1},
 and \texttt{x4}, \texttt{x5} contributing more to \texttt{PC2}.
-Table~\ref{tbl-box-pcs} shows the coefficients for the first three PCs.
-Variables \texttt{x1}, \texttt{x2}, \texttt{x3} contribute strongly to
-\texttt{PC1}, \texttt{PC2} has contributions from all variables except
-\texttt{x3} and variables \texttt{x4} and \texttt{x5} contribute
-strongly to \texttt{PC3}.
+Table~\ref{tbl-box-pcs} shows the coefficients for the first three PCs
+of the \texttt{box} data. Variables \texttt{x1}, \texttt{x2},
+\texttt{x3} contribute strongly to \texttt{PC1}, \texttt{PC2} has
+contributions from all variables except \texttt{x3} and variables
+\texttt{x4} and \texttt{x5} contribute strongly to \texttt{PC3}.
 
 \index{dimension reduction!coefficients}
 \index{dimension reduction!principal components}
@@ -1657,10 +1666,11 @@ x5 & $0.02$ & $0.66$ & $0.43$ \\
 In each of these simulated data sets, all five variables contributed to
 the dimension reduction. If we added two purely noise variables to the
 plane data, as done in Chapter~\ref{sec-dimension-overview}, the scree
-plot would indicate that the data is now 4D, and we would get a
-different interpretation of the coefficients from the PCA. We see that
-\texttt{PC1} and \texttt{PC2} are approximately the same as before, with
-main variables being (\texttt{x1}, \texttt{x2}, \texttt{x3}) and
+plot in Figure~\ref{fig-plane-noise-scree} would indicate that the data
+is now 4D, and we would get a different interpretation of the
+coefficients from the PCA, see Table~\ref{tbl-plane-noise-pcs}. We see
+that \texttt{PC1} and \texttt{PC2} are approximately the same as before,
+with main variables being (\texttt{x1}, \texttt{x2}, \texttt{x3}) and
 (\texttt{x4}, \texttt{x5}) respectively. \texttt{PC3} and \texttt{PC4}
 are both \texttt{x6} and \texttt{x7}.
 
@@ -1673,14 +1683,14 @@ are both \texttt{x6} and \texttt{x7}.
 }
 
 \caption{\label{fig-plane-noise-scree}Additional noise variables expands
-the data to 4D.}
+the plane data to 4D.}
 
 \end{figure}%
 
 \begin{longtable}{lrrrr}
 
 \caption{\label{tbl-plane-noise-pcs}Coefficients for the first four PCs
-for the box data.}
+for the plane data with two noise variables.}
 
 \tabularnewline
 
@@ -1781,7 +1791,7 @@ bottle in 3D looks from some angles}.
 \caption{\label{fig-pisa-pca-pdf}Scree plot and a frame from a tour of
 the \texttt{pisa} data, with 30 variables being the plausible scores for
 Australian students. In combination, these suggest that the data is
-effectively 1D.}
+effectively 1D. \faIcon{play-circle}}
 
 \end{figure}%
 
@@ -1821,7 +1831,7 @@ and pointing the other way.
 This data has player statistics for all the matches in the 2021 season.
 We would be interested to know which variables contain similar
 information, and thus might be combined into single variables. We would
-expect that many statistics to group into a few small sets, such as
+expect that many statistics group into a few small sets, such as
 offensive and defensive skills. We might also expect that some of the
 statistics are skewed, most players have low values and just a handful
 of players are stellar. It is also possible that there are some extreme
@@ -1867,7 +1877,8 @@ Figure~\ref{fig-aflw-gt-pdf}.
 player statistics. Most player statistics concentrate near the centre,
 indicating most players are ``average''! There are a few outliers
 appearing in different combinations of the skills, which one would
-expect to be the star players for particular skill sets.}
+expect to be the star players for particular skill sets.
+\faIcon{play-circle}}
 
 \end{figure}%
 
@@ -2025,7 +2036,7 @@ generally good player descriptions like ``elite disposals'', ``powerful
 left foot'', ``hard-running midfielder'', ``best and fairest''.
 
 In the direction of PC 2, you'll find players like Lauren Ahrens, Stacey
-Livingstone who are star defenders. Players in this end of PC 1, have
+Livingstone who are star defenders. Players in this end of PC 2, have
 high scores on \texttt{intercepts} and \texttt{rebounds\_in50}.
 
 Another interesting frame for inspecting PC 2 is 59. PC 2 at one end has
@@ -2073,7 +2084,7 @@ than two PCs. Occasionally you will see the biplot made for PC \(j\) vs
 PC \(k\) also. With the \texttt{pca\_tour()} function in the
 \texttt{tourr} package you can view a \(k\)-D biplot. This will display
 the \(k\) PCs with the axes displaying the original variables, and thus
-see their contribution to the PCs.
+show their contribution to the PCs.
 
 \begin{figure}
 
@@ -2136,7 +2147,7 @@ Figure~\ref{fig-plane-box-model-pdf} shows the models for the
 \end{minipage}%
 
 \caption{\label{fig-plane-box-model-pdf}PCA model overlaid on the data
-for the 2D in 5D, and 3D in 5D simulated data.}
+for the 2D in 5D, and 3D in 5D simulated data. \faIcon{play-circle}}
 
 \end{figure}%
 
@@ -2145,7 +2156,8 @@ for the 2D in 5D, and 3D in 5D simulated data.}
 \index{data!pisa}
 
 The model for the \texttt{pisa} data is a 1D vector, shown in
-Figure~\ref{fig-pisa-model-pdf}.
+Figure~\ref{fig-pisa-model-pdf}. In this example there is a good
+agreement between the model and the data.
 
 \begin{figure}
 
@@ -2157,9 +2169,12 @@ Figure~\ref{fig-pisa-model-pdf}.
 
 \caption{\label{fig-pisa-model-pdf}PCA model of the \texttt{pisa} data.
 The 1D model captures the primary variation in the data and there is a
-small amount of spread in all directions away from the model.}
+small amount of spread in all directions away from the model.
+\faIcon{play-circle}}
 
 \end{figure}%
+
+\insightbox{The `pisa` data fits fairly closely to the 1D PCA model. The variance of points away from the model is symmetric and relatively small. These suggest the 1D model is a reasonably summary of the test scores.}
 
 \subsection{Example: aflw}\label{example-aflw-1}
 
@@ -2186,7 +2201,7 @@ linear, because the spread extends unevenly away from the box.
 The linear model is not ideal for this data, which has other patterns
 like outliers, and some branching. However, the model roughly captures
 the linear associations, and leaves unexplained variation in different
-directions.}
+directions. \faIcon{play-circle}}
 
 \end{figure}%
 
@@ -2261,7 +2276,7 @@ PC1-4}
 
 \caption{\label{fig-p-o-pca-pdf}Examining the handling of outliers in
 the PCA of the planar data with noise variables and two outliers. PCA
-has lost these two extreme values.}
+has lost these two extreme values. \faIcon{play-circle}}
 
 \end{figure}%
 
@@ -2339,7 +2354,7 @@ first three principal components. Non-linear relationships between
 several variables can be seen in a tour on all five variables. The first
 three principal components reveal a strong non-linear relationship. Some
 of the non-linearity is clearly visible in the reduced dimension space,
-but the full data has more complexities.}
+but the full data has more complexities. \faIcon{play-circle}}
 
 \end{figure}%
 
@@ -2425,8 +2440,8 @@ components.)
 \item
   Recall that the outliers were added in rows 101 and 102 of the data.
   Make a scatter plots showing the projection onto the first, second and
-  third component, using color to highlight the outliers. Are they
-  visible as outliers with three components?
+  third component found by \texttt{dobin}, using color to highlight the
+  outliers. Are they visible as outliers with three components?
 \item
   Adjust the \texttt{frac} parameter of the \texttt{dobin} function to
   \texttt{frac\ =\ 0.99} and repeat the graphical evaluation from point
