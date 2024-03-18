@@ -264,7 +264,7 @@
 
 \title{Interactively exploring high-dimensional data and models in R}
 \author{Dianne Cook and Ursula Laa}
-\date{2024-03-09}
+\date{2024-03-18}
 
 \begin{document}
 \maketitle
@@ -528,7 +528,8 @@ spinning a line around the centre of the data plot, with points
 projected orthogonally onto the line. With this data, when the line is
 at \texttt{x1=x2\ (0.707,\ 0.707)} or \texttt{(-0.707,\ -0.707)} the
 clustering is the strongest. When it is at
-\texttt{x1=-x2\ \ (0.707,\ -0.707)} there is no clustering.}
+\texttt{x1=-x2\ \ (0.707,\ -0.707)} there is no clustering.
+\faIcon{play-circle}}
 
 \end{figure*}%
 
@@ -560,7 +561,8 @@ high-dimensional data illustrated by showing a sequence of random 2D
 projections of 3D data (a). The data has a donut shape with the hole
 revealed in a single 2D projection (b). Data usually arrives with a
 given number of observations, and when we plot it like this using a
-scatterplot, it is like shadows of a transparent object.}
+scatterplot, it is like shadows of a transparent object.
+\faIcon{play-circle}}
 
 \end{figure*}%
 
@@ -905,18 +907,15 @@ X_{21} & X_{22} & \dots & X_{2p}\\
 X_{n1} & X_{n2} & \dots & X_{np} \end{array} \right]_{n\times p}
 \end{eqnarray*}
 
-where \(X\) indicates the the \(n\times p\) data matrix, \(X_j\)
-indicates variable \(j, j=1, \dots, p\) and \(X_{ij}\) indicates the
-value \(j^{th}\) variable of the \(i^{th}\) observation. (It can be
-confusing to distinguish whether one is referring to the observation or
-a variable, because \(X_i\) is used to indicate observation also. When
+where \(X\) indicates the \(n\times p\) data matrix, \(X_j\) indicates
+variable \(j, j=1, \dots, p\) and \(X_{ij}\) indicates the value of the
+\(j^{th}\) variable for the \(i^{th}\) observation. (It can be confusing
+to distinguish whether one is referring to the observation or a
+variable, because \(X_i\) is used to indicate observation also. When
 this is done it is usually accompanied by qualifying words such as
 \textbf{observation} \(X_3\), or \textbf{variable} \(X_3\).)
 
-Having notation is helpful for concise explanations of different
-methods, to explain how data is scaled, processed and projected for
-various tasks, and how different quantities are calculated from the
-data.
+\infobox{Having notation is helpful for concise explanations of different methods, to explain how data is scaled, processed and projected for various tasks, and how different quantities are calculated from the data. }
 
 When there is a response variable(s), it is common to consider \(X\) to
 be the predictors, and use \(Y\) to indicate the response variable(s).
@@ -924,8 +923,8 @@ be the predictors, and use \(Y\) to indicate the response variable(s).
 commonly \(q=1\). \(Y\) could be numeric or categorical, and this would
 change how it is handled with visualisation.
 
-To make a low-dimensional projection (shadow) of the data, we need a
-projection matrix:
+To make a low-dimensional projection (shadow) of the data onto \(d\)
+dimensions (\(d < p\)), we need an orthonormal basis:
 
 \begin{eqnarray*}
 A_{p\times d} = \left[ \begin{array}{cccc}
@@ -1017,7 +1016,7 @@ or an individual cell (value):
 [1] 3.4
 \end{verbatim}
 
-To make a projection we need an orthonormal matrix:
+To make the data projection we need an orthonormal matrix:
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1056,7 +1055,7 @@ You can check that it is orthonormal by
 [1] 0
 \end{verbatim}
 
-and make a projection using matrix multiplication:
+and compute the projected data using matrix multiplication:
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1071,17 +1070,20 @@ and make a projection using matrix multiplication:
 [3,] 4.8783 4.8076
 \end{verbatim}
 
-The seemingly magical number \texttt{0.707} used above and to create the
+The magical number \texttt{0.707} used above and to create the
 projection in Figure~\ref{fig-explain-1D-pdf} arises from normalising a
 vector with equal contributions from each variable, \texttt{(1,\ 1)}.
 Dividing by \texttt{sqrt(2)} gives \texttt{(0.707,\ 0.707)}.
 
-The notation convention used throughout the book is:
-
-\texttt{n\ =} number of observations \texttt{p\ =} number of variables,
-dimension of data \texttt{d\ =} dimension of the projection
-\texttt{g\ =} number of groups, in classification \texttt{X\ =} data
-matrix
+\infobox{The notation convention used throughout the book is:
+\begin{itemize}
+\item n = number of observations
+\item p = number of variables, dimension of data
+\item d = dimension of the projection
+\item g = number of groups, in classification
+\item X = data matrix
+\end{itemize}
+}
 
 \section*{Exercises}\label{exercises-1}
 \addcontentsline{toc}{section}{Exercises}
@@ -1096,11 +1098,14 @@ matrix
   where each value is randomly drawn from a standard normal
   distribution. Extract the element at row 3 and column 1.
 \item
-  We will interpret \(A\) as a projection matrix and therefore it needs
-  to be orthonormalised. Use the function \texttt{tourr::orthonormalise}
-  to do this, and explicitly check that each column is normalised and
-  that the two columns are orthogonal now. Which dimensions contribute
-  most to the projection for your \(A\)?
+  We will interpret \(A\) as an orthonormal basis and therefore it needs
+  to be checked for orthonormality, and if it fails, then to be
+  orthonormalised. Use the function \texttt{tourr::is\_orthonormal} to
+  explicitly check that each column is normalised and that the two
+  columns are orthogonal. If they are not, then use
+  \texttt{tourr::orthonormalise} to make them so. For the fixed version
+  of \(A\), which dimensions contribute most to the projection,
+  horizontally and vertically?
 \item
   Use matrix multiplication to calculate the projection of the
   \texttt{mulgar::clusters} data onto the 2D plane defined by \(A\).
@@ -1565,33 +1570,17 @@ check whether there might be potential issues for PCA, such as skewness,
 outliers or clustering, or even non-linear dependencies.
 
 We'll start by showing PCA on the simulated data from
-Chapter~\ref{sec-dimension-overview}. The scree plots show that PCA
-supports that the data are 2D, 3D and 5D respectively.
+Chapter~\ref{sec-dimension-overview}. The scree plots are produced using
+the \texttt{mulgar::ggscree()} function, and include a grey guideline to
+help decide how many PCs are sufficient. This guideline is generated by
+taking the median value from of the eigenvalues generated by doing PCA
+on 100 samples from a standard multivariate normal distribution. Any
+values much lower than this line would indicate that those PCs are not
+contributing to the explanation of variation. For these three simulated
+examples, the scree plots illustrate that PCA supports that the data are
+2D, 3D and 5D respectively.
 
 \index{dimension reduction!scree plot}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\# Conduct PCA and make the scree plot for }
-\CommentTok{\# the 2{-}, 3{-} and 5{-}D planar data}
-\FunctionTok{library}\NormalTok{(dplyr)}
-\FunctionTok{library}\NormalTok{(ggplot2)}
-\FunctionTok{library}\NormalTok{(mulgar)}
-\FunctionTok{data}\NormalTok{(plane)}
-\FunctionTok{data}\NormalTok{(box)}
-\FunctionTok{library}\NormalTok{(geozoo)}
-\NormalTok{cube5d }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\FunctionTok{cube.solid.random}\NormalTok{(}\AttributeTok{p=}\DecValTok{5}\NormalTok{, }\AttributeTok{n=}\DecValTok{300}\NormalTok{)}\SpecialCharTok{$}\NormalTok{points)}
-\FunctionTok{colnames}\NormalTok{(cube5d) }\OtherTok{\textless{}{-}} \FunctionTok{paste0}\NormalTok{(}\StringTok{"x"}\NormalTok{, }\DecValTok{1}\SpecialCharTok{:}\DecValTok{5}\NormalTok{)}
-\NormalTok{cube5d }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\FunctionTok{apply}\NormalTok{(cube5d, }\DecValTok{2}\NormalTok{, }
-                           \ControlFlowTok{function}\NormalTok{(x) (x}\SpecialCharTok{{-}}\FunctionTok{mean}\NormalTok{(x))}\SpecialCharTok{/}\FunctionTok{sd}\NormalTok{(x)))}
-\NormalTok{p\_pca }\OtherTok{\textless{}{-}} \FunctionTok{prcomp}\NormalTok{(plane)}
-\NormalTok{b\_pca }\OtherTok{\textless{}{-}} \FunctionTok{prcomp}\NormalTok{(box)}
-\NormalTok{c\_pca }\OtherTok{\textless{}{-}} \FunctionTok{prcomp}\NormalTok{(cube5d)}
-\NormalTok{p\_scree }\OtherTok{\textless{}{-}} \FunctionTok{ggscree}\NormalTok{(p\_pca, }\AttributeTok{q =} \DecValTok{5}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{theme\_minimal}\NormalTok{()}
-\NormalTok{b\_scree }\OtherTok{\textless{}{-}} \FunctionTok{ggscree}\NormalTok{(b\_pca, }\AttributeTok{q =} \DecValTok{5}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{theme\_minimal}\NormalTok{()}
-\NormalTok{c\_scree }\OtherTok{\textless{}{-}} \FunctionTok{ggscree}\NormalTok{(c\_pca, }\AttributeTok{q =} \DecValTok{5}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{theme\_minimal}\NormalTok{()}
-\end{Highlighting}
-\end{Shaded}
 
 \begin{figure}
 
@@ -1689,8 +1678,8 @@ the plane data to 4D.}
 
 \begin{longtable}{lrrrr}
 
-\caption{\label{tbl-plane-noise-pcs}Coefficients for the first four PCs
-for the plane data with two noise variables.}
+\caption{\label{tbl-plane-noise-pcs}Coefficients for PCs 1-4 of the
+plane plus noise data.}
 
 \tabularnewline
 
@@ -1907,7 +1896,8 @@ the scree plot.
 }
 
 \caption{\label{fig-aflw-pca}Scree plot showing decay in variance of
-PCs.}
+PCs. There are sharp drops for the first four PCs, and then smaller
+declines.}
 
 \end{figure}%
 
@@ -1921,7 +1911,10 @@ variance.
 
 \begin{longtable}{lrrrr}
 
-\caption{\label{tbl-aflw-pcs}Coefficients for the first four PCs.}
+\caption{\label{tbl-aflw-pcs}Coefficients for the first four PCs. PC 1
+contrasts some with PC 1, with the first having large coefficients
+primarily on field play statistics, and the second having large
+coefficients on the scoring statistics.}
 
 \tabularnewline
 
@@ -1968,61 +1961,54 @@ been sorted according to the PC 1 coefficients.
 
 PC 1 is primarily composed of \texttt{disposals}, \texttt{possessions},
 \texttt{kicks}, \texttt{metres}, \texttt{uncontested},
-\texttt{contested}, \ldots. Actually almost all variables positively
-contribute, albeit in different amounts! It is quite common in PCA for
-the first PC to be a combination of all variables, although it might
-commonly be a closer to equal contribution, and it tells us that there
-is one main direction of variation in the data. For PC 1 in the
-\texttt{aflw} data, PCA is telling us that the primary variation is
-through a combination of skills, and this maps to basic football playing
-skills, where some skills (e.g.~disposals, possessions, kicks, \ldots)
-are more important.
+\texttt{contested}, \ldots. primarily the field play statistics! It is
+quite common in PCA for the first PC to be a combination of all
+variables, which suggests that there is one main direction of variation
+in the data. Here it is not quite that. PCA suggests that the primary
+variation is through a combination of field skills, or basic football
+playing skills.
 
-Thus the second PC might be the more interesting. PC 2 is primarily a
+Thus the second PC contrasts the first, because it is primarily a
 combination of \texttt{shots}, \texttt{goals}, \texttt{marks\_in50},
 \texttt{accuracy}, and \texttt{behinds} contrasted against
-\texttt{rebounds\_in50} and \texttt{intercepts}. The negative
-coefficients are primary offensive skills and the positive coefficients
+\texttt{rebounds\_in50} and \texttt{intercepts}. The positive
+coefficients are primary offensive skills and the negative coefficients
 are defensive skills. This PC is reasonable measure of the offensive vs
 defensive skills of a player.
 
 \index{dimension reduction!interpretation}
 
-We would continue to interpret each PC by examining large coefficients
+We could continue to interpret each PC by examining large coefficients
 to help decide how many PCs are a suitable summary of the information in
-the data. Briefly, PC 3 is a measure of worth of the player because
-\texttt{time\_pct} has a large coefficient, so players that are on the
-field longer will contribute strongly to this new variable. It also has
-large (and opposite) contributions from \texttt{clearances},
-\texttt{tackles}, \texttt{contested\_marks}. PC 4 appears to be related
-to aggressive play with \texttt{clangers}, \texttt{turnovers},
-\texttt{bounces} and \texttt{frees\_against} featuring. So all four PCs
-have useful information. (Note, if we had continued to examine large
-coefficients on PC 5 we would find that all variables already have had
-reasonably large coefficients on PC 1-4, which supports restricting
-attention to the first four.)
+the data. Briefly, PC 3 mixed but it is possibly a measure of worth of
+the player because \texttt{time\_pct} has a large coefficient, so
+players that are on the field longer will contribute strongly to this
+new variable. It also has large (and opposite) contributions from
+\texttt{clearances}, \texttt{tackles}, \texttt{contested\_marks}. PC 4
+appears to be related to aggressive play with \texttt{clangers},
+\texttt{turnovers}, \texttt{bounces} and \texttt{frees\_against}
+featuring. All four PCs have useful information.
 
-Ideally, when we tour the four PCs, we'd like to be able to stop and
-identify players. This involves creating a pre-computed animation, with
-additional mouse-over, made possible by \texttt{plotly}. This is only
-feasible with a small number of observations, like the \texttt{aflw}
-data, because all of the animation frames are constructed in a single
-object. This object gets large very quickly!
-
-The code to make this animation, and the interactive plot is in the
-online version of the book.
+For deeper exploration, when we tour the four PCs, we'd like to be able
+to stop and identify players. This can be done by creating a
+pre-computed animation, with additional mouse-over, made using
+\texttt{plotly}. However, it is not size-efficient, can is only feasible
+with a small number of observations. Because all of the animation frames
+with the fully projected data in each, are composed into a single
+object, which gets large very quickly.
 
 \begin{figure}
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{4-pca_files/figure-pdf/fig-aflw-pcaplots-pdf-1.pdf}
+\includegraphics[width=0.6\textwidth,height=\textheight]{4-pca_files/figure-pdf/fig-aflw-pcaplots-pdf-1.pdf}
 
 }
 
 \caption{\label{fig-aflw-pcaplots-pdf}Frame 18 re-plotted so that
-players can be identified, ideally using on mouse-over. Here some points
-are labelled.}
+players can be identified. Here some players are labelled, but ideally
+this plot is interactive and any player can be identified.
+\faIcon{play-circle}}
 
 \end{figure}%
 
@@ -2253,7 +2239,7 @@ outliers.}
 
 \centering{
 
-\includegraphics[width=2.39583in,height=\textheight]{images/plane_n_o_clr_181.png}
+\includegraphics[width=2.1875in,height=\textheight]{images/plane_n_o_clr_181.png}
 
 }
 
@@ -2265,7 +2251,7 @@ outliers.}
 
 \centering{
 
-\includegraphics[width=2.39583in,height=\textheight]{images/plane_n_o_pca_181.png}
+\includegraphics[width=2.1875in,height=\textheight]{images/plane_n_o_pca_181.png}
 
 }
 
@@ -2329,7 +2315,7 @@ suggests three PCs.}
 
 \centering{
 
-\includegraphics[width=2.60417in,height=\textheight]{images/plane_nonlin_61.png}
+\includegraphics[width=2.1875in,height=\textheight]{images/plane_nonlin_61.png}
 
 }
 
@@ -2341,7 +2327,7 @@ suggests three PCs.}
 
 \centering{
 
-\includegraphics[width=2.60417in,height=\textheight]{images/plane_nonlin_pca_129.png}
+\includegraphics[width=2.1875in,height=\textheight]{images/plane_nonlin_pca_129.png}
 
 }
 
@@ -2909,17 +2895,17 @@ of the data that had not been found using numerical clustering methods,
 and to find a variety of structures in high-dimensional space.
 Chapter~\ref{sec-hclust} describes methods for reducing the interpoint
 distance matrix to an intercluster distance matrix using hierarchical
-algorithms, Chapter~\ref{sec-mclust} covers model-based clustering, and
-Chapter~\ref{sec-som} described clustering with self-organising maps.
+algorithms, in Chapter~\ref{sec-kmeans} shows the the \(k\)-means
+algorithm, Chapter~\ref{sec-mclust} covers model-based clustering, and
+Chapter~\ref{sec-som} describes clustering with self-organising maps.
 Each of these chapters shows how graphical tools can be used to assess
 the results of numerical methods. Chapter~\ref{sec-clust-compare}
-summarizes the chapter and revisits the data analysis strategies used in
-the examples. Additional references that provide good companions to the
-material presented in these chapters are Venables \& Ripley (2002a),
+summarizes these chapters and revisits the data analysis strategies used
+in the examples. Additional references that provide good companions to
+the material presented in these chapters are Venables \& Ripley (2002a),
 Boehmke \& Greenwell (2019), Hennig et al. (2015), Giordani et al.
 (2020), Kassambara (2017), and the CRAN Task View (Leisch \& Gruen,
-2023). Chapter~\ref{sec-clust-compare} summarizes the chapter and
-revisits the data analysis strategies used in the examples.
+2023).
 
 \section{The importance of defining similar}\label{sec-clust-bg}
 
@@ -3024,7 +3010,7 @@ between two cases, \(\rho(a_i,a_j)\), is defined as
 
 \begin{align*}
 \rho(a_i,a_j) = \frac{(a_i-c_i)^\top(a_j-c_j)}
-{\sqrt(a_i-c_i)^\top(a_i-c_i) \sqrt(a_j-c_j)^\top(a_j-c_j)}
+{\sqrt{(a_i-c_i)^\top(a_i-c_i)} \sqrt{(a_j-c_j)^\top(a_j-c_j)}}
 \label{corc}
 \end{align*}
 
@@ -3123,8 +3109,8 @@ x2 0.8 1.0 0.8
 x3 0.8 0.8 1.0
 \end{verbatim}
 
-(The function \texttt{mahalanobis} will calculate this in R. Technically
-this gives distance between each case and the mean vector.)
+(The base function \texttt{mahalanobis()} will calculate this in R.
+Technically this gives distance between each case and the mean vector.)
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -3392,11 +3378,11 @@ linkage, on the \texttt{simple\_clusters} data. The steps taken are to:
   Compute the hierarchical clustering.
 \item
   Plot the dendrogram to help decide on an appropriate number of
-  clusters, using the \texttt{dendro\_data} function from the
+  clusters, using the \texttt{dendro\_data()} function from the
   \texttt{ggdendro} package.
 \item
   Show the dendrogram overlaid on the data, calculated by the
-  \texttt{hierfly} function in \texttt{mulgar}.
+  \texttt{hierfly()} function in \texttt{mulgar}.
 \item
   Plot the clustering result, by colouring points in the plot of the
   data.
@@ -4635,7 +4621,7 @@ agree that three clusters is the best. The different variance-covariance
 models for three clusters have similar BIC values with EVE (different
 shape, same volume and orientation) being slightly higher. These plots
 are made from the \texttt{mclust} package output using the
-\texttt{ggmcbic} and \texttt{mc\_ellipse} functions fro the
+\texttt{ggmcbic()} and \texttt{mc\_ellipse()} functions from the
 \texttt{mulgar} package.
 
 \section{Examining the model in high
@@ -6703,7 +6689,7 @@ the two groups are concentric circles, with the inner one solid. A
 non-linear SVM should be fitted to this data, which should see circular
 gap between the two classes.
 
-Note that the \texttt{svm} function in the \texttt{e1071} package will
+Note that the \texttt{svm()} function in the \texttt{e1071} package will
 automatically scale observations into the range \([0,1]\). To make it
 easier to examine the fitted model, it is best to scale your data first,
 and then fit the model.
@@ -6857,7 +6843,7 @@ which can be used to generate a line to show the boundary with the data.
 
 \textbf{Note that} care in scaling of data is important to get the
 intercept calculated exactly. We have standardised the data, and set the
-\texttt{scale=FALSE} parameter in the \texttt{svm} function. The slope
+\texttt{scale=FALSE} parameter in the \texttt{svm()} function. The slope
 calculation is quite robust to the data scaling.
 
 \infobox{Like LDA, a linear SVM model for two groups can be written using the equation of a hyperplane. The fitted model coefficients are then used to generate points on this plane, to examine the boundary between groups.
@@ -7255,26 +7241,16 @@ these points.
 
 \begin{minipage}{0.50\linewidth}
 
-\centering{
-
 \includegraphics[width=2.29167in,height=\textheight]{images/p_split.png}
 
-}
-
-\subcaption{\label{fig-split-grand}Grand tour}
-
+\subcaption{\label{}Grand tour}
 \end{minipage}%
 %
 \begin{minipage}{0.50\linewidth}
 
-\centering{
-
 \includegraphics[width=2.29167in,height=\textheight]{images/p_split_guided.png}
 
-}
-
-\subcaption{\label{fig-split-guided}Guided tour}
-
+\subcaption{\label{}Guided tour}
 \end{minipage}%
 
 \caption{\label{fig-p-split-pdf}Evaluating the training/test split,
@@ -7814,7 +7790,13 @@ here. The comparison is using the test-subset of the data.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{17-nn_files/figure-pdf/unnamed-chunk-27-1.pdf}
+\begin{verbatim}
+Warning in get_plot_component(plot, "guide-box"): Multiple
+components found; returning the first one. To return all, use
+`return_all = TRUE`.
+\end{verbatim}
+
+\includegraphics[width=0.8\textwidth,height=\textheight]{17-nn_files/figure-pdf/unnamed-chunk-27-1.png}
 
 Looking only at the first two principal components we note some clear
 differences from the transformation in the hidden layer. The
@@ -7831,32 +7813,23 @@ use the tour on the first five principal components.
 
 \begin{minipage}{0.50\linewidth}
 
-\centering{
-
 \includegraphics[width=2.08333in,height=\textheight]{images/fashion_images_gt_36.png}
 
-}
-
-\subcaption{\label{fig-fashion-input}Input space}
-
+\subcaption{\label{}Input space}
 \end{minipage}%
 %
 \begin{minipage}{0.50\linewidth}
 
-\centering{
-
 \includegraphics[width=2.08333in,height=\textheight]{images/fashion_activation_gt_126.png}
 
-}
-
-\subcaption{\label{fig-fashion-activation}Activations}
-
+\subcaption{\label{}Activations}
 \end{minipage}%
-
-\caption{\label{fig-p-split-pdf}Comparison of the test observations in
-the first five principal components of the input space (left) and in the
-hidden layer activations (right). The activation function results in
-more clearly defined grouping of the different classes.}
+\newline
+\begin{minipage}{0.50\linewidth}
+Comparison of the test observations in the first five principal
+components of the input space (left) and in the hidden layer activations
+(right). The activation function results in more clearly defined
+grouping of the different classes.\end{minipage}%
 
 \end{figure}%
 
@@ -7908,12 +7881,52 @@ observed    0    1    2    3    4    5    6    7    8    9
        9    0    0    0    2    0    0    0  947    0   51
 \end{verbatim}
 
-From this we see that the model mainly confuses certain categories with
-each other, and within expected groups (e.g.~different types of shoes
-can be confused with each other, or different types of shirts). We can
-further investigate this by visualizing the full probability matrix for
-the test observations, to see which categories the model is uncertain
-about.
+Here the labels are used as 0 - T-shirt/top, 1 - Trouser, 2 - Pullover,
+3 - Dress, 4 - Coat, 5 - Sandal, 6 - Shirt, 7 - Sneaker, 8 - Bag, 9 -
+Ankle boot. From this we see that the model mainly confuses certain
+categories with each other, and within expected groups (e.g.~different
+types of shoes can be confused with each other, or different types of
+shirts). We can further investigate this by visualizing the full
+probability matrix for the test observations, to see which categories
+the model is uncertain about.
+
+\begin{figure}
+
+\begin{minipage}{0.33\linewidth}
+\includegraphics[width=1.35417in,height=\textheight]{images/fashion_confustion_gt_36.png}\end{minipage}%
+%
+\begin{minipage}{0.33\linewidth}
+\includegraphics[width=1.35417in,height=\textheight]{images/fashion_confusion_gt_58.png}\end{minipage}%
+%
+\begin{minipage}{0.33\linewidth}
+\includegraphics[width=1.35417in,height=\textheight]{images/fashion_confusion_gt_69.png}\end{minipage}%
+\newline
+\begin{minipage}{0.33\linewidth}
+\includegraphics[width=1.35417in,height=\textheight]{images/fashion_confusion_gt_161.png}\end{minipage}%
+%
+\begin{minipage}{0.33\linewidth}
+\includegraphics[width=1.35417in,height=\textheight]{images/fashion_confusion_gt_212.png}\end{minipage}%
+%
+\begin{minipage}{0.33\linewidth}
+\includegraphics[width=1.35417in,height=\textheight]{images/fashion_confusion_gt_333.png}\end{minipage}%
+
+\caption{\label{fig-fashion-confusion-split-pdf}A tour of the confusion
+matrix for the fashion MNIST test observations, focusing on a subset of
+items. Often observations get confused between two of the classes, this
+appears as points falling along one of the edges, for example some
+Shirts look more like T-shirts/tops, while others get confused with
+Coats. We can also notice that a subset of three other classes not
+mapped to colors as very separate from this group.}
+
+\end{figure}%
+
+The tour of the class probabilities shows that the model is often
+confused between two classes, this appears as points falling along one
+edge in the simplex. In particular for the highlighted categories we can
+notice some interesting patterns, where pairs of classes get confused
+with each other. We also see some three-way confusions, these are
+observations that fall on one surface triangle defined via three corners
+of the simplex, for example between Pullover, Shirt and Coat.
 
 For this data using explainers like SHAP is not so interesting, since
 the individual pixel contribution to a prediction are typically not of
@@ -7949,8 +7962,12 @@ images. This however is beyond the scope of this book.
   see if you can reproduce the analysis of the penguins data in this
   chapter with this subset.
 \item
-  XXX fake trees, can we think about the number of nodes and make it
-  work with a simple NN similar to penguins data?
+  Can you fit a neural network that can predict the class in the fake
+  tree data? Because the data is noisy and we do not have that many
+  observations, it can be easy to overfit the data. Once you find a
+  setting that works, think about what aspects of the model might be
+  interesting for visualization. What comparisons with a random forest
+  model could be of interest?
 \item
   The sketches data could also be considered a classic image
   classification problem, and we have seen that we can get a reasonable
@@ -8181,10 +8198,6 @@ Asimov, D. (1985). {T}he {G}rand {T}our: {A} {T}ool for {V}iewing
 {M}ultidimensional {D}ata. \emph{SIAM Journal of Scientific and
 Statistical Computing}, \emph{6}(1), 128--143.
 
-\bibitem[\citeproctext]{ref-R-gridExtra}
-Auguie, B. (2017). \emph{gridExtra: Miscellaneous functions for "grid"
-graphics}. \url{https://CRAN.R-project.org/package=gridExtra}
-
 \bibitem[\citeproctext]{ref-forest}
 Australian Bureau of Agricultural and Resource Economics and Sciences.
 (2018). \emph{{Forests of Australia}}.
@@ -8224,11 +8237,6 @@ Bishop, C. M. (2006). \emph{Pattern {R}ecognition and {M}achine
 Boehmke, B., \& Greenwell, B. M. (2019). \emph{Hands-on machine learning
 with r (1st ed.)}. Chapman; Hall/CRC.
 \url{https://doi.org/10.1201/9780367816377}
-
-\bibitem[\citeproctext]{ref-R-aweSOM}
-Boelaert, J., Ollion, E., \& Sodoge, J. (2022). \emph{aweSOM:
-Interactive self-organizing maps}.
-\url{https://CRAN.R-project.org/package=aweSOM}
 
 \bibitem[\citeproctext]{ref-Bonneau2006}
 Bonneau, G.-P., Ertl, T., \& Nielson, G. M. (Eds.). (2006).
@@ -8594,7 +8602,7 @@ dimensions, demonstrated with scRNA-seq data. \emph{The R Journal},
 \emph{15}(2), 206--219. \url{https://doi.org/10.32614/RJ-2023-046}
 
 \bibitem[\citeproctext]{ref-R-detourr}
-Hart, C., \& Wang, E. (2022). \emph{Detourr: Portable and performant
+Hart, C., \& Wang, E. (2024). \emph{Detourr: Portable and performant
 tour animations}. \url{https://casperhart.github.io/detourr/}
 
 \bibitem[\citeproctext]{ref-HK81}
@@ -8647,7 +8655,7 @@ tools for statistical analysis results}.
 \bibitem[\citeproctext]{ref-R-palmerpenguins}
 Horst, A., Hill, A., \& Gorman, K. (2022). \emph{Palmerpenguins: Palmer
 archipelago (antarctica) penguin data}.
-\url{https://CRAN.R-project.org/package=palmerpenguins}
+\url{https://allisonhorst.github.io/palmerpenguins/}
 
 \bibitem[\citeproctext]{ref-hotelling-pca}
 Hotelling, H. (1933). Analysis of a complex of statistical variables
@@ -8665,7 +8673,7 @@ data analysis} {[}PhD thesis{]}. University of Washington.
 \bibitem[\citeproctext]{ref-R-gt}
 Iannone, R., Cheng, J., Schloerke, B., Hughes, E., Lauer, A., \& Seo, J.
 (2023). \emph{Gt: Easily create presentation-ready display tables}.
-\url{https://CRAN.R-project.org/package=gt}
+\url{https://gt.rstudio.com/}
 
 \bibitem[\citeproctext]{ref-R1996}
 Ihaka, R., \& Gentleman, R. (1996). R: {A} {L}anguage for {D}ata
@@ -8676,7 +8684,7 @@ Statistics}, \emph{5}, 299--314.
 Ihaka, R., Murrell, P., Hornik, K., Fisher, J. C., Stauffer, R., Wilke,
 C. O., McWhite, C. D., \& Zeileis, A. (2023). \emph{Colorspace: A
 toolbox for manipulating and assessing colors and palettes}.
-\url{https://CRAN.R-project.org/package=colorspace}
+\url{https://colorspace.R-Forge.R-project.org/}
 
 \bibitem[\citeproctext]{ref-In85}
 Inselberg, A. (1985). {T}he {P}lane with {P}arallel {C}oordinates.
@@ -8746,8 +8754,7 @@ packages for modeling and machine learning using tidyverse principles.}
 
 \bibitem[\citeproctext]{ref-R-tidymodels}
 Kuhn, M., \& Wickham, H. (2023). \emph{Tidymodels: Easily install and
-load the tidymodels packages}.
-\url{https://CRAN.R-project.org/package=tidymodels}
+load the tidymodels packages}. \url{https://tidymodels.tidymodels.org}
 
 \bibitem[\citeproctext]{ref-sagetour}
 Laa, U., Cook, D., \& Lee, S. (2022). Burning sage: Reversing the curse
@@ -8792,7 +8799,7 @@ of Computational and Graphical Statistics}, \emph{14}(4), 831--846.
 
 \bibitem[\citeproctext]{ref-R-liminal}
 Lee, S. (2021). \emph{Liminal: Multivariate data visualization with
-tours and embeddings}. \url{https://CRAN.R-project.org/package=liminal}
+tours and embeddings}. \url{https://github.com/sa-lee/liminal/}
 
 \bibitem[\citeproctext]{ref-tours2022}
 Lee, S., Cook, D., Silva, N. da, Laa, U., Spyrison, N., Wang, E., \&
@@ -8811,10 +8818,6 @@ Statistics}, \emph{7}(none), 1369--1386.
 Leisch, F., \& Gruen, B. (2023). \emph{CRAN task view: Cluster analysis
 \& finite mixture models}.
 https://cran.r-project.org/web/views/Cluster.html.
-
-\bibitem[\citeproctext]{ref-R-MSA}
-Leisch, F., \& Grün, B. (2020). \emph{MSA: Market segmentation
-analysis}.
 
 \bibitem[\citeproctext]{ref-li2020visualizing}
 Li, M., Zhao, Z., \& Scheidegger, C. (2020). Visualizing neural networks
@@ -8888,19 +8891,13 @@ Sons.
 McVicar, T. (2011). \emph{Near-surface wind speed. v10. CSIRO. Data
 collection.} \url{https://doi.org/10.25919/5c5106acbcb02}
 
-\bibitem[\citeproctext]{ref-R-e1071}
-Meyer, D., Dimitriadou, E., Hornik, K., Weingessel, A., \& Leisch, F.
-(2023). \emph{e1071: Misc functions of the department of statistics,
-probability theory group (formerly: E1071), TU wien}.
-\url{https://CRAN.R-project.org/package=e1071}
-
 \bibitem[\citeproctext]{ref-R-rpart.plot}
 Milborrow, S. (2022). \emph{Rpart.plot: Plot rpart models: An enhanced
 version of plot.rpart}. \url{http://www.milbo.org/rpart-plot/index.html}
 
 \bibitem[\citeproctext]{ref-R-gtExtras}
 Mock, T. (2022). \emph{gtExtras: Extending gt for beautiful HTML
-tables}. \url{https://CRAN.R-project.org/package=gtExtras}
+tables}. \url{https://github.com/jthomasmock/gtExtras}
 
 \bibitem[\citeproctext]{ref-iml}
 Molnar, C. (2022). \emph{Interpretable machine learning: A guide for
@@ -8931,7 +8928,7 @@ Philosophical Magazine and Journal of Science}, \emph{2}(11), 559--572.
 
 \bibitem[\citeproctext]{ref-R-patchwork}
 Pedersen, T. L. (2024). \emph{Patchwork: The composer of plots}.
-\url{https://CRAN.R-project.org/package=patchwork}
+\url{https://patchwork.data-imaginist.com}
 
 \bibitem[\citeproctext]{ref-perisic2009}
 Perisic, I., \& Posse, C. (2005). Projection pursuit indices based on
@@ -8997,7 +8994,7 @@ of Experimental Psychology}, \emph{53}, 94--101.
 
 \bibitem[\citeproctext]{ref-R-geozoo}
 Schloerke, B. (2016). \emph{Geozoo: Zoo of geometric objects}.
-\url{https://CRAN.R-project.org/package=geozoo}
+\url{http://schloerke.github.io/geozoo/}
 
 \bibitem[\citeproctext]{ref-R-GGally}
 Schloerke, B., Cook, D., Larmarange, J., Briatte, F., Marbach, M.,
@@ -9022,14 +9019,13 @@ r, plotly, and shiny}. Chapman; Hall/CRC. \url{https://plotly-r.com}
 \bibitem[\citeproctext]{ref-R-plotly}
 Sievert, C., Parmer, C., Hocking, T., Chamberlain, S., Ram, K.,
 Corvellec, M., \& Despouy, P. (2023). \emph{Plotly: Create interactive
-web graphics via plotly.js}.
-\url{https://CRAN.R-project.org/package=plotly}
+web graphics via plotly.js}. \url{https://plotly-r.com}
 
 \bibitem[\citeproctext]{ref-R-gtsummary}
 Sjoberg, D. D., Larmarange, J., Curry, M., Lavery, J., Whiting, K., \&
 Zabor, E. C. (2023). \emph{Gtsummary: Presentation-ready data summary
 and analytic result tables}.
-\url{https://CRAN.R-project.org/package=gtsummary}
+\url{https://github.com/ddsjoberg/gtsummary}
 
 \bibitem[\citeproctext]{ref-gtsummary}
 Sjoberg, D. D., Whiting, K., Curry, M., Lavery, J. A., \& Larmarange, J.
@@ -9141,7 +9137,7 @@ Temple Lang, D., Swayne, D., Wickham, H., \& Lawrence, M. (2006).
 \bibitem[\citeproctext]{ref-R-rpart}
 Therneau, T., \& Atkinson, B. (2023). \emph{Rpart: Recursive
 partitioning and regression trees}.
-\url{https://CRAN.R-project.org/package=rpart}
+\url{https://github.com/bethatkinson/rpart}
 
 \bibitem[\citeproctext]{ref-Theus02}
 Theus, M. (2002). Interactive {D}ata {V}isualization {U}sing {M}ondrian.
@@ -9314,11 +9310,6 @@ Wehrens, R., \& Kruisselbrink, J. (2018). Flexible self-organizing maps
 in {kohonen} 3.0. \emph{Journal of Statistical Software}, \emph{87}(7),
 1--18. \url{https://doi.org/10.18637/jss.v087.i07}
 
-\bibitem[\citeproctext]{ref-R-kohonen}
-Wehrens, R., \& Kruisselbrink, J. (2023). \emph{Kohonen: Supervised and
-unsupervised self-organising maps}.
-\url{https://CRAN.R-project.org/package=kohonen}
-
 \bibitem[\citeproctext]{ref-ggplot22016}
 Wickham, H. (2016). \emph{ggplot2: Elegant graphics for data analysis}.
 Springer-Verlag New York. \url{https://ggplot2.tidyverse.org}
@@ -9331,7 +9322,7 @@ high dimensions}. \url{http://had.co.nz/classifly}
 Wickham, H., Chang, W., Henry, L., Pedersen, T. L., Takahashi, K.,
 Wilke, C., Woo, K., Yutani, H., Dunnington, D., \& van den Brand, T.
 (2024). \emph{ggplot2: Create elegant data visualisations using the
-grammar of graphics}. \url{https://CRAN.R-project.org/package=ggplot2}
+grammar of graphics}. \url{https://ggplot2.tidyverse.org}
 
 \bibitem[\citeproctext]{ref-R-tourr}
 Wickham, H., \& Cook, D. (2024). \emph{Tourr: Tour methods for
@@ -9358,11 +9349,11 @@ of Statistical Software}, \emph{40}(2), 1--18.
 \bibitem[\citeproctext]{ref-R-dplyr}
 Wickham, H., François, R., Henry, L., Müller, K., \& Vaughan, D. (2023).
 \emph{Dplyr: A grammar of data manipulation}.
-\url{https://CRAN.R-project.org/package=dplyr}
+\url{https://dplyr.tidyverse.org}
 
 \bibitem[\citeproctext]{ref-R-readr}
 Wickham, H., Hester, J., \& Bryan, J. (2024). \emph{Readr: Read
-rectangular text data}. \url{https://CRAN.R-project.org/package=readr}
+rectangular text data}. \url{https://readr.tidyverse.org}
 
 \bibitem[\citeproctext]{ref-WWS99}
 Wilhelm, A. F. X., Wegman, E. J., \& Symanzik, J. (1999). Visual
@@ -9420,7 +9411,7 @@ Zhang, H. S., Cook, D., Laa, U., Langrené, N., \& Menéndez, P. (2022).
 
 \bibitem[\citeproctext]{ref-R-kableExtra}
 Zhu, H. (2021). \emph{kableExtra: Construct complex table with kable and
-pipe syntax}. \url{https://CRAN.R-project.org/package=kableExtra}
+pipe syntax}. \url{http://haozhu233.github.io/kableExtra/}
 
 \end{CSLReferences}
 

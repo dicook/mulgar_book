@@ -27,7 +27,7 @@ Having notation is helpful for concise explanations of different methods, to exp
 
 When there is a response variable(s), it is common to consider $X$ to be the predictors, and use $Y$ to indicate the response variable(s). $Y$ could be a matrix, also, and would be $n\times q$, where commonly $q=1$. $Y$ could be numeric or categorical, and this would change how it is handled with visualisation.
 
-To make a low-dimensional projection (shadow) of the data onto $d$ dimensions ($d < p$), we need a projection matrix:
+To make a low-dimensional projection (shadow) of the data onto $d$ dimensions ($d < p$), we need an orthonormal basis:
 
 \begin{eqnarray*}
 A_{p\times d} = \left[ \begin{array}{cccc}
@@ -84,7 +84,7 @@ or an individual cell (value):
 X[3,2]
 ```
 
-To make a projection we need an orthonormal matrix:
+To make the data projection we need an orthonormal matrix:
 
 ```{r}
 #| code-fold: false
@@ -100,14 +100,14 @@ sum(A[,1]^2)
 sum(A[,1]*A[,2])
 ```
 
-and make a projection using matrix multiplication:
+and compute the projected data using matrix multiplication:
 
 ```{r}
 #| code-fold: false
 X %*% A
 ```
 
-The seemingly magical number `0.707` used above and to create the projection in `r ifelse(knitr::is_html_output(), '@fig-explain-1D-html', '@fig-explain-1D-pdf')` arises from normalising a vector with equal contributions from each variable, `(1, 1)`. Dividing by `sqrt(2)` gives `(0.707, 0.707)`.
+The magical number `0.707` used above and to create the projection in `r ifelse(knitr::is_html_output(), '@fig-explain-1D-html', '@fig-explain-1D-pdf')` arises from normalising a vector with equal contributions from each variable, `(1, 1)`. Dividing by `sqrt(2)` gives `(0.707, 0.707)`.
 
 
 ::: {.content-visible when-format="html"}
@@ -138,7 +138,7 @@ The notation convention used throughout the book is:
 ## Exercises {-}
 
 1. Generate a matrix $A$ with $p=5$ (rows) and $d=2$ (columns), where each value is randomly drawn from a standard normal distribution. Extract the element at row 3 and column 1.
-2. We will interpret $A$ as a projection matrix and therefore it needs to be orthonormalised. Use the function `tourr::orthonormalise` to do this, and explicitly check that each column is normalised and that the two columns are orthogonal now. Which dimensions contribute most to the projection for your $A$?
+2. We will interpret $A$ as an orthonormal basis and therefore it needs to be checked for orthonormality, and if it fails, then to be orthonormalised. Use the function `tourr::is_orthonormal` to explicitly check that each column is normalised and that the two columns are orthogonal. If they are not, then use `tourr::orthonormalise` to make them so. For the fixed version of $A$, which dimensions contribute most to the projection, horizontally and vertically?
 3. Use matrix multiplication to calculate the projection of the `mulgar::clusters` data onto the 2D plane defined by $A$. Make a scatterplot of the projected data. Can you identify clustering in this view?
 
  
