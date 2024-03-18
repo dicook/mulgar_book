@@ -16,122 +16,6 @@ It will not work very well when there are no distinct clusters and the purpose o
 
 With a complex problem where there are many clusters, one can work sequentially, and remove each cluster after it is brushed, to de-clutter the display, in order to find more clusters.
 
-<!--
-## Using `plotly`
-
-@fig-penguins-brush-and-spin shows a fixed length grand tour produced using `plotly`, with a brush tool made available to colour points. The code is messy, but follows that of [animation-tour-basic.R](https://github.com/plotly/plotly.R/blob/master/demo/animation-tour-basic.R) from @plotly2020. There are key pieces in the code:
-
-1. Create the sequence of tour projections, and the data object containing data projections and projection coordinates. Include an observation id in the data object.
-2. Specify that the `id` variable is to be used to mark observations across animation frames using `highlight_key`.
-3. Draw them using `plotly`, with a `frame` parameter which specifies the animation sequence. 
-4. Add a brush colour palette and specific brushing control using `highlight` to the plotly plot.
-
-The result is an HTML object which can be saved for sharing. The drawback of this approach is that the results of the user actions cannot be saved, so you cannot recover the clusters corresponding to the colours.
-
-```{r}
-#| eval: false
-#| message: false
-# Following https://github.com/plotly/plotly.R/blob/master/demo/animation-tour-basic.R
-# TURN INTO A FUNCTION TO MAKE IT EASIER
-library(tourr)
-library(plotly)
-load("data/penguins_sub.rda")
-p_mat <- as.matrix(penguins_sub[,1:4])
-tour <- new_tour(p_mat, 
-                 grand_tour(), NULL)
-
-tour_dat <- function(step_size) {
-  step <- tour(step_size)
-  proj <- center(p_mat %*% step$proj)
-  data.frame(x = proj[,1], y = proj[,2], 
-             species = penguins_sub$species,
-             id = 1:nrow(penguins_sub))
-}
-
-proj_dat <- function(step_size) {
-  step <- tour(step_size)
-  data.frame(
-    x = step$proj[,1], y = step$proj[,2], measure = colnames(p_mat)
- )
-}
-
-steps <- c(0, rep(1/15, 150))
-stepz <- cumsum(steps)
-
-# tidy version of tour data
-tour_dats <- lapply(steps, tour_dat)
-tour_datz <- Map(function(x, y) cbind(x, step = y),
-                 tour_dats, stepz)
-tour_data <- dplyr::bind_rows(tour_datz)
-
-tour_data <- highlight_key(tour_data, ~id)
-
-# tidy version of tour projection data
-proj_dats <- lapply(steps, proj_dat)
-proj_datz <- Map(function(x, y) cbind(x, step = y), proj_dats, stepz)
-proj_data <- dplyr::bind_rows(proj_datz)
-proj_data$x <- proj_data$x*3
-proj_data$y <- proj_data$y*3
-
-ax <- list(
-  title = "",
-  range = c(-3, 3),
-  zeroline = FALSE
-)
-
-# Set colors
-clrs <- grDevices::hcl.colors(6, palette="Zissou 1")
-  
-# for nicely formatted slider labels
-options(digits = 2)
-
-p_b_s <- proj_data %>%
-  plot_ly(x = ~x, y = ~y, frame = ~step, 
-          color = I("gray80"),
-          width=600, height=600) %>%
-  config(displaylogo = FALSE, 
-         modeBarButtonsToRemove = c("sendDataToCloud", "editInChartStudio", "zoom2d", "zoomIn2d", "zoomOut2d", "pan2d", "drawclosedpath", "drawopenpath", "autoScale2d", "hoverClosestCartesian", "hoverCompareCartesian", "resetScale2d")) %>%
-  add_segments(xend = 0, yend = 0) %>%
-  add_text(text = ~measure) %>%
-  add_markers(color = I("black"), data = tour_data, text = ~id, ids = ~id, hoverinfo = "text") %>%
-  layout(xaxis = ax, yaxis = ax) %>%
-  hide_legend() %>%
-  animation_opts(50, transition = 0, redraw = FALSE) %>%
-  highlight(on = "plotly_selected", 
-            off = "plotly_doubleclick",
-            color = clrs, 
-            persistent = TRUE, 
-            dynamic = TRUE, 
-            opacityDim = 0.5)
-htmlwidgets::saveWidget(p_b_s,
-          file="html/penguins_brush_and_spin.html",
-          selfcontained = TRUE)
-
-```
-
-::: {.content-hidden when-format="pdf"}
-
-::: {#fig-penguins-brush-and-spin fig-align="center"}
-
-<iframe width="600" height="650" src="html/penguins_brush_and_spin.html" title="Controls to brush and spin to discover the three clusters in the penguins data."></iframe>
-
-Controls to brush and spin to discover the three clusters in the penguins data. Use the lasso brush to colour points persistently when you see a cluster. Spin and colour again as necessary to identify all the clusters.
-:::
-
-:::
-
-::: {#fig-penguins-bs-static fig-align="center" layout-ncol=2}
-
-
-![](images/penguins-bs4.png){#fig-penguins-bs1 fig-alt="FIX ME" fig.align="center"}
-
-![](images/penguins-bs5.png){#fig-penguins-bs2 fig-alt="FIX ME" fig.align="center"}
-
-Screenshots of the spin-and-brush approach being used on the penguins data.
-:::
-
-## Using `detourr`
--->
 
 Spin-and-brush is best achieved using a fully interactive graphics system like in the `detourr` package, where the results can be saved for further analysis. The code is very easy, and then all the controls are interactive.
 
@@ -180,28 +64,6 @@ table(penguins_sub$species, detourr_penguins$colour)
 
 It's quite close! All but two of the 119 Gentoo penguins were identified as a cluster (labelled as "3e9eb6" from the chosen light blue hex colour), and all but three of the 146 Adelie penguins were identified as a cluster, (labelled as "000000" which is the unbrushed black group). Most of the Chinstrap species were recovered also (labelled as "f5191c" for the red hex colour).
 
-
-```{r}
-#| eval: false
-#| echo: false
-# remotes::install_github("pfh/langevitour")
-# remotes::install_github("plotly/plotly.R")
-library(langevitour)
-library(crosstalk)
-shared <- SharedData$new(penguins_sub)
-
-langevitourWidget <- langevitour(
-    penguins_sub[,1:4], 
-    link=shared,  
-    pointSize=2,
-    width=700, height=700)
-
-library(liminal)
-limn_tour(fake_trees, dim1:dim10)
-```
-
-
-
 ## Exercises {-}
 
 1. Use the spin-and-brush approach to identify the three clusters in the `mulgar::clusters` data set.
@@ -218,9 +80,10 @@ library(detourr)
 strt <- tourr::basis_random(10, 2)
 detour(multicluster, 
        tour_aes(projection = -group)) |>
-       tour_path(grand_tour(2), start=strt, fps = 60) |>
-       show_scatter(alpha = 0.7, axes = FALSE)
-
+       tour_path(grand_tour(2), 
+                 start=strt, fps = 60) |>
+       show_scatter(alpha = 0.7, 
+                    axes = FALSE)
 ```
 
 4. Use the spin-and-brush technique to identify the branches of the `fake_trees` data. The result should look something like this:
@@ -243,8 +106,11 @@ ft_pca <- prcomp(fake_trees[,1:100],
 ggscree(ft_pca)
 detour(as.data.frame(ft_pca$x[,1:10]), 
        tour_aes(projection = PC1:PC10)) |>
-       tour_path(grand_tour(2), fps = 60, max_bases=50) |>
-       show_scatter(alpha = 0.7, axes = FALSE)
+       tour_path(grand_tour(2), 
+                 fps = 60, 
+                 max_bases=50) |>
+       show_scatter(alpha = 0.7, 
+                    axes = FALSE)
 
 ft_sb <- read_csv("data/fake_trees_sb.csv")
 table(fake_trees$branches, ft_sb$colour)
