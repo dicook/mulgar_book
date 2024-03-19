@@ -264,7 +264,7 @@
 
 \title{Interactively exploring high-dimensional data and models in R}
 \author{Dianne Cook and Ursula Laa}
-\date{2024-03-18}
+\date{2024-03-19}
 
 \begin{document}
 \maketitle
@@ -2443,8 +2443,8 @@ reduction}\label{non-linear-dimension-reduction}
 
 Non-linear dimension reduction (NLDR) aims to find a low-dimensional
 representation of the high-dimensional data that shows the main features
-of the data. In statistics, it dates back to Kruskal (1964a)'s work on
-multidimensional scaling (MDS). Some techniques only require an
+of the data. In statistics, it dates back to the work of Kruskal (1964a)
+on multidimensional scaling (MDS). Some techniques only require an
 interpoint similarity or distance matrix as the main ingredient, rather
 than the full data. We'll focus on when the full data is available here,
 so we can also compare structure perceived using the tour on the
@@ -2452,39 +2452,24 @@ high-dimensional space, relative to structure revealed in the
 low-dimensional embedding.
 
 There are many methods available for generating non-linear low
-dimensional representations of the data. MDS is a classical technique
-that minimises the difference between two interpoint distance matrices,
-the distance between points in the high-dimensions, and in the
-low-dimensional representations. A good resource for learning about MDS
-is Borg \& Groenen (2005).
+dimensional representations of the data. Classically, MDS minimises some
+function of the difference between two interpoint distance matrices, the
+distance between points in the high-dimensions, and in the
+low-dimensional representations.
+
+\[
+\mbox{Stress}_D(x_1, ..., x_n) = \left(\sum_{i, j=1; i\neq j}^n (d_{ij} - d_k(i,j))^2\right)^{1/2}
+\] where \(D\) is an \(n\times n\) matrix of distances \((d_{ij})\)
+between all pairs of points, and \(d_k(i,j)\) is the distance between
+the points in the low-dimensional space. PCA is a special case of MDS.
+The result from PCA is a linear projection, but generally MDS can
+provide non-linear transformations to represent unusual high-dimensional
+patterns. A good resource for learning about MDS is Borg \& Groenen
+(2005).
 
 \index{dimension reduction!t-SNE} \index{dimension reduction!UMAP}
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{library}\NormalTok{(mulgar)}
-\FunctionTok{library}\NormalTok{(Rtsne)}
-\FunctionTok{library}\NormalTok{(uwot)}
-\FunctionTok{library}\NormalTok{(ggplot2)}
-\FunctionTok{library}\NormalTok{(patchwork)}
-\FunctionTok{set.seed}\NormalTok{(}\DecValTok{42}\NormalTok{)}
-\NormalTok{cnl\_tsne }\OtherTok{\textless{}{-}} \FunctionTok{Rtsne}\NormalTok{(clusters\_nonlin)}
-\NormalTok{cnl\_umap }\OtherTok{\textless{}{-}} \FunctionTok{umap}\NormalTok{(clusters\_nonlin)}
-\NormalTok{n1 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(}\FunctionTok{as.data.frame}\NormalTok{(cnl\_tsne}\SpecialCharTok{$}\NormalTok{Y), }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{V1, }\AttributeTok{y=}\NormalTok{V2)) }\SpecialCharTok{+}
-  \FunctionTok{geom\_point}\NormalTok{() }\SpecialCharTok{+} 
-  \FunctionTok{ggtitle}\NormalTok{(}\StringTok{"(a) t{-}SNE"}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+} 
-  \FunctionTok{theme}\NormalTok{(}\AttributeTok{aspect.ratio=}\DecValTok{1}\NormalTok{)}
-\NormalTok{n2 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(}\FunctionTok{as.data.frame}\NormalTok{(cnl\_umap), }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{V1, }\AttributeTok{y=}\NormalTok{V2)) }\SpecialCharTok{+}
-  \FunctionTok{geom\_point}\NormalTok{() }\SpecialCharTok{+} 
-  \FunctionTok{ggtitle}\NormalTok{(}\StringTok{"(b) UMAP"}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+} 
-  \FunctionTok{theme}\NormalTok{(}\AttributeTok{aspect.ratio=}\DecValTok{1}\NormalTok{)}
-\NormalTok{n1 }\SpecialCharTok{+}\NormalTok{ n2}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{figure}[H]
+\begin{figure}
 
 \centering{
 
@@ -2498,46 +2483,38 @@ clusters, with two being non-linear in some form.}
 
 \end{figure}%
 
-Figure~\ref{fig-nldr-clusters} show two NLDR views of the
+Popular methods in current use for NLDR include t-SNE (Maaten \& Hinton,
+2008) and UMAP (McInnes et al., 2018). The approach of t-SNE is to
+compare interpoint distances with a standard probability distribution
+(eg \(t\)-distribution) to exaggerate local neighbourhood differences.
+UMAP compares the interpoint distances with what might be expected if
+the data was uniformly distributed in the high-dimensions.
+
+Figure~\ref{fig-nldr-clusters} shows two NLDR views of the
 \texttt{clusters\_nonlin} data set from the \texttt{mulgar} package.
 Both suggest that there are four clusters, and that some clusters are
 non-linearly shaped. They disagree on the type of non-linear pattern,
 where t-SNE represents one cluster as a wavy-shape and UMAP both have a
-simple parabolic shape. Popular methods in current use include t-SNE
-(Maaten \& Hinton, 2008), UMAP (McInnes et al., 2018) and PHATE (Moon et
-al., 2019).
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{library}\NormalTok{(tourr)}
-\FunctionTok{render\_gif}\NormalTok{(clusters\_nonlin, }
-           \FunctionTok{grand\_tour}\NormalTok{(),}
-           \FunctionTok{display\_xy}\NormalTok{(),}
-           \AttributeTok{gif\_file =} \StringTok{"gifs/clusters\_nonlin.gif"}\NormalTok{,}
-           \AttributeTok{frames =} \DecValTok{500}\NormalTok{,}
-           \AttributeTok{width =} \DecValTok{300}\NormalTok{, }
-           \AttributeTok{height =} \DecValTok{300}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
+simple parabolic shape.
 
 \begin{figure}
 
 \begin{minipage}{0.50\linewidth}
-\includegraphics[width=2.60417in,height=\textheight]{images/clusters_nonlin_60.png}\end{minipage}%
+\includegraphics[width=2.29167in,height=\textheight]{images/clusters_nonlin_60.png}\end{minipage}%
 %
 \begin{minipage}{0.50\linewidth}
-\includegraphics[width=2.60417in,height=\textheight]{images/clusters_nonlin_233.png}\end{minipage}%
+\includegraphics[width=2.29167in,height=\textheight]{images/clusters_nonlin_233.png}\end{minipage}%
 
 \caption{\label{fig-clusters-nonlin-pdf}Two frames from a grand tour of
 the nonlinear clusters data set, shows four clusters. Two are very small
 and spherical in shape. One is large, and has a sine wave shape, and the
-other is fairly small with a bent rod shape.}
+other is fairly small with a bent rod shape. \faIcon{play-circle}}
 
 \end{figure}%
 
 The full 4D data is shown with a grand tour in
-Figure~\ref{fig-clusters-nonlin-pdf} @. The four clusters suggested by
-the NLDR methods can be seen. We also get a better sense of the relative
+Figure~\ref{fig-clusters-nonlin-pdf}. The four clusters suggested by the
+NLDR methods can be seen. We also get a better sense of the relative
 size and proximity of the clusters. There are two small spherical
 clusters, one quite close to the end of the large sine wave cluster. The
 fourth cluster is relatively small, and has a slight curve, like a bent
@@ -2545,9 +2522,7 @@ rod. The t-SNE representation is slightly more accurate than the UMAP
 representation. We would expect that the wavy cluster is the sine wave
 seen in the tour.
 
-NLDR can provide useful low-dimensional summaries of high-dimensional
-structure but you need to check whether it is a sensible and accurate
-representation by comparing with what is perceived from a tour.
+\infobox{NLDR can provide useful low-dimensional summaries of high-dimensional structure but you need to check whether it is a sensible and accurate representation by comparing with what is perceived from a tour.}
 
 \section{Assessing reliability of the NLDR
 representation}\label{assessing-reliability-of-the-nldr-representation}
@@ -2560,7 +2535,7 @@ depending on the parameter choices, and even the random number seeding
 the fit. (You can check this by changing the \texttt{set.seed} in the
 code above, and by changing from the default parameters.) Also, it may
 not be possible to represent the high-dimensional structures faithfully
-low dimensions. For these reasons, one needs to connect the NLDR view
+in low dimensions. For these reasons, one needs to connect the NLDR view
 with a tour of the data, to help assess its usefulness and accuracy. For
 example, with this data, we would want to know which of the two curved
 clusters in the UMAP representation correspond to the sine wave cluster.
@@ -2573,7 +2548,7 @@ clusters in the UMAP representation correspond to the sine wave cluster.
 Figure~\ref{fig-liminal-clusters-nonlin} shows how the NLDR plot can be
 linked to a tour view, using the \texttt{liminal} package, to better
 understand how well the structure of the data is represented. Here we
-see learn that the smile in the UMAP embedding is the small bent rod
+learn that the smile in the UMAP embedding is the small bent rod
 cluster, and that the unibrow is the sine wave.
 
 \begin{Shaded}
@@ -2726,7 +2701,7 @@ into three pieces by t-SNE.
 
 \centering{
 
-\includegraphics{images/fake_trees1.png}
+\includegraphics[width=3.125in,height=\textheight]{images/fake_trees1.png}
 
 }
 
@@ -2741,7 +2716,7 @@ lot more variation in the data, and less difference between clusters.}
 
 \centering{
 
-\includegraphics{images/fake_trees2.png}
+\includegraphics[width=3.125in,height=\textheight]{images/fake_trees2.png}
 
 }
 
@@ -2756,7 +2731,7 @@ of the t-SNE mapping.}
 
 \centering{
 
-\includegraphics{images/fake_trees3.png}
+\includegraphics[width=3.125in,height=\textheight]{images/fake_trees3.png}
 
 }
 
@@ -2773,9 +2748,7 @@ space. The close proximity in the t-SNE view is reasonable, though.}
 
 \end{figure}%
 
-The t-SNE representation clearly shows the linear structures of the
-data, but viewing this 10D data with the tour shows that t-SNE makes
-several inaccurate breaks of some of the branches.
+\insightbox{The t-SNE representation clearly shows the linear structures of the data, but viewing this 10D data with the tour shows that t-SNE makes several inaccurate breaks of some of the branches. }
 
 \section*{Exercises}\label{exercises-4}
 \addcontentsline{toc}{section}{Exercises}
@@ -2786,14 +2759,20 @@ several inaccurate breaks of some of the branches.
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  Using the \texttt{penguins\_sub} data generate a 2D representation
-  using t-SNE. Plot the points mapping the colour to species. What is
-  most surprising? (Hint: Are the three species represented by three
-  distinct clusters?)
+  This question uses the \texttt{penguins\_sub} data
+\end{enumerate}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\tightlist
 \item
-  Re-do the t-SNE representation with different parameter choices. Are
-  the results different each time, or could they be considered to be
-  equivalent?
+  Generate a 2D representation using t-SNE. Plot the points mapping the
+  colour to species. What is most surprising? (Hint: Are the three
+  species represented by three distinct clusters?)
+\item
+  Re-do the t-SNE representation with different parameter choices,
+  including using different random seeds. Are the results different each
+  time, or do you think that they could be considered to be equivalent?
 \item
   Use \texttt{liminal} or \texttt{detourr} to link the t-SNE
   representation to a tour of the penguins. Highlight the points that
@@ -2802,13 +2781,45 @@ several inaccurate breaks of some of the branches.
   tour view, and think about whether there is any rationale for the
   awkward placement.
 \item
-  Use UMAP to make the 2D representation, and use \texttt{liminal} or
-  \texttt{detourr} to link with a tour to explore the result.
+  Try again using UMAP to make the 2D representation, and use
+  \texttt{liminal} or \texttt{detourr} to link with a tour to explore
+  the result.
+\end{enumerate}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{1}
+\tightlist
 \item
   Conduct your best t-SNE and UMAP representations of the \texttt{aflw}
-  data. Compare and contrast what is learned relative to a tour on the
+  data. Compare and contrast what is learned relative to a tour or the
   principal component analysis.
 \end{enumerate}
+
+\section*{Project}\label{project-1}
+\addcontentsline{toc}{section}{Project}
+
+\markright{Project}
+
+The paper Z. Chen et al. (2023) describes clustering in human peripheral
+blood mononuclear cells data, producing the \texttt{pbmc} available from
+the \texttt{Seurat} R package Satija et al. (2015). The paper web site
+has code to extract and pre-process the data, which follow the tutorial
+at https://satijalab.org/seurat/articles/pbmc3k\_tutorial.html. The
+processed data, containing the first 50 PCs is provided with the book,
+as \texttt{pbmc\_pca\_50.rds}.
+
+Z. Chen et al. (2023) used UMAP on the first 15 PCs to find a
+representation of the data to illustrate the clustering. They used the
+default settings of the \texttt{RunUMAP()} function in \texttt{Seurat},
+without setting a seed.
+
+Generate the t-SNE and UMAP representations of the first 9 PCs of data,
+using their default settings. They should be quite different. (We use 9
+PCs because the scree plot in the data pre-processing suggests that 15
+is too many.) Based on your examination of the data in a tour, which
+method yields the more accurate representation? Explain what the
+structure in the 2D is relative to that seen in the tour.
 
 \bookmarksetup{startatroot}
 
@@ -5266,7 +5277,7 @@ relative to the two clusters.}
   decide which is the better solution.
 \end{enumerate}
 
-\section*{Project}\label{project-1}
+\section*{Project}\label{project-2}
 \addcontentsline{toc}{section}{Project}
 
 \markright{Project}
@@ -5277,11 +5288,8 @@ In this case our toolbox will be useful in comparing and contrasting
 different methods, understanding to what extend a cluster mean can
 describe the observations in the cluster, and also how the boundaries
 between clusters have been drawn. To explore this we will use survey
-data that examines the risk taking behavior of tourists. The data was
-collected in Australia in 2015 (Hajibaba et al., 2016) and includes six
-types of risks (recreational, health, career, financial, safety and
-social) with responses on a scale from 1 (never) to 5 (very often). The
-data is available in \texttt{risk\_MSA.rds} from the book web site.
+data that examines the risk taking behavior of tourists, this is the
+\texttt{risk\_MSA} data, see the Appendix for details.
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -8315,6 +8323,12 @@ L. (2008). Data visualization with multidimensional scaling.
 Buja, A., \& Tukey, P. (Eds.). (1991). \emph{Computing and {G}raphics in
 {S}tatistics}. Springer-Verlag.
 
+\bibitem[\citeproctext]{ref-seurat3}
+Butler, A., Hoffman, P., Smibert, P., Papalexi, E., \& Satija, R.
+(2018). Integrating single-cell transcriptomic data across different
+conditions, technologies, and species. \emph{Nature Biotechnology},
+\emph{36}, 411--420. \url{https://doi.org/10.1038/nbt.4096}
+
 \bibitem[\citeproctext]{ref-CMS99}
 Card, S. K., Mackinlay, J. D., \& Schneiderman, B. (1999).
 \emph{Readings in information visualization}. Morgan Kaufmann
@@ -8336,6 +8350,12 @@ computational statistics (volume III) data visualization}. Springer.
 \bibitem[\citeproctext]{ref-UHC06}
 Chen, C.-H., Härdle, W., \& Unwin, A. (Eds.). (2007). \emph{Handbook of
 {D}ata {V}isualization}. Springer.
+
+\bibitem[\citeproctext]{ref-chen2023}
+Chen, Z., Wang, C., Huang, S., Shi, Y., \& Xi, R. (2023). Directly
+selecting differentially expressed genes for single-cell clustering
+analyses. \emph{bioRxiv}.
+\url{https://doi.org/10.1101/2023.07.26.550670}
 
 \bibitem[\citeproctext]{ref-CT94}
 Cheng, B., \& Titterington, M. (1994). Neural {N}etworks: {A} {R}eview
@@ -8593,6 +8613,14 @@ Research}, \emph{56}(8), 1065--1078.
 \bibitem[\citeproctext]{ref-Hansen2004}
 Hansen, C., \& Johnson, C. R. (2004). \emph{Visualization handbook}.
 Academic Press.
+
+\bibitem[\citeproctext]{ref-seurat1}
+Hao, Y., Hao, S., Andersen-Nissen, E., III, W. M. M., Zheng, S., Butler,
+A., Lee, M. J., Wilk, A. J., Darby, C., Zagar, M., Hoffman, P.,
+Stoeckius, M., Papalexi, E., Mimitou, E. P., Jain, J., Srivastava, A.,
+Stuart, T., Fleming, L. B., Yeung, B., \ldots{} Satija, R. (2021).
+Integrated analysis of multimodal single-cell data. \emph{Cell}.
+\url{https://doi.org/10.1016/j.cell.2021.04.048}
 
 \bibitem[\citeproctext]{ref-R-langevitour}
 Harrison, P. (2023a). \emph{Langevitour: Langevin tour}.
@@ -8994,6 +9022,12 @@ Rothkopf, E. Z. (1957). A {M}easure of {S}timulus {S}imilarity and
 {E}rrors in {S}ome {P}aired-associate {L}earning {T}asks. \emph{Journal
 of Experimental Psychology}, \emph{53}, 94--101.
 
+\bibitem[\citeproctext]{ref-seurat4}
+Satija, R., Farrell, J. A., Gennert, D., Schier, A. F., \& Regev, A.
+(2015). Spatial reconstruction of single-cell gene expression data.
+\emph{Nature Biotechnology}, \emph{33}, 495--502.
+\url{https://doi.org/10.1038/nbt.3192}
+
 \bibitem[\citeproctext]{ref-R-geozoo}
 Schloerke, B. (2016). \emph{Geozoo: Zoo of geometric objects}.
 \url{http://schloerke.github.io/geozoo/}
@@ -9056,6 +9090,12 @@ Somewhere over the rainbow: How to make effective use of colors in
 meteorological visualizations. \emph{Bulletin of the American
 Meteorological Society}, \emph{96}(2), 203--216.
 \url{https://doi.org/10.1175/BAMS-D-13-00155.1}
+
+\bibitem[\citeproctext]{ref-seurat2}
+Stuart, T., Butler, A., Hoffman, P., Hafemeister, C., Papalexi, E., III,
+W. M. M., Hao, Y., Stoeckius, M., Smibert, P., \& Satija, R. (2019).
+Comprehensive integration of single-cell data. \emph{Cell}, \emph{177},
+1888--1902. \url{https://doi.org/10.1016/j.cell.2019.05.031}
 
 \bibitem[\citeproctext]{ref-SRLLDCC00}
 Sutherland, P., Rossini, A., Lumley, T., Lewin-Koh, N., Dickerson, J.,
@@ -9280,6 +9320,13 @@ Cambridge University Press.
 \bibitem[\citeproctext]{ref-Wa78}
 Wang, P. C. C. (Ed.). (1978). \emph{{G}raphical {R}epresentation of
 {M}ultivariate {D}ata}. Academic Press.
+
+\bibitem[\citeproctext]{ref-pacmap}
+Wang, Y., Huang, H., Rudin, C., \& Shaposhnik, Y. (2021). Understanding
+how dimension reduction tools work: An empirical approach to deciphering
+t-SNE, UMAP, TriMap, and PaCMAP for data visualization. \emph{Journal of
+Machine Learning Research}, \emph{22}(201), 1--73.
+\url{http://jmlr.org/papers/v22/20-1061.html}
 
 \bibitem[\citeproctext]{ref-We90}
 Wegman, E. (1990). {H}yperdimensional {D}ata {A}nalysis {U}sing
@@ -10602,6 +10649,84 @@ https://tensorflow.rstudio.com/tutorials/keras/classification.
 
 The data is available from
 https://github.com/zalandoresearch/fashion-mnist.
+
+\section{\texorpdfstring{\texttt{risk\_MSA}}{risk\_MSA}}\label{risk_msa}
+
+\subsection*{Description}\label{description-11}
+\addcontentsline{toc}{subsection}{Description}
+
+The data was collected in Australia in 2015 (Hajibaba et al., 2016) and
+includes six types of risks (recreational, health, career, financial,
+safety and social) with responses on a scale from 1 (never) to 5 (very
+often).
+
+\subsection*{Variables}\label{variables-11}
+\addcontentsline{toc}{subsection}{Variables}
+
+\begin{verbatim}
+Rows: 563
+Columns: 6
+$ Recreational <int> 3, 1, 2, 1, 5, 5, 1, 5, 1, 3, 1, 5, 2, ~
+$ Health       <int> 2, 1, 2, 1, 4, 2, 1, 5, 1, 5, 1, 5, 2, ~
+$ Career       <int> 1, 1, 1, 1, 1, 5, 1, 5, 1, 2, 1, 5, 2, ~
+$ Financial    <int> 2, 1, 1, 1, 3, 3, 1, 5, 1, 1, 1, 5, 2, ~
+$ Safety       <int> 2, 1, 2, 1, 5, 2, 1, 5, 1, 4, 1, 5, 1, ~
+$ Social       <int> 4, 1, 3, 1, 5, 3, 1, 5, 1, 5, 1, 5, 1, ~
+\end{verbatim}
+
+\subsection*{Purpose}\label{purpose-11}
+\addcontentsline{toc}{subsection}{Purpose}
+
+This data is useful for the demonstration of clustering methods, it was
+also used in Dolnicar et al. (2018).
+
+\subsection*{Source}\label{source-11}
+\addcontentsline{toc}{subsection}{Source}
+
+The data is available from https://homepage.boku.ac.at/leisch/MSA/.
+
+\section{Peripheral Blood Mononuclear
+Cells}\label{peripheral-blood-mononuclear-cells}
+
+\subsection*{Description}\label{description-12}
+\addcontentsline{toc}{subsection}{Description}
+
+The data was described in Z. Chen et al. (2023), which is available
+through the R package \texttt{Seurat} Satija et al. (2015). Here the
+data has been pre-processed following the tutorial at
+https://satijalab.org/seurat/articles/pbmc3k\_tutorial.html, and the
+first 50 PCs are made available in the data file
+\texttt{pbmc\_pca\_50.rds} which is read into R using the
+\texttt{readRDS()} function.
+
+\subsection*{Variables}\label{variables-12}
+\addcontentsline{toc}{subsection}{Variables}
+
+\begin{longtable}[]{@{}ll@{}}
+\toprule\noalign{}
+Name & Description \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{PC\_1}-\texttt{PC\_50} & Principal component scores \\
+\end{longtable}
+
+\subsection*{Purpose}\label{purpose-12}
+\addcontentsline{toc}{subsection}{Purpose}
+
+The purpose is to understand the clustering of cell types, relative to
+clustering in the gene expression. Here, our purpose is to determine if
+the low-dimensional representation provided by NLDR is an accurate
+representation of the clustering, as understood from using the tour on
+the PCs. We ignore the cell type labels, and focus on the geometric
+shapes of clumps and clusters in the high dimensions.
+
+\subsection*{Source}\label{source-12}
+\addcontentsline{toc}{subsection}{Source}
+
+The data can be downloaded and pre-processed following
+https://satijalab.org/seurat/articles/pbmc3k\_tutorial.html.
 
 \chapter{Links to Book Code and Additional Data}\label{book-data}
 
