@@ -239,6 +239,41 @@ limn_tour_link(
 
 ![Highlighting the penguins where the methods disagree so we can see where these observations are located relative to the two clusters.](images/compare-clusters2.png){#fig-compare-clusters2}
 
+Linking the confusion matrix with the tour can also be accomplished with `crosstalk` and `detourr`.  
+
+```{r}
+#| eval: false
+#| echo: true
+library(crosstalk)
+library(plotly)
+library(viridis)
+p_cl_shared <- SharedData$new(penguins_cl)
+
+detour_plot <- detour(p_cl_shared, tour_aes(
+  projection = bl:bm,
+  colour = cl_w)) |>
+    tour_path(grand_tour(2), 
+                    max_bases=50, fps = 60) |>
+       show_scatter(alpha = 0.7, axes = FALSE,
+                    width = "100%", height = "450px")
+
+conf_mat <- plot_ly(p_cl_shared, 
+                    x = ~cl_mc_j,
+                    y = ~cl_w_j,
+                    color = ~cl_w,
+                    colors = viridis_pal(option = "D")(3),
+                    height = 450) |>
+  highlight(on = "plotly_selected", 
+              off = "plotly_doubleclick") %>%
+    add_trace(type = "scatter", 
+              mode = "markers")
+  
+bscols(
+     detour_plot, conf_mat,
+     widths = c(5, 6)
+ )                 
+```
+
 ## Exercises {-}
 
 1. Compare the results of the four cluster model-based clustering with that of the four cluster Wards linkage clustering of the penguins data.
@@ -248,7 +283,7 @@ limn_tour_link(
 
 ## Project {-}
 
-Most of the time your data will not neatly separate into clusters, but partitioning it into groups of similar observations can still be useful. In this case our toolbox will be useful in comparing and contrasting different methods, understanding to what extend a cluster mean can describe the observations in the cluster, and also how the boundaries between clusters have been drawn. To explore this we will use survey data that examines the risk taking behavior of tourists. The data was collected in Australia in 2015 [@risk-survey] and includes six types of risks (recreational, health, career, financial, safety and social) with responses on a scale from 1 (never) to 5 (very often). The data is available in `risk_MSA.rds` from the book web site.
+Most of the time your data will not neatly separate into clusters, but partitioning it into groups of similar observations can still be useful. In this case our toolbox will be useful in comparing and contrasting different methods, understanding to what extend a cluster mean can describe the observations in the cluster, and also how the boundaries between clusters have been drawn. To explore this we will use survey data that examines the risk taking behavior of tourists, this is the `risk_MSA` data, see the Appendix for details.
 
 1. We first examine the data in a grand tour. Do you notice that each variable was measured on a discrete scale?
 2. Next we explore different solutions from hierarchical clustering of the data. For comparison we will keep the number of clusters fixed to 6 and we will perform the hierarchical clustering with different combinations of distance functions (Manhattan distance and Euclidean distance) and linkage (single, complete and Ward linkage). Which combinations make sense based on what we know about the method and the data?

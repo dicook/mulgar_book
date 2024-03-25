@@ -42,10 +42,10 @@ datasets |>
   dplyr::select(Name, Description, Analysis) |>
   knitr::kable(format="latex", booktabs = T) |>
   kable_paper(full_width = F) |>
-  kable_styling() |>
+  kable_styling(font_size = 8) |>
   column_spec(1, width = "2cm") |>
   column_spec(2, width = "5cm") |>
-  column_spec(3, width = "5cm") 
+  column_spec(3, width = "4cm") 
 ```
 :::
 
@@ -146,30 +146,6 @@ Considerable pre-processing was done to produce these data sets. The original da
 
 ## Palmer penguins
 
-```{r}
-#| label: penguins
-#| message: FALSE
-#| eval: FALSE
-library(palmerpenguins)
-penguins <- penguins %>%
-  na.omit() # 11 observations out of 344 removed
-# use only vars of interest, and standardise
-# them for easier interpretation
-penguins_sub <- penguins %>% 
-  select(bill_length_mm,
-         bill_depth_mm,
-         flipper_length_mm,
-         body_mass_g,
-         species, 
-         sex) %>% 
-  mutate(across(where(is.numeric),  ~ scale(.)[,1])) %>%
-  rename(bl = bill_length_mm,
-         bd = bill_depth_mm,
-         fl = flipper_length_mm,
-         bm = body_mass_g)
-save(penguins_sub, file="data/penguins_sub.rda")
-```
-
 ### Description {-}
 
 This data measure four physical characteristics of three species of penguins.  
@@ -250,7 +226,7 @@ The data was reduced to country and the plausible scores, and filtered to the tw
 
 ### Description {-}
 
-This data is a subset of images from https://quickdraw.withgoogle.com. The subset was created using the quickdraw R package at https://huizezhang-sherry.github.io/quickdraw/. It has 6 different groups: banana, boomerang, cactus, flip flops, kangaroo. Each image is 28x28 pixels. The `sketches_train` data would be used to train a classification model, and the unlabelled `sketches_test` can be used for prediction. 
+This data is a subset of images from https://quickdraw.withgoogle.com. The subset was created using the quickdraw R package at https://huizezhang-sherry.github.io/quickdraw/. It has 6 different groups: banana, boomerang, cactus, crab, flip flops, kangaroo. Each image is 28x28 pixels. The `sketches_train` data would be used to train a classification model, and the unlabelled `sketches_test` can be used for prediction. 
 
 ### Variables {-}
 
@@ -323,7 +299,7 @@ The primary goal is to find the different clusters.
 
 ### Source {-}
 
-This data is originally from http://ifs.tuwien.ac.at/dm/download/multiChallenge-matrix.txt, and provided as a challenge for non-linear dimension reduction.It was used as an example in Lee, Laa, Cook (2023) https://doi.org/10.52933/jdssv.v2i3.
+This data is originally from http://ifs.tuwien.ac.at/dm/download/multiChallenge-matrix.txt, and provided as a challenge for non-linear dimension reduction. It was used as an example in Lee, Laa, Cook (2023) https://doi.org/10.52933/jdssv.v2i3.
 
 ## `clusters`, `clusters_nonlin`, `simple_clusters`
 
@@ -364,7 +340,7 @@ data("box")
 
 ### Description {-}
 
-This data has a various number of numeric variables. 
+This data has a varying number of numeric variables. 
 
 ### Variables {-}
 
@@ -382,15 +358,9 @@ Simulated using the code in the `simulate.R` file of the `data-raw` directory of
 
 ## `c1` - `c7`
 
-```{r}
-library(mulgar)
-data("c1")
-# Load others similarly
-```
-
 ### Description {-}
 
-This data has a various number of numeric variables, and a variety of cluster shapes. 
+This data has a varying number of numeric variables, and a variety of cluster shapes. 
 
 ### Variables {-}
 
@@ -426,6 +396,53 @@ Primarily this data is useful as an example for neural network modeling, followi
 ### Source {-}
 
 The data is available from https://github.com/zalandoresearch/fashion-mnist. 
+
+## `risk_MSA`
+
+### Description {-}
+
+The data was collected in Australia in 2015 [@risk-survey] and includes six types of risks (recreational, health, career, financial, safety and social) with responses on a scale from 1 (never) to 5 (very often).
+
+### Variables {-}
+
+```{r}
+#| label: data-risk
+#| echo: FALSE
+#| message: FALSE
+#| warning: FALSE
+library(MSA)
+data("risk", package = "MSA")
+glimpse(as_tibble(risk))
+```
+
+### Purpose {-}
+
+This data is useful for the demonstration of clustering methods, it was also used in @msabook.
+
+### Source {-}
+
+The data is available from https://homepage.boku.ac.at/leisch/MSA/. 
+
+## Peripheral Blood Mononuclear Cells 
+
+### Description {-}
+
+The data was described in @chen2023, which is available through the R package `Seurat` (@seurat1, @seurat2, @seurat3, @seurat4). Here the data has been pre-processed following the tutorial at https://satijalab.org/seurat/articles/pbmc3k_tutorial.html, and the first 50 PCs are made available in the data file `pbmc_pca_50.rds` which is read into R using the `readRDS()` function.
+
+### Variables {-}
+
+|Name      | Description     |
+|:---------|:----------------|
+|`PC_1`-`PC_50`       |  Principal component scores |
+
+
+### Purpose {-}
+
+The purpose is to understand the clustering of cell types, relative to clustering in the gene expression. Here, our purpose is to determine if the low-dimensional representation provided by NLDR is an accurate representation of the clustering, as understood from using the tour on the PCs. We ignore the cell type labels, and focus on the geometric shapes of clumps and clusters in the high dimensions.
+
+### Source {-}
+
+The data can be downloaded and pre-processed following https://satijalab.org/seurat/articles/pbmc3k_tutorial.html. 
 
 
 <!--

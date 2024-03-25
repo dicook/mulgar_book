@@ -5,8 +5,10 @@ High-dimensional data means that we have a large number of numeric features or v
 \index{variable}\index{feature}
 \index{projection}
 
-![](images/shadow_puppets.png){width=450 fig-align="center" fig-env="figure*" fig-cap="Viewing high dimensions using low-dimensional displays is like playing shadow puppets, looking at the shadows to guess what the shape is." fig-alt="Three images, each with a hand or two hands, illustrating making shadows of a bird in flight, snail and dog."}
+![Viewing high dimensions using low-dimensional displays is like playing shadow puppets, looking at the shadows to guess what the shape is.](images/shadow_puppets.png){#fig-shadow-puppets width=450 fig-alt="Three images, each with a hand or two hands, illustrating making shadows of a bird in flight, snail and dog."}
 
+
+One approach to visualise high dimensional data and models is by using linear projections, as done in a tour. You can think of projections of high-dimensional data like shadows (@fig-shadow-puppets). Unlike shadow puppets, though the object stays fixed, and with multiple projections we can obtain a *view of the object from all sides*. 
 
 
 ## Getting familiar with tours
@@ -24,7 +26,7 @@ s_p <- ggplot(simple_clusters, aes(x=x1, y=x2)) +
   annotate("text", x=2.0, y=2.2, label="(0.707, 0.707)", angle=45) +
   annotate("text", x=2.2, y=2.0, label="most clustered", angle=45) +
   geom_abline(intercept=0, slope=-1) +
-  annotate("text", x=-1.6, y=1.8, label="(-0.707, 0.707)", angle=-45) +
+  annotate("text", x=-1.6, y=1.8, label="(0.707, -0.707)", angle=-45) +
   annotate("text", x=-1.8, y=1.6, label="no clusters", angle=-45) +
   geom_abline(intercept=0, slope=0) +
   annotate("text", x=-1.6, y=0.15, label="(1, 0)") +
@@ -104,7 +106,7 @@ How a tour can be used to explore high-dimensional data illustrated using (a) 2D
 
 ```{r fig-explain-1D-pdf, eval=knitr::is_latex_output()}
 #| echo: false
-#| fig-cap: "How a tour can be used to explore high-dimensional data illustrated using (a) 2D data with two clusters and (b,c,d) 1D projections from a tour shown as a density plot. Imagine spinning a line around the centre of the data plot, with points projected orthogonally onto the line. With this data, when the line is at `x1=x2 (0.707, 0.707)` or `(-0.707, -0.707)` the clustering is the strongest. When it is at `x1=-x2  (0.707, -0.707)` there is no clustering."
+#| fig-cap: "How a tour can be used to explore high-dimensional data illustrated using (a) 2D data with two clusters and (b,c,d) 1D projections from a tour shown as a density plot. Imagine spinning a line around the centre of the data plot, with points projected orthogonally onto the line. With this data, when the line is at `x1=x2 (0.707, 0.707)` or `(-0.707, -0.707)` the clustering is the strongest. When it is at `x1=-x2  (0.707, -0.707)` there is no clustering. {{< fa play-circle >}}"
 #| fig-width: 8
 #| fig-height: 8
 #| out-width: 100%
@@ -228,7 +230,7 @@ How a tour can be used to explore high-dimensional data illustrated by showing a
 
 ```{r fig-explain-2D-pdf, eval=knitr::is_latex_output()}
 #| echo: false
-#| fig-cap: "How a tour can be used to explore high-dimensional data illustrated by showing a sequence of random 2D projections of 3D data (a). The data has a donut shape with the hole revealed in a single 2D projection (b). Data usually arrives with a given number of observations, and when we plot it like this using a scatterplot, it is like shadows of a transparent object."
+#| fig-cap: "How a tour can be used to explore high-dimensional data illustrated by showing a sequence of random 2D projections of 3D data (a). The data has a donut shape with the hole revealed in a single 2D projection (b). Data usually arrives with a given number of observations, and when we plot it like this using a scatterplot, it is like shadows of a transparent object. {{< fa play-circle >}}"
 #| fig-width: 8
 #| fig-height: 8
 #| out-width: 100%
@@ -530,7 +532,7 @@ Two 5D datasets shown as tours of 2D projections. Can you see clusters of points
 
 ![Outliers](images/outlier-intro.png){#fig-tour-clusters width=200}
 
-Frames from 2D tours on two 5D datasets, with clusters of points in (a) and two outliers with a plane in (b). This figure is best viewed in the HTML version of the book.
+Frames from 2D tours on two 5D datasets, with clusters of points in (a) and two outliers with a plane in (b). This figure is best viewed in the HTML version of the book. {{< fa play-circle >}}
 :::
 
 :::
@@ -674,13 +676,6 @@ render_gif(plane_outliers[,1:5],
 The movement of points give further clues about the structure of the data in high-dimensions. In the data with clustering, often we can see a group of points moving differently from the others. Because there are three clusters, you should see three distinct movement patterns. It is similar with outliers, except these may be individual points moving alone, and different from all others. This can be seen in the static plot, one point (top left) has a movement pattern upwards whereas most of the other observations near it are moving down towards the right. 
 :::
 
-<!--
-![Movement pattern indicates clustering as seen in a grand tour.](gifs/trails-clusters.gif){#fig-clusters-trails-tour fig-alt="" width="300"}
-
-![Movement pattern indicates an outlier as seen in a grand tour.](gifs/trails-outlier.gif){#fig-outlier-trails-tour fig-alt="" width="300"}
-
--->
-
 
 This type of visualisation is useful for many activities in dealing with high-dimensional data, including: 
 
@@ -711,13 +706,13 @@ With computer graphics, the capability of animating plots to show more than a si
 
 The methods in this book primarily emerge from @As85's grand tour method. The algorithm provided the first smooth and continuous sequence of low dimensional projections, and guaranteed that all possible low dimensional projections were likely to be shown. The algorithm was refined in @BA86b (and documented in detail in @BCAH05) to make it *efficiently* show all possible projections. Since then there have been numerous varieties of tour algorithms developed to focus on specific tasks in exploring high dimensional data, and these are documented in @tours2022. 
 
-This book is an evolution from @CS07. One of the difficulties in working on interactive and dynamic graphics research has been the rapid change in technology. Programming languages have changed a little (FORTRAN to C to java to python) but graphics toolkits and display devices have changed a lot! The tour software used in this book evolved from XGobi, which was written in C and used the X Window System, which was then rewritten in  GGobi using gtk. The video library has engaging videos of these software systems There have been several other short-lived implementations, including orca [@orca], written in java, and cranvas [@cranvas], written in R with a back-end provided by wrapper functions to qt libraries. 
+This book is an evolution from @CS07. One of the difficulties in working on interactive and dynamic graphics research has been the rapid change in technology. Programming languages have changed a little (FORTRAN to C to java to python) but graphics toolkits and display devices have changed a lot! The tour software used in this book evolved from XGobi, which was written in C and used the X Window System, which was then rewritten in  GGobi using gtk. The video library has engaging videos of these software systems There have been several other short-lived implementations, including orca [@orca], written in java, and cranvas [@cranvas], written in R with a back-end provided by wrapper functions to `qt` libraries. 
 
 Although attempts were made with these ancestor systems to connect the data plots to a statistical analysis system, these were always limited. With the emergence of R, having graphics in the data analysis workflow has been much easier, albeit at the cost of the interactivity with graphics that matches the old systems. We are mostly using the R package, `tourr` [@tourr] for examples in this book. It provides the machinery for running a tour, and has the flexibility that it can be ported, modified, and used as a regular element of data analysis.
 
 ## Exercises {-}
 
-1. Randomly generate data points that are uniformly distributed in a hyper-cube of 3, 5 and 10 dimensions, with 500 points in each sample, using the `cube.solid.random` function of the `geozoo` package. What differences do we expect to see? Now visualise each set in a grand tour and describe how they differ, and whether this matched your expectations? 
+1. Randomly generate data points that are uniformly distributed in a hyper-cube of 3, 5 and 10 dimensions, with 500 points in each sample, using the `cube.solid.random()` function of the `geozoo` package. What differences do we expect to see? Now visualise each set in a grand tour and describe how they differ, and whether this matched your expectations? 
 2. Use the `geozoo` package to generate samples from different shapes and use them to get a better understanding of how shapes appear in a grand tour. You can start with exploring the conic spiral in 3D, a torus in 4D and points along the wire frame of a cube in 5D.
 3. For each of the challenge data sets, `c1`, ..., `c7` from the `mulgar` package, use the grand tour to view and try to identify structure (outliers, clusters, non-linear relationships). 
 
@@ -733,31 +728,23 @@ cube3 <- cube.solid.random(3, 500)$points
 cube5 <- cube.solid.random(5, 500)$points
 cube10 <- cube.solid.random(5, 500)$points
 
-animate(cube3)
-animate(cube5)
-animate(cube10)
+animate_xy(cube3, axes="bottomleft")
+animate_xy(cube5, axes="bottomleft")
+animate_xy(cube10, axes="bottomleft")
 ```
+
+::: {.content-hidden when-format="pdf"}
+::: {.hidden}
+Answer 1. Each of the projections has a boxy shape, which gets less distinct as the dimension increases. 
+
+As the dimension increases, the points tend to concentrate in the centre of the plot window, with a smattering of points in the edges. 
+:::
+:::
 
 ```{r}
 #| eval: false
 #| echo: false
 # Answer to Q3
-library(tourr)
-library(mvtnorm)
-
-s1 <- diag(5)
-s2 <- diag(5)
-s2[3,4] <- 0.7
-s2[4,3] <- 0.7
-s3 <- s2
-s3[1,2] <- 0.7
-s3[2,1] <- 0.7
-
-set.seed(1234)
-d1 <- as.data.frame(rmvnorm(500, sigma = s1))
-d2 <- as.data.frame(rmvnorm(500, sigma = s2))
-d3 <- as.data.frame(rmvnorm(500, sigma = s3))
-
 library(mulgar)
 animate_xy(c1)
 render_gif(c1, 
