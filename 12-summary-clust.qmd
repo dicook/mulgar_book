@@ -239,6 +239,41 @@ limn_tour_link(
 
 ![Highlighting the penguins where the methods disagree so we can see where these observations are located relative to the two clusters.](images/compare-clusters2.png){#fig-compare-clusters2}
 
+Linking the confusion matrix with the tour can also be accomplished with `crosstalk` and `detourr`.  
+
+```{r}
+#| eval: false
+#| echo: true
+library(crosstalk)
+library(plotly)
+library(viridis)
+p_cl_shared <- SharedData$new(penguins_cl)
+
+detour_plot <- detour(p_cl_shared, tour_aes(
+  projection = bl:bm,
+  colour = cl_w)) |>
+    tour_path(grand_tour(2), 
+                    max_bases=50, fps = 60) |>
+       show_scatter(alpha = 0.7, axes = FALSE,
+                    width = "100%", height = "450px")
+
+conf_mat <- plot_ly(p_cl_shared, 
+                    x = ~cl_mc_j,
+                    y = ~cl_w_j,
+                    color = ~cl_w,
+                    colors = viridis_pal(option = "D")(3),
+                    height = 450) |>
+  highlight(on = "plotly_selected", 
+              off = "plotly_doubleclick") %>%
+    add_trace(type = "scatter", 
+              mode = "markers")
+  
+bscols(
+     detour_plot, conf_mat,
+     widths = c(5, 6)
+ )                 
+```
+
 ## Exercises {-}
 
 1. Compare the results of the four cluster model-based clustering with that of the four cluster Wards linkage clustering of the penguins data.
