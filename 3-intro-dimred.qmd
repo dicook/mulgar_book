@@ -4,19 +4,29 @@ This chapter sets up the concepts related to methods for reducing dimension such
 
 ## The meaning of dimension
 
-Dimension is perceived in a tour using the spread of points. When the points are spread far apart, then the data is filling the space. Conversely when the points "collapse" into a sub-region then the data is only partially filling the space, and some dimension reduction to reduce to this smaller dimensional space may be worthwhile. 
+Dimension is perceived in a tour using the spread of points. When the points are spread far apart, then the data is filling the space. Conversely, when the points "collapse" into a sub-region then the data is only partially filling the space, and some dimension reduction to reduce to this smaller dimensional space may be worthwhile. 
 
 ::: {.content-visible when-format="html"}
 ::: info
-When points do not fill the plotting canvas fully, it means that it lives in a lower dimension. This low-dimensional space might be linear or non-linear, with the latter being much harder to define and capture.
+When exploring the dimensionality of multivariate data we are looking for projections where the points do not fill the plotting canvas fully. This would indicate that the observed values do not fully populate high dimensions. 
 :::
 :::
 
 ::: {.content-visible when-format="pdf"}
-\infobox{When points do not fill the plotting canvas fully, it means that it lives in a lower dimension. This low-dimensional space might be linear or non-linear, with the latter being much harder to define and capture.}
+\infobox{When exploring the dimensionality of multivariate data we are looking for projections where the points do not fill the plotting canvas fully. This would indicate that the observed values do not fully populate high dimensions. }
 :::
 
-Let's start with some 2D examples. You need at least two variables to be able to talk about association between variables. @fig-2D shows three plots of two variables. Plot (a) shows two variables that are strongly linearly associated[^correlation], because when `x1` is low, `x2` is low also, and conversely when `x1` is high, `x2` is also high. This can also be seen by the reduction in spread of points (or "collapse") in one direction making the data fill less than the full square of the plot. *So from this we can conclude that the data is not fully 2D.* The second step is to infer which variables contribute to this reduction in dimension. The axes for `x1` and `x2` are drawn extending from $(0,0)$ and because they both extend out of the cloud of points, in the direction away from the collapse of points we can say that they are jointly responsible for the dimension reduction. 
+Let's start with some 2D examples. @fig-2D shows three plots of two variables. Plot (a) shows two variables that are strongly linearly associated[^correlation], because when `x1` is low, `x2` is low also, and conversely when `x1` is high, `x2` is also high. This can also be seen by the reduction in spread of points (or "collapse") in one direction making the data fill less than the full square of the plot. *So from this we can conclude that the data is not fully 2D.* The second step is to infer which variables contribute to this reduction in dimension. The axes for `x1` and `x2` are drawn extending from $(0,0)$ and because they both extend out of the cloud of points, in the direction away from the collapse of points we can say that they are jointly responsible for the dimension reduction. 
+
+::: {.content-visible when-format="html"}
+::: info
+The way variables are scaled can affect the appearance of dimension. If the variables are scaled together, using global values, some variables may have smaller variance than others. Scaling variables individually shifts the focus to association between variables, as the predominant reason for reduced dimension.
+:::
+:::
+
+::: {.content-visible when-format="pdf"}
+\infobox{The way variables are scaled can affect the appearance of dimension. If the variables are scaled together, using global values, some variables may have smaller variance than others. Scaling variables individually shifts the focus to association between variables, as the predominant reason for reduced dimension.}
+:::
 
 @fig-2D (b) shows a pair of variables that are **not** linearly associated. Variable `x1` is more varied than `x3` but knowing the value on `x1` tells us nothing about possible values on `x3`. Before running a tour all variables are typically scaled to have equal spread. The purpose of the tour is to capture association and relationships between the variables, so any univariate differences should be removed ahead of time. @fig-2D (c) shows what this would look like when `x3` is scaled - the points are fully spread in the full square of the plot. 
 
@@ -91,6 +101,130 @@ dp3 <- ggplot(df) +
 #| fig-cap: "Explanation of how dimension reduction is perceived in 2D, relative to variables: (a) Two variables with strong linear association. Both variables contribute to the association, as indicated by their axes extending out from the 'collapsed' direction of the points; (b) Two variables with no linear association. But x3 has less variation, so points collapse in this direction; (c) The situation in plot (b) does not arise in a tour because all variables are (usually) scaled.  When an axis extends out of a direction where the points are collapsed, it means that this variable is partially responsible for the reduced dimension."
 #| fig-alt: "Three scatterplots: (a) points lie close to a straight line in the x=y direction, (b) points lie close to a horizontal line, (c) points spread out in the full plot region. There are no axis labels or scales."
 dp1 + dp2 + dp3 + plot_layout(ncol=3)
+```
+
+@fig-nonlin-2D illustrates other types of association that could indicate reduced dimension. Plot (a) shows a strong nonlinear association. Plots (b) and (c) show substantial regions of the data space that have no observations, which may mean there is some barrier or gap in the data generating process. The L-shape in plot (d) is a pattern where one variable only shows variability if the other variable is essentially all the same, say close to zero. It could be described as if one variable has a non-zero value then the other variable is zero. This is a very strong association pattern, but not one that is captured by correlation. Plots (e) and (f) show other types of association, one with heterogeneous variance depending on the subspace, and clustering of observations, respectively. While we might detect these visually, using dimension reduction methods with these structures are not easy, and may be impossible. 
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+library(tidyr)
+library(dplyr)
+set.seed(1115)
+d_form <- tibble(x = runif(100) - 0.5) |>
+  mutate(
+    linear = 4 * x + rnorm(100) * 0.5,
+    nonlinear1 = 12 * x^2 + rnorm(100) * 0.5,
+    nonlinear2 = 2 * x - 5 * x^2 + rnorm(100) * 0.1
+  ) |>
+  pivot_longer(
+    cols = linear:nonlinear2, names_to = "form",
+    values_to = "y"
+  ) |>
+  filter(form == "nonlinear2") |>
+  select(form, x, y)
+
+d_gaps <- tibble(x = runif(150)) |>
+  mutate(y = runif(150))
+d_gaps <- d_gaps |>
+  filter(!(between(x + 2 * y, 1.2, 1.6)))
+
+d_barrier <- tibble(x = runif(200)) |>
+  mutate(y = runif(200))
+d_barrier <- d_barrier |>
+  filter(-x + 3 * y < 1.2)
+
+l_shape <- tibble(
+  x = c(rexp(50, 0.01), runif(50) * 20),
+  y = c(runif(50) * 20, rexp(50, 0.01))
+)
+
+hetero <- tibble(x = runif(200) - 0.5) |>
+  mutate(y = -2 * x + rnorm(200) * (x + 0.5))
+
+d_clusters <- tibble(x = c(
+  rnorm(50) / 6 - 0.5,
+  rnorm(50) / 6,
+  rnorm(50) / 6 + 0.5
+)) |>
+  mutate(y = c(
+    rnorm(50) / 6,
+    rnorm(50) / 6 + 1, rnorm(50) / 6
+  ))
+
+```
+
+```{r}
+#| label: fig-nonlin-2D
+#| echo: false
+#| fig-width: 9
+#| fig-height: 6
+#| out-width: 100%
+#| fig-cap: "Other types of association: (a) nonlinear, (b) gap between subspaces, (c) barrier beyond which no values are observed, perhaps a limiting inequality constraint, (d) L-shape where is one variable is observed the other is not, (e) skewness or heterogeneous variance, (f) clustering."
+pn1 <- ggplot(data=d_form, aes(x=x, y=y)) +
+  geom_point() +
+    ggtitle("(a) Nonlinear") +
+  theme_minimal() +
+  theme(aspect.ratio=1,
+        axis.title = element_blank(),
+        axis.text = element_blank(),
+        panel.border = element_rect(colour="black", fill=NA))
+
+pn2 <- ggplot(data=d_gaps, aes(x=x, y=y)) +
+  geom_polygon(
+    data = tibble(x = c(0, 1, 1, 0), y = c(1.2 / 2, 0.2 / 2, 0.6 / 2, 1.6 / 2)),
+    fill = "#EAC024", alpha = 0.3
+  ) +
+  geom_point() +
+    ggtitle("(b) Gaps") +
+  theme_minimal() +
+  theme(aspect.ratio=1,
+        axis.title = element_blank(),
+        axis.text = element_blank(),
+        panel.border = element_rect(colour="black", fill=NA))
+
+pn3 <- ggplot(data=d_barrier, aes(x=x, y=y)) +
+  geom_polygon(
+    data = tibble(x = c(0, 1, 1, 0), y = c(1.2 / 3, 2.2 / 3, 1, 1)),
+    fill = "#EAC024", alpha = 0.3
+  ) +
+  geom_point() +
+    ggtitle("(c) Barrier") +
+  theme_minimal() +
+  theme(aspect.ratio=1,
+        axis.title = element_blank(),
+        axis.text = element_blank(),
+        panel.border = element_rect(colour="black", fill=NA))
+
+pn4 <- ggplot(data=l_shape, aes(x=x, y=y)) +
+  geom_point() +
+    ggtitle("(d) L-shape") +
+  theme_minimal() +
+  theme(aspect.ratio=1,
+        axis.title = element_blank(),
+        axis.text = element_blank(),
+        panel.border = element_rect(colour="black", fill=NA))
+
+pn5 <- ggplot(data=hetero, aes(x=x, y=y)) +
+  geom_point() +
+    ggtitle("(e) Skewed") +
+  theme_minimal() +
+  theme(aspect.ratio=1,
+        axis.title = element_blank(),
+        axis.text = element_blank(),
+        panel.border = element_rect(colour="black", fill=NA))
+
+pn6 <- ggplot(data=d_clusters, aes(x=x, y=y)) +
+  geom_point() +
+    ggtitle("(f) Clusters") +
+  theme_minimal() +
+  theme(aspect.ratio=1,
+        axis.title = element_blank(),
+        axis.text = element_blank(),
+        panel.border = element_rect(colour="black", fill=NA))
+
+pn1 + pn2 + pn3 + pn4 + pn5 + pn6 + plot_layout(ncol=3)
 ```
 
 ## How to perceive the dimensionality using a tour
@@ -290,12 +424,12 @@ Two frames from a grand tour of the plane with two additional dimensions of pure
 
 ::: {.content-visible when-format="html"}
 ::: info
-To determine which variables are responsible for the reduced dimension look for the axes that extend out of the point cloud. These contribute to smaller variation in the observations, and thus indicate dimension reduction.
+To determine which variables are responsible for the reduced dimension look for the axes that extend out of the point cloud. These contribute to smaller variation in the observations, and thus indicate possible dimension reduction using these variables.
 :::
 :::
 
 ::: {.content-visible when-format="pdf"}
-\infobox{To determine which variables are responsible for the reduced dimension look for the axes that extend out of the point cloud. These contribute to smaller variation in the observations, and thus indicate dimension reduction.}
+\infobox{To determine which variables are responsible for the reduced dimension look for the axes that extend out of the point cloud. These contribute to smaller variation in the observations, and thus indicate possible dimension reduction using these variables}
 :::
 
 The simulated data here is very simple, and what we have learned from the tour could also be learned from principal component analysis. However, if there are small complications, such as outliers or nonlinear relationships, that might not be visible from principal component analysis, the tour can help you to see them.
@@ -476,3 +610,5 @@ d_r <- d %>%
          x2 = cos(pi/6)*x2 + sin(pi/6)*x4,
          x4 = -sin(pi/6)*x2 + cos(pi/6)*x4)
 ```
+
+4. Examine each of the challenge data sets `c1`, `c2`, ..., `c7` from the the `mulgar` package for signs of the observed values not filling out the full $p$ dimensions.

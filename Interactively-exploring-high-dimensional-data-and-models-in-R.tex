@@ -42,14 +42,28 @@
 \setlength{\emergencystretch}{3em} % prevent overfull lines
 \setcounter{secnumdepth}{5}
 % Make \paragraph and \subparagraph free-standing
+\makeatletter
 \ifx\paragraph\undefined\else
   \let\oldparagraph\paragraph
-  \renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+  \renewcommand{\paragraph}{
+    \@ifstar
+      \xxxParagraphStar
+      \xxxParagraphNoStar
+  }
+  \newcommand{\xxxParagraphStar}[1]{\oldparagraph*{#1}\mbox{}}
+  \newcommand{\xxxParagraphNoStar}[1]{\oldparagraph{#1}\mbox{}}
 \fi
 \ifx\subparagraph\undefined\else
   \let\oldsubparagraph\subparagraph
-  \renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+  \renewcommand{\subparagraph}{
+    \@ifstar
+      \xxxSubParagraphStar
+      \xxxSubParagraphNoStar
+  }
+  \newcommand{\xxxSubParagraphStar}[1]{\oldsubparagraph*{#1}\mbox{}}
+  \newcommand{\xxxSubParagraphNoStar}[1]{\oldsubparagraph{#1}\mbox{}}
 \fi
+\makeatother
 
 \usepackage{color}
 \usepackage{fancyvrb}
@@ -69,7 +83,7 @@
 \newcommand{\CommentTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
 \newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
 \newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
-\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{\textbf{#1}}}
 \newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
 \newcommand{\DecValTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
 \newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
@@ -79,7 +93,7 @@
 \newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.28,0.35,0.67}{#1}}
 \newcommand{\ImportTok}[1]{\textcolor[rgb]{0.00,0.46,0.62}{#1}}
 \newcommand{\InformationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
-\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{\textbf{#1}}}
 \newcommand{\NormalTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
 \newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
 \newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
@@ -105,15 +119,17 @@
 \makesavenoteenv{longtable}
 \usepackage{graphicx}
 \makeatletter
-\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
-\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
-\makeatother
-% Scale images if necessary, so that they will not overflow the page
-% margins by default, and it is still possible to overwrite the defaults
-% using explicit options in \includegraphics[width, height, ...]{}
-\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
 % Set default figure placement to htbp
-\makeatletter
 \def\fps@figure{htbp}
 \makeatother
 % definitions for citeproc citations
@@ -186,6 +202,21 @@
   \end{minipage}%
 }%
 }
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{colortbl}
+\usepackage{pdflscape}
+\usepackage{tabu}
+\usepackage{threeparttable}
+\usepackage{threeparttablex}
+\usepackage[normalem]{ulem}
+\usepackage{makecell}
+\usepackage{xcolor}
 \usepackage{amsmath}
 \usepackage{blkarray}
 \usepackage[most]{tcolorbox}
@@ -245,9 +276,7 @@
 \makeatletter
 \@ifpackageloaded{fontawesome5}{}{\usepackage{fontawesome5}}
 \makeatother
-\ifLuaTeX
-  \usepackage{selnolig}  % disable illegal ligatures
-\fi
+
 \usepackage{bookmark}
 
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
@@ -262,9 +291,10 @@
   urlcolor={Blue},
   pdfcreator={LaTeX via pandoc}}
 
+
 \title{Interactively exploring high-dimensional data and models in R}
 \author{Dianne Cook and Ursula Laa}
-\date{2024-07-03}
+\date{2024-12-03}
 
 \begin{document}
 \maketitle
@@ -275,6 +305,7 @@
 \setcounter{tocdepth}{1}
 \tableofcontents
 }
+
 \bookmarksetup{startatroot}
 
 \chapter*{Preface}\label{preface}
@@ -495,7 +526,7 @@ different techniques. \index{dimensionality}
 
 \centering{
 
-\includegraphics[width=4.6875in,height=\textheight]{images/shadow_puppets.png}
+\includegraphics[width=4.6875in,height=\textheight,keepaspectratio]{images/shadow_puppets.png}
 
 }
 
@@ -519,7 +550,7 @@ projections we can obtain a \emph{view of the object from all sides}.
 
 \centering{
 
-\includegraphics[width=1\textwidth,height=\textheight]{1-intro_files/figure-pdf/fig-explain-1D-pdf-1.pdf}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{1-intro_files/figure-pdf/fig-explain-1D-pdf-1.pdf}
 
 }
 
@@ -554,7 +585,7 @@ equal, and the projection is \texttt{(0.707,\ \ 0.707)} or
 
 \centering{
 
-\includegraphics[width=1\textwidth,height=\textheight]{1-intro_files/figure-pdf/fig-explain-2D-pdf-1.pdf}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{1-intro_files/figure-pdf/fig-explain-2D-pdf-1.pdf}
 
 }
 
@@ -596,7 +627,7 @@ methods mentioned, in this book.
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{1-intro_files/figure-pdf/fig-dimension-cubes-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{1-intro_files/figure-pdf/fig-dimension-cubes-1.pdf}
 
 }
 
@@ -608,9 +639,10 @@ the dimension increase by one, the cube doubles.}
 \end{figure}%
 
 Interestingly, the struggle with imagining high-dimensions this way is
-described in a novel published in 1884 (Abbott, 1884) \footnote{Thanks
-  to Barret Schloerke for directing co-author Cook to this history when
-  he was an undergraduate student and we were starting the
+described in a novel titled ``Flatland: A Romance of Many Dimensions''
+published in 1884 (Abbott, 1884) \footnote{Thanks to Barret Schloerke
+  for directing co-author Cook to this history when he was an
+  undergraduate student and we were starting the
   \href{http://schloerke.com/geozoo/}{geozoo} project.}. Yes, more than
 100 years ago! This is a story about characters living in a 2D world,
 being visited by an alien 3D character. It also is a social satire,
@@ -646,7 +678,8 @@ edge of the sample space.
 For visualisation, the curse manifests in an opposite manner. Projecting
 from high to low dimensions creates a crowding or piling of points near
 the center of the distribution. This was noted by Diaconis \& Freedman
-(1984a). Figure~\ref{fig-density} illustrates this phenomenon. As
+(1984a). Figure~\ref{fig-density} illustrates this phenomenon, using
+samples that are uniformly distributed in \(p\)-dimensional spheres. As
 dimension increases, the points crowd the centre, even with as few as
 ten dimensions. This is something that we may need to correct for when
 exploring high dimensions with low-dimensional projections.
@@ -657,15 +690,16 @@ exploring high dimensions with low-dimensional projections.
 
 \centering{
 
-\includegraphics[width=0.95\textwidth,height=\textheight]{1-intro_files/figure-pdf/fig-density-1.pdf}
+\includegraphics[width=0.95\linewidth,height=\textheight,keepaspectratio]{1-intro_files/figure-pdf/fig-density-1.pdf}
 
 }
 
 \caption{\label{fig-density}Illustration of data crowding in the
 low-dimensional projection as dimension increases, here from 3, 10, 100.
-Colour shows the number of points in each hexagon bin (pink is large,
-navy is small). As dimension increases the points concentrate near the
-centre.}
+The samples are generated from a uniform distribution in
+\(p\)-dimensional spheres. Colour shows the number of points in each
+hexagon bin (pink is large, navy is small). As dimension increases the
+points concentrate near the centre.}
 
 \end{figure}%
 
@@ -682,7 +716,7 @@ dimensionality, with different variance or spread in some directions.
 
 \centering{
 
-\includegraphics[width=2.08333in,height=\textheight]{images/clusters-intro.png}
+\includegraphics[width=2.08333in,height=\textheight,keepaspectratio]{images/clusters-intro.png}
 
 }
 
@@ -694,7 +728,7 @@ dimensionality, with different variance or spread in some directions.
 
 \centering{
 
-\includegraphics[width=2.08333in,height=\textheight]{images/outlier-intro.png}
+\includegraphics[width=2.08333in,height=\textheight,keepaspectratio]{images/outlier-intro.png}
 
 }
 
@@ -735,7 +769,7 @@ only visible in combinations of variables.
 
 \centering{
 
-\includegraphics[width=1\textwidth,height=\textheight]{1-intro_files/figure-pdf/fig-example-structure-1.pdf}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{1-intro_files/figure-pdf/fig-example-structure-1.pdf}
 
 }
 
@@ -756,7 +790,7 @@ and outliers (c, d).
 
 \centering{
 
-\includegraphics{images/trails-clusters.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/trails-clusters.png}}
 
 }
 
@@ -768,7 +802,7 @@ and outliers (c, d).
 
 \centering{
 
-\includegraphics{images/trails-outlier.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/trails-outlier.png}}
 
 }
 
@@ -913,9 +947,11 @@ where \(X\) indicates the \(n\times p\) data matrix, \(X_j\) indicates
 variable \(j, j=1, \dots, p\) and \(X_{ij}\) indicates the value of the
 \(j^{th}\) variable for the \(i^{th}\) observation. (It can be confusing
 to distinguish whether one is referring to the observation or a
-variable, because \(X_i\) is used to indicate observation also. When
-this is done it is usually accompanied by qualifying words such as
-\textbf{observation} \(X_3\), or \textbf{variable} \(X_3\).)
+variable, because \(X_i\) is used to indicate observation. In
+descriptions where it is unclear we will use \(X_{i.}\) to indicate
+observation/row and \(X_{.j}\) to indicate variable/column. Also this
+will usually accompanied by qualifying words such as
+\textbf{observation} or \textbf{variable}.)
 
 \infobox{Having notation is helpful for concise explanations of different methods, to explain how data is scaled, processed and projected for various tasks, and how different quantities are calculated from the data. }
 
@@ -1128,16 +1164,15 @@ these methods.
 
 Dimension is perceived in a tour using the spread of points. When the
 points are spread far apart, then the data is filling the space.
-Conversely when the points ``collapse'' into a sub-region then the data
+Conversely, when the points ``collapse'' into a sub-region then the data
 is only partially filling the space, and some dimension reduction to
 reduce to this smaller dimensional space may be worthwhile.
 
-\infobox{When points do not fill the plotting canvas fully, it means that it lives in a lower dimension. This low-dimensional space might be linear or non-linear, with the latter being much harder to define and capture.}
+\infobox{When exploring the dimensionality of multivariate data we are looking for projections where the points do not fill the plotting canvas fully. This would indicate that the observed values do not fully populate high dimensions. }
 
-Let's start with some 2D examples. You need at least two variables to be
-able to talk about association between variables. Figure~\ref{fig-2D}
-shows three plots of two variables. Plot (a) shows two variables that
-are strongly linearly associated\footnote{It is generally better to use
+Let's start with some 2D examples. Figure~\ref{fig-2D} shows three plots
+of two variables. Plot (a) shows two variables that are strongly
+linearly associated\footnote{It is generally better to use
   \emph{associated} than \emph{correlated}. Correlation is a statistical
   quantity, measuring linear association. The term \emph{associated} can
   be prefaced with the type of association, such as \emph{linear} or
@@ -1152,6 +1187,8 @@ are drawn extending from \((0,0)\) and because they both extend out of
 the cloud of points, in the direction away from the collapse of points
 we can say that they are jointly responsible for the dimension
 reduction.
+
+\infobox{The way variables are scaled can affect the appearance of dimension. If the variables are scaled together, using global values, some variables may have smaller variance than others. Scaling variables individually shifts the focus to association between variables, as the predominant reason for reduced dimension.}
 
 Figure~\ref{fig-2D} (b) shows a pair of variables that are \textbf{not}
 linearly associated. Variable \texttt{x1} is more varied than
@@ -1181,7 +1218,7 @@ is scaled - the points are fully spread in the full square of the plot.
 
 \centering{
 
-\includegraphics[width=1\textwidth,height=\textheight]{3-intro-dimred_files/figure-pdf/fig-2D-1.pdf}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{3-intro-dimred_files/figure-pdf/fig-2D-1.pdf}
 
 }
 
@@ -1195,6 +1232,37 @@ in plot (b) does not arise in a tour because all variables are (usually)
 scaled. When an axis extends out of a direction where the points are
 collapsed, it means that this variable is partially responsible for the
 reduced dimension.}
+
+\end{figure}%
+
+Figure~\ref{fig-nonlin-2D} illustrates other types of association that
+could indicate reduced dimension. Plot (a) shows a strong nonlinear
+association. Plots (b) and (c) show substantial regions of the data
+space that have no observations, which may mean there is some barrier or
+gap in the data generating process. The L-shape in plot (d) is a pattern
+where one variable only shows variability if the other variable is
+essentially all the same, say close to zero. It could be described as if
+one variable has a non-zero value then the other variable is zero. This
+is a very strong association pattern, but not one that is captured by
+correlation. Plots (e) and (f) show other types of association, one with
+heterogeneous variance depending on the subspace, and clustering of
+observations, respectively. While we might detect these visually, using
+dimension reduction methods with these structures are not easy, and may
+be impossible.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{3-intro-dimred_files/figure-pdf/fig-nonlin-2D-1.pdf}
+
+}
+
+\caption{\label{fig-nonlin-2D}Other types of association: (a) nonlinear,
+(b) gap between subspaces, (c) barrier beyond which no values are
+observed, perhaps a limiting inequality constraint, (d) L-shape where is
+one variable is observed the other is not, (e) skewness or heterogeneous
+variance, (f) clustering.}
 
 \end{figure}%
 
@@ -1217,7 +1285,7 @@ al., 2022) makes a correction for this.
 
 \centering{
 
-\includegraphics[width=1.66667in,height=\textheight]{images/plane.png}
+\includegraphics[width=1.66667in,height=\textheight,keepaspectratio]{images/plane.png}
 
 }
 
@@ -1229,7 +1297,7 @@ al., 2022) makes a correction for this.
 
 \centering{
 
-\includegraphics[width=1.66667in,height=\textheight]{images/box.png}
+\includegraphics[width=1.66667in,height=\textheight,keepaspectratio]{images/box.png}
 
 }
 
@@ -1241,7 +1309,7 @@ al., 2022) makes a correction for this.
 
 \centering{
 
-\includegraphics[width=1.66667in,height=\textheight]{images/cube5d.png}
+\includegraphics[width=1.66667in,height=\textheight,keepaspectratio]{images/cube5d.png}
 
 }
 
@@ -1281,7 +1349,7 @@ Figure~\ref{fig-plane-scatmat}.
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{3-intro-dimred_files/figure-pdf/fig-plane-scatmat-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{3-intro-dimred_files/figure-pdf/fig-plane-scatmat-1.pdf}
 
 }
 
@@ -1319,7 +1387,7 @@ noise.
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{3-intro-dimred_files/figure-pdf/fig-plane-noise-scatter-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{3-intro-dimred_files/figure-pdf/fig-plane-noise-scatter-1.pdf}
 
 }
 
@@ -1349,13 +1417,13 @@ not linearly related to the other variables.
 
 \begin{minipage}{0.50\linewidth}
 \begin{center}
-\includegraphics[width=2.08333in,height=\textheight]{images/plane_noise1.png}
+\includegraphics[width=2.08333in,height=\textheight,keepaspectratio]{images/plane_noise1.png}
 \end{center}
 \end{minipage}%
 %
 \begin{minipage}{0.50\linewidth}
 \begin{center}
-\includegraphics[width=2.08333in,height=\textheight]{images/plane_noise2.png}
+\includegraphics[width=2.08333in,height=\textheight,keepaspectratio]{images/plane_noise2.png}
 \end{center}
 \end{minipage}%
 
@@ -1369,7 +1437,7 @@ linearly associated, but other variables are. \faIcon{play-circle}}
 
 \end{figure}%
 
-\infobox{To determine which variables are responsible for the reduced dimension look for the axes that extend out of the point cloud. These contribute to smaller variation in the observations, and thus indicate dimension reduction.}
+\infobox{To determine which variables are responsible for the reduced dimension look for the axes that extend out of the point cloud. These contribute to smaller variation in the observations, and thus indicate possible dimension reduction using these variables}
 
 The simulated data here is very simple, and what we have learned from
 the tour could also be learned from principal component analysis.
@@ -1402,7 +1470,7 @@ relationships.
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{3-intro-dimred_files/figure-pdf/fig-plane-noise-outlier-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{3-intro-dimred_files/figure-pdf/fig-plane-noise-outlier-1.pdf}
 
 }
 
@@ -1418,7 +1486,7 @@ correlation.}
 
 \centering{
 
-\includegraphics[width=2.08333in,height=\textheight]{images/pn_outliers.png}
+\includegraphics[width=2.08333in,height=\textheight,keepaspectratio]{images/pn_outliers.png}
 
 }
 
@@ -1430,7 +1498,7 @@ correlation.}
 
 \centering{
 
-\includegraphics[width=2.08333in,height=\textheight]{images/plane_nonlin.png}
+\includegraphics[width=2.08333in,height=\textheight,keepaspectratio]{images/plane_nonlin.png}
 
 }
 
@@ -1514,6 +1582,16 @@ techniques but are often visible with the tour. \faIcon{play-circle}}
 \end{Highlighting}
 \end{Shaded}
 
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{3}
+\tightlist
+\item
+  Examine each of the challenge data sets \texttt{c1}, \texttt{c2},
+  \ldots, \texttt{c7} from the the \texttt{mulgar} package for signs of
+  the observed values not filling out the full \(p\) dimensions.
+\end{enumerate}
+
 \bookmarksetup{startatroot}
 
 \chapter{Principal component
@@ -1588,7 +1666,7 @@ examples, the scree plots illustrate that PCA supports that the data are
 
 \centering{
 
-\includegraphics[width=1\textwidth,height=\textheight]{4-pca_files/figure-pdf/fig-2D-pca-1.pdf}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{4-pca_files/figure-pdf/fig-2D-pca-1.pdf}
 
 }
 
@@ -1669,7 +1747,7 @@ are both \texttt{x6} and \texttt{x7}.
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{4-pca_files/figure-pdf/fig-plane-noise-scree-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{4-pca_files/figure-pdf/fig-plane-noise-scree-1.pdf}
 
 }
 
@@ -1759,7 +1837,7 @@ bottle in 3D looks from some angles}.
 
 \centering{
 
-\includegraphics{images/fig-pisa-scree-1.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/fig-pisa-scree-1.png}}
 
 }
 
@@ -1771,7 +1849,7 @@ bottle in 3D looks from some angles}.
 
 \centering{
 
-\includegraphics{images/pisa_gt_249.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/pisa_gt_249.png}}
 
 }
 
@@ -1859,10 +1937,10 @@ Figure~\ref{fig-aflw-gt-pdf}.
 \begin{figure}
 
 \begin{minipage}{0.50\linewidth}
-\includegraphics[width=2.375in,height=\textheight]{images/aflw_gt_70.png}\end{minipage}%
+\includegraphics[width=2.375in,height=\textheight,keepaspectratio]{images/aflw_gt_70.png}\end{minipage}%
 %
 \begin{minipage}{0.50\linewidth}
-\includegraphics[width=2.375in,height=\textheight]{images/aflw_gt_329.png}\end{minipage}%
+\includegraphics[width=2.375in,height=\textheight,keepaspectratio]{images/aflw_gt_329.png}\end{minipage}%
 
 \caption{\label{fig-aflw-gt-pdf}Two frames from a grand tour of the AFLW
 player statistics. Most player statistics concentrate near the centre,
@@ -1893,7 +1971,7 @@ the scree plot.
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{4-pca_files/figure-pdf/fig-aflw-pca-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{4-pca_files/figure-pdf/fig-aflw-pca-1.pdf}
 
 }
 
@@ -2003,7 +2081,7 @@ object, which gets large very quickly.
 
 \centering{
 
-\includegraphics[width=0.6\textwidth,height=\textheight]{4-pca_files/figure-pdf/fig-aflw-pcaplots-pdf-1.pdf}
+\includegraphics[width=0.6\linewidth,height=\textheight,keepaspectratio]{4-pca_files/figure-pdf/fig-aflw-pcaplots-pdf-1.pdf}
 
 }
 
@@ -2078,7 +2156,7 @@ show their contribution to the PCs.
 
 \centering{
 
-\includegraphics[width=1\textwidth,height=\textheight]{4-pca_files/figure-pdf/fig-plane-biplot-1.pdf}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{4-pca_files/figure-pdf/fig-plane-biplot-1.pdf}
 
 }
 
@@ -2114,7 +2192,7 @@ Figure~\ref{fig-plane-box-model-pdf} shows the models for the
 
 \centering{
 
-\includegraphics{images/plane_model_55.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/plane_model_55.png}}
 
 }
 
@@ -2126,7 +2204,7 @@ Figure~\ref{fig-plane-box-model-pdf} shows the models for the
 
 \centering{
 
-\includegraphics{images/box_model_13.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/box_model_13.png}}
 
 }
 
@@ -2151,7 +2229,7 @@ agreement between the model and the data.
 
 \centering{
 
-\includegraphics[width=3.125in,height=\textheight]{images/pisa_model_17.png}
+\includegraphics[width=3.125in,height=\textheight,keepaspectratio]{images/pisa_model_17.png}
 
 }
 
@@ -2181,7 +2259,7 @@ linear, because the spread extends unevenly away from the box.
 
 \centering{
 
-\includegraphics[width=3.125in,height=\textheight]{images/aflw_model_70.png}
+\includegraphics[width=3.125in,height=\textheight,keepaspectratio]{images/aflw_model_70.png}
 
 }
 
@@ -2225,7 +2303,7 @@ only in PC5, PC6 and PC7.
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{4-pca_files/figure-pdf/fig-plane-n-o-scree-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{4-pca_files/figure-pdf/fig-plane-n-o-scree-1.pdf}
 
 }
 
@@ -2241,7 +2319,7 @@ outliers.}
 
 \centering{
 
-\includegraphics[width=2.1875in,height=\textheight]{images/plane_n_o_clr_181.png}
+\includegraphics[width=2.1875in,height=\textheight,keepaspectratio]{images/plane_n_o_clr_181.png}
 
 }
 
@@ -2253,7 +2331,7 @@ outliers.}
 
 \centering{
 
-\includegraphics[width=2.1875in,height=\textheight]{images/plane_n_o_pca_181.png}
+\includegraphics[width=2.1875in,height=\textheight,keepaspectratio]{images/plane_n_o_pca_181.png}
 
 }
 
@@ -2272,7 +2350,7 @@ has lost these two extreme values. \faIcon{play-circle}}
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{4-pca_files/figure-pdf/fig-plane-o-n-pairs-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{4-pca_files/figure-pdf/fig-plane-o-n-pairs-1.pdf}
 
 }
 
@@ -2302,7 +2380,7 @@ outlier.
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{4-pca_files/figure-pdf/fig-plane-nonlin-scree-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{4-pca_files/figure-pdf/fig-plane-nonlin-scree-1.pdf}
 
 }
 
@@ -2317,7 +2395,7 @@ suggests three PCs.}
 
 \centering{
 
-\includegraphics[width=2.1875in,height=\textheight]{images/plane_nonlin_61.png}
+\includegraphics[width=2.1875in,height=\textheight,keepaspectratio]{images/plane_nonlin_61.png}
 
 }
 
@@ -2329,7 +2407,7 @@ suggests three PCs.}
 
 \centering{
 
-\includegraphics[width=2.1875in,height=\textheight]{images/plane_nonlin_pca_129.png}
+\includegraphics[width=2.1875in,height=\textheight,keepaspectratio]{images/plane_nonlin_pca_129.png}
 
 }
 
@@ -2350,7 +2428,7 @@ but the full data has more complexities. \faIcon{play-circle}}
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{4-pca_files/figure-pdf/fig-plane-nonlin-pairs-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{4-pca_files/figure-pdf/fig-plane-nonlin-pairs-1.pdf}
 
 }
 
@@ -2475,7 +2553,7 @@ patterns. A good resource for learning about MDS is Borg \& Groenen
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{5-nldr_files/figure-pdf/fig-nldr-clusters-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{5-nldr_files/figure-pdf/fig-nldr-clusters-1.pdf}
 
 }
 
@@ -2502,10 +2580,10 @@ simple parabolic shape.
 \begin{figure}
 
 \begin{minipage}{0.50\linewidth}
-\includegraphics[width=2.29167in,height=\textheight]{images/clusters_nonlin_60.png}\end{minipage}%
+\includegraphics[width=2.29167in,height=\textheight,keepaspectratio]{images/clusters_nonlin_60.png}\end{minipage}%
 %
 \begin{minipage}{0.50\linewidth}
-\includegraphics[width=2.29167in,height=\textheight]{images/clusters_nonlin_233.png}\end{minipage}%
+\includegraphics[width=2.29167in,height=\textheight,keepaspectratio]{images/clusters_nonlin_233.png}\end{minipage}%
 
 \caption{\label{fig-clusters-nonlin-pdf}Two frames from a grand tour of
 the nonlinear clusters data set, shows four clusters. Two are very small
@@ -2572,7 +2650,7 @@ cluster, and that the unibrow is the sine wave.
 
 \centering{
 
-\includegraphics{images/liminal-clusters-nonlin1.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/liminal-clusters-nonlin1.png}}
 
 }
 
@@ -2584,7 +2662,7 @@ cluster, and that the unibrow is the sine wave.
 
 \centering{
 
-\includegraphics{images/liminal-clusters-nonlin2.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/liminal-clusters-nonlin2.png}}
 
 }
 
@@ -2648,7 +2726,7 @@ interactive using \texttt{plotly}.
 
 \centering{
 
-\includegraphics{images/detourr-clusters-nonlin.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/detourr-clusters-nonlin.png}}
 
 }
 
@@ -2703,7 +2781,7 @@ into three pieces by t-SNE.
 
 \centering{
 
-\includegraphics[width=3.125in,height=\textheight]{images/fake_trees1.png}
+\includegraphics[width=3.125in,height=\textheight,keepaspectratio]{images/fake_trees1.png}
 
 }
 
@@ -2718,7 +2796,7 @@ lot more variation in the data, and less difference between clusters.}
 
 \centering{
 
-\includegraphics[width=3.125in,height=\textheight]{images/fake_trees2.png}
+\includegraphics[width=3.125in,height=\textheight,keepaspectratio]{images/fake_trees2.png}
 
 }
 
@@ -2733,7 +2811,7 @@ of the t-SNE mapping.}
 
 \centering{
 
-\includegraphics[width=3.125in,height=\textheight]{images/fake_trees3.png}
+\includegraphics[width=3.125in,height=\textheight,keepaspectratio]{images/fake_trees3.png}
 
 }
 
@@ -2859,7 +2937,7 @@ an effective means of simplifying and understanding a dataset.
 
 \centering{
 
-\includegraphics[width=1\textwidth,height=\textheight]{6-intro-clust_files/figure-pdf/fig-ideal-clusters-1.pdf}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{6-intro-clust_files/figure-pdf/fig-ideal-clusters-1.pdf}
 
 }
 
@@ -2985,13 +3063,13 @@ d_{\rm Euc} = \begin{bmatrix}
 
 \begin{minipage}{0.50\linewidth}
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{6-intro-clust_files/figure-pdf/unnamed-chunk-2-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{6-intro-clust_files/figure-pdf/unnamed-chunk-2-1.pdf}
 
 \end{minipage}%
 %
 \begin{minipage}{0.50\linewidth}
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{6-intro-clust_files/figure-pdf/unnamed-chunk-3-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{6-intro-clust_files/figure-pdf/unnamed-chunk-3-1.pdf}
 
 \end{minipage}%
 
@@ -3236,7 +3314,7 @@ controls are interactive.
 
 \centering{
 
-\includegraphics[width=2.8125in,height=\textheight]{images/penguins-bs6.png}
+\includegraphics[width=2.8125in,height=\textheight,keepaspectratio]{images/penguins-bs6.png}
 
 }
 
@@ -3248,7 +3326,7 @@ controls are interactive.
 
 \centering{
 
-\includegraphics[width=2.8125in,height=\textheight]{images/penguins-bs7.png}
+\includegraphics[width=2.8125in,height=\textheight,keepaspectratio]{images/penguins-bs7.png}
 
 }
 
@@ -3340,7 +3418,7 @@ Most of the Chinstrap species were recovered also (labelled as
 
 \centering{
 
-\includegraphics{images/fake_trees_sb.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/fake_trees_sb.png}}
 
 }
 
@@ -3529,7 +3607,7 @@ two-cluster solution. This two-cluster solution is shown in plot (d).
 
 \centering{
 
-\includegraphics[width=1\textwidth,height=\textheight]{8-hierarchical_files/figure-pdf/fig-hc-sim-1.pdf}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{8-hierarchical_files/figure-pdf/fig-hc-sim-1.pdf}
 
 }
 
@@ -3597,7 +3675,7 @@ clustering analysis is important for generating useful results.
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{8-hierarchical_files/figure-pdf/fig-problems-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{8-hierarchical_files/figure-pdf/fig-problems-1.pdf}
 
 }
 
@@ -3722,7 +3800,7 @@ linkage but not Wards linkage hierarchical clustering.
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{8-hierarchical_files/figure-pdf/fig-d1-s-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{8-hierarchical_files/figure-pdf/fig-d1-s-1.pdf}
 
 }
 
@@ -3855,7 +3933,7 @@ clustered across the gap.
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{8-hierarchical_files/figure-pdf/fig-d2-c-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{8-hierarchical_files/figure-pdf/fig-d2-c-1.pdf}
 
 }
 
@@ -3896,7 +3974,7 @@ from the others.
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{8-hierarchical_files/figure-pdf/fig-penguins-pairs-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{8-hierarchical_files/figure-pdf/fig-penguins-pairs-1.pdf}
 
 }
 
@@ -3937,7 +4015,7 @@ observations.}
 
 \centering{
 
-\includegraphics{images/penguins_gt_59.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/penguins_gt_59.png}}
 
 }
 
@@ -4089,7 +4167,7 @@ emphasizes it, bringing it more strongly to our attention.
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{8-hierarchical_files/figure-pdf/fig-penguins-ddw-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{8-hierarchical_files/figure-pdf/fig-penguins-ddw-1.pdf}
 
 }
 
@@ -4104,7 +4182,7 @@ emphasizes it, bringing it more strongly to our attention.
 
 \centering{
 
-\includegraphics{images/penguins_hflyw_59.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/penguins_hflyw_59.png}}
 
 }
 
@@ -4116,7 +4194,7 @@ emphasizes it, bringing it more strongly to our attention.
 
 \centering{
 
-\includegraphics{images/penguins_hflys_59.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/penguins_hflys_59.png}}
 
 }
 
@@ -4128,7 +4206,7 @@ emphasizes it, bringing it more strongly to our attention.
 
 \centering{
 
-\includegraphics{images/penguins_w3_59.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/penguins_w3_59.png}}
 
 }
 
@@ -4140,7 +4218,7 @@ emphasizes it, bringing it more strongly to our attention.
 
 \centering{
 
-\includegraphics{images/penguins_s3_59.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/penguins_s3_59.png}}
 
 }
 
@@ -4393,7 +4471,7 @@ divide that visually we would all agree should form a separation.
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{9-kmeans_files/figure-pdf/fig-km-2D-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{9-kmeans_files/figure-pdf/fig-km-2D-1.pdf}
 
 }
 
@@ -4456,7 +4534,7 @@ penguins data as shown in Figure~\ref{fig-p-km-pdf}.
 
 \centering{
 
-\includegraphics[width=4.16667in,height=\textheight]{images/p_km_71.png}
+\includegraphics[width=4.16667in,height=\textheight,keepaspectratio]{images/p_km_71.png}
 
 }
 
@@ -4587,7 +4665,7 @@ model.
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{10-model-based_files/figure-pdf/fig-penguins-bl-fl-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{10-model-based_files/figure-pdf/fig-penguins-bl-fl-1.pdf}
 
 }
 
@@ -4638,7 +4716,7 @@ model.
 
 \centering{
 
-\includegraphics[width=1\textwidth,height=\textheight]{10-model-based_files/figure-pdf/fig-penguins-bl-fl-mc-1.pdf}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{10-model-based_files/figure-pdf/fig-penguins-bl-fl-mc-1.pdf}
 
 }
 
@@ -4686,7 +4764,7 @@ three-cluster solution is the best match to the data shape.
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{10-model-based_files/figure-pdf/fig-penguins-bic-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{10-model-based_files/figure-pdf/fig-penguins-bic-1.pdf}
 
 }
 
@@ -4722,7 +4800,7 @@ equally as good, but the very best model is the four-cluster VEE.}
 
 \centering{
 
-\includegraphics{images/penguins_best_mc_60.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/penguins_best_mc_60.png}}
 
 }
 
@@ -4734,7 +4812,7 @@ equally as good, but the very best model is the four-cluster VEE.}
 
 \centering{
 
-\includegraphics{images/penguins_simpler_mc_60.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/penguins_simpler_mc_60.png}}
 
 }
 
@@ -4914,7 +4992,7 @@ indicating which points to connect to draw the net.
 
 \centering{
 
-\includegraphics{images/fig-p-som2-1.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/fig-p-som2-1.png}}
 
 }
 
@@ -4926,7 +5004,7 @@ indicating which points to connect to draw the net.
 
 \centering{
 
-\includegraphics{images/p_som_47.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/p_som_47.png}}
 
 }
 
@@ -5147,7 +5225,7 @@ compute the \(p\)-D convex hull.
 
 \centering{
 
-\includegraphics{images/fig-penguin-hull-2D-1.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/fig-penguin-hull-2D-1.png}}
 
 }
 
@@ -5159,7 +5237,7 @@ compute the \(p\)-D convex hull.
 
 \centering{
 
-\includegraphics{images/penguins_chull_105.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/penguins_chull_105.png}}
 
 }
 
@@ -5244,7 +5322,7 @@ should be grouped.
 
 \centering{
 
-\includegraphics{images/compare-clusters1.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/compare-clusters1.png}}
 
 }
 
@@ -5259,7 +5337,7 @@ disagreement on eight penguins is with cluster 1 from Wards and cluster
 
 \centering{
 
-\includegraphics{images/compare-clusters2.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/compare-clusters2.png}}
 
 }
 
@@ -5473,7 +5551,7 @@ examine the relationship between predictors, and the different classes.
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{13-intro-class_files/figure-pdf/fig-sup-example-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{13-intro-class_files/figure-pdf/fig-sup-example-1.pdf}
 
 }
 
@@ -5695,7 +5773,7 @@ Figure~\ref{fig-p-lda}).
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{14-lda_files/figure-pdf/fig-p-lda-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{14-lda_files/figure-pdf/fig-p-lda-1.pdf}
 
 }
 
@@ -5771,7 +5849,7 @@ depend on assumptions about the data which should be validated.
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{14-lda_files/figure-pdf/fig-lda-assumptions1-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{14-lda_files/figure-pdf/fig-lda-assumptions1-1.pdf}
 
 }
 
@@ -5787,7 +5865,7 @@ variance-covariances are equal.}
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{14-lda_files/figure-pdf/fig-lda-assumptions2-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{14-lda_files/figure-pdf/fig-lda-assumptions2-1.pdf}
 
 }
 
@@ -5816,7 +5894,7 @@ safe to assume that the population variance-covariances are equal.
 
 \centering{
 
-\includegraphics{images/penguins_lda1.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/penguins_lda1.png}}
 
 }
 
@@ -5828,7 +5906,7 @@ safe to assume that the population variance-covariances are equal.
 
 \centering{
 
-\includegraphics{images/penguins_lda2.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/penguins_lda2.png}}
 
 }
 
@@ -5899,7 +5977,7 @@ difficult to view all together.
 
 \centering{
 
-\includegraphics{images/penguins_lda_pooled1.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/penguins_lda_pooled1.png}}
 
 }
 
@@ -5911,7 +5989,7 @@ difficult to view all together.
 
 \centering{
 
-\includegraphics{images/penguins_lda_pooled2.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/penguins_lda_pooled2.png}}
 
 }
 
@@ -5990,7 +6068,7 @@ regions, with the observed data and the sample means overlaid.
 
 \centering{
 
-\includegraphics[width=0.7\textwidth,height=\textheight]{14-lda_files/figure-pdf/fig-lda-2D-boundary-1.pdf}
+\includegraphics[width=0.7\linewidth,height=\textheight,keepaspectratio]{14-lda_files/figure-pdf/fig-lda-2D-boundary-1.pdf}
 
 }
 
@@ -6036,7 +6114,7 @@ classification rules in this 2D space.\\
 
 \centering{
 
-\includegraphics[width=2.08333in,height=\textheight]{images/penguins_lda_boundaries.png}
+\includegraphics[width=2.08333in,height=\textheight,keepaspectratio]{images/penguins_lda_boundaries.png}
 
 }
 
@@ -6048,7 +6126,7 @@ classification rules in this 2D space.\\
 
 \centering{
 
-\includegraphics[width=2.08333in,height=\textheight]{images/fig-lda-2D-boundaries-1.png}
+\includegraphics[width=2.08333in,height=\textheight,keepaspectratio]{images/fig-lda-2D-boundaries-1.png}
 
 }
 
@@ -6056,9 +6134,6 @@ classification rules in this 2D space.\\
 
 \end{minipage}%
 \newline
-\begin{minipage}{0.50\linewidth}
-
-\end{minipage}%
 
 \caption{\label{fig-penguins-lda-boundaries-pdf}Examining the boundaries
 produced by the LDA model in the full 4D with a slice tour (left shows a
@@ -6167,7 +6242,7 @@ four variables.
 
 \centering{
 
-\includegraphics[width=1\textwidth,height=\textheight]{15-forests_files/figure-pdf/fig-p-bl-bd-tree-1.pdf}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{15-forests_files/figure-pdf/fig-p-bl-bd-tree-1.pdf}
 
 }
 
@@ -6219,7 +6294,7 @@ examine without them.
 
 \centering{
 
-\includegraphics{images/penguins_lda_boundaries.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/penguins_lda_boundaries.png}}
 
 }
 
@@ -6231,7 +6306,7 @@ examine without them.
 
 \centering{
 
-\includegraphics{images/penguins_tree_boundaries.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/penguins_tree_boundaries.png}}
 
 }
 
@@ -6357,7 +6432,7 @@ the votes matrix to get the ternary diagram.
 
 \centering{
 
-\includegraphics{images/penguins_rf_votes.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/penguins_rf_votes.png}}
 
 }
 
@@ -6369,7 +6444,7 @@ the votes matrix to get the ternary diagram.
 
 \centering{
 
-\includegraphics{images/fig-p-votes-ggplot-1.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/fig-p-votes-ggplot-1.png}}
 
 }
 
@@ -6472,7 +6547,7 @@ interesting to see how well the random forest model performs.
 
 \begin{minipage}{0.50\linewidth}
 
-\includegraphics[width=4.16667in,height=\textheight]{images/ft-votes.png}
+\includegraphics[width=4.16667in,height=\textheight,keepaspectratio]{images/ft-votes.png}
 
 \end{minipage}%
 
@@ -6597,10 +6672,10 @@ and PC4.
 \begin{figure}
 
 \begin{minipage}{0.50\linewidth}
-\includegraphics{images/ft_cl1.png}\end{minipage}%
+\pandocbounded{\includegraphics[keepaspectratio]{images/ft_cl1.png}}\end{minipage}%
 %
 \begin{minipage}{0.50\linewidth}
-\includegraphics{images/fig-ft-cl1-pc-1.png}\end{minipage}%
+\pandocbounded{\includegraphics[keepaspectratio]{images/fig-ft-cl1-pc-1.png}}\end{minipage}%
 
 \caption{\label{fig-ft-cl-pdf}Focusing on class 1 in the
 \texttt{fake\_trees} data. The most important variables were PC1 and
@@ -6652,10 +6727,10 @@ points, but it is clearer if more variables are used.
 \begin{figure}
 
 \begin{minipage}{0.50\linewidth}
-\includegraphics{images/ft_cl8.png}\end{minipage}%
+\pandocbounded{\includegraphics[keepaspectratio]{images/ft_cl8.png}}\end{minipage}%
 %
 \begin{minipage}{0.50\linewidth}
-\includegraphics{images/fig-ft-cl8-pc-1.png}\end{minipage}%
+\pandocbounded{\includegraphics[keepaspectratio]{images/fig-ft-cl8-pc-1.png}}\end{minipage}%
 
 \caption{\label{fig-ft-cl2}Focusing on class 8 in the
 \texttt{fake\_trees} data using a tour (left) reveals that it shares an
@@ -6782,7 +6857,7 @@ and then fit the model.
 
 \centering{
 
-\includegraphics[width=1\textwidth,height=\textheight]{16-svm_files/figure-pdf/fig-svm-toy-1.pdf}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{16-svm_files/figure-pdf/fig-svm-toy-1.pdf}
 
 }
 
@@ -6949,7 +7024,7 @@ approach.
 
 \centering{
 
-\includegraphics[width=2.08333in,height=\textheight]{images/chinstrap_svs.png}
+\includegraphics[width=2.08333in,height=\textheight,keepaspectratio]{images/chinstrap_svs.png}
 
 }
 
@@ -6961,7 +7036,7 @@ approach.
 
 \centering{
 
-\includegraphics[width=2.08333in,height=\textheight]{images/chinstrap_svm.png}
+\includegraphics[width=2.08333in,height=\textheight,keepaspectratio]{images/chinstrap_svm.png}
 
 }
 
@@ -7045,7 +7120,7 @@ and \texttt{bm}). \index{tour!radial}
 
 \centering{
 
-\includegraphics[width=2.08333in,height=\textheight]{images/chinstrap_rad_bl1.png}
+\includegraphics[width=2.08333in,height=\textheight,keepaspectratio]{images/chinstrap_rad_bl1.png}
 
 }
 
@@ -7057,7 +7132,7 @@ and \texttt{bm}). \index{tour!radial}
 
 \centering{
 
-\includegraphics[width=2.08333in,height=\textheight]{images/chinstrap_rad_bl2.png}
+\includegraphics[width=2.08333in,height=\textheight,keepaspectratio]{images/chinstrap_rad_bl2.png}
 
 }
 
@@ -7069,7 +7144,7 @@ and \texttt{bm}). \index{tour!radial}
 
 \centering{
 
-\includegraphics[width=2.08333in,height=\textheight]{images/chinstrap_rad_bd.png}
+\includegraphics[width=2.08333in,height=\textheight,keepaspectratio]{images/chinstrap_rad_bd.png}
 
 }
 
@@ -7081,7 +7156,7 @@ and \texttt{bm}). \index{tour!radial}
 
 \centering{
 
-\includegraphics[width=2.08333in,height=\textheight]{images/chinstrap_rad_bm.png}
+\includegraphics[width=2.08333in,height=\textheight,keepaspectratio]{images/chinstrap_rad_bm.png}
 
 }
 
@@ -7271,7 +7346,7 @@ model will also be saved in order to diagnose and make predictions.
 
 \centering{
 
-\includegraphics{images/nn-diagram.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/nn-diagram.png}}
 
 }
 
@@ -7308,14 +7383,14 @@ these points.
 
 \begin{minipage}{0.50\linewidth}
 
-\includegraphics[width=2.29167in,height=\textheight]{images/p_split.png}
+\includegraphics[width=2.29167in,height=\textheight,keepaspectratio]{images/p_split.png}
 
 \subcaption{\label{}Grand tour}
 \end{minipage}%
 %
 \begin{minipage}{0.50\linewidth}
 
-\includegraphics[width=2.29167in,height=\textheight]{images/p_split_guided.png}
+\includegraphics[width=2.29167in,height=\textheight,keepaspectratio]{images/p_split_guided.png}
 
 \subcaption{\label{}Guided tour}
 \end{minipage}%
@@ -7499,7 +7574,7 @@ this matrix before computing the data projection.
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{17-nn_files/figure-pdf/fig-hidden-layer-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{17-nn_files/figure-pdf/fig-hidden-layer-1.pdf}
 
 }
 
@@ -7593,7 +7668,7 @@ for the votes matrix from a random forest in Section~\ref{sec-votes}.
 
 \begin{figure}[H]
 
-{\centering \includegraphics[width=0.7\textwidth,height=\textheight]{17-nn_files/figure-pdf/unnamed-chunk-17-1.pdf}
+{\centering \includegraphics[width=0.7\linewidth,height=\textheight,keepaspectratio]{17-nn_files/figure-pdf/unnamed-chunk-17-1.pdf}
 
 }
 
@@ -7666,7 +7741,7 @@ increases on average.
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{17-nn_files/figure-pdf/fig-shapley-pcp-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{17-nn_files/figure-pdf/fig-shapley-pcp-1.pdf}
 
 }
 
@@ -7688,7 +7763,7 @@ impacted by \texttt{bm} being in the model.
 
 \centering{
 
-\includegraphics[width=1\textwidth,height=\textheight]{17-nn_files/figure-pdf/fig-penguins-bl-bm-bd-1.pdf}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{17-nn_files/figure-pdf/fig-penguins-bl-bm-bd-1.pdf}
 
 }
 
@@ -7711,7 +7786,7 @@ along with those of the LDA model.
 
 \centering{
 
-\includegraphics[width=2.08333in,height=\textheight]{images/fig-lda-2D-boundaries-1.png}
+\includegraphics[width=2.08333in,height=\textheight,keepaspectratio]{images/fig-lda-2D-boundaries-1.png}
 
 }
 
@@ -7723,7 +7798,7 @@ along with those of the LDA model.
 
 \centering{
 
-\includegraphics[width=3.02083in,height=\textheight]{images/penguins-nn-boundaries-1.png}
+\includegraphics[width=3.02083in,height=\textheight,keepaspectratio]{images/penguins-nn-boundaries-1.png}
 
 }
 
@@ -7863,7 +7938,7 @@ components found; returning the first one. To return all, use
 `return_all = TRUE`.
 \end{verbatim}
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{17-nn_files/figure-pdf/unnamed-chunk-27-1.png}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{17-nn_files/figure-pdf/unnamed-chunk-27-1.png}
 
 Looking only at the first two principal components we note some clear
 differences from the transformation in the hidden layer. The
@@ -7880,16 +7955,30 @@ use the tour on the first five principal components.
 
 \begin{minipage}{0.50\linewidth}
 
-\includegraphics[width=2.08333in,height=\textheight]{images/fashion_images_gt_36.png}
+\begin{figure}[H]
 
-\subcaption{\label{}Input space}
+{\centering \includegraphics[width=2.08333in,height=\textheight,keepaspectratio]{images/fashion_images_gt_36.png}
+
+}
+
+\subcaption{Input space}
+
+\end{figure}%
+
 \end{minipage}%
 %
 \begin{minipage}{0.50\linewidth}
 
-\includegraphics[width=2.08333in,height=\textheight]{images/fashion_activation_gt_126.png}
+\begin{figure}[H]
 
-\subcaption{\label{}Activations}
+{\centering \includegraphics[width=2.08333in,height=\textheight,keepaspectratio]{images/fashion_activation_gt_126.png}
+
+}
+
+\subcaption{Activations}
+
+\end{figure}%
+
 \end{minipage}%
 \newline
 \begin{minipage}{0.50\linewidth}
@@ -7960,22 +8049,22 @@ the model is uncertain about.
 \begin{figure}
 
 \begin{minipage}{0.33\linewidth}
-\includegraphics[width=1.35417in,height=\textheight]{images/fashion_confustion_gt_36.png}\end{minipage}%
+\includegraphics[width=1.35417in,height=\textheight,keepaspectratio]{images/fashion_confustion_gt_36.png}\end{minipage}%
 %
 \begin{minipage}{0.33\linewidth}
-\includegraphics[width=1.35417in,height=\textheight]{images/fashion_confusion_gt_58.png}\end{minipage}%
+\includegraphics[width=1.35417in,height=\textheight,keepaspectratio]{images/fashion_confusion_gt_58.png}\end{minipage}%
 %
 \begin{minipage}{0.33\linewidth}
-\includegraphics[width=1.35417in,height=\textheight]{images/fashion_confusion_gt_69.png}\end{minipage}%
+\includegraphics[width=1.35417in,height=\textheight,keepaspectratio]{images/fashion_confusion_gt_69.png}\end{minipage}%
 \newline
 \begin{minipage}{0.33\linewidth}
-\includegraphics[width=1.35417in,height=\textheight]{images/fashion_confusion_gt_161.png}\end{minipage}%
+\includegraphics[width=1.35417in,height=\textheight,keepaspectratio]{images/fashion_confusion_gt_161.png}\end{minipage}%
 %
 \begin{minipage}{0.33\linewidth}
-\includegraphics[width=1.35417in,height=\textheight]{images/fashion_confusion_gt_212.png}\end{minipage}%
+\includegraphics[width=1.35417in,height=\textheight,keepaspectratio]{images/fashion_confusion_gt_212.png}\end{minipage}%
 %
 \begin{minipage}{0.33\linewidth}
-\includegraphics[width=1.35417in,height=\textheight]{images/fashion_confusion_gt_333.png}\end{minipage}%
+\includegraphics[width=1.35417in,height=\textheight,keepaspectratio]{images/fashion_confusion_gt_333.png}\end{minipage}%
 
 \caption{\label{fig-fashion-confusion-split-pdf}A tour of the confusion
 matrix for the fashion MNIST test observations, focusing on a subset of
@@ -8122,7 +8211,7 @@ species.
 
 \centering{
 
-\includegraphics[width=2.08333in,height=\textheight]{images/p_rf_errors.png}
+\includegraphics[width=2.08333in,height=\textheight,keepaspectratio]{images/p_rf_errors.png}
 
 }
 
@@ -8134,7 +8223,7 @@ species.
 
 \centering{
 
-\includegraphics[width=2.08333in,height=\textheight]{images/p_rf_errors_guided.png}
+\includegraphics[width=2.08333in,height=\textheight,keepaspectratio]{images/p_rf_errors_guided.png}
 
 }
 
@@ -8606,6 +8695,7 @@ versus interpretability of classification. \emph{Biometrics},
 Fraley, C., \& Raftery, A. E. (2002). Model-based {C}lustering,
 {D}iscriminant {A}nalysis, {D}ensity {E}stimation. \emph{Journal of the
 American Statistical Association}, \emph{97}, 611--631.
+\url{http://www.stat.washington.edu/mclust}
 
 \bibitem[\citeproctext]{ref-R-mclust}
 Fraley, C., Raftery, A. E., \& Scrucca, L. (2024). \emph{Mclust:
@@ -9094,8 +9184,14 @@ Schloerke, B., Cook, D., Larmarange, J., Briatte, F., Marbach, M.,
 Thoen, E., Elberg, A., \& Crowley, J. (2024). \emph{GGally: Extension to
 ggplot2}. \url{https://ggobi.github.io/ggally/}
 
+\bibitem[\citeproctext]{ref-mclust}
+Scrucca, L., Fraley, C., Murphy, T. B., \& Raftery, A. E. (2023a).
+\emph{Model-based clustering, classification, and density estimation
+using {mclust} in {R}}. Chapman; Hall/CRC.
+\url{https://doi.org/10.1201/9781003277965}
+
 \bibitem[\citeproctext]{ref-mclust2023}
-Scrucca, L., Fraley, C., Murphy, T. B., \& Raftery, A. E. (2023).
+Scrucca, L., Fraley, C., Murphy, T. B., \& Raftery, A. E. (2023b).
 \emph{Model-based clustering, classification, and density estimation
 using {mclust} in {R}}. Chapman; Hall/CRC.
 \url{https://doi.org/10.1201/9781003277965}
@@ -9759,7 +9855,7 @@ part of the overall space.
 
 \centering{
 
-\includegraphics[width=2.1875in,height=\textheight]{images/tour_paths1d.png}
+\includegraphics[width=2.1875in,height=\textheight,keepaspectratio]{images/tour_paths1d.png}
 
 }
 
@@ -9771,7 +9867,7 @@ part of the overall space.
 
 \centering{
 
-\includegraphics[width=2.1875in,height=\textheight]{images/tour_paths2d.png}
+\includegraphics[width=2.1875in,height=\textheight,keepaspectratio]{images/tour_paths2d.png}
 
 }
 
@@ -9812,7 +9908,7 @@ ordering of categories, the tour is not advised.
 
 \centering{
 
-\includegraphics[width=2.29167in,height=\textheight]{images/discrete_data.png}
+\includegraphics[width=2.29167in,height=\textheight,keepaspectratio]{images/discrete_data.png}
 
 }
 
@@ -9824,7 +9920,7 @@ ordering of categories, the tour is not advised.
 
 \centering{
 
-\includegraphics[width=2.29167in,height=\textheight]{images/jittered_data.png}
+\includegraphics[width=2.29167in,height=\textheight,keepaspectratio]{images/jittered_data.png}
 
 }
 
@@ -9863,7 +9959,7 @@ values are outside the domain of the complete cases.
 
 \centering{
 
-\includegraphics[width=2.1875in,height=\textheight]{images/fig-missings-below-2D-pdf-1.png}
+\includegraphics[width=2.1875in,height=\textheight,keepaspectratio]{images/fig-missings-below-2D-pdf-1.png}
 
 }
 
@@ -9875,7 +9971,7 @@ values are outside the domain of the complete cases.
 
 \centering{
 
-\includegraphics[width=2.1875in,height=\textheight]{images/missing_values1.png}
+\includegraphics[width=2.1875in,height=\textheight,keepaspectratio]{images/missing_values1.png}
 
 }
 
@@ -9887,7 +9983,7 @@ values are outside the domain of the complete cases.
 
 \centering{
 
-\includegraphics[width=2.1875in,height=\textheight]{images/fig-missings-mean-2D-pdf-1.png}
+\includegraphics[width=2.1875in,height=\textheight,keepaspectratio]{images/fig-missings-mean-2D-pdf-1.png}
 
 }
 
@@ -9899,7 +9995,7 @@ values are outside the domain of the complete cases.
 
 \centering{
 
-\includegraphics[width=2.1875in,height=\textheight]{images/missing_values2.png}
+\includegraphics[width=2.1875in,height=\textheight,keepaspectratio]{images/missing_values2.png}
 
 }
 
@@ -10277,8 +10373,8 @@ penguins.
 \addcontentsline{toc}{subsection}{Variables}
 
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.3704}}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.6296}}@{}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.3704}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.6296}}@{}}
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
 Name
@@ -10457,7 +10553,7 @@ sketches in a recognisable form:
 
 \centering{
 
-\includegraphics[width=0.2\textwidth,height=\textheight]{A2-data_files/figure-pdf/fig-sketches-1.pdf}
+\includegraphics[width=0.2\linewidth,height=\textheight,keepaspectratio]{A2-data_files/figure-pdf/fig-sketches-1.pdf}
 
 }
 
@@ -10641,8 +10737,8 @@ has 10,000 images.
 \addcontentsline{toc}{subsection}{Variables}
 
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.3704}}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.6296}}@{}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.3704}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.6296}}@{}}
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
 Name
@@ -10877,5 +10973,6 @@ self-organising map (SOM) & Kohonen map & use a grid-constrained set of means to
 
 
 \printindex
+
 
 \end{document}
