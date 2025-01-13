@@ -205,11 +205,11 @@
 \usepackage{booktabs}
 \usepackage{caption}
 \usepackage{longtable}
+\usepackage{colortbl}
 \usepackage{array}
 \usepackage{multirow}
 \usepackage{wrapfig}
 \usepackage{float}
-\usepackage{colortbl}
 \usepackage{pdflscape}
 \usepackage{tabu}
 \usepackage{threeparttable}
@@ -597,9 +597,8 @@ centre of the plot. Clustering can be seen in many of the projections,
 with the strongest being when the contribution of both variables is
 equal, and the projection is \texttt{(0.707,\ \ 0.707)} or
 \texttt{(-0.707,\ -0.707)}. (If you are curious about the number
-\texttt{0.707}, read the last section of this chapter.)
-
-\index{projection!1D}
+\texttt{0.707}, the Chapter~\ref{sec-notation} provides the
+explanation.) \index{projection!1D} \index{tour!grand}
 
 \begin{figure*}
 
@@ -626,6 +625,25 @@ and we can see through the data. The donut shape can be inferred from
 watching many 2D projections but some are more revealing that others.
 The projection shown in (b) is where the hole in the donut is clearly
 visible. \index{projection!2D}
+
+\section{Reading the axes}\label{reading-the-axes}
+
+The coefficients of the projection are important to matching the
+variables with the patterns detected. For example, in the 2D data used
+in Figure~\ref{fig-explain-1D-pdf} the primary structure to detect is
+the clustering. It is when a positive, equal combination of the two
+variables \texttt{x1} and \texttt{x2} are used that the two clusters can
+be observed in a projection.
+
+When the projection dimension is 2, as in the example data used in
+Figure~\ref{fig-explain-2D-pdf}, there are two sets of projection
+coefficients. These are represented in the plot by the circle and line
+segments. The direction and length of the line segments indicate how the
+variable contributes to the view seen. Lining these up with any patterns
+in the data helps to understand how the variables contribute to making
+the pattern. In this data, the interesting feature is the hole in the
+donut, which can be seen in certain combinations of \texttt{x1} and
+\texttt{x3} plotted against \texttt{x2}.
 
 \section{What's different about space beyond
 2D?}\label{whats-different-about-space-beyond-2d}
@@ -919,6 +937,148 @@ book. It provides the machinery for running a tour, and has the
 flexibility that it can be ported, modified, and used as a regular
 element of data analysis.
 
+\section{An illustration of the
+benefits}\label{an-illustration-of-the-benefits}
+
+The Palmer penguins data (A. M. Horst et al., 2022) is available in the
+R package \texttt{palmerpenguins} (A. Horst et al., 2022). These are
+measurements on three species of penguins, recording the bill length
+(\texttt{bl}) and depth (\texttt{bd}), flipper length (\texttt{fl}) and
+body mass (\texttt{bm}), along with the sex, island location and year of
+recording. Of interest here are the four physical measurements and the
+species. There are two penguins with missing values on these
+measurements which are removed from the analysis below. The variables
+have also been standardised. \index{data!penguins}
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{1-intro_files/figure-pdf/fig-penguins-scatmat-1.pdf}
+
+}
+
+\caption{\label{fig-penguins-scatmat}Scatterplot matrix of the penguins,
+with colour indicating species.}
+
+\end{figure}%
+
+Figure~\ref{fig-penguins-scatmat} shows the data as a scatterplot
+matrix, as produced by the \texttt{ggscatmat} function in the R package
+GGally (Emerson et al., 2013), a common way to examine multivariate data
+with low-dimensional plots: pairwise scatterplots and univariate density
+plots. A lot of information can be gained from viewing this plot:
+
+\begin{itemize}
+\tightlist
+\item
+  the three species form three clusters, indicating that the physical
+  characteristics of the three are different.
+\item
+  the Gentoo species forms a separated cluster when \texttt{bd} is
+  plotted with \texttt{bm}.
+\item
+  there is one anomaly, a Chinstrap penguin that has a very low value of
+  \texttt{fl} relative to it's \texttt{bl} measurement.
+\end{itemize}
+
+Although one cannot see it in this plot clearly, making the plot larger
+also reveals that \texttt{fl} values appear to have been often rounded
+because there is some discreteness in the plots.
+
+\begin{figure}
+
+\begin{minipage}{0.50\linewidth}
+
+\pandocbounded{\includegraphics[keepaspectratio]{images/penguins6.png}}
+
+\subcaption{\label{}Nice view}
+\end{minipage}%
+%
+\begin{minipage}{0.50\linewidth}
+
+\pandocbounded{\includegraphics[keepaspectratio]{images/penguins5.png}}
+
+\subcaption{\label{}Chinstrap anomaly}
+\end{minipage}%
+\newline
+\begin{minipage}{0.50\linewidth}
+
+\pandocbounded{\includegraphics[keepaspectratio]{images/penguins3.png}}
+
+\subcaption{\label{}Gentoo anomaly}
+\end{minipage}%
+%
+\begin{minipage}{0.50\linewidth}
+
+\pandocbounded{\includegraphics[keepaspectratio]{images/penguins4.png}}
+
+\subcaption{\label{}Multiple anomalies}
+\end{minipage}%
+
+\caption{\label{fig-penguins-tour}Four projections from a tour, showing
+the data \emph{from more sides}. We can see that the separation between
+clusters is larger and that there are more unusually shaped penguins.}
+
+\end{figure}%
+
+In Figure~\ref{fig-penguins-tour} there are four 2D projections from a
+grand tour of the penguins data. Projection (a) reveals a 2D projection
+where all three species are distinct. It's quite a nice view where all
+species have circular spread, the Gentoo are separated, and the other
+two are very slightly overlapped. There is also one Adelie penguin that
+is a little different from the others here, primarily due to having
+large flippers but small bill depth. Projection (b) shows the anomalous
+Chinstrap penguin, and reveals that the gap between it and the other
+penguins is bigger than was seen in the scatterplot matrix. Projection
+(c) that there is an unusual Gentoo penguin, and projection (d) shows
+possibly a few more anomalous Gentoo, with relatively small \texttt{bl}
+and larger \texttt{bm}.
+
+In terms of understanding how the variables contribute to the patterns
+observed, we need to study the axes display on each plot. In projection
+(a) showing the nice view of the clusters, all four variables contribute
+in an interesting way. The variables operate in pairs of what we might
+call contrasts in statistics: \texttt{bl} and \texttt{bm} combine in the
+top left to bottom right direction, while \texttt{fl} and \texttt{bd}
+combine in the top right to bottom left direction. Because the axes are
+pointing in opposite directions, in each pair one variable contributes
+in the opposite way to the other. That is, one coefficient in the pair
+will be positive and the other negative. We can also infer that
+\texttt{fl} and \texttt{bd} contribute most to distinguishing Gentoo
+from the other species, and also that \texttt{bl} and \texttt{bm}
+contribute primarily to distinguishing Chinstrap from Adelie penguins.
+
+Interpretations can be checked against plots of the individual
+variables, like the scatterplot matrix in
+Figure~\ref{fig-penguins-scatmat}. Here, can see that, yes, \texttt{bl}
+is primarily distinguishing Chinstrap from Adelie, and \texttt{fl}
+strongly contributes to distinguishing Gentoo from the others. The plot
+of \texttt{bl} against \texttt{fl} has a reasonably good view of the
+three species as different from each other. This view gets even better
+when \texttt{bm} is combined with \texttt{bl}, and \texttt{bd} is
+combined with \texttt{fl}, to produce what we see with the tour.
+
+The penguins data is relatively simple, and well-studied. Despite this,
+examining this data with a tour of linear projections provides a few
+more details that may have gone unobserved.
+
+\section{Common choices of tours}\label{common-choices-of-tours}
+
+There are many different types of tours, all generated by different ways
+of choosing the sequence of linear projections to show. There are three
+main ones we commonly use, grand tour, guided tour and manual or radial
+tour. The grand tour is designed to show as many projections of the data
+as fast as possible with the goal being to give an overview or big
+picture of the data. The guided tour is used when particular patterns,
+such as clusters or anomalies, need to be discovered. It steers the
+choice of projections towards those that have these patterns. The radial
+tour a variable (or combination of two) from the projection, then puts
+it back, with the specific intent to learn if the pattern depends on
+this variable's contribution. If the pattern disappears when the
+variable disappears it means that this variable is vital or very
+important for defining the pattern.
+
 \section*{Exercises}\label{exercises}
 \addcontentsline{toc}{section}{Exercises}
 
@@ -947,8 +1107,7 @@ element of data analysis.
 
 \bookmarksetup{startatroot}
 
-\chapter{Notation conventions and R
-objects}\label{notation-conventions-and-r-objects}
+\chapter{Notation conventions and R objects}\label{sec-notation}
 
 The data can be considered to be a matrix of numbers with the columns
 corresponding to variables, and the rows correspond to observations. It
@@ -1605,12 +1764,13 @@ analysis}\label{principal-component-analysis}
 \index{dimension reduction!principal component analysis (PCA)}
 
 Reducing dimensionality using principal component analysis (PCA) dates
-back to Pearson (1901) and Hotelling (1933), and Jolliffe \& Cadima
-(2016) provides a current overview. The goal is to find a smaller set of
-variables, \(q (< p)\), that contain as much information as the original
-as possible. The new set of variables, known as principal components
-(PCs), are linear combinations of the original variables. The PCs can be
-used to represent the data in a lower-dimensional space.
+back to Pearson (1901) and Hotelling (1933). The goal is to find a
+smaller set of variables, \(q (< p)\), that contain as much information
+as the original, as possible. The new set of variables, known as
+principal components (PCs), are linear combinations of the original
+variables. The PCs can be used to represent the data in a
+lower-dimensional space. Jolliffe \& Cadima (2016) provides a
+contemporary review of the century of developments in PCA.
 
 The process is essentially an optimisation procedure, although PCA has
 an analytical solution. It solves the problem of
@@ -1619,21 +1779,28 @@ an analytical solution. It solves the problem of
 \max_{a_k} ~\text{Var} (Xa_k),
 \] where \(X\) is the \(n \times p\) data matrix, \(a_k (k=1, ..., p)\)
 is a 1D projection vector, called an eigenvector, and the
-\(\text{Var} (Xa_k)\) is called an eigenvalue. So PCA is a sequential
-process, that will find the direction in the high-dimensional space (as
-given by the first eigenvector) where the data is most varied, and then
-find the second most varied direction, and so on. The eigenvectors
-define the combination of the original variables, and the eigenvalues
-define the amount of variance explained by the reduced number of
-variables. \index{dimension reduction!eigenvalue}
+\(\text{Var} (Xa_k)\) is called an eigenvalue. PCA is a sequential
+process: you first find the projection that captures the most variance,
+then you find a projection that is orthogonal to the first axis that
+captures the most variance in the \((p-1)\)-dimensional space, then you
+find a projection that is orthogonal to the first two axes that captures
+the most variance in the \((p-2)\)-dimensional space, and so on. The
+eigenvectors define the combination of the original variables, and the
+eigenvalues define the amount of total variance explained by each of the
+new of variables. \index{dimension reduction!eigenvalue}
 \index{dimension reduction!eigenvector}
 
-PCA is very broadly useful for summarising linear association by using
-combinations of variables that are highly correlated. However, high
-correlation can also occur when there are outliers, or clustering. PCA
-is commonly used to detect these patterns also.
+\infobox{Visualisation can be used to assess if PCA is suitable to use to summarise the variation in the data. It is also used to detect other patterns -- clustering, outliers or non-linear association -- which are interesting to find and indicate that PCA is not suitable.}
 
-\infobox{With visualisation we want to assess whether it is appropriate to use PCA to summarise any linear association by using combinations of variables that are highly correlated. It can help to detect other patterns that might affect the PCA results such as outliers, clustering or non-linear dependence.}
+PCA is very broadly useful for summarising linear association by using
+combinations of the variables that are highly correlated. However, high
+correlation can also occur when there are outliers, or clustering. PCA
+is commonly used to detect these patterns also, although this might NOT
+be a reliable way to do so. To detect clustering or anomalies, using
+more a different approach that is specifically focused on these types of
+patterns is advisable. To some extent capturing clustering or anomalies
+using PCA is actually finding problematic patterns that adversely
+affects conducting appropriate dimension reduction.
 
 PCA is not very effective when the distribution of the variables is
 highly skewed, so it can be helpful to transform variables to make them
@@ -1708,7 +1875,7 @@ plane data.}
 
 \toprule
 Variable & PC1 & PC2 \\ 
-\midrule
+\midrule\addlinespace[2.5pt]
 x1 & $0.58$ & $-0.06$ \\ 
 x2 & $-0.55$ & $0.21$ \\ 
 x3 & $0.47$ & $-0.41$ \\ 
@@ -1727,7 +1894,7 @@ box data.}
 
 \toprule
 Variable & PC1 & PC2 & PC3 \\ 
-\midrule
+\midrule\addlinespace[2.5pt]
 x1 & $-0.51$ & $0.46$ & $0.11$ \\ 
 x2 & $0.51$ & $0.46$ & $0.00$ \\ 
 x3 & $-0.65$ & $-0.09$ & $0.23$ \\ 
@@ -1770,7 +1937,7 @@ plane plus noise data.}
 
 \toprule
 Variable & PC1 & PC2 & PC3 & PC4 \\ 
-\midrule
+\midrule\addlinespace[2.5pt]
 x1 & $0.58$ & $0.04$ & $0.01$ & $0.00$ \\ 
 x2 & $-0.55$ & $-0.18$ & $-0.03$ & $0.07$ \\ 
 x3 & $0.47$ & $0.37$ & $0.05$ & $-0.20$ \\ 
@@ -2005,7 +2172,7 @@ coefficients on the scoring statistics.}
 
 \toprule
 Variable & PC1 & PC2 & PC3 & PC4 \\ 
-\midrule
+\midrule\addlinespace[2.5pt]
 disposals & $0.31$ & $-0.05$ & $-0.03$ & $0.07$ \\ 
 possessions & $0.31$ & $-0.03$ & $-0.07$ & $0.09$ \\ 
 kicks & $0.29$ & $-0.04$ & $0.09$ & $-0.12$ \\ 
@@ -2492,12 +2659,12 @@ is an unusual observation also.}
 \markright{Project}
 
 Linear dimension reduction can optimise for other criteria, and here we
-will explore one example: the algorithm implemented in the
-\texttt{dobin} package finds a basis in which the first few directions
-are optimized for the detection of outliers in the data. We will examine
-how it performs for the \texttt{plane\_noise\_outliers} data (the
-example where outliers were hidden in the first four principal
-components.)
+will explore one example: the algorithm (Kandanaarachchi \& Hyndman,
+2021) implemented in the \texttt{dobin} package (Kandanaarachchi, 2022)
+finds a basis in which the first few directions are optimized for the
+detection of outliers in the data. We will examine how it performs for
+the \texttt{plane\_noise\_outliers} data (the example where outliers
+were hidden in the first four principal components.)
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -8672,6 +8839,12 @@ analysis: Understanding it, doing it, and making it useful} (pp.
 Dykes, J., MacEachren, A. M., \& Kraak, M.-J. (2005). \emph{Exploring
 geovisualization}. Elsevier.
 
+\bibitem[\citeproctext]{ref-emerson2013}
+Emerson, J. W., Green, W. A., Schloerke, B., Crowley, J., Cook, D.,
+Hofmann, H., \& Wickham, H. (2013). The generalized pairs plot.
+\emph{Journal of Computational and Graphical Statistics}, \emph{22}(1),
+79--91. \url{https://doi.org/10.1080/10618600.2012.694762}
+
 \bibitem[\citeproctext]{ref-Ev11}
 Everitt, B. S., Landau, S., Leese, M., \& Stahel, D. (2011).
 \emph{Cluster {A}nalysis (5th ed)}. John Wiley \& Sons, Ltd.
@@ -8857,6 +9030,12 @@ Hofmann, H., \& Theus, M. (1998). Selection {S}equences in {MANET}.
 Horikoshi, M., \& Tang, Y. (2023). \emph{{ggfortify}: Data visualization
 tools for statistical analysis results}.
 \url{https://github.com/sinhrks/ggfortify}
+
+\bibitem[\citeproctext]{ref-horst2022}
+Horst, A. M., Hill, A. P., \& Gorman, K. B. (2022). Palmer archipelago
+penguins data in the palmerpenguins r package - an alternative to
+anderson's irises. \emph{The R Journal}, \emph{14}, 244--254.
+\url{https://doi.org/10.32614/RJ-2022-020}
 
 \bibitem[\citeproctext]{ref-R-palmerpenguins}
 Horst, A., Hill, A., \& Gorman, K. (2022). \emph{{palmerpenguins}:
@@ -9223,6 +9402,10 @@ Schloerke, B. (2016). \emph{{geozoo}: Zoo of geometric objects}.
 Schloerke, B., Cook, D., Larmarange, J., Briatte, F., Marbach, M.,
 Thoen, E., Elberg, A., \& Crowley, J. (2024). \emph{{GGally}: Extension
 to ggplot2}. \url{https://ggobi.github.io/ggally/}
+
+\bibitem[\citeproctext]{ref-geozoo}
+Schloerke, B., Wickham, H., Cook, D., \& Hofmann, H. (2016). Escape from
+boxland. \emph{The R Journal}, \emph{8}, 243--257.
 
 \bibitem[\citeproctext]{ref-mclust}
 Scrucca, L., Fraley, C., Murphy, T. B., \& Raftery, A. E. (2023a).
@@ -10438,8 +10621,8 @@ illustrate cluster analysis.
 \addcontentsline{toc}{subsection}{Source}
 
 Details of the penguins data can be found at
-\url{https://allisonhorst.github.io/palmerpenguins/}, and Horst et al.
-(2022) is the package source.
+\url{https://allisonhorst.github.io/palmerpenguins/}, and A. Horst et
+al. (2022) is the package source.
 
 \subsection*{Pre-processing}\label{pre-processing-3}
 \addcontentsline{toc}{subsection}{Pre-processing}
