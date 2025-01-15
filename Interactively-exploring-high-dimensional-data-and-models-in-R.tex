@@ -1079,6 +1079,24 @@ this variable's contribution. If the pattern disappears when the
 variable disappears it means that this variable is vital or very
 important for defining the pattern.
 
+The Appendix~\ref{sec-toolbox} contains details on running tours,
+primarily using the \texttt{tourr} package but other software is listed.
+A grand tour making 2D projections uses the \texttt{animate\_xy()}
+function, which implicitly uses the algorithm created by the
+\texttt{grand\_tour()} function. The guided tour is created using the
+\texttt{guided\_tour()} function as an argument, and the radial/manual
+tour is created using the \texttt{radial\_tour()} function as an
+argument. It is also useful to use the \texttt{save\_history()} function
+to pre-compute the set of projections to show, and then use the
+\texttt{planned\_tour()} function to play the sequence. All the
+different algorithms for generating paths of projections can be used
+with \texttt{save\_history()}. For saving an animation to include in an
+HTML document the \texttt{render\_gif()} can be used. It will save a set
+of images to a file that will be recognised as an animated gif. It is
+also possible to extract any of the individal images from this file. All
+the gifs accompanying this book are created using the
+\texttt{render\_gif()} function.
+
 \section*{Exercises}\label{exercises}
 \addcontentsline{toc}{section}{Exercises}
 
@@ -2025,36 +2043,13 @@ will also score well in reading and science.
 \end{Shaded}
 
 The scree plot in Figure~\ref{fig-pisa-pca-pdf} shows a big drop from
-one to two PCs in the amount of variance explained. A grand tour on the
-30 variables can be run using \texttt{animate\_xy()}:
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{animate\_xy}\NormalTok{(pisa\_std, }\AttributeTok{half\_range=}\DecValTok{1}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-or rendered as an animated gif using \texttt{render\_gif()}:
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{render\_gif}\NormalTok{(pisa\_std, }
-           \FunctionTok{grand\_tour}\NormalTok{(), }
-           \FunctionTok{display\_xy}\NormalTok{(}\AttributeTok{half\_range=}\FloatTok{0.9}\NormalTok{),}
-           \AttributeTok{gif\_file=}\StringTok{"gifs/pisa\_gt.gif"}\NormalTok{,}
-           \AttributeTok{frames=}\DecValTok{500}\NormalTok{,}
-           \AttributeTok{width=}\DecValTok{400}\NormalTok{,}
-           \AttributeTok{height=}\DecValTok{400}\NormalTok{,}
-           \AttributeTok{loop=}\ConstantTok{FALSE}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-and we can see that the data is elliptical in most projections,
-sometimes shrinking to be a small circle. This pattern strongly
-indicates that there is one primary direction of variation in the data,
-with only small variation in any direction away from it. Shrinking to
-the small circle is analogous to to how \emph{a pencil or cigar or water
-bottle in 3D looks from some angles}.
+one to two PCs in the amount of variance explained. From a grand tour on
+the 30 variables we can see that the data is elliptical in most
+projections, sometimes shrinking to be a small circle. This pattern
+strongly indicates that there is one primary direction of variation in
+the data, with only small variation in any direction away from it.
+Shrinking to the small circle is analogous to to how \emph{a pencil or
+cigar or water bottle in 3D looks from some angles}.
 
 \begin{figure}
 
@@ -2146,18 +2141,6 @@ for potential problems with the data prior to conducting PCA.
 
 To look at all of the 29 player statistics in a grand tour in
 Figure~\ref{fig-aflw-gt-pdf}.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{animate\_xy}\NormalTok{(aflw\_std[,}\DecValTok{7}\SpecialCharTok{:}\DecValTok{35}\NormalTok{], }\AttributeTok{half\_range=}\FloatTok{0.9}\NormalTok{)}
-\FunctionTok{render\_gif}\NormalTok{(aflw\_std[,}\DecValTok{7}\SpecialCharTok{:}\DecValTok{35}\NormalTok{], }
-           \FunctionTok{grand\_tour}\NormalTok{(), }
-           \FunctionTok{display\_xy}\NormalTok{(}\AttributeTok{half\_range=}\FloatTok{0.9}\NormalTok{),}
-           \AttributeTok{gif\_file=}\StringTok{"gifs/aflw\_gt.gif"}\NormalTok{,}
-           \AttributeTok{frames=}\DecValTok{500}\NormalTok{,}
-           \AttributeTok{loop=}\ConstantTok{FALSE}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
 
 \begin{figure}
 
@@ -2763,8 +2746,8 @@ distance between points in the high-dimensions, and in the
 low-dimensional representations.
 
 \[
-\mbox{Stress}_D(x_1, ..., x_n) = \left(\sum_{i, j=1; i\neq j}^n (d_{ij} - d_k(i,j))^2\right)^{1/2}
-\] where \(D\) is an \(n\times n\) matrix of distances \((d_{ij})\)
+\mbox{Stress}_D(x_1, ..., x_n) = \left(\sum_{i, j=1; i\neq j}^n (d_p(i,j) - d_k(i,j))^2\right)^{1/2}
+\] where \(D\) is an \(n\times n\) matrix of distances \((d_p(i,j))\)
 between all pairs of points, and \(d_k(i,j)\) is the distance between
 the points in the low-dimensional space. PCA is a special case of MDS.
 The result from PCA is a linear projection, but generally MDS can
@@ -9892,7 +9875,7 @@ and pipe syntax}. \url{http://haozhu233.github.io/kableExtra/}
 \addcontentsline{toc}{part}{Appendices}
 \appendix
 
-\chapter{Toolbox}\label{toolbox}
+\chapter{Toolbox}\label{sec-toolbox}
 
 \section{\texorpdfstring{Using tours in the \texttt{tourr}
 package}{Using tours in the tourr package}}\label{using-tours-in-the-tourr-package}
