@@ -294,7 +294,7 @@
 
 \title{Interactively exploring high-dimensional data and models in R}
 \author{Dianne Cook and Ursula Laa}
-\date{2025-01-15}
+\date{2025-01-16}
 
 \begin{document}
 \maketitle
@@ -1097,6 +1097,28 @@ also possible to extract any of the individal images from this file. All
 the gifs accompanying this book are created using the
 \texttt{render\_gif()} function.
 
+\section{Do you really have high-dimensional
+data?}\label{do-you-really-have-high-dimensional-data}
+
+Even though, you have multiple numeric variables, there may not be any
+need to use high-dimensional data visualisation. The purpose of using
+high-dimensional visualisation is to learn about the associations
+between variables. If there is no association between variables
+everything we need to learn can be done with univariate data
+visualisation methods. Chapter~\ref{sec-dimension-overview} focuses on
+this dimensionality, finding associations, and reducing dimensionality.
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{1-intro_files/figure-pdf/do-you-have-high-d-1.pdf}
+
+}
+
+\caption{Examples of 2D data that lack association, for which univariate
+methods are sufficient.}
+
+\end{figure}%
+
 \section*{Exercises}\label{exercises}
 \addcontentsline{toc}{section}{Exercises}
 
@@ -1173,6 +1195,111 @@ the gifs accompanying this book are created using the
 \FunctionTok{library}\NormalTok{(readr)}
 \NormalTok{prim7 }\OtherTok{\textless{}{-}} \FunctionTok{read\_csv}\NormalTok{(}\StringTok{"http://ggobi.org/book/data/prim7.csv"}\NormalTok{,}
                   \AttributeTok{show\_col\_types =} \ConstantTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\section*{Project}\label{project}
+\addcontentsline{toc}{section}{Project}
+
+\markright{Project}
+
+The data set \texttt{nigeria-water-imputed.csv} contains water
+availability data recorded for Nigeria, obtained from
+https://www.waterpointdata.org. Examining this data is motivated by an
+analysis by Julia Silge
+\href{https://juliasilge.com/blog/water-sources/}{``Predict availability
+in \#TidyTuesday water sources with random forest models''}. The data
+has been cleaned, and a small number of missing values have been imputed
+using the variable means. Variables with \texttt{\_NA} at the end
+indicate values that are imputed, and can be ignored for this exercise.
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  There are 86684 observations. To do an initial examination of the the
+  data we will start with a small subset. Make a 1\% sample to work
+  with. Note, that generally when sampling one should sample the same
+  fraction within strata that are important for the analysis. Here we
+  will examine the type of water source as indicated by the
+  \texttt{water\_tech\_category} variable. You can do the sampling with
+  this code:
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(tidyverse)}
+\FunctionTok{library}\NormalTok{(tourr)}
+\NormalTok{water }\OtherTok{\textless{}{-}} \FunctionTok{read\_csv}\NormalTok{(}\StringTok{"data/nigeria{-}water{-}imputed.csv"}\NormalTok{)}
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{113}\NormalTok{)}
+\NormalTok{water\_sub }\OtherTok{\textless{}{-}}\NormalTok{ water }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{group\_by}\NormalTok{(water\_tech\_category) }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{sample\_frac}\NormalTok{(}\AttributeTok{size =} \FloatTok{0.01}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{1}
+\tightlist
+\item
+  Take a look at the variables starting with \texttt{distance\_}. This
+  can be done more easily by making a smaller subset of variables (see
+  code below, and using shorter variable names). What are the patterns
+  you can see? Does it look like there is much association between
+  variables, or clustering?
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{water\_dist }\OtherTok{\textless{}{-}}\NormalTok{ water\_sub }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{select}\NormalTok{(water\_tech\_category, }\FunctionTok{starts\_with}\NormalTok{(}\StringTok{"distance"}\NormalTok{)) }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{select}\NormalTok{(}\SpecialCharTok{!}\FunctionTok{contains}\NormalTok{(}\StringTok{"\_NA"}\NormalTok{)) }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{water\_tech\_category =} \FunctionTok{factor}\NormalTok{(water\_tech\_category)) }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{rename}\NormalTok{(}\AttributeTok{dpr =}\NormalTok{ distance\_to\_primary\_road,}
+         \AttributeTok{dsr =}\NormalTok{ distance\_to\_secondary\_road,}
+         \AttributeTok{dtr =}\NormalTok{ distance\_to\_tertiary\_road,}
+         \AttributeTok{dc =}\NormalTok{ distance\_to\_city,}
+         \AttributeTok{dt =}\NormalTok{ distance\_to\_town)}
+\FunctionTok{animate\_xy}\NormalTok{(water\_dist[,}\DecValTok{2}\SpecialCharTok{:}\DecValTok{6}\NormalTok{], }\AttributeTok{rescale=}\ConstantTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{2}
+\tightlist
+\item
+  Now let's see how the type of water source might vary by distance.
+  Colour the points by the \texttt{water\_tech\_category} and examine
+  this in a grand tour. Would you expect that the water source is
+  different depending on the distance from populated areas?
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{animate\_xy}\NormalTok{(water\_dist[,}\DecValTok{2}\SpecialCharTok{:}\DecValTok{6}\NormalTok{], }\AttributeTok{rescale=}\ConstantTok{TRUE}\NormalTok{,}
+           \AttributeTok{col=}\NormalTok{water\_dist}\SpecialCharTok{$}\NormalTok{water\_tech\_category)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{3}
+\tightlist
+\item
+  Now try using a guided tour to find the best combination to see the
+  differences between the type of water sources. Interpret which
+  variable combination yields this difference.
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{324}\NormalTok{)}
+\FunctionTok{animate\_xy}\NormalTok{(water\_dist[,}\DecValTok{2}\SpecialCharTok{:}\DecValTok{6}\NormalTok{],}
+           \FunctionTok{guided\_tour}\NormalTok{(}\FunctionTok{lda\_pp}\NormalTok{(water\_dist}\SpecialCharTok{$}\NormalTok{water\_tech\_category)),}
+           \AttributeTok{rescale=}\ConstantTok{TRUE}\NormalTok{,}
+           \AttributeTok{col=}\NormalTok{water\_dist}\SpecialCharTok{$}\NormalTok{water\_tech\_category)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -2689,7 +2816,7 @@ is an unusual observation also.}
   lower dimensional space?
 \end{enumerate}
 
-\section*{Project}\label{project}
+\section*{Project}\label{project-1}
 \addcontentsline{toc}{section}{Project}
 
 \markright{Project}
@@ -3084,7 +3211,7 @@ space. The close proximity in the t-SNE view is reasonable, though.}
   principal component analysis.
 \end{enumerate}
 
-\section*{Project}\label{project-1}
+\section*{Project}\label{project-2}
 \addcontentsline{toc}{section}{Project}
 
 \markright{Project}
@@ -3662,7 +3789,7 @@ Tabulate the \texttt{branches} id variable in the original data with the
 \texttt{colour} groups created from brushing, to see how closely you
 have recovered the original classes.
 
-\section*{Project}\label{project-2}
+\section*{Project}\label{project-3}
 \addcontentsline{toc}{section}{Project}
 
 \markright{Project}
@@ -5642,7 +5769,7 @@ Linking the confusion matrix with the tour can also be accomplished with
   decide which is the better solution.
 \end{enumerate}
 
-\section*{Project}\label{project-3}
+\section*{Project}\label{project-4}
 \addcontentsline{toc}{section}{Project}
 
 \markright{Project}
