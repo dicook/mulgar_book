@@ -294,7 +294,7 @@
 
 \title{Interactively exploring high-dimensional data and models in R}
 \author{Dianne Cook and Ursula Laa}
-\date{2025-01-20}
+\date{2025-01-31}
 
 \begin{document}
 \maketitle
@@ -457,30 +457,43 @@ To get started set up your computer with the current versions of
 \href{https://cran.r-project.org}{R} and ideally also with
 \href{https://posit.co/download/rstudio-desktop/}{Rstudio Desktop}.
 
-In addition, we have made an R package to share the data and functions
-used in this book, called
-\href{http://dicook.github.io/mulgar}{\texttt{mulgar}}.\footnote{Mulga
-  is a type of Australian habitat composed of woodland or open forest
-  dominated by the mulga tree. Massive clearing of mulga led to the vast
-  wheat fields of Western Australia. Here \textbf{mulgar} is an acronym
-  for \textbf{MUL}tivariate \textbf{G}raphical \textbf{A}nalysis with
+The examples are created using the
+\href{http://ggobi.github.io/tourr/}{\texttt{tourr}} and
+\href{https://casperhart.github.io/detourr/}{\texttt{detourr}} packages.
+In addition, we have made an R package to share most of the data and
+functions used in this book, called
+\href{http://dicook.github.io/mulgar}{\texttt{mulgar}}.\footnote{The
+  mulga is an iconic landscape in Australia. It is a woodland dominated
+  by the mulga tree (Acacia aneura). As you travel through mulga the
+  trees look very regular, sometimes like a stand of lollipops, which is
+  apparently due to close neighbours being clones! The wood is
+  especially hardy, durable and resistant to pests. The climate is
+  semi-arid and it can be found across Australia, Queensland, New South
+  Wales, South Australia and Western Australia. This landscape is host
+  to numerous species: red kangaroos, spinifex hopping mice, mulga
+  parrots, dunnarts, thorny devils, bearded dragons, and pests like
+  feral goats. Here \textbf{mulgar} is an acronym for
+  \textbf{MUL}tivariate \textbf{G}raphical \textbf{A}nalysis with
   \textbf{R}.}\footnote{Photo of mulga tree taken by L. G. Cook.}
+Ideally the methods described are not entirely bound by the current
+available packages, and still applicable as new technology arises.
 
 \begin{Shaded}
 \begin{Highlighting}[]
+\FunctionTok{install.packages}\NormalTok{(}\StringTok{"tourr"}\NormalTok{, }\AttributeTok{dependencies=}\ConstantTok{TRUE}\NormalTok{)}
+\FunctionTok{install.packages}\NormalTok{(}\StringTok{"detourr"}\NormalTok{, }\AttributeTok{dependencies=}\ConstantTok{TRUE}\NormalTok{)}
 \FunctionTok{install.packages}\NormalTok{(}\StringTok{"mulgar"}\NormalTok{, }\AttributeTok{dependencies=}\ConstantTok{TRUE}\NormalTok{)}
-\CommentTok{\# or the development version}
-\NormalTok{devtools}\SpecialCharTok{::}\FunctionTok{install\_github}\NormalTok{(}\StringTok{"dicook/mulgar"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
-To get a copy of the code and data used and an RStudio project to get
-started, you can download with this code:
+and development versions can be installed from the GitHub repositories
+for the packages. To get a copy of the code and additional data used and
+an RStudio project to get started, you can download with this code:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{book\_url }\OtherTok{\textless{}{-}} \StringTok{"https://dicook.github.io/mulgar\_book/code\_and\_data.zip"}
-\NormalTok{usethis}\SpecialCharTok{::}\FunctionTok{use\_zip}\NormalTok{(}\AttributeTok{url=}\NormalTok{book\_url)}
+\NormalTok{u }\OtherTok{\textless{}{-}} \StringTok{"https://dicook.github.io/mulgar\_book/code\_and\_data.zip"}
+\NormalTok{usethis}\SpecialCharTok{::}\FunctionTok{use\_zip}\NormalTok{(}\AttributeTok{url=}\NormalTok{u)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -519,12 +532,11 @@ High-dimensional data means that we have a large number of features or
 variables, which can be considered as dimensions in a mathematical
 space. The variables can be different types, such as categorical or
 temporal, but the handling of these variables involves different
-techniques. Here we focus on primarily numeric variables, which would
-might be considered as belonging to a Euclidean space where each
-observation is a vector and the distance between observations can be
-described by a distance metric. \index{dimensionality}
-\index{variable}\index{feature} \index{Euclidean space}
-\index{distance metric} \index{vector}
+techniques. Here we focus on primarily numeric variables, which might be
+considered as belonging to a Euclidean space where each observation is a
+vector and the distance between observations can be described by a
+distance metric. \index{dimensionality} \index{variable}\index{feature}
+\index{Euclidean space} \index{distance metric} \index{vector}
 
 Models that operate on high-dimensional data can be thought of as
 decomposing observations into two sets of values, fitted values and
@@ -559,8 +571,10 @@ Asimov, 1986; Cook et al., 2006; S. Lee et al., 2022). You can think of
 projections of high-dimensional data like shadows
 (Figure~\ref{fig-shadow-puppets}). Unlike shadow puppets, though the
 object stays fixed, and with multiple projections we can obtain a
-\emph{view of the object from all sides}. \index{projection}
-\index{shadow}
+\emph{view of the object from all sides}. A tour will pick directions to
+look at by selecting a set of linear projections. The views are
+interpolated to move from one linear projection to the next, this is
+displayed as an animation. \index{projection} \index{shadow}
 
 \infobox{With a tour we slowly rotate the viewing direction, this allows us to see many individual projections and to track movement patterns. Look for interesting structures such as clusters or outlying points.}
 
@@ -921,7 +935,7 @@ a little (FORTRAN to C to java to python) but graphics toolkits and
 display devices have changed a lot! The tour software used in this book
 evolved from XGobi, which was written in C and used the X Window System,
 which was then rewritten in GGobi using gtk. The video library has
-engaging videos of these software systems There have been several other
+engaging videos of these software systems. There have been several other
 short-lived implementations, including orca (Sutherland et al., 2000a),
 written in java, and cranvas (Xie et al., 2014), written in R with a
 back-end provided by wrapper functions to \texttt{qt} libraries.
@@ -1032,9 +1046,9 @@ is a little different from the others here, primarily due to having
 large flippers but small bill depth. Projection (b) shows the anomalous
 Chinstrap penguin, and reveals that the gap between it and the other
 penguins is bigger than was seen in the scatterplot matrix. Projection
-(c) that there is an unusual Gentoo penguin, and projection (d) shows
-possibly a few more anomalous Gentoo, with relatively small \texttt{bl}
-and larger \texttt{bm}.
+(c) shows that there is an unusual Gentoo penguin, and projection (d)
+shows possibly a few more anomalous Gentoo, with relatively small
+\texttt{bl} and larger \texttt{bm}.
 
 In terms of understanding how the variables contribute to the patterns
 observed, we need to study the axes display on each plot. In projection
@@ -1306,7 +1320,10 @@ indicate values that are imputed, and can be ignored for this exercise.
 \end{Highlighting}
 \end{Shaded}
 
-\chapter{Notation conventions and R objects}\label{sec-notation}
+\chapter{Technical details}\label{sec-notation}
+
+\section{Notation conventions and R
+objects}\label{notation-conventions-and-r-objects}
 
 The data can be considered to be a matrix of numbers with the columns
 corresponding to variables, and the rows correspond to observations. It
@@ -1331,6 +1348,8 @@ observation/row and \(X_{.j}\) to indicate variable/column. Also this
 will usually accompanied by qualifying words such as
 \textbf{observation} or \textbf{variable}.)
 
+\index{data!matrix}
+
 \infobox{Having notation is helpful for concise explanations of different methods, to explain how data is scaled, processed and projected for various tasks, and how different quantities are calculated from the data. }
 
 When there is a response variable(s), it is common to consider \(X\) to
@@ -1350,11 +1369,14 @@ A_{21} & A_{22} & \dots & A_{2d}\\
 A_{p1} & A_{p2} & \dots & A_{pd} \end{array} \right]_{p\times d}
 \end{eqnarray*}
 
+\index{orthonormal} \index{projection basis}
+
 \(A\) should be an orthonormal matrix, which means that the
 \(\sum_{j=1}^p A_{jk}^2=1, k=1, \dots, d\) (columns represent vectors of
 length 1) and \(\sum_{j=1}^p A_{jk}A_{jl}=0, k,l=1, \dots, d; k\neq l\)
 (columns represent vectors that are orthogonal to each other). In matrix
 notation, this can be written as \(A^{\top}A = I_d\).
+\index{data!projection}
 
 Then the projected data is written as:
 
@@ -1501,6 +1523,306 @@ Dividing by \texttt{sqrt(2)} gives \texttt{(0.707,\ 0.707)}.
 \end{itemize}
 }
 
+\section{Mechanics of tours}\label{mechanics-of-tours}
+
+\subsection{Different ways to choose target
+bases}\label{different-ways-to-choose-target-bases}
+
+Although there are a variety of different tour types, they are (almost)
+all composed of three core building blocks: a set of target projection
+bases, a method for interpolating between them and the method to display
+the projected data. The manner that the target planes are chosen
+primarily determines the type of tour. Figure~\ref{fig-tour-types-pdf}
+illustrates three main tour types: grand, guided and radial. The
+appendix has a list of the many others.
+
+\infobox{
+Tours are composed from three elements:
+\begin{itemize}
+\item a set of target projection bases
+\item an interpolation method
+\item the method to display the projected data
+\end{itemize}
+}
+
+The original tour was called the \emph{grand tour} (Asimov, 1985). In a
+grand tour, the target bases are chosen randomly from all possible
+projections. The reason to use a grand tour is to get an overview of the
+data quickly - it is possible to discover relationships between
+variables that were not pre-conceived. The particular grand tour
+available in the \texttt{tourr} package also has the feature that all
+projections are equally likely to be viewed, and it efficiently covers
+the space of all projections. The tour in the \texttt{langevitour}
+(Harrison, 2023a) software is similar to a grand tour but uses a
+different dynamic to choose the tour path, based on jostling particles.
+It doesn't need to do interpolation because changes are incremental.
+
+\index{tour!grand} \index{tour!guided}
+
+Because space gets large as dimension increases, the wait for seeing
+interesting structure in projections when using a grand tour can be
+long. So if you have an idea of the types of structure that would be
+interesting to observe using a \emph{guided tour} (Cook et al., 1995a)
+may help. A guided tour chooses target bases according to some function
+describing interesting, and the tour path follows an optimisation of
+this function. For example, the \texttt{LDA} index (E.-K. Lee et al.,
+2005) is a function that describes the separation between known classes
+in a projection, and is defined as follows:
+
+\begin{eqnarray*}
+I_{\rm LDA}(A) = 1- \frac{|A'WA|}{|A'(W+B)A|}
+\end{eqnarray*}
+
+where \(B = \sum_{i=1}^g
+n_i(\bar{y}_{i.}-\bar{y}_{..})(\bar{y}_{i.}-\bar{y}_{..})',
+W=\sum_{i=1}^g\sum_{j=1}^{n_i}
+(y_{ij}-\bar{y}_{i.})(y_{ij}-\bar{y}_{i.})'\) are the between- and
+within-group sum of squares matrices in a linear discriminant analysis,
+with \(g=\)number of groups, and \(n_i, i=1, ....g\) is the number of
+cases in each group.
+
+The \emph{radial tour} (Ursula Laa \& Valencia, 2023) provides a way to
+assess the importance of any variable or combination of variables. The
+target basis is chosen by zeroing out a variable (or multiple variables)
+and the interpolation runs from the initial projection to the target and
+back to the initial. If the structure observed in the initial plot
+doesn't change much when the variable(s) is removed, then the variable
+is not important. This is often best combined with the guided tour,
+where the radial tour would start from the best projection (as done in
+Figure~\ref{fig-tour-types-pdf} c), the most structured projection, and
+each of the variables can be tested for their importance in producing
+the structure.
+
+Each of these tour types can be run in the \texttt{tourr} package by
+setting the \texttt{tour\_path} parameter of the \texttt{animate\_XXX()}
+functions. The paths of projection bases can also be generated and saved
+to be used later with the \texttt{save\_history()} function. This is the
+manner with which to save a particular data projection, or to generate
+sequences of projections to pass to external software.
+
+\begin{figure}
+
+\begin{minipage}{\linewidth}
+
+\pandocbounded{\includegraphics[keepaspectratio]{images/p_grand3.png}}
+
+\subcaption{\label{}Data projected into three target projection bases
+from a grand tour}
+\end{minipage}%
+\newline
+\begin{minipage}{\linewidth}
+
+\pandocbounded{\includegraphics[keepaspectratio]{images/p_guided3.png}}
+
+\subcaption{\label{}Data projected into three target projection bases
+from a guided tour}
+\end{minipage}%
+\newline
+\begin{minipage}{\linewidth}
+
+\pandocbounded{\includegraphics[keepaspectratio]{images/p_radial3.png}}
+
+\subcaption{\label{}Data projected into three target projection bases
+from a radial tour}
+\end{minipage}%
+
+\caption{\label{fig-tour-types-pdf}With the grand tour (a) each target
+plane is randomly selected, to show as many possible projections as
+possible and obtain an overview of the data. A tour guided by the LDA
+index (b) steers towards projections where the species are most
+separated. However, the guided tour might miss something unexpected,
+like the anomaly (yellow) seen in the third grand tour frame (a). The
+radial tour (c) rotates a variable (here \texttt{fl}) out of the
+projection and back in to assess the impact on the structure. It can be
+seen that removing the contribution of \texttt{fl} makes only a small
+difference to the separation. \faIcon{play-circle}}
+
+\end{figure}%
+
+\begin{figure}
+
+\begin{minipage}{\linewidth}
+
+\pandocbounded{\includegraphics[keepaspectratio]{images/interpolation.png}}
+
+\end{minipage}%
+
+\caption{\label{fig-interpolation}Two different types of interpolation
+to a target: (a) geodesic plane-to-plane, (b) basis-to-basis using
+Givens rotations. The geodesic interpolation follows the shortest paths
+between planes. Givens respects the orientation of the basis when
+plotting or calculating projection pursuit indexes. Both methods
+maintain orthonormality of the bases for each step.}
+
+\end{figure}%
+
+\subsection{Interpolating between
+targets}\label{interpolating-between-targets}
+
+Interpolating from the current basis to the target basis is most
+commonly achieved using geodesic interpolation. This type of
+interpolation (described in Buja et al. (2005)) has especially important
+properties: (1) it is plane-to-plane so follows the shortest path, and
+(2) maintains orthonormality of the basis at each step when \(d>1\). The
+plane-to-plane movement operates like video stabilisation, by removing
+the within-plane spin, so you can focus on structure without distracting
+movement. However, when using the guided tour if the index is not
+rotationally invariant, for example, if based on correlation or splines,
+it can be important respect a particular orientation. For this rare
+situation, using Givens interpolation, available in the \texttt{woylier}
+package (Batsaikan et al., 2024) can be helpful.
+Figure~\ref{fig-interpolation} illustrates the difference.
+
+\subsection{Displaying the projected
+data}\label{displaying-the-projected-data}
+
+Based on the dimension of the projection basis there are natural ways to
+display the projected data. If \(d=2\) it is most common that we would
+use a scatterplot, as shown in (as done in
+Figure~\ref{fig-tour-types-pdf}.
+
+If \(d=1\) there are many choices of display - histogram, density plot,
+dotplot, boxplot - any method commonly used to display univariate
+continuous data (see \texttt{animate\_dist()}). If \(d=1\) but a second
+(set of) variable(s) is available, such as a time index, a categorical
+variable index (\texttt{animate\_idx()}), or spatial coordinates
+(\texttt{animate\_image()}), then the display might reserve one axis for
+the projected data and another for the additional variables.
+Figure~\ref{fig-displays} shows two different display choices for
+\(d=1\), a histogram of the projected data (a) and an ordered dotplot of
+an index created by combining values of several ranking variables. In
+each display the box with horizontal lines at the bottom represents the
+projection coefficients. In (a) there are six variables contributing to
+the projection, four with negative coefficients, which reveals some
+bimodality and a potential anomaly in this data. In (b), nine ranking
+variables on the liveability of 10 US cities are combined to give an
+overall rank for each city. This combination is a projection, and a tour
+is used to assess how the city ranks would change if the combination of
+these measures changed. That is, the use case, is how robust is the
+ranking to small changes in its construction.
+
+When \(d>2\), even though it primarily academic, some possible choices
+are to use stereo to simulate 3D, scatterplot matrices or parallel
+coordinates.
+
+\begin{figure}
+
+\begin{minipage}{0.63\linewidth}
+
+\pandocbounded{\includegraphics[keepaspectratio]{images/display-dist2.png}}
+
+\subcaption{\label{}histogram}
+\end{minipage}%
+%
+\begin{minipage}{0.37\linewidth}
+
+\pandocbounded{\includegraphics[keepaspectratio]{images/display-idx.png}}
+
+\subcaption{\label{}dotplot}
+\end{minipage}%
+
+\caption{\label{fig-displays}Different choices for displaying projected
+data: (a) histogram, (b) ordered dotplot. In each case the projected
+data is 1D. In the histogram, the lines at the bottom of the display
+correspond to the projection basis. For the ordered dotplot each point
+corresponds to a US city, which has been measured on several criteria
+such as housing, climate, crime, and education. The lines at the bottom
+correspond the coefficients for each of these ratings in the projection
+basis.}
+
+\end{figure}%
+
+Adjustments to the display are useful for some problems. The crowding
+problem where points concentrate as dimension increases can be
+alleviated with a transformation of the projected data documented in Laa
+et al. (2022) and available with the \texttt{animate\_sage()} function.
+When the data is particularly dense, for example, simulated data filling
+out a full \(p\)-dimensional cube from a fitted model generated to
+understand the fit, it can be useful to use slicing (Laa et al., 2020a).
+Slicing will fade out observations beyond a given distance from the
+centre of the data, relative to the projection.
+Figure~\ref{fig-slicing-pdf} illustrates the slice display available
+using the \texttt{animate\_slice()} function.
+
+\begin{figure}
+
+\begin{minipage}{0.50\linewidth}
+
+\pandocbounded{\includegraphics[keepaspectratio]{images/torus_proj.png}}
+
+\subcaption{\label{}projection}
+\end{minipage}%
+%
+\begin{minipage}{0.50\linewidth}
+
+\pandocbounded{\includegraphics[keepaspectratio]{images/torus_slice.png}}
+
+\subcaption{\label{}slice}
+\end{minipage}%
+
+\caption{\label{fig-slicing-pdf}Slicing can cut through high density is
+useful to find hollowness in high-dimensional data, or understand
+limitations of fitted models. Here points on the surface of a 3D torus
+are shown using (a) projections, and (b) slices. The slicing reveals the
+hollowness of this data with the circular cuts to the donut shape.
+\faIcon{play-circle}}
+
+\end{figure}%
+
+It can also be useful to add layers to the data, such as summary
+statistics, labels for selected observations, or connecting points with
+lines to represent model fits. Figure~\ref{fig-adornments-pdf}
+illustrates two use cases. In (a) labels for specific players are shown
+when examining player statistics in the \texttt{aflw} data. All three
+were named best players in the 2021 AFLW season, Bowers and Davey were
+equal best and fairest, and Vescio was awarded best goal kicker. All
+three have quite different player statistics profiles. The play of
+Bowers and Davey differs in the number of handballs and kicks - Davey
+tends to distribute the ball with handballs, while Bowers tends to kick.
+In (b) the lines indicate constraints. This is compositional data where
+each row adds to 1. It is the \texttt{Fireworks} data from the
+\texttt{compositions} (van den Boogaart et al., 2024) package, and
+measures the mixtures of five different ingredients. We can see that it
+is relatively equal mixtures because all are very centred within the
+constraints. We can also see points banding into stripes, suggesting
+that there are just a small number of firework recipes.
+
+\index{data!aflw} \index{data!fireworks}
+
+\begin{figure}
+
+\begin{minipage}{0.50\linewidth}
+
+\pandocbounded{\includegraphics[keepaspectratio]{images/aflw_labelled.png}}
+
+\subcaption{\label{}labelling}
+\end{minipage}%
+%
+\begin{minipage}{0.50\linewidth}
+
+\pandocbounded{\includegraphics[keepaspectratio]{images/fireworks.png}}
+
+\subcaption{\label{}constraints}
+\end{minipage}%
+
+\caption{\label{fig-adornments-pdf}It is sometimes useful to overlay
+additional information, such as labels for a few points (a) or
+representing constraints (b). The labels in (a) correspond to players
+that won awards in the 2021 AFLW season. The lines in (b) correspond to
+constraints - this is compositional data where each 5D observation is
+constrained to sum to 1. \faIcon{play-circle}}
+
+\end{figure}%
+
+It is often asked why isn't the data display using solid shapes, or
+provide depth cues with point size or colour. But the nature of
+high-dimensions is that comprehensive research on lighting models and
+perspective conducted for 3D graphics, does not extend to more than 3D.
+For example, a light source, like a lamp, is a point object, and in 4D
+the shadows would be 3D. A surface in 4D is 3D. So the choice of using
+points to represent objects, and lines to indicate geometric features is
+because these are meaningful in any dimension.
+
 \section*{Exercises}\label{exercises-1}
 \addcontentsline{toc}{section}{Exercises}
 
@@ -1527,7 +1849,75 @@ Dividing by \texttt{sqrt(2)} gives \texttt{(0.707,\ 0.707)}.
   \texttt{mulgar::clusters} data onto the 2D plane defined by \(A\).
   Make a scatterplot of the projected data. Can you identify clustering
   in this view?
+\item
+  Use \texttt{save\_history()} to generate a grand tour path for the
+  \texttt{mulgar::clusters} data, with three target planes. Extract and
+  report the second target basis, and plot the resulting data.
+\item
+  Using the saved path, generate the interpolation between the target
+  planes, using \texttt{interpolate()}. How many bases are in the tour
+  path? Plot the first four in set of planes, and explain what is
+  happening. Save tour path, extract basis and plot data
+\item
+  Repeat \texttt{save\_history()} but use a holes index guided tour.
+  Plot the final projection. Does the guided tour find the three
+  clusters? Which of the variables have the largest contributions to the
+  differences between groups?
+\item
+  Repeat \texttt{save\_history()} using a radial tour, starting from the
+  best projection basis from the guided tour, and exploring the
+  contribution of \texttt{x1} (\texttt{mvar=1}). Why should the length
+  of the path be set to three? Why is the last basis the same as the
+  first? Examine the second target basis, and explain how it is
+  different from the first basis.
+\item
+  Run the tours from in 4-7 using the \texttt{animate\_xy()}. You can
+  use the \texttt{planned\_tour} method, but it is more interesting to
+  simply re-generate using the different \texttt{tour\_path} methods. It
+  is interesting to examine the importance of \texttt{x5} and
+  \texttt{x4} to the clustering seen in the best projection from the
+  guided tour.
+\item
+  Examine tours of 1D projections of the \texttt{mulgar::clusters} data,
+  using density or histogram rendering. Can the three clusters be seen
+  with 1D projections?
+\item
+  Explore the use of the slice tour on these geometric objects, that can
+  be simulated using \texttt{geozoo}:
 \end{enumerate}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\tightlist
+\item
+  Roman Surface, generated by
+\end{enumerate}
+
+\texttt{rs\ \textless{}-\ geozoo::roman.surface()\$points\ \textbar{}\textgreater{}\ scale()\ \textbar{}\textgreater{}\ as.data.frame()}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\setcounter{enumi}{1}
+\tightlist
+\item
+  solid 4D sphere, generated by
+\end{enumerate}
+
+\texttt{s\_solid\ \textless{}-\ geozoo::sphere.solid.random(4,\ 2000)\$points\ \textbar{}\textgreater{}\ as.data.frame()}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\setcounter{enumi}{2}
+\tightlist
+\item
+  hollow 4D sphere, generated by
+\end{enumerate}
+
+\texttt{s\_hollow\ \textless{}-\ geozoo::sphere.hollow(4,\ 2000)\$points\ \textbar{}\textgreater{}\ as.data.frame()}
+
+Use both regular tours, and the slice tours on each. What does the slice
+tour allow us to see in the Roman Surface? What is the difference
+between the solid and hollow spheres?
 
 \part{Dimension reduction}
 
@@ -2822,7 +3212,7 @@ is an unusual observation also.}
 
 Linear dimension reduction can optimise for other criteria, and here we
 will explore one example: the algorithm (Kandanaarachchi \& Hyndman,
-2021) implemented in the \texttt{dobin} package (Kandanaarachchi, 2022)
+2021) implemented in the \texttt{dobin} package (\textbf{R-dobin?})
 finds a basis in which the first few directions are optimized for the
 detection of outliers in the data. We will examine how it performs for
 the \texttt{plane\_noise\_outliers} data (the example where outliers
@@ -8678,8 +9068,8 @@ A. Getis (Eds.), \emph{{R}ecent {D}evelopments in {S}patial {A}nalysis}
 (pp. 35--59). Springer.
 
 \bibitem[\citeproctext]{ref-R-ggthemes}
-Arnold, J. B. (2021). \emph{{ggthemes}: Extra themes, scales and geoms
-for ggplot2}. \url{https://github.com/jrnold/ggthemes}
+Arnold, J. B. (2024). \emph{Ggthemes: Extra themes, scales and geoms for
+ggplot2}. \url{https://jrnold.github.io/ggthemes/}
 
 \bibitem[\citeproctext]{ref-ASA23}
 ASA Statistical Graphics Section. (2023). \emph{Video {L}ibrary}.
@@ -8690,10 +9080,24 @@ Asimov, D. (1985). {T}he {G}rand {T}our: {A} {T}ool for {V}iewing
 {M}ultidimensional {D}ata. \emph{SIAM Journal of Scientific and
 Statistical Computing}, \emph{6}(1), 128--143.
 
+\bibitem[\citeproctext]{ref-R-gridExtra}
+Auguie, B. (2017). \emph{gridExtra: Miscellaneous functions for "grid"
+graphics}. \url{https://CRAN.R-project.org/package=gridExtra}
+
 \bibitem[\citeproctext]{ref-forest}
 Australian Bureau of Agricultural and Resource Economics and Sciences.
 (2018). \emph{{Forests of Australia}}.
 \url{https://www.agriculture.gov.au/abares/forestsaustralia/forest-data-maps-and-tools/spatial-data/forest-cover}
+
+\bibitem[\citeproctext]{ref-R-woylier}
+Batsaikan, Z., Cook, D., \& Laa, U. (2024). \emph{Woylier: Alternative
+tour frame interpolation method}.
+\url{https://numbats.github.io/woylier/}
+
+\bibitem[\citeproctext]{ref-woylier2023}
+Batsaikhan, Z., Cook, D., \& Laa, U. (2023). \emph{Frame to frame
+interpolation for high-dimensional data visualisation using the woylier
+package}. \url{https://doi.org/10.48550/arXiv.2311.08181}
 
 \bibitem[\citeproctext]{ref-BC84}
 Becker, R. A., \& Chambers, J. M. (1984). \emph{{S}: An environment for
@@ -8730,6 +9134,11 @@ Boehmke, B., \& Greenwell, B. M. (2019). \emph{Hands-on machine learning
 with {R} (1st ed.)}. Chapman; Hall/CRC.
 \url{https://doi.org/10.1201/9780367816377}
 
+\bibitem[\citeproctext]{ref-R-aweSOM}
+Boelaert, J., Ollion, E., \& Sodoge, J. (2022). \emph{aweSOM:
+Interactive self-organizing maps}.
+\url{https://CRAN.R-project.org/package=aweSOM}
+
 \bibitem[\citeproctext]{ref-Bonneau2006}
 Bonneau, G.-P., Ertl, T., \& Nielson, G. M. (Eds.). (2006).
 \emph{Scientific visualization: The visual extraction of knowledge from
@@ -8745,7 +9154,7 @@ Breiman, L. (2001). Random {F}orests. \emph{Machine Learning},
 
 \bibitem[\citeproctext]{ref-R-randomForest}
 Breiman, L., Cutler, A., Liaw, A., \& Wiener, M. (2022).
-\emph{{randomForest}: Breiman and cutler's random forests for
+\emph{randomForest: Breiman and cutler's random forests for
 classification and regression}.
 \url{https://www.stat.berkeley.edu/~breiman/RandomForests/}
 
@@ -8842,7 +9251,7 @@ from a {S}tatistical {P}erspective. \emph{Statistical Science},
 \emph{9}(1), 2--30.
 
 \bibitem[\citeproctext]{ref-R-crosstalk}
-Cheng, J., \& Sievert, C. (2023). \emph{{crosstalk}: Inter-widget
+Cheng, J., \& Sievert, C. (2023). \emph{Crosstalk: Inter-widget
 interactivity for HTML widgets}.
 \url{https://rstudio.github.io/crosstalk/}
 
@@ -8890,8 +9299,8 @@ Cook, D., Hofmann, H., Lee, E.-K., Yang, H., Nikolau, B., \& Wurtele, E.
 \emph{Journal of Data Science}, \emph{5}(2), 151--182.
 
 \bibitem[\citeproctext]{ref-R-mulgar}
-Cook, D., \& Laa, U. (2023). \emph{{mulgar}: Functions for
-pre-processing data for multivariate data visualisation using tours}.
+Cook, D., \& Laa, U. (2025). \emph{Mulgar: Functions for pre-processing
+data for multivariate data visualisation using tours}.
 \url{https://dicook.github.io/mulgar/}
 
 \bibitem[\citeproctext]{ref-CLBW06}
@@ -8939,9 +9348,9 @@ Workshop on {T}emporal {D}ata {M}ining: {A}lgorithms, {T}heory and
 Houston, November 27, 2005}, 25--32.
 
 \bibitem[\citeproctext]{ref-R-ggdendro}
-de Vries, A., \& Ripley, B. D. (2022). \emph{{ggdendro}: Create
+de Vries, A., \& Ripley, B. D. (2024). \emph{Ggdendro: Create
 dendrograms and tree diagrams using ggplot2}.
-\url{https://github.com/andrie/ggdendro}
+\url{https://andrie.github.io/ggdendro/}
 
 \bibitem[\citeproctext]{ref-fireorigin}
 Department of Environment, Land, Water \& Planning. (2019). \emph{{Fire
@@ -9038,7 +9447,7 @@ American Statistical Association}, \emph{97}, 611--631.
 \url{http://www.stat.washington.edu/mclust}
 
 \bibitem[\citeproctext]{ref-R-mclust}
-Fraley, C., Raftery, A. E., \& Scrucca, L. (2024). \emph{{mclust}:
+Fraley, C., Raftery, A. E., \& Scrucca, L. (2024). \emph{Mclust:
 Gaussian mixture modelling for model-based clustering, classification,
 and density estimation}. \url{https://mclust-org.github.io/mclust/}
 
@@ -9114,17 +9523,22 @@ Stuart, T., Fleming, L. B., Yeung, B., \ldots{} Satija, R. (2021).
 Integrated analysis of multimodal single-cell data. \emph{Cell}.
 \url{https://doi.org/10.1016/j.cell.2021.04.048}
 
-\bibitem[\citeproctext]{ref-R-langevitour}
-Harrison, P. (2023a). \emph{{langevitour}: Langevin tour}.
-\url{https://logarithmic.net/langevitour/}
+\bibitem[\citeproctext]{ref-langevitour}
+Harrison, P. (2023a). Langevitour: Smooth interactive touring of high
+dimensions, demonstrated with scRNA-seq data. \emph{The R Journal},
+\emph{15}, 206--219. \url{https://doi.org/10.32614/RJ-2023-046}
 
 \bibitem[\citeproctext]{ref-langevitour2023}
 Harrison, P. (2023b). Langevitour: Smooth interactive touring of high
 dimensions, demonstrated with scRNA-seq data. \emph{The R Journal},
 \emph{15}(2), 206--219. \url{https://doi.org/10.32614/RJ-2023-046}
 
+\bibitem[\citeproctext]{ref-R-langevitour}
+Harrison, P. (2024). \emph{Langevitour: Langevin tour}.
+\url{https://logarithmic.net/langevitour/}
+
 \bibitem[\citeproctext]{ref-R-detourr}
-Hart, C., \& Wang, E. (2022). \emph{{detourr}: Portable and performant
+Hart, C., \& Wang, E. (2024). \emph{Detourr: Portable and performant
 tour animations}. \url{https://casperhart.github.io/detourr/}
 
 \bibitem[\citeproctext]{ref-HK81}
@@ -9164,8 +9578,13 @@ Hofmann, H. (2003). Constructing and {R}eading {M}osaicplots.
 Hofmann, H., \& Theus, M. (1998). Selection {S}equences in {MANET}.
 \emph{Computational Statistics}, \emph{13}(1), 77--87.
 
+\bibitem[\citeproctext]{ref-ggfortify2018}
+Horikoshi, M., \& Tang, Y. (2018). \emph{Ggfortify: Data visualization
+tools for statistical analysis results}.
+\url{https://CRAN.R-project.org/package=ggfortify}
+
 \bibitem[\citeproctext]{ref-R-ggfortify}
-Horikoshi, M., \& Tang, Y. (2023). \emph{{ggfortify}: Data visualization
+Horikoshi, M., \& Tang, Y. (2024). \emph{Ggfortify: Data visualization
 tools for statistical analysis results}.
 \url{https://github.com/sinhrks/ggfortify}
 
@@ -9176,8 +9595,8 @@ anderson's irises. \emph{The R Journal}, \emph{14}, 244--254.
 \url{https://doi.org/10.32614/RJ-2022-020}
 
 \bibitem[\citeproctext]{ref-R-palmerpenguins}
-Horst, A., Hill, A., \& Gorman, K. (2022). \emph{{palmerpenguins}:
-Palmer archipelago (antarctica) penguin data}.
+Horst, A., Hill, A., \& Gorman, K. (2022). \emph{Palmerpenguins: Palmer
+archipelago (antarctica) penguin data}.
 \url{https://allisonhorst.github.io/palmerpenguins/}
 
 \bibitem[\citeproctext]{ref-hotelling-pca}
@@ -9195,8 +9614,8 @@ data analysis} {[}PhD thesis{]}. University of Washington.
 
 \bibitem[\citeproctext]{ref-R-gt}
 Iannone, R., Cheng, J., Schloerke, B., Hughes, E., Lauer, A., \& Seo, J.
-(2023). \emph{{gt}: Easily create presentation-ready display tables}.
-\url{https://gt.rstudio.com/}
+(2024). \emph{Gt: Easily create presentation-ready display tables}.
+\url{https://gt.rstudio.com}
 
 \bibitem[\citeproctext]{ref-R1996}
 Ihaka, R., \& Gentleman, R. (1996). R: {A} {L}anguage for {D}ata
@@ -9205,7 +9624,7 @@ Statistics}, \emph{5}, 299--314.
 
 \bibitem[\citeproctext]{ref-R-colorspace}
 Ihaka, R., Murrell, P., Hornik, K., Fisher, J. C., Stauffer, R., Wilke,
-C. O., McWhite, C. D., \& Zeileis, A. (2023). \emph{{colorspace}: A
+C. O., McWhite, C. D., \& Zeileis, A. (2024). \emph{Colorspace: A
 toolbox for manipulating and assessing colors and palettes}.
 \url{https://colorspace.R-Forge.R-project.org/}
 
@@ -9235,10 +9654,6 @@ Jones, M. C., \& Sibson, R. (1987). {W}hat is {P}rojection {P}ursuit?
 (With discussion). \emph{Journal of the Royal Statistical Society,
 Series A}, \emph{150}, 1--36.
 
-\bibitem[\citeproctext]{ref-R-dobin}
-Kandanaarachchi, S. (2022). \emph{{dobin}: Dimension reduction for
-outlier detection}. \url{https://CRAN.R-project.org/package=dobin}
-
 \bibitem[\citeproctext]{ref-Kandanaarachchi02012021}
 Kandanaarachchi, S., \& Hyndman, R. J. (2021). Dimension reduction for
 outlier detection using DOBIN. \emph{Journal of Computational and
@@ -9250,7 +9665,7 @@ Kassambara, A. (2017). \emph{Practical guide to cluster analysis in {R}:
 Unsupervised machine learning}. STHDA.
 
 \bibitem[\citeproctext]{ref-R-ggpubr}
-Kassambara, A. (2023). \emph{{ggpubr}: ggplot2 based publication ready
+Kassambara, A. (2023). \emph{Ggpubr: ggplot2 based publication ready
 plots}. \url{https://rpkgs.datanovia.com/ggpubr/}
 
 \bibitem[\citeproctext]{ref-Ko01}
@@ -9263,7 +9678,7 @@ discussion). \emph{Journal of Business and Economic Statistics},
 \emph{14}(1), 113--132.
 
 \bibitem[\citeproctext]{ref-R-Rtsne}
-Krijthe, J. (2022). \emph{{Rtsne}: T-distributed stochastic neighbor
+Krijthe, J. (2023). \emph{Rtsne: T-distributed stochastic neighbor
 embedding using a barnes-hut implementation}.
 \url{https://github.com/jkrijthe/Rtsne}
 
@@ -9286,7 +9701,7 @@ packages for modeling and machine learning using tidyverse principles.}
 \url{https://www.tidymodels.org}
 
 \bibitem[\citeproctext]{ref-R-tidymodels}
-Kuhn, M., \& Wickham, H. (2023). \emph{{tidymodels}: Easily install and
+Kuhn, M., \& Wickham, H. (2024). \emph{Tidymodels: Easily install and
 load the tidymodels packages}. \url{https://tidymodels.tidymodels.org}
 
 \bibitem[\citeproctext]{ref-sagetour}
@@ -9312,7 +9727,7 @@ Lancaster, H. O. (1965). The helmert matrices. \emph{The American
 Mathematical Monthly}, \emph{72}(1), 4--12.
 
 \bibitem[\citeproctext]{ref-R-cxhull}
-Laurent, S. (2023). \emph{{cxhull}: Convex hull}.
+Laurent, S. (2023). \emph{Cxhull: Convex hull}.
 \url{https://github.com/stla/cxhull}
 
 \bibitem[\citeproctext]{ref-Lee2018}
@@ -9331,7 +9746,7 @@ Lee, E.-K., Cook, D., Klinke, S., \& Lumley, T. (2005). {P}rojection
 of Computational and Graphical Statistics}, \emph{14}(4), 831--846.
 
 \bibitem[\citeproctext]{ref-R-liminal}
-Lee, S. (2021). \emph{{liminal}: Multivariate data visualization with
+Lee, S. (2021). \emph{Liminal: Multivariate data visualization with
 tours and embeddings}. \url{https://github.com/sa-lee/liminal/}
 
 \bibitem[\citeproctext]{ref-tours2022}
@@ -9425,12 +9840,18 @@ Sons.
 McVicar, T. (2011). \emph{Near-surface wind speed. v10. CSIRO. Data
 collection.} \url{https://doi.org/10.25919/5c5106acbcb02}
 
+\bibitem[\citeproctext]{ref-R-e1071}
+Meyer, D., Dimitriadou, E., Hornik, K., Weingessel, A., \& Leisch, F.
+(2024). \emph{e1071: Misc functions of the department of statistics,
+probability theory group (formerly: E1071), TU wien}.
+\url{https://CRAN.R-project.org/package=e1071}
+
 \bibitem[\citeproctext]{ref-R-rpart.plot}
-Milborrow, S. (2022). \emph{{rpart.plot}: Plot rpart models: An enhanced
+Milborrow, S. (2024). \emph{Rpart.plot: Plot rpart models: An enhanced
 version of plot.rpart}. \url{http://www.milbo.org/rpart-plot/index.html}
 
 \bibitem[\citeproctext]{ref-R-gtExtras}
-Mock, T. (2022). \emph{{gtExtras}: Extending gt for beautiful HTML
+Mock, T. (2023). \emph{gtExtras: Extending gt for beautiful HTML
 tables}. \url{https://github.com/jthomasmock/gtExtras}
 
 \bibitem[\citeproctext]{ref-iml}
@@ -9461,7 +9882,7 @@ Philosophical Magazine and Journal of Science}, \emph{2}(11), 559--572.
 \url{https://doi.org/10.1080/14786440109462720}
 
 \bibitem[\citeproctext]{ref-R-patchwork}
-Pedersen, T. L. (2024). \emph{{patchwork}: The composer of plots}.
+Pedersen, T. L. (2024). \emph{Patchwork: The composer of plots}.
 \url{https://patchwork.data-imaginist.com}
 
 \bibitem[\citeproctext]{ref-perisic2009}
@@ -9513,13 +9934,14 @@ Ripley, B. (1996). \emph{Pattern {R}ecognition and {N}eural {N}etworks}.
 Cambridge University Press.
 
 \bibitem[\citeproctext]{ref-R-nnet}
-Ripley, B. (2023). \emph{{nnet}: Feed-forward neural networks and
+Ripley, B. (2023). \emph{Nnet: Feed-forward neural networks and
 multinomial log-linear models}.
 \url{http://www.stats.ox.ac.uk/pub/MASS4/}
 
 \bibitem[\citeproctext]{ref-R-MASS}
-Ripley, B. (2024). \emph{{MASS}: Support functions and datasets for
-venables and ripley's MASS}. \url{http://www.stats.ox.ac.uk/pub/MASS4/}
+Ripley, B., \& Venables, B. (2024). \emph{MASS: Support functions and
+datasets for venables and ripley's MASS}.
+\url{http://www.stats.ox.ac.uk/pub/MASS4/}
 
 \bibitem[\citeproctext]{ref-Ro1957}
 Rothkopf, E. Z. (1957). A {M}easure of {S}timulus {S}imilarity and
@@ -9533,13 +9955,13 @@ Satija, R., Farrell, J. A., Gennert, D., Schier, A. F., \& Regev, A.
 \url{https://doi.org/10.1038/nbt.3192}
 
 \bibitem[\citeproctext]{ref-R-geozoo}
-Schloerke, B. (2016). \emph{{geozoo}: Zoo of geometric objects}.
+Schloerke, B. (2016). \emph{Geozoo: Zoo of geometric objects}.
 \url{http://schloerke.github.io/geozoo/}
 
 \bibitem[\citeproctext]{ref-R-GGally}
 Schloerke, B., Cook, D., Larmarange, J., Briatte, F., Marbach, M.,
-Thoen, E., Elberg, A., \& Crowley, J. (2024). \emph{{GGally}: Extension
-to ggplot2}. \url{https://ggobi.github.io/ggally/}
+Thoen, E., Elberg, A., \& Crowley, J. (2024). \emph{GGally: Extension to
+ggplot2}. \url{https://ggobi.github.io/ggally/}
 
 \bibitem[\citeproctext]{ref-geozoo}
 Schloerke, B., Wickham, H., Cook, D., \& Hofmann, H. (2016). Escape from
@@ -9568,25 +9990,25 @@ r, plotly, and shiny}. Chapman; Hall/CRC. \url{https://plotly-r.com}
 
 \bibitem[\citeproctext]{ref-R-plotly}
 Sievert, C., Parmer, C., Hocking, T., Chamberlain, S., Ram, K.,
-Corvellec, M., \& Despouy, P. (2024). \emph{{plotly}: Create interactive
+Corvellec, M., \& Despouy, P. (2024). \emph{Plotly: Create interactive
 web graphics via plotly.js}. \url{https://plotly-r.com}
 
 \bibitem[\citeproctext]{ref-R-gtsummary}
 Sjoberg, D. D., Larmarange, J., Curry, M., Lavery, J., Whiting, K., \&
-Zabor, E. C. (2023). \emph{{gtsummary}: Presentation-ready data summary
+Zabor, E. C. (2024). \emph{Gtsummary: Presentation-ready data summary
 and analytic result tables}.
 \url{https://github.com/ddsjoberg/gtsummary}
 
 \bibitem[\citeproctext]{ref-gtsummary}
 Sjoberg, D. D., Whiting, K., Curry, M., Lavery, J. A., \& Larmarange, J.
-(2021). Reproducible summary tables with the {gtsummary} package.
+(2021). Reproducible summary tables with the gtsummary package.
 \emph{{The R Journal}}, \emph{13}, 570--580.
 \url{https://doi.org/10.32614/RJ-2021-053}
 
 \bibitem[\citeproctext]{ref-R-ggrepel}
-Slowikowski, K. (2023). \emph{{ggrepel}: Automatically position
+Slowikowski, K. (2024). \emph{Ggrepel: Automatically position
 non-overlapping text labels with ggplot2}.
-\url{https://github.com/slowkow/ggrepel}
+\url{https://ggrepel.slowkow.com/}
 
 \bibitem[\citeproctext]{ref-R-bomrang}
 Sparks, A. H., Carroll, J., Goldie, J., Marchiori, D., Melloy, P.,
@@ -9674,6 +10096,12 @@ Takatsuka, M., \& Gahegan, M. (2002). {GeoVISTA Studio}: A {C}odeless
 {A}nalysis and {V}isualization. \emph{The Journal of Computers and
 Geosciences}, \emph{28}(10), 1131--1144.
 
+\bibitem[\citeproctext]{ref-ggfortify2016}
+Tang, Y., Horikoshi, M., \& Li, W. (2016). Ggfortify: Unified interface
+to visualize statistical result of popular r packages. \emph{The R
+Journal}, \emph{8}(2), 474--485.
+\url{https://doi.org/10.32614/RJ-2016-060}
+
 \bibitem[\citeproctext]{ref-TF95}
 Tarpey, T., Li, L., \& Flury, B. (1995). Principal points and
 self--consistent points of elliptical distributions. \emph{The Annals of
@@ -9685,7 +10113,7 @@ Temple Lang, D., Swayne, D., Wickham, H., \& Lawrence, M. (2006).
 {GG}obi}.{\texttt{\ http://www.R-project.org}}.
 
 \bibitem[\citeproctext]{ref-R-rpart}
-Therneau, T., \& Atkinson, B. (2023). \emph{{rpart}: Recursive
+Therneau, T., \& Atkinson, B. (2023). \emph{Rpart: Recursive
 partitioning and regression trees}.
 \url{https://github.com/bethatkinson/rpart}
 
@@ -9722,8 +10150,8 @@ imputations. \emph{Journal of Statistical Software}, \emph{105}(7),
 1--31. \url{https://doi.org/10.18637/jss.v105.i07}
 
 \bibitem[\citeproctext]{ref-R-naniar}
-Tierney, N., Cook, D., McBain, M., \& Fay, C. (2023). \emph{{naniar}:
-Data structures, summaries, and visualisations for missing data}.
+Tierney, N., Cook, D., McBain, M., \& Fay, C. (2024). \emph{Naniar: Data
+structures, summaries, and visualisations for missing data}.
 \url{https://github.com/njtierney/naniar}
 
 \bibitem[\citeproctext]{ref-To52}
@@ -9769,10 +10197,22 @@ Urbanek, S., \& Theus, M. (2003). {iPlots}: {H}igh {I}nteraction
 \emph{Proceedings of the 3rd international workshop on distributed
 statistical computing (DSC 2003)}.
 
+\bibitem[\citeproctext]{ref-radial-tour}
+Ursula Laa, D. C., Alex Aumann, \& Valencia, G. (2023). New and
+simplified manual controls for projection and slice tours, with
+application to exploring classification boundaries in high dimensions.
+\emph{Journal of Computational and Graphical Statistics}, \emph{32}(3),
+1229--1236. \url{https://doi.org/10.1080/10618600.2023.2206459}
+
 \bibitem[\citeproctext]{ref-R-htmlwidgets}
 Vaidyanathan, R., Xie, Y., Allaire, J., Cheng, J., Sievert, C., \&
-Russell, K. (2023). \emph{{htmlwidgets}: HTML widgets for r}.
+Russell, K. (2023). \emph{Htmlwidgets: HTML widgets for r}.
 \url{https://github.com/ramnathv/htmlwidgets}
+
+\bibitem[\citeproctext]{ref-R-compositions}
+van den Boogaart, K. G., Tolosana-Delgado, R., \& Bren, M. (2024).
+\emph{Compositions: Compositional data analysis}.
+\url{https://CRAN.R-project.org/package=compositions}
 
 \bibitem[\citeproctext]{ref-Rtsne2014}
 van der Maaten, L. J. P. (2014). Accelerating t-SNE using tree-based
@@ -9867,22 +10307,27 @@ Wehrens, R., \& Kruisselbrink, J. (2018). Flexible self-organizing maps
 in {kohonen} 3.0. \emph{Journal of Statistical Software}, \emph{87}(7),
 1--18. \url{https://doi.org/10.18637/jss.v087.i07}
 
+\bibitem[\citeproctext]{ref-R-kohonen}
+Wehrens, R., \& Kruisselbrink, J. (2023). \emph{Kohonen: Supervised and
+unsupervised self-organising maps}.
+\url{https://CRAN.R-project.org/package=kohonen}
+
 \bibitem[\citeproctext]{ref-ggplot22016}
-Wickham, H. (2016). \emph{{ggplot2}: Elegant graphics for data
-analysis}. Springer-Verlag New York. \url{https://ggplot2.tidyverse.org}
+Wickham, H. (2016). \emph{ggplot2: Elegant graphics for data analysis}.
+Springer-Verlag New York. \url{https://ggplot2.tidyverse.org}
 
 \bibitem[\citeproctext]{ref-R-classifly}
-Wickham, H. (2022). \emph{{classifly}: Explore classification models in
+Wickham, H. (2022). \emph{Classifly: Explore classification models in
 high dimensions}. \url{http://had.co.nz/classifly}
 
 \bibitem[\citeproctext]{ref-R-ggplot2}
 Wickham, H., Chang, W., Henry, L., Pedersen, T. L., Takahashi, K.,
 Wilke, C., Woo, K., Yutani, H., Dunnington, D., \& van den Brand, T.
-(2024). \emph{{ggplot2}: Create elegant data visualisations using the
+(2024). \emph{ggplot2: Create elegant data visualisations using the
 grammar of graphics}. \url{https://ggplot2.tidyverse.org}
 
 \bibitem[\citeproctext]{ref-R-tourr}
-Wickham, H., \& Cook, D. (2023). \emph{{tourr}: Tour methods for
+Wickham, H., \& Cook, D. (2024). \emph{Tourr: Tour methods for
 multivariate data visualisation}. \url{https://github.com/ggobi/tourr}
 
 \bibitem[\citeproctext]{ref-wickham2015}
@@ -9905,11 +10350,11 @@ of Statistical Software}, \emph{40}(2), 1--18.
 
 \bibitem[\citeproctext]{ref-R-dplyr}
 Wickham, H., François, R., Henry, L., Müller, K., \& Vaughan, D. (2023).
-\emph{{dplyr}: A grammar of data manipulation}.
+\emph{Dplyr: A grammar of data manipulation}.
 \url{https://dplyr.tidyverse.org}
 
 \bibitem[\citeproctext]{ref-R-readr}
-Wickham, H., Hester, J., \& Bryan, J. (2024). \emph{{readr}: Read
+Wickham, H., Hester, J., \& Bryan, J. (2024). \emph{Readr: Read
 rectangular text data}. \url{https://readr.tidyverse.org}
 
 \bibitem[\citeproctext]{ref-WWS99}
@@ -9962,13 +10407,13 @@ guided tours. \emph{The R Journal}, \emph{13}(2), 624--641.
 \url{https://doi.org/10.32614/RJ-2021-105}
 
 \bibitem[\citeproctext]{ref-R-ferrn}
-Zhang, H. S., Cook, D., Laa, U., Langrené, N., \& Menéndez, P. (2022).
-\emph{{ferrn}: Facilitate exploration of touRR optimisatioN}.
+Zhang, H. S., Cook, D., Laa, U., Langrené, N., \& Menéndez, P. (2024).
+\emph{Ferrn: Facilitate exploration of touRR optimisatioN}.
 \url{https://github.com/huizezhang-sherry/ferrn/}
 
 \bibitem[\citeproctext]{ref-R-kableExtra}
-Zhu, H. (2021). \emph{{kableExtra}: Construct complex table with kable
-and pipe syntax}. \url{http://haozhu233.github.io/kableExtra/}
+Zhu, H. (2024). \emph{kableExtra: Construct complex table with kable and
+pipe syntax}. \url{http://haozhu233.github.io/kableExtra/}
 
 \end{CSLReferences}
 

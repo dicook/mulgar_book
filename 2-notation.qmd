@@ -1,4 +1,6 @@
-# Notation conventions and R objects {#sec-notation}
+# Technical details {#sec-notation}
+
+## Notation conventions and R objects 
 
 The data can be considered to be a matrix of numbers with the columns corresponding to variables, and the rows correspond to observations. It can be helpful to write this in mathematical notation, like:
 
@@ -12,6 +14,8 @@ X_{n1} & X_{n2} & \dots & X_{np} \end{array} \right]_{n\times p}
 \end{eqnarray*}
 
 where $X$ indicates the $n\times p$ data matrix, $X_j$ indicates variable $j, j=1, \dots, p$ and $X_{ij}$ indicates the value of the $j^{th}$ variable for the $i^{th}$ observation. (It can be confusing to distinguish whether one is referring to the observation or a variable, because $X_i$ is used to indicate observation. In descriptions where it is unclear we will use $X_{i.}$ to indicate observation/row and $X_{.j}$ to indicate variable/column. Also this will usually accompanied by qualifying words such as **observation** or **variable**.)
+
+\index{data!matrix}
 
 ::: {.content-visible when-format="html"}
 ::: info
@@ -37,8 +41,11 @@ A_{21} & A_{22} & \dots & A_{2d}\\
 A_{p1} & A_{p2} & \dots & A_{pd} \end{array} \right]_{p\times d}
 \end{eqnarray*}
 
+\index{orthonormal}
+\index{projection basis}
 
 $A$ should be an orthonormal matrix, which means that the $\sum_{j=1}^p A_{jk}^2=1, k=1, \dots, d$ (columns represent vectors of length 1) and $\sum_{j=1}^p A_{jk}A_{jl}=0, k,l=1, \dots, d; k\neq l$ (columns represent vectors that are orthogonal to each other). In matrix notation, this can be written as $A^{\top}A = I_d$.
+\index{data!projection}
 
 Then the projected data is written as:
 
@@ -135,32 +142,609 @@ The notation convention used throughout the book is:
 }
 :::
 
+## Mechanics of tours
+
+### Different ways to choose target bases
+
+Although there are a variety of different tour types, they are (almost) all composed of three core building blocks: a set of target projection bases, a method for interpolating between them and the method to display the projected data. The manner that the target planes are chosen primarily determines the type of tour. `r ifelse(knitr::is_html_output(), '@fig-tour-types-html', '@fig-tour-types-pdf')` illustrates three main tour types: grand, guided and radial. The appendix has a list of the many others. 
+
+::: {.content-visible when-format="html"}
+::: {.info-box}
+Tours are composed from three elements:
+- a set of target projection bases
+- an interpolation method
+- the method to display the projected data
+:::
+:::
+
+::: {.content-visible when-format="pdf"}
+
+\infobox{
+Tours are composed from three elements:
+\begin{itemize}
+\item a set of target projection bases
+\item an interpolation method
+\item the method to display the projected data
+\end{itemize}
+}
+:::
+
+The original tour was called the *grand tour* [@As85]. In a grand tour, the target bases are chosen randomly from all possible projections. The reason to use a grand tour is to get an overview of the data quickly - it is possible to discover relationships between variables that were not pre-conceived. The particular grand tour available in the `tourr` package also has the feature that all projections are equally likely to be viewed, and it efficiently covers the space of all projections. The tour in the `langevitour` [@langevitour] software is similar to a grand tour but uses a different dynamic to choose the tour path, based on jostling particles. It doesn't need to do interpolation because changes are incremental. 
+
+\index{tour!grand}
+\index{tour!guided}
+
+```{r}
+#| eval: false
+#| echo: false
+# This code is to generate the gifs, but not the best to 
+# start users on. 
+library(tourr)
+library(mulgar)
+library(ggplot2)
+library(colorspace)
+data("penguins_sub")
+set.seed(1148)
+p_t_grand <- save_history(penguins_sub[, 1:4], 
+                    max_bases = 50)
+animate_xy(penguins_sub[, 1:4], 
+           planned_tour(p_t_grand), 
+           col=penguins_sub$species
+           )
+render_gif(penguins_sub[, 1:4], 
+           planned_tour(p_t_grand), 
+           display_xy(col=penguins_sub$species), 
+           gif_file = "gifs/penguins_cl_grand.gif",
+           frames=1000,
+           width=400,
+           height=400
+           )
+set.seed(1209)
+p_t_guided <- save_history(
+  penguins_sub[, 1:4], 
+  guided_tour(lda_pp(penguins_sub$species)),
+  max_bases = 50)
+animate_xy(penguins_sub[, 1:4], 
+           planned_tour(p_t_guided), 
+           col=penguins_sub$species
+           )
+render_gif(penguins_sub[, 1:4], 
+           planned_tour(p_t_guided), 
+           display_xy(col=penguins_sub$species), 
+           gif_file = "gifs/penguins_cl_guided.gif",
+           frames=1000,
+           width=400,
+           height=400
+           )
+best_proj <- matrix(p_t_guided[,,5], ncol=2)
+p_t_radial <- save_history(
+  penguins_sub[, 1:4], 
+  radial_tour(best_proj, 3),
+  max_bases = 3)
+animate_xy(penguins_sub[, 1:4], 
+           planned_tour(p_t_radial), 
+           col=penguins_sub$species
+           )
+render_gif(penguins_sub[, 1:4], 
+           planned_tour(p_t_radial), 
+           display_xy(col=penguins_sub$species), 
+           gif_file = "gifs/penguins_cl_radial.gif",
+           frames=1000,
+           width=400,
+           height=400
+           )
+```
+
+```{r}
+#| eval: false
+#| echo: false
+# This code is generates sequences of projections to demonstrate differences between methods. 
+# Function to make plots
+plot_tour_projection <- function(d) {
+  plt <- ggplot() +
+  geom_path(data=d$circle, aes(x=c1, y=c2)) +
+  geom_segment(data=d$axes, 
+               aes(x=x1, y=y1, xend=x2, yend=y2)) +
+  geom_text(data=d$axes, aes(x=x2, y=y2,
+                             label=rownames(d$axes))) +
+  geom_point(data=d$data_prj, 
+             aes(x=P1, y=P2, 
+                 colour=species)) +
+    xlim(-1,1) + ylim(-1, 1) +
+    scale_color_discrete_divergingx(palette="Zissou 1") +
+    theme_minimal() +
+    theme(aspect.ratio=1,
+       legend.position = "none",
+       axis.text=element_blank(),
+       axis.title=element_blank(),
+       axis.ticks=element_blank(),
+       panel.grid=element_blank(),
+       panel.background = element_rect(fill=NA,
+                                       colour="black"))
+  plt
+}
+# Grand tour
+prj <- matrix(p_t_grand[,,3], ncol=2)
+gr1 <- render_proj(penguins_sub[, 1:4], prj)
+gr1$data_prj$species <- penguins_sub$species
+gr1_plt <- plot_tour_projection(gr1)
+prj <- matrix(p_t_grand[,,4], ncol=2)
+gr2 <- render_proj(penguins_sub[, 1:4], prj)
+gr2$data_prj$species <- penguins_sub$species
+gr2_plt <- plot_tour_projection(gr2)
+prj <- matrix(p_t_grand[,,6], ncol=2)
+gr3 <- render_proj(penguins_sub[, 1:4], prj)
+gr3$data_prj$species <- penguins_sub$species
+gr3_plt <- plot_tour_projection(gr3)
+# Guided tour
+prj <- matrix(p_t_guided[,,1], ncol=2)
+gd1 <- render_proj(penguins_sub[, 1:4], prj)
+gd1$data_prj$species <- penguins_sub$species
+gd1_plt <- plot_tour_projection(gd1)
+prj <- matrix(p_t_guided[,,3], ncol=2)
+gd2 <- render_proj(penguins_sub[, 1:4], prj)
+gd2$data_prj$species <- penguins_sub$species
+gd2_plt <- plot_tour_projection(gd2)
+prj <- matrix(p_t_guided[,,5], ncol=2)
+gd3 <- render_proj(penguins_sub[, 1:4], prj)
+gd3$data_prj$species <- penguins_sub$species
+gd3_plt <- plot_tour_projection(gd3)
+# Radial tour
+prj <- matrix(p_t_radial[,,1], ncol=2)
+rd1 <- render_proj(penguins_sub[, 1:4], prj)
+rd1$data_prj$species <- penguins_sub$species
+rd1_plt <- plot_tour_projection(rd1)
+prj <- matrix(p_t_radial[,,2], ncol=2)
+rd2 <- render_proj(penguins_sub[, 1:4], prj)
+rd2$data_prj$species <- penguins_sub$species
+rd2_plt <- plot_tour_projection(rd2)
+prj <- matrix(p_t_radial[,,3], ncol=2)
+rd3 <- render_proj(penguins_sub[, 1:4], prj)
+rd3$data_prj$species <- penguins_sub$species
+rd3_plt <- plot_tour_projection(rd3)
+# Make plots and save to png
+library(gridExtra)
+grid.arrange(gr1_plt, gr2_plt, gr3_plt, ncol=3)
+grid.arrange(gd1_plt, gd2_plt, gd3_plt, ncol=3)
+grid.arrange(rd1_plt, rd2_plt, rd3_plt, ncol=3)
+
+# This code will plot the path of index values
+index_vals <- path_index(interpolate(p_t_guided),
+  lda_pp(penguins_sub$species))
+guided_plot <- plot(index_vals) +
+  scale_x_continuous(breaks=c(1, 17, 37, 47, 57)) +
+  scale_y_continuous(breaks=index_vals[c(1, 17, 37, 47, 57)],
+                     labels=round(index_vals[c(1, 17, 37, 47, 57)], 3)) +
+  xlab("projection sequence") +
+  theme_minimal() + 
+  theme(panel.background = element_rect(fill=NA,
+                                             colour="black"),
+        panel.grid.minor = element_blank())
+```
+
+Because space gets large as dimension increases, the wait for seeing interesting structure in projections when using a grand tour can be long. So if you have an idea of the types of structure that would be interesting to observe using a *guided tour* [@CBCH95] may help. A guided tour chooses target bases according to some function describing interesting, and the tour path follows an optimisation of this function. For example, the `LDA` index [@LCKL05] is a function that describes the separation between known classes in a projection, and is defined as follows: 
+
+\begin{eqnarray*}
+I_{\rm LDA}(A) = 1- \frac{|A'WA|}{|A'(W+B)A|}
+\end{eqnarray*}
+
+where $B = \sum_{i=1}^g
+n_i(\bar{y}_{i.}-\bar{y}_{..})(\bar{y}_{i.}-\bar{y}_{..})',
+W=\sum_{i=1}^g\sum_{j=1}^{n_i}
+(y_{ij}-\bar{y}_{i.})(y_{ij}-\bar{y}_{i.})'$ are the
+between- and within-group sum of squares matrices in a linear
+discriminant analysis, with $g=$number of groups, and $n_i, i=1, ....g$ is the number of cases in each group. 
+
+The *radial tour* [@radial-tour] provides a way to assess the importance of any variable or combination of variables. The target basis is chosen by zeroing out a variable (or multiple variables) and the interpolation runs from the initial projection to the target and back to the initial. If the structure observed in the initial plot doesn't change much when the variable(s) is removed, then the variable is not important. This is often best combined with the guided tour, where the radial tour would start from the best projection (as done in `r ifelse(knitr::is_html_output(), '@fig-tour-types-html', '@fig-tour-types-pdf')` c), the most structured projection, and each of the variables can be tested for their importance in producing the structure.
+
+Each of these tour types can be run in the `tourr` package by setting the `tour_path` parameter of the `animate_XXX()` functions. The paths of projection bases can also be generated and saved to be used later with the `save_history()` function. This is the manner with which to save a particular data projection, or to generate sequences of projections to pass to external software. 
+
+::: {.content-visible when-format="html"}
+::: {#fig-tour-types-html  layout="[[33, 33, 33]]"}
+
+![grand tour](gifs/penguins_cl_grand.gif)
+
+![guided tour](gifs/penguins_cl_guided.gif)
+
+![radial](gifs/penguins_cl_radial.gif)
+
+Three main tour types for examining multivariate data: (a) grand tour for obtaining an overview, (b) guided tour to explore for particular structure, (c) radial tour to assess the importance of a variable. The guided tour does show the separations between the three groups better, but will miss unexpected features like the several anomalies. The radial tour shows that `fl` is not contributing much to the separation of the Gentoo (red) penguins from the others.
+:::
+:::
+
+
+::: {.content-visible when-format="pdf"}
+
+::: {#fig-tour-types-pdf layout="[[100]]"}
+
+![Data projected into three target projection bases from a grand tour](images/p_grand3.png)
+
+![Data projected into three target projection bases from a guided tour](images/p_guided3.png)
+
+![Data projected into three target projection bases from a radial tour](images/p_radial3.png)
+
+With the grand tour (a) each target plane is randomly selected, to show as many possible projections as possible and obtain an overview of the data. A tour guided by the LDA index (b) steers towards projections where the species are most separated. However, the guided tour might miss something unexpected, like the anomaly (yellow) seen in the third grand tour frame (a). The radial tour (c) rotates a variable (here \texttt{fl}) out of the projection and back in to assess the impact on the structure. It can be seen that removing the contribution of \texttt{fl} makes only a small difference to the separation. {{< fa play-circle >}}
+:::
+
+:::
+
+::: {#fig-interpolation layout="[[100]]"}
+![](images/interpolation.png)
+
+Two different types of interpolation to a target: (a) geodesic plane-to-plane, (b) basis-to-basis using Givens rotations. The geodesic interpolation follows the shortest paths between planes. Givens respects the orientation of the basis when plotting or calculating projection pursuit indexes. Both methods maintain orthonormality of the bases for each step. 
+:::
+
+### Interpolating between targets
+
+Interpolating from the current basis to the target basis is most commonly achieved using geodesic interpolation. This type of interpolation (described in @BCAH05) has especially important properties: (1) it is plane-to-plane so follows the shortest path, and (2) maintains orthonormality of the basis at each step when $d>1$. The plane-to-plane movement operates like video stabilisation, by removing the within-plane spin, so you can focus on structure without distracting movement. However, when using the guided tour if the index is not rotationally invariant, for example, if based on correlation or splines, it can be important respect a particular orientation. For this rare situation, using Givens interpolation, available in the `woylier` package [@R-woylier] can be helpful. @fig-interpolation illustrates the difference.
+
+### Displaying the projected data
+
+Based on the dimension of the projection basis there are natural ways to display the projected data. If $d=2$ it is most common that we would use a scatterplot, as shown in (as done in `r ifelse(knitr::is_html_output(), '@fig-tour-types-html', '@fig-tour-types-pdf')`. 
+
+If $d=1$ there are many choices of display - histogram, density plot, dotplot, boxplot - any method commonly used to display univariate continuous data (see `animate_dist()`). If $d=1$ but a second (set of) variable(s) is available, such as a time index, a categorical variable index (`animate_idx()`), or spatial coordinates (`animate_image()`), then the display might reserve one axis for the projected data and another for the additional variables. @fig-displays shows two different display choices for $d=1$, a histogram of the projected data (a) and an ordered dotplot of an index created by combining values of several ranking variables. In each display the box with horizontal lines at the bottom represents the projection coefficients. In (a) there are six variables contributing to the projection, four with negative coefficients, which reveals some bimodality and a potential anomaly in this data. In (b), nine ranking variables on the liveability of 10 US cities are combined to give an overall rank for each city. This combination is a projection, and a tour is used to assess how the city ranks would change if the combination of these measures changed. That is, the use case, is how robust is the ranking to small changes in its construction.
+
+When $d>2$, even though it primarily academic, some possible choices are to use stereo to simulate 3D, scatterplot matrices or parallel coordinates. 
+
+```{r}
+#| echo: false
+#| eval: false
+library(tourr)
+animate_dist(flea[, 1:6], 
+             method="histogram", 
+             bw=0.1, scale_density=TRUE)
+data(places)
+places_01 <- apply(places[1:10,1:9], 2, function(x) (x-min(x))/(max(x)-min(x)))
+b <- matrix(rep(1/sqrt(9), 9), ncol=1)
+places_init <- cbind(places_01, idx = as.vector(as.matrix(places_01) %*% b))
+places_sorted <- places_init[order(places_init[,10]), 1:9]
+animate_idx(places_sorted, tour_path = local_tour(b, angle=pi/8),
+            label=as.character(places$stnum[1:9]),
+            label_x_pos = 0)
+```
+
+::: {#fig-displays layout="[[63,37]]"}
+
+
+![histogram](images/display-dist2.png)
+
+![dotplot](images/display-idx.png)
+
+Different choices for displaying projected data: (a) histogram, (b) ordered dotplot. In each case the projected data is 1D. In the histogram, the lines at the bottom of the display correspond to the projection basis. For the ordered dotplot each point corresponds to a US city, which has been measured on several criteria such as housing, climate, crime, and education. The lines at the bottom correspond the coefficients for each of these ratings in the projection basis.
+:::
+
+Adjustments to the display are useful for some problems. The crowding problem where points concentrate as dimension increases can be alleviated with a transformation of the projected data documented in @sagetour and available with the `animate_sage()` function. When the data is particularly dense, for example, simulated data filling out a full $p$-dimensional cube from a fitted model generated to understand the fit, it can be useful to use slicing [@slicetour]. Slicing will fade out observations beyond a given distance from the centre of the data, relative to the projection. `r ifelse(knitr::is_html_output(), '@fig-slicing-html', '@fig-slicing-pdf')` illustrates the slice display available using the `animate_slice()` function.
+
+```{r}
+#| echo: false
+#| eval: false
+library(tourr)
+library(geozoo)
+set.seed(1351)
+d <- torus(3, n=4304)$points
+d <- apply(d, 2, function(x) (x-mean(x))/sd(x))
+d <- data.frame(d)
+slice_t2 <- save_history(d, grand_tour(), 20)
+animate_xy(d, planned_tour(slice_t2), axes="bottomleft", col="#EC5C00")
+animate_slice(d, planned_tour(slice_t2), axes="bottomleft", col="#EC5C00")
+
+render_gif(d, 
+           planned_tour(slice_t2),
+           display_xy(col="#EC5C00",
+             axes="bottomleft", half_range=3.5),
+           gif_file = "gifs/torus_proj.gif",
+           frames = 1000,
+           width = 400, 
+           height = 400)
+
+render_gif(d, 
+           planned_tour(slice_t2),
+           display_slice(col="#EC5C00",
+             axes="bottomleft", half_range=3.5),
+           gif_file = "gifs/torus_slice.gif",
+           frames = 1000,
+           width = 400, 
+           height = 400)
+```
+
+::: {.content-visible when-format="html"}
+::: {#fig-slicing-html layout="[[50, 50]]"}
+
+![projection](gifs/torus_proj.gif)
+
+![slice](gifs/torus_slice.gif)
+
+Slicing can cut through high density is useful to find hollowness in high-dimensional data, or understand limitations of fitted models. Here points on the surface of a 3D torus are shown using (a) projections, and (b) slices. The slicing reveals the hollowness of this data with the circular cuts to the donut shape.
+:::
+:::
+
+::: {.content-visible when-format="pdf"}
+::: {#fig-slicing-pdf  layout="[[50, 50]]"}
+
+![projection](images/torus_proj.png)
+
+![slice](images/torus_slice.png)
+
+Slicing can cut through high density is useful to find hollowness in high-dimensional data, or understand limitations of fitted models. Here points on the surface of a 3D torus are shown using (a) projections, and (b) slices. The slicing reveals the hollowness of this data with the circular cuts to the donut shape. {{< fa play-circle >}}
+:::
+:::
+
+It can also be useful to add layers to the data, such as summary statistics, labels for selected observations, or connecting points with lines to represent model fits. `r ifelse(knitr::is_html_output(), '@fig-adornments-html', '@fig-adornments-pdf')` illustrates two use cases. In (a) labels for specific players are shown when examining player statistics in the `aflw` data. All three were named best players in the 2021 AFLW season, Bowers and Davey were equal best and fairest, and Vescio was awarded best goal kicker. All three have quite different player statistics profiles. The play of Bowers and Davey differs in the number of handballs and kicks -  Davey tends to distribute the ball with handballs, while Bowers tends to kick. In (b) the lines indicate constraints. This is compositional data where each row adds to 1. It is the `Fireworks` data from the `compositions` [@R-compositions] package, and measures the mixtures of five different ingredients. We can see that it is relatively equal mixtures because all are very centred within the constraints. We can also see points banding into stripes, suggesting that there are just a small number of firework recipes. 
+
+\index{data!aflw}
+\index{data!fireworks}
+
+```{r}
+#| echo: false
+#| eval: false
+library(tourr)
+library(mulgar)
+data(aflw)
+aflw_labels <- ifelse(aflw$surname %in% 
+                        c("Vescio", "Bowers", "Davey"), aflw$surname, "")
+clrs <- ifelse(aflw$surname %in% 
+                        c("Vescio", "Bowers", "Davey"), "yes", "no")
+animate_xy(aflw[,8:11], obs_labels=aflw_labels, col=clrs, rescale=TRUE)
+aflw_t2 <- save_history(aflw[,8:11], max_bases=50)
+render_gif(aflw[,8:11],
+           planned_tour(aflw_t2),
+           display_xy(obs_labels=aflw_labels, 
+                      col=clrs), 
+           rescale=TRUE,
+           gif_file = "gifs/aflw_labelled.gif",
+           frames=1000,
+           width=400,
+           height=400)
+```
+
+```{r}
+#| echo: false
+#| eval: false
+library(compositions)
+library(geozoo)
+library(dplyr)
+data("Firework")
+# Five components
+# Check
+apply(Firework[,1:5], 1, sum)
+clr <- factor(ifelse(Firework[,6]>17, "high", "low"))
+animate_xy(Firework[,1:5], col=clr)
+
+# Project
+proj <- t(geozoo::f_helmert(5)[-1,])
+fireworks_p <- as.matrix(Firework[,1:5]) %*% proj
+colnames(fireworks_p) <- c("x1", "x2", "x3", "x4")
+fireworks_p <- as.data.frame(fireworks_p)
+animate_xy(fireworks_p)
+
+simp <- geozoo::simplex(p=4)
+sp <- data.frame(simp$points)
+colnames(sp) <- c("x1", "x2", "x3", "x4")
+fireworks_p <- bind_rows(sp, fireworks_p) 
+labels <- c("a" , "b", "c", "d", "e",
+                rep("", 81))
+
+animate_xy(fireworks_p, 
+           col="#EC5C00",
+           axes = "off", 
+           half_range = 0.8,
+           edges = as.matrix(simp$edges),
+           obs_labels = labels)
+
+clrs <- c(rep("black", 5), rep("#EC5C00", 81))
+ptsize <- c(rep(0.1, 5), rep(3, 81))
+fireworks_t2 <- save_history(fireworks_p, max_bases=50)
+render_gif(fireworks_p,
+           planned_tour(fireworks_t2),
+           display_xy(
+             col = clrs,
+             cex = ptsize,
+             axes = "off", 
+             half_range = 1,
+             edges = as.matrix(simp$edges),
+             edges.width = 0.1,
+             obs_labels = labels,
+             center = TRUE), 
+           gif_file = "gifs/fireworks.gif",
+           frames=1000,
+           width=400,
+           height=400)
+
+```
+
+::: {.content-visible when-format="html"}
+::: {#fig-adornments-html layout="[[50, 50]]"}
+
+![labelling](gifs/aflw_labelled.gif)
+
+![constraints](gifs/fireworks.gif)
+
+It is sometimes useful to overlay additional information, such as labels for a few points (a) or representing constraints (b). The labels in (a) correspond to players that won awards in the 2021 AFLW season. The lines in (b) correspond to constraints - this is compositional data where each 5D observation is constrained to sum to 1.
+:::
+:::
+
+::: {.content-visible when-format="pdf"}
+::: {#fig-adornments-pdf layout="[[50, 50]]"}
+
+![labelling](images/aflw_labelled.png)
+
+![constraints](images/fireworks.png)
+
+It is sometimes useful to overlay additional information, such as labels for a few points (a) or representing constraints (b). The labels in (a) correspond to players that won awards in the 2021 AFLW season. The lines in (b) correspond to constraints - this is compositional data where each 5D observation is constrained to sum to 1. {{< fa play-circle >}}
+:::
+:::
+
+It is often asked why isn't the data display using solid shapes, or provide depth cues with point size or colour. But the nature of high-dimensions is that comprehensive research on lighting models and perspective conducted for 3D graphics, does not extend to more than 3D. For example, a light source, like a lamp, is a point object, and in 4D the shadows would be 3D. A surface in 4D is 3D. So the choice of using points to represent objects, and lines to indicate geometric features is because these are meaningful in any dimension.  
+
 ## Exercises {-}
 
 1. Generate a matrix $A$ with $p=5$ (rows) and $d=2$ (columns), where each value is randomly drawn from a standard normal distribution. Extract the element at row 3 and column 1.
 2. We will interpret $A$ as an orthonormal basis and therefore it needs to be checked for orthonormality, and if it fails, then to be orthonormalised. Use the function `tourr::is_orthonormal` to explicitly check that each column is normalised and that the two columns are orthogonal. If they are not, then use `tourr::orthonormalise` to make them so. For the fixed version of $A$, which dimensions contribute most to the projection, horizontally and vertically?
 3. Use matrix multiplication to calculate the projection of the `mulgar::clusters` data onto the 2D plane defined by $A$. Make a scatterplot of the projected data. Can you identify clustering in this view?
+4. Use `save_history()` to generate a grand tour path for the `mulgar::clusters` data, with three target planes. Extract and report the second target basis, and plot the resulting data. 
+5. Using the saved path, generate the interpolation between the target planes, using `interpolate()`. How many bases are in the tour path? Plot the first four in set of planes, and explain what is happening.
+Save tour path, extract basis and plot data
+6. Repeat `save_history()` but use a holes index guided tour. Plot the final projection. Does the guided tour find the three clusters? Which of the variables have the largest contributions to the differences between groups?
+7. Repeat `save_history()` using a radial tour, starting from the best projection basis from the guided tour, and exploring the contribution of `x1` (`mvar=1`). Why should the length of the path be set to three? Why is the last basis the same as the first? Examine the second target basis, and explain how it is different from the first basis.
+8. Run the tours from in 4-7 using the `animate_xy()`. You can use the `planned_tour` method, but it is more interesting to simply re-generate using the different `tour_path` methods. It is interesting to examine the importance of `x5` and `x4` to the clustering seen in the best projection from the guided tour.
+9. Examine tours of 1D projections of the `mulgar::clusters` data, using density or histogram rendering. Can the three clusters be seen with 1D projections?
+10. Explore the use of the slice tour on these geometric objects, that can be simulated using `geozoo`:
 
+a. Roman Surface, generated by 
+
+`rs <- geozoo::roman.surface()$points |> scale() |> as.data.frame()`
+  
+b. solid 4D sphere, generated by 
+
+`s_solid <- geozoo::sphere.solid.random(4, 2000)$points |> as.data.frame()`
+
+c. hollow 4D sphere, generated by 
+
+`s_hollow <- geozoo::sphere.hollow(4, 2000)$points |> as.data.frame()`
+
+Use both regular tours, and the slice tours on each. What does the slice tour allow us to see in the Roman Surface? What is the difference between the solid and hollow spheres?
+
+::: {.content-hidden when-format="pdf"}
+::: {.hidden}
+## Solutions to exercises
+:::
+:::
  
+  
 ```{r}
 #| eval: false
 #| echo: false
 library(tourr)
 library(mulgar)
 library(ggplot2)
+library(geozoo)
+# Answer to Q1
 set.seed(110)
 m <- matrix(rnorm(10), ncol = 2)
+m[3, 1]
+
+# Answer to Q2
+is_orthonormal(m)
 m <- orthonormalise(m)
-# with this seed components 2 and 4 contribute most to direction 1
-# and components 3 and 4 contribute most to direction 2
+is_orthonormal(m)
 sum(m[,1]^2) # = 1 if properly normalised
 sum(m[,2]^2) # = 1 if properly normalised
 sum(m[,1]*m[,2]) # = 0 if orthogonal
+m
+# with this seed components 
+# 2 and 4 contribute most horizontally
+# 3 and 4 contribute most vertically
+
+# Answer to Q3
 clusters_proj <- as.matrix(clusters[,1:5]) %*% m # calculate projection
 colnames(clusters_proj) <- c("p1", "p2")
 clusters_proj <- as.data.frame(clusters_proj)
 ggplot(clusters_proj, aes(p1, p2, color = clusters$cl)) +
-  geom_point()
-# with this projection we can distinguish one cluster from the other two
+  geom_point() +
+  theme(aspect.ratio=1)
+# with this projection we can see a difference in all three clusters,
+# although there is some overlap between A and B
+
+# Answer to Q4
+set.seed(1044)
+cl_t2 <- save_history(clusters[,1:5], max_bases=3)
+cl_t2[,,2]
+clusters_proj <- as.matrix(clusters[,1:5]) %*% matrix(cl_t2[,,2], ncol=2) 
+colnames(clusters_proj) <- c("p1", "p2")
+clusters_proj <- as.data.frame(clusters_proj)
+ggplot(clusters_proj, aes(p1, p2, color = clusters$cl)) +
+  geom_point() +
+  theme(aspect.ratio=1)
+
+# Answer to Q4
+cl_t2_i <- interpolate(cl_t2)
+dim(cl_t2_i)[3]
+clusters_proj <- as.matrix(clusters[,1:5]) %*% matrix(cl_t2_i[,,1], ncol=2) 
+colnames(clusters_proj) <- c("p1", "p2")
+clusters_proj <- as.data.frame(clusters_proj)
+p1 <- ggplot(clusters_proj, aes(p1, p2, color = clusters$cl)) +
+  geom_point() +
+  theme(aspect.ratio=1,
+        legend.position="none")
+clusters_proj <- as.matrix(clusters[,1:5]) %*% matrix(cl_t2_i[,,2], ncol=2) 
+colnames(clusters_proj) <- c("p1", "p2")
+clusters_proj <- as.data.frame(clusters_proj)
+p2 <- ggplot(clusters_proj, aes(p1, p2, color = clusters$cl)) +
+  geom_point() +
+  theme(aspect.ratio=1,
+        legend.position="none")
+clusters_proj <- as.matrix(clusters[,1:5]) %*% matrix(cl_t2_i[,,3], ncol=2) 
+colnames(clusters_proj) <- c("p1", "p2")
+clusters_proj <- as.data.frame(clusters_proj)
+p3 <- ggplot(clusters_proj, aes(p1, p2, color = clusters$cl)) +
+  geom_point() +
+  theme(aspect.ratio=1,
+        legend.position="none")
+clusters_proj <- as.matrix(clusters[,1:5]) %*% matrix(cl_t2_i[,,4], ncol=2) 
+colnames(clusters_proj) <- c("p1", "p2")
+clusters_proj <- as.data.frame(clusters_proj)
+p4 <- ggplot(clusters_proj, aes(p1, p2, color = clusters$cl)) +
+  geom_point() +
+  theme(aspect.ratio=1,
+        legend.position="none")
+library(patchwork)
+p1 + p2 + p3 + p4 + plot_layout(ncol=4)
+# They look ALMOST identical. These are very small interpolation steps, and the data changes very little between each one. 
+
+# Answer to Q6
+cl_t2_guided <- save_history(clusters[,1:5], 
+                             tour_path = guided_tour(holes()))
+cl_t2_guided[,,14]
+clusters_proj <- as.matrix(clusters[,1:5]) %*% matrix(cl_t2_guided[,,14], ncol=2) 
+colnames(clusters_proj) <- c("p1", "p2")
+clusters_proj <- as.data.frame(clusters_proj)
+ggplot(clusters_proj, aes(p1, p2, color = clusters$cl)) +
+  geom_point() +
+  theme(aspect.ratio=1)
+# This view shows three clusters, with some overlap between A and B.
+#
+
+# Answer to Q7
+cl_t2_r <- save_history(clusters[,1:5], 
+     tour_path = radial_tour(start=matrix(cl_t2_guided[,,14], ncol=2),
+                             mvar=1), max_bases=3)
+# Only three bases are needed, because it runs from starting projection
+# to a target where the chosen variable as coefficient equal to 0
+# The first and third are the same because it goes back to where it started
+# The second basis has the coefficients for variable 1 equal to zero
+
+# Answer to Q8
+set.seed(1215)
+animate_xy(clusters[,1:5], col=clusters$cl)
+animate_xy(clusters[,1:5], tour_path=guided_tour(holes()), col=clusters$cl)
+animate_xy(clusters[,1:5], 
+  radial_tour(start=matrix(cl_t2_guided[,,14], ncol=2), mvar=1), 
+              col=clusters$cl)
+# x1 can be removed, and the clusters are still completely visible
+# x5 can be removed, and the clusters are still completely visible
+# When x4 is removed cluster C is not separated from the others
+
+# Answer to Q9
+set.seed(1218)
+animate_dist(clusters[,1:5])
+animate_dist(clusters[,1:5], tour_path=guided_tour(holes()))
+animate_dist(clusters[,1:5], method="histogram", bw=0.1)
+# The three clusters cannot be seen so easily. Many projections have bimodal
+# density, so it is clear that there are two clusters, but detecting the
+# third is not possible.
+
+# Answer to Q10
+rs <- geozoo::roman.surface()$points |> scale() |> as.data.frame()
+animate_xy(rs)
+animate_slice(rs)
+# The twisted hollow shape of the Roman Surface can be seen better with the slice tour
+s_solid <- geozoo::sphere.solid.random(4, 2000)$points |> as.data.frame()
+animate_xy(s_solid)
+animate_slice(s_solid)
+
+s_hollow <- geozoo::sphere.hollow(4, 2000)$points |> as.data.frame()
+animate_xy(s_hollow)
+animate_slice(s_hollow)
+# The hollow sphere has a crisper edge than the solid sphere, and slices show the interior is empty, has no points, because the slices are all circles.
 ```
 
