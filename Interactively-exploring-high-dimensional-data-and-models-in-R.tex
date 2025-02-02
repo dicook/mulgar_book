@@ -42,14 +42,28 @@
 \setlength{\emergencystretch}{3em} % prevent overfull lines
 \setcounter{secnumdepth}{5}
 % Make \paragraph and \subparagraph free-standing
+\makeatletter
 \ifx\paragraph\undefined\else
   \let\oldparagraph\paragraph
-  \renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+  \renewcommand{\paragraph}{
+    \@ifstar
+      \xxxParagraphStar
+      \xxxParagraphNoStar
+  }
+  \newcommand{\xxxParagraphStar}[1]{\oldparagraph*{#1}\mbox{}}
+  \newcommand{\xxxParagraphNoStar}[1]{\oldparagraph{#1}\mbox{}}
 \fi
 \ifx\subparagraph\undefined\else
   \let\oldsubparagraph\subparagraph
-  \renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+  \renewcommand{\subparagraph}{
+    \@ifstar
+      \xxxSubParagraphStar
+      \xxxSubParagraphNoStar
+  }
+  \newcommand{\xxxSubParagraphStar}[1]{\oldsubparagraph*{#1}\mbox{}}
+  \newcommand{\xxxSubParagraphNoStar}[1]{\oldsubparagraph{#1}\mbox{}}
 \fi
+\makeatother
 
 \usepackage{color}
 \usepackage{fancyvrb}
@@ -69,7 +83,7 @@
 \newcommand{\CommentTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
 \newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
 \newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
-\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{\textbf{#1}}}
 \newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
 \newcommand{\DecValTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
 \newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
@@ -79,7 +93,7 @@
 \newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.28,0.35,0.67}{#1}}
 \newcommand{\ImportTok}[1]{\textcolor[rgb]{0.00,0.46,0.62}{#1}}
 \newcommand{\InformationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
-\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{\textbf{#1}}}
 \newcommand{\NormalTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
 \newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
 \newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
@@ -105,15 +119,17 @@
 \makesavenoteenv{longtable}
 \usepackage{graphicx}
 \makeatletter
-\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
-\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
-\makeatother
-% Scale images if necessary, so that they will not overflow the page
-% margins by default, and it is still possible to overwrite the defaults
-% using explicit options in \includegraphics[width, height, ...]{}
-\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
 % Set default figure placement to htbp
-\makeatletter
 \def\fps@figure{htbp}
 \makeatother
 % definitions for citeproc citations
@@ -186,6 +202,21 @@
   \end{minipage}%
 }%
 }
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{longtable}
+\usepackage{colortbl}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{pdflscape}
+\usepackage{tabu}
+\usepackage{threeparttable}
+\usepackage{threeparttablex}
+\usepackage[normalem]{ulem}
+\usepackage{makecell}
+\usepackage{xcolor}
 \usepackage{amsmath}
 \usepackage{blkarray}
 \usepackage[most]{tcolorbox}
@@ -245,9 +276,7 @@
 \makeatletter
 \@ifpackageloaded{fontawesome5}{}{\usepackage{fontawesome5}}
 \makeatother
-\ifLuaTeX
-  \usepackage{selnolig}  % disable illegal ligatures
-\fi
+
 \usepackage{bookmark}
 
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
@@ -262,9 +291,10 @@
   urlcolor={Blue},
   pdfcreator={LaTeX via pandoc}}
 
+
 \title{Interactively exploring high-dimensional data and models in R}
 \author{Dianne Cook and Ursula Laa}
-\date{2024-03-25}
+\date{2025-01-31}
 
 \begin{document}
 \maketitle
@@ -272,9 +302,10 @@
 \renewcommand*\contentsname{Contents}
 {
 \hypersetup{linkcolor=}
-\setcounter{tocdepth}{1}
+\setcounter{tocdepth}{2}
 \tableofcontents
 }
+
 \bookmarksetup{startatroot}
 
 \chapter*{Preface}\label{preface}
@@ -426,30 +457,43 @@ To get started set up your computer with the current versions of
 \href{https://cran.r-project.org}{R} and ideally also with
 \href{https://posit.co/download/rstudio-desktop/}{Rstudio Desktop}.
 
-In addition, we have made an R package to share the data and functions
-used in this book, called
-\href{http://dicook.github.io/mulgar}{\texttt{mulgar}}.\footnote{Mulga
-  is a type of Australian habitat composed of woodland or open forest
-  dominated by the mulga tree. Massive clearing of mulga led to the vast
-  wheat fields of Western Australia. Here \textbf{mulgar} is an acronym
-  for \textbf{MUL}tivariate \textbf{G}raphical \textbf{A}nalysis with
+The examples are created using the
+\href{http://ggobi.github.io/tourr/}{\texttt{tourr}} and
+\href{https://casperhart.github.io/detourr/}{\texttt{detourr}} packages.
+In addition, we have made an R package to share most of the data and
+functions used in this book, called
+\href{http://dicook.github.io/mulgar}{\texttt{mulgar}}.\footnote{The
+  mulga is an iconic landscape in Australia. It is a woodland dominated
+  by the mulga tree (Acacia aneura). As you travel through mulga the
+  trees look very regular, sometimes like a stand of lollipops, which is
+  apparently due to close neighbours being clones! The wood is
+  especially hardy, durable and resistant to pests. The climate is
+  semi-arid and it can be found across Australia, Queensland, New South
+  Wales, South Australia and Western Australia. This landscape is host
+  to numerous species: red kangaroos, spinifex hopping mice, mulga
+  parrots, dunnarts, thorny devils, bearded dragons, and pests like
+  feral goats. Here \textbf{mulgar} is an acronym for
+  \textbf{MUL}tivariate \textbf{G}raphical \textbf{A}nalysis with
   \textbf{R}.}\footnote{Photo of mulga tree taken by L. G. Cook.}
+Ideally the methods described are not entirely bound by the current
+available packages, and still applicable as new technology arises.
 
 \begin{Shaded}
 \begin{Highlighting}[]
+\FunctionTok{install.packages}\NormalTok{(}\StringTok{"tourr"}\NormalTok{, }\AttributeTok{dependencies=}\ConstantTok{TRUE}\NormalTok{)}
+\FunctionTok{install.packages}\NormalTok{(}\StringTok{"detourr"}\NormalTok{, }\AttributeTok{dependencies=}\ConstantTok{TRUE}\NormalTok{)}
 \FunctionTok{install.packages}\NormalTok{(}\StringTok{"mulgar"}\NormalTok{, }\AttributeTok{dependencies=}\ConstantTok{TRUE}\NormalTok{)}
-\CommentTok{\# or the development version}
-\NormalTok{devtools}\SpecialCharTok{::}\FunctionTok{install\_github}\NormalTok{(}\StringTok{"dicook/mulgar"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
-To get a copy of the code and data used and an RStudio project to get
-started, you can download with this code:
+and development versions can be installed from the GitHub repositories
+for the packages. To get a copy of the code and additional data used and
+an RStudio project to get started, you can download with this code:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{book\_url }\OtherTok{\textless{}{-}} \StringTok{"https://dicook.github.io/mulgar\_book/code\_and\_data.zip"}
-\NormalTok{usethis}\SpecialCharTok{::}\FunctionTok{use\_zip}\NormalTok{(}\AttributeTok{url=}\NormalTok{book\_url)}
+\NormalTok{u }\OtherTok{\textless{}{-}} \StringTok{"https://dicook.github.io/mulgar\_book/code\_and\_data.zip"}
+\NormalTok{usethis}\SpecialCharTok{::}\FunctionTok{use\_zip}\NormalTok{(}\AttributeTok{url=}\NormalTok{u)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -480,22 +524,38 @@ these components:
   copy of the error message that was generated
 \end{itemize}
 
-\bookmarksetup{startatroot}
+\part{Introduction}
 
 \chapter{Picturing high dimensions}\label{intro}
 
-High-dimensional data means that we have a large number of numeric
-features or variables, which can be considered as dimensions in a
-mathematical space. The variables can be different types, such as
-categorical or temporal, but the handling of these variables involves
-different techniques. \index{dimensionality}
-\index{variable}\index{feature} \index{projection}
+High-dimensional data means that we have a large number of features or
+variables, which can be considered as dimensions in a mathematical
+space. The variables can be different types, such as categorical or
+temporal, but the handling of these variables involves different
+techniques. Here we focus on primarily numeric variables, which might be
+considered as belonging to a Euclidean space where each observation is a
+vector and the distance between observations can be described by a
+distance metric. \index{dimensionality} \index{variable}\index{feature}
+\index{Euclidean space} \index{distance metric} \index{vector}
+
+Models that operate on high-dimensional data can be thought of as
+decomposing observations into two sets of values, fitted values and
+residuals from the fit. The fitted values capture the systematic or
+predictable variation between variables, and can be considered a
+sharpened view of the data, to see through the noise in the data. The
+residuals capture this noise, and represent random variation. When using
+models for high-dimensional data, such as unsupervised or supervised
+classification, or dimension reduction, it is important to use
+visualisation to assess how well the model fits the data. If it fits
+well, picturing the model fit might be a clearer view of the
+relationships between variables. \index{model!fitted values}
+\index{model!residuals}
 
 \begin{figure}
 
 \centering{
 
-\includegraphics[width=4.6875in,height=\textheight]{images/shadow_puppets.png}
+\includegraphics[width=4.6875in,height=\textheight,keepaspectratio]{images/shadow_puppets.png}
 
 }
 
@@ -505,11 +565,18 @@ shadows to guess what the shape is.}
 
 \end{figure}%
 
-One approach to visualise high dimensional data and models is by using
-linear projections, as done in a tour. You can think of projections of
-high-dimensional data like shadows (Figure~\ref{fig-shadow-puppets}).
-Unlike shadow puppets, though the object stays fixed, and with multiple
-projections we can obtain a \emph{view of the object from all sides}.
+One approach to visualise numeric high dimensional data and models is by
+using linear projections, as done in a tour (Asimov, 1985; Buja \&
+Asimov, 1986; Cook et al., 2006; S. Lee et al., 2022). You can think of
+projections of high-dimensional data like shadows
+(Figure~\ref{fig-shadow-puppets}). Unlike shadow puppets, though the
+object stays fixed, and with multiple projections we can obtain a
+\emph{view of the object from all sides}. A tour will pick directions to
+look at by selecting a set of linear projections. The views are
+interpolated to move from one linear projection to the next, this is
+displayed as an animation. \index{projection} \index{shadow}
+
+\infobox{With a tour we slowly rotate the viewing direction, this allows us to see many individual projections and to track movement patterns. Look for interesting structures such as clusters or outlying points.}
 
 \section{Getting familiar with tours}\label{getting-familiar-with-tours}
 
@@ -517,7 +584,7 @@ projections we can obtain a \emph{view of the object from all sides}.
 
 \centering{
 
-\includegraphics[width=1\textwidth,height=\textheight]{1-intro_files/figure-pdf/fig-explain-1D-pdf-1.pdf}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{1-intro_files/figure-pdf/fig-explain-1D-pdf-1.pdf}
 
 }
 
@@ -544,15 +611,14 @@ centre of the plot. Clustering can be seen in many of the projections,
 with the strongest being when the contribution of both variables is
 equal, and the projection is \texttt{(0.707,\ \ 0.707)} or
 \texttt{(-0.707,\ -0.707)}. (If you are curious about the number
-\texttt{0.707}, read the last section of this chapter.)
-
-\index{projection!1D}
+\texttt{0.707}, the Chapter~\ref{sec-notation} provides the
+explanation.) \index{projection!1D} \index{tour!grand}
 
 \begin{figure*}
 
 \centering{
 
-\includegraphics[width=1\textwidth,height=\textheight]{1-intro_files/figure-pdf/fig-explain-2D-pdf-1.pdf}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{1-intro_files/figure-pdf/fig-explain-2D-pdf-1.pdf}
 
 }
 
@@ -574,6 +640,25 @@ watching many 2D projections but some are more revealing that others.
 The projection shown in (b) is where the hole in the donut is clearly
 visible. \index{projection!2D}
 
+\section{Reading the axes}\label{reading-the-axes}
+
+The coefficients of the projection are important to matching the
+variables with the patterns detected. For example, in the 2D data used
+in Figure~\ref{fig-explain-1D-pdf} the primary structure to detect is
+the clustering. It is when a positive, equal combination of the two
+variables \texttt{x1} and \texttt{x2} are used that the two clusters can
+be observed in a projection.
+
+When the projection dimension is 2, as in the example data used in
+Figure~\ref{fig-explain-2D-pdf}, there are two sets of projection
+coefficients. These are represented in the plot by the circle and line
+segments. The direction and length of the line segments indicate how the
+variable contributes to the view seen. Lining these up with any patterns
+in the data helps to understand how the variables contribute to making
+the pattern. In this data, the interesting feature is the hole in the
+donut, which can be seen in certain combinations of \texttt{x1} and
+\texttt{x3} plotted against \texttt{x2}.
+
 \section{What's different about space beyond
 2D?}\label{whats-different-about-space-beyond-2d}
 
@@ -594,7 +679,7 @@ methods mentioned, in this book.
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{1-intro_files/figure-pdf/fig-dimension-cubes-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{1-intro_files/figure-pdf/fig-dimension-cubes-1.pdf}
 
 }
 
@@ -606,9 +691,10 @@ the dimension increase by one, the cube doubles.}
 \end{figure}%
 
 Interestingly, the struggle with imagining high-dimensions this way is
-described in a novel published in 1884 (Abbott, 1884) \footnote{Thanks
-  to Barret Schloerke for directing co-author Cook to this history when
-  he was an undergraduate student and we were starting the
+described in a novel titled ``Flatland: A Romance of Many Dimensions''
+published in 1884 (Abbott, 1884) \footnote{Thanks to Barret Schloerke
+  for directing co-author Cook to this history when he was an
+  undergraduate student and we were starting the
   \href{http://schloerke.com/geozoo/}{geozoo} project.}. Yes, more than
 100 years ago! This is a story about characters living in a 2D world,
 being visited by an alien 3D character. It also is a social satire,
@@ -644,7 +730,8 @@ edge of the sample space.
 For visualisation, the curse manifests in an opposite manner. Projecting
 from high to low dimensions creates a crowding or piling of points near
 the center of the distribution. This was noted by Diaconis \& Freedman
-(1984a). Figure~\ref{fig-density} illustrates this phenomenon. As
+(1984a). Figure~\ref{fig-density} illustrates this phenomenon, using
+samples that are uniformly distributed in \(p\)-dimensional spheres. As
 dimension increases, the points crowd the centre, even with as few as
 ten dimensions. This is something that we may need to correct for when
 exploring high dimensions with low-dimensional projections.
@@ -655,15 +742,16 @@ exploring high dimensions with low-dimensional projections.
 
 \centering{
 
-\includegraphics[width=0.95\textwidth,height=\textheight]{1-intro_files/figure-pdf/fig-density-1.pdf}
+\includegraphics[width=0.95\linewidth,height=\textheight,keepaspectratio]{1-intro_files/figure-pdf/fig-density-1.pdf}
 
 }
 
 \caption{\label{fig-density}Illustration of data crowding in the
 low-dimensional projection as dimension increases, here from 3, 10, 100.
-Colour shows the number of points in each hexagon bin (pink is large,
-navy is small). As dimension increases the points concentrate near the
-centre.}
+The samples are generated from a uniform distribution in
+\(p\)-dimensional spheres. Colour shows the number of points in each
+hexagon bin (pink is large, navy is small). As dimension increases the
+points concentrate near the centre.}
 
 \end{figure}%
 
@@ -680,7 +768,7 @@ dimensionality, with different variance or spread in some directions.
 
 \centering{
 
-\includegraphics[width=2.08333in,height=\textheight]{images/clusters-intro.png}
+\includegraphics[width=2.08333in,height=\textheight,keepaspectratio]{images/clusters-intro.png}
 
 }
 
@@ -692,7 +780,7 @@ dimensionality, with different variance or spread in some directions.
 
 \centering{
 
-\includegraphics[width=2.08333in,height=\textheight]{images/outlier-intro.png}
+\includegraphics[width=2.08333in,height=\textheight,keepaspectratio]{images/outlier-intro.png}
 
 }
 
@@ -702,8 +790,7 @@ dimensionality, with different variance or spread in some directions.
 
 \caption{\label{fig-tour-intro-pdf}Frames from 2D tours on two 5D
 datasets, with clusters of points in (a) and two outliers with a plane
-in (b). This figure is best viewed in the HTML version of the book.
-\faIcon{play-circle}}
+in (b). \faIcon{play-circle}}
 
 \end{figure}%
 
@@ -733,7 +820,7 @@ only visible in combinations of variables.
 
 \centering{
 
-\includegraphics[width=1\textwidth,height=\textheight]{1-intro_files/figure-pdf/fig-example-structure-1.pdf}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{1-intro_files/figure-pdf/fig-example-structure-1.pdf}
 
 }
 
@@ -754,7 +841,7 @@ and outliers (c, d).
 
 \centering{
 
-\includegraphics{images/trails-clusters.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/trails-clusters.png}}
 
 }
 
@@ -766,7 +853,7 @@ and outliers (c, d).
 
 \centering{
 
-\includegraphics{images/trails-outlier.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/trails-outlier.png}}
 
 }
 
@@ -809,7 +896,7 @@ high-dimensional data, including:
   diagnosing the fit of multivariate models.
 \end{itemize}
 
-\infobox{With a tour we slowly rotate the viewing direction, this allows us to see many individual projections and to track movement patterns. Look for interesting structures such as clusters or outlying points.}
+\infobox{You use a tour when analysing multivariate data so that you can see what exists in the data and what your models are fitting, in the same way that you walk down the street with {\em your eyes open} to avoid being hit by a bus or to discover a delightful shop.}
 
 \section{A little history}\label{a-little-history}
 
@@ -848,7 +935,7 @@ a little (FORTRAN to C to java to python) but graphics toolkits and
 display devices have changed a lot! The tour software used in this book
 evolved from XGobi, which was written in C and used the X Window System,
 which was then rewritten in GGobi using gtk. The video library has
-engaging videos of these software systems There have been several other
+engaging videos of these software systems. There have been several other
 short-lived implementations, including orca (Sutherland et al., 2000a),
 written in java, and cranvas (Xie et al., 2014), written in R with a
 back-end provided by wrapper functions to \texttt{qt} libraries.
@@ -862,6 +949,192 @@ package, \texttt{tourr} (Wickham et al., 2011a) for examples in this
 book. It provides the machinery for running a tour, and has the
 flexibility that it can be ported, modified, and used as a regular
 element of data analysis.
+
+\section{An illustration of the
+benefits}\label{an-illustration-of-the-benefits}
+
+The Palmer penguins data (A. M. Horst et al., 2022) is available in the
+R package \texttt{palmerpenguins} (A. Horst et al., 2022). These are
+measurements on three species of penguins, recording the bill length
+(\texttt{bl}) and depth (\texttt{bd}), flipper length (\texttt{fl}) and
+body mass (\texttt{bm}), along with the sex, island location and year of
+recording. Of interest here are the four physical measurements and the
+species. There are two penguins with missing values on these
+measurements which are removed from the analysis below. The variables
+have also been standardised. \index{data!penguins}
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{1-intro_files/figure-pdf/fig-penguins-scatmat-1.pdf}
+
+}
+
+\caption{\label{fig-penguins-scatmat}Scatterplot matrix of the penguins,
+with colour indicating the three species, Adelie, Chinstrap, Gentoo. The
+clusters for each species are similarly shaped in each scatterplot, and
+centred at different locations in some plots.}
+
+\end{figure}%
+
+Figure~\ref{fig-penguins-scatmat} shows the data as a scatterplot
+matrix, as produced by the \texttt{ggscatmat} function in the R package
+GGally (Emerson et al., 2013), a common way to examine multivariate data
+with low-dimensional plots: pairwise scatterplots and univariate density
+plots. A lot of information can be gained from viewing this plot:
+
+\begin{itemize}
+\tightlist
+\item
+  the three species form three clusters, indicating that the physical
+  characteristics of the three are different.
+\item
+  the Gentoo species forms a separated cluster when \texttt{bd} is
+  plotted with \texttt{bm}.
+\item
+  there is one anomaly, a Chinstrap penguin that has a very low value of
+  \texttt{fl} relative to it's \texttt{bl} measurement.
+\end{itemize}
+
+Although one cannot see it in this plot clearly, making the plot larger
+also reveals that \texttt{fl} values appear to have been often rounded
+because there is some discreteness in the plots.
+
+\begin{figure}
+
+\begin{minipage}{0.50\linewidth}
+
+\pandocbounded{\includegraphics[keepaspectratio]{images/penguins6.png}}
+
+\subcaption{\label{}Nice view}
+\end{minipage}%
+%
+\begin{minipage}{0.50\linewidth}
+
+\pandocbounded{\includegraphics[keepaspectratio]{images/penguins5.png}}
+
+\subcaption{\label{}Chinstrap anomaly}
+\end{minipage}%
+\newline
+\begin{minipage}{0.50\linewidth}
+
+\pandocbounded{\includegraphics[keepaspectratio]{images/penguins3.png}}
+
+\subcaption{\label{}Gentoo anomaly}
+\end{minipage}%
+%
+\begin{minipage}{0.50\linewidth}
+
+\pandocbounded{\includegraphics[keepaspectratio]{images/penguins4.png}}
+
+\subcaption{\label{}Multiple anomalies}
+\end{minipage}%
+
+\caption{\label{fig-penguins-tour}Four projections from a tour, showing
+the data \emph{from more sides}. We can see that the separation between
+clusters is larger and that there are more unusually shaped penguins.}
+
+\end{figure}%
+
+In Figure~\ref{fig-penguins-tour} there are four 2D projections from a
+grand tour of the penguins data. Projection (a) reveals a 2D projection
+where all three species are distinct. It's quite a nice view where all
+species have circular spread, the Gentoo are separated, and the other
+two are very slightly overlapped. There is also one Adelie penguin that
+is a little different from the others here, primarily due to having
+large flippers but small bill depth. Projection (b) shows the anomalous
+Chinstrap penguin, and reveals that the gap between it and the other
+penguins is bigger than was seen in the scatterplot matrix. Projection
+(c) shows that there is an unusual Gentoo penguin, and projection (d)
+shows possibly a few more anomalous Gentoo, with relatively small
+\texttt{bl} and larger \texttt{bm}.
+
+In terms of understanding how the variables contribute to the patterns
+observed, we need to study the axes display on each plot. In projection
+(a) showing the nice view of the clusters, all four variables contribute
+in an interesting way. The variables operate in pairs of what we might
+call contrasts in statistics: \texttt{bl} and \texttt{bm} combine in the
+top left to bottom right direction, while \texttt{fl} and \texttt{bd}
+combine in the top right to bottom left direction. Because the axes are
+pointing in opposite directions, in each pair one variable contributes
+in the opposite way to the other. That is, one coefficient in the pair
+will be positive and the other negative. We can also infer that
+\texttt{fl} and \texttt{bd} contribute most to distinguishing Gentoo
+from the other species, and also that \texttt{bl} and \texttt{bm}
+contribute primarily to distinguishing Chinstrap from Adelie penguins.
+
+Interpretations can be checked against plots of the individual
+variables, like the scatterplot matrix in
+Figure~\ref{fig-penguins-scatmat}. Here, can see that, yes, \texttt{bl}
+is primarily distinguishing Chinstrap from Adelie, and \texttt{fl}
+strongly contributes to distinguishing Gentoo from the others. The plot
+of \texttt{bl} against \texttt{fl} has a reasonably good view of the
+three species as different from each other. This view gets even better
+when \texttt{bm} is combined with \texttt{bl}, and \texttt{bd} is
+combined with \texttt{fl}, to produce what we see with the tour.
+
+The penguins data is relatively simple, and well-studied. Despite this,
+examining this data with a tour of linear projections provides a few
+more details that may have gone unobserved.
+
+\section{Common choices of tours}\label{common-choices-of-tours}
+
+There are many different types of tours, all generated by different ways
+of choosing the sequence of linear projections to show. There are three
+main ones we commonly use, grand tour, guided tour and manual or radial
+tour. The grand tour is designed to show as many projections of the data
+as fast as possible with the goal being to give an overview or big
+picture of the data. The guided tour is used when particular patterns,
+such as clusters or anomalies, need to be discovered. It steers the
+choice of projections towards those that have these patterns. The radial
+tour a variable (or combination of two) from the projection, then puts
+it back, with the specific intent to learn if the pattern depends on
+this variable's contribution. If the pattern disappears when the
+variable disappears it means that this variable is vital or very
+important for defining the pattern.
+
+The Appendix~\ref{sec-toolbox} contains details on running tours,
+primarily using the \texttt{tourr} package but other software is listed.
+A grand tour making 2D projections uses the \texttt{animate\_xy()}
+function, which implicitly uses the algorithm created by the
+\texttt{grand\_tour()} function. The guided tour is created using the
+\texttt{guided\_tour()} function as an argument, and the radial/manual
+tour is created using the \texttt{radial\_tour()} function as an
+argument. It is also useful to use the \texttt{save\_history()} function
+to pre-compute the set of projections to show, and then use the
+\texttt{planned\_tour()} function to play the sequence. All the
+different algorithms for generating paths of projections can be used
+with \texttt{save\_history()}. For saving an animation to include in an
+HTML document the \texttt{render\_gif()} can be used. It will save a set
+of images to a file that will be recognised as an animated gif. It is
+also possible to extract any of the individual images from this file.
+All the gifs accompanying this book are created using the
+\texttt{render\_gif()} function.
+
+\section{Do you really have high-dimensional
+data?}\label{do-you-really-have-high-dimensional-data}
+
+Even though, you have multiple numeric variables, there may not be any
+need to use high-dimensional data visualisation. The purpose of using
+high-dimensional visualisation is to learn about the associations
+between variables. If there is no association between variables
+everything we need to learn can be done with univariate data
+visualisation methods. Chapter~\ref{sec-dimension-overview} focuses on
+this dimensionality, finding associations, and reducing dimensionality.
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{1-intro_files/figure-pdf/do-you-have-high-d-1.pdf}
+
+}
+
+\caption{Examples of 2D data that lack association, for which univariate
+methods are sufficient: (a) points spread uniformly in the square, (b)
+points spread in a circle with higher density in the middle, (c) points
+conentrated in the centre vertically and skewed to the right.}
+
+\end{figure}%
 
 \section*{Exercises}\label{exercises}
 \addcontentsline{toc}{section}{Exercises}
@@ -887,11 +1160,169 @@ element of data analysis.
   For each of the challenge data sets, \texttt{c1}, \ldots, \texttt{c7}
   from the \texttt{mulgar} package, use the grand tour to view and try
   to identify structure (outliers, clusters, non-linear relationships).
+\item
+  The \texttt{datasets} package in R has some classic data to explore.
+
+  \begin{enumerate}
+  \def\labelenumii{\alph{enumii}.}
+  \tightlist
+  \item
+    Examine the \texttt{USArrests} data, using a grand tour
+    (\texttt{animate\_xy()}). Explain the structure, and why the scale
+    of the variables might affect your interpretation of the structure.
+    Re-run the tour on standardised variables (option
+    \texttt{recale=TRUE}). Do you see any outliers?
+  \item
+    Examine the \texttt{swiss} data, using a grand tour, making sure to
+    use standardised variables. Explain the patterns that you see.
+  \end{enumerate}
+\item
+  The \texttt{MASS} package has two data sets that are interesting to
+  examine.
+
+  \begin{enumerate}
+  \def\labelenumii{\alph{enumii}.}
+  \tightlist
+  \item
+    Using a grand tour of the physical variables (\texttt{FL},
+    \texttt{RW}, \texttt{CL}, \texttt{CW}, \texttt{BD}) variables in the
+    \texttt{crabs} data with the points coloured by species
+    (\texttt{sp}) what can you see? Is there a difference in the
+    species? (Note that for this data you don't need to standardise. All
+    are measured in the same units, and are not too different in scale,
+    so the associations can still be seen well enough.)
+  \item
+    Using a grand tour of the chemical \% (\texttt{Na}:\texttt{Fe})
+    variables in the \texttt{fgl} data with the points coloured by
+    \texttt{type} what can you see? Is there a difference in the types
+    of glass? (Here, the variables need to be standardised. Even though
+    they are \%'s, the different amounts of each impede the ability to
+    assess the associations without rescaling.)
+  \end{enumerate}
+\item
+  There are several interesting data sets available on the GGobi web
+  site, for example, one of Tukey's original data set \texttt{PRIM7}.
+  Examine this data for different types of patterns. The \texttt{olive},
+  \texttt{PBC}, and \texttt{music} data sets are also interesting to
+  explore. \texttt{PRIM7} can be read using:
 \end{enumerate}
 
-\bookmarksetup{startatroot}
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(readr)}
+\NormalTok{prim7 }\OtherTok{\textless{}{-}} \FunctionTok{read\_csv}\NormalTok{(}\StringTok{"http://ggobi.org/book/data/prim7.csv"}\NormalTok{,}
+                  \AttributeTok{show\_col\_types =} \ConstantTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
 
-\chapter{Notation conventions and R
+\section*{Project}\label{project}
+\addcontentsline{toc}{section}{Project}
+
+\markright{Project}
+
+The data set \texttt{nigeria-water-imputed.csv} contains water
+availability data recorded for Nigeria, obtained from
+https://www.waterpointdata.org. Examining this data is motivated by an
+analysis by Julia Silge
+\href{https://juliasilge.com/blog/water-sources/}{``Predict availability
+in \#TidyTuesday water sources with random forest models''}. The data
+has been cleaned, and a small number of missing values have been imputed
+using the variable means. Variables with \texttt{\_NA} at the end
+indicate values that are imputed, and can be ignored for this exercise.
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  There are 86684 observations. To do an initial examination of the the
+  data we will start with a small subset. Make a 1\% sample to work
+  with. Note, that generally when sampling one should sample the same
+  fraction within strata that are important for the analysis. Here we
+  will examine the type of water source as indicated by the
+  \texttt{water\_tech\_category} variable. You can do the sampling with
+  this code:
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(tidyverse)}
+\FunctionTok{library}\NormalTok{(tourr)}
+\NormalTok{water }\OtherTok{\textless{}{-}} \FunctionTok{read\_csv}\NormalTok{(}\StringTok{"data/nigeria{-}water{-}imputed.csv"}\NormalTok{)}
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{113}\NormalTok{)}
+\NormalTok{water\_sub }\OtherTok{\textless{}{-}}\NormalTok{ water }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{group\_by}\NormalTok{(water\_tech\_category) }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{sample\_frac}\NormalTok{(}\AttributeTok{size =} \FloatTok{0.01}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{1}
+\tightlist
+\item
+  Take a look at the variables starting with \texttt{distance\_}. This
+  can be done more easily by making a smaller subset of variables (see
+  code below, and using shorter variable names). What are the patterns
+  you can see? Does it look like there is much association between
+  variables, or clustering?
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{water\_dist }\OtherTok{\textless{}{-}}\NormalTok{ water\_sub }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{select}\NormalTok{(water\_tech\_category, }\FunctionTok{starts\_with}\NormalTok{(}\StringTok{"distance"}\NormalTok{)) }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{select}\NormalTok{(}\SpecialCharTok{!}\FunctionTok{contains}\NormalTok{(}\StringTok{"\_NA"}\NormalTok{)) }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{water\_tech\_category =} \FunctionTok{factor}\NormalTok{(water\_tech\_category)) }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{rename}\NormalTok{(}\AttributeTok{dpr =}\NormalTok{ distance\_to\_primary\_road,}
+         \AttributeTok{dsr =}\NormalTok{ distance\_to\_secondary\_road,}
+         \AttributeTok{dtr =}\NormalTok{ distance\_to\_tertiary\_road,}
+         \AttributeTok{dc =}\NormalTok{ distance\_to\_city,}
+         \AttributeTok{dt =}\NormalTok{ distance\_to\_town)}
+\FunctionTok{animate\_xy}\NormalTok{(water\_dist[,}\DecValTok{2}\SpecialCharTok{:}\DecValTok{6}\NormalTok{], }\AttributeTok{rescale=}\ConstantTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{2}
+\tightlist
+\item
+  Now let's see how the type of water source might vary by distance.
+  Colour the points by the \texttt{water\_tech\_category} and examine
+  this in a grand tour. Would you expect that the water source is
+  different depending on the distance from populated areas?
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{animate\_xy}\NormalTok{(water\_dist[,}\DecValTok{2}\SpecialCharTok{:}\DecValTok{6}\NormalTok{], }\AttributeTok{rescale=}\ConstantTok{TRUE}\NormalTok{,}
+           \AttributeTok{col=}\NormalTok{water\_dist}\SpecialCharTok{$}\NormalTok{water\_tech\_category)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{3}
+\tightlist
+\item
+  Now try using a guided tour to find the best combination to see the
+  differences between the type of water sources. Interpret which
+  variable combination yields this difference.
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{324}\NormalTok{)}
+\FunctionTok{animate\_xy}\NormalTok{(water\_dist[,}\DecValTok{2}\SpecialCharTok{:}\DecValTok{6}\NormalTok{],}
+           \FunctionTok{guided\_tour}\NormalTok{(}\FunctionTok{lda\_pp}\NormalTok{(water\_dist}\SpecialCharTok{$}\NormalTok{water\_tech\_category)),}
+           \AttributeTok{rescale=}\ConstantTok{TRUE}\NormalTok{,}
+           \AttributeTok{col=}\NormalTok{water\_dist}\SpecialCharTok{$}\NormalTok{water\_tech\_category)}
+\end{Highlighting}
+\end{Shaded}
+
+\chapter{Technical details}\label{sec-notation}
+
+\section{Notation conventions and R
 objects}\label{notation-conventions-and-r-objects}
 
 The data can be considered to be a matrix of numbers with the columns
@@ -911,9 +1342,13 @@ where \(X\) indicates the \(n\times p\) data matrix, \(X_j\) indicates
 variable \(j, j=1, \dots, p\) and \(X_{ij}\) indicates the value of the
 \(j^{th}\) variable for the \(i^{th}\) observation. (It can be confusing
 to distinguish whether one is referring to the observation or a
-variable, because \(X_i\) is used to indicate observation also. When
-this is done it is usually accompanied by qualifying words such as
-\textbf{observation} \(X_3\), or \textbf{variable} \(X_3\).)
+variable, because \(X_i\) is used to indicate observation. In
+descriptions where it is unclear we will use \(X_{i.}\) to indicate
+observation/row and \(X_{.j}\) to indicate variable/column. Also this
+will usually accompanied by qualifying words such as
+\textbf{observation} or \textbf{variable}.)
+
+\index{data!matrix}
 
 \infobox{Having notation is helpful for concise explanations of different methods, to explain how data is scaled, processed and projected for various tasks, and how different quantities are calculated from the data. }
 
@@ -934,11 +1369,14 @@ A_{21} & A_{22} & \dots & A_{2d}\\
 A_{p1} & A_{p2} & \dots & A_{pd} \end{array} \right]_{p\times d}
 \end{eqnarray*}
 
+\index{orthonormal} \index{projection basis}
+
 \(A\) should be an orthonormal matrix, which means that the
 \(\sum_{j=1}^p A_{jk}^2=1, k=1, \dots, d\) (columns represent vectors of
 length 1) and \(\sum_{j=1}^p A_{jk}A_{jl}=0, k,l=1, \dots, d; k\neq l\)
 (columns represent vectors that are orthogonal to each other). In matrix
 notation, this can be written as \(A^{\top}A = I_d\).
+\index{data!projection}
 
 Then the projected data is written as:
 
@@ -1085,6 +1523,306 @@ Dividing by \texttt{sqrt(2)} gives \texttt{(0.707,\ 0.707)}.
 \end{itemize}
 }
 
+\section{Mechanics of tours}\label{mechanics-of-tours}
+
+\subsection{Different ways to choose target
+bases}\label{different-ways-to-choose-target-bases}
+
+Although there are a variety of different tour types, they are (almost)
+all composed of three core building blocks: a set of target projection
+bases, a method for interpolating between them and the method to display
+the projected data. The manner that the target planes are chosen
+primarily determines the type of tour. Figure~\ref{fig-tour-types-pdf}
+illustrates three main tour types: grand, guided and radial. The
+appendix has a list of the many others.
+
+\infobox{
+Tours are composed from three elements:
+\begin{itemize}
+\item a set of target projection bases
+\item an interpolation method
+\item the method to display the projected data
+\end{itemize}
+}
+
+The original tour was called the \emph{grand tour} (Asimov, 1985). In a
+grand tour, the target bases are chosen randomly from all possible
+projections. The reason to use a grand tour is to get an overview of the
+data quickly - it is possible to discover relationships between
+variables that were not pre-conceived. The particular grand tour
+available in the \texttt{tourr} package also has the feature that all
+projections are equally likely to be viewed, and it efficiently covers
+the space of all projections. The tour in the \texttt{langevitour}
+(Harrison, 2023a) software is similar to a grand tour but uses a
+different dynamic to choose the tour path, based on jostling particles.
+It doesn't need to do interpolation because changes are incremental.
+
+\index{tour!grand} \index{tour!guided}
+
+Because space gets large as dimension increases, the wait for seeing
+interesting structure in projections when using a grand tour can be
+long. So if you have an idea of the types of structure that would be
+interesting to observe using a \emph{guided tour} (Cook et al., 1995a)
+may help. A guided tour chooses target bases according to some function
+describing interesting, and the tour path follows an optimisation of
+this function. For example, the \texttt{LDA} index (E.-K. Lee et al.,
+2005) is a function that describes the separation between known classes
+in a projection, and is defined as follows:
+
+\begin{eqnarray*}
+I_{\rm LDA}(A) = 1- \frac{|A'WA|}{|A'(W+B)A|}
+\end{eqnarray*}
+
+where \(B = \sum_{i=1}^g
+n_i(\bar{y}_{i.}-\bar{y}_{..})(\bar{y}_{i.}-\bar{y}_{..})',
+W=\sum_{i=1}^g\sum_{j=1}^{n_i}
+(y_{ij}-\bar{y}_{i.})(y_{ij}-\bar{y}_{i.})'\) are the between- and
+within-group sum of squares matrices in a linear discriminant analysis,
+with \(g=\)number of groups, and \(n_i, i=1, ....g\) is the number of
+cases in each group.
+
+The \emph{radial tour} (Ursula Laa \& Valencia, 2023) provides a way to
+assess the importance of any variable or combination of variables. The
+target basis is chosen by zeroing out a variable (or multiple variables)
+and the interpolation runs from the initial projection to the target and
+back to the initial. If the structure observed in the initial plot
+doesn't change much when the variable(s) is removed, then the variable
+is not important. This is often best combined with the guided tour,
+where the radial tour would start from the best projection (as done in
+Figure~\ref{fig-tour-types-pdf} c), the most structured projection, and
+each of the variables can be tested for their importance in producing
+the structure.
+
+Each of these tour types can be run in the \texttt{tourr} package by
+setting the \texttt{tour\_path} parameter of the \texttt{animate\_XXX()}
+functions. The paths of projection bases can also be generated and saved
+to be used later with the \texttt{save\_history()} function. This is the
+manner with which to save a particular data projection, or to generate
+sequences of projections to pass to external software.
+
+\begin{figure}
+
+\begin{minipage}{\linewidth}
+
+\pandocbounded{\includegraphics[keepaspectratio]{images/p_grand3.png}}
+
+\subcaption{\label{}Data projected into three target projection bases
+from a grand tour}
+\end{minipage}%
+\newline
+\begin{minipage}{\linewidth}
+
+\pandocbounded{\includegraphics[keepaspectratio]{images/p_guided3.png}}
+
+\subcaption{\label{}Data projected into three target projection bases
+from a guided tour}
+\end{minipage}%
+\newline
+\begin{minipage}{\linewidth}
+
+\pandocbounded{\includegraphics[keepaspectratio]{images/p_radial3.png}}
+
+\subcaption{\label{}Data projected into three target projection bases
+from a radial tour}
+\end{minipage}%
+
+\caption{\label{fig-tour-types-pdf}With the grand tour (a) each target
+plane is randomly selected, to show as many possible projections as
+possible and obtain an overview of the data. A tour guided by the LDA
+index (b) steers towards projections where the species are most
+separated. However, the guided tour might miss something unexpected,
+like the anomaly (yellow) seen in the third grand tour frame (a). The
+radial tour (c) rotates a variable (here \texttt{fl}) out of the
+projection and back in to assess the impact on the structure. It can be
+seen that removing the contribution of \texttt{fl} makes only a small
+difference to the separation. \faIcon{play-circle}}
+
+\end{figure}%
+
+\begin{figure}
+
+\begin{minipage}{\linewidth}
+
+\pandocbounded{\includegraphics[keepaspectratio]{images/interpolation.png}}
+
+\end{minipage}%
+
+\caption{\label{fig-interpolation}Two different types of interpolation
+to a target: (a) geodesic plane-to-plane, (b) basis-to-basis using
+Givens rotations. The geodesic interpolation follows the shortest paths
+between planes. Givens respects the orientation of the basis when
+plotting or calculating projection pursuit indexes. Both methods
+maintain orthonormality of the bases for each step.}
+
+\end{figure}%
+
+\subsection{Interpolating between
+targets}\label{interpolating-between-targets}
+
+Interpolating from the current basis to the target basis is most
+commonly achieved using geodesic interpolation. This type of
+interpolation (described in Buja et al. (2005)) has especially important
+properties: (1) it is plane-to-plane so follows the shortest path, and
+(2) maintains orthonormality of the basis at each step when \(d>1\). The
+plane-to-plane movement operates like video stabilisation, by removing
+the within-plane spin, so you can focus on structure without distracting
+movement. However, when using the guided tour if the index is not
+rotationally invariant, for example, if based on correlation or splines,
+it can be important respect a particular orientation. For this rare
+situation, using Givens interpolation, available in the \texttt{woylier}
+package (Batsaikan et al., 2024) can be helpful.
+Figure~\ref{fig-interpolation} illustrates the difference.
+
+\subsection{Displaying the projected
+data}\label{displaying-the-projected-data}
+
+Based on the dimension of the projection basis there are natural ways to
+display the projected data. If \(d=2\) it is most common that we would
+use a scatterplot, as shown in (as done in
+Figure~\ref{fig-tour-types-pdf}.
+
+If \(d=1\) there are many choices of display - histogram, density plot,
+dotplot, boxplot - any method commonly used to display univariate
+continuous data (see \texttt{animate\_dist()}). If \(d=1\) but a second
+(set of) variable(s) is available, such as a time index, a categorical
+variable index (\texttt{animate\_idx()}), or spatial coordinates
+(\texttt{animate\_image()}), then the display might reserve one axis for
+the projected data and another for the additional variables.
+Figure~\ref{fig-displays} shows two different display choices for
+\(d=1\), a histogram of the projected data (a) and an ordered dotplot of
+an index created by combining values of several ranking variables. In
+each display the box with horizontal lines at the bottom represents the
+projection coefficients. In (a) there are six variables contributing to
+the projection, four with negative coefficients, which reveals some
+bimodality and a potential anomaly in this data. In (b), nine ranking
+variables on the liveability of 10 US cities are combined to give an
+overall rank for each city. This combination is a projection, and a tour
+is used to assess how the city ranks would change if the combination of
+these measures changed. That is, the use case, is how robust is the
+ranking to small changes in its construction.
+
+When \(d>2\), even though it primarily academic, some possible choices
+are to use stereo to simulate 3D, scatterplot matrices or parallel
+coordinates.
+
+\begin{figure}
+
+\begin{minipage}{0.63\linewidth}
+
+\pandocbounded{\includegraphics[keepaspectratio]{images/display-dist2.png}}
+
+\subcaption{\label{}histogram}
+\end{minipage}%
+%
+\begin{minipage}{0.37\linewidth}
+
+\pandocbounded{\includegraphics[keepaspectratio]{images/display-idx.png}}
+
+\subcaption{\label{}dotplot}
+\end{minipage}%
+
+\caption{\label{fig-displays}Different choices for displaying projected
+data: (a) histogram, (b) ordered dotplot. In each case the projected
+data is 1D. In the histogram, the lines at the bottom of the display
+correspond to the projection basis. For the ordered dotplot each point
+corresponds to a US city, which has been measured on several criteria
+such as housing, climate, crime, and education. The lines at the bottom
+correspond the coefficients for each of these ratings in the projection
+basis.}
+
+\end{figure}%
+
+Adjustments to the display are useful for some problems. The crowding
+problem where points concentrate as dimension increases can be
+alleviated with a transformation of the projected data documented in Laa
+et al. (2022) and available with the \texttt{animate\_sage()} function.
+When the data is particularly dense, for example, simulated data filling
+out a full \(p\)-dimensional cube from a fitted model generated to
+understand the fit, it can be useful to use slicing (Laa et al., 2020a).
+Slicing will fade out observations beyond a given distance from the
+centre of the data, relative to the projection.
+Figure~\ref{fig-slicing-pdf} illustrates the slice display available
+using the \texttt{animate\_slice()} function.
+
+\begin{figure}
+
+\begin{minipage}{0.50\linewidth}
+
+\pandocbounded{\includegraphics[keepaspectratio]{images/torus_proj.png}}
+
+\subcaption{\label{}projection}
+\end{minipage}%
+%
+\begin{minipage}{0.50\linewidth}
+
+\pandocbounded{\includegraphics[keepaspectratio]{images/torus_slice.png}}
+
+\subcaption{\label{}slice}
+\end{minipage}%
+
+\caption{\label{fig-slicing-pdf}Slicing can cut through high density is
+useful to find hollowness in high-dimensional data, or understand
+limitations of fitted models. Here points on the surface of a 3D torus
+are shown using (a) projections, and (b) slices. The slicing reveals the
+hollowness of this data with the circular cuts to the donut shape.
+\faIcon{play-circle}}
+
+\end{figure}%
+
+It can also be useful to add layers to the data, such as summary
+statistics, labels for selected observations, or connecting points with
+lines to represent model fits. Figure~\ref{fig-adornments-pdf}
+illustrates two use cases. In (a) labels for specific players are shown
+when examining player statistics in the \texttt{aflw} data. All three
+were named best players in the 2021 AFLW season, Bowers and Davey were
+equal best and fairest, and Vescio was awarded best goal kicker. All
+three have quite different player statistics profiles. The play of
+Bowers and Davey differs in the number of handballs and kicks - Davey
+tends to distribute the ball with handballs, while Bowers tends to kick.
+In (b) the lines indicate constraints. This is compositional data where
+each row adds to 1. It is the \texttt{Fireworks} data from the
+\texttt{compositions} (van den Boogaart et al., 2024) package, and
+measures the mixtures of five different ingredients. We can see that it
+is relatively equal mixtures because all are very centred within the
+constraints. We can also see points banding into stripes, suggesting
+that there are just a small number of firework recipes.
+
+\index{data!aflw} \index{data!fireworks}
+
+\begin{figure}
+
+\begin{minipage}{0.50\linewidth}
+
+\pandocbounded{\includegraphics[keepaspectratio]{images/aflw_labelled.png}}
+
+\subcaption{\label{}labelling}
+\end{minipage}%
+%
+\begin{minipage}{0.50\linewidth}
+
+\pandocbounded{\includegraphics[keepaspectratio]{images/fireworks.png}}
+
+\subcaption{\label{}constraints}
+\end{minipage}%
+
+\caption{\label{fig-adornments-pdf}It is sometimes useful to overlay
+additional information, such as labels for a few points (a) or
+representing constraints (b). The labels in (a) correspond to players
+that won awards in the 2021 AFLW season. The lines in (b) correspond to
+constraints - this is compositional data where each 5D observation is
+constrained to sum to 1. \faIcon{play-circle}}
+
+\end{figure}%
+
+It is often asked why isn't the data display using solid shapes, or
+provide depth cues with point size or colour. But the nature of
+high-dimensions is that comprehensive research on lighting models and
+perspective conducted for 3D graphics, does not extend to more than 3D.
+For example, a light source, like a lamp, is a point object, and in 4D
+the shadows would be 3D. A surface in 4D is 3D. So the choice of using
+points to represent objects, and lines to indicate geometric features is
+because these are meaningful in any dimension.
+
 \section*{Exercises}\label{exercises-1}
 \addcontentsline{toc}{section}{Exercises}
 
@@ -1111,9 +1849,77 @@ Dividing by \texttt{sqrt(2)} gives \texttt{(0.707,\ 0.707)}.
   \texttt{mulgar::clusters} data onto the 2D plane defined by \(A\).
   Make a scatterplot of the projected data. Can you identify clustering
   in this view?
+\item
+  Use \texttt{save\_history()} to generate a grand tour path for the
+  \texttt{mulgar::clusters} data, with three target planes. Extract and
+  report the second target basis, and plot the resulting data.
+\item
+  Using the saved path, generate the interpolation between the target
+  planes, using \texttt{interpolate()}. How many bases are in the tour
+  path? Plot the first four in set of planes, and explain what is
+  happening. Save tour path, extract basis and plot data
+\item
+  Repeat \texttt{save\_history()} but use a holes index guided tour.
+  Plot the final projection. Does the guided tour find the three
+  clusters? Which of the variables have the largest contributions to the
+  differences between groups?
+\item
+  Repeat \texttt{save\_history()} using a radial tour, starting from the
+  best projection basis from the guided tour, and exploring the
+  contribution of \texttt{x1} (\texttt{mvar=1}). Why should the length
+  of the path be set to three? Why is the last basis the same as the
+  first? Examine the second target basis, and explain how it is
+  different from the first basis.
+\item
+  Run the tours from in 4-7 using the \texttt{animate\_xy()}. You can
+  use the \texttt{planned\_tour} method, but it is more interesting to
+  simply re-generate using the different \texttt{tour\_path} methods. It
+  is interesting to examine the importance of \texttt{x5} and
+  \texttt{x4} to the clustering seen in the best projection from the
+  guided tour.
+\item
+  Examine tours of 1D projections of the \texttt{mulgar::clusters} data,
+  using density or histogram rendering. Can the three clusters be seen
+  with 1D projections?
+\item
+  Explore the use of the slice tour on these geometric objects, that can
+  be simulated using \texttt{geozoo}:
 \end{enumerate}
 
-\bookmarksetup{startatroot}
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\tightlist
+\item
+  Roman Surface, generated by
+\end{enumerate}
+
+\texttt{rs\ \textless{}-\ geozoo::roman.surface()\$points\ \textbar{}\textgreater{}\ scale()\ \textbar{}\textgreater{}\ as.data.frame()}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\setcounter{enumi}{1}
+\tightlist
+\item
+  solid 4D sphere, generated by
+\end{enumerate}
+
+\texttt{s\_solid\ \textless{}-\ geozoo::sphere.solid.random(4,\ 2000)\$points\ \textbar{}\textgreater{}\ as.data.frame()}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\setcounter{enumi}{2}
+\tightlist
+\item
+  hollow 4D sphere, generated by
+\end{enumerate}
+
+\texttt{s\_hollow\ \textless{}-\ geozoo::sphere.hollow(4,\ 2000)\$points\ \textbar{}\textgreater{}\ as.data.frame()}
+
+Use both regular tours, and the slice tours on each. What does the slice
+tour allow us to see in the Roman Surface? What is the difference
+between the solid and hollow spheres?
+
+\part{Dimension reduction}
 
 \chapter{Dimension reduction overview}\label{sec-dimension-overview}
 
@@ -1124,18 +1930,21 @@ these methods.
 
 \section{The meaning of dimension}\label{the-meaning-of-dimension}
 
-Dimension is perceived in a tour using the spread of points. When the
-points are spread far apart, then the data is filling the space.
-Conversely when the points ``collapse'' into a sub-region then the data
+The number of variables, \(p\), is considered to be the dimension of the
+data. However, the observed data may live in a lower dimensional
+sub-space and then not fill out the full \(p\)-dimensions. This implicit
+dimensionality is perceived in a tour using the spread of points. When
+the points are spread far apart, then the data is filling the space.
+Conversely, when the points ``collapse'' into a sub-region then the data
 is only partially filling the space, and some dimension reduction to
 reduce to this smaller dimensional space may be worthwhile.
+\index{dimensionality!implicit}
 
-\infobox{When points do not fill the plotting canvas fully, it means that it lives in a lower dimension. This low-dimensional space might be linear or non-linear, with the latter being much harder to define and capture.}
+\infobox{When exploring the implicit dimensionality of multivariate data we are looking for projections where the points do not fill the plotting canvas fully. This would indicate that the observed values do not fully populate high dimensions. }
 
-Let's start with some 2D examples. You need at least two variables to be
-able to talk about association between variables. Figure~\ref{fig-2D}
-shows three plots of two variables. Plot (a) shows two variables that
-are strongly linearly associated\footnote{It is generally better to use
+Let's start with some 2D examples. Figure~\ref{fig-2D} shows three plots
+of two variables. Plot (a) shows two variables that are strongly
+linearly associated\footnote{It is generally better to use
   \emph{associated} than \emph{correlated}. Correlation is a statistical
   quantity, measuring linear association. The term \emph{associated} can
   be prefaced with the type of association, such as \emph{linear} or
@@ -1150,6 +1959,8 @@ are drawn extending from \((0,0)\) and because they both extend out of
 the cloud of points, in the direction away from the collapse of points
 we can say that they are jointly responsible for the dimension
 reduction.
+
+\infobox{The way variables are scaled can affect the appearance of dimensionity. If the variables are scaled together, using global values, some variables may have smaller variance than others. Scaling variables individually shifts the focus to association between variables, as the predominant reason for reduced dimension.}
 
 Figure~\ref{fig-2D} (b) shows a pair of variables that are \textbf{not}
 linearly associated. Variable \texttt{x1} is more varied than
@@ -1179,7 +1990,7 @@ is scaled - the points are fully spread in the full square of the plot.
 
 \centering{
 
-\includegraphics[width=1\textwidth,height=\textheight]{3-intro-dimred_files/figure-pdf/fig-2D-1.pdf}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{3-intro-dimred_files/figure-pdf/fig-2D-1.pdf}
 
 }
 
@@ -1193,6 +2004,36 @@ in plot (b) does not arise in a tour because all variables are (usually)
 scaled. When an axis extends out of a direction where the points are
 collapsed, it means that this variable is partially responsible for the
 reduced dimension.}
+
+\end{figure}%
+
+Figure~\ref{fig-nonlin-2D} illustrates other types of association that
+could indicate reduced dimensionality. Plot (a) shows a strong nonlinear
+association. Plots (b) and (c) show substantial regions of the data
+space that have no observations, which may mean there is some barrier or
+gap in the data generating process. The L-shape in plot (d) is a pattern
+where one variable only shows variability if the other variable is
+essentially all the same, say close to zero. It could be described as if
+one variable has a non-zero value then the other variable is zero. This
+is a very strong association pattern, but not one that is captured by
+correlation. Plots (e) and (f) show other types of association, one with
+heterogeneous variance depending on the subspace, and clustering of
+observations, respectively. While we might detect these visually, using
+dimension reduction methods with these structures can be tricky.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{3-intro-dimred_files/figure-pdf/fig-nonlin-2D-1.pdf}
+
+}
+
+\caption{\label{fig-nonlin-2D}Other types of association: (a) nonlinear,
+(b) gap between subspaces, (c) barrier beyond which no values are
+observed, perhaps a limiting inequality constraint, (d) L-shape where is
+one variable is observed the other is not, (e) skewness or heterogeneous
+variance, (f) clustering.}
 
 \end{figure}%
 
@@ -1215,7 +2056,7 @@ al., 2022) makes a correction for this.
 
 \centering{
 
-\includegraphics[width=1.66667in,height=\textheight]{images/plane.png}
+\includegraphics[width=1.66667in,height=\textheight,keepaspectratio]{images/plane.png}
 
 }
 
@@ -1227,7 +2068,7 @@ al., 2022) makes a correction for this.
 
 \centering{
 
-\includegraphics[width=1.66667in,height=\textheight]{images/box.png}
+\includegraphics[width=1.66667in,height=\textheight,keepaspectratio]{images/box.png}
 
 }
 
@@ -1239,7 +2080,7 @@ al., 2022) makes a correction for this.
 
 \centering{
 
-\includegraphics[width=1.66667in,height=\textheight]{images/cube5d.png}
+\includegraphics[width=1.66667in,height=\textheight,keepaspectratio]{images/cube5d.png}
 
 }
 
@@ -1262,24 +2103,11 @@ examples just provided, all variables are linearly associated in the 2D
 and 3D data. You can check this by making a scatterplot matrix,
 Figure~\ref{fig-plane-scatmat}.
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{library}\NormalTok{(GGally)}
-\FunctionTok{library}\NormalTok{(mulgar)}
-\FunctionTok{data}\NormalTok{(plane)}
-\FunctionTok{ggscatmat}\NormalTok{(plane) }\SpecialCharTok{+}
-  \FunctionTok{theme}\NormalTok{(}\AttributeTok{panel.background =} 
-          \FunctionTok{element\_rect}\NormalTok{(}\AttributeTok{colour=}\StringTok{"black"}\NormalTok{, }\AttributeTok{fill=}\ConstantTok{NA}\NormalTok{),}
-    \AttributeTok{axis.text =} \FunctionTok{element\_blank}\NormalTok{(),}
-    \AttributeTok{axis.ticks =} \FunctionTok{element\_blank}\NormalTok{())}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{figure}[H]
+\begin{figure}
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{3-intro-dimred_files/figure-pdf/fig-plane-scatmat-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{3-intro-dimred_files/figure-pdf/fig-plane-scatmat-1.pdf}
 
 }
 
@@ -1303,21 +2131,14 @@ noise.
 \NormalTok{plane\_noise}\SpecialCharTok{$}\NormalTok{x7 }\OtherTok{\textless{}{-}} \FunctionTok{rnorm}\NormalTok{(}\DecValTok{100}\NormalTok{)}
 \NormalTok{plane\_noise }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\FunctionTok{apply}\NormalTok{(plane\_noise, }\DecValTok{2}\NormalTok{, }
     \ControlFlowTok{function}\NormalTok{(x) (x}\SpecialCharTok{{-}}\FunctionTok{mean}\NormalTok{(x))}\SpecialCharTok{/}\FunctionTok{sd}\NormalTok{(x)))}
-\FunctionTok{ggduo}\NormalTok{(plane\_noise, }\AttributeTok{columnsX =} \DecValTok{1}\SpecialCharTok{:}\DecValTok{5}\NormalTok{, }\AttributeTok{columnsY =} \DecValTok{6}\SpecialCharTok{:}\DecValTok{7}\NormalTok{, }
-    \AttributeTok{types =} \FunctionTok{list}\NormalTok{(}\AttributeTok{continuous =} \StringTok{"points"}\NormalTok{)) }\SpecialCharTok{+}
-  \FunctionTok{theme}\NormalTok{(}\AttributeTok{aspect.ratio=}\DecValTok{1}\NormalTok{,}
-    \AttributeTok{panel.background =} 
-          \FunctionTok{element\_rect}\NormalTok{(}\AttributeTok{colour=}\StringTok{"black"}\NormalTok{, }\AttributeTok{fill=}\ConstantTok{NA}\NormalTok{),}
-    \AttributeTok{axis.text =} \FunctionTok{element\_blank}\NormalTok{(),}
-    \AttributeTok{axis.ticks =} \FunctionTok{element\_blank}\NormalTok{())}
 \end{Highlighting}
 \end{Shaded}
 
-\begin{figure}[H]
+\begin{figure}
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{3-intro-dimred_files/figure-pdf/fig-plane-noise-scatter-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{3-intro-dimred_files/figure-pdf/fig-plane-noise-scatter-1.pdf}
 
 }
 
@@ -1347,13 +2168,13 @@ not linearly related to the other variables.
 
 \begin{minipage}{0.50\linewidth}
 \begin{center}
-\includegraphics[width=2.08333in,height=\textheight]{images/plane_noise1.png}
+\includegraphics[width=2.08333in,height=\textheight,keepaspectratio]{images/plane_noise1.png}
 \end{center}
 \end{minipage}%
 %
 \begin{minipage}{0.50\linewidth}
 \begin{center}
-\includegraphics[width=2.08333in,height=\textheight]{images/plane_noise2.png}
+\includegraphics[width=2.08333in,height=\textheight,keepaspectratio]{images/plane_noise2.png}
 \end{center}
 \end{minipage}%
 
@@ -1367,7 +2188,7 @@ linearly associated, but other variables are. \faIcon{play-circle}}
 
 \end{figure}%
 
-\infobox{To determine which variables are responsible for the reduced dimension look for the axes that extend out of the point cloud. These contribute to smaller variation in the observations, and thus indicate dimension reduction.}
+\infobox{To determine which variables are responsible for the reduced dimension look for the axes that extend out of the point cloud. These contribute to smaller variation in the observations, and thus indicate possible dimension reduction using these variables}
 
 The simulated data here is very simple, and what we have learned from
 the tour could also be learned from principal component analysis.
@@ -1386,21 +2207,14 @@ relationships.
 \NormalTok{plane\_noise\_outliers }\OtherTok{\textless{}{-}}\NormalTok{ plane\_noise}
 \NormalTok{plane\_noise\_outliers[}\DecValTok{101}\NormalTok{,] }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{, }\DecValTok{2}\NormalTok{, }\SpecialCharTok{{-}}\DecValTok{2}\NormalTok{, }\DecValTok{0}\NormalTok{, }\DecValTok{0}\NormalTok{, }\DecValTok{0}\NormalTok{, }\DecValTok{0}\NormalTok{)}
 \NormalTok{plane\_noise\_outliers[}\DecValTok{102}\NormalTok{,] }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{0}\NormalTok{, }\DecValTok{0}\NormalTok{,}\SpecialCharTok{{-}}\DecValTok{2}\NormalTok{, }\SpecialCharTok{{-}}\DecValTok{2}\NormalTok{, }\DecValTok{0}\NormalTok{, }\DecValTok{0}\NormalTok{)}
-
-\FunctionTok{ggscatmat}\NormalTok{(plane\_noise\_outliers, }\AttributeTok{columns =} \DecValTok{1}\SpecialCharTok{:}\DecValTok{5}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{theme}\NormalTok{(}\AttributeTok{aspect.ratio=}\DecValTok{1}\NormalTok{,}
-    \AttributeTok{panel.background =} 
-          \FunctionTok{element\_rect}\NormalTok{(}\AttributeTok{colour=}\StringTok{"black"}\NormalTok{, }\AttributeTok{fill=}\ConstantTok{NA}\NormalTok{),}
-    \AttributeTok{axis.text =} \FunctionTok{element\_blank}\NormalTok{(),}
-    \AttributeTok{axis.ticks =} \FunctionTok{element\_blank}\NormalTok{())}
 \end{Highlighting}
 \end{Shaded}
 
-\begin{figure}[H]
+\begin{figure}
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{3-intro-dimred_files/figure-pdf/fig-plane-noise-outlier-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{3-intro-dimred_files/figure-pdf/fig-plane-noise-outlier-1.pdf}
 
 }
 
@@ -1416,7 +2230,7 @@ correlation.}
 
 \centering{
 
-\includegraphics[width=2.08333in,height=\textheight]{images/pn_outliers.png}
+\includegraphics[width=2.08333in,height=\textheight,keepaspectratio]{images/pn_outliers.png}
 
 }
 
@@ -1428,7 +2242,7 @@ correlation.}
 
 \centering{
 
-\includegraphics[width=2.08333in,height=\textheight]{images/plane_nonlin.png}
+\includegraphics[width=2.08333in,height=\textheight,keepaspectratio]{images/plane_nonlin.png}
 
 }
 
@@ -1512,7 +2326,24 @@ techniques but are often visible with the tour. \faIcon{play-circle}}
 \end{Highlighting}
 \end{Shaded}
 
-\bookmarksetup{startatroot}
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{3}
+\item
+  Examine each of the challenge data sets \texttt{c1}, \texttt{c2},
+  \ldots, \texttt{c7} from the the \texttt{mulgar} package for signs of
+  the observed values not filling out the full \(p\) dimensions.
+\item
+  The data sets \texttt{assoc1}, \texttt{assoc2}, \texttt{assoc3} have
+  other types of association. Can you detect what the associations are
+  in each set?
+\item
+  The data sets \texttt{anomaly1}, \texttt{anomaly2}, \texttt{anomaly3},
+  \texttt{anomaly4}, \texttt{anomaly5} all have single anomalies. For
+  there to be an anomaly in a data set, there must be some association
+  between the variables, and the anomaly doesn't conform to this
+  association pattern. Can you find them?
+\end{enumerate}
 
 \chapter{Principal component
 analysis}\label{principal-component-analysis}
@@ -1520,12 +2351,13 @@ analysis}\label{principal-component-analysis}
 \index{dimension reduction!principal component analysis (PCA)}
 
 Reducing dimensionality using principal component analysis (PCA) dates
-back to Pearson (1901) and Hotelling (1933), and Jolliffe \& Cadima
-(2016) provides a current overview. The goal is to find a smaller set of
-variables, \(q (< p)\), that contain as much information as the original
-as possible. The new set of variables, known as principal components
-(PCs), are linear combinations of the original variables. The PCs can be
-used to represent the data in a lower-dimensional space.
+back to Pearson (1901) and Hotelling (1933). The goal is to find a
+smaller set of variables, \(q (< p)\), that contain as much information
+as the original, as possible. The new set of variables, known as
+principal components (PCs), are linear combinations of the original
+variables. The PCs can be used to represent the data in a
+lower-dimensional space. Jolliffe \& Cadima (2016) provides a
+contemporary review of the century of developments in PCA.
 
 The process is essentially an optimisation procedure, although PCA has
 an analytical solution. It solves the problem of
@@ -1534,21 +2366,28 @@ an analytical solution. It solves the problem of
 \max_{a_k} ~\text{Var} (Xa_k),
 \] where \(X\) is the \(n \times p\) data matrix, \(a_k (k=1, ..., p)\)
 is a 1D projection vector, called an eigenvector, and the
-\(\text{Var} (Xa_k)\) is called an eigenvalue. So PCA is a sequential
-process, that will find the direction in the high-dimensional space (as
-given by the first eigenvector) where the data is most varied, and then
-find the second most varied direction, and so on. The eigenvectors
-define the combination of the original variables, and the eigenvalues
-define the amount of variance explained by the reduced number of
-variables. \index{dimension reduction!eigenvalue}
+\(\text{Var} (Xa_k)\) is called an eigenvalue. PCA is a sequential
+process: you first find the projection that captures the most variance,
+then you find a projection that is orthogonal to the first axis that
+captures the most variance in the \((p-1)\)-dimensional space, then you
+find a projection that is orthogonal to the first two axes that captures
+the most variance in the \((p-2)\)-dimensional space, and so on. The
+eigenvectors define the combination of the original variables, and the
+eigenvalues define the amount of total variance explained by each of the
+new of variables. \index{dimension reduction!eigenvalue}
 \index{dimension reduction!eigenvector}
 
-PCA is very broadly useful for summarising linear association by using
-combinations of variables that are highly correlated. However, high
-correlation can also occur when there are outliers, or clustering. PCA
-is commonly used to detect these patterns also.
+\infobox{Visualisation can be used to assess if PCA is suitable to use to summarise the variation in the data. It is also used to detect other patterns -- clustering, outliers or non-linear association -- which are interesting to find and indicate that PCA is not suitable.}
 
-\infobox{With visualisation we want to assess whether it is appropriate to use PCA to summarise any linear association by using combinations of variables that are highly correlated. It can help to detect other patterns that might affect the PCA results such as outliers, clustering or non-linear dependence.}
+PCA is very broadly useful for summarising linear association by using
+combinations of the variables that are highly correlated. However, high
+correlation can also occur when there are outliers, or clustering. PCA
+is commonly used to detect these patterns also, although this might NOT
+be a reliable way to do so. To detect clustering or anomalies, using
+more a different approach that is specifically focused on these types of
+patterns is advisable. To some extent capturing clustering or anomalies
+using PCA is actually finding problematic patterns that adversely
+affects conducting appropriate dimension reduction.
 
 PCA is not very effective when the distribution of the variables is
 highly skewed, so it can be helpful to transform variables to make them
@@ -1586,7 +2425,7 @@ examples, the scree plots illustrate that PCA supports that the data are
 
 \centering{
 
-\includegraphics[width=1\textwidth,height=\textheight]{4-pca_files/figure-pdf/fig-2D-pca-1.pdf}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{4-pca_files/figure-pdf/fig-2D-pca-1.pdf}
 
 }
 
@@ -1623,7 +2462,7 @@ plane data.}
 
 \toprule
 Variable & PC1 & PC2 \\ 
-\midrule
+\midrule\addlinespace[2.5pt]
 x1 & $0.58$ & $-0.06$ \\ 
 x2 & $-0.55$ & $0.21$ \\ 
 x3 & $0.47$ & $-0.41$ \\ 
@@ -1642,7 +2481,7 @@ box data.}
 
 \toprule
 Variable & PC1 & PC2 & PC3 \\ 
-\midrule
+\midrule\addlinespace[2.5pt]
 x1 & $-0.51$ & $0.46$ & $0.11$ \\ 
 x2 & $0.51$ & $0.46$ & $0.00$ \\ 
 x3 & $-0.65$ & $-0.09$ & $0.23$ \\ 
@@ -1667,7 +2506,7 @@ are both \texttt{x6} and \texttt{x7}.
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{4-pca_files/figure-pdf/fig-plane-noise-scree-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{4-pca_files/figure-pdf/fig-plane-noise-scree-1.pdf}
 
 }
 
@@ -1685,7 +2524,7 @@ plane plus noise data.}
 
 \toprule
 Variable & PC1 & PC2 & PC3 & PC4 \\ 
-\midrule
+\midrule\addlinespace[2.5pt]
 x1 & $0.58$ & $0.04$ & $0.01$ & $0.00$ \\ 
 x2 & $-0.55$ & $-0.18$ & $-0.03$ & $0.07$ \\ 
 x3 & $0.47$ & $0.37$ & $0.05$ & $-0.20$ \\ 
@@ -1720,36 +2559,13 @@ will also score well in reading and science.
 \end{Shaded}
 
 The scree plot in Figure~\ref{fig-pisa-pca-pdf} shows a big drop from
-one to two PCs in the amount of variance explained. A grand tour on the
-30 variables can be run using \texttt{animate\_xy()}:
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{animate\_xy}\NormalTok{(pisa\_std, }\AttributeTok{half\_range=}\DecValTok{1}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-or rendered as an animated gif using \texttt{render\_gif()}:
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{render\_gif}\NormalTok{(pisa\_std, }
-           \FunctionTok{grand\_tour}\NormalTok{(), }
-           \FunctionTok{display\_xy}\NormalTok{(}\AttributeTok{half\_range=}\FloatTok{0.9}\NormalTok{),}
-           \AttributeTok{gif\_file=}\StringTok{"gifs/pisa\_gt.gif"}\NormalTok{,}
-           \AttributeTok{frames=}\DecValTok{500}\NormalTok{,}
-           \AttributeTok{width=}\DecValTok{400}\NormalTok{,}
-           \AttributeTok{height=}\DecValTok{400}\NormalTok{,}
-           \AttributeTok{loop=}\ConstantTok{FALSE}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-and we can see that the data is elliptical in most projections,
-sometimes shrinking to be a small circle. This pattern strongly
-indicates that there is one primary direction of variation in the data,
-with only small variation in any direction away from it. Shrinking to
-the small circle is analogous to to how \emph{a pencil or cigar or water
-bottle in 3D looks from some angles}.
+one to two PCs in the amount of variance explained. From a grand tour on
+the 30 variables we can see that the data is elliptical in most
+projections, sometimes shrinking to be a small circle. This pattern
+strongly indicates that there is one primary direction of variation in
+the data, with only small variation in any direction away from it.
+Shrinking to the small circle is analogous to to how \emph{a pencil or
+cigar or water bottle in 3D looks from some angles}.
 
 \begin{figure}
 
@@ -1757,7 +2573,7 @@ bottle in 3D looks from some angles}.
 
 \centering{
 
-\includegraphics{images/fig-pisa-scree-1.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/fig-pisa-scree-1.png}}
 
 }
 
@@ -1769,7 +2585,7 @@ bottle in 3D looks from some angles}.
 
 \centering{
 
-\includegraphics{images/pisa_gt_249.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/pisa_gt_249.png}}
 
 }
 
@@ -1842,25 +2658,13 @@ for potential problems with the data prior to conducting PCA.
 To look at all of the 29 player statistics in a grand tour in
 Figure~\ref{fig-aflw-gt-pdf}.
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{animate\_xy}\NormalTok{(aflw\_std[,}\DecValTok{7}\SpecialCharTok{:}\DecValTok{35}\NormalTok{], }\AttributeTok{half\_range=}\FloatTok{0.9}\NormalTok{)}
-\FunctionTok{render\_gif}\NormalTok{(aflw\_std[,}\DecValTok{7}\SpecialCharTok{:}\DecValTok{35}\NormalTok{], }
-           \FunctionTok{grand\_tour}\NormalTok{(), }
-           \FunctionTok{display\_xy}\NormalTok{(}\AttributeTok{half\_range=}\FloatTok{0.9}\NormalTok{),}
-           \AttributeTok{gif\_file=}\StringTok{"gifs/aflw\_gt.gif"}\NormalTok{,}
-           \AttributeTok{frames=}\DecValTok{500}\NormalTok{,}
-           \AttributeTok{loop=}\ConstantTok{FALSE}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
 \begin{figure}
 
 \begin{minipage}{0.50\linewidth}
-\includegraphics[width=2.375in,height=\textheight]{images/aflw_gt_70.png}\end{minipage}%
+\includegraphics[width=2.375in,height=\textheight,keepaspectratio]{images/aflw_gt_70.png}\end{minipage}%
 %
 \begin{minipage}{0.50\linewidth}
-\includegraphics[width=2.375in,height=\textheight]{images/aflw_gt_329.png}\end{minipage}%
+\includegraphics[width=2.375in,height=\textheight,keepaspectratio]{images/aflw_gt_329.png}\end{minipage}%
 
 \caption{\label{fig-aflw-gt-pdf}Two frames from a grand tour of the AFLW
 player statistics. Most player statistics concentrate near the centre,
@@ -1891,7 +2695,7 @@ the scree plot.
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{4-pca_files/figure-pdf/fig-aflw-pca-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{4-pca_files/figure-pdf/fig-aflw-pca-1.pdf}
 
 }
 
@@ -1920,7 +2724,7 @@ coefficients on the scoring statistics.}
 
 \toprule
 Variable & PC1 & PC2 & PC3 & PC4 \\ 
-\midrule
+\midrule\addlinespace[2.5pt]
 disposals & $0.31$ & $-0.05$ & $-0.03$ & $0.07$ \\ 
 possessions & $0.31$ & $-0.03$ & $-0.07$ & $0.09$ \\ 
 kicks & $0.29$ & $-0.04$ & $0.09$ & $-0.12$ \\ 
@@ -2001,7 +2805,7 @@ object, which gets large very quickly.
 
 \centering{
 
-\includegraphics[width=0.6\textwidth,height=\textheight]{4-pca_files/figure-pdf/fig-aflw-pcaplots-pdf-1.pdf}
+\includegraphics[width=0.6\linewidth,height=\textheight,keepaspectratio]{4-pca_files/figure-pdf/fig-aflw-pcaplots-pdf-1.pdf}
 
 }
 
@@ -2076,7 +2880,7 @@ show their contribution to the PCs.
 
 \centering{
 
-\includegraphics[width=1\textwidth,height=\textheight]{4-pca_files/figure-pdf/fig-plane-biplot-1.pdf}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{4-pca_files/figure-pdf/fig-plane-biplot-1.pdf}
 
 }
 
@@ -2112,7 +2916,7 @@ Figure~\ref{fig-plane-box-model-pdf} shows the models for the
 
 \centering{
 
-\includegraphics{images/plane_model_55.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/plane_model_55.png}}
 
 }
 
@@ -2124,7 +2928,7 @@ Figure~\ref{fig-plane-box-model-pdf} shows the models for the
 
 \centering{
 
-\includegraphics{images/box_model_13.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/box_model_13.png}}
 
 }
 
@@ -2149,7 +2953,7 @@ agreement between the model and the data.
 
 \centering{
 
-\includegraphics[width=3.125in,height=\textheight]{images/pisa_model_17.png}
+\includegraphics[width=3.125in,height=\textheight,keepaspectratio]{images/pisa_model_17.png}
 
 }
 
@@ -2179,7 +2983,7 @@ linear, because the spread extends unevenly away from the box.
 
 \centering{
 
-\includegraphics[width=3.125in,height=\textheight]{images/aflw_model_70.png}
+\includegraphics[width=3.125in,height=\textheight,keepaspectratio]{images/aflw_model_70.png}
 
 }
 
@@ -2223,7 +3027,7 @@ only in PC5, PC6 and PC7.
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{4-pca_files/figure-pdf/fig-plane-n-o-scree-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{4-pca_files/figure-pdf/fig-plane-n-o-scree-1.pdf}
 
 }
 
@@ -2239,7 +3043,7 @@ outliers.}
 
 \centering{
 
-\includegraphics[width=2.1875in,height=\textheight]{images/plane_n_o_clr_181.png}
+\includegraphics[width=2.1875in,height=\textheight,keepaspectratio]{images/plane_n_o_clr_181.png}
 
 }
 
@@ -2251,7 +3055,7 @@ outliers.}
 
 \centering{
 
-\includegraphics[width=2.1875in,height=\textheight]{images/plane_n_o_pca_181.png}
+\includegraphics[width=2.1875in,height=\textheight,keepaspectratio]{images/plane_n_o_pca_181.png}
 
 }
 
@@ -2270,7 +3074,7 @@ has lost these two extreme values. \faIcon{play-circle}}
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{4-pca_files/figure-pdf/fig-plane-o-n-pairs-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{4-pca_files/figure-pdf/fig-plane-o-n-pairs-1.pdf}
 
 }
 
@@ -2300,7 +3104,7 @@ outlier.
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{4-pca_files/figure-pdf/fig-plane-nonlin-scree-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{4-pca_files/figure-pdf/fig-plane-nonlin-scree-1.pdf}
 
 }
 
@@ -2315,7 +3119,7 @@ suggests three PCs.}
 
 \centering{
 
-\includegraphics[width=2.1875in,height=\textheight]{images/plane_nonlin_61.png}
+\includegraphics[width=2.1875in,height=\textheight,keepaspectratio]{images/plane_nonlin_61.png}
 
 }
 
@@ -2327,7 +3131,7 @@ suggests three PCs.}
 
 \centering{
 
-\includegraphics[width=2.1875in,height=\textheight]{images/plane_nonlin_pca_129.png}
+\includegraphics[width=2.1875in,height=\textheight,keepaspectratio]{images/plane_nonlin_pca_129.png}
 
 }
 
@@ -2348,7 +3152,7 @@ but the full data has more complexities. \faIcon{play-circle}}
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{4-pca_files/figure-pdf/fig-plane-nonlin-pairs-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{4-pca_files/figure-pdf/fig-plane-nonlin-pairs-1.pdf}
 
 }
 
@@ -2401,18 +3205,18 @@ is an unusual observation also.}
   lower dimensional space?
 \end{enumerate}
 
-\section*{Project}\label{project}
+\section*{Project}\label{project-1}
 \addcontentsline{toc}{section}{Project}
 
 \markright{Project}
 
 Linear dimension reduction can optimise for other criteria, and here we
-will explore one example: the algorithm implemented in the
-\texttt{dobin} package finds a basis in which the first few directions
-are optimized for the detection of outliers in the data. We will examine
-how it performs for the \texttt{plane\_noise\_outliers} data (the
-example where outliers were hidden in the first four principal
-components.)
+will explore one example: the algorithm (Kandanaarachchi \& Hyndman,
+2021) implemented in the \texttt{dobin} package (\textbf{R-dobin?})
+finds a basis in which the first few directions are optimized for the
+detection of outliers in the data. We will examine how it performs for
+the \texttt{plane\_noise\_outliers} data (the example where outliers
+were hidden in the first four principal components.)
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -2433,8 +3237,6 @@ components.)
   \texttt{frac\ =\ 0.99} and repeat the graphical evaluation from point
   3. How does it compare to the previous solution?
 \end{enumerate}
-
-\bookmarksetup{startatroot}
 
 \chapter{Non-linear dimension
 reduction}\label{non-linear-dimension-reduction}
@@ -2458,8 +3260,8 @@ distance between points in the high-dimensions, and in the
 low-dimensional representations.
 
 \[
-\mbox{Stress}_D(x_1, ..., x_n) = \left(\sum_{i, j=1; i\neq j}^n (d_{ij} - d_k(i,j))^2\right)^{1/2}
-\] where \(D\) is an \(n\times n\) matrix of distances \((d_{ij})\)
+\mbox{Stress}_D(x_1, ..., x_n) = \left(\sum_{i, j=1; i\neq j}^n (d_p(i,j) - d_k(i,j))^2\right)^{1/2}
+\] where \(D\) is an \(n\times n\) matrix of distances \((d_p(i,j))\)
 between all pairs of points, and \(d_k(i,j)\) is the distance between
 the points in the low-dimensional space. PCA is a special case of MDS.
 The result from PCA is a linear projection, but generally MDS can
@@ -2473,7 +3275,7 @@ patterns. A good resource for learning about MDS is Borg \& Groenen
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{5-nldr_files/figure-pdf/fig-nldr-clusters-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{5-nldr_files/figure-pdf/fig-nldr-clusters-1.pdf}
 
 }
 
@@ -2500,10 +3302,10 @@ simple parabolic shape.
 \begin{figure}
 
 \begin{minipage}{0.50\linewidth}
-\includegraphics[width=2.29167in,height=\textheight]{images/clusters_nonlin_60.png}\end{minipage}%
+\includegraphics[width=2.29167in,height=\textheight,keepaspectratio]{images/clusters_nonlin_60.png}\end{minipage}%
 %
 \begin{minipage}{0.50\linewidth}
-\includegraphics[width=2.29167in,height=\textheight]{images/clusters_nonlin_233.png}\end{minipage}%
+\includegraphics[width=2.29167in,height=\textheight,keepaspectratio]{images/clusters_nonlin_233.png}\end{minipage}%
 
 \caption{\label{fig-clusters-nonlin-pdf}Two frames from a grand tour of
 the nonlinear clusters data set, shows four clusters. Two are very small
@@ -2570,7 +3372,7 @@ cluster, and that the unibrow is the sine wave.
 
 \centering{
 
-\includegraphics{images/liminal-clusters-nonlin1.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/liminal-clusters-nonlin1.png}}
 
 }
 
@@ -2582,7 +3384,7 @@ cluster, and that the unibrow is the sine wave.
 
 \centering{
 
-\includegraphics{images/liminal-clusters-nonlin2.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/liminal-clusters-nonlin2.png}}
 
 }
 
@@ -2646,7 +3448,7 @@ interactive using \texttt{plotly}.
 
 \centering{
 
-\includegraphics{images/detourr-clusters-nonlin.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/detourr-clusters-nonlin.png}}
 
 }
 
@@ -2701,7 +3503,7 @@ into three pieces by t-SNE.
 
 \centering{
 
-\includegraphics[width=3.125in,height=\textheight]{images/fake_trees1.png}
+\includegraphics[width=3.125in,height=\textheight,keepaspectratio]{images/fake_trees1.png}
 
 }
 
@@ -2716,7 +3518,7 @@ lot more variation in the data, and less difference between clusters.}
 
 \centering{
 
-\includegraphics[width=3.125in,height=\textheight]{images/fake_trees2.png}
+\includegraphics[width=3.125in,height=\textheight,keepaspectratio]{images/fake_trees2.png}
 
 }
 
@@ -2731,7 +3533,7 @@ of the t-SNE mapping.}
 
 \centering{
 
-\includegraphics[width=3.125in,height=\textheight]{images/fake_trees3.png}
+\includegraphics[width=3.125in,height=\textheight,keepaspectratio]{images/fake_trees3.png}
 
 }
 
@@ -2796,7 +3598,7 @@ space. The close proximity in the t-SNE view is reasonable, though.}
   principal component analysis.
 \end{enumerate}
 
-\section*{Project}\label{project-1}
+\section*{Project}\label{project-2}
 \addcontentsline{toc}{section}{Project}
 
 \markright{Project}
@@ -2809,7 +3611,7 @@ https://satijalab.org/seurat/articles/pbmc3k\_tutorial.html. The
 processed data, containing the first 50 PCs is provided with the book,
 as \texttt{pbmc\_pca\_50.rds}.
 
-The original paper (Z. Chen et al., 2023) used UMAP on the first 15 PCs
+The original paper (Z. Chen et al., 2024) used UMAP on the first 15 PCs
 to find a representation of the data to illustrate the clustering. They
 used the default settings of the \texttt{RunUMAP()} function in
 \texttt{Seurat}, without setting a seed.
@@ -2821,14 +3623,20 @@ is too many.) Based on your examination of the data in a tour, which
 method yields the more accurate representation? Explain what the
 structure in the 2D is relative to that seen in the tour.
 
-\bookmarksetup{startatroot}
+\part{Cluster analysis}
 
 \chapter{Introduction to clustering}\label{introduction-to-clustering}
 
+This chapter introduces the concepts of cluster data and how the tour
+can be used to assist with identifying clusters.
+
+\section{What is cluster analysis?}\label{what-is-cluster-analysis}
+
 Unsupervised classification, or cluster analysis, organizes observations
-into similar groups. Cluster analysis is a commonly used, appealing, and
-conceptually intuitive statistical method. Some of its uses include
-market segmentation, where customers are grouped into clusters with
+into similar groups (see Everitt et al. (2011) and (2015)). Cluster
+analysis is a commonly used, appealing, and conceptually intuitive
+statistical method. Some of its uses include market segmentation
+(Dolnicar et al., 2018), where customers are grouped into clusters with
 similar attributes for targeted marketing; gene expression analysis,
 where genes with similar expression patterns are grouped together; and
 the creation of taxonomies for animals, insects, or plants. Clustering
@@ -2857,7 +3665,7 @@ an effective means of simplifying and understanding a dataset.
 
 \centering{
 
-\includegraphics[width=1\textwidth,height=\textheight]{6-intro-clust_files/figure-pdf/fig-ideal-clusters-1.pdf}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{6-intro-clust_files/figure-pdf/fig-ideal-clusters-1.pdf}
 
 }
 
@@ -2915,8 +3723,7 @@ summarizes these chapters and revisits the data analysis strategies used
 in the examples. Additional references that provide good companions to
 the material presented in these chapters are Venables \& Ripley (2002a),
 Boehmke \& Greenwell (2019), Hennig et al. (2015), Giordani et al.
-(2020), Kassambara (2017), and the CRAN Task View (Leisch \& Gruen,
-2023).
+(2020), Kassambara (2017), and the CRAN Task View (Gruen, 2024).
 
 \section{The importance of defining similar}\label{sec-clust-bg}
 
@@ -2983,13 +3790,13 @@ d_{\rm Euc} = \begin{bmatrix}
 
 \begin{minipage}{0.50\linewidth}
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{6-intro-clust_files/figure-pdf/unnamed-chunk-2-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{6-intro-clust_files/figure-pdf/unnamed-chunk-2-1.pdf}
 
 \end{minipage}%
 %
 \begin{minipage}{0.50\linewidth}
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{6-intro-clust_files/figure-pdf/unnamed-chunk-3-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{6-intro-clust_files/figure-pdf/unnamed-chunk-3-1.pdf}
 
 \end{minipage}%
 
@@ -3085,6 +3892,12 @@ To use an even more pragmatic criterion, if a company can gain an
 economic advantage by using a particular clustering method to carve up
 their customer database, then that is the method they should use.
 
+\section{How the tour can be used to perceive
+clustering}\label{how-the-tour-can-be-used-to-perceive-clustering}
+
+Refer to Leisch (2008) and also show examples of bad ways that the
+example data are clustered. XXX
+
 \section*{Exercises}\label{exercises-5}
 \addcontentsline{toc}{section}{Exercises}
 
@@ -3141,7 +3954,16 @@ Technically this gives distance between each case and the mean vector.)
   cases are from each other.
 \end{enumerate}
 
-\bookmarksetup{startatroot}
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{7}
+\item
+  From these plots of 2D data sketch what you would expect the clusters
+  to be? XXX
+\item
+  The data sets \texttt{assoc1}, \texttt{assoc2}, \texttt{assoc3} have
+  other types of association. Can you detect the association?
+\end{enumerate}
 
 \chapter{Spin-and-brush approach}\label{sec-clust-graphics}
 
@@ -3234,7 +4056,7 @@ controls are interactive.
 
 \centering{
 
-\includegraphics[width=2.8125in,height=\textheight]{images/penguins-bs6.png}
+\includegraphics[width=2.8125in,height=\textheight,keepaspectratio]{images/penguins-bs6.png}
 
 }
 
@@ -3246,7 +4068,7 @@ controls are interactive.
 
 \centering{
 
-\includegraphics[width=2.8125in,height=\textheight]{images/penguins-bs7.png}
+\includegraphics[width=2.8125in,height=\textheight,keepaspectratio]{images/penguins-bs7.png}
 
 }
 
@@ -3338,7 +4160,7 @@ Most of the Chinstrap species were recovered also (labelled as
 
 \centering{
 
-\includegraphics{images/fake_trees_sb.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/fake_trees_sb.png}}
 
 }
 
@@ -3352,7 +4174,7 @@ Tabulate the \texttt{branches} id variable in the original data with the
 \texttt{colour} groups created from brushing, to see how closely you
 have recovered the original classes.
 
-\section*{Project}\label{project-2}
+\section*{Project}\label{project-3}
 \addcontentsline{toc}{section}{Project}
 
 \markright{Project}
@@ -3363,8 +4185,6 @@ cluster the data into as many clusters or clumps as you can see. Save
 the clusters. Now use spin-and-brush in \texttt{detourr} to colour as
 many clusters in the high dimensions as you can find. Save your
 clusters. How closely do these two approaches agree?
-
-\bookmarksetup{startatroot}
 
 \chapter{Hierarchical clustering}\label{sec-hclust}
 
@@ -3527,7 +4347,7 @@ two-cluster solution. This two-cluster solution is shown in plot (d).
 
 \centering{
 
-\includegraphics[width=1\textwidth,height=\textheight]{8-hierarchical_files/figure-pdf/fig-hc-sim-1.pdf}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{8-hierarchical_files/figure-pdf/fig-hc-sim-1.pdf}
 
 }
 
@@ -3595,7 +4415,7 @@ clustering analysis is important for generating useful results.
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{8-hierarchical_files/figure-pdf/fig-problems-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{8-hierarchical_files/figure-pdf/fig-problems-1.pdf}
 
 }
 
@@ -3720,7 +4540,7 @@ linkage but not Wards linkage hierarchical clustering.
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{8-hierarchical_files/figure-pdf/fig-d1-s-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{8-hierarchical_files/figure-pdf/fig-d1-s-1.pdf}
 
 }
 
@@ -3853,7 +4673,7 @@ clustered across the gap.
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{8-hierarchical_files/figure-pdf/fig-d2-c-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{8-hierarchical_files/figure-pdf/fig-d2-c-1.pdf}
 
 }
 
@@ -3894,7 +4714,7 @@ from the others.
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{8-hierarchical_files/figure-pdf/fig-penguins-pairs-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{8-hierarchical_files/figure-pdf/fig-penguins-pairs-1.pdf}
 
 }
 
@@ -3935,7 +4755,7 @@ observations.}
 
 \centering{
 
-\includegraphics{images/penguins_gt_59.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/penguins_gt_59.png}}
 
 }
 
@@ -4087,7 +4907,7 @@ emphasizes it, bringing it more strongly to our attention.
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{8-hierarchical_files/figure-pdf/fig-penguins-ddw-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{8-hierarchical_files/figure-pdf/fig-penguins-ddw-1.pdf}
 
 }
 
@@ -4102,7 +4922,7 @@ emphasizes it, bringing it more strongly to our attention.
 
 \centering{
 
-\includegraphics{images/penguins_hflyw_59.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/penguins_hflyw_59.png}}
 
 }
 
@@ -4114,7 +4934,7 @@ emphasizes it, bringing it more strongly to our attention.
 
 \centering{
 
-\includegraphics{images/penguins_hflys_59.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/penguins_hflys_59.png}}
 
 }
 
@@ -4126,7 +4946,7 @@ emphasizes it, bringing it more strongly to our attention.
 
 \centering{
 
-\includegraphics{images/penguins_w3_59.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/penguins_w3_59.png}}
 
 }
 
@@ -4138,7 +4958,7 @@ emphasizes it, bringing it more strongly to our attention.
 
 \centering{
 
-\includegraphics{images/penguins_s3_59.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/penguins_s3_59.png}}
 
 }
 
@@ -4287,8 +5107,6 @@ the three-cluster solution of each.}
   in detecting the clusters that you have seen.
 \end{enumerate}
 
-\bookmarksetup{startatroot}
-
 \chapter{\texorpdfstring{\(k\)-means
 clustering}{k-means clustering}}\label{sec-kmeans}
 
@@ -4391,7 +5209,7 @@ divide that visually we would all agree should form a separation.
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{9-kmeans_files/figure-pdf/fig-km-2D-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{9-kmeans_files/figure-pdf/fig-km-2D-1.pdf}
 
 }
 
@@ -4454,7 +5272,7 @@ penguins data as shown in Figure~\ref{fig-p-km-pdf}.
 
 \centering{
 
-\includegraphics[width=4.16667in,height=\textheight]{images/p_km_71.png}
+\includegraphics[width=4.16667in,height=\textheight,keepaspectratio]{images/p_km_71.png}
 
 }
 
@@ -4500,8 +5318,6 @@ to the scree plot for PCA.
   cluster structure, as you have described it from earlier chapters, is
   detected or not.
 \end{enumerate}
-
-\bookmarksetup{startatroot}
 
 \chapter{Model-based clustering}\label{sec-mclust}
 
@@ -4585,7 +5401,7 @@ model.
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{10-model-based_files/figure-pdf/fig-penguins-bl-fl-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{10-model-based_files/figure-pdf/fig-penguins-bl-fl-1.pdf}
 
 }
 
@@ -4636,7 +5452,7 @@ model.
 
 \centering{
 
-\includegraphics[width=1\textwidth,height=\textheight]{10-model-based_files/figure-pdf/fig-penguins-bl-fl-mc-1.pdf}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{10-model-based_files/figure-pdf/fig-penguins-bl-fl-mc-1.pdf}
 
 }
 
@@ -4684,7 +5500,7 @@ three-cluster solution is the best match to the data shape.
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{10-model-based_files/figure-pdf/fig-penguins-bic-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{10-model-based_files/figure-pdf/fig-penguins-bic-1.pdf}
 
 }
 
@@ -4720,7 +5536,7 @@ equally as good, but the very best model is the four-cluster VEE.}
 
 \centering{
 
-\includegraphics{images/penguins_best_mc_60.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/penguins_best_mc_60.png}}
 
 }
 
@@ -4732,7 +5548,7 @@ equally as good, but the very best model is the four-cluster VEE.}
 
 \centering{
 
-\includegraphics{images/penguins_simpler_mc_60.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/penguins_simpler_mc_60.png}}
 
 }
 
@@ -4784,8 +5600,6 @@ fits the data better, even though it has a lower BIC.}
   \texttt{c1}-\texttt{c7} from the \texttt{mulgar} package. Explain why
   or why not the best model fits the cluster structure or not.
 \end{enumerate}
-
-\bookmarksetup{startatroot}
 
 \chapter{Self-organizing maps}\label{sec-som}
 
@@ -4912,7 +5726,7 @@ indicating which points to connect to draw the net.
 
 \centering{
 
-\includegraphics{images/fig-p-som2-1.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/fig-p-som2-1.png}}
 
 }
 
@@ -4924,7 +5738,7 @@ indicating which points to connect to draw the net.
 
 \centering{
 
-\includegraphics{images/p_som_47.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/p_som_47.png}}
 
 }
 
@@ -4985,8 +5799,6 @@ direction of \texttt{map\ 1}.
   for each? Explain why or why not the model fits the cluster structure
   of each or not.
 \end{enumerate}
-
-\bookmarksetup{startatroot}
 
 \chapter{Summarising and comparing clustering
 results}\label{sec-clust-compare}
@@ -5145,7 +5957,7 @@ compute the \(p\)-D convex hull.
 
 \centering{
 
-\includegraphics{images/fig-penguin-hull-2D-1.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/fig-penguin-hull-2D-1.png}}
 
 }
 
@@ -5157,7 +5969,7 @@ compute the \(p\)-D convex hull.
 
 \centering{
 
-\includegraphics{images/penguins_chull_105.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/penguins_chull_105.png}}
 
 }
 
@@ -5203,12 +6015,12 @@ methods.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{longtable*}{rrrr}
+\begin{longtable*}{>{\raggedleft\arraybackslash}p{60px}>{\raggedleft\arraybackslash}p{60px}>{\raggedleft\arraybackslash}p{60px}>{\raggedleft\arraybackslash}p{60px}}
 \toprule
  & \multicolumn{3}{c}{cl\_mc} \\ 
 \cmidrule(lr){2-4}
 cl\_w & 2 & 3 & 1 \\ 
-\midrule
+\midrule\addlinespace[2.5pt]
 1 & 8 & 0 & 149 \\ 
 2 & 0 & 119 & 0 \\ 
 3 & 57 & 0 & 0 \\ 
@@ -5242,7 +6054,7 @@ should be grouped.
 
 \centering{
 
-\includegraphics{images/compare-clusters1.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/compare-clusters1.png}}
 
 }
 
@@ -5257,7 +6069,7 @@ disagreement on eight penguins is with cluster 1 from Wards and cluster
 
 \centering{
 
-\includegraphics{images/compare-clusters2.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/compare-clusters2.png}}
 
 }
 
@@ -5332,7 +6144,7 @@ Linking the confusion matrix with the tour can also be accomplished with
   decide which is the better solution.
 \end{enumerate}
 
-\section*{Project}\label{project-3}
+\section*{Project}\label{project-4}
 \addcontentsline{toc}{section}{Project}
 
 \markright{Project}
@@ -5408,7 +6220,7 @@ data that examines the risk taking behavior of tourists, this is the
   space, it means that the optimisation wasn't successful.
 \end{enumerate}
 
-\bookmarksetup{startatroot}
+\part{Supervised classification}
 
 \chapter{Introduction to supervised
 classification}\label{introduction-to-supervised-classification}
@@ -5471,7 +6283,7 @@ examine the relationship between predictors, and the different classes.
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{13-intro-class_files/figure-pdf/fig-sup-example-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{13-intro-class_files/figure-pdf/fig-sup-example-1.pdf}
 
 }
 
@@ -5514,8 +6326,6 @@ performance.
   use the tour to decide whether the two classes are separable, and
   whether the boundary might be linear or non-linear.
 \end{enumerate}
-
-\bookmarksetup{startatroot}
 
 \chapter{Linear discriminant analysis}\label{sec-lda}
 
@@ -5693,7 +6503,7 @@ Figure~\ref{fig-p-lda}).
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{14-lda_files/figure-pdf/fig-p-lda-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{14-lda_files/figure-pdf/fig-p-lda-1.pdf}
 
 }
 
@@ -5769,7 +6579,7 @@ depend on assumptions about the data which should be validated.
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{14-lda_files/figure-pdf/fig-lda-assumptions1-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{14-lda_files/figure-pdf/fig-lda-assumptions1-1.pdf}
 
 }
 
@@ -5785,7 +6595,7 @@ variance-covariances are equal.}
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{14-lda_files/figure-pdf/fig-lda-assumptions2-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{14-lda_files/figure-pdf/fig-lda-assumptions2-1.pdf}
 
 }
 
@@ -5814,7 +6624,7 @@ safe to assume that the population variance-covariances are equal.
 
 \centering{
 
-\includegraphics{images/penguins_lda1.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/penguins_lda1.png}}
 
 }
 
@@ -5826,7 +6636,7 @@ safe to assume that the population variance-covariances are equal.
 
 \centering{
 
-\includegraphics{images/penguins_lda2.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/penguins_lda2.png}}
 
 }
 
@@ -5897,7 +6707,7 @@ difficult to view all together.
 
 \centering{
 
-\includegraphics{images/penguins_lda_pooled1.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/penguins_lda_pooled1.png}}
 
 }
 
@@ -5909,7 +6719,7 @@ difficult to view all together.
 
 \centering{
 
-\includegraphics{images/penguins_lda_pooled2.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/penguins_lda_pooled2.png}}
 
 }
 
@@ -5988,7 +6798,7 @@ regions, with the observed data and the sample means overlaid.
 
 \centering{
 
-\includegraphics[width=0.7\textwidth,height=\textheight]{14-lda_files/figure-pdf/fig-lda-2D-boundary-1.pdf}
+\includegraphics[width=0.7\linewidth,height=\textheight,keepaspectratio]{14-lda_files/figure-pdf/fig-lda-2D-boundary-1.pdf}
 
 }
 
@@ -6034,7 +6844,7 @@ classification rules in this 2D space.\\
 
 \centering{
 
-\includegraphics[width=2.08333in,height=\textheight]{images/penguins_lda_boundaries.png}
+\includegraphics[width=2.08333in,height=\textheight,keepaspectratio]{images/penguins_lda_boundaries.png}
 
 }
 
@@ -6046,7 +6856,7 @@ classification rules in this 2D space.\\
 
 \centering{
 
-\includegraphics[width=2.08333in,height=\textheight]{images/fig-lda-2D-boundaries-1.png}
+\includegraphics[width=2.08333in,height=\textheight,keepaspectratio]{images/fig-lda-2D-boundaries-1.png}
 
 }
 
@@ -6054,9 +6864,6 @@ classification rules in this 2D space.\\
 
 \end{minipage}%
 \newline
-\begin{minipage}{0.50\linewidth}
-
-\end{minipage}%
 
 \caption{\label{fig-penguins-lda-boundaries-pdf}Examining the boundaries
 produced by the LDA model in the full 4D with a slice tour (left shows a
@@ -6122,8 +6929,6 @@ they are orthogonal to these two dimensions.}
   lightning caused fires and the other groups change?
 \end{enumerate}
 
-\bookmarksetup{startatroot}
-
 \chapter{Trees and forests}\label{sec-trees-forests}
 
 \section{Trees}\label{sec-trees}
@@ -6165,7 +6970,7 @@ four variables.
 
 \centering{
 
-\includegraphics[width=1\textwidth,height=\textheight]{15-forests_files/figure-pdf/fig-p-bl-bd-tree-1.pdf}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{15-forests_files/figure-pdf/fig-p-bl-bd-tree-1.pdf}
 
 }
 
@@ -6217,7 +7022,7 @@ examine without them.
 
 \centering{
 
-\includegraphics{images/penguins_lda_boundaries.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/penguins_lda_boundaries.png}}
 
 }
 
@@ -6229,7 +7034,7 @@ examine without them.
 
 \centering{
 
-\includegraphics{images/penguins_tree_boundaries.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/penguins_tree_boundaries.png}}
 
 }
 
@@ -6298,11 +7103,11 @@ the random forest model object. The first five rows are:
 
 \begin{verbatim}
   Adelie Chinstrap Gentoo
-1 0.9860  0.014019      0
-2 0.9641  0.035897      0
-3 0.9951  0.004878      0
-4 1.0000  0.000000      0
-5 0.9946  0.005376      0
+1 1.0000   0.00000      0
+2 0.9598   0.04023      0
+3 0.9883   0.01170      0
+4 1.0000   0.00000      0
+5 1.0000   0.00000      0
 \end{verbatim}
 
 This has three columns corresponding to the three species, but because
@@ -6355,7 +7160,7 @@ the votes matrix to get the ternary diagram.
 
 \centering{
 
-\includegraphics{images/penguins_rf_votes.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/penguins_rf_votes.png}}
 
 }
 
@@ -6367,7 +7172,7 @@ the votes matrix to get the ternary diagram.
 
 \centering{
 
-\includegraphics{images/fig-p-votes-ggplot-1.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/fig-p-votes-ggplot-1.png}}
 
 }
 
@@ -6458,19 +7263,19 @@ interesting to see how well the random forest model performs.
 \end{Shaded}
 
 \begin{verbatim}
-    0     1    2    3     4    5 6 7     8     9
-1 0.9 0.000 0.03 0.00 0.011 0.09 0 0 0.000 0.000
-2 0.6 0.000 0.03 0.00 0.005 0.32 0 0 0.000 0.000
-3 0.8 0.000 0.07 0.02 0.118 0.03 0 0 0.000 0.011
-4 0.9 0.000 0.02 0.00 0.000 0.06 0 0 0.000 0.000
-5 0.6 0.006 0.05 0.01 0.035 0.25 0 0 0.006 0.006
+    0     1    2     3     4    5 6 7     8    9
+1 0.9 0.000 0.02 0.005 0.000 0.09 0 0 0.005 0.00
+2 0.7 0.000 0.02 0.000 0.012 0.28 0 0 0.000 0.00
+3 0.8 0.000 0.04 0.011 0.117 0.02 0 0 0.000 0.02
+4 0.9 0.000 0.01 0.000 0.006 0.07 0 0 0.006 0.00
+5 0.6 0.006 0.05 0.011 0.011 0.28 0 0 0.011 0.00
 \end{verbatim}
 
 \begin{figure}
 
 \begin{minipage}{0.50\linewidth}
 
-\includegraphics[width=4.16667in,height=\textheight]{images/ft-votes.png}
+\includegraphics[width=4.16667in,height=\textheight,keepaspectratio]{images/ft-votes.png}
 
 \end{minipage}%
 
@@ -6539,16 +7344,16 @@ the accuracy and Gini metrics.}
 
 \toprule
 Var & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & Acc & Gini \\ 
-\midrule
-PC1 & $0.1$ & $0.4$ & $0.5$ & $0.3$ & $0.2$ & $0.5$ & $0.4$ & $0.2$ & $0.3$ & $0.3$ & $0.30$ & $473$ \\ 
-PC2 & $0.1$ & $0.2$ & $0.2$ & $0.5$ & $0.3$ & $0.3$ & $0.2$ & $0.4$ & $0.2$ & $0.3$ & $0.27$ & $381$ \\ 
-PC3 & $0.1$ & $0.1$ & $0.1$ & $0.1$ & $0.5$ & $0.2$ & $0.1$ & $0.1$ & $0.2$ & $0.2$ & $0.17$ & $311$ \\ 
-PC4 & $0.1$ & $0.5$ & $0.1$ & $0.0$ & $0.1$ & $0.0$ & $0.4$ & $0.1$ & $0.1$ & $0.1$ & $0.15$ & $335$ \\ 
-PC5 & $0.1$ & $0.1$ & $0.3$ & $0.1$ & $0.2$ & $0.2$ & $0.1$ & $0.1$ & $0.3$ & $0.2$ & $0.18$ & $333$ \\ 
-PC6 & $0.1$ & $0.2$ & $0.2$ & $0.2$ & $0.0$ & $0.1$ & $0.0$ & $0.3$ & $0.2$ & $0.2$ & $0.16$ & $281$ \\ 
-PC7 & $0.1$ & $0.0$ & $0.1$ & $0.0$ & $0.0$ & $0.1$ & $0.1$ & $0.3$ & $0.1$ & $0.1$ & $0.11$ & $254$ \\ 
-PC8 & $0.1$ & $0.1$ & $0.0$ & $0.2$ & $0.1$ & $0.1$ & $0.0$ & $0.0$ & $0.1$ & $0.3$ & $0.09$ & $228$ \\ 
-PC9 & $0.1$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.1$ & $0.0$ & $0.02$ & $57$ \\ 
+\midrule\addlinespace[2.5pt]
+PC1 & $0.1$ & $0.3$ & $0.4$ & $0.3$ & $0.2$ & $0.5$ & $0.4$ & $0.2$ & $0.3$ & $0.3$ & $0.30$ & $482$ \\ 
+PC2 & $0.1$ & $0.2$ & $0.2$ & $0.5$ & $0.3$ & $0.3$ & $0.2$ & $0.4$ & $0.2$ & $0.3$ & $0.28$ & $385$ \\ 
+PC3 & $0.1$ & $0.1$ & $0.1$ & $0.1$ & $0.5$ & $0.1$ & $0.1$ & $0.1$ & $0.2$ & $0.2$ & $0.16$ & $304$ \\ 
+PC4 & $0.1$ & $0.5$ & $0.1$ & $0.0$ & $0.1$ & $0.0$ & $0.4$ & $0.1$ & $0.1$ & $0.1$ & $0.15$ & $341$ \\ 
+PC5 & $0.1$ & $0.1$ & $0.3$ & $0.1$ & $0.2$ & $0.2$ & $0.1$ & $0.1$ & $0.3$ & $0.2$ & $0.18$ & $322$ \\ 
+PC6 & $0.1$ & $0.2$ & $0.2$ & $0.2$ & $0.0$ & $0.1$ & $0.0$ & $0.3$ & $0.1$ & $0.2$ & $0.16$ & $291$ \\ 
+PC7 & $0.1$ & $0.0$ & $0.2$ & $0.0$ & $0.0$ & $0.1$ & $0.1$ & $0.3$ & $0.1$ & $0.1$ & $0.11$ & $251$ \\ 
+PC8 & $0.0$ & $0.1$ & $0.0$ & $0.2$ & $0.1$ & $0.1$ & $0.0$ & $0.0$ & $0.1$ & $0.3$ & $0.10$ & $222$ \\ 
+PC9 & $0.1$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.1$ & $0.0$ & $0.02$ & $56$ \\ 
 PC10 & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.01$ & $45$ \\ 
 \bottomrule
 
@@ -6595,10 +7400,10 @@ and PC4.
 \begin{figure}
 
 \begin{minipage}{0.50\linewidth}
-\includegraphics{images/ft_cl1.png}\end{minipage}%
+\pandocbounded{\includegraphics[keepaspectratio]{images/ft_cl1.png}}\end{minipage}%
 %
 \begin{minipage}{0.50\linewidth}
-\includegraphics{images/fig-ft-cl1-pc-1.png}\end{minipage}%
+\pandocbounded{\includegraphics[keepaspectratio]{images/fig-ft-cl1-pc-1.png}}\end{minipage}%
 
 \caption{\label{fig-ft-cl-pdf}Focusing on class 1 in the
 \texttt{fake\_trees} data. The most important variables were PC1 and
@@ -6629,16 +7434,16 @@ not each other.
 
 \begin{verbatim}
     0   1   2   3   4   5   6   7   8   9 class.error
-0 263   4   3   4   3   4   6   2   8   3       0.123
+0 268   4   2   3   4   4   4   3   4   4       0.107
 1  13 287   0   0   0   0   0   0   0   0       0.043
-2  10   0 288   0   2   0   0   0   0   0       0.040
-3   6   0   0 290   0   0   0   3   0   1       0.033
-4  12   0   0   0 288   0   0   0   0   0       0.040
+2   8   0 290   0   2   0   0   0   0   0       0.033
+3   5   0   0 290   0   0   0   3   0   2       0.033
+4  13   0   0   0 287   0   0   0   0   0       0.043
 5  11   0   0   0   0 289   0   0   0   0       0.037
 6  14   0   0   0   0   0 285   0   1   0       0.050
-7   6   0   0   4   0   0   0 290   0   0       0.033
-8   5   0   0   0   0   0   0   0 295   0       0.017
-9   6   0   0   0   0   0   0   1   0 293       0.023
+7   5   0   0   5   0   0   0 289   0   1       0.037
+8   8   0   0   0   0   0   0   0 292   0       0.027
+9   3   0   0   0   0   0   0   0   0 297       0.010
 \end{verbatim}
 
 From the tour in Figure~\ref{fig-ft-cl2} we can see that clusters 1, 6,
@@ -6650,10 +7455,10 @@ points, but it is clearer if more variables are used.
 \begin{figure}
 
 \begin{minipage}{0.50\linewidth}
-\includegraphics{images/ft_cl8.png}\end{minipage}%
+\pandocbounded{\includegraphics[keepaspectratio]{images/ft_cl8.png}}\end{minipage}%
 %
 \begin{minipage}{0.50\linewidth}
-\includegraphics{images/fig-ft-cl8-pc-1.png}\end{minipage}%
+\pandocbounded{\includegraphics[keepaspectratio]{images/fig-ft-cl8-pc-1.png}}\end{minipage}%
 
 \caption{\label{fig-ft-cl2}Focusing on class 8 in the
 \texttt{fake\_trees} data using a tour (left) reveals that it shares an
@@ -6704,8 +7509,6 @@ relative to 6, 1 and 0 is largely due to PC5 (right).}
   showing the best distinction between your chosen cluster and the other
   observations.
 \end{enumerate}
-
-\bookmarksetup{startatroot}
 
 \chapter{Support vector machines}\label{support-vector-machines}
 
@@ -6780,7 +7583,7 @@ and then fit the model.
 
 \centering{
 
-\includegraphics[width=1\textwidth,height=\textheight]{16-svm_files/figure-pdf/fig-svm-toy-1.pdf}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{16-svm_files/figure-pdf/fig-svm-toy-1.pdf}
 
 }
 
@@ -6947,7 +7750,7 @@ approach.
 
 \centering{
 
-\includegraphics[width=2.08333in,height=\textheight]{images/chinstrap_svs.png}
+\includegraphics[width=2.08333in,height=\textheight,keepaspectratio]{images/chinstrap_svs.png}
 
 }
 
@@ -6959,7 +7762,7 @@ approach.
 
 \centering{
 
-\includegraphics[width=2.08333in,height=\textheight]{images/chinstrap_svm.png}
+\includegraphics[width=2.08333in,height=\textheight,keepaspectratio]{images/chinstrap_svm.png}
 
 }
 
@@ -7043,7 +7846,7 @@ and \texttt{bm}). \index{tour!radial}
 
 \centering{
 
-\includegraphics[width=2.08333in,height=\textheight]{images/chinstrap_rad_bl1.png}
+\includegraphics[width=2.08333in,height=\textheight,keepaspectratio]{images/chinstrap_rad_bl1.png}
 
 }
 
@@ -7055,7 +7858,7 @@ and \texttt{bm}). \index{tour!radial}
 
 \centering{
 
-\includegraphics[width=2.08333in,height=\textheight]{images/chinstrap_rad_bl2.png}
+\includegraphics[width=2.08333in,height=\textheight,keepaspectratio]{images/chinstrap_rad_bl2.png}
 
 }
 
@@ -7067,7 +7870,7 @@ and \texttt{bm}). \index{tour!radial}
 
 \centering{
 
-\includegraphics[width=2.08333in,height=\textheight]{images/chinstrap_rad_bd.png}
+\includegraphics[width=2.08333in,height=\textheight,keepaspectratio]{images/chinstrap_rad_bd.png}
 
 }
 
@@ -7079,7 +7882,7 @@ and \texttt{bm}). \index{tour!radial}
 
 \centering{
 
-\includegraphics[width=2.08333in,height=\textheight]{images/chinstrap_rad_bm.png}
+\includegraphics[width=2.08333in,height=\textheight,keepaspectratio]{images/chinstrap_rad_bm.png}
 
 }
 
@@ -7163,8 +7966,6 @@ forcing some coefficients to zero.
   together with the slice tour to do this. You can use different kernels
   and compare the resulting decision boundaries.
 \end{enumerate}
-
-\bookmarksetup{startatroot}
 
 \chapter{Neural networks and deep
 learning}\label{neural-networks-and-deep-learning}
@@ -7269,7 +8070,7 @@ model will also be saved in order to diagnose and make predictions.
 
 \centering{
 
-\includegraphics{images/nn-diagram.png}
+\pandocbounded{\includegraphics[keepaspectratio]{images/nn-diagram.png}}
 
 }
 
@@ -7306,14 +8107,14 @@ these points.
 
 \begin{minipage}{0.50\linewidth}
 
-\includegraphics[width=2.29167in,height=\textheight]{images/p_split.png}
+\includegraphics[width=2.29167in,height=\textheight,keepaspectratio]{images/p_split.png}
 
 \subcaption{\label{}Grand tour}
 \end{minipage}%
 %
 \begin{minipage}{0.50\linewidth}
 
-\includegraphics[width=2.29167in,height=\textheight]{images/p_split_guided.png}
+\includegraphics[width=2.29167in,height=\textheight,keepaspectratio]{images/p_split_guided.png}
 
 \subcaption{\label{}Guided tour}
 \end{minipage}%
@@ -7497,7 +8298,7 @@ this matrix before computing the data projection.
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{17-nn_files/figure-pdf/fig-hidden-layer-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{17-nn_files/figure-pdf/fig-hidden-layer-1.pdf}
 
 }
 
@@ -7591,7 +8392,7 @@ for the votes matrix from a random forest in Section~\ref{sec-votes}.
 
 \begin{figure}[H]
 
-{\centering \includegraphics[width=0.7\textwidth,height=\textheight]{17-nn_files/figure-pdf/unnamed-chunk-17-1.pdf}
+{\centering \includegraphics[width=0.7\linewidth,height=\textheight,keepaspectratio]{17-nn_files/figure-pdf/unnamed-chunk-17-1.pdf}
 
 }
 
@@ -7664,7 +8465,7 @@ increases on average.
 
 \centering{
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{17-nn_files/figure-pdf/fig-shapley-pcp-1.pdf}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{17-nn_files/figure-pdf/fig-shapley-pcp-1.pdf}
 
 }
 
@@ -7686,7 +8487,7 @@ impacted by \texttt{bm} being in the model.
 
 \centering{
 
-\includegraphics[width=1\textwidth,height=\textheight]{17-nn_files/figure-pdf/fig-penguins-bl-bm-bd-1.pdf}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{17-nn_files/figure-pdf/fig-penguins-bl-bm-bd-1.pdf}
 
 }
 
@@ -7709,7 +8510,7 @@ along with those of the LDA model.
 
 \centering{
 
-\includegraphics[width=2.08333in,height=\textheight]{images/fig-lda-2D-boundaries-1.png}
+\includegraphics[width=2.08333in,height=\textheight,keepaspectratio]{images/fig-lda-2D-boundaries-1.png}
 
 }
 
@@ -7721,7 +8522,7 @@ along with those of the LDA model.
 
 \centering{
 
-\includegraphics[width=3.02083in,height=\textheight]{images/penguins-nn-boundaries-1.png}
+\includegraphics[width=3.02083in,height=\textheight,keepaspectratio]{images/penguins-nn-boundaries-1.png}
 
 }
 
@@ -7861,7 +8662,7 @@ components found; returning the first one. To return all, use
 `return_all = TRUE`.
 \end{verbatim}
 
-\includegraphics[width=0.8\textwidth,height=\textheight]{17-nn_files/figure-pdf/unnamed-chunk-27-1.png}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{17-nn_files/figure-pdf/unnamed-chunk-27-1.png}
 
 Looking only at the first two principal components we note some clear
 differences from the transformation in the hidden layer. The
@@ -7878,16 +8679,30 @@ use the tour on the first five principal components.
 
 \begin{minipage}{0.50\linewidth}
 
-\includegraphics[width=2.08333in,height=\textheight]{images/fashion_images_gt_36.png}
+\begin{figure}[H]
 
-\subcaption{\label{}Input space}
+{\centering \includegraphics[width=2.08333in,height=\textheight,keepaspectratio]{images/fashion_images_gt_36.png}
+
+}
+
+\subcaption{Input space}
+
+\end{figure}%
+
 \end{minipage}%
 %
 \begin{minipage}{0.50\linewidth}
 
-\includegraphics[width=2.08333in,height=\textheight]{images/fashion_activation_gt_126.png}
+\begin{figure}[H]
 
-\subcaption{\label{}Activations}
+{\centering \includegraphics[width=2.08333in,height=\textheight,keepaspectratio]{images/fashion_activation_gt_126.png}
+
+}
+
+\subcaption{Activations}
+
+\end{figure}%
+
 \end{minipage}%
 \newline
 \begin{minipage}{0.50\linewidth}
@@ -7958,22 +8773,22 @@ the model is uncertain about.
 \begin{figure}
 
 \begin{minipage}{0.33\linewidth}
-\includegraphics[width=1.35417in,height=\textheight]{images/fashion_confustion_gt_36.png}\end{minipage}%
+\includegraphics[width=1.35417in,height=\textheight,keepaspectratio]{images/fashion_confustion_gt_36.png}\end{minipage}%
 %
 \begin{minipage}{0.33\linewidth}
-\includegraphics[width=1.35417in,height=\textheight]{images/fashion_confusion_gt_58.png}\end{minipage}%
+\includegraphics[width=1.35417in,height=\textheight,keepaspectratio]{images/fashion_confusion_gt_58.png}\end{minipage}%
 %
 \begin{minipage}{0.33\linewidth}
-\includegraphics[width=1.35417in,height=\textheight]{images/fashion_confusion_gt_69.png}\end{minipage}%
+\includegraphics[width=1.35417in,height=\textheight,keepaspectratio]{images/fashion_confusion_gt_69.png}\end{minipage}%
 \newline
 \begin{minipage}{0.33\linewidth}
-\includegraphics[width=1.35417in,height=\textheight]{images/fashion_confusion_gt_161.png}\end{minipage}%
+\includegraphics[width=1.35417in,height=\textheight,keepaspectratio]{images/fashion_confusion_gt_161.png}\end{minipage}%
 %
 \begin{minipage}{0.33\linewidth}
-\includegraphics[width=1.35417in,height=\textheight]{images/fashion_confusion_gt_212.png}\end{minipage}%
+\includegraphics[width=1.35417in,height=\textheight,keepaspectratio]{images/fashion_confusion_gt_212.png}\end{minipage}%
 %
 \begin{minipage}{0.33\linewidth}
-\includegraphics[width=1.35417in,height=\textheight]{images/fashion_confusion_gt_333.png}\end{minipage}%
+\includegraphics[width=1.35417in,height=\textheight,keepaspectratio]{images/fashion_confusion_gt_333.png}\end{minipage}%
 
 \caption{\label{fig-fashion-confusion-split-pdf}A tour of the confusion
 matrix for the fashion MNIST test observations, focusing on a subset of
@@ -8049,8 +8864,6 @@ images. This however is beyond the scope of this book.
   batch normalization should improve the model performance.
 \end{enumerate}
 
-\bookmarksetup{startatroot}
-
 \chapter{Exploring
 misclassifications}\label{exploring-misclassifications}
 
@@ -8078,7 +8891,7 @@ other two penguin species.
 
 \begin{verbatim}
           Adelie Chinstrap Gentoo class.error
-Adelie       143         3      0 0.020547945
+Adelie       143         2      1 0.020547945
 Chinstrap      4        64      0 0.058823529
 Gentoo         0         1    118 0.008403361
 \end{verbatim}
@@ -8120,7 +8933,7 @@ species.
 
 \centering{
 
-\includegraphics[width=2.08333in,height=\textheight]{images/p_rf_errors.png}
+\includegraphics[width=2.08333in,height=\textheight,keepaspectratio]{images/p_rf_errors.png}
 
 }
 
@@ -8132,7 +8945,7 @@ species.
 
 \centering{
 
-\includegraphics[width=2.08333in,height=\textheight]{images/p_rf_errors_guided.png}
+\includegraphics[width=2.08333in,height=\textheight,keepaspectratio]{images/p_rf_errors_guided.png}
 
 }
 
@@ -8217,6 +9030,10 @@ model}\label{constructing-data-to-diagnose-your-model}
 
 \phantomsection\label{refs}
 \begin{CSLReferences}{1}{0}
+\bibitem[\citeproctext]{ref-hennig2015}
+(2015). {[}Computer software{]}. Chapman; Hall/CRC.
+https://doi.org/\url{https://doi.org/10.1201/b19706}
+
 \bibitem[\citeproctext]{ref-Ab1884}
 Abbott, E. (1884). \emph{Flatland: A romance of many dimensions}. Dover
 Publications.
@@ -8227,7 +9044,7 @@ Ahlberg, C., Williamson, C., \& Shneiderman, B. (1991). Dynamic
 {E}valuation. \emph{ACM CHI `92 Conference Proceedings}, 619--626.
 
 \bibitem[\citeproctext]{ref-keras}
-Allaire, J., \& Chollet, F. (2023). \emph{Keras: R interface to
+Allaire, J., \& Chollet, F. (2023). \emph{Keras: {R} interface to
 'keras'}. \url{https://CRAN.R-project.org/package=keras}
 
 \bibitem[\citeproctext]{ref-An57}
@@ -8251,8 +9068,8 @@ A. Getis (Eds.), \emph{{R}ecent {D}evelopments in {S}patial {A}nalysis}
 (pp. 35--59). Springer.
 
 \bibitem[\citeproctext]{ref-R-ggthemes}
-Arnold, J. B. (2021). \emph{Ggthemes: Extra themes, scales and geoms for
-ggplot2}. \url{https://github.com/jrnold/ggthemes}
+Arnold, J. B. (2024). \emph{Ggthemes: Extra themes, scales and geoms for
+ggplot2}. \url{https://jrnold.github.io/ggthemes/}
 
 \bibitem[\citeproctext]{ref-ASA23}
 ASA Statistical Graphics Section. (2023). \emph{Video {L}ibrary}.
@@ -8263,10 +9080,24 @@ Asimov, D. (1985). {T}he {G}rand {T}our: {A} {T}ool for {V}iewing
 {M}ultidimensional {D}ata. \emph{SIAM Journal of Scientific and
 Statistical Computing}, \emph{6}(1), 128--143.
 
+\bibitem[\citeproctext]{ref-R-gridExtra}
+Auguie, B. (2017). \emph{gridExtra: Miscellaneous functions for "grid"
+graphics}. \url{https://CRAN.R-project.org/package=gridExtra}
+
 \bibitem[\citeproctext]{ref-forest}
 Australian Bureau of Agricultural and Resource Economics and Sciences.
 (2018). \emph{{Forests of Australia}}.
 \url{https://www.agriculture.gov.au/abares/forestsaustralia/forest-data-maps-and-tools/spatial-data/forest-cover}
+
+\bibitem[\citeproctext]{ref-R-woylier}
+Batsaikan, Z., Cook, D., \& Laa, U. (2024). \emph{Woylier: Alternative
+tour frame interpolation method}.
+\url{https://numbats.github.io/woylier/}
+
+\bibitem[\citeproctext]{ref-woylier2023}
+Batsaikhan, Z., Cook, D., \& Laa, U. (2023). \emph{Frame to frame
+interpolation for high-dimensional data visualisation using the woylier
+package}. \url{https://doi.org/10.48550/arXiv.2311.08181}
 
 \bibitem[\citeproctext]{ref-BC84}
 Becker, R. A., \& Chambers, J. M. (1984). \emph{{S}: An environment for
@@ -8300,8 +9131,13 @@ Bishop, C. M. (2006). \emph{Pattern {R}ecognition and {M}achine
 
 \bibitem[\citeproctext]{ref-HOML}
 Boehmke, B., \& Greenwell, B. M. (2019). \emph{Hands-on machine learning
-with r (1st ed.)}. Chapman; Hall/CRC.
+with {R} (1st ed.)}. Chapman; Hall/CRC.
 \url{https://doi.org/10.1201/9780367816377}
+
+\bibitem[\citeproctext]{ref-R-aweSOM}
+Boelaert, J., Ollion, E., \& Sodoge, J. (2022). \emph{aweSOM:
+Interactive self-organizing maps}.
+\url{https://CRAN.R-project.org/package=aweSOM}
 
 \bibitem[\citeproctext]{ref-Bonneau2006}
 Bonneau, G.-P., Ertl, T., \& Nielson, G. M. (Eds.). (2006).
@@ -8398,19 +9234,16 @@ Center for Computational Statistics, George Mason University.
 Chatfield, C. (1995). \emph{Problem solving: A statistician's guide}.
 Chapman; Hall/CRC Press.
 
-\bibitem[\citeproctext]{ref-haerdle}
-Chen, C., Härdle, W., \& Unwin, A. (Eds.). (2006). \emph{Handbook of
-computational statistics (volume III) data visualization}. Springer.
-
 \bibitem[\citeproctext]{ref-UHC06}
 Chen, C.-H., Härdle, W., \& Unwin, A. (Eds.). (2007). \emph{Handbook of
 {D}ata {V}isualization}. Springer.
+\url{https://doi.org/10.1007/978-3-540-33037-0}
 
 \bibitem[\citeproctext]{ref-chen2023}
-Chen, Z., Wang, C., Huang, S., Shi, Y., \& Xi, R. (2023). Directly
-selecting differentially expressed genes for single-cell clustering
-analyses. \emph{bioRxiv}.
-\url{https://doi.org/10.1101/2023.07.26.550670}
+Chen, Z., Wang, C., Huang, S., Shi, Y., \& Xi, R. (2024). Directly
+selecting cell-type marker genes for single-cell clustering analyses.
+\emph{Cell Reports Methods}, \emph{4}, 100810.
+\url{https://doi.org/10.1016/j.crmeth.2024.100810}
 
 \bibitem[\citeproctext]{ref-CT94}
 Cheng, B., \& Titterington, M. (1994). Neural {N}etworks: {A} {R}eview
@@ -8466,7 +9299,7 @@ Cook, D., Hofmann, H., Lee, E.-K., Yang, H., Nikolau, B., \& Wurtele, E.
 \emph{Journal of Data Science}, \emph{5}(2), 151--182.
 
 \bibitem[\citeproctext]{ref-R-mulgar}
-Cook, D., \& Laa, U. (2023). \emph{Mulgar: Functions for pre-processing
+Cook, D., \& Laa, U. (2025). \emph{Mulgar: Functions for pre-processing
 data for multivariate data visualisation using tours}.
 \url{https://dicook.github.io/mulgar/}
 
@@ -8475,6 +9308,7 @@ Cook, D., Lee, E.-K., Buja, A., \& Wickham, H. (2006). {G}rand {T}ours,
 {P}rojection {P}ursuit {G}uided {T}ours and {M}anual {C}ontrols. In
 C.-H. Chen, W. Härdle, \& A. Unwin (Eds.), \emph{Handbook of {D}ata
 {V}isualization}. Springer.
+\url{https://doi.org/10.1007/978-3-540-33037-0}
 
 \bibitem[\citeproctext]{ref-CMSC95}
 Cook, D., Majure, J. J., Symanzik, J., \& Cressie, N. (1996). {D}ynamic
@@ -8514,9 +9348,9 @@ Workshop on {T}emporal {D}ata {M}ining: {A}lgorithms, {T}heory and
 Houston, November 27, 2005}, 25--32.
 
 \bibitem[\citeproctext]{ref-R-ggdendro}
-de Vries, A., \& Ripley, B. D. (2022). \emph{Ggdendro: Create
+de Vries, A., \& Ripley, B. D. (2024). \emph{Ggdendro: Create
 dendrograms and tree diagrams using ggplot2}.
-\url{https://github.com/andrie/ggdendro}
+\url{https://andrie.github.io/ggdendro/}
 
 \bibitem[\citeproctext]{ref-fireorigin}
 Department of Environment, Land, Water \& Planning. (2019). \emph{{Fire
@@ -8552,9 +9386,15 @@ analysis: Understanding it, doing it, and making it useful} (pp.
 Dykes, J., MacEachren, A. M., \& Kraak, M.-J. (2005). \emph{Exploring
 geovisualization}. Elsevier.
 
-\bibitem[\citeproctext]{ref-Ev01}
-Everitt, B. S., Landau, S., \& Leese, M. (2001). \emph{Cluster
-{A}nalysis (4th ed)}. Edward Arnold.
+\bibitem[\citeproctext]{ref-emerson2013}
+Emerson, J. W., Green, W. A., Schloerke, B., Crowley, J., Cook, D.,
+Hofmann, H., \& Wickham, H. (2013). The generalized pairs plot.
+\emph{Journal of Computational and Graphical Statistics}, \emph{22}(1),
+79--91. \url{https://doi.org/10.1080/10618600.2012.694762}
+
+\bibitem[\citeproctext]{ref-Ev11}
+Everitt, B. S., Landau, S., Leese, M., \& Stahel, D. (2011).
+\emph{Cluster {A}nalysis (5th ed)}. John Wiley \& Sons, Ltd.
 
 \bibitem[\citeproctext]{ref-Fi79}
 Fienberg, S. E. (1979). Graphical {M}ethods in {S}tatistics.
@@ -8604,6 +9444,7 @@ versus interpretability of classification. \emph{Biometrics},
 Fraley, C., \& Raftery, A. E. (2002). Model-based {C}lustering,
 {D}iscriminant {A}nalysis, {D}ensity {E}stimation. \emph{Journal of the
 American Statistical Association}, \emph{97}, 611--631.
+\url{http://www.stat.washington.edu/mclust}
 
 \bibitem[\citeproctext]{ref-R-mclust}
 Fraley, C., Raftery, A. E., \& Scrucca, L. (2024). \emph{Mclust:
@@ -8645,7 +9486,7 @@ computational statistics: Concepts and methods}. Springer.
 
 \bibitem[\citeproctext]{ref-giordani}
 Giordani, P., Ferraro, M. B., \& Martella, F. (2020). \emph{An
-introduction to clustering with r}. Springer Singapore.
+introduction to clustering with {R}}. Springer Singapore.
 \url{https://doi.org/10.1007/978-981-13-0553-5}
 
 \bibitem[\citeproctext]{ref-GH92}
@@ -8659,6 +9500,11 @@ Good, P. (2005). \emph{Permutation, {P}arametric, and {B}ootstrap
 
 \bibitem[\citeproctext]{ref-GH96}
 Gower, J. C., \& Hand, D. J. (1996). \emph{Biplots}. Chapman; Hall.
+
+\bibitem[\citeproctext]{ref-ctv-clustering}
+Gruen, B. (2024). \emph{CRAN task view: Cluster analysis \& finite
+mixture models} (Version 2024-08-20).
+https://cran.r-project.org/web/views/Cluster.html.
 
 \bibitem[\citeproctext]{ref-risk-survey}
 Hajibaba, H., Karlsson, L., \& Dolnicar, S. (2016). Residents open their
@@ -8677,17 +9523,22 @@ Stuart, T., Fleming, L. B., Yeung, B., \ldots{} Satija, R. (2021).
 Integrated analysis of multimodal single-cell data. \emph{Cell}.
 \url{https://doi.org/10.1016/j.cell.2021.04.048}
 
-\bibitem[\citeproctext]{ref-R-langevitour}
-Harrison, P. (2023a). \emph{Langevitour: Langevin tour}.
-\url{https://logarithmic.net/langevitour/}
+\bibitem[\citeproctext]{ref-langevitour}
+Harrison, P. (2023a). Langevitour: Smooth interactive touring of high
+dimensions, demonstrated with scRNA-seq data. \emph{The R Journal},
+\emph{15}, 206--219. \url{https://doi.org/10.32614/RJ-2023-046}
 
 \bibitem[\citeproctext]{ref-langevitour2023}
 Harrison, P. (2023b). Langevitour: Smooth interactive touring of high
 dimensions, demonstrated with scRNA-seq data. \emph{The R Journal},
 \emph{15}(2), 206--219. \url{https://doi.org/10.32614/RJ-2023-046}
 
+\bibitem[\citeproctext]{ref-R-langevitour}
+Harrison, P. (2024). \emph{Langevitour: Langevin tour}.
+\url{https://logarithmic.net/langevitour/}
+
 \bibitem[\citeproctext]{ref-R-detourr}
-Hart, C., \& Wang, E. (2022). \emph{Detourr: Portable and performant
+Hart, C., \& Wang, E. (2024). \emph{Detourr: Portable and performant
 tour animations}. \url{https://casperhart.github.io/detourr/}
 
 \bibitem[\citeproctext]{ref-HK81}
@@ -8733,9 +9584,15 @@ tools for statistical analysis results}.
 \url{https://CRAN.R-project.org/package=ggfortify}
 
 \bibitem[\citeproctext]{ref-R-ggfortify}
-Horikoshi, M., \& Tang, Y. (2023). \emph{Ggfortify: Data visualization
+Horikoshi, M., \& Tang, Y. (2024). \emph{Ggfortify: Data visualization
 tools for statistical analysis results}.
 \url{https://github.com/sinhrks/ggfortify}
+
+\bibitem[\citeproctext]{ref-horst2022}
+Horst, A. M., Hill, A. P., \& Gorman, K. B. (2022). Palmer archipelago
+penguins data in the palmerpenguins r package - an alternative to
+anderson's irises. \emph{The R Journal}, \emph{14}, 244--254.
+\url{https://doi.org/10.32614/RJ-2022-020}
 
 \bibitem[\citeproctext]{ref-R-palmerpenguins}
 Horst, A., Hill, A., \& Gorman, K. (2022). \emph{Palmerpenguins: Palmer
@@ -8757,8 +9614,8 @@ data analysis} {[}PhD thesis{]}. University of Washington.
 
 \bibitem[\citeproctext]{ref-R-gt}
 Iannone, R., Cheng, J., Schloerke, B., Hughes, E., Lauer, A., \& Seo, J.
-(2023). \emph{Gt: Easily create presentation-ready display tables}.
-\url{https://gt.rstudio.com/}
+(2024). \emph{Gt: Easily create presentation-ready display tables}.
+\url{https://gt.rstudio.com}
 
 \bibitem[\citeproctext]{ref-R1996}
 Ihaka, R., \& Gentleman, R. (1996). R: {A} {L}anguage for {D}ata
@@ -8767,7 +9624,7 @@ Statistics}, \emph{5}, 299--314.
 
 \bibitem[\citeproctext]{ref-R-colorspace}
 Ihaka, R., Murrell, P., Hornik, K., Fisher, J. C., Stauffer, R., Wilke,
-C. O., McWhite, C. D., \& Zeileis, A. (2023). \emph{Colorspace: A
+C. O., McWhite, C. D., \& Zeileis, A. (2024). \emph{Colorspace: A
 toolbox for manipulating and assessing colors and palettes}.
 \url{https://colorspace.R-Forge.R-project.org/}
 
@@ -8797,8 +9654,14 @@ Jones, M. C., \& Sibson, R. (1987). {W}hat is {P}rojection {P}ursuit?
 (With discussion). \emph{Journal of the Royal Statistical Society,
 Series A}, \emph{150}, 1--36.
 
+\bibitem[\citeproctext]{ref-Kandanaarachchi02012021}
+Kandanaarachchi, S., \& Hyndman, R. J. (2021). Dimension reduction for
+outlier detection using DOBIN. \emph{Journal of Computational and
+Graphical Statistics}, \emph{30}(1), 204--219.
+https://doi.org/\url{https://doi.org/10.1080/10618600.2020.1807353}
+
 \bibitem[\citeproctext]{ref-kassambara}
-Kassambara, A. (2017). \emph{Practical guide to cluster analysis in r:
+Kassambara, A. (2017). \emph{Practical guide to cluster analysis in {R}:
 Unsupervised machine learning}. STHDA.
 
 \bibitem[\citeproctext]{ref-R-ggpubr}
@@ -8815,7 +9678,7 @@ discussion). \emph{Journal of Business and Economic Statistics},
 \emph{14}(1), 113--132.
 
 \bibitem[\citeproctext]{ref-R-Rtsne}
-Krijthe, J. (2022). \emph{Rtsne: T-distributed stochastic neighbor
+Krijthe, J. (2023). \emph{Rtsne: T-distributed stochastic neighbor
 embedding using a barnes-hut implementation}.
 \url{https://github.com/jkrijthe/Rtsne}
 
@@ -8838,7 +9701,7 @@ packages for modeling and machine learning using tidyverse principles.}
 \url{https://www.tidymodels.org}
 
 \bibitem[\citeproctext]{ref-R-tidymodels}
-Kuhn, M., \& Wickham, H. (2023). \emph{Tidymodels: Easily install and
+Kuhn, M., \& Wickham, H. (2024). \emph{Tidymodels: Easily install and
 load the tidymodels packages}. \url{https://tidymodels.tidymodels.org}
 
 \bibitem[\citeproctext]{ref-sagetour}
@@ -8868,7 +9731,7 @@ Laurent, S. (2023). \emph{Cxhull: Convex hull}.
 \url{https://github.com/stla/cxhull}
 
 \bibitem[\citeproctext]{ref-Lee2018}
-Lee, E.-K. (2018). PPtreeViz: An r package for visualizing projection
+Lee, E.-K. (2018). PPtreeViz: An {R} package for visualizing projection
 pursuit classification trees. \emph{Journal of Statistical Software},
 \emph{83}(8), 1--30. \url{https://doi.org/10.18637/jss.v083.i08}
 
@@ -8899,10 +9762,11 @@ Projection pursuit classification tree}. \emph{Electronic Journal of
 Statistics}, \emph{7}(none), 1369--1386.
 \url{https://doi.org/10.1214/13-EJS810}
 
-\bibitem[\citeproctext]{ref-ctv-clustering}
-Leisch, F., \& Gruen, B. (2023). \emph{CRAN task view: Cluster analysis
-\& finite mixture models}.
-https://cran.r-project.org/web/views/Cluster.html.
+\bibitem[\citeproctext]{ref-Leisch2008}
+Leisch, F. (2008). Visualizing cluster analysis and finite mixture
+models. In \emph{Handbook of data visualization} (pp. 561--587).
+Springer Berlin Heidelberg.
+\url{https://doi.org/10.1007/978-3-540-33037-0_22}
 
 \bibitem[\citeproctext]{ref-li2020visualizing}
 Li, M., Zhao, Z., \& Scheidegger, C. (2020). Visualizing neural networks
@@ -8948,7 +9812,7 @@ and probability} (Vol. 1, pp. 281--297). University of California Press.
 
 \bibitem[\citeproctext]{ref-MB03}
 Maindonald, J., \& Braun, J. (2003). \emph{Data analysis and graphics
-using r - an example-based approach}. Cambridge University Press.
+using {R} - an example-based approach}. Cambridge University Press.
 
 \bibitem[\citeproctext]{ref-Ma65}
 Martin, E. (1965). \emph{Flatland}.
@@ -8976,12 +9840,18 @@ Sons.
 McVicar, T. (2011). \emph{Near-surface wind speed. v10. CSIRO. Data
 collection.} \url{https://doi.org/10.25919/5c5106acbcb02}
 
+\bibitem[\citeproctext]{ref-R-e1071}
+Meyer, D., Dimitriadou, E., Hornik, K., Weingessel, A., \& Leisch, F.
+(2024). \emph{e1071: Misc functions of the department of statistics,
+probability theory group (formerly: E1071), TU wien}.
+\url{https://CRAN.R-project.org/package=e1071}
+
 \bibitem[\citeproctext]{ref-R-rpart.plot}
-Milborrow, S. (2022). \emph{Rpart.plot: Plot rpart models: An enhanced
+Milborrow, S. (2024). \emph{Rpart.plot: Plot rpart models: An enhanced
 version of plot.rpart}. \url{http://www.milbo.org/rpart-plot/index.html}
 
 \bibitem[\citeproctext]{ref-R-gtExtras}
-Mock, T. (2022). \emph{gtExtras: Extending gt for beautiful HTML
+Mock, T. (2023). \emph{gtExtras: Extending gt for beautiful HTML
 tables}. \url{https://github.com/jthomasmock/gtExtras}
 
 \bibitem[\citeproctext]{ref-iml}
@@ -9069,8 +9939,9 @@ multinomial log-linear models}.
 \url{http://www.stats.ox.ac.uk/pub/MASS4/}
 
 \bibitem[\citeproctext]{ref-R-MASS}
-Ripley, B. (2024). \emph{MASS: Support functions and datasets for
-venables and ripley's MASS}. \url{http://www.stats.ox.ac.uk/pub/MASS4/}
+Ripley, B., \& Venables, B. (2024). \emph{MASS: Support functions and
+datasets for venables and ripley's MASS}.
+\url{http://www.stats.ox.ac.uk/pub/MASS4/}
 
 \bibitem[\citeproctext]{ref-Ro1957}
 Rothkopf, E. Z. (1957). A {M}easure of {S}timulus {S}imilarity and
@@ -9092,8 +9963,18 @@ Schloerke, B., Cook, D., Larmarange, J., Briatte, F., Marbach, M.,
 Thoen, E., Elberg, A., \& Crowley, J. (2024). \emph{GGally: Extension to
 ggplot2}. \url{https://ggobi.github.io/ggally/}
 
+\bibitem[\citeproctext]{ref-geozoo}
+Schloerke, B., Wickham, H., Cook, D., \& Hofmann, H. (2016). Escape from
+boxland. \emph{The R Journal}, \emph{8}, 243--257.
+
+\bibitem[\citeproctext]{ref-mclust}
+Scrucca, L., Fraley, C., Murphy, T. B., \& Raftery, A. E. (2023a).
+\emph{Model-based clustering, classification, and density estimation
+using {mclust} in {R}}. Chapman; Hall/CRC.
+\url{https://doi.org/10.1201/9781003277965}
+
 \bibitem[\citeproctext]{ref-mclust2023}
-Scrucca, L., Fraley, C., Murphy, T. B., \& Raftery, A. E. (2023).
+Scrucca, L., Fraley, C., Murphy, T. B., \& Raftery, A. E. (2023b).
 \emph{Model-based clustering, classification, and density estimation
 using {mclust} in {R}}. Chapman; Hall/CRC.
 \url{https://doi.org/10.1201/9781003277965}
@@ -9114,7 +9995,7 @@ web graphics via plotly.js}. \url{https://plotly-r.com}
 
 \bibitem[\citeproctext]{ref-R-gtsummary}
 Sjoberg, D. D., Larmarange, J., Curry, M., Lavery, J., Whiting, K., \&
-Zabor, E. C. (2023). \emph{Gtsummary: Presentation-ready data summary
+Zabor, E. C. (2024). \emph{Gtsummary: Presentation-ready data summary
 and analytic result tables}.
 \url{https://github.com/ddsjoberg/gtsummary}
 
@@ -9125,9 +10006,9 @@ Sjoberg, D. D., Whiting, K., Curry, M., Lavery, J. A., \& Larmarange, J.
 \url{https://doi.org/10.32614/RJ-2021-053}
 
 \bibitem[\citeproctext]{ref-R-ggrepel}
-Slowikowski, K. (2023). \emph{Ggrepel: Automatically position
+Slowikowski, K. (2024). \emph{Ggrepel: Automatically position
 non-overlapping text labels with ggplot2}.
-\url{https://github.com/slowkow/ggrepel}
+\url{https://ggrepel.slowkow.com/}
 
 \bibitem[\citeproctext]{ref-R-bomrang}
 Sparks, A. H., Carroll, J., Goldie, J., Marchiori, D., Melloy, P.,
@@ -9269,7 +10150,7 @@ imputations. \emph{Journal of Statistical Software}, \emph{105}(7),
 1--31. \url{https://doi.org/10.18637/jss.v105.i07}
 
 \bibitem[\citeproctext]{ref-R-naniar}
-Tierney, N., Cook, D., McBain, M., \& Fay, C. (2023). \emph{Naniar: Data
+Tierney, N., Cook, D., McBain, M., \& Fay, C. (2024). \emph{Naniar: Data
 structures, summaries, and visualisations for missing data}.
 \url{https://github.com/njtierney/naniar}
 
@@ -9316,10 +10197,22 @@ Urbanek, S., \& Theus, M. (2003). {iPlots}: {H}igh {I}nteraction
 \emph{Proceedings of the 3rd international workshop on distributed
 statistical computing (DSC 2003)}.
 
+\bibitem[\citeproctext]{ref-radial-tour}
+Ursula Laa, D. C., Alex Aumann, \& Valencia, G. (2023). New and
+simplified manual controls for projection and slice tours, with
+application to exploring classification boundaries in high dimensions.
+\emph{Journal of Computational and Graphical Statistics}, \emph{32}(3),
+1229--1236. \url{https://doi.org/10.1080/10618600.2023.2206459}
+
 \bibitem[\citeproctext]{ref-R-htmlwidgets}
 Vaidyanathan, R., Xie, Y., Allaire, J., Cheng, J., Sievert, C., \&
 Russell, K. (2023). \emph{Htmlwidgets: HTML widgets for r}.
 \url{https://github.com/ramnathv/htmlwidgets}
+
+\bibitem[\citeproctext]{ref-R-compositions}
+van den Boogaart, K. G., Tolosana-Delgado, R., \& Bren, M. (2024).
+\emph{Compositions: Compositional data analysis}.
+\url{https://CRAN.R-project.org/package=compositions}
 
 \bibitem[\citeproctext]{ref-Rtsne2014}
 van der Maaten, L. J. P. (2014). Accelerating t-SNE using tree-based
@@ -9414,6 +10307,11 @@ Wehrens, R., \& Kruisselbrink, J. (2018). Flexible self-organizing maps
 in {kohonen} 3.0. \emph{Journal of Statistical Software}, \emph{87}(7),
 1--18. \url{https://doi.org/10.18637/jss.v087.i07}
 
+\bibitem[\citeproctext]{ref-R-kohonen}
+Wehrens, R., \& Kruisselbrink, J. (2023). \emph{Kohonen: Supervised and
+unsupervised self-organising maps}.
+\url{https://CRAN.R-project.org/package=kohonen}
+
 \bibitem[\citeproctext]{ref-ggplot22016}
 Wickham, H. (2016). \emph{ggplot2: Elegant graphics for data analysis}.
 Springer-Verlag New York. \url{https://ggplot2.tidyverse.org}
@@ -9429,7 +10327,7 @@ Wilke, C., Woo, K., Yutani, H., Dunnington, D., \& van den Brand, T.
 grammar of graphics}. \url{https://ggplot2.tidyverse.org}
 
 \bibitem[\citeproctext]{ref-R-tourr}
-Wickham, H., \& Cook, D. (2023). \emph{Tourr: Tour methods for
+Wickham, H., \& Cook, D. (2024). \emph{Tourr: Tour methods for
 multivariate data visualisation}. \url{https://github.com/ggobi/tourr}
 
 \bibitem[\citeproctext]{ref-wickham2015}
@@ -9509,12 +10407,12 @@ guided tours. \emph{The R Journal}, \emph{13}(2), 624--641.
 \url{https://doi.org/10.32614/RJ-2021-105}
 
 \bibitem[\citeproctext]{ref-R-ferrn}
-Zhang, H. S., Cook, D., Laa, U., Langrené, N., \& Menéndez, P. (2022).
+Zhang, H. S., Cook, D., Laa, U., Langrené, N., \& Menéndez, P. (2024).
 \emph{Ferrn: Facilitate exploration of touRR optimisatioN}.
 \url{https://github.com/huizezhang-sherry/ferrn/}
 
 \bibitem[\citeproctext]{ref-R-kableExtra}
-Zhu, H. (2021). \emph{kableExtra: Construct complex table with kable and
+Zhu, H. (2024). \emph{kableExtra: Construct complex table with kable and
 pipe syntax}. \url{http://haozhu233.github.io/kableExtra/}
 
 \end{CSLReferences}
@@ -9524,7 +10422,7 @@ pipe syntax}. \url{http://haozhu233.github.io/kableExtra/}
 \addcontentsline{toc}{part}{Appendices}
 \appendix
 
-\chapter{Toolbox}\label{toolbox}
+\chapter{Toolbox}\label{sec-toolbox}
 
 \section{\texorpdfstring{Using tours in the \texttt{tourr}
 package}{Using tours in the tourr package}}\label{using-tours-in-the-tourr-package}
@@ -9757,7 +10655,7 @@ part of the overall space.
 
 \centering{
 
-\includegraphics[width=2.1875in,height=\textheight]{images/tour_paths1d.png}
+\includegraphics[width=2.1875in,height=\textheight,keepaspectratio]{images/tour_paths1d.png}
 
 }
 
@@ -9769,7 +10667,7 @@ part of the overall space.
 
 \centering{
 
-\includegraphics[width=2.1875in,height=\textheight]{images/tour_paths2d.png}
+\includegraphics[width=2.1875in,height=\textheight,keepaspectratio]{images/tour_paths2d.png}
 
 }
 
@@ -9810,7 +10708,7 @@ ordering of categories, the tour is not advised.
 
 \centering{
 
-\includegraphics[width=2.29167in,height=\textheight]{images/discrete_data.png}
+\includegraphics[width=2.29167in,height=\textheight,keepaspectratio]{images/discrete_data.png}
 
 }
 
@@ -9822,7 +10720,7 @@ ordering of categories, the tour is not advised.
 
 \centering{
 
-\includegraphics[width=2.29167in,height=\textheight]{images/jittered_data.png}
+\includegraphics[width=2.29167in,height=\textheight,keepaspectratio]{images/jittered_data.png}
 
 }
 
@@ -9861,7 +10759,7 @@ values are outside the domain of the complete cases.
 
 \centering{
 
-\includegraphics[width=2.1875in,height=\textheight]{images/fig-missings-below-2D-pdf-1.png}
+\includegraphics[width=2.1875in,height=\textheight,keepaspectratio]{images/fig-missings-below-2D-pdf-1.png}
 
 }
 
@@ -9873,7 +10771,7 @@ values are outside the domain of the complete cases.
 
 \centering{
 
-\includegraphics[width=2.1875in,height=\textheight]{images/missing_values1.png}
+\includegraphics[width=2.1875in,height=\textheight,keepaspectratio]{images/missing_values1.png}
 
 }
 
@@ -9885,7 +10783,7 @@ values are outside the domain of the complete cases.
 
 \centering{
 
-\includegraphics[width=2.1875in,height=\textheight]{images/fig-missings-mean-2D-pdf-1.png}
+\includegraphics[width=2.1875in,height=\textheight,keepaspectratio]{images/fig-missings-mean-2D-pdf-1.png}
 
 }
 
@@ -9897,7 +10795,7 @@ values are outside the domain of the complete cases.
 
 \centering{
 
-\includegraphics[width=2.1875in,height=\textheight]{images/missing_values2.png}
+\includegraphics[width=2.1875in,height=\textheight,keepaspectratio]{images/missing_values2.png}
 
 }
 
@@ -9997,7 +10895,7 @@ used in the book examples.}
 
 \centering{
 
-\centering
+\centering\centering
 \fontsize{8}{10}\selectfont
 \begin{tabular}{>{\raggedright\arraybackslash}p{2cm}>{\raggedright\arraybackslash}p{5cm}>{\raggedright\arraybackslash}p{4cm}}
 \toprule
@@ -10016,8 +10914,11 @@ plane and box & Simulated data showing hyper-planes & dimension reduction\\
 clusters, clusters\_nonlin, simple\_clusters & Simulated data with various clustering & clustering\\
 \addlinespace
 c1-c7 & Simulated data with various clustering, challenge data & clustering\\
+anomaly1-5 & Simulated data with various anomalies & dimension reduction, exploration\\
+assoc1-3 & Simulated data with various associations & dimension reduction\\
 fashion MNIST & Collection of apparel images & classification\\
 risk\_MSA & Six types of risks and responses by survey & clustering\\
+\addlinespace
 pbmc & 50 PCs of scRNA-seq gene expression & dimension reduction, clustering\\
 \bottomrule
 \end{tabular}
@@ -10275,8 +11176,8 @@ penguins.
 \addcontentsline{toc}{subsection}{Variables}
 
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.3704}}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.6296}}@{}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.3704}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.6296}}@{}}
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
 Name
@@ -10306,8 +11207,8 @@ illustrate cluster analysis.
 \addcontentsline{toc}{subsection}{Source}
 
 Details of the penguins data can be found at
-\url{https://allisonhorst.github.io/palmerpenguins/}, and Horst et al.
-(2022) is the package source.
+\url{https://allisonhorst.github.io/palmerpenguins/}, and A. Horst et
+al. (2022) is the package source.
 
 \subsection*{Pre-processing}\label{pre-processing-3}
 \addcontentsline{toc}{subsection}{Pre-processing}
@@ -10455,7 +11356,7 @@ sketches in a recognisable form:
 
 \centering{
 
-\includegraphics[width=0.2\textwidth,height=\textheight]{A2-data_files/figure-pdf/fig-sketches-1.pdf}
+\includegraphics[width=0.2\linewidth,height=\textheight,keepaspectratio]{A2-data_files/figure-pdf/fig-sketches-1.pdf}
 
 }
 
@@ -10592,8 +11493,8 @@ out.
 Simulated using the code in the \texttt{simulate.R} file of the
 \texttt{data-raw} directory of the \texttt{mulgar} package.
 
-\section{\texorpdfstring{\texttt{c1} -
-\texttt{c7}}{c1 - c7}}\label{c1---c7}
+\section{\texorpdfstring{clusterchallenges: \texttt{c1} -
+\texttt{c7}}{clusterchallenges: c1 - c7}}\label{clusterchallenges-c1---c7}
 
 \subsection*{Description}\label{description-9}
 \addcontentsline{toc}{subsection}{Description}
@@ -10625,9 +11526,74 @@ The primary goal is to detect the different clusters.
 These are challenge data sets, so the code to simulate them is not made
 available.
 
-\section{Fashion MNIST}\label{fashion-mnist}
+\section{\texorpdfstring{anomalies: \texttt{anomaly1} -
+\texttt{anomaly5}}{anomalies: anomaly1 - anomaly5}}\label{anomalies-anomaly1---anomaly5}
 
 \subsection*{Description}\label{description-10}
+\addcontentsline{toc}{subsection}{Description}
+
+These dataset have four numeric variables, and a variety of anomalies.
+
+\subsection*{Variables}\label{variables-10}
+\addcontentsline{toc}{subsection}{Variables}
+
+\begin{longtable}[]{@{}ll@{}}
+\toprule\noalign{}
+Name & Description \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{x1}, \ldots, \texttt{x4} & numeric variables \\
+\end{longtable}
+
+\subsection*{Purpose}\label{purpose-10}
+\addcontentsline{toc}{subsection}{Purpose}
+
+The primary goal is to detect the anomalies.
+
+\subsection*{Source}\label{source-10}
+\addcontentsline{toc}{subsection}{Source}
+
+These are challenge data sets, so the code to simulate them is not made
+available.
+
+\section{\texorpdfstring{associations: \texttt{assoc1} -
+\texttt{assoc3}}{associations: assoc1 - assoc3}}\label{associations-assoc1---assoc3}
+
+\subsection*{Description}\label{description-11}
+\addcontentsline{toc}{subsection}{Description}
+
+These dataset have four numeric variables, and a variety of types of
+association.
+
+\subsection*{Variables}\label{variables-11}
+\addcontentsline{toc}{subsection}{Variables}
+
+\begin{longtable}[]{@{}ll@{}}
+\toprule\noalign{}
+Name & Description \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{x1}, \ldots, \texttt{x4} & numeric variables \\
+\end{longtable}
+
+\subsection*{Purpose}\label{purpose-11}
+\addcontentsline{toc}{subsection}{Purpose}
+
+The primary goal is to detect the associations.
+
+\subsection*{Source}\label{source-11}
+\addcontentsline{toc}{subsection}{Source}
+
+These are challenge data sets, so the code to simulate them is not made
+available.
+
+\section{Fashion MNIST}\label{fashion-mnist}
+
+\subsection*{Description}\label{description-12}
 \addcontentsline{toc}{subsection}{Description}
 
 This data is a subset of images from
@@ -10635,12 +11601,12 @@ https://github.com/zalandoresearch/fashion-mnist. Each image is 28x28
 grayscale image. The training set has 60,000 images, and the test set
 has 10,000 images.
 
-\subsection*{Variables}\label{variables-10}
+\subsection*{Variables}\label{variables-12}
 \addcontentsline{toc}{subsection}{Variables}
 
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.3704}}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.6296}}@{}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.3704}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.6296}}@{}}
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
 Name
@@ -10656,14 +11622,14 @@ Description
 Dress, Coat, Sandal, Shirt, Sneaker, Bag, Ankle boot \\
 \end{longtable}
 
-\subsection*{Purpose}\label{purpose-10}
+\subsection*{Purpose}\label{purpose-12}
 \addcontentsline{toc}{subsection}{Purpose}
 
 Primarily this data is useful as an example for neural network modeling,
 following the tutorial at
 https://tensorflow.rstudio.com/tutorials/keras/classification.
 
-\subsection*{Source}\label{source-10}
+\subsection*{Source}\label{source-12}
 \addcontentsline{toc}{subsection}{Source}
 
 The data is available from
@@ -10671,7 +11637,7 @@ https://github.com/zalandoresearch/fashion-mnist.
 
 \section{\texorpdfstring{\texttt{risk\_MSA}}{risk\_MSA}}\label{risk_msa}
 
-\subsection*{Description}\label{description-11}
+\subsection*{Description}\label{description-13}
 \addcontentsline{toc}{subsection}{Description}
 
 The data was collected in Australia in 2015 (Hajibaba et al., 2016) and
@@ -10679,7 +11645,7 @@ includes six types of risks (recreational, health, career, financial,
 safety and social) with responses on a scale from 1 (never) to 5 (very
 often).
 
-\subsection*{Variables}\label{variables-11}
+\subsection*{Variables}\label{variables-13}
 \addcontentsline{toc}{subsection}{Variables}
 
 \begin{verbatim}
@@ -10693,13 +11659,13 @@ $ Safety       <int> 2, 1, 2, 1, 5, 2, 1, 5, 1, 4, 1, 5, 1, ~
 $ Social       <int> 4, 1, 3, 1, 5, 3, 1, 5, 1, 5, 1, 5, 1, ~
 \end{verbatim}
 
-\subsection*{Purpose}\label{purpose-11}
+\subsection*{Purpose}\label{purpose-13}
 \addcontentsline{toc}{subsection}{Purpose}
 
 This data is useful for the demonstration of clustering methods, it was
 also used in Dolnicar et al. (2018).
 
-\subsection*{Source}\label{source-11}
+\subsection*{Source}\label{source-13}
 \addcontentsline{toc}{subsection}{Source}
 
 The data is available from https://homepage.boku.ac.at/leisch/MSA/.
@@ -10707,10 +11673,10 @@ The data is available from https://homepage.boku.ac.at/leisch/MSA/.
 \section{Peripheral Blood Mononuclear
 Cells}\label{peripheral-blood-mononuclear-cells}
 
-\subsection*{Description}\label{description-12}
+\subsection*{Description}\label{description-14}
 \addcontentsline{toc}{subsection}{Description}
 
-The data was described in Z. Chen et al. (2023), which is available
+The data was described in Z. Chen et al. (2024), which is available
 through the R package \texttt{Seurat} (Hao et al. (2021), Stuart et al.
 (2019), Butler et al. (2018), Satija et al. (2015)). Here the data has
 been pre-processed following the tutorial at
@@ -10719,7 +11685,7 @@ first 50 PCs are made available in the data file
 \texttt{pbmc\_pca\_50.rds} which is read into R using the
 \texttt{readRDS()} function.
 
-\subsection*{Variables}\label{variables-12}
+\subsection*{Variables}\label{variables-14}
 \addcontentsline{toc}{subsection}{Variables}
 
 \begin{longtable}[]{@{}ll@{}}
@@ -10732,7 +11698,7 @@ Name & Description \\
 \texttt{PC\_1}-\texttt{PC\_50} & Principal component scores \\
 \end{longtable}
 
-\subsection*{Purpose}\label{purpose-12}
+\subsection*{Purpose}\label{purpose-14}
 \addcontentsline{toc}{subsection}{Purpose}
 
 The purpose is to understand the clustering of cell types, relative to
@@ -10742,7 +11708,7 @@ representation of the clustering, as understood from using the tour on
 the PCs. We ignore the cell type labels, and focus on the geometric
 shapes of clumps and clusters in the high dimensions.
 
-\subsection*{Source}\label{source-12}
+\subsection*{Source}\label{source-14}
 \addcontentsline{toc}{subsection}{Source}
 
 The data can be downloaded and pre-processed following
@@ -10875,5 +11841,6 @@ self-organising map (SOM) & Kohonen map & use a grid-constrained set of means to
 
 
 \printindex
+
 
 \end{document}

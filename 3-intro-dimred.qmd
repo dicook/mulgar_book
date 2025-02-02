@@ -4,19 +4,30 @@ This chapter sets up the concepts related to methods for reducing dimension such
 
 ## The meaning of dimension
 
-Dimension is perceived in a tour using the spread of points. When the points are spread far apart, then the data is filling the space. Conversely when the points "collapse" into a sub-region then the data is only partially filling the space, and some dimension reduction to reduce to this smaller dimensional space may be worthwhile. 
+The number of variables, $p$, is considered to be the dimension of the data. However, the observed data may live in a lower dimensional sub-space and then not fill out the full $p$-dimensions. This implicit dimensionality is perceived in a tour using the spread of points. When the points are spread far apart, then the data is filling the space. Conversely, when the points "collapse" into a sub-region then the data is only partially filling the space, and some dimension reduction to reduce to this smaller dimensional space may be worthwhile. 
+\index{dimensionality!implicit}
 
 ::: {.content-visible when-format="html"}
 ::: info
-When points do not fill the plotting canvas fully, it means that it lives in a lower dimension. This low-dimensional space might be linear or non-linear, with the latter being much harder to define and capture.
+When exploring the implicit dimensionality of multivariate data we are looking for projections where the points do not fill the plotting canvas fully. This would indicate that the observed values do not fully populate high dimensions. 
 :::
 :::
 
 ::: {.content-visible when-format="pdf"}
-\infobox{When points do not fill the plotting canvas fully, it means that it lives in a lower dimension. This low-dimensional space might be linear or non-linear, with the latter being much harder to define and capture.}
+\infobox{When exploring the implicit dimensionality of multivariate data we are looking for projections where the points do not fill the plotting canvas fully. This would indicate that the observed values do not fully populate high dimensions. }
 :::
 
-Let's start with some 2D examples. You need at least two variables to be able to talk about association between variables. @fig-2D shows three plots of two variables. Plot (a) shows two variables that are strongly linearly associated[^correlation], because when `x1` is low, `x2` is low also, and conversely when `x1` is high, `x2` is also high. This can also be seen by the reduction in spread of points (or "collapse") in one direction making the data fill less than the full square of the plot. *So from this we can conclude that the data is not fully 2D.* The second step is to infer which variables contribute to this reduction in dimension. The axes for `x1` and `x2` are drawn extending from $(0,0)$ and because they both extend out of the cloud of points, in the direction away from the collapse of points we can say that they are jointly responsible for the dimension reduction. 
+Let's start with some 2D examples. @fig-2D shows three plots of two variables. Plot (a) shows two variables that are strongly linearly associated[^correlation], because when `x1` is low, `x2` is low also, and conversely when `x1` is high, `x2` is also high. This can also be seen by the reduction in spread of points (or "collapse") in one direction making the data fill less than the full square of the plot. *So from this we can conclude that the data is not fully 2D.* The second step is to infer which variables contribute to this reduction in dimension. The axes for `x1` and `x2` are drawn extending from $(0,0)$ and because they both extend out of the cloud of points, in the direction away from the collapse of points we can say that they are jointly responsible for the dimension reduction. 
+
+::: {.content-visible when-format="html"}
+::: info
+The way variables are scaled can affect the appearance of dimensionality. If the variables are scaled together, using global values, some variables may have smaller variance than others. Scaling variables individually shifts the focus to association between variables, as the predominant reason for reduced dimension.
+:::
+:::
+
+::: {.content-visible when-format="pdf"}
+\infobox{The way variables are scaled can affect the appearance of dimensionity. If the variables are scaled together, using global values, some variables may have smaller variance than others. Scaling variables individually shifts the focus to association between variables, as the predominant reason for reduced dimension.}
+:::
 
 @fig-2D (b) shows a pair of variables that are **not** linearly associated. Variable `x1` is more varied than `x3` but knowing the value on `x1` tells us nothing about possible values on `x3`. Before running a tour all variables are typically scaled to have equal spread. The purpose of the tour is to capture association and relationships between the variables, so any univariate differences should be removed ahead of time. @fig-2D (c) shows what this would look like when `x3` is scaled - the points are fully spread in the full square of the plot. 
 
@@ -93,6 +104,130 @@ dp3 <- ggplot(df) +
 dp1 + dp2 + dp3 + plot_layout(ncol=3)
 ```
 
+@fig-nonlin-2D illustrates other types of association that could indicate reduced dimensionality. Plot (a) shows a strong nonlinear association. Plots (b) and (c) show substantial regions of the data space that have no observations, which may mean there is some barrier or gap in the data generating process. The L-shape in plot (d) is a pattern where one variable only shows variability if the other variable is essentially all the same, say close to zero. It could be described as if one variable has a non-zero value then the other variable is zero. This is a very strong association pattern, but not one that is captured by correlation. Plots (e) and (f) show other types of association, one with heterogeneous variance depending on the subspace, and clustering of observations, respectively. While we might detect these visually, using dimension reduction methods with these structures can be tricky. 
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+library(tidyr)
+library(dplyr)
+set.seed(1115)
+d_form <- tibble(x = runif(100) - 0.5) |>
+  mutate(
+    linear = 4 * x + rnorm(100) * 0.5,
+    nonlinear1 = 12 * x^2 + rnorm(100) * 0.5,
+    nonlinear2 = 2 * x - 5 * x^2 + rnorm(100) * 0.1
+  ) |>
+  pivot_longer(
+    cols = linear:nonlinear2, names_to = "form",
+    values_to = "y"
+  ) |>
+  filter(form == "nonlinear2") |>
+  select(form, x, y)
+
+d_gaps <- tibble(x = runif(150)) |>
+  mutate(y = runif(150))
+d_gaps <- d_gaps |>
+  filter(!(between(x + 2 * y, 1.2, 1.6)))
+
+d_barrier <- tibble(x = runif(200)) |>
+  mutate(y = runif(200))
+d_barrier <- d_barrier |>
+  filter(-x + 3 * y < 1.2)
+
+l_shape <- tibble(
+  x = c(rexp(50, 0.01), runif(50) * 20),
+  y = c(runif(50) * 20, rexp(50, 0.01))
+)
+
+hetero <- tibble(x = runif(200) - 0.5) |>
+  mutate(y = -2 * x + rnorm(200) * (x + 0.5))
+
+d_clusters <- tibble(x = c(
+  rnorm(50) / 6 - 0.5,
+  rnorm(50) / 6,
+  rnorm(50) / 6 + 0.5
+)) |>
+  mutate(y = c(
+    rnorm(50) / 6,
+    rnorm(50) / 6 + 1, rnorm(50) / 6
+  ))
+
+```
+
+```{r}
+#| label: fig-nonlin-2D
+#| echo: false
+#| fig-width: 9
+#| fig-height: 6
+#| out-width: 100%
+#| fig-cap: "Other types of association: (a) nonlinear, (b) gap between subspaces, (c) barrier beyond which no values are observed, perhaps a limiting inequality constraint, (d) L-shape where is one variable is observed the other is not, (e) skewness or heterogeneous variance, (f) clustering."
+pn1 <- ggplot(data=d_form, aes(x=x, y=y)) +
+  geom_point() +
+    ggtitle("(a) Nonlinear") +
+  theme_minimal() +
+  theme(aspect.ratio=1,
+        axis.title = element_blank(),
+        axis.text = element_blank(),
+        panel.border = element_rect(colour="black", fill=NA))
+
+pn2 <- ggplot(data=d_gaps, aes(x=x, y=y)) +
+  geom_polygon(
+    data = tibble(x = c(0, 1, 1, 0), y = c(1.2 / 2, 0.2 / 2, 0.6 / 2, 1.6 / 2)),
+    fill = "#EAC024", alpha = 0.3
+  ) +
+  geom_point() +
+    ggtitle("(b) Gaps") +
+  theme_minimal() +
+  theme(aspect.ratio=1,
+        axis.title = element_blank(),
+        axis.text = element_blank(),
+        panel.border = element_rect(colour="black", fill=NA))
+
+pn3 <- ggplot(data=d_barrier, aes(x=x, y=y)) +
+  geom_polygon(
+    data = tibble(x = c(0, 1, 1, 0), y = c(1.2 / 3, 2.2 / 3, 1, 1)),
+    fill = "#EAC024", alpha = 0.3
+  ) +
+  geom_point() +
+    ggtitle("(c) Barrier") +
+  theme_minimal() +
+  theme(aspect.ratio=1,
+        axis.title = element_blank(),
+        axis.text = element_blank(),
+        panel.border = element_rect(colour="black", fill=NA))
+
+pn4 <- ggplot(data=l_shape, aes(x=x, y=y)) +
+  geom_point() +
+    ggtitle("(d) L-shape") +
+  theme_minimal() +
+  theme(aspect.ratio=1,
+        axis.title = element_blank(),
+        axis.text = element_blank(),
+        panel.border = element_rect(colour="black", fill=NA))
+
+pn5 <- ggplot(data=hetero, aes(x=x, y=y)) +
+  geom_point() +
+    ggtitle("(e) Skewed") +
+  theme_minimal() +
+  theme(aspect.ratio=1,
+        axis.title = element_blank(),
+        axis.text = element_blank(),
+        panel.border = element_rect(colour="black", fill=NA))
+
+pn6 <- ggplot(data=d_clusters, aes(x=x, y=y)) +
+  geom_point() +
+    ggtitle("(f) Clusters") +
+  theme_minimal() +
+  theme(aspect.ratio=1,
+        axis.title = element_blank(),
+        axis.text = element_blank(),
+        panel.border = element_rect(colour="black", fill=NA))
+
+pn1 + pn2 + pn3 + pn4 + pn5 + pn6 + plot_layout(ncol=3)
+```
+
 ## How to perceive the dimensionality using a tour
 
 Now let's think about what this looks like with five variables. `r ifelse(knitr::is_html_output(), '@fig-dimension-html', '@fig-dimension-pdf')` shows a grand tour on five variables, with (a) data that is primarily 2D, (b) data that is primarily 3D and (c) fully 5D data.  You can see that both (a) and (b) the spread of points collapse in some projections, with it happening more in (a). In (c) the data is always spread out in the square, although it does seem to concentrate or pile in the centre. This piling is typical when projecting from high dimensions to low dimensions. The sage tour [@sagetour] makes a correction for this. 
@@ -161,7 +296,7 @@ Single frames from different dimensional planes - 2D, 3D, 5D - displayed in a gr
 
 The next step is to determine which variables contribute. In the examples just provided, all variables are linearly associated in the 2D and 3D data. You can check this by making a scatterplot matrix, @fig-plane-scatmat.
 
-```{r}
+```{r echo=knitr::is_html_output()}
 #| label: fig-plane-scatmat
 #| fig-cap: "Scatterplot matrix of plane data. You can see that x1-x3 are strongly linearly associated, and also x4 and x5. When you watch the tour of this data, any time the data collapses into a line you should see only (x1, x2, x3) or (x4, x5). When combinations of x1 and x4 or x5 show, the data should be spread out." 
 #| fig-alt: "A five-by-five scatterplot matrix, with scatterplots in the lower triangle, correlaton printed in the upper triangle and density plots shown on the diagonal. Plots of x1 vs x2, x1 vs x3, x2 vs x3, and x4 vs x5 have strong positive or negative correlation. The remaining pairs of variables have no association."
@@ -184,19 +319,22 @@ ggscatmat(plane) +
 To make an example where not all variables contribute, we have added two additional variables to the `plane` data set, which are purely noise.
 
 ```{r}
-#| label: fig-plane-noise-scatter
-#| fig-cap: "Scatterplots showing two additional noise variables that are not associated with any of the first five variables."
-#| fig-alt: "Two rows of scatterplots showing x6 and x7 against x1-x5. The points are spread out in the full plotting region, although x6 has one point with an unusually low value."
 #| code-fold: false
-#| fig-height: 3
-#| fig-width: 6
-#| warning: false
 # Add two pure noise dimensions to the plane
 plane_noise <- plane
 plane_noise$x6 <- rnorm(100)
 plane_noise$x7 <- rnorm(100)
 plane_noise <- data.frame(apply(plane_noise, 2, 
     function(x) (x-mean(x))/sd(x)))
+```
+
+```{r echo=knitr::is_html_output()}
+#| label: fig-plane-noise-scatter
+#| fig-cap: "Scatterplots showing two additional noise variables that are not associated with any of the first five variables."
+#| fig-alt: "Two rows of scatterplots showing x6 and x7 against x1-x5. The points are spread out in the full plotting region, although x6 has one point with an unusually low value."
+#| fig-height: 3
+#| fig-width: 6
+#| warning: false
 ggduo(plane_noise, columnsX = 1:5, columnsY = 6:7, 
     types = list(continuous = "points")) +
   theme(aspect.ratio=1,
@@ -290,12 +428,12 @@ Two frames from a grand tour of the plane with two additional dimensions of pure
 
 ::: {.content-visible when-format="html"}
 ::: info
-To determine which variables are responsible for the reduced dimension look for the axes that extend out of the point cloud. These contribute to smaller variation in the observations, and thus indicate dimension reduction.
+To determine which variables are responsible for the reduced dimension look for the axes that extend out of the point cloud. These contribute to smaller variation in the observations, and thus indicate possible dimension reduction using these variables.
 :::
 :::
 
 ::: {.content-visible when-format="pdf"}
-\infobox{To determine which variables are responsible for the reduced dimension look for the axes that extend out of the point cloud. These contribute to smaller variation in the observations, and thus indicate dimension reduction.}
+\infobox{To determine which variables are responsible for the reduced dimension look for the axes that extend out of the point cloud. These contribute to smaller variation in the observations, and thus indicate possible dimension reduction using these variables}
 :::
 
 The simulated data here is very simple, and what we have learned from the tour could also be learned from principal component analysis. However, if there are small complications, such as outliers or nonlinear relationships, that might not be visible from principal component analysis, the tour can help you to see them.
@@ -303,6 +441,13 @@ The simulated data here is very simple, and what we have learned from the tour c
 @fig-plane-noise-outlier and `r ifelse(knitr::is_html_output(), '@fig-outlier-nonlin-html', '@fig-outlier-nonlin-pdf')`(a) show example data with an outlier and `r ifelse(knitr::is_html_output(), '@fig-outlier-nonlin-html', '@fig-outlier-nonlin-pdf')`(b) shows data with non-linear relationships. 
 
 ```{r}
+# Add several outliers to the plane_noise data
+plane_noise_outliers <- plane_noise
+plane_noise_outliers[101,] <- c(2, 2, -2, 0, 0, 0, 0)
+plane_noise_outliers[102,] <- c(0, 0, 0,-2, -2, 0, 0)
+```
+
+```{r echo=knitr::is_html_output()}
 #| label: fig-plane-noise-outlier
 #| fig-cap: "Scatterplot matrix of the plane with noise data, with two added outliers in variables with strong correlation."
 #| fig-alt: "A five-by-five scatterplot matrix, with scatterplots in the lower triangle, correlaton printed in the upper triangle and density plots shown on the diagonal. Plots of x1 vs x2, x1 vs x3, x2 vs x3, and x4 vs x5 have strong positive or negative correlation, with an outlier in the corner of the plot. The remaining pairs of variables have no association, and thus also no outliers."
@@ -310,11 +455,6 @@ The simulated data here is very simple, and what we have learned from the tour c
 #| fig-width: 6
 #| out-width: 80%
 #| code-summary: "Code for scatterplot matrix"
-# Add several outliers to the plane_noise data
-plane_noise_outliers <- plane_noise
-plane_noise_outliers[101,] <- c(2, 2, -2, 0, 0, 0, 0)
-plane_noise_outliers[102,] <- c(0, 0, 0,-2, -2, 0, 0)
-
 ggscatmat(plane_noise_outliers, columns = 1:5) +
   theme(aspect.ratio=1,
     panel.background = 
@@ -476,3 +616,11 @@ d_r <- d %>%
          x2 = cos(pi/6)*x2 + sin(pi/6)*x4,
          x4 = -sin(pi/6)*x2 + cos(pi/6)*x4)
 ```
+
+4. Examine each of the challenge data sets `c1`, `c2`, ..., `c7` from the the `mulgar` package for signs of the observed values not filling out the full $p$ dimensions.
+
+5. The data sets `assoc1`,  `assoc2`, `assoc3` have other types of association. Can you detect what the associations are in each set?
+
+6. The data sets `anomaly1`,  `anomaly2`, `anomaly3`, `anomaly4`, `anomaly5` all have single anomalies. For there to be an anomaly in a data set, there must be some association between the variables, and the anomaly doesn't conform to this association pattern. Can you find them?
+
+7. XXX Use `covsim` package to simulate data
