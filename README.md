@@ -5,7 +5,7 @@ This is a repo for revising elements of "Interactive and Dynamic Graphics for Da
 
 The compiled book is located in `docs/`.
 
-(Notes on rendering: all the chapters need to be rendered to ensure that links are updated everywhere. Images used in the callouts, need to be manually added to docs.)
+(Notes on rendering: all the chapters need to be rendered to ensure that links are updated everywhere.)
 
 ## Contributing
 
