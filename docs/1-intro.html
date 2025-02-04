@@ -749,19 +749,20 @@ Figure&nbsp;1.10: Four projections from a tour, showing the data <em>from more s
 <li>There are 86684 observations. To do an initial examination of the the data we will start with a small subset. Make a 1% sample to work with. Note, that generally when sampling one should sample the same fraction within strata that are important for the analysis. Here we will examine the type of water source as indicated by the <code>water_tech_category</code> variable. You can do the sampling with this code:</li>
 </ol>
 <div class="cell">
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org">tidyverse</a></span><span class="op">)</span></span>
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org">tidyverse</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/ggobi/tourr">tourr</a></span><span class="op">)</span></span>
 <span><span class="va">water</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html">read_csv</a></span><span class="op">(</span><span class="st">"data/nigeria-water-imputed.csv"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">113</span><span class="op">)</span></span>
 <span><span class="va">water_sub</span> <span class="op">&lt;-</span> <span class="va">water</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">water_tech_category</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/sample_n.html">sample_frac</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">0.01</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div>
 <ol start="2" type="1">
 <li>Take a look at the variables starting with <code>distance_</code>. This can be done more easily by making a smaller subset of variables (see code below, and using shorter variable names). What are the patterns you can see? Does it look like there is much association between variables, or clustering?</li>
 </ol>
 <div class="cell">
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">water_dist</span> <span class="op">&lt;-</span> <span class="va">water_sub</span> <span class="op">|&gt;</span></span>
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">water_dist</span> <span class="op">&lt;-</span> <span class="va">water_sub</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">water_tech_category</span>, <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html">starts_with</a></span><span class="op">(</span><span class="st">"distance"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html">contains</a></span><span class="op">(</span><span class="st">"_NA"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>water_tech_category <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">water_tech_category</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -771,23 +772,26 @@ Figure&nbsp;1.10: Four projections from a tour, showing the data <em>from more s
 <span>         dc <span class="op">=</span> <span class="va">distance_to_city</span>,</span>
 <span>         dt <span class="op">=</span> <span class="va">distance_to_town</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://ggobi.github.io/tourr/reference/display_xy.html">animate_xy</a></span><span class="op">(</span><span class="va">water_dist</span><span class="op">[</span>,<span class="fl">2</span><span class="op">:</span><span class="fl">6</span><span class="op">]</span>, rescale<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div>
 <ol start="3" type="1">
 <li>Now let’s see how the type of water source might vary by distance. Colour the points by the <code>water_tech_category</code> and examine this in a grand tour. Would you expect that the water source is different depending on the distance from populated areas?</li>
 </ol>
 <div class="cell">
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://ggobi.github.io/tourr/reference/display_xy.html">animate_xy</a></span><span class="op">(</span><span class="va">water_dist</span><span class="op">[</span>,<span class="fl">2</span><span class="op">:</span><span class="fl">6</span><span class="op">]</span>, rescale<span class="op">=</span><span class="cn">TRUE</span>,</span>
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://ggobi.github.io/tourr/reference/display_xy.html">animate_xy</a></span><span class="op">(</span><span class="va">water_dist</span><span class="op">[</span>,<span class="fl">2</span><span class="op">:</span><span class="fl">6</span><span class="op">]</span>, rescale<span class="op">=</span><span class="cn">TRUE</span>,</span>
 <span>           col<span class="op">=</span><span class="va">water_dist</span><span class="op">$</span><span class="va">water_tech_category</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div>
 <ol start="4" type="1">
 <li>Now try using a guided tour to find the best combination to see the differences between the type of water sources. Interpret which variable combination yields this difference.</li>
 </ol>
 <div class="cell">
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">324</span><span class="op">)</span></span>
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">324</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://ggobi.github.io/tourr/reference/display_xy.html">animate_xy</a></span><span class="op">(</span><span class="va">water_dist</span><span class="op">[</span>,<span class="fl">2</span><span class="op">:</span><span class="fl">6</span><span class="op">]</span>,</span>
 <span>           <span class="fu"><a href="https://ggobi.github.io/tourr/reference/guided_tour.html">guided_tour</a></span><span class="op">(</span><span class="fu"><a href="https://ggobi.github.io/tourr/reference/lda_pp.html">lda_pp</a></span><span class="op">(</span><span class="va">water_dist</span><span class="op">$</span><span class="va">water_tech_category</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>           rescale<span class="op">=</span><span class="cn">TRUE</span>,</span>
 <span>           col<span class="op">=</span><span class="va">water_dist</span><span class="op">$</span><span class="va">water_tech_category</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div>
 <div class="hidden">
 <p>Answers. 1. It is worth checking that the proportions of the groups remain the same with the sampling, so the 1% is applied in each group, eg</p>
