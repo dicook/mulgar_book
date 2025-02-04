@@ -425,7 +425,7 @@ w_{0h}\phi(a_h+\sum_{i=1}^{p} w_{ih}x_i)
 \end{aligned}
 \]</span> which is a combination of two (linear) models, each of which could be examined for their role in making predictions.</p>
 <p>In practice, a model may have many nodes, and several hidden layers, a variety of activation functions, and regularisation modifications. One should keep in mind the principle of parsimony is important when applying NNs, because it is tempting to make an overly complex, and thus over-parameterised, construction. Fitting NNs is still problematic. One would hope that fitting produces a stable result, whatever the starting seed the same parameter estimates are returned. However, this is not the case, and different, sometimes radically different, results are routinely obtained after each attempted fit <span class="citation" data-cites="wickham2015">(<a href="references.html#ref-wickham2015" role="doc-biblioref">Wickham et al., 2015</a>)</span>.</p>
-<p>For these examples we use the software <code>keras</code> <span class="citation" data-cites="keras">(<a href="references.html#ref-keras" role="doc-biblioref">Allaire &amp; Chollet, 2023</a>)</span> following the installation and tutorial details at <a href="https://tensorflow.rstudio.com/tutorials/">https://tensorflow.rstudio.com/tutorials/</a>. Because it is an interface to python it can be tricky to install. If this is a problem, the example code should be possible to convert to use <code>nnet</code> <span class="citation" data-cites="VR02">(<a href="references.html#ref-VR02" role="doc-biblioref">Venables &amp; Ripley, 2002a</a>)</span> or <code>neuralnet</code> <span class="citation" data-cites="neuralnet">(<a href="references.html#ref-neuralnet" role="doc-biblioref">Fritsch et al., 2019</a>)</span>. We will use the penguins data to illustrate the fitting, because it makes it easier to understand the procedures and the fit. However, a NN is like using a jackhammer instead of a trowel to plant a seedling, more complicated than necessary to build a good classification model for this data.</p>
+<p>For these examples we use the software <code>keras</code> <span class="citation" data-cites="keras">(<a href="references.html#ref-keras" role="doc-biblioref">Allaire &amp; Chollet, 2023</a>)</span> following the installation and tutorial details at <a href="https://tensorflow.rstudio.com/tutorials/" class="uri">https://tensorflow.rstudio.com/tutorials/</a>. Because it is an interface to python it can be tricky to install. If this is a problem, the example code should be possible to convert to use <code>nnet</code> <span class="citation" data-cites="VR02">(<a href="references.html#ref-VR02" role="doc-biblioref">Venables &amp; Ripley, 2002a</a>)</span> or <code>neuralnet</code> <span class="citation" data-cites="neuralnet">(<a href="references.html#ref-neuralnet" role="doc-biblioref">Fritsch et al., 2019</a>)</span>. We will use the penguins data to illustrate the fitting, because it makes it easier to understand the procedures and the fit. However, a NN is like using a jackhammer instead of a trowel to plant a seedling, more complicated than necessary to build a good classification model for this data.</p>
 <section id="setting-up-the-model" class="level2" data-number="17.1"><h2 data-number="17.1" class="anchored" data-anchor-id="setting-up-the-model">
 <span class="header-section-number">17.1</span> Setting up the model</h2>
 <p></p>
@@ -473,6 +473,8 @@ Figure&nbsp;17.1: Network architecture for the model on the penguins data. The r
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org">tidyr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rsample.tidymodels.org">rsample</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/eclarke/ggbeeswarm">ggbeeswarm</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidymodels.tidymodels.org">tidymodels</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/ggobi/tourr">tourr</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"data/penguins_sub.rda"</span><span class="op">)</span> <span class="co"># from mulgar book</span></span>
 <span></span>
@@ -492,29 +494,33 @@ Figure&nbsp;17.1: Network architecture for the model on the penguins data. The r
 </details>
 </div>
 <div class="cell">
-<details class="code-fold"><summary>Code to run tours</summary><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">animate_xy</span><span class="op">(</span><span class="va">p_split_check</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, </span>
+<details class="code-fold"><summary>Code to run tours</summary><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://ggobi.github.io/tourr/reference/display_xy.html">animate_xy</a></span><span class="op">(</span><span class="va">p_split_check</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, </span>
 <span>           col<span class="op">=</span><span class="va">p_split_check</span><span class="op">$</span><span class="va">species</span>,</span>
-<span>           pch<span class="op">=</span><span class="va">p_split_check</span><span class="op">$</span><span class="va">type</span><span class="op">)</span></span>
-<span><span class="fu">animate_xy</span><span class="op">(</span><span class="va">p_split_check</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, </span>
-<span>           <span class="fu">guided_tour</span><span class="op">(</span><span class="fu">lda_pp</span><span class="op">(</span><span class="va">p_split_check</span><span class="op">$</span><span class="va">species</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>           pch<span class="op">=</span><span class="va">p_split_check</span><span class="op">$</span><span class="va">type</span>, </span>
+<span>           shapeset<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">16</span>,<span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://ggobi.github.io/tourr/reference/display_xy.html">animate_xy</a></span><span class="op">(</span><span class="va">p_split_check</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, </span>
+<span>           <span class="fu"><a href="https://ggobi.github.io/tourr/reference/guided_tour.html">guided_tour</a></span><span class="op">(</span><span class="fu"><a href="https://ggobi.github.io/tourr/reference/lda_pp.html">lda_pp</a></span><span class="op">(</span><span class="va">p_split_check</span><span class="op">$</span><span class="va">species</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>           col<span class="op">=</span><span class="va">p_split_check</span><span class="op">$</span><span class="va">species</span>,</span>
-<span>           pch<span class="op">=</span><span class="va">p_split_check</span><span class="op">$</span><span class="va">type</span><span class="op">)</span></span>
-<span><span class="fu">render_gif</span><span class="op">(</span><span class="va">p_split_check</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,</span>
-<span>           <span class="fu">grand_tour</span><span class="op">(</span><span class="op">)</span>,</span>
-<span>           <span class="fu">display_xy</span><span class="op">(</span> </span>
+<span>           pch<span class="op">=</span><span class="va">p_split_check</span><span class="op">$</span><span class="va">type</span>, </span>
+<span>           shapeset<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">16</span>,<span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://ggobi.github.io/tourr/reference/render_gif.html">render_gif</a></span><span class="op">(</span><span class="va">p_split_check</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,</span>
+<span>           <span class="fu"><a href="https://ggobi.github.io/tourr/reference/grand_tour.html">grand_tour</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>           <span class="fu"><a href="https://ggobi.github.io/tourr/reference/display_xy.html">display_xy</a></span><span class="op">(</span> </span>
 <span>             col<span class="op">=</span><span class="va">p_split_check</span><span class="op">$</span><span class="va">species</span>, </span>
-<span>             pch<span class="op">=</span><span class="va">p_split_check</span><span class="op">$</span><span class="va">type</span>,</span>
+<span>             pch<span class="op">=</span><span class="va">p_split_check</span><span class="op">$</span><span class="va">type</span>, </span>
+<span>             shapeset<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">16</span>,<span class="fl">1</span><span class="op">)</span>,</span>
 <span>             cex<span class="op">=</span><span class="fl">1.5</span>,</span>
 <span>             axes<span class="op">=</span><span class="st">"bottomleft"</span><span class="op">)</span>, </span>
 <span>           gif_file<span class="op">=</span><span class="st">"gifs/p_split.gif"</span>,</span>
 <span>           frames<span class="op">=</span><span class="fl">500</span>,</span>
 <span>           loop<span class="op">=</span><span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
-<span><span class="fu">render_gif</span><span class="op">(</span><span class="va">p_split_check</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,</span>
-<span>           <span class="fu">guided_tour</span><span class="op">(</span><span class="fu">lda_pp</span><span class="op">(</span><span class="va">p_split_check</span><span class="op">$</span><span class="va">species</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>           <span class="fu">display_xy</span><span class="op">(</span> </span>
+<span><span class="fu"><a href="https://ggobi.github.io/tourr/reference/render_gif.html">render_gif</a></span><span class="op">(</span><span class="va">p_split_check</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,</span>
+<span>           <span class="fu"><a href="https://ggobi.github.io/tourr/reference/guided_tour.html">guided_tour</a></span><span class="op">(</span><span class="fu"><a href="https://ggobi.github.io/tourr/reference/lda_pp.html">lda_pp</a></span><span class="op">(</span><span class="va">p_split_check</span><span class="op">$</span><span class="va">species</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>           <span class="fu"><a href="https://ggobi.github.io/tourr/reference/display_xy.html">display_xy</a></span><span class="op">(</span> </span>
 <span>             col<span class="op">=</span><span class="va">p_split_check</span><span class="op">$</span><span class="va">species</span>, </span>
-<span>             pch<span class="op">=</span><span class="va">p_split_check</span><span class="op">$</span><span class="va">type</span>,</span>
+<span>             pch<span class="op">=</span><span class="va">p_split_check</span><span class="op">$</span><span class="va">type</span>, </span>
+<span>             shapeset<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">16</span>,<span class="fl">1</span><span class="op">)</span>,</span>
 <span>             cex<span class="op">=</span><span class="fl">1.5</span>,</span>
 <span>             axes<span class="op">=</span><span class="st">"bottomleft"</span><span class="op">)</span>, </span>
 <span>           gif_file<span class="op">=</span><span class="st">"gifs/p_split_guided.gif"</span>,</span>
@@ -796,7 +802,7 @@ Figure&nbsp;17.3: Plot of the data in the linear combinations from the two nodes
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>aspect.ratio<span class="op">=</span><span class="fl">1</span>, legend.position <span class="op">=</span> <span class="st">"right"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
-<figure class="figure"><p><img src="17-nn_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" style="width:70.0%"></p>
+<figure class="figure"><p><img src="17-nn_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid figure-img" style="width:70.0%"></p>
 <figcaption>Ternary diagram for the three groups of the predictive probabilities of both training ans test sets. From what we already know about the penguins data this fit is not good. Both Chinstrap and Gentoo penguins are confused with Adelie, or at risk of it. Gentoo is very well-separated from the other two species when several variables are used, and this fitted model is blind to it. One useful finding is that there is little difference between training and test sets, so the model has not been over-fitted.</figcaption></figure>
 </div>
 </div>
@@ -1154,27 +1160,31 @@ Figure&nbsp;17.7: Comparison of the boundaries produced by the LDA (a) and the N
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span>,</span>
 <span>          legend.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_blank</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guides.html">guides</a></span><span class="op">(</span>color <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guide_legend.html">guide_legend</a></span><span class="op">(</span>override.aes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> </span>
-<span><span class="op">)</span></span>
-<span><span class="co"># hide plotting code</span></span>
+<span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stderr">
+<pre><code>Warning in get_plot_component(plot, "guide-box"): Multiple components found;
+returning the first one. To return all, use `return_all = TRUE`.</code></pre>
+</div>
+<details class="code-fold"><summary>Code to run tours</summary><div class="sourceCode" id="cb33"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># hide plotting code</span></span>
 <span><span class="fu">cowplot</span><span class="fu">::</span><span class="fu"><a href="https://wilkelab.org/cowplot/reference/plot_grid.html">plot_grid</a></span><span class="op">(</span><span class="fu">cowplot</span><span class="fu">::</span><span class="fu"><a href="https://wilkelab.org/cowplot/reference/plot_grid.html">plot_grid</a></span><span class="op">(</span><span class="va">p1</span>, <span class="va">p2</span><span class="op">)</span>, <span class="va">legend_labels</span>,</span>
 <span>                   rel_heights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">.3</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div>
-<figure class="figure"><p><img src="17-nn_files/figure-html/unnamed-chunk-27-1.png" class="img-fluid figure-img" width="672"></p>
+<figure class="figure"><p><img src="17-nn_files/figure-html/unnamed-chunk-28-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
 </div>
 <p>Looking only at the first two principal components we note some clear differences from the transformation in the hidden layer. The observations seem to be more evenly spread in the input space, while in the activations space we notice grouping along specific directions. In particular the category “Bag” appears to be most different from all other classes, and the non-linear transformation in the activations space shows that they are clearly different from the shoe categories, while in the input space we could note some overlap in the linear projection. To better identify differences between other groups we will use the tour on the first five principal components.</p>
 <div class="cell">
-<details class="code-fold"><summary>Code to run tours</summary><div class="sourceCode" id="cb32"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">animate_xy</span><span class="op">(</span><span class="va">images_pc</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>, col <span class="op">=</span> <span class="va">test_tags</span>,</span>
+<details class="code-fold"><summary>Code to run tours</summary><div class="sourceCode" id="cb34"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://ggobi.github.io/tourr/reference/display_xy.html">animate_xy</a></span><span class="op">(</span><span class="va">images_pc</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>, col <span class="op">=</span> <span class="va">test_tags</span>,</span>
 <span>        cex<span class="op">=</span><span class="fl">0.2</span>, palette <span class="op">=</span> <span class="st">"Dynamic"</span><span class="op">)</span></span>
-<span><span class="fu">animate_xy</span><span class="op">(</span><span class="va">activations_pc</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>, col <span class="op">=</span> <span class="va">test_tags</span>,</span>
+<span><span class="fu"><a href="https://ggobi.github.io/tourr/reference/display_xy.html">animate_xy</a></span><span class="op">(</span><span class="va">activations_pc</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>, col <span class="op">=</span> <span class="va">test_tags</span>,</span>
 <span>        cex<span class="op">=</span><span class="fl">0.2</span>, palette <span class="op">=</span> <span class="st">"Dynamic"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">render_gif</span><span class="op">(</span><span class="va">images_pc</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>,</span>
-<span>           <span class="fu">grand_tour</span><span class="op">(</span><span class="op">)</span>,</span>
-<span>           <span class="fu">display_xy</span><span class="op">(</span> </span>
+<span><span class="fu"><a href="https://ggobi.github.io/tourr/reference/render_gif.html">render_gif</a></span><span class="op">(</span><span class="va">images_pc</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>,</span>
+<span>           <span class="fu"><a href="https://ggobi.github.io/tourr/reference/grand_tour.html">grand_tour</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>           <span class="fu"><a href="https://ggobi.github.io/tourr/reference/display_xy.html">display_xy</a></span><span class="op">(</span> </span>
 <span>             col<span class="op">=</span><span class="va">test_tags</span>, </span>
 <span>             cex<span class="op">=</span><span class="fl">0.2</span>,</span>
 <span>             palette <span class="op">=</span> <span class="st">"Dynamic"</span>,</span>
@@ -1183,9 +1193,9 @@ Figure&nbsp;17.7: Comparison of the boundaries produced by the LDA (a) and the N
 <span>           frames<span class="op">=</span><span class="fl">500</span>,</span>
 <span>           loop<span class="op">=</span><span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
-<span><span class="fu">render_gif</span><span class="op">(</span><span class="va">activations_pc</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>,</span>
-<span>           <span class="fu">grand_tour</span><span class="op">(</span><span class="op">)</span>,</span>
-<span>           <span class="fu">display_xy</span><span class="op">(</span> </span>
+<span><span class="fu"><a href="https://ggobi.github.io/tourr/reference/render_gif.html">render_gif</a></span><span class="op">(</span><span class="va">activations_pc</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>,</span>
+<span>           <span class="fu"><a href="https://ggobi.github.io/tourr/reference/grand_tour.html">grand_tour</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>           <span class="fu"><a href="https://ggobi.github.io/tourr/reference/display_xy.html">display_xy</a></span><span class="op">(</span> </span>
 <span>             col<span class="op">=</span><span class="va">test_tags</span>, </span>
 <span>             cex<span class="op">=</span><span class="fl">0.2</span>,</span>
 <span>             palette <span class="op">=</span> <span class="st">"Dynamic"</span>,</span>
@@ -1226,9 +1236,9 @@ Figure&nbsp;17.8: Comparison of the test observations in the first five principa
 </figcaption></figure>
 </div>
 <p>As with the first two principal components we get a much more spread out distribution in the original space. Nevertheless we can see differences between the classes, and that some groups are varying along specific directions in that space. Overall the activations space shows tighter clusters as expected after including the ReLU activation function, but the picture is not as neat as the first two principal components would suggest. While certain groups appear very compact even in this larger subspace, others vary quite a bit within part of the space. For example we can clearly see the “Bag” observations as different from all other images, but also notice that there is a large variation within this class along certain directions.</p>
-<p>Finally we will investigate the model performance through the missclassifications and uncertainty between classes. We start with the error matrix for the test observations. To fit the error matrix we use the numeric labels, the ordering is as defined above for the labels.</p>
+<p>Finally we will investigate the model performance through the misclassifications and uncertainty between classes. We start with the error matrix for the test observations. To fit the error matrix we use the numeric labels, the ordering is as defined above for the labels.</p>
 <div class="cell">
-<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb33"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">fashion_test_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">model_fashion_mnist</span>,</span>
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb35"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">fashion_test_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">model_fashion_mnist</span>,</span>
 <span>                             <span class="va">test_images</span>, verbose <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
 <span><span class="va">fashion_test_pred_cat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/levels.html">levels</a></span><span class="op">(</span><span class="va">test_tags</span><span class="op">)</span><span class="op">[</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/apply.html">apply</a></span><span class="op">(</span><span class="va">fashion_test_pred</span>, <span class="fl">1</span>,</span>
@@ -1254,13 +1264,13 @@ observed    0    1    2    3    4    5    6    7    8    9
        9    0    0    0    2    0    0    0  947    0   51</code></pre>
 </div>
 </div>
-<p>From this we see that the model mainly confuses certain categories with each other, and within expected groups (e.g.&nbsp;different types of shoes can be confused with each other, or different types of shirts). We can further investigate this by visualizing the full probability matrix for the test observations, to see which categories the model is uncertain about.</p>
+<p>Here the labels are used as 0 - T-shirt/top, 1 - Trouser, 2 - Pullover, 3 - Dress, 4 - Coat, 5 - Sandal, 6 - Shirt, 7 - Sneaker, 8 - Bag, 9 - Ankle boot. From this we see that the model mainly confuses certain categories with each other, and within expected groups (e.g.&nbsp;different types of shoes can be confused with each other, or different types of shirts). We can further investigate this by visualizing the full probability matrix for the test observations, to see which categories the model is uncertain about.</p>
 <div class="cell">
-<details class="code-fold"><summary>Code to visualize probabilities</summary><div class="sourceCode" id="cb35"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># getting the probabilities from the output layer</span></span>
+<details class="code-fold"><summary>Code to visualize probabilities</summary><div class="sourceCode" id="cb37"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># getting the probabilities from the output layer</span></span>
 <span><span class="va">fashion_test_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">model_fashion_mnist</span>,</span>
 <span>                             <span class="va">test_images</span>, verbose <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># copying this from RF fake tree vote matrix</span></span>
+<span><span class="co"># this is the same code as was used in the RF chapter</span></span>
 <span><span class="va">proj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="fu">geozoo</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/geozoo/man/f_helmert.html">f_helmert</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span><span class="op">[</span><span class="op">-</span><span class="fl">1</span>,<span class="op">]</span><span class="op">)</span></span>
 <span><span class="va">f_nn_v_p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">fashion_test_pred</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">proj</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">f_nn_v_p</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>, <span class="st">"x4"</span>, <span class="st">"x5"</span>, <span class="st">"x6"</span>, <span class="st">"x7"</span>, <span class="st">"x8"</span>, <span class="st">"x9"</span><span class="op">)</span></span>
@@ -1278,20 +1288,50 @@ observed    0    1    2    3    4    5    6    7    8    9
 <span>                                     <span class="st">"Pullover"</span>,</span>
 <span>                                     <span class="st">"Shirt"</span>,</span>
 <span>                                     <span class="st">"Coat"</span><span class="op">)</span>, <span class="va">class</span>, <span class="st">"Other"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>class <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">class</span>, levels<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Other"</span>,</span>
-<span>                                        <span class="st">"T-shirt/top"</span>,</span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>class <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">class</span>, levels<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"T-shirt/top"</span>,</span>
 <span>                                        <span class="st">"Pullover"</span>,</span>
 <span>                                        <span class="st">"Shirt"</span>,</span>
-<span>                                        <span class="st">"Coat"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> </span>
-<span><span class="co"># nicely shows confusion between certain classes is common</span></span>
-<span><span class="fu">animate_xy</span><span class="op">(</span><span class="va">f_nn_v_p_s</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">9</span><span class="op">]</span>, col <span class="op">=</span> <span class="va">f_nn_v_p_s</span><span class="op">$</span><span class="va">class</span>, </span>
-<span>           axes <span class="op">=</span> <span class="st">"off"</span>, pch <span class="op">=</span> <span class="st">"."</span>,</span>
+<span>                                        <span class="st">"Coat"</span>,</span>
+<span>                                        <span class="st">"Other"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> </span>
+<span></span>
+<span><span class="fu"><a href="https://ggobi.github.io/tourr/reference/display_xy.html">animate_xy</a></span><span class="op">(</span><span class="va">f_nn_v_p_s</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">9</span><span class="op">]</span>, col <span class="op">=</span> <span class="va">f_nn_v_p_s</span><span class="op">$</span><span class="va">class</span>, </span>
+<span>           axes <span class="op">=</span> <span class="st">"off"</span>, cex<span class="op">=</span><span class="fl">0.2</span>,</span>
 <span>           edges <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">simp</span><span class="op">$</span><span class="va">edges</span><span class="op">)</span>,</span>
 <span>           edges.width <span class="op">=</span> <span class="fl">0.05</span>,</span>
-<span>           palette <span class="op">=</span> <span class="st">"Lajolla"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span>           palette <span class="op">=</span> <span class="st">"Viridis"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://ggobi.github.io/tourr/reference/render_gif.html">render_gif</a></span><span class="op">(</span><span class="va">f_nn_v_p_s</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">9</span><span class="op">]</span>,</span>
+<span>           <span class="fu"><a href="https://ggobi.github.io/tourr/reference/grand_tour.html">grand_tour</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>           <span class="fu"><a href="https://ggobi.github.io/tourr/reference/display_xy.html">display_xy</a></span><span class="op">(</span> </span>
+<span>             col<span class="op">=</span><span class="va">f_nn_v_p_s</span><span class="op">$</span><span class="va">class</span>, </span>
+<span>             cex<span class="op">=</span><span class="fl">0.2</span>,</span>
+<span>             palette <span class="op">=</span> <span class="st">"Viridis"</span>,</span>
+<span>             axes<span class="op">=</span><span class="st">"off"</span>,</span>
+<span>             edges <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">simp</span><span class="op">$</span><span class="va">edges</span><span class="op">)</span>,</span>
+<span>             edges.width <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span>, </span>
+<span>           gif_file<span class="op">=</span><span class="st">"gifs/fashion_confusion_gt.gif"</span>,</span>
+<span>           frames<span class="op">=</span><span class="fl">500</span>,</span>
+<span>           loop<span class="op">=</span><span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<p>For this data using explainers like SHAP is not so interesting, since the individual pixel contribution to a prediction are typically not of interest. With image classification a next step might be to further investigate which part of the image is important for a prediction, and this can be visualized as a heat map placed over the original image. This is especially interesting in the case of difficult or missclassified images. This however is beyond the scope of this book.</p>
+<div id="fig-fashion-conf-gt-html" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-fashion-conf-gt-html-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div id="fig-fashion-confusion" class="quarto-float quarto-figure quarto-figure-center anchored" alt="FIX ME">
+<figure class="quarto-float quarto-subfloat-fig figure"><div aria-describedby="fig-fashion-confusion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="gifs/fashion_confusion_gt.gif" class="img-fluid figure-img" data-ref-parent="fig-fashion-conf-gt-html" alt="FIX ME" width="400">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-fashion-confusion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(a) Input space
+</figcaption></figure>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-fashion-conf-gt-html-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;17.9: A tour of the confusion matrix for the fashion MNIST test observations, focusing on a subset of items. Often observations get confused between two of the classes, this appears as points falling along one of the edges, for example some Shirts look more like T-shirts/tops, while others get confused with Coats. We can also notice that a subset of three other classes not mapped to colors as very separate from this group.
+</figcaption></figure>
+</div>
+<p>The tour of the class probabilities shows that the model is often confused between two classes, this appears as points falling along one edge in the simplex. In particular for the highlighted categories we can notice some interesting patterns, where pairs of classes get confused with each other. We also see some three-way confusions, these are observations that fall on one surface triangle defined via three corners of the simplex, for example between Pullover, Shirt and Coat.</p>
+<p>For this data using explainers like SHAP is not so interesting, since the individual pixel contribution to a prediction are typically not of interest. With image classification a next step might be to further investigate which part of the image is important for a prediction, and this can be visualized as a heat map placed over the original image. This is especially interesting in the case of difficult or misclassified images. This however is beyond the scope of this book.</p>
 <!--
 This chapter will likely include:
 
@@ -1331,7 +1371,7 @@ Sketches as an example
 <ol type="1">
 <li>The problem with the NN model fitted to the penguins is that the Gentoo are poorly classified, when they should be perfectly predictable due to the big gap between class clusters. Re-fit the NN to the penguins data, to find a better model that appropriately perfectly predicts Gentoo penguins. Support this by plotting the model (using the hidden layer), and the predictive probabilities as a ternary plot. Do the SHAP values also support that <code>bd</code> plays a stronger role in your best model? (<code>bd</code> is the main variable for distinguishing Gentoo’s from the other species, particularly when used with <code>fl</code> or <code>bl</code>.)</li>
 <li>For the fashion MNIST data we have seen that certain categories are more likely to be confused with each other. Select a subset of the data including only the categories Ankle boot, Sneaker and Sandal and see if you can reproduce the analysis of the penguins data in this chapter with this subset.</li>
-<li>XXX fake trees, can we think about the number of nodes and make it work with a simple NN similar to penguins data?</li>
+<li>Can you fit a neural network that can predict the class in the fake tree data? Because the data is noisy and we do not have that many observations, it can be easy to overfit the data. Once you find a setting that works, think about what aspects of the model might be interesting for visualization. What comparisons with a random forest model could be of interest?</li>
 <li>The sketches data could also be considered a classic image classification problem, and we have seen that we can get a reasonable accuracy with a random forest model. Because we only have a smaller number of observations (compared to the fashion MNIST data) when fitting a neural network we need to be very careful not to overfit the training data. Try fitting a flat neural network (similar to what we did for the fashion MNIST data) and check the test accuracy of the model.</li>
 <li>Challenge: try to design a more accurate neural network for the sketches data. Here you can investigate using a convolutional neural network in combination with data augmentation. In addition, using batch normalization should improve the model performance.</li>
 </ol>
@@ -2051,6 +2091,9 @@ Ursula Laa, D. C., Alex Aumann, &amp; Valencia, G. (2023). New and simplified ma
 </div>
 <div id="ref-R-htmlwidgets" class="csl-entry" role="listitem">
 Vaidyanathan, R., Xie, Y., Allaire, J., Cheng, J., Sievert, C., &amp; Russell, K. (2023). <em>Htmlwidgets: HTML widgets for r</em>. <a href="https://github.com/ramnathv/htmlwidgets">https://github.com/ramnathv/htmlwidgets</a>
+</div>
+<div id="ref-R-compositions" class="csl-entry" role="listitem">
+van den Boogaart, K. G., Tolosana-Delgado, R., &amp; Bren, M. (2024). <em>Compositions: Compositional data analysis</em>. <a href="http://www.stat.boogaart.de/compositions/">http://www.stat.boogaart.de/compositions/</a>
 </div>
 <div id="ref-Rtsne2014" class="csl-entry" role="listitem">
 van der Maaten, L. J. P. (2014). Accelerating t-SNE using tree-based algorithms. <em>Journal of Machine Learning Research</em>, <em>15</em>, 3221–3245.
