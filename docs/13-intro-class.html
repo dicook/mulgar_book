@@ -17,6 +17,40 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 /* CSS for citations */
 div.csl-bib-body { }
 div.csl-entry {
@@ -399,11 +433,30 @@ Figure&nbsp;13.1: Examples of supervised classification patterns: (a) linearly s
 </div>
 </div>
 <p><a href="#fig-sup-example" class="quarto-xref">Figure&nbsp;<span>13.1</span></a> shows some 2D examples where the two classes are (a) linearly separable, (b) not completely separable but linearly different, (c) non-linearly separable and (d) not completely separable but with a non-linear difference. We can also see that in (a) only the horizontal variable would be important for the model because the two classes are completely separable in this direction. Although the pattern in (c) is separable classes, most models would have difficulty capturing the separation. It is for this reason that it is important to understand the boundary between classes produced by a fitted model. In each of b, c, d it is likely that some observations would be misclassified. Identifying these cases, and inspecting where they are in the data space is important for understanding the model’s future performance.</p>
+<p> </p>
 <section id="exercises" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="exercises">Exercises</h2>
 <ol type="1">
-<li>For the penguins data, use the tour to decide if the species are separable, and if the boundaries between species is linear or non-linear.</li>
-<li>Using just the variables <code>se</code>, <code>maxt</code>, <code>mint</code>, <code>log_dist_road</code>, and “accident” or “lightning” causes, use the tour to decide whether the two classes are separable, and whether the boundary might be linear or non-linear.</li>
+<li>Using just the variables <code>se</code>, <code>maxt</code>, <code>mint</code>, <code>log_dist_road</code>, and “accident” or “lightning” causes, in the <code>bushfires</code> data use the tour (grand or guided using <code>lda_pp</code>) to decide</li>
 </ol>
+<ol type="a">
+<li>whether the two classes are separable,</li>
+<li>which variables might be more important, and</li>
+<li>whether one should fit a linear or nonlinear classifier to separate the groups by assessing whether the border between groups is linear or nonlinear.</li>
+</ol>
+<ol start="2" type="1">
+<li><p>Make a 10% sample of the <code>pisa</code> data, stratified by the two countries, and examine the first 5 math scores <code>PV1MATH</code>-<code>PV5MATH</code>. Explain whether there is a difference between the two countries, and whether they are separable based on math scores.</p></li>
+<li><p>There are several interesting data sets with class variables available on the <a href="http://ggobi.org/book/index.html">GGobi website</a>, for example, <code>olive</code>, and <code>music</code> data sets. The <code>music</code> data can be read using:</p></li>
+</ol>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://readr.tidyverse.org">readr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span></span>
+<span><span class="va">music</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html">read_csv</a></span><span class="op">(</span><span class="st">"http://ggobi.org/book/data/music-sub.csv"</span>,</span>
+<span>                  show_col_types <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html">rename</a></span><span class="op">(</span>title <span class="op">=</span> <span class="va">`...1`</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">type</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Examine the differences between <code>type</code> of music, based on the the variables <code>lvar</code>, <code>lave</code>, <code>lmax</code>, <code>lfener</code>, <code>lfreq</code>. Are these music types separable? If so, which variables are important.</p>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list" style="display: none">
