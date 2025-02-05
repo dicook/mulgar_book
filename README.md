@@ -5,6 +5,8 @@ This is a repo for revising elements of "Interactive and Dynamic Graphics for Da
 
 The compiled book is located in `docs/`.
 
+(Notes on rendering: all the chapters need to be rendered to ensure that links are updated everywhere.)
+
 ## Contributing
 
 We welcome contributions. If you have a suggestion or a bug report please post this as an [issue](https://github.com/dicook/mulgar_book/issues) on GitHub.
