@@ -384,7 +384,7 @@ window.Quarto = {
    
   <ul>
 <li><a href="#examining-the-model-in-2d" id="toc-examining-the-model-in-2d" class="nav-link active" data-scroll-target="#examining-the-model-in-2d"><span class="header-section-number">10.1</span> Examining the model in 2D</a></li>
-  <li><a href="#extending-to-higher-dimensions" id="toc-extending-to-higher-dimensions" class="nav-link" data-scroll-target="#extending-to-higher-dimensions"><span class="header-section-number">10.2</span> Extending to higher dimensions</a></li>
+  <li><a href="#examining-the-model-in-high-dimensions" id="toc-examining-the-model-in-high-dimensions" class="nav-link" data-scroll-target="#examining-the-model-in-high-dimensions"><span class="header-section-number">10.2</span> Examining the model in high dimensions</a></li>
   <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises">Exercises</a></li>
   </ul><div class="toc-actions"><ul><li><a href="https://github.com/dicook/mulgar_book/edit/master/10-model-based.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/dicook/mulgar_book/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
@@ -405,11 +405,11 @@ window.Quarto = {
 
 
 </header><p></p>
-<p>Model-based clustering <span class="citation" data-cites="FR02">Fraley &amp; Raftery (<a href="references.html#ref-FR02" role="doc-biblioref">2002</a>)</span> fits a multivariate normal mixture model to the data. It uses the EM algorithm to fit the parameters for the mean, variance–covariance of each population, and the mixing proportion. The variance-covariance matrix is re-parametrized using an eigen-decomposition</p>
+<p>Model-based clustering <span class="citation" data-cites="FR02">Fraley &amp; Raftery (<a href="references.html#ref-FR02" role="doc-biblioref">2002</a>)</span> fits a multivariate normal mixture model to the data. It uses the EM algorithm to fit the parameters for the mean, variance-covariance of each population, and the mixing proportion. The variance-covariance matrix is re-parameterised using an eigen-decomposition</p>
 <p><span class="math display">\[
 \Sigma_k = \lambda_kD_kA_kD_k^\top, ~~~k=1, \dots, g ~~\mbox{(number of clusters)}
 \]</span></p>
-<p>resulting in several model choices, ranging from simple to complex, as shown in <a href="#tbl-covariances" class="quarto-xref">Table&nbsp;<span>10.1</span></a>.</p>
+<p>resulting in several model choices, ranging from simple to complex, as shown in <a href="#tbl-covariances-html" class="quarto-xref">Table&nbsp;<span>10.1</span></a>.</p>
 <div class="cell">
 <details class="code-fold"><summary>Load libraries</summary><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://haozhu233.github.io/kableExtra/">kableExtra</a></span><span class="op">)</span></span>
@@ -422,10 +422,10 @@ window.Quarto = {
 </details>
 </div>
 <div class="cell">
-<div id="tbl-covariances" class="cell quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-covariances-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div id="tbl-covariances-html" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-covariances-html-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;10.1: Parameterizations of the covariance matrix.
-</figcaption><div aria-describedby="tbl-covariances-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+</figcaption><div aria-describedby="tbl-covariances-html-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
 <table class="table do-not-create-environment cell caption-top table-sm table-striped small" data-quarto-postprocess="true">
 <thead><tr class="header">
@@ -514,7 +514,7 @@ Table&nbsp;10.1: Parameterizations of the covariance matrix.
 <td style="text-align: center;">$$\lambda_k DA_kD^\top$$</td>
 <td style="text-align: center;">Ellipsoidal</td>
 <td style="text-align: center;">Variable</td>
-<td style="text-align: center;">Equal</td>
+<td style="text-align: center;">Variable</td>
 <td style="text-align: center;">Equal</td>
 </tr>
 <tr class="odd">
@@ -530,7 +530,7 @@ Table&nbsp;10.1: Parameterizations of the covariance matrix.
 <td style="text-align: center;">$$\lambda_k D_kAD_k^\top$$</td>
 <td style="text-align: center;">Ellipsoidal</td>
 <td style="text-align: center;">Variable</td>
-<td style="text-align: center;">Variable</td>
+<td style="text-align: center;">Equal</td>
 <td style="text-align: center;">Variable</td>
 </tr>
 <tr class="odd">
@@ -582,8 +582,10 @@ Figure&nbsp;10.1: Scatterplot of flipper length by bill length of the penguins d
 </div>
 </div>
 </div>
+<p>To draw ellipses in any dimension, a reasonable procedure is to sample points uniformly on a sphere, and then transform this into a sphere using the inverse of the variance-covariance matrix. The <code>mulgar</code> function <code><a href="https://dicook.github.io/mulgar/reference/mc_ellipse.html">mc_ellipse()</a></code> does this for each cluster in the fitted model.</p>
 <div class="cell">
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">penguins_BIC</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mclust-org.github.io/mclust/reference/mclustBIC.html">mclustBIC</a></span><span class="op">(</span><span class="va">penguins_sub</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">3</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Fit the model, plot BIC, construct and plot ellipses</span></span>
+<span><span class="va">penguins_BIC</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mclust-org.github.io/mclust/reference/mclustBIC.html">mclustBIC</a></span><span class="op">(</span><span class="va">penguins_sub</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">3</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="va">ggmc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dicook.github.io/mulgar/reference/ggmcbic.html">ggmcbic</a></span><span class="op">(</span><span class="va">penguins_BIC</span>, cl<span class="op">=</span><span class="fl">2</span><span class="op">:</span><span class="fl">9</span>, top<span class="op">=</span><span class="fl">4</span><span class="op">)</span> <span class="op">+</span> </span>
 <span>  <span class="fu"><a href="https://colorspace.R-Forge.R-project.org/reference/scale_colour_discrete_divergingx.html">scale_color_discrete_divergingx</a></span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"Roma"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ggtitle</a></span><span class="op">(</span><span class="st">"(a)"</span><span class="op">)</span> <span class="op">+</span></span>
@@ -612,7 +614,7 @@ Figure&nbsp;10.1: Scatterplot of flipper length by bill length of the penguins d
 <div class="cell-output-display">
 <div id="fig-penguins-bl-fl-mc" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-penguins-bl-fl-mc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="10-model-based_files/figure-html/fig-penguins-bl-fl-mc-1.png" class="img-fluid figure-img" width="768">
+<img src="10-model-based_files/figure-html/fig-penguins-bl-fl-mc-1.png" class="img-fluid figure-img" style="width:100.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-penguins-bl-fl-mc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;10.2: Summary plots from model-based clustering: (a) BIC values for clusters 2-9 of top four models, (b) variance-covariance ellipses and cluster means (+) corresponding to the best model. The best model is three-cluster EVE, which has differently shaped variance-covariances albeit the same volume and orientation.
@@ -620,10 +622,10 @@ Figure&nbsp;10.2: Summary plots from model-based clustering: (a) BIC values for 
 </div>
 </div>
 </div>
-<p><a href="#fig-penguins-bl-fl-mc" class="quarto-xref">Figure&nbsp;<span>10.2</span></a> summarises the results. All models agree that three clusters is the best. The different variance-covariance models for three clusters have similar BIC values with EVE (different shape, same volume and orientation) being slightly higher. These plots are made from the <code>mclust</code> package output using the <code>ggmcbic</code> and <code>mc_ellipse</code> functions fro the <code>mulgar</code> package.</p>
-</section><section id="extending-to-higher-dimensions" class="level2" data-number="10.2"><h2 data-number="10.2" class="anchored" data-anchor-id="extending-to-higher-dimensions">
-<span class="header-section-number">10.2</span> Extending to higher dimensions</h2>
-<p>Now we will examine how model-based clustering will group the penguins data using all four variables.</p>
+<p><a href="#fig-penguins-bl-fl-mc" class="quarto-xref">Figure&nbsp;<span>10.2</span></a> summarises the results. All models agree that three clusters is the best. The different variance-covariance models for three clusters have similar BIC values with EVE (different shape, same volume and orientation) being slightly higher. These plots are made from the <code>mclust</code> package output using the <code><a href="https://dicook.github.io/mulgar/reference/ggmcbic.html">ggmcbic()</a></code> and <code><a href="https://dicook.github.io/mulgar/reference/mc_ellipse.html">mc_ellipse()</a></code> functions from the <code>mulgar</code> package.</p>
+</section><section id="examining-the-model-in-high-dimensions" class="level2" data-number="10.2"><h2 data-number="10.2" class="anchored" data-anchor-id="examining-the-model-in-high-dimensions">
+<span class="header-section-number">10.2</span> Examining the model in high dimensions</h2>
+<p>Now we will examine how model-based clustering will group the penguins data using all four variables. <a href="#fig-penguins-bic" class="quarto-xref">Figure&nbsp;<span>10.3</span></a> shows the summary of different models, of which we would choose the four-cluster VEE, if we strictly followed the BIC choice. <a href="#fig-penguins-mc-html" class="quarto-xref">Figure&nbsp;<span>10.4</span></a> shows this model in a tour, and the best three-cluster model. You can see that the four-cluster result is inadequate, in various ways. One of the species (Chinstrap) does have a bimodal density, due to the two species, and we would expect that a four cluster solution might detect this. The tour shows that the three-cluster solution is the best match to the data shape.</p>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">penguins_BIC</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mclust-org.github.io/mclust/reference/mclustBIC.html">mclustBIC</a></span><span class="op">(</span><span class="va">penguins_sub</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="va">ggmc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dicook.github.io/mulgar/reference/ggmcbic.html">ggmcbic</a></span><span class="op">(</span><span class="va">penguins_BIC</span>, cl<span class="op">=</span><span class="fl">2</span><span class="op">:</span><span class="fl">9</span>, top<span class="op">=</span><span class="fl">7</span><span class="op">)</span> <span class="op">+</span> </span>
@@ -709,23 +711,23 @@ Figure&nbsp;10.3: BIC values for the top models for 2-9 clusters on the penguins
 <span>           loop<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div id="fig-penguins-mc" class="quarto-layout-panel">
-<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-penguins-mc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div id="fig-penguins-mc-html" class="quarto-layout-panel">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-penguins-mc-html-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="quarto-layout-row">
-<div class="quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-penguins-mc" style="flex-basis: 50.0%;justify-content: flex-start;">
-<div id="fig-penguins-best_mc" class="quarto-float quarto-figure quarto-figure-center anchored" alt="FIX ME" data-fig.align="center">
+<div class="quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-penguins-mc-html" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-penguins-best_mc" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig.align="center" alt="FIX ME">
 <figure class="quarto-float quarto-subfloat-fig figure"><div aria-describedby="fig-penguins-best_mc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="gifs/penguins_best_mc.gif" class="img-fluid figure-img" data-fig.align="center" data-ref-parent="fig-penguins-mc" alt="FIX ME">
+<img src="gifs/penguins_best_mc.gif" class="img-fluid figure-img" data-fig.align="center" data-ref-parent="fig-penguins-mc-html" alt="FIX ME">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-penguins-best_mc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-(a) Best model: four-cluster VEE
+(a) Four-cluster VEE
 </figcaption></figure>
 </div>
 </div>
-<div class="quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-penguins-mc" style="flex-basis: 50.0%;justify-content: flex-start;">
-<div id="fig-penguins-simpler_mc" class="quarto-float quarto-figure quarto-figure-center anchored" alt="FIX ME" data-fig.align="center">
+<div class="quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-penguins-mc-html" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-penguins-simpler_mc" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig.align="center" alt="FIX ME">
 <figure class="quarto-float quarto-subfloat-fig figure"><div aria-describedby="fig-penguins-simpler_mc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="gifs/penguins_simpler_mc.gif" class="img-fluid figure-img" data-fig.align="center" data-ref-parent="fig-penguins-mc" alt="FIX ME">
+<img src="gifs/penguins_simpler_mc.gif" class="img-fluid figure-img" data-fig.align="center" data-ref-parent="fig-penguins-mc-html" alt="FIX ME">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-penguins-simpler_mc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 (b) Three-cluster EEE
@@ -733,23 +735,8 @@ Figure&nbsp;10.3: BIC values for the top models for 2-9 clusters on the penguins
 </div>
 </div>
 </div>
-<div class="quarto-layout-row">
-<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
-
 </div>
-<div class="quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-penguins-mc" style="flex-basis: 50.0%;justify-content: flex-start;">
-<div id="fig-penguins-simpler_mc" class="quarto-float quarto-figure quarto-figure-center anchored" alt="FIX ME" data-fig.align="center">
-<figure class="quarto-float quarto-subfloat-fig figure"><div aria-describedby="fig-penguins-simpler_mc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="images/penguins_simpler_mc_60.png" class="img-fluid figure-img" data-fig.align="center" data-ref-parent="fig-penguins-mc" alt="FIX ME">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-penguins-simpler_mc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-(c) Three-cluster EEE
-</figcaption></figure>
-</div>
-</div>
-</div>
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-penguins-mc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-penguins-mc-html-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;10.4: Examining the model-based clustering results for the penguins data: (a) best model according to BIC value, (b) simpler three-cluster model. Dots are ellipse points, and “x” are data points. It is important to note that the three cluster solution fits the data better, even though it has a lower BIC.
 </figcaption></figure>
 </div>
@@ -1481,6 +1468,9 @@ Ursula Laa, D. C., Alex Aumann, &amp; Valencia, G. (2023). New and simplified ma
 </div>
 <div id="ref-R-htmlwidgets" class="csl-entry" role="listitem">
 Vaidyanathan, R., Xie, Y., Allaire, J., Cheng, J., Sievert, C., &amp; Russell, K. (2023). <em>Htmlwidgets: HTML widgets for r</em>. <a href="https://github.com/ramnathv/htmlwidgets">https://github.com/ramnathv/htmlwidgets</a>
+</div>
+<div id="ref-R-compositions" class="csl-entry" role="listitem">
+van den Boogaart, K. G., Tolosana-Delgado, R., &amp; Bren, M. (2024). <em>Compositions: Compositional data analysis</em>. <a href="http://www.stat.boogaart.de/compositions/">http://www.stat.boogaart.de/compositions/</a>
 </div>
 <div id="ref-Rtsne2014" class="csl-entry" role="listitem">
 van der Maaten, L. J. P. (2014). Accelerating t-SNE using tree-based algorithms. <em>Journal of Machine Learning Research</em>, <em>15</em>, 3221–3245.

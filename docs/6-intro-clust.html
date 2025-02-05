@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="generator" content="quarto-1.6.33">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>6&nbsp; Overview – Interactively exploring high-dimensional data and models in R</title>
+<title>6&nbsp; Introduction to clustering – Interactively exploring high-dimensional data and models in R</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -382,15 +382,17 @@ window.Quarto = {
         <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Table of contents</h2>
    
   <ul>
-<li><a href="#what-are-clusters" id="toc-what-are-clusters" class="nav-link active" data-scroll-target="#what-are-clusters"><span class="header-section-number">6.1</span> What are clusters?</a></li>
-  <li><a href="#sec-clust-bg" id="toc-sec-clust-bg" class="nav-link" data-scroll-target="#sec-clust-bg"><span class="header-section-number">6.2</span> The importance of defining similar</a></li>
+<li><a href="#what-is-cluster-analysis" id="toc-what-is-cluster-analysis" class="nav-link active" data-scroll-target="#what-is-cluster-analysis"><span class="header-section-number">6.1</span> What is cluster analysis?</a></li>
+  <li><a href="#what-are-clusters" id="toc-what-are-clusters" class="nav-link" data-scroll-target="#what-are-clusters"><span class="header-section-number">6.2</span> What are clusters?</a></li>
+  <li><a href="#sec-clust-bg" id="toc-sec-clust-bg" class="nav-link" data-scroll-target="#sec-clust-bg"><span class="header-section-number">6.3</span> The importance of defining similar</a></li>
+  <li><a href="#how-the-tour-can-be-used-to-perceive-clustering" id="toc-how-the-tour-can-be-used-to-perceive-clustering" class="nav-link" data-scroll-target="#how-the-tour-can-be-used-to-perceive-clustering"><span class="header-section-number">6.4</span> How the tour can be used to perceive clustering</a></li>
   <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises">Exercises</a></li>
   </ul><div class="toc-actions"><ul><li><a href="https://github.com/dicook/mulgar_book/edit/master/6-intro-clust.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/dicook/mulgar_book/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./6-intro-clust.html">Cluster analysis</a></li><li class="breadcrumb-item"><a href="./6-intro-clust.html"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Introduction to clustering</span></a></li></ol></nav><div class="quarto-title">
 <h1 class="title">
-<span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Overview</span>
+<span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Introduction to clustering</span>
 </h1>
 </div>
 
@@ -405,9 +407,12 @@ window.Quarto = {
   
 
 
-</header><p>Unsupervised classification, or cluster analysis, organizes observations into similar groups. Cluster analysis is a commonly used, appealing, and conceptually intuitive statistical method. Some of its uses include market segmentation, where customers are grouped into clusters with similar attributes for targeted marketing; gene expression analysis, where genes with similar expression patterns are grouped together; and the creation of taxonomies for animals, insects, or plants. Clustering can be used as a way of reducing a massive amount of data because observations within a cluster can be summarized by its centre. Also, clustering effectively subsets the data thus simplifying analysis because observations in each cluster can be analyzed separately.</p>
-<section id="what-are-clusters" class="level2" data-number="6.1"><h2 data-number="6.1" class="anchored" data-anchor-id="what-are-clusters">
-<span class="header-section-number">6.1</span> What are clusters?</h2>
+</header><p>This chapter introduces the concepts of cluster data and how the tour can be used to assist with identifying clusters.</p>
+<section id="what-is-cluster-analysis" class="level2" data-number="6.1"><h2 data-number="6.1" class="anchored" data-anchor-id="what-is-cluster-analysis">
+<span class="header-section-number">6.1</span> What is cluster analysis?</h2>
+<p>Unsupervised classification, or cluster analysis, organizes observations into similar groups (see <span class="citation" data-cites="Ev11">Everitt et al. (<a href="references.html#ref-Ev11" role="doc-biblioref">2011</a>)</span> and <span class="citation" data-cites="hennig2015"> (<a href="references.html#ref-hennig2015" role="doc-biblioref">2015</a>)</span>). Cluster analysis is a commonly used, appealing, and conceptually intuitive statistical method. Some of its uses include market segmentation <span class="citation" data-cites="msabook">(<a href="references.html#ref-msabook" role="doc-biblioref">Dolnicar et al., 2018</a>)</span>, where customers are grouped into clusters with similar attributes for targeted marketing; gene expression analysis, where genes with similar expression patterns are grouped together; and the creation of taxonomies for animals, insects, or plants. Clustering can be used as a way of reducing a massive amount of data because observations within a cluster can be summarized by its centre. Also, clustering effectively subsets the data thus simplifying analysis because observations in each cluster can be analyzed separately.</p>
+</section><section id="what-are-clusters" class="level2" data-number="6.2"><h2 data-number="6.2" class="anchored" data-anchor-id="what-are-clusters">
+<span class="header-section-number">6.2</span> What are clusters?</h2>
 <p>Organizing objects into groups is a common task to help make sense of the world around us. Perhaps this is why it is an appealing method of data analysis. However, cluster analysis is more complex than it initially appears. Many people imagine that it will produce neatly separated clusters like those in <a href="#fig-ideal-clusters" class="quarto-xref">Figure&nbsp;<span>6.1</span></a>(a), but it almost never does. Such ideal clusters are rarely encountered in real data, so we often need to modify our objective from <em>find the natural clusters in this data</em>. Instead, we need to organize the <em>cases into groups that are similar in some way</em>. Even though this may seem disappointing when compared with the ideal, it is still often an effective means of simplifying and understanding a dataset.</p>
 <div class="info">
 <p>Knowing what shapes are in your data helps to decide on the best method and to diagnose the result. For example, if the clusters are elliptical model-based clustering is recommended.</p>
@@ -426,9 +431,9 @@ Figure&nbsp;6.1: Different structures in data impact cluster analysis. When ther
 </div>
 <p>At the heart of the clustering process is the work of discovering which variables are most important for defining the groups. It is often true that we only require a subset of the variables for finding clusters, whereas another subset (called <em>nuisance variables</em>) has no impact. In the bottom left plot of <a href="#fig-ideal-clusters" class="quarto-xref">Figure&nbsp;<span>6.1</span></a>, it is clear that the variable plotted horizontally is important for splitting this data into two clusters, whereas the variable plotted vertically is a nuisance variable. Nuisance is an apt term for these variables, because they can radically change the interpoint distances and impair the clustering process. </p>
 <p>Dynamic graphical methods help us to find and understand the cluster structure in high dimensions. With the tools in our toolbox, primarily tours, along with linked scatterplots and parallel coordinate plots, we can see clusters in high-dimensional spaces. We can detect gaps between clusters, the shape and relative positions of clusters, and the presence of nuisance variables. We can even find unusually shaped clusters, like those in the bottom right plot in <a href="#fig-ideal-clusters" class="quarto-xref">Figure&nbsp;<span>6.1</span></a>. In simple situations we can use graphics alone to group observations into clusters, using a “spin and brush” method. In more difficult data problems, we can assess and refine numerical solutions using graphics. </p>
-<p>This part of the book discusses the use of interactive and dynamic graphics in the clustering of data. <a href="#sec-clust-bg" class="quarto-xref"><span>Section 6.2</span></a> introduces cluster analysis, focusing on interpoint distance measures. <a href="7-spin-and-brush.html" class="quarto-xref"><span>Chapter 7</span></a> describes an example of a purely graphical approach to cluster analysis, the spin and brush method. In the example shown in that section, we were able to find simplifications of the data that had not been found using numerical clustering methods, and to find a variety of structures in high-dimensional space. <a href="8-hierarchical.html" class="quarto-xref"><span>Chapter 8</span></a> describes methods for reducing the interpoint distance matrix to an intercluster distance matrix using hierarchical algorithms, <a href="10-model-based.html" class="quarto-xref"><span>Chapter 10</span></a> covers model-based clustering, and <a href="11-som.html" class="quarto-xref"><span>Chapter 11</span></a> described clustering with self-organising maps. Each of these chapters shows how graphical tools can be used to assess the results of numerical methods. <a href="12-summary-clust.html" class="quarto-xref"><span>Chapter 12</span></a> summarizes the chapter and revisits the data analysis strategies used in the examples. Additional references that provide good companions to the material presented in these chapters are <span class="citation" data-cites="VR02">Venables &amp; Ripley (<a href="references.html#ref-VR02" role="doc-biblioref">2002a</a>)</span>, <span class="citation" data-cites="HOML">Boehmke &amp; Greenwell (<a href="references.html#ref-HOML" role="doc-biblioref">2019</a>)</span>, <span class="citation" data-cites="hennig">Hennig et al. (<a href="references.html#ref-hennig" role="doc-biblioref">2015</a>)</span>, <span class="citation" data-cites="giordani">Giordani et al. (<a href="references.html#ref-giordani" role="doc-biblioref">2020</a>)</span>, <span class="citation" data-cites="kassambara">Kassambara (<a href="references.html#ref-kassambara" role="doc-biblioref">2017</a>)</span>, and the CRAN Task View <span class="citation" data-cites="ctv-clustering">(<a href="references.html#ref-ctv-clustering" role="doc-biblioref">Gruen, 2024</a>)</span>. <a href="12-summary-clust.html" class="quarto-xref"><span>Chapter 12</span></a> summarizes the chapter and revisits the data analysis strategies used in the examples.</p>
-</section><section id="sec-clust-bg" class="level2" data-number="6.2"><h2 data-number="6.2" class="anchored" data-anchor-id="sec-clust-bg">
-<span class="header-section-number">6.2</span> The importance of defining similar</h2>
+<p>This part of the book discusses the use of interactive and dynamic graphics in the clustering of data. <a href="#sec-clust-bg" class="quarto-xref"><span>Section 6.3</span></a> introduces cluster analysis, focusing on interpoint distance measures. <a href="7-spin-and-brush.html" class="quarto-xref"><span>Chapter 7</span></a> describes an example of a purely graphical approach to cluster analysis, the spin and brush method. In the example shown in that section, we were able to find simplifications of the data that had not been found using numerical clustering methods, and to find a variety of structures in high-dimensional space. <a href="8-hierarchical.html" class="quarto-xref"><span>Chapter 8</span></a> describes methods for reducing the interpoint distance matrix to an intercluster distance matrix using hierarchical algorithms, in <a href="9-kmeans.html" class="quarto-xref"><span>Chapter 9</span></a> shows the the <span class="math inline">\(k\)</span>-means algorithm, <a href="10-model-based.html" class="quarto-xref"><span>Chapter 10</span></a> covers model-based clustering, and <a href="11-som.html" class="quarto-xref"><span>Chapter 11</span></a> describes clustering with self-organising maps. Each of these chapters shows how graphical tools can be used to assess the results of numerical methods. <a href="12-summary-clust.html" class="quarto-xref"><span>Chapter 12</span></a> summarizes these chapters and revisits the data analysis strategies used in the examples. Additional references that provide good companions to the material presented in these chapters are <span class="citation" data-cites="VR02">Venables &amp; Ripley (<a href="references.html#ref-VR02" role="doc-biblioref">2002a</a>)</span>, <span class="citation" data-cites="HOML">Boehmke &amp; Greenwell (<a href="references.html#ref-HOML" role="doc-biblioref">2019</a>)</span>, <span class="citation" data-cites="hennig">Hennig et al. (<a href="references.html#ref-hennig" role="doc-biblioref">2015</a>)</span>, <span class="citation" data-cites="giordani">Giordani et al. (<a href="references.html#ref-giordani" role="doc-biblioref">2020</a>)</span>, <span class="citation" data-cites="kassambara">Kassambara (<a href="references.html#ref-kassambara" role="doc-biblioref">2017</a>)</span>, and the CRAN Task View <span class="citation" data-cites="ctv-clustering">(<a href="references.html#ref-ctv-clustering" role="doc-biblioref">Gruen, 2024</a>)</span>.</p>
+</section><section id="sec-clust-bg" class="level2" data-number="6.3"><h2 data-number="6.3" class="anchored" data-anchor-id="sec-clust-bg">
+<span class="header-section-number">6.3</span> The importance of defining similar</h2>
 <p>Before we can begin finding groups of cases that are similar<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>, we need to decide how to define or measure whether they are close together or far apart. Consider a dataset with three cases <span class="math inline">\((a_1, a_2, a_3)\)</span> and four variables <span class="math inline">\((V_1, V_2, V_3, V_4)\)</span>, described in matrix format as</p>
 <p><span class="math display">\[\begin{align*}
 X = \begin{bmatrix}
@@ -532,7 +537,7 @@ Figure&nbsp;6.2: The scatterplot matrix (left) shows that cases <span class="mat
 <p>As an example, see the parallel coordinate plot of the sample data at the right of <a href="#fig-similarity1" class="quarto-xref">Figure&nbsp;<span>6.2</span></a>. Cases <span class="math inline">\(a_1\)</span> and <span class="math inline">\(a_3\)</span> are widely separated, but their shapes are similar (low, medium, medium, high). Case <span class="math inline">\(a_2\)</span>, although overlapping with case <span class="math inline">\(a_1\)</span>, has a very different shape (high, medium, medium, low). The Pearson correlation between two cases, <span class="math inline">\(\rho(a_i,a_j)\)</span>, is defined as</p>
 <p><span class="math display">\[\begin{align*}
 \rho(a_i,a_j) = \frac{(a_i-c_i)^\top(a_j-c_j)}
-{\sqrt(a_i-c_i)^\top(a_i-c_i) \sqrt(a_j-c_j)^\top(a_j-c_j)}
+{\sqrt{(a_i-c_i)^\top(a_i-c_i)} \sqrt{(a_j-c_j)^\top(a_j-c_j)}}
 \label{corc}
 \end{align*}\]</span></p>
 <p>Typically, <span class="math inline">\(c_i, c_j\)</span> are the sample means of each case, <span class="math inline">\(\bar{a}_i,\bar{a}_j\)</span>. For these three observations, <span class="math inline">\(c_1=\bar{a}_1=7.650, c_2=\bar{a}_2=7.275, c_3=\bar{a}_3=4.525\)</span>. An interesting geometric fact, is that if <span class="math inline">\(c_i, c_j\)</span> are set to be 0, as is commonly done, <span class="math inline">\(\rho\)</span> is a generalized correlation that describes the angle between the two data vectors. The correlation is then converted to a distance metric, with one possibility being as follows:</p>
@@ -556,6 +561,9 @@ d_{\rm Cor} = \begin{bmatrix}
 <p>Defining an appropriate distance metric from the context of the problem is a most important decision. For example, if your variables are all numeric, and on the same scale then Euclidean distance might be best. If your variables are categorical, you might need to use something like Hamming distance.</p>
 </div>
 <p>The context in which the data arises is the key to assessing the results. If the clusters can be characterized in a sensible manner, and they increase our knowledge of the data, then we are on the right track. To use an even more pragmatic criterion, if a company can gain an economic advantage by using a particular clustering method to carve up their customer database, then that is the method they should use.</p>
+</section><section id="how-the-tour-can-be-used-to-perceive-clustering" class="level2" data-number="6.4"><h2 data-number="6.4" class="anchored" data-anchor-id="how-the-tour-can-be-used-to-perceive-clustering">
+<span class="header-section-number">6.4</span> How the tour can be used to perceive clustering</h2>
+<p>Refer to <span class="citation" data-cites="Leisch2008">Leisch (<a href="references.html#ref-Leisch2008" role="doc-biblioref">2008</a>)</span> and also show examples of bad ways that the example data are clustered. XXX</p>
 </section><section id="exercises" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="exercises">Exercises</h2>
 <p>Use the following data to answer these questions:</p>
 <div class="cell">
@@ -580,12 +588,15 @@ x2 0.8 1.0 0.8
 x3 0.8 0.8 1.0</code></pre>
 </div>
 </div>
-<p>(The function <code>mahalanobis</code> will calculate this in R. Technically this gives distance between each case and the mean vector.)</p>
+<p>(The base function <code><a href="https://rdrr.io/r/stats/mahalanobis.html">mahalanobis()</a></code> will calculate this in R. Technically this gives distance between each case and the mean vector.)</p>
 <ol start="4" type="1">
 <li><p>Is the ordering of distance between cases the same if Manhattan distance is used instead of Euclidean?</p></li>
 <li><p>Compute the Chebychev distance between cases <code>a1</code>, <code>a2</code>, <code>a3</code>, <code>a4</code>.</p></li>
 <li><p>Compute Bray-Curtis distance between cases <code>a1</code>, <code>a2</code>, <code>a3</code>, <code>a4</code>.</p></li>
 <li><p>Make a plot of the data, and write a paragraph describing how the different distance metrics agree and disagree on how close or far the cases are from each other.</p></li>
+</ol>
+<ol start="8" type="1">
+<li>From these plots of 2D data sketch what you would expect the clusters to be? XXX</li>
 </ol>
 
 
@@ -1303,6 +1314,9 @@ Ursula Laa, D. C., Alex Aumann, &amp; Valencia, G. (2023). New and simplified ma
 </div>
 <div id="ref-R-htmlwidgets" class="csl-entry" role="listitem">
 Vaidyanathan, R., Xie, Y., Allaire, J., Cheng, J., Sievert, C., &amp; Russell, K. (2023). <em>Htmlwidgets: HTML widgets for r</em>. <a href="https://github.com/ramnathv/htmlwidgets">https://github.com/ramnathv/htmlwidgets</a>
+</div>
+<div id="ref-R-compositions" class="csl-entry" role="listitem">
+van den Boogaart, K. G., Tolosana-Delgado, R., &amp; Bren, M. (2024). <em>Compositions: Compositional data analysis</em>. <a href="http://www.stat.boogaart.de/compositions/">http://www.stat.boogaart.de/compositions/</a>
 </div>
 <div id="ref-Rtsne2014" class="csl-entry" role="listitem">
 van der Maaten, L. J. P. (2014). Accelerating t-SNE using tree-based algorithms. <em>Journal of Machine Learning Research</em>, <em>15</em>, 3221–3245.
