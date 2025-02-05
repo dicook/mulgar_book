@@ -419,7 +419,7 @@ window.Quarto = {
 <section id="components-of-the-svm-model" class="level2" data-number="16.1"><h2 data-number="16.1" class="anchored" data-anchor-id="components-of-the-svm-model">
 <span class="header-section-number">16.1</span> Components of the SVM model</h2>
 <p>To illustrate the approach, we use two simple simulated data examples. Both have only two variables, and two classes. Explaining SVM is easier when there are just two groups. In the first data set the two classes have different covariances matrices, which will cause trouble for LDA, but SVM should see the gap between the two clusters and place the separating hyperplane in the middle of the gap. In the second data set the two groups are concentric circles, with the inner one solid. A non-linear SVM should be fitted to this data, which should see circular gap between the two classes.</p>
-<p>Note that the <code>svm</code> function in the <code>e1071</code> package will automatically scale observations into the range <span class="math inline">\([0,1]\)</span>. To make it easier to examine the fitted model, it is best to scale your data first, and then fit the model.</p>
+<p>Note that the <code><a href="https://rdrr.io/pkg/e1071/man/svm.html">svm()</a></code> function in the <code>e1071</code> package will automatically scale observations into the range <span class="math inline">\([0,1]\)</span>. To make it easier to examine the fitted model, it is best to scale your data first, and then fit the model.</p>
 <div class="cell">
 <details class="code-fold"><summary>Code to simulate data examples</summary><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Toy examples</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dicook.github.io/mulgar/">mulgar</a></span><span class="op">)</span></span>
@@ -558,7 +558,7 @@ x2 -1.356237</code></pre>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">s1</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html">geom_abline</a></span><span class="op">(</span>intercept<span class="op">=</span><span class="va">df1_svm</span><span class="op">$</span><span class="va">rho</span><span class="op">/</span><span class="va">w</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>,</span>
 <span>                 slope<span class="op">=</span><span class="op">-</span><span class="va">w</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">/</span><span class="va">w</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p><strong>Note that</strong> care in scaling of data is important to get the intercept calculated exactly. We have standardised the data, and set the <code>scale=FALSE</code> parameter in the <code>svm</code> function. The slope calculation is quite robust to the data scaling.</p>
+<p><strong>Note that</strong> care in scaling of data is important to get the intercept calculated exactly. We have standardised the data, and set the <code>scale=FALSE</code> parameter in the <code><a href="https://rdrr.io/pkg/e1071/man/svm.html">svm()</a></code> function. The slope calculation is quite robust to the data scaling.</p>
 <div class="info">
 <p>Like LDA, a linear SVM model for two groups can be written using the equation of a hyperplane. The fitted model coefficients are then used to generate points on this plane, to examine the boundary between groups.</p>
 </div>
@@ -779,7 +779,7 @@ Figure&nbsp;16.3: Exploring the importance of the four variables to the separati
 <li>Generate a small subset from the <code>bushfire</code> data: we keep the variables <code>log_dist_cfa</code>, <code>log_dist_road</code> and <code>cause</code>, and we select only observations where <code>cause</code> is either lightning or arson. Fit a linear SVM model to separate the two classes and show the decision boundary together with the data. Compare to the boundary obtained by LDA and argue how the two models place the separating hyperplane in different ways.</li>
 <li>We extend this into a multivariate setting by also including <code>amaxt180</code> and <code>amaxt720</code> as predictors. Fit a linear SVM model and calculate the hyperplane to judge which of these variables are important.</li>
 <li>Calculate the decision boundary and look at it with a radial tour to see the effect from including individual predictors in a projection. Also explore what happens when rotating out multiple variables together. What can you learn from this?</li>
-<li>From the <code>sketches_train</code> data select all observations of class banana or boomerang For this subset use PCA to find the first 5 PCs. Fit two SVM models: once with linear kernel and once with radial kernel and default value for the gamma parameter. Compare the number of missclassified observations in the training data for the two models.</li>
+<li>From the <code>sketches_train</code> data select all observations of class banana or boomerang For this subset use PCA to find the first 5 PCs. Fit two SVM models: once with linear kernel and once with radial kernel and default value for the gamma parameter. Compare the number of misclassified observations in the training data for the two models.</li>
 <li>Compute the model predictions and compare the decision boundaries between the linear and radial SVM using a slice tour. Does the shape match what you expect given the respective kernel function?</li>
 <li>SVM models are defined for separating two classes, but and ensemble of such models can be used when we want to distinguish more than two classes. Look up the documentation of the <code>svm</code> function to learn how this works, then fit an SVM model to separate the three penguin species. In this case we primarily use the model predictions to investigate the decision boundaries, you can use <code>explore</code> together with the slice tour to do this. You can use different kernels and compare the resulting decision boundaries.</li>
 </ol>
@@ -1499,6 +1499,9 @@ Ursula Laa, D. C., Alex Aumann, &amp; Valencia, G. (2023). New and simplified ma
 </div>
 <div id="ref-R-htmlwidgets" class="csl-entry" role="listitem">
 Vaidyanathan, R., Xie, Y., Allaire, J., Cheng, J., Sievert, C., &amp; Russell, K. (2023). <em>Htmlwidgets: HTML widgets for r</em>. <a href="https://github.com/ramnathv/htmlwidgets">https://github.com/ramnathv/htmlwidgets</a>
+</div>
+<div id="ref-R-compositions" class="csl-entry" role="listitem">
+van den Boogaart, K. G., Tolosana-Delgado, R., &amp; Bren, M. (2024). <em>Compositions: Compositional data analysis</em>. <a href="http://www.stat.boogaart.de/compositions/">http://www.stat.boogaart.de/compositions/</a>
 </div>
 <div id="ref-Rtsne2014" class="csl-entry" role="listitem">
 van der Maaten, L. J. P. (2014). Accelerating t-SNE using tree-based algorithms. <em>Journal of Machine Learning Research</em>, <em>15</em>, 3221–3245.

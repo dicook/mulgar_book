@@ -383,6 +383,7 @@ window.Quarto = {
    
   <ul>
 <li><a href="#exercises" id="toc-exercises" class="nav-link active" data-scroll-target="#exercises">Exercises</a></li>
+  <li><a href="#project" id="toc-project" class="nav-link" data-scroll-target="#project">Project</a></li>
   </ul><div class="toc-actions"><ul><li><a href="https://github.com/dicook/mulgar_book/edit/master/7-spin-and-brush.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/dicook/mulgar_book/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
 <!-- main -->
@@ -412,124 +413,6 @@ window.Quarto = {
 <p>Spin-and-brush is useful for exploring clustering when the data is numeric, and contains well-separated clusters. Patterns that adversely affect numerical techniques, such as nuisance variables or cases, differences in variances or shapes between clusters, don’t pose any problems for spin-and-brush. It is also effective if the data has connected low-dimensional (1D or 2D) clusters in high dimensions.</p>
 <p>It will not work very well when there are no distinct clusters and the purpose of clustering is to partition the data into subsets. Here, you could begin with a solution provided by some numerical clustering algorithm, and to use visual tools to evaluate it, with goal of refining the results.</p>
 <p>With a complex problem where there are many clusters, one can work sequentially, and remove each cluster after it is brushed, to de-clutter the display, in order to find more clusters.</p>
-<!--
-## Using `plotly`
-
-@fig-penguins-brush-and-spin shows a fixed length grand tour produced using `plotly`, with a brush tool made available to colour points. The code is messy, but follows that of [animation-tour-basic.R](https://github.com/plotly/plotly.R/blob/master/demo/animation-tour-basic.R) from @plotly2020. There are key pieces in the code:
-
-1. Create the sequence of tour projections, and the data object containing data projections and projection coordinates. Include an observation id in the data object.
-2. Specify that the `id` variable is to be used to mark observations across animation frames using `highlight_key`.
-3. Draw them using `plotly`, with a `frame` parameter which specifies the animation sequence. 
-4. Add a brush colour palette and specific brushing control using `highlight` to the plotly plot.
-
-The result is an HTML object which can be saved for sharing. The drawback of this approach is that the results of the user actions cannot be saved, so you cannot recover the clusters corresponding to the colours.
-
-
-::: {.cell}
-
-```{.r .cell-code}
-# Following https://github.com/plotly/plotly.R/blob/master/demo/animation-tour-basic.R
-# TURN INTO A FUNCTION TO MAKE IT EASIER
-library(tourr)
-library(plotly)
-load("data/penguins_sub.rda")
-p_mat <- as.matrix(penguins_sub[,1:4])
-tour <- new_tour(p_mat, 
-                 grand_tour(), NULL)
-
-tour_dat <- function(step_size) {
-  step <- tour(step_size)
-  proj <- center(p_mat %*% step$proj)
-  data.frame(x = proj[,1], y = proj[,2], 
-             species = penguins_sub$species,
-             id = 1:nrow(penguins_sub))
-}
-
-proj_dat <- function(step_size) {
-  step <- tour(step_size)
-  data.frame(
-    x = step$proj[,1], y = step$proj[,2], measure = colnames(p_mat)
- )
-}
-
-steps <- c(0, rep(1/15, 150))
-stepz <- cumsum(steps)
-
-# tidy version of tour data
-tour_dats <- lapply(steps, tour_dat)
-tour_datz <- Map(function(x, y) cbind(x, step = y),
-                 tour_dats, stepz)
-tour_data <- dplyr::bind_rows(tour_datz)
-
-tour_data <- highlight_key(tour_data, ~id)
-
-# tidy version of tour projection data
-proj_dats <- lapply(steps, proj_dat)
-proj_datz <- Map(function(x, y) cbind(x, step = y), proj_dats, stepz)
-proj_data <- dplyr::bind_rows(proj_datz)
-proj_data$x <- proj_data$x*3
-proj_data$y <- proj_data$y*3
-
-ax <- list(
-  title = "",
-  range = c(-3, 3),
-  zeroline = FALSE
-)
-
-# Set colors
-clrs <- grDevices::hcl.colors(6, palette="Zissou 1")
-  
-# for nicely formatted slider labels
-options(digits = 2)
-
-p_b_s <- proj_data %>%
-  plot_ly(x = ~x, y = ~y, frame = ~step, 
-          color = I("gray80"),
-          width=600, height=600) %>%
-  config(displaylogo = FALSE, 
-         modeBarButtonsToRemove = c("sendDataToCloud", "editInChartStudio", "zoom2d", "zoomIn2d", "zoomOut2d", "pan2d", "drawclosedpath", "drawopenpath", "autoScale2d", "hoverClosestCartesian", "hoverCompareCartesian", "resetScale2d")) %>%
-  add_segments(xend = 0, yend = 0) %>%
-  add_text(text = ~measure) %>%
-  add_markers(color = I("black"), data = tour_data, text = ~id, ids = ~id, hoverinfo = "text") %>%
-  layout(xaxis = ax, yaxis = ax) %>%
-  hide_legend() %>%
-  animation_opts(50, transition = 0, redraw = FALSE) %>%
-  highlight(on = "plotly_selected", 
-            off = "plotly_doubleclick",
-            color = clrs, 
-            persistent = TRUE, 
-            dynamic = TRUE, 
-            opacityDim = 0.5)
-htmlwidgets::saveWidget(p_b_s,
-          file="html/penguins_brush_and_spin.html",
-          selfcontained = TRUE)
-```
-:::
-
-
-::: {.content-hidden when-format="pdf"}
-
-::: {#fig-penguins-brush-and-spin fig-align="center"}
-
-<iframe width="600" height="650" src="html/penguins_brush_and_spin.html" title="Controls to brush and spin to discover the three clusters in the penguins data."></iframe>
-
-Controls to brush and spin to discover the three clusters in the penguins data. Use the lasso brush to colour points persistently when you see a cluster. Spin and colour again as necessary to identify all the clusters.
-:::
-
-:::
-
-::: {#fig-penguins-bs-static fig-align="center" layout-ncol=2}
-
-
-![](images/penguins-bs4.png){#fig-penguins-bs1 fig-alt="FIX ME" fig.align="center"}
-
-![](images/penguins-bs5.png){#fig-penguins-bs2 fig-alt="FIX ME" fig.align="center"}
-
-Screenshots of the spin-and-brush approach being used on the penguins data.
-:::
-
-## Using `detourr`
--->
 <p>Spin-and-brush is best achieved using a fully interactive graphics system like in the <code>detourr</code> package, where the results can be saved for further analysis. The code is very easy, and then all the controls are interactive.</p>
 <div class="cell">
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://casperhart.github.io/detourr/">detourr</a></span><span class="op">)</span></span>
@@ -608,10 +491,12 @@ Figure&nbsp;7.1: Screenshots of the spin-and-brush approach using <code>detourr<
 <span><span class="va">strt</span> <span class="op">&lt;-</span> <span class="fu">tourr</span><span class="fu">::</span><span class="fu"><a href="https://ggobi.github.io/tourr/reference/basis_random.html">basis_random</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://casperhart.github.io/detourr/reference/detour.html">detour</a></span><span class="op">(</span><span class="va">multicluster</span>, </span>
 <span>       <span class="fu"><a href="https://casperhart.github.io/detourr/reference/tour_aes.html">tour_aes</a></span><span class="op">(</span>projection <span class="op">=</span> <span class="op">-</span><span class="va">group</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>       <span class="fu"><a href="https://casperhart.github.io/detourr/reference/tour_path.html">tour_path</a></span><span class="op">(</span><span class="fu"><a href="https://ggobi.github.io/tourr/reference/grand_tour.html">grand_tour</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span>, start<span class="op">=</span><span class="va">strt</span>, fps <span class="op">=</span> <span class="fl">60</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>       <span class="fu"><a href="https://casperhart.github.io/detourr/reference/show_scatter.html">show_scatter</a></span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.7</span>, axes <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span>       <span class="fu"><a href="https://casperhart.github.io/detourr/reference/tour_path.html">tour_path</a></span><span class="op">(</span><span class="fu"><a href="https://ggobi.github.io/tourr/reference/grand_tour.html">grand_tour</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span>, </span>
+<span>                 start<span class="op">=</span><span class="va">strt</span>, fps <span class="op">=</span> <span class="fl">60</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>       <span class="fu"><a href="https://casperhart.github.io/detourr/reference/show_scatter.html">show_scatter</a></span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.7</span>, </span>
+<span>                    axes <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<ol start="3" type="1">
+<ol start="4" type="1">
 <li>Use the spin-and-brush technique to identify the branches of the <code>fake_trees</code> data. The result should look something like this:</li>
 </ol>
 <div id="fig-fake-trees-sb" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Projection where some clusters extend in different direction, with point colors indicating the user-identified clusters.">
@@ -623,6 +508,8 @@ Figure&nbsp;7.2: Example solution after spin-and-brush on fake trees data.
 </figcaption></figure>
 </div>
 <p>You can use the download button to save the data with the colours. Tabulate the <code>branches</code> id variable in the original data with the <code>colour</code> groups created from brushing, to see how closely you have recovered the original classes.</p>
+</section><section id="project" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="project">Project</h2>
+<p>This exercise continues from the project in Chapter 5, to check your choice of NLDR representation. Using your best NLDR representation, cluster the data into as many clusters or clumps as you can see. Save the clusters. Now use spin-and-brush in <code>detourr</code> to colour as many clusters in the high dimensions as you can find. Save your clusters. How closely do these two approaches agree?</p>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list" style="display: none">
@@ -1339,6 +1226,9 @@ Ursula Laa, D. C., Alex Aumann, &amp; Valencia, G. (2023). New and simplified ma
 </div>
 <div id="ref-R-htmlwidgets" class="csl-entry" role="listitem">
 Vaidyanathan, R., Xie, Y., Allaire, J., Cheng, J., Sievert, C., &amp; Russell, K. (2023). <em>Htmlwidgets: HTML widgets for r</em>. <a href="https://github.com/ramnathv/htmlwidgets">https://github.com/ramnathv/htmlwidgets</a>
+</div>
+<div id="ref-R-compositions" class="csl-entry" role="listitem">
+van den Boogaart, K. G., Tolosana-Delgado, R., &amp; Bren, M. (2024). <em>Compositions: Compositional data analysis</em>. <a href="http://www.stat.boogaart.de/compositions/">http://www.stat.boogaart.de/compositions/</a>
 </div>
 <div id="ref-Rtsne2014" class="csl-entry" role="listitem">
 van der Maaten, L. J. P. (2014). Accelerating t-SNE using tree-based algorithms. <em>Journal of Machine Learning Research</em>, <em>15</em>, 3221–3245.
