@@ -83,9 +83,9 @@ The next step is to look at the coefficients for the selected number of PCs. @tb
 #| tbl-cap: "Coefficients for the first two PCs for the plane data."
 #| code-summary: "Code to print PC coefficients"
 library(gt)
-p_pca$rotation[,1:2] %>%
-  as_tibble(rownames="Variable") %>% 
-  gt() %>%
+p_pca$rotation[,1:2] |>
+  as_tibble(rownames="Variable") |> 
+  gt() |>
   fmt_number(columns = c(PC1, PC2),
              decimals = 2)
 ```
@@ -94,9 +94,9 @@ p_pca$rotation[,1:2] %>%
 #| label: tbl-box-pcs
 #| tbl-cap: "Coefficients for the first three PCs for the box data."
 #| code-summary: "Code to print PC coefficients"
-b_pca$rotation[,1:3] %>%
-  as_tibble(rownames="Variable") %>% 
-  gt() %>%
+b_pca$rotation[,1:3] |>
+  as_tibble(rownames="Variable") |> 
+  gt() |>
   fmt_number(columns = c(PC1, PC2, PC3),
              decimals = 2)
 ```
@@ -124,9 +124,9 @@ ggscree(pn_pca, q = 7) + theme_minimal()
 #| label: tbl-plane-noise-pcs
 #| tbl-cap: "Coefficients for PCs 1-4 of the plane plus noise data."
 #| code-summary: "Code to print PC coefficients"
-pn_pca$rotation[,1:4] %>%
-  as_tibble(rownames="Variable") %>% 
-  gt() %>%
+pn_pca$rotation[,1:4] |>
+  as_tibble(rownames="Variable") |> 
+  gt() |>
   fmt_number(columns = c(PC1, PC2, PC3, PC4),
              decimals = 2)
 ```
@@ -139,9 +139,9 @@ The `pisa` data contains simulated data from math, reading and science scores, t
 ```{r}
 #| code-fold: false
 data(pisa)
-pisa_std <- pisa %>%
-  filter(CNT == "Australia") %>%
-  select(-CNT) %>%
+pisa_std <- pisa |>
+  filter(CNT == "Australia") |>
+  select(-CNT) |>
   mutate_all(mulgar:::scale2)
 pisa_pca <- prcomp(pisa_std)
 pisa_scree <- ggscree(pisa_pca, q = 15) + theme_minimal()
@@ -233,7 +233,7 @@ This data has player statistics for all the matches in the 2021 season. We would
 #| code-fold: false
 library(tourr)
 data(aflw)
-aflw_std <- aflw %>%
+aflw_std <- aflw |>
   mutate_if(is.numeric, function(x) (x-
       mean(x, na.rm=TRUE))/
       sd(x, na.rm=TRUE))
@@ -303,10 +303,10 @@ From the scree plot in @fig-aflw-pca, we see a sharp drop from one to two, two t
 #| tbl-cap: "Coefficients for the first four PCs. PC 1 contrasts some with PC 1, with the first having large coefficients primarily on field play statistics, and the second having large coefficients on the scoring statistics."
 #| code-summary: "Code to print PC coefficients"
 library(gt)
-aflw_pca$rotation[,1:4] %>%
-  as_tibble(rownames="Variable") %>% 
-  arrange(desc(PC1), desc(PC2), desc(PC3)) %>%
-  gt() %>%
+aflw_pca$rotation[,1:4] |>
+  as_tibble(rownames="Variable") |> 
+  arrange(desc(PC1), desc(PC2), desc(PC3)) |>
+  gt() |>
   fmt_number(columns = c(PC1, PC2, PC3, PC4),
              decimals = 2)
 ```
@@ -375,10 +375,10 @@ aflw_gp <- ggplot() +
          panel.grid=element_blank())
 aflw_pctour <- ggplotly(aflw_gp,
                         width=500,
-                        height=550) %>%
-       animation_button(label="Go") %>%
+                        height=550) |>
+       animation_button(label="Go") |>
        animation_slider(len=0.8, x=0.5,
-                        xanchor="center") %>%
+                        xanchor="center") |>
        animation_opts(easing="linear", transition = 0)
 
 htmlwidgets::saveWidget(aflw_pctour,
@@ -458,7 +458,7 @@ ggplotly(pg18, width=500, height=500)
 #| fig-width: 5
 #| fig-height: 4
 #| out-width: 60%
-p18_labels <- p18[["data_prj"]] %>% as_tibble() %>% filter(obs_labels %in% c("AhrensLauren", "LivingstoneStacey", "ParkerAlyce", "BonniciBrittany", "HookerDana", "BowersKiara"))
+p18_labels <- p18[["data_prj"]] |> as_tibble() |> filter(obs_labels %in% c("AhrensLauren", "LivingstoneStacey", "ParkerAlyce", "BonniciBrittany", "HookerDana", "BowersKiara"))
 pg18 + theme(aspect.ratio=1, legend.position="none") +
   geom_point(data=p18_labels, aes(x=P1, y=P2, 
                                  label=obs_labels,
@@ -908,8 +908,8 @@ ggscatmat(aflw_pca$x, columns=1:4)
 library(mulgar)
 library(dplyr)
 data(bushfires)
-bushfires_std <- bushfires %>%
-  dplyr::select(`rf`:`log_dist_road`) %>%
+bushfires_std <- bushfires |>
+  dplyr::select(`rf`:`log_dist_road`) |>
   mutate_if(is.numeric, function(x) (x-
       mean(x, na.rm=TRUE))/
       sd(x, na.rm=TRUE))
