@@ -294,7 +294,7 @@
 
 \title{Interactively exploring high-dimensional data and models in R}
 \author{Dianne Cook and Ursula Laa}
-\date{2025-02-11}
+\date{2025-02-12}
 
 \begin{document}
 \maketitle
@@ -3348,7 +3348,7 @@ clusters in the UMAP representation correspond to the sine wave cluster.
 \subsection{\texorpdfstring{Using
 \texttt{liminal}}{Using liminal}}\label{using-liminal}
 
-\index{liminal}
+\index{software!liminal}
 
 Figure~\ref{fig-liminal-clusters-nonlin} shows how the NLDR plot can be
 linked to a tour view, using the \texttt{liminal} package, to better
@@ -3405,7 +3405,8 @@ unibrow matches to the sine wave cluster.}
 \subsection{\texorpdfstring{Using
 \texttt{detourr}}{Using detourr}}\label{using-detourr}
 
-\index{detourr}
+\index{software!detourr} \index{software!crosstalk}
+\index{software!plotly}
 
 Figure~\ref{fig-detourr-clusters-nonlin} shows how the linking is
 achieved using \texttt{detourr}. It uses a shared data object, as made
@@ -4015,6 +4016,8 @@ system like in the \texttt{detourr} package, where the results can be
 saved for further analysis. The code is very easy, and then all the
 controls are interactive.
 
+\index{software!detourr}
+
 \begin{Shaded}
 \begin{Highlighting}[]
 \FunctionTok{library}\NormalTok{(detourr)}
@@ -4117,6 +4120,8 @@ Most of the Chinstrap species were recovered also (labelled as
 \addcontentsline{toc}{section}{Exercises}
 
 \markright{Exercises}
+
+\index{data!clusters} \index{data!multicluster} \index{data!fake trees}
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -6086,6 +6091,8 @@ relative to the two clusters.}
 Linking the confusion matrix with the tour can also be accomplished with
 \texttt{crosstalk} and \texttt{detourr}.
 
+\index{software!crosstalk} \index{software!detourr}
+
 \begin{Shaded}
 \begin{Highlighting}[]
 \FunctionTok{library}\NormalTok{(crosstalk)}
@@ -6959,7 +6966,35 @@ they are orthogonal to these two dimensions.}
 Because the variables are standardised before computing LDA in the
 examples above, we can examine the magnitude and sign of the
 coefficients for the discriminant space to assess the importance of
-variables (Table~\ref{tbl-ds-coef-pdf}).
+variables (Table~\ref{tbl-ds-coef-pdf}). In the direction of LD1, the
+variables \texttt{bd}, \texttt{fl}, \texttt{bm} have much larger
+magnitudes than \texttt{bl}. This says that in the it is a combination
+of these three variables, actually a contrast between \texttt{bd}
+against \texttt{fl} and \texttt{bm} because of the differing signs. In
+the direction of LD2 the variables \texttt{bl} and \texttt{bm} have the
+largest magnitude and opposing signs which says that it is a contrast of
+these two variables which produce the second axis of the linear
+discriminant space.
+
+The next step is to match LD1 and LD2 with the differences between the
+clusters. From Figure~\ref{fig-penguins-lda-boundaries-pdf} (b) we can
+see that in the direction of LD1 the structure is that the Gentoo
+penguins (red) are distinct from the other two species, and in the
+direction of LD2 we can see the slightly overlapping Adelie and
+Chinstrap clusters. Then we can conclude that \texttt{bl} and
+\texttt{bm} are important for distinguishing Adelie from Chinstrap. We
+can also conclude that \texttt{bl} is \emph{not} important for
+distinguishing Gentoo from the other species.
+
+Interpretation using the magnitude and sign of the coefficients is
+accurate only if there is no association between the variables. If the
+variables are associated, then one variable may still be important for
+the structure seen, but masked by the other variables. For example, if
+\texttt{bl} is strongly correlated with \texttt{bd} (which it isn't)
+then it is possible that although \texttt{bl} does not contribute to
+LD1, it is still important for distinguishing Gentoo penguins. This type
+of higher level association and the impact of interpretability can be
+explored using the radial tour.
 
 \begin{table}
 
@@ -6993,8 +7028,13 @@ bm & -1.22 & 1.24 & -0.45 & 0.43\\
 
 The discriminant space can be considered to be a 2D projection basis,
 except that it needs to be orthonormalised to be an orthonormal basis.
-This can be passed into a radial tour to assess the importance of each
-variable for generating the separation between classes.
+This orthonormal basis provides the initial projection for a radial tour
+where each variable can be rotated out of the projection to assess its
+importance to the visible structure. It can also be used as the anchor
+basis for a local tour, where small steps to and from this projection to
+randomly selected nearby projections. This allows the inspection of the
+local neighbourhood of the discriminant space, to assess the effect of
+small changes in the projection basis on the visible structure.
 
 \index{tour!radial} \index{tour!local}
 
@@ -7043,10 +7083,47 @@ Adelie penguins. \faIcon{play-circle}}
 
 \end{figure}%
 
+\infobox{The radial tour can be used to assess variable importance to the structure present, especially when predictors are strongly associated with each other.}
+
+Figure~\ref{fig-interpret-pdf} illustrates how the radial tour (a,b) and
+the local tour (c,d) can be used to assess the importance of variables
+to structure of interest in a plot. In the radial tour the interpolation
+runs from the projection corresponding to the discriminant space, and to
+a projection where one of the variables (here \texttt{bl}) has been
+removed. The purpose for examining \texttt{bl} is that it has a small
+contribution to LD1, and thus may \emph{not} be important for separating
+Gentoo from the other species. We would also be assessing it's large
+contribution to LD2, and the separation between Adelie and Chinstrap,
+where we expect that it is indispensable. This is indeed what we learn.
+By removing \texttt{bl} there is no change to the separation between
+Gentoo, so it might be a simpler best 2D projection if the coefficient
+for Gentoo in LD1 is actually 0. However, for LD2 removing \texttt{bl}
+results in completely overlapping clusters for Adelie and Chinstrap,
+which confirms that this is the main variable that distinguishes the two
+species.
+
+The local tour is used here to explore the neighbourhood of the
+discriminant space. We anchor the tour at the discriminant space and
+interpolate to many random target planes within a specified distance. It
+can be used to examine how the structure changes with small differences
+in the combination of variables. Here we can see some small improvements
+in distinguishing the Adelie (blue) from Chinstrap (yellow) penguins. In
+the discriminant space there are about three Adelie penguins mixed among
+a group of Chinstrap penguins. In one change of the projection basis
+this can be reduced to one Adelie penguin mixed among the Chinstrap, and
+otherwise a neatly linear boundary could divide the clusters. This is a
+small improvement, but it does illustrate how visualisation in high
+dimensions can help to refine an automated rule.
+
+\insightbox{In the penguins data the small contribution of \textsf{bl} in the discriminant space for separating Gentoo can be ignored, or changed to zero without affecting the class difference.}
+
 \section*{Exercises}\label{exercises-13}
 \addcontentsline{toc}{section}{Exercises}
 
 \markright{Exercises}
+
+\index{data!simple clusters} \index{data!clusters}
+\index{data!multicluster} \index{data!sketches} \index{data!bushfires}
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -7090,7 +7167,7 @@ Adelie penguins. \faIcon{play-circle}}
   Compute the boundary between classes, for the LDA model where the
   prior probability reflects the sample size, and the LDA model where
   the priors are equal for all groups. How does the boundary between
-  lightning caused fires and the other groups change?
+  lightning cause fires and the other groups change?
 \item
   XXX Question on interpretability, variable importance
 \end{enumerate}

@@ -629,7 +629,11 @@ From the tour, we can see that the LDA boundaries divide the classes only in the
 
 ## Interpretability 
 
-Because the variables are standardised before computing LDA in the examples above, we can examine the magnitude and sign of the coefficients for the discriminant space to assess the importance of variables (`r ifelse(knitr::is_html_output(), '@tbl-ds-coef-html', '@tbl-ds-coef-pdf')`). 
+Because the variables are standardised before computing LDA in the examples above, we can examine the magnitude and sign of the coefficients for the discriminant space to assess the importance of variables (`r ifelse(knitr::is_html_output(), '@tbl-ds-coef-html', '@tbl-ds-coef-pdf')`). In the direction of LD1, the variables `bd`, `fl`, `bm` have much larger magnitudes than `bl`. This says that in the it is a combination of these three variables, actually a contrast between `bd` against `fl` and `bm` because of the differing signs. In the direction of LD2 the variables `bl` and `bm` have the largest magnitude and opposing signs which says that it is a contrast of these two variables which produce the second axis of the linear discriminant space. 
+
+The next step is to match LD1 and LD2 with the differences between the clusters. From `r ifelse(knitr::is_html_output(), '@fig-penguins-lda-boundaries-html', '@fig-penguins-lda-boundaries-pdf')` (b) we can see that in the direction of LD1 the structure is that the Gentoo penguins (red) are distinct from the other two species, and in the direction of LD2 we can see the slightly overlapping Adelie and Chinstrap clusters. Then we can conclude that `bl` and `bm` are important for distinguishing Adelie from Chinstrap. We can also conclude that `bl` is *not* important for distinguishing Gentoo from the other species.
+
+Interpretation using the magnitude and sign of the coefficients is accurate only if there is no association between the variables. If the variables are associated, then one variable may still be important for the structure seen, but masked by the other variables. For example, if `bl` is strongly correlated with `bd` (which it isn't) then it is possible that although `bl` does not contribute to LD1, it is still important for distinguishing Gentoo penguins. This type of higher level association and the impact of interpretability can be explored using the radial tour. 
 
 ```{r}
 #| echo: false
@@ -644,6 +648,8 @@ ds_proj <- tourr::orthonormalise(p_lda$scaling) |>
   dplyr::select(var, LD1, LD2, oLD1, oLD2)
 ```
 
+::: {.content-visible when-format="html"}
+
 ```{r eval=knitr::is_html_output()}
 #| label: tbl-ds-coef-html
 #| echo: false
@@ -652,6 +658,9 @@ knitr::kable(p_lda$scaling, digits=2,
              col.names = c(" ", "LD1", "LD2", "LD1", "LD2")) |>
   add_header_above(c(" " = 1, "original"=2, "orthonormal"=2))
 ```
+:::
+
+::: {.content-visible when-format="pdf"}
 
 ```{r eval=knitr::is_latex_output()}
 #| label: tbl-ds-coef-pdf
@@ -661,8 +670,9 @@ knitr::kable(ds_proj, digits=2, format="latex",
              col.names = c(" ", "LD1", "LD2", "LD1", "LD2")) |>
   add_header_above(c(" " = 1, "original"=2, "orthonormal"=2))
 ```
+:::
 
-The discriminant space can be considered to be a 2D projection basis, except that it needs to be orthonormalised to be an orthonormal basis. This can be passed into a radial tour to assess the importance of each variable for generating the separation between classes.
+The discriminant space can be considered to be a 2D projection basis, except that it needs to be orthonormalised to be an orthonormal basis. This orthonormal basis provides the initial projection for a radial tour where each variable can be rotated out of the projection to assess its importance to the visible structure. It can also be used as the anchor basis for a local tour, where small steps to and from this projection to randomly selected nearby projections. This allows the inspection of the local neighbourhood of the discriminant space, to assess the effect of small changes in the projection basis on the visible structure. 
 
 \index{tour!radial}
 \index{tour!local}
@@ -717,20 +727,51 @@ Using the radial tour (a) and local tour (b) to investigate the importance of va
 
 ::: {.content-visible when-format="pdf"}
 ::: {#fig-interpret-pdf  layout="[[50, 50]]"}
-![radial: DS](images/penguins_vip1.png){fig-alt="something"}
+![radial: DS](images/penguins_vip1.png){fig-alt="Scatterplot showing projection into discriminant space, where red (Gentoo) is a cluster on the left, blue (Adelie) and yellow (Chinstrap are slightly overlapped clusters on the right, with blue above yellow.  The axis display of a circle and segments shows the projection coefficients. It is bm pointing to 10 o'clock, fl pointing to 9 o'clock, bl pointing to 6 o'clock and bd pointing to half past 2."}
 
-![radial: no bl](images/penguins_vip2.png){fig-alt="something"}
+![radial: no bl](images/penguins_vip2.png){fig-alt="Scatterplot of a projection where the bl contribution is reduced to 0, from the initial discriminant space projection. There is not much change in the red cluster (Gentoo) but the blue (Adelie) and yellow (Chinstrap) are completely overlapping."}
 
-![local: DS](images/penguins_local1.png){fig-alt="something"}
+![local: DS](images/penguins_local1.png){fig-alt="Scatterplot showing projection into discriminant space, where red (Gentoo) is a cluster on the left, blue (Adelie) and yellow (Chinstrap) are slightly overlapped clusters on the right, with blue above yellow.  The axis display of a circle and segments shows the projection coefficients. It is bm pointing to 10 o'clock, fl pointing to 9 o'clock, bl pointing to 6 o'clock and bd pointing to half past 2. There are about three blue points mixed with the cluster of yellow points."}
 
-![local: better](images/penguins_local2.png){fig-alt="something"}
+![local: better](images/penguins_local2.png){fig-alt="Scatterplot of a projection which is close to the initial discriminant space projection. The small change is that there is now only one blue (Adelie) point mixed with the yellow (Chinstrap) points, and otherwise a clear linear boundary between these clusters."}
 
 Using the radial tour (a,b) and local tour (c,d) to investigate the importance of variables to the separation between species of penguins provided by LDA. The radial tour starts at the discriminant space, and removes the contribution of bl. This results in Adelie and Chinstrap being confused, but it has no impact on the separation of Gentoo. That is, the coefficient of bl on LD1 could be changed from slightly non-zero to actually zero without impacting that structure. In the local tour, again starting from discriminant space, the movement is slightly out of this projection to explore how the data looks in the nearby neighbourhood. What we learn is that there are slightly better separations between these two samples of Chinstrap and Adelie penguins. {{< fa play-circle >}}
 :::
 :::
 
+::: {.content-visible when-format="html"}
+::: info
+The radial tour can be used to assess variable importance to the structure present, especially when predictors are strongly associated with each other.
+:::
+:::
+
+::: {.content-visible when-format="pdf"}
+
+\infobox{The radial tour can be used to assess variable importance to the structure present, especially when predictors are strongly associated with each other.}
+:::
+
+`r ifelse(knitr::is_html_output(), '@fig-interpret-html', '@fig-interpret-pdf')` illustrates how the radial tour (a,b) and the local tour (c,d) can be used to assess the importance of variables to structure of interest in a plot. In the radial tour the interpolation runs from the projection corresponding to the discriminant space, and to a projection where one of the variables (here `bl`) has been removed. The purpose for examining `bl` is that it has a small contribution to LD1, and thus may *not* be important for separating Gentoo from the other species. We would also be assessing it's large contribution to LD2, and the separation between Adelie and Chinstrap, where we expect that it is indispensable. This is indeed what we learn. By removing `bl` there is no change to the separation between Gentoo, so it might be a simpler best 2D projection if the coefficient for Gentoo in LD1 is actually 0. However, for LD2 removing `bl` results in completely overlapping clusters for Adelie and Chinstrap, which confirms that this is the main variable that distinguishes the two species.
+
+The local tour is used here to explore the neighbourhood of the discriminant space. We anchor the tour at the discriminant space and interpolate to many random target planes within a specified distance. It can be used to examine how the structure changes with small differences in the combination of variables. Here we can see some small improvements in distinguishing the Adelie (blue)  from Chinstrap (yellow) penguins. In the discriminant space there are about three Adelie penguins mixed among a group of Chinstrap penguins. In one change of the projection basis this can be reduced to one Adelie penguin mixed among the Chinstrap, and otherwise a neatly linear boundary could divide the clusters. This is a small improvement, but it does illustrate how visualisation in high dimensions can help to refine an automated rule.
+
+::: {.content-visible when-format="html"}
+::: insight
+In the penguins data the small contribution of `bl` in the discriminant space for separating Gentoo can be ignored, or changed to zero without affecting the class difference.
+:::
+:::
+
+::: {.content-visible when-format="pdf"}
+
+\insightbox{In the penguins data the small contribution of \textsf{bl} in the discriminant space for separating Gentoo can be ignored, or changed to zero without affecting the class difference.}
+:::
 
 ## Exercises {-}
+
+\index{data!simple clusters}
+\index{data!clusters}
+\index{data!multicluster}
+\index{data!sketches}
+\index{data!bushfires}
 
 1. For the `simple_clusters` compute the LDA model, and make a plot of the data, with points coloured by the class. Overlay variance-covariance ellipses, and a $+$ indicating the sample mean for each class. Is it reasonable to assume that the two classes are sampled from populations with the same variance-covariance?
 2. Examine the clusters corresponding to the classes in the `clusters` data set, using a tour. Based on the shape of the data is the assumption of equal variance-covariance reasonable?
@@ -740,7 +781,7 @@ Using the radial tour (a,b) and local tour (c,d) to investigate the importance o
 6. Assess the LDA assumptions for the `multicluster` data. Is LDA an appropriate model?
 7. Compute the first 12 PCs of the `sketches` data. Check the assumption of equal, elliptical variance-covariance of the 6 groups. Regardless of whether you decide that the assumption is satisfied or not, fit an LDA to the 12 PCs. Extract the discriminant space (the `x` component of the `predict` object), and examine the separation (or not) of the 6 groups in this 5D space. Is LDA providing a good classification model for this data?
 8. Even though the `bushfires` data does not satisfy the assumptions for LDA, fit LDA to the first five PCs. Examine the class differences in the 3D discriminant space. 
-9. Compute the boundary between classes, for the LDA model where the prior probability reflects the sample size, and the LDA model where the priors are equal for all groups. How does the boundary between lightning caused fires and the other groups change?
+9. Compute the boundary between classes, for the LDA model where the prior probability reflects the sample size, and the LDA model where the priors are equal for all groups. How does the boundary between lightning cause fires and the other groups change?
 10. XXX Question on interpretability, variable importance
 
 ```{r}
