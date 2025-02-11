@@ -51,11 +51,14 @@ where $\pi_k$ is a prior probability for class $k$ that might be based on unequa
 
 We can fit an LDA model using the `lda()` function from the `MASS` package. Here we have used the `penguins` data, assuming equal prior probability, to illustrate. 
 
+\index{software!MASS}
+\index{software!mulgar}
+\index{data!penguins}
+
 ```{r}
 #| message: false
 #| code-fold: false
 # Code to fit the model
-library(dplyr)
 library(mulgar)
 library(MASS)
 load("data/penguins_sub.rda")
@@ -93,17 +96,24 @@ p_lda_pred <- predict(p_lda, penguins_sub)
 
 The best separation between classes can be viewed from this object, which can be shown to match the original data projected using the `scaling` component of the model object (see @fig-p-lda).
 
+\index{software!colorspace}
+\index{software!ggplot2}
+\index{software!dplyr}
+\index{software!ggpubr}
+
 ```{r}
 #| label: fig-p-lda
 #| warning: false
-#| fig-cap: "Penguins projected into the 2D discriminant space, done two ways: (a) using the predicted values, (b) directly projecting using the model component. The scale is not quite the same but the projected data is identical in shape."
+#| fig-cap: "Penguins projected into the 2D discriminant space, done two ways: (a) using the predicted values, (b) directly projecting using the model component. The scale is different but the projected data is identical in shape."
 #| message: false
 #| fig-width: 8
 #| fig-height: 4
+#| fig-alt: "Two plots labelled (a) and (b) that are the same scatterplot, except the scale in each is different. Plot (a) has x-axis LD1 with labels -4, 0, 4 and 8 has y-axis LD2 with labels -6, -3, 0, 3 and 6. Plot (b) has x-axis LD1 with labels -4, 0, 4 and 8 and y-axis LD2 with labels -4, 0 and 4. There is a legend indicating colour is used to show species, with 3 levels: Adelie shown as brilliant greenish blue colour, Chinstrap shown as brilliant yellow colour and Gentoo shown as vivid red colour. The chart is a set of 313 big solid circle points of which about 97% can be seen. Red is separated from the other two clusters, but green and yellow are overlapped."
 #| code-summary: "Code to generate LDA plots"
 # Check calculations from the fitted model, and equations
 library(colorspace)
 library(ggplot2)
+library(dplyr)
 library(ggpubr)
 # Using the predicted values from the model object
 p_lda_pred_x1 <- data.frame(p_lda_pred$x)
@@ -177,7 +187,7 @@ To check the equal and elliptical variance-covariance assumption, generate point
 # Generate ellipses for each group's variance-covariance
 p_ell <- NULL
 for (i in unique(penguins_sub$species)) {
-  x <- penguins_sub %>% dplyr::filter(species == i)
+  x <- penguins_sub |> dplyr::filter(species == i)
   e <- gen_xvar_ellipse(x[,1:2], n=150, nstd=1.5)
   e$species <- i
   p_ell <- bind_rows(p_ell, e)
@@ -190,6 +200,7 @@ for (i in unique(penguins_sub$species)) {
 #| message: false
 #| fig-width: 8
 #| fig-height: 4
+#| fig-alt: "Two plots labelled (a) and (b). Both have x-axis bl with labels -2, -1, 0, 1, 2 and 3 and y-axis bd with labels -2, -1, 0, 1 and 2. There is a legend indicating colour is used to show species, with 3 levels: Adelie shown as brilliant greenish blue colour, Chinstrap shown as brilliant yellow colour and Gentoo shown as vivid red colour. Plot (a) is a set of 333 big solid circle points of which about 97% can be seen, where differences between the three groups are visible. Plot (b) is a set of 450 big solid circle points arranged into three very similar shaped and oriented non-overlapping ellipses."
 #| code-summary: "Code for penguins data and ellipse plots"
 #| code-fold: true
 lda1 <- ggplot(penguins_sub, aes(x=bl, 
@@ -216,10 +227,11 @@ ggarrange(lda1, lda2, ncol=2,
 
 ```{r echo=knitr::is_html_output()}
 #| label: fig-lda-assumptions2
-#| fig-cap: "Scatterplot of distance to cfa and road for the bushfires data, and corresponding variance-covariance ellipses. There is a lot of difference between the ellipses, so it cannot be assumed that the population variance-covariances are equal."
+#| fig-cap: "Scatterplot of distance to cfa and road for the bushfires data, and corresponding variance-covariance ellipses. There is a lot of difference between the shapes and the orientation of the ellipses, so it cannot be assumed that the population variance-covariances are equal."
 #| message: false
 #| fig-width: 8
 #| fig-height: 4
+#| fig-alt: "Two plots labelled (a) and (b). Both have x-axis log_dist_cfa with labels 6, 7, 8, 9, 10 and 11 and y-axis log_dist_road with labels 0.0, 2.5, 5.0, 7.5 and 10.0. There is a legend indicating colour is used to show cause, with 4 levels: accident shown as brilliant greenish blue colour,  arson shown as light yellowish green colour,  burning_off shown as strong orange yellow colour and lightning shown as vivid red colour. Plot (a) is a set of 333 big solid circle points of which about 97% can be seen, with few differences between the four groups. Plot (b) is a set of 450 big solid circle points arranged into four differently shaped and oriented overlapping ellipses."
 #| code-summary: "Code for bushfires data and ellipse plots"
 #| code-fold: true
 # Now repeat for a data set that violates assumptions
@@ -235,7 +247,7 @@ lda3 <- ggplot(bushfires, aes(x=log_dist_cfa,
   theme(aspect.ratio = 1)
 b_ell <- NULL
 for (i in unique(bushfires$cause)) {
-  x <- bushfires %>% dplyr::filter(cause == i)
+  x <- bushfires |> dplyr::filter(cause == i)
   e <- gen_xvar_ellipse(x[,c(57, 59)], n=150, nstd=2)
   e$cause <- i
   b_ell <- bind_rows(b_ell, e)
@@ -276,7 +288,7 @@ This approach extends to any dimension. We would use the same projection sequenc
 library(tourr)
 p_ell <- NULL
 for (i in unique(penguins_sub$species)) {
-  x <- penguins_sub %>% dplyr::filter(species == i)
+  x <- penguins_sub |> dplyr::filter(species == i)
   e <- gen_xvar_ellipse(x[,1:4], n=150, nstd=1.5)
   e$species <- i
   p_ell <- bind_rows(p_ell, e)
@@ -313,9 +325,9 @@ Checking the assumption of equal variance-covariance matrices for the 4D penguin
 ::: {.content-visible when-format="pdf"}
 
 ::: {#fig-penguins-lda-ellipses-pdf layout-ncol=2}
-![Data](images/penguins_lda1.png){#fig-lda-4D-assumptions1 fig-alt="Single frame from a tour of the penguins data, with colour indicating species. Each group has slightly negatively elliptical shaped spread."}
+![Data](images/penguins_lda1.png){#fig-lda-4D-assumptions1 fig-alt="Single frame from a tour of the penguins data, with colour indicating species of penguins: Adelie, Gentoo, and Chinstrap. The Adelie penguins are marked in blue, Gentoo in red, and Chinstrap in yellow. The points are spread in a diagonal pattern, with the red cluster (Gentoo) on the left, the yellow cluster (Chinstrap) in the center, and the blue cluster (Adelie) on the right. Each group has slightly negatively elliptical shaped spread. A legend in the top-right corner identifies the species by color. The background is white with a black border around the plot."}
 
-![Variance-covariance ellipses](images/penguins_lda2.png){#fig-lda-4D-assumptions2 fig-alt="Single frame from a tour of the ellipses corresponding to variance-covariance matrices for each species. Each ellipse has a north-west to south-east oriention. The red group is slightly smaller and more elliptical than the other two groups."}
+![Variance-covariance ellipses](images/penguins_lda2.png){#fig-lda-4D-assumptions2 fig-alt="Single frame from a tour of the ellipses corresponding to variance-covariance matrices for each species, matching the data shown in plot (a). Each ellipse has a north-west to south-east oriention. The red group (Gentoo), at top left, is slightly smaller and more elliptical than the other two groups. The yellow cluster (Chinstrap) in the center, and the blue cluster (Adelie) on the right and more circular."}
 
 Checking the assumption of equal variance-covariance matrices for the 4D penguins data. Each ellipse corresponds to the sample variance-covariance for each species.
 :::
@@ -462,6 +474,8 @@ $\bar{x}_{Adelie} = ($ `r p_bl_bd_lda$means[1,1]`, `r p_bl_bd_lda$means[1,2]`$)^
 
 The boundaries can be examined using the `explore()` function from the `classifly` package, which generates observations in the range of all values of`bl` and `bd` and predicts their class. @fig-lda-2D-boundary shows the resulting prediction regions, with the observed data and the sample means overlaid.
 
+\index{software!classifly}
+
 ```{r}
 #| message: false
 #| label: fig-lda-2D-boundary
@@ -497,9 +511,10 @@ p_bl_bd_lda_m1 +
 \index{classification!boundaries}
 \index{tour!slice}
 
-This approach can be readily extended to higher dimensions. One first fits the model with all four variables, and uses the `explore()` to generate points in the 4D space with predictions, generating a representation of the prediction regions. `r ifelse(knitr::is_html_output(), '@fig-penguins-lda-boundaries-html', '@fig-penguins-lda-boundaries-pdf')`(a) shows the results using a slice tour [@slicetour]. Points inside the slice are shown in larger size. The slice is made in the centre of the data, to show the boundaries in this neighbourhood. As the tour progresses we see a thin slice through the centre of the data, parallel with the projection plane. In most projections there is some small overlap of points between groups, which happens because we are examining a 4D object with 2D. The slice helps to alleviate this, allowing a focus on the boundaries in the centre of the cube. In all projections the boundaries between groups is linear, as would be expected when using LDA. We can also see that the model roughly divides the cube into three relatively equally-sized regions.
+This approach can be readily extended to higher dimensions. One first fits the model with all four variables, and uses the `explore()` to generate points in the 4D space with predictions, generating a representation of the prediction regions. `r ifelse(knitr::is_html_output(), '@fig-penguins-lda-boundaries-html', '@fig-penguins-lda-boundaries-pdf')` (a) shows the results using a slice tour [@slicetour]. Points inside the slice are shown in larger size. The slice is made in the centre of the data, to show the boundaries in this neighbourhood. As the tour progresses we see a thin slice through the centre of the data, parallel with the projection plane. In most projections there is some small overlap of points between groups, which happens because we are examining a 4D object with 2D. The slice helps to alleviate this, allowing a focus on the boundaries in the centre of the cube. In all projections the boundaries between groups is linear, as would be expected when using LDA. We can also see that the model roughly divides the cube into three relatively equally-sized regions.
 
-`r ifelse(knitr::is_html_output(), '@fig-penguins-lda-boundaries-html', '@fig-penguins-lda-boundaries-pdf')`(b) shows the three prediction regions, represented by points in 4D, projected into the discriminant space. Linear boundaries neatly divide the full space, which is to be expected because the LDA model computes it's classification rules in this 2D space.  
+`r ifelse(knitr::is_html_output(), '@fig-penguins-lda-boundaries-html', '@fig-penguins-lda-boundaries-pdf')` (b) shows the three prediction regions, represented by points in 4D, projected into the discriminant space. Linear boundaries neatly divide the full space, which is to be expected because the LDA model computes it's classification rules in this 2D space.  In this view the data has been overlaid and it can be seen that the boundaries produced by LDA quite nicely separate the species, albeit some confusion between Adelie and Chinstrap. Overlaying the data on the slide tour in (a) could be useful but it also adds too many parts to the plot, possibly making it more difficult to focus on the boundary. 
+
 \index{classification!discriminant space}
 
 ```{r echo=knitr::is_html_output()}
@@ -512,17 +527,24 @@ p_lda_boundaries <- explore(p_lda, penguins_sub)
 #| eval: false
 #| code-summary: "Code for generating slice tour"
 # Code to run the tour
-p_lda_boundaries$species
-animate_slice(p_lda_boundaries[p_lda_boundaries$.TYPE == "simulated",1:4], col=p_lda_boundaries$species[p_lda_boundaries$.TYPE == "simulated"], v_rel=0.02, axes="bottomleft")
+animate_slice(p_lda_boundaries[
+  p_lda_boundaries$.TYPE == "simulated", 1:4], 
+              col=p_lda_boundaries$species[
+                p_lda_boundaries$.TYPE == "simulated"], 
+              v_rel=0.8, 
+              axes="bottomleft")
 render_gif(p_lda_boundaries[p_lda_boundaries$.TYPE == "simulated",1:4],
            planned_tour(pt1),
-           display_slice(v_rel=0.02, 
-             col=p_lda_boundaries$species[p_lda_boundaries$.TYPE == "simulated"], 
-             axes="bottomleft"),                     gif_file="gifs/penguins_lda_boundaries.gif",
+           display_slice(v_rel=0.8, 
+             col=p_lda_boundaries$species[
+               p_lda_boundaries$.TYPE == "simulated"], 
+             axes="bottomleft"),     
+           gif_file="gifs/penguins_lda_boundaries.gif",
            frames=500,
            loop=FALSE
            )
 ```
+
 
 ```{r echo=knitr::is_html_output()}
 #| code-summary: "Code for projecting into LDA space"
@@ -573,9 +595,9 @@ Examining the boundaries produced by the LDA model in the full 4D with a slice t
 
 ::: {#fig-penguins-lda-boundaries-pdf layout-ncol=2 fig-alt="FIX-ME"}
 
-![4D](images/penguins_lda_boundaries.png){#fig-lda-4D-boundaries fig-alt="A scatterplot with large points showing roughly linear boundaries between three groups." width=200}
+![4D](images/penguins_lda_boundaries.png){#fig-lda-4D-boundaries fig-alt="A scatterplot with large points showing a roughly linear boundaries between three groups. Yellow (Chinstrap) on the left, has a vertical boundary with blue (Adelie), and an oblique top left to middle boundary with red (Gentoo). There is a circle with line segments at lower left indicating the contributions of each variable to this projection: bl points to the left, bm a small amount to the right, bd points to the bottom and fl a small amount upwards." width=200}
 
-![Discriminant space](images/fig-lda-2D-boundaries-1.png){#fig-lda-4D-ds fig-alt="Scatterplot of points divided neatly into three colour groups by linear boundaries. The regions are split at the middle, and with the boundary between blue and red, blue and yellow, and yellow and red, starting near 11, 4, and o'clock, respectively." width=200}
+![Discriminant space](images/fig-lda-2D-boundaries-1.png){#fig-lda-4D-ds fig-alt="Scatterplot of points divided neatly into three colour groups by linear boundaries. The regions are split at the middle, and with the boundary between blue and red, blue and yellow, and yellow and red, starting near 11, 4, and o'clock, respectively. Black points with different shapes fit neatly into the three regions, indicating that the linear boundary quite neatly distinguishes the species." width=200}
 
 ```{r}
 #| echo: false
@@ -605,6 +627,109 @@ From the tour, we can see that the LDA boundaries divide the classes only in the
 \insightbox{From the tour, we can see that the LDA boundaries divide the classes only in the discriminant space. It is not using the space orthogonal to the 2D discriminant space. You can see this because the boundary is sharp in just one 2D projection, while most of the projections show some overlap of regions.}
 :::
 
+## Interpretability 
+
+Because the variables are standardised before computing LDA in the examples above, we can examine the magnitude and sign of the coefficients for the discriminant space to assess the importance of variables (`r ifelse(knitr::is_html_output(), '@tbl-ds-coef-html', '@tbl-ds-coef-pdf')`). 
+
+```{r}
+#| echo: false
+#| message: false
+# Prepare data
+library(kableExtra)
+ds_proj <- tourr::orthonormalise(p_lda$scaling) |>
+  as_tibble() |>
+  rename(oLD1 = LD1, oLD2 = LD2) |>
+  bind_cols(p_lda$scaling) |>
+  mutate(var = rownames(p_lda$scaling)) |>
+  dplyr::select(var, LD1, LD2, oLD1, oLD2)
+```
+
+```{r eval=knitr::is_html_output()}
+#| label: tbl-ds-coef-html
+#| echo: false
+#| tbl-cap: "Coefficients of the discriminant space, original and othonormalised. LD1 is the direction where Gentoo is separated from the others, and the coefficients suggest this is due to a contrast between bd and fl/bm. LD2 is where Adelie is different from Chinstrap, which is generated by a contrast between bl and bm."
+knitr::kable(p_lda$scaling, digits=2,
+             col.names = c(" ", "LD1", "LD2", "LD1", "LD2")) |>
+  add_header_above(c(" " = 1, "original"=2, "orthonormal"=2))
+```
+
+```{r eval=knitr::is_latex_output()}
+#| label: tbl-ds-coef-pdf
+#| echo: false
+#| tbl-cap: "Coefficients of the discriminant space, original and othonormalised. LD1 is the direction where Gentoo is separated from the others, and the coefficients suggest this is due to a contrast between bd and fl/bm. LD2 is where Adelie is different from Chinstrap, which is generated by a contrast between bl and bm."
+knitr::kable(ds_proj, digits=2, format="latex",
+             col.names = c(" ", "LD1", "LD2", "LD1", "LD2")) |>
+  add_header_above(c(" " = 1, "original"=2, "orthonormal"=2))
+```
+
+The discriminant space can be considered to be a 2D projection basis, except that it needs to be orthonormalised to be an orthonormal basis. This can be passed into a radial tour to assess the importance of each variable for generating the separation between classes.
+
+\index{tour!radial}
+\index{tour!local}
+
+```{r}
+#| eval: false
+#| echo: false
+animate_xy(penguins_sub[, 1:4], 
+           radial_tour(as.matrix(ds_proj[,4:5]), 1), 
+           col=penguins_sub$species
+           )
+render_gif(penguins_sub[, 1:4], 
+           radial_tour(as.matrix(ds_proj[,4:5]), 1), 
+           display_xy(col=penguins_sub$species), 
+           gif_file = "gifs/penguins_vip.gif",
+           frames=100,
+           width=400,
+           height=400,
+           loop=FALSE
+           )
+```
+
+```{r}
+#| eval: false
+#| echo: false
+set.seed(458)
+animate_xy(penguins_sub[, 1:4], 
+           local_tour(as.matrix(ds_proj[,4:5]), pi/10), 
+           col=penguins_sub$species
+           )
+set.seed(458)
+render_gif(penguins_sub[, 1:4], 
+           local_tour(as.matrix(ds_proj[,4:5]), pi/10), 
+           display_xy(col=penguins_sub$species), 
+           gif_file = "gifs/penguins_local.gif",
+           frames=500,
+           width=400,
+           height=400,
+           loop=FALSE
+           )
+```
+
+::: {.content-visible when-format="html"}
+::: {#fig-interpret-html  layout="[[50, 50]]"}
+![radial](gifs/penguins_vip.gif){fig-alt="Animation showing a sequence of 2D projections of three species of penguin starting from a projection where the three are distinct. Initial projection has bm pointing to 10 o'clock, fl pointing to 9 o'clock, bl pointing to 6 o'clock and bd pointing to half past 2. The bl contribution is reduced to 0 and then back to its original value. This has a large effect on the separation of Chinstrap from Adelie but not on Gentoo."}
+
+![local](gifs/penguins_local.gif){fig-alt="Animation showing a sequence of 2D projections of three species of penguin starting from a projection where the three are distinct. Initial projection has bm pointing to 10 o'clock, fl pointing to 9 o'clock, bl pointing to 6 o'clock and bd pointing to half past 2. The contribution of all variables changes a little whith the only effect being small difference in the overlap between the Adelie and Chinstrap."}
+
+Using the radial tour (a) and local tour (b) to investigate the importance of variables to the separation between species of penguins provided by LDA. The radial tour starts at the discriminant space, and removes the contribution of bl. This results in Adelie and Chinstrap being confused, but it has no impact on the separation of Gentoo. That is, the coefficient of bl on LD1 could be changed from slightly non-zero to actually zero without impacting that structure. In the local tour, again starting from discriminant space, the movement is slightly out of this projection to explore how the data looks in the nearby neighbourhood. What we learn is that there are slightly better separations between these two samples of Chinstrap and Adelie penguins.
+:::
+:::
+
+::: {.content-visible when-format="pdf"}
+::: {#fig-interpret-pdf  layout="[[50, 50]]"}
+![radial: DS](images/penguins_vip1.png){fig-alt="something"}
+
+![radial: no bl](images/penguins_vip2.png){fig-alt="something"}
+
+![local: DS](images/penguins_local1.png){fig-alt="something"}
+
+![local: better](images/penguins_local2.png){fig-alt="something"}
+
+Using the radial tour (a,b) and local tour (c,d) to investigate the importance of variables to the separation between species of penguins provided by LDA. The radial tour starts at the discriminant space, and removes the contribution of bl. This results in Adelie and Chinstrap being confused, but it has no impact on the separation of Gentoo. That is, the coefficient of bl on LD1 could be changed from slightly non-zero to actually zero without impacting that structure. In the local tour, again starting from discriminant space, the movement is slightly out of this projection to explore how the data looks in the nearby neighbourhood. What we learn is that there are slightly better separations between these two samples of Chinstrap and Adelie penguins. {{< fa play-circle >}}
+:::
+:::
+
+
 ## Exercises {-}
 
 1. For the `simple_clusters` compute the LDA model, and make a plot of the data, with points coloured by the class. Overlay variance-covariance ellipses, and a $+$ indicating the sample mean for each class. Is it reasonable to assume that the two classes are sampled from populations with the same variance-covariance?
@@ -616,6 +741,7 @@ From the tour, we can see that the LDA boundaries divide the classes only in the
 7. Compute the first 12 PCs of the `sketches` data. Check the assumption of equal, elliptical variance-covariance of the 6 groups. Regardless of whether you decide that the assumption is satisfied or not, fit an LDA to the 12 PCs. Extract the discriminant space (the `x` component of the `predict` object), and examine the separation (or not) of the 6 groups in this 5D space. Is LDA providing a good classification model for this data?
 8. Even though the `bushfires` data does not satisfy the assumptions for LDA, fit LDA to the first five PCs. Examine the class differences in the 3D discriminant space. 
 9. Compute the boundary between classes, for the LDA model where the prior probability reflects the sample size, and the LDA model where the priors are equal for all groups. How does the boundary between lightning caused fires and the other groups change?
+10. XXX Question on interpretability, variable importance
 
 ```{r}
 #| eval: false
@@ -634,25 +760,25 @@ animate_xy(sketches_pc[,1:12], col=sketches_pc$word)
 
 sketches_lda <- lda(word~., data=sketches_pc)
 sketches_pred <- predict(sketches_lda, sketches_pc)
-sketches_ds <- data.frame(sketches_pred$x) %>%
+sketches_ds <- data.frame(sketches_pred$x) |>
   mutate(word = sketches_pc$word)
 
 animate_xy(sketches_ds[,1:5], col=sketches_ds$word)
 
 # bushfires
 data(bushfires)
-bushfires_std <- bushfires %>%
-  dplyr::select(`rf`:`log_dist_road`) %>%
+bushfires_std <- bushfires |>
+  dplyr::select(`rf`:`log_dist_road`) |>
   mutate_if(is.numeric, function(x) (x-
       mean(x, na.rm=TRUE))/
       sd(x, na.rm=TRUE))
 bushfires_pca <- prcomp(bushfires_std)
-bushfires_pc <- data.frame(bushfires_pca$x[,1:5]) %>%
+bushfires_pc <- data.frame(bushfires_pca$x[,1:5]) |>
   mutate(cause = bushfires$cause)
 
 bushfires_lda <- lda(cause~., data=bushfires_pc)
 bushfires_pred <- predict(bushfires_lda, bushfires_pc)
-bushfires_ds <- data.frame(bushfires_pred$x) %>%
+bushfires_ds <- data.frame(bushfires_pred$x) |>
   mutate(cause = factor(bushfires$cause))
 animate_xy(bushfires_ds[,1:3], col=bushfires_ds$cause)
 

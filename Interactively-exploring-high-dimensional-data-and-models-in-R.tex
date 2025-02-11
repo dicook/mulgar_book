@@ -294,7 +294,7 @@
 
 \title{Interactively exploring high-dimensional data and models in R}
 \author{Dianne Cook and Ursula Laa}
-\date{2025-02-06}
+\date{2025-02-11}
 
 \begin{document}
 \maketitle
@@ -1582,14 +1582,14 @@ within-group sum of squares matrices in a linear discriminant analysis,
 with \(g=\)number of groups, and \(n_i, i=1, ....g\) is the number of
 cases in each group.
 
-The \emph{radial tour} (Ursula Laa \& Valencia, 2023) provides a way to
-assess the importance of any variable or combination of variables. The
-target basis is chosen by zeroing out a variable (or multiple variables)
-and the interpolation runs from the initial projection to the target and
-back to the initial. If the structure observed in the initial plot
-doesn't change much when the variable(s) is removed, then the variable
-is not important. This is often best combined with the guided tour,
-where the radial tour would start from the best projection (as done in
+The \emph{radial tour} (Laa et al., 2023) provides a way to assess the
+importance of any variable or combination of variables. The target basis
+is chosen by zeroing out a variable (or multiple variables) and the
+interpolation runs from the initial projection to the target and back to
+the initial. If the structure observed in the initial plot doesn't
+change much when the variable(s) is removed, then the variable is not
+important. This is often best combined with the guided tour, where the
+radial tour would start from the best projection (as done in
 Figure~\ref{fig-tour-types-pdf} c), the most structured projection, and
 each of the variables can be tested for their importance in producing
 the structure.
@@ -6457,10 +6457,11 @@ We can fit an LDA model using the \texttt{lda()} function from the
 \texttt{MASS} package. Here we have used the \texttt{penguins} data,
 assuming equal prior probability, to illustrate.
 
+\index{software!MASS} \index{software!mulgar} \index{data!penguins}
+
 \begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{\# Code to fit the model}
-\FunctionTok{library}\NormalTok{(dplyr)}
 \FunctionTok{library}\NormalTok{(mulgar)}
 \FunctionTok{library}\NormalTok{(MASS)}
 \FunctionTok{load}\NormalTok{(}\StringTok{"data/penguins\_sub.rda"}\NormalTok{)}
@@ -6523,11 +6524,15 @@ which can be shown to match the original data projected using the
 \texttt{scaling} component of the model object (see
 Figure~\ref{fig-p-lda}).
 
+\index{software!colorspace} \index{software!ggplot2}
+\index{software!dplyr} \index{software!ggpubr}
+
 \begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{\# Check calculations from the fitted model, and equations}
 \FunctionTok{library}\NormalTok{(colorspace)}
 \FunctionTok{library}\NormalTok{(ggplot2)}
+\FunctionTok{library}\NormalTok{(dplyr)}
 \FunctionTok{library}\NormalTok{(ggpubr)}
 \CommentTok{\# Using the predicted values from the model object}
 \NormalTok{p\_lda\_pred\_x1 }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(p\_lda\_pred}\SpecialCharTok{$}\NormalTok{x)}
@@ -6570,8 +6575,8 @@ Figure~\ref{fig-p-lda}).
 
 \caption{\label{fig-p-lda}Penguins projected into the 2D discriminant
 space, done two ways: (a) using the predicted values, (b) directly
-projecting using the model component. The scale is not quite the same
-but the projected data is identical in shape.}
+projecting using the model component. The scale is different but the
+projected data is identical in shape.}
 
 \end{figure}%
 
@@ -6628,7 +6633,7 @@ depend on assumptions about the data which should be validated.
 \CommentTok{\# Generate ellipses for each group\textquotesingle{}s variance{-}covariance}
 \NormalTok{p\_ell }\OtherTok{\textless{}{-}} \ConstantTok{NULL}
 \ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \FunctionTok{unique}\NormalTok{(penguins\_sub}\SpecialCharTok{$}\NormalTok{species)) \{}
-\NormalTok{  x }\OtherTok{\textless{}{-}}\NormalTok{ penguins\_sub }\SpecialCharTok{\%\textgreater{}\%}\NormalTok{ dplyr}\SpecialCharTok{::}\FunctionTok{filter}\NormalTok{(species }\SpecialCharTok{==}\NormalTok{ i)}
+\NormalTok{  x }\OtherTok{\textless{}{-}}\NormalTok{ penguins\_sub }\SpecialCharTok{|\textgreater{}}\NormalTok{ dplyr}\SpecialCharTok{::}\FunctionTok{filter}\NormalTok{(species }\SpecialCharTok{==}\NormalTok{ i)}
 \NormalTok{  e }\OtherTok{\textless{}{-}} \FunctionTok{gen\_xvar\_ellipse}\NormalTok{(x[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{2}\NormalTok{], }\AttributeTok{n=}\DecValTok{150}\NormalTok{, }\AttributeTok{nstd=}\FloatTok{1.5}\NormalTok{)}
 \NormalTok{  e}\SpecialCharTok{$}\NormalTok{species }\OtherTok{\textless{}{-}}\NormalTok{ i}
 \NormalTok{  p\_ell }\OtherTok{\textless{}{-}} \FunctionTok{bind\_rows}\NormalTok{(p\_ell, e)}
@@ -6662,8 +6667,9 @@ variance-covariances are equal.}
 
 \caption{\label{fig-lda-assumptions2}Scatterplot of distance to cfa and
 road for the bushfires data, and corresponding variance-covariance
-ellipses. There is a lot of difference between the ellipses, so it
-cannot be assumed that the population variance-covariances are equal.}
+ellipses. There is a lot of difference between the shapes and the
+orientation of the ellipses, so it cannot be assumed that the population
+variance-covariances are equal.}
 
 \end{figure}%
 
@@ -6829,6 +6835,8 @@ range of all values of\texttt{bl} and \texttt{bd} and predicts their
 class. Figure~\ref{fig-lda-2D-boundary} shows the resulting prediction
 regions, with the observed data and the sample means overlaid.
 
+\index{software!classifly}
+
 \begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{\# Compute points in domain of data and predict}
@@ -6879,7 +6887,7 @@ This approach can be readily extended to higher dimensions. One first
 fits the model with all four variables, and uses the \texttt{explore()}
 to generate points in the 4D space with predictions, generating a
 representation of the prediction regions.
-Figure~\ref{fig-penguins-lda-boundaries-pdf}(a) shows the results using
+Figure~\ref{fig-penguins-lda-boundaries-pdf} (a) shows the results using
 a slice tour (Laa et al., 2020a). Points inside the slice are shown in
 larger size. The slice is made in the centre of the data, to show the
 boundaries in this neighbourhood. As the tour progresses we see a thin
@@ -6892,11 +6900,17 @@ linear, as would be expected when using LDA. We can also see that the
 model roughly divides the cube into three relatively equally-sized
 regions.
 
-Figure~\ref{fig-penguins-lda-boundaries-pdf}(b) shows the three
+Figure~\ref{fig-penguins-lda-boundaries-pdf} (b) shows the three
 prediction regions, represented by points in 4D, projected into the
 discriminant space. Linear boundaries neatly divide the full space,
 which is to be expected because the LDA model computes it's
-classification rules in this 2D space.\\
+classification rules in this 2D space. In this view the data has been
+overlaid and it can be seen that the boundaries produced by LDA quite
+nicely separate the species, albeit some confusion between Adelie and
+Chinstrap. Overlaying the data on the slide tour in (a) could be useful
+but it also adds too many parts to the plot, possibly making it more
+difficult to focus on the boundary.
+
 \index{classification!discriminant space}
 
 \begin{figure}
@@ -6939,6 +6953,95 @@ they are orthogonal to these two dimensions.}
 \end{figure}%
 
 \insightbox{From the tour, we can see that the LDA boundaries divide the classes only in the discriminant space. It is not using the space orthogonal to the 2D discriminant space. You can see this because the boundary is sharp in just one 2D projection, while most of the projections show some overlap of regions.}
+
+\section{Interpretability}\label{interpretability}
+
+Because the variables are standardised before computing LDA in the
+examples above, we can examine the magnitude and sign of the
+coefficients for the discriminant space to assess the importance of
+variables (Table~\ref{tbl-ds-coef-pdf}).
+
+\begin{table}
+
+\caption{\label{tbl-ds-coef-pdf}Coefficients of the discriminant space,
+original and othonormalised. LD1 is the direction where Gentoo is
+separated from the others, and the coefficients suggest this is due to a
+contrast between bd and fl/bm. LD2 is where Adelie is different from
+Chinstrap, which is generated by a contrast between bl and bm.}
+
+\centering{
+
+\begin{tabular}{l|r|r|r|r}
+\hline
+\multicolumn{1}{c|}{ } & \multicolumn{2}{c|}{original} & \multicolumn{2}{c}{orthonormal} \\
+\cline{2-3} \cline{4-5}
+  & LD1 & LD2 & LD1 & LD2\\
+\hline
+bl & -0.24 & -2.31 & -0.09 & -0.89\\
+\hline
+bd & 2.04 & 0.19 & 0.76 & 0.14\\
+\hline
+fl & -1.20 & 0.08 & -0.45 & -0.01\\
+\hline
+bm & -1.22 & 1.24 & -0.45 & 0.43\\
+\hline
+\end{tabular}
+
+}
+
+\end{table}%
+
+The discriminant space can be considered to be a 2D projection basis,
+except that it needs to be orthonormalised to be an orthonormal basis.
+This can be passed into a radial tour to assess the importance of each
+variable for generating the separation between classes.
+
+\index{tour!radial} \index{tour!local}
+
+\begin{figure}
+
+\begin{minipage}{0.50\linewidth}
+
+\pandocbounded{\includegraphics[keepaspectratio]{images/penguins_vip1.png}}
+
+\subcaption{\label{}radial: DS}
+\end{minipage}%
+%
+\begin{minipage}{0.50\linewidth}
+
+\pandocbounded{\includegraphics[keepaspectratio]{images/penguins_vip2.png}}
+
+\subcaption{\label{}radial: no bl}
+\end{minipage}%
+\newline
+\begin{minipage}{0.50\linewidth}
+
+\pandocbounded{\includegraphics[keepaspectratio]{images/penguins_local1.png}}
+
+\subcaption{\label{}local: DS}
+\end{minipage}%
+%
+\begin{minipage}{0.50\linewidth}
+
+\pandocbounded{\includegraphics[keepaspectratio]{images/penguins_local2.png}}
+
+\subcaption{\label{}local: better}
+\end{minipage}%
+
+\caption{\label{fig-interpret-pdf}Using the radial tour (a,b) and local
+tour (c,d) to investigate the importance of variables to the separation
+between species of penguins provided by LDA. The radial tour starts at
+the discriminant space, and removes the contribution of bl. This results
+in Adelie and Chinstrap being confused, but it has no impact on the
+separation of Gentoo. That is, the coefficient of bl on LD1 could be
+changed from slightly non-zero to actually zero without impacting that
+structure. In the local tour, again starting from discriminant space,
+the movement is slightly out of this projection to explore how the data
+looks in the nearby neighbourhood. What we learn is that there are
+slightly better separations between these two samples of Chinstrap and
+Adelie penguins. \faIcon{play-circle}}
+
+\end{figure}%
 
 \section*{Exercises}\label{exercises-13}
 \addcontentsline{toc}{section}{Exercises}
@@ -6988,6 +7091,8 @@ they are orthogonal to these two dimensions.}
   prior probability reflects the sample size, and the LDA model where
   the priors are equal for all groups. How does the boundary between
   lightning caused fires and the other groups change?
+\item
+  XXX Question on interpretability, variable importance
 \end{enumerate}
 
 \chapter{Trees and forests}\label{sec-trees-forests}
@@ -9759,6 +9864,13 @@ packages for modeling and machine learning using tidyverse principles.}
 Kuhn, M., \& Wickham, H. (2024). \emph{Tidymodels: Easily install and
 load the tidymodels packages}. \url{https://tidymodels.tidymodels.org}
 
+\bibitem[\citeproctext]{ref-radial-tour}
+Laa, U., Aumann, A., Cook, D., \& Valencia, G. (2023). New and
+simplified manual controls for projection and slice tours, with
+application to exploring classification boundaries in high dimensions.
+\emph{Journal of Computational and Graphical Statistics}, \emph{32}(3),
+1229--1236. \url{https://doi.org/10.1080/10618600.2023.2206459}
+
 \bibitem[\citeproctext]{ref-sagetour}
 Laa, U., Cook, D., \& Lee, S. (2022). Burning sage: Reversing the curse
 of dimensionality in the visualization of high-dimensional data.
@@ -10249,13 +10361,6 @@ Urbanek, S., \& Theus, M. (2003). {iPlots}: {H}igh {I}nteraction
 {G}raphics for {R}. In K. Hornik, F. Leisch, \& A. Zeileis (Eds.),
 \emph{Proceedings of the 3rd international workshop on distributed
 statistical computing (DSC 2003)}.
-
-\bibitem[\citeproctext]{ref-radial-tour}
-Ursula Laa, D. C., Alex Aumann, \& Valencia, G. (2023). New and
-simplified manual controls for projection and slice tours, with
-application to exploring classification boundaries in high dimensions.
-\emph{Journal of Computational and Graphical Statistics}, \emph{32}(3),
-1229--1236. \url{https://doi.org/10.1080/10618600.2023.2206459}
 
 \bibitem[\citeproctext]{ref-R-htmlwidgets}
 Vaidyanathan, R., Xie, Y., Allaire, J., Cheng, J., Sievert, C., \&
