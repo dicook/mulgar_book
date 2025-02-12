@@ -4,15 +4,17 @@
 
 Non-linear dimension reduction (NLDR) aims to find a low-dimensional representation of the high-dimensional data that shows the main features of the data. In statistics, it dates back to the work of @Kr64a on multidimensional scaling (MDS). Some techniques only require an interpoint similarity or distance matrix as the main ingredient, rather than the full data. We'll focus on when the full data is available here, so we can also compare structure perceived using the tour on the high-dimensional space, relative to structure revealed in the low-dimensional embedding.
 
-There are many methods available for generating non-linear low dimensional representations of the data. Classically, MDS  minimises some function of the difference between two interpoint distance matrices, the distance between points in the high-dimensions, and in the low-dimensional representations. 
+There are many methods available for generating non-linear low-dimensional representations of the data. Classically, MDS minimises some function of the difference between two interpoint distance matrices, the distance between points in the high-dimensions, and in the low-dimensional representations using a stress function ($C_{L2}$):
 
 $$
-\mbox{Stress}_D(x_1, ..., x_n) = \left(\sum_{i, j=1; i\neq j}^n (d_p(i,j) - d_k(i,j))^2\right)^{1/2}
+C_{L2} = \left(\sum_{i, j=1; i\neq j}^n (d_p(i,j) - d_k(i,j))^2\right)^{1/2}
 $$
-where $D$ is an $n\times n$ matrix of distances $(d_p(i,j))$ between all pairs of points, and $d_k(i,j)$ is the distance between the points in the low-dimensional space. PCA is a special case of MDS. The result from PCA is a linear projection, but generally MDS can provide non-linear transformations to represent unusual high-dimensional patterns. A good resource for learning about MDS is @BG05.
+where $(d_p(i,j))$ are the distances between all pairs of points in $p$-dimensions, and $d_k(i,j)$ is the distance between the points in the low-dimensional ($k$) space. PCA is a special case of MDS. The result from PCA is a linear projection, but generally MDS can provide non-linear transformations to represent unusual high-dimensional patterns. The choices for defining $d_p$ are huge and including ones that are locally computed or globally computed. The locally computed choices can capture highly non-linear geometric shapes living in high-dimensions. Some methods modify the stress function the $L_2$-norm, by replacing the 2 with an arbitrary power. Others yet use transformations of the distances. A good resource for learning about MDS and the many choices is @BG05.
 
+\index{dimension reduction!MDS}
 \index{dimension reduction!t-SNE}
 \index{dimension reduction!UMAP}
+
 
 ```{r echo=knitr::is_html_output()}
 #| label: fig-nldr-clusters
@@ -43,7 +45,31 @@ n2 <- ggplot(as.data.frame(cnl_umap), aes(x=V1, y=V2)) +
 n1 + n2
 ```
 
-Popular methods in current use for NLDR include t-SNE [@Maaten2008] and UMAP [@McInnes2018]. The approach of t-SNE is to compare interpoint distances with a standard probability distribution (eg $t$-distribution) to exaggerate local neighbourhood differences. UMAP compares the interpoint distances with what might be expected if the data was uniformly distributed in the high-dimensions.
+::: {.content-visible when-format="html"}
+::: info
+A common myth is that non-linear dimension reduction captures non-linear patterns in the high-dimensional data. It may or may not do this. It is called non-linear dimension reduction because it transforms the data non-linearly into a useful visual representation. 
+:::
+:::
+
+::: {.content-visible when-format="pdf"}
+
+\infobox{A common myth is that non-linear dimension reduction captures non-linear patterns in the high-dimensional data. It may or may not do this. It is called non-linear dimension reduction because it transforms the data non-linearly into a useful visual representation.}
+
+:::
+
+Popular methods in current use for NLDR include t-SNE [@Maaten2008] and UMAP [@McInnes2018]. These approaches use a different approach for comparing the high-dimensional and low-dimensional distances, based on Kullback-Leibler divergence:
+
+$$
+C_{KL} = \sum_{i,j} p_{ij}\log\left(\frac{p_{ij}}{q_{ij}}\right)
+$$
+where $i,j$ indicate two observations in the data, and $p_{ij}, q_{ij}$ are the probability distributions of the distances in $p$ and $k$ dimensions, respectively. To obtain $p_{ij}$ the interpoint distances are computed, and normalised by dividing by $\sum_{i,j} p_{ij}$, as is done similarly to obtain $q_{ij}$. A further step in t-SNE is transforming the distances through the CDF of a specified distribution (Gaussian in $p$-D and $t$-distribution in $k$-D) to reflect differences is volume between the high and low dimensional spaces, akin to the transformation used in the sage tour (@sagetour). (See @fig-density illustrating the crowding effect.) The normalisation effectively means small distances, like distances between points that are in a cluster, even if clusters are bigger or smaller, become relatively closer in comparison with all the large distances. 
+
+In practice, the optimisation is conducted with a likelihood function:
+
+$$
+C_{LV} = \sum_{i \neq j} p_{ij} \log\left(w_{ij}\right) + \gamma \sum_{i \neq j} \log\left(w_{ij}\right)
+$$
+where $w_{ij}$ are the unnormalised similarities in the $k$-dimensional representation, and the second component weighted by $\gamma$ adds a repulsive force to push points apart. UMAP optimises a variation of $C_{LV}$. Both t-SNE and UMAP are designed with cluster structure in mind, and may provide useful low-dimensional representations of clustering in high-dimensions. 
 
 @fig-nldr-clusters shows two NLDR views of the `clusters_nonlin` data set from the `mulgar` package. Both suggest that there are four clusters, and that some clusters are non-linearly shaped. They disagree on the type of non-linear pattern, where t-SNE represents one cluster as a wavy-shape and UMAP both have a simple parabolic shape.
 
