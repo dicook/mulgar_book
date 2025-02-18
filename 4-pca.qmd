@@ -83,9 +83,9 @@ The next step is to look at the coefficients for the selected number of PCs. @tb
 #| tbl-cap: "Coefficients for the first two PCs for the plane data."
 #| code-summary: "Code to print PC coefficients"
 library(gt)
-p_pca$rotation[,1:2] %>%
-  as_tibble(rownames="Variable") %>% 
-  gt() %>%
+p_pca$rotation[,1:2] |>
+  as_tibble(rownames="Variable") |> 
+  gt() |>
   fmt_number(columns = c(PC1, PC2),
              decimals = 2)
 ```
@@ -94,9 +94,9 @@ p_pca$rotation[,1:2] %>%
 #| label: tbl-box-pcs
 #| tbl-cap: "Coefficients for the first three PCs for the box data."
 #| code-summary: "Code to print PC coefficients"
-b_pca$rotation[,1:3] %>%
-  as_tibble(rownames="Variable") %>% 
-  gt() %>%
+b_pca$rotation[,1:3] |>
+  as_tibble(rownames="Variable") |> 
+  gt() |>
   fmt_number(columns = c(PC1, PC2, PC3),
              decimals = 2)
 ```
@@ -124,9 +124,9 @@ ggscree(pn_pca, q = 7) + theme_minimal()
 #| label: tbl-plane-noise-pcs
 #| tbl-cap: "Coefficients for PCs 1-4 of the plane plus noise data."
 #| code-summary: "Code to print PC coefficients"
-pn_pca$rotation[,1:4] %>%
-  as_tibble(rownames="Variable") %>% 
-  gt() %>%
+pn_pca$rotation[,1:4] |>
+  as_tibble(rownames="Variable") |> 
+  gt() |>
   fmt_number(columns = c(PC1, PC2, PC3, PC4),
              decimals = 2)
 ```
@@ -139,9 +139,9 @@ The `pisa` data contains simulated data from math, reading and science scores, t
 ```{r}
 #| code-fold: false
 data(pisa)
-pisa_std <- pisa %>%
-  filter(CNT == "Australia") %>%
-  select(-CNT) %>%
+pisa_std <- pisa |>
+  filter(CNT == "Australia") |>
+  select(-CNT) |>
   mutate_all(mulgar:::scale2)
 pisa_pca <- prcomp(pisa_std)
 pisa_scree <- ggscree(pisa_pca, q = 15) + theme_minimal()
@@ -233,7 +233,7 @@ This data has player statistics for all the matches in the 2021 season. We would
 #| code-fold: false
 library(tourr)
 data(aflw)
-aflw_std <- aflw %>%
+aflw_std <- aflw |>
   mutate_if(is.numeric, function(x) (x-
       mean(x, na.rm=TRUE))/
       sd(x, na.rm=TRUE))
@@ -303,10 +303,10 @@ From the scree plot in @fig-aflw-pca, we see a sharp drop from one to two, two t
 #| tbl-cap: "Coefficients for the first four PCs. PC 1 contrasts some with PC 1, with the first having large coefficients primarily on field play statistics, and the second having large coefficients on the scoring statistics."
 #| code-summary: "Code to print PC coefficients"
 library(gt)
-aflw_pca$rotation[,1:4] %>%
-  as_tibble(rownames="Variable") %>% 
-  arrange(desc(PC1), desc(PC2), desc(PC3)) %>%
-  gt() %>%
+aflw_pca$rotation[,1:4] |>
+  as_tibble(rownames="Variable") |> 
+  arrange(desc(PC1), desc(PC2), desc(PC3)) |>
+  gt() |>
   fmt_number(columns = c(PC1, PC2, PC3, PC4),
              decimals = 2)
 ```
@@ -375,10 +375,10 @@ aflw_gp <- ggplot() +
          panel.grid=element_blank())
 aflw_pctour <- ggplotly(aflw_gp,
                         width=500,
-                        height=550) %>%
-       animation_button(label="Go") %>%
+                        height=550) |>
+       animation_button(label="Go") |>
        animation_slider(len=0.8, x=0.5,
-                        xanchor="center") %>%
+                        xanchor="center") |>
        animation_opts(easing="linear", transition = 0)
 
 htmlwidgets::saveWidget(aflw_pctour,
@@ -458,7 +458,7 @@ ggplotly(pg18, width=500, height=500)
 #| fig-width: 5
 #| fig-height: 4
 #| out-width: 60%
-p18_labels <- p18[["data_prj"]] %>% as_tibble() %>% filter(obs_labels %in% c("AhrensLauren", "LivingstoneStacey", "ParkerAlyce", "BonniciBrittany", "HookerDana", "BowersKiara"))
+p18_labels <- p18[["data_prj"]] |> as_tibble() |> filter(obs_labels %in% c("AhrensLauren", "LivingstoneStacey", "ParkerAlyce", "BonniciBrittany", "HookerDana", "BowersKiara"))
 pg18 + theme(aspect.ratio=1, legend.position="none") +
   geom_point(data=p18_labels, aes(x=P1, y=P2, 
                                  label=obs_labels,
@@ -891,6 +891,43 @@ One of the dangers of PCA is that interesting and curious details of the data on
 4. Examine the `bushfires` data using a grand tour on the numeric variables, ignoring the `cause` (class) variable. Note any issues such as outliers, or skewness that might affect PCA. How many principal components would be recommended by the scree plot? Examine this PCA model with the data, and explain how well it does or doesn't fit.
 5. Use the `pca_tour` to examine the first five PCs of the `bushfires` data. How do all of the variables contribute to this reduced space?
 6. Reduce the dimension of the `sketches` data to 12 PCs. How much variation does this explain? Is there any obvious clustering in this lower dimensional space?
+7. Copulas are commonly used to define the covariance relationship between pairs of variables, for fixed marginal distributions. There are several R packages that enable simulating multivariate data using copula methods. 
+
+a. Use the `covsim` package to simulate data. The following code will generate 5D data with normal marginal distributions.  
+
+```{r}
+#| eval: false
+library(covsim)
+library(tidyverse)
+library(tourr)
+set.seed(308) # define a target covariance
+p <- 5
+# Basically randomise the target covariance bc small sample
+sigma.target <- cov(MASS::mvrnorm(10, mu=rep(0, p), Sigma=diag(1, p)))
+# normal margins that match the covariances:
+marginsnorm <- lapply(X=sqrt(diag(sigma.target)),function(X) list(distr="norm", sd=X) )
+calibrated.vine <- vita(marginsnorm, sigma.target =sigma.target, Nmax=10^5, cores=1)
+copdata <- rvinecopulib::rvine(467, calibrated.vine)
+copdata <- as.data.frame(copdata)
+GGally::ggscatmat(copdata)
+cov(copdata)
+sigma.target
+animate_xy(copdata)
+```
+
+b. The `ecoCopula` package has a function `simulate` that can generate data similar to ecological abundance data using discretised copulas. 
+
+```{r}
+#| eval: false
+library(ecoCopula)
+data(spider)
+abund <- spider$abund
+spider_mod_ssdm = stackedsdm(abund,~1, data = spider$x, ncores=2)
+spid_lv_ssdm = cord(spider_mod_ssdm)
+spider_sim <- simulate(spid_lv_ssdm, nsim=1, seed=1001)
+
+```
+
 
 ```{r}
 #| label: aflw-pairs
@@ -908,8 +945,8 @@ ggscatmat(aflw_pca$x, columns=1:4)
 library(mulgar)
 library(dplyr)
 data(bushfires)
-bushfires_std <- bushfires %>%
-  dplyr::select(`rf`:`log_dist_road`) %>%
+bushfires_std <- bushfires |>
+  dplyr::select(`rf`:`log_dist_road`) |>
   mutate_if(is.numeric, function(x) (x-
       mean(x, na.rm=TRUE))/
       sd(x, na.rm=TRUE))

@@ -124,6 +124,7 @@ print(class1 + class2 + class3 + class4 + plot_layout(ncol=2))
 
 \index{data!bushfires}
 \index{data!pisa}
+\index{data!aflw}
 
 ## Exercises {-}
 
@@ -135,7 +136,7 @@ c. whether one should fit a linear or nonlinear classifier to separate the group
 
 2. Make a 10% sample of the `pisa` data, stratified by the two countries, and examine the first 5 math scores `PV1MATH`-`PV5MATH`. Explain whether there is a difference between the two countries, and whether they are separable based on math scores.
 
-3. There are several interesting data sets with class variables available on the [GGobi website](http://ggobi.org/book/index.html), for example, `olive`, and `music` data sets. The `music` data can be read using:
+3. There are several interesting data sets with class variables available on the [GGobi website](http://ggobi.org/book/index.html). Examine the differences between `type` of music, based on the the variables `lvar`, `lave`, `lmax`, `lfener`, `lfreq`. Are these music types separable? If so, which variables are important. The `music` data can be read using:
 
 ```{r}
 #| echo: true
@@ -148,7 +149,8 @@ music <- read_csv("http://ggobi.org/book/data/music-sub.csv",
   mutate(type = factor(type))
 ```
 
-Examine the differences between `type` of music, based on the the variables `lvar`, `lave`, `lmax`, `lfener`, `lfreq`. Are these music types separable? If so, which variables are important. 
+4. The `aflw` data contains information on the [player positions](https://en.wikipedia.org/wiki/Australian_rules_football_positions), as well as their statistics. Subset the data to `FF` (full forward), `BPL` (back pocket left) and `RR` (ruck). Examine the differences between player statistics (goals to tackles) for these positions. Explain whether the players in these positions have different profiles on the statistics, and whether the position is distinguishable based on combinations of the statistics. 
+
 
 
 ```{r eval=FALSE}
@@ -174,6 +176,16 @@ animate_xy(pisa_sub[,2:6], col=pisa_sub$CNT)
 
 animate_xy(music[,4:8], guided_tour(lda_pp(music$type)), col=music$type, rescale=TRUE)
 
+data(aflw)
+aflw_sub <- aflw |> 
+  filter(position %in% c("BPL", "FF", "RR")) |>
+  mutate(position = factor(position))
+animate_xy(aflw_sub[,8:15], col=aflw_sub$position, rescale=TRUE)
+animate_xy(aflw_sub[,8:15], 
+           guided_tour(lda_pp(aflw_sub$position)), 
+           col=aflw_sub$position, 
+           rescale=TRUE)
+
 ```
 
 ::: {.content-hidden}
@@ -192,4 +204,8 @@ The types of music are nearly separable. At least, "Rock" is almost perfectly se
 
 The difference is mostly due to `lave`, with smaller contributions from all of the other variables.
 
+Q4 answer:
+The guided tour with lda_pp is best for studying this data. The players in these positions have quite different statistics, especially FF vs RR. From the final projection using the guided tour, RR is distinguishable from FF, primarily in disposals, RR makes more disposals and FF few. The other statistics that contribute to this difference are kicks, tackles, bounces and behinds. FF tend to do more bounces and behinds than RR, and RR makes more kicks and tackles. The BPL players are distinguishable from the other two based on marks, goals and handballs. BPL do more marks, and RR and FF make more goals and do more handballs.
+
+These groups are linearly separable, but the covariance of each group is very different, so LDA could not be used. 
 :::

@@ -1,25 +1,285 @@
 ## Non-linear dimension reduction
 
-## Explanation of NLDR methods
+Non-linear dimension reduction (NLDR) aims to find a single low-dimensional representation of the high-dimensional data that shows the main features of the data. If there are separated clusters present then it might be a layout where the clusters are all distinct, in a way that a single linear projection could not reveal. For observations falling on a low-dimensional non-linear manifold in high dimensions the NLDR might unfold or unroll it so that they are represented in a plane where the distances are similar to their distance along the manifold. 
 
-Non-linear dimension reduction (NLDR) aims to find a low-dimensional representation of the high-dimensional data that shows the main features of the data. In statistics, it dates back to the work of @Kr64a on multidimensional scaling (MDS). Some techniques only require an interpoint similarity or distance matrix as the main ingredient, rather than the full data. We'll focus on when the full data is available here, so we can also compare structure perceived using the tour on the high-dimensional space, relative to structure revealed in the low-dimensional embedding.
+\index{manifold}
+\index{interpoint distance}
 
-There are many methods available for generating non-linear low dimensional representations of the data. Classically, MDS  minimises some function of the difference between two interpoint distance matrices, the distance between points in the high-dimensions, and in the low-dimensional representations. 
+Most techniques only require an interpoint similarity or distance matrix as the main ingredient, rather than the full $p$-dimensional data. A classic example where only this information is the morse code data reported by @morsecode, and available in the `xgobi` software [@xgobi]. The data contains the counts of the number of times that a letter is mistaken for another letter collected in an experimental study. However, here we focus on problems where the full $p$-dimensional data is available, so we can also compare structure perceived using the tour on the high-dimensional space, relative to structure revealed in the low-dimensional embedding.
+
+::: {.content-visible when-format="html"}
+::: info
+A common myth is that non-linear dimension reduction captures non-linear patterns in the high-dimensional data. It may or may not do this. The term means that the methods transform the data non-linearly into a useful (or not) visual representation.
+:::
+:::
+
+::: {.content-visible when-format="pdf"}
+
+\infobox{A common myth is that non-linear dimension reduction captures non-linear patterns in the high-dimensional data. It may or may not do this. The term means that the methods transform the data non-linearly into a useful (or not) visual representation.}
+
+:::
+
+## Classical methods
+
+In statistics, methods for non-linear dimension reduction arise with multidimensional scaling (MDS) [@Kr64a].  Classically, MDS minimises some function of the difference between two interpoint distance matrices, the distance between points in the high-dimensions, and in the low-dimensional representations using a stress function ($C_{L2}$):
 
 $$
-\mbox{Stress}_D(x_1, ..., x_n) = \left(\sum_{i, j=1; i\neq j}^n (d_p(i,j) - d_k(i,j))^2\right)^{1/2}
+C_{L2} = \left(\sum_{i, j=1; i\neq j}^n (d_p(i,j) - d_k(i,j))^2\right)^{1/2}
 $$
-where $D$ is an $n\times n$ matrix of distances $(d_p(i,j))$ between all pairs of points, and $d_k(i,j)$ is the distance between the points in the low-dimensional space. PCA is a special case of MDS. The result from PCA is a linear projection, but generally MDS can provide non-linear transformations to represent unusual high-dimensional patterns. A good resource for learning about MDS is @BG05.
+where $(d_p(i,j))$ are the distances between all pairs of points in $p$-dimensions, and $d_k(i,j)$ is the distance between the points in the low-dimensional ($k$) space. PCA is a special case of MDS, in that, the first two PCs provide the solution to the above equation if distance is Euclidean. Each PC is a linear projection, but generally MDS can provide non-linear transformations to represent unusual high-dimensional patterns. 
 
+The choices for defining $d_p$ are many, including ones that are locally, using say $k$ nearest neighbours, or globally computed. Distances can also be transformed using some function, including ranks instead of actual distance. Another approach modifies the stress function the $L_2$-norm, by replacing the 2 with an arbitrary power. Others yet use transformations of the distances. A good resource for learning about MDS and the many choices is @BG05.
+
+\index{data!swiss roll}
+
+The methods *isomap* [@isomap] and *local linear embedding* (LLE) are two methods where local distance is used, and they were designed to unwrap data from a manifold. `r ifelse(knitr::is_html_output(), '@fig-swiss-html', '@fig-swiss-pdf')` illustrates how the results on the classic swiss roll data can differ according to method, in useful ways. The observations lie on a 2D non-linear manifold in 3D. The data is a manufactured example introduced to illustrate the ability of isomap and LLE to unwrap the swiss roll and lay out the points in a rectangle as though one was travelling along the surface. 
+
+\index{software!Rdimtools}
+\index{software!cardinalR}
+\index{dimension reduction!isomap}
+\index{dimension reduction!local linear embedding (LLE)}
+
+```{r echo=knitr::is_html_output()}
+#| message: false
+#| code-summary: Code for spiral plots
+library(Rdimtools)
+library(colorspace)
+library(cardinalR)
+library(tsibble)
+library(ggplot2)
+library(dplyr)
+library(patchwork)
+library(ggthemes)
+n_obs <- 1652  
+set.seed(259)
+swiss <- swiss_roll(n_obs, num_noise = 0)
+# Standardising ruins structure
+# swiss <- apply(swiss, 2, function(x) (x-mean(x))/sd(x))
+swiss[,3] <- swiss[,3] * 3 # This scale produces more recognisable results
+# Compute distance from (0,0) in first two coordinates - spiral
+swiss <- cbind(swiss, sqrt(swiss[,1]^2 +
+                           swiss[,2]^2))
+colnames(swiss) <- c("x", "y", "z", "d")
+swiss_tbl <- as_tibble(swiss)
+swiss_pca <- prcomp(swiss[,1:3], scale=FALSE)
+swiss_tbl <- bind_cols(swiss_tbl, as_tibble(swiss_pca$x))
+spiral1 <- ggplot(swiss_tbl, 
+                  aes(x=PC2, 
+                      y=PC3, 
+                      colour=d)) +
+  geom_point() +
+  scale_colour_continuous_divergingx(palette="Zissou 1",
+       mid=median(swiss_tbl$d)) + 
+  theme_minimal() +
+  theme(aspect.ratio=1, 
+        axis.text = element_blank(),
+        legend.position = "none")
+
+swiss_iso <- do.isomap(swiss[,1:3],
+  ndim=2, type=c("knn", 10), 
+  weight=FALSE)$Y
+colnames(swiss_iso) <- c("iso1", "iso2")
+swiss_iso <- as_tibble(swiss_iso) |>
+  bind_cols(swiss_tbl)
+spiral2 <- ggplot(swiss_iso, 
+                  aes(x=iso1, 
+                      y=iso2, 
+                      colour=d)) + 
+  geom_point() +
+  scale_colour_continuous_divergingx(palette="Zissou 1",
+       mid=median(swiss_iso$d)) + 
+  theme_minimal() +
+  theme(aspect.ratio=1, 
+        axis.text = element_blank(),
+        legend.position = "none")
+
+#spiral1 + spiral2 + plot_layout(ncol=2)
+```
+
+::: {.content-visible when-format="html"}
+::: {#fig-swiss-html layout="[[33, 33, 33]]"}
+
+![tour](gifs/swiss.gif){width=280 alt="Rotating 3D plot where points are spread uniformly on a swiss roll shape."}
+
+```{r}
+#| fig-width: 4
+#| fig-height: 4
+#| out-width: 100%
+#| fig-cap: "PCA"
+#| fig-alt: "This is an untitled chart has x-axis 'PC2' and y-axis 'PC3' with no labels or legend. Colour is used to show a variable d. The chart is a set of 1652 solid circle points laid out in a spiral pattern, with colours starting with one end of the rainbow smoothly transitioning the the other end of the rainbow scale at the other end of the spiral."
+#| echo: false
+spiral1
+```
+
+```{r}
+#| fig-width: 4
+#| fig-height: 4
+#| out-width: 100%
+#| fig-cap: "isomap"
+#| fig-alt: "This is an untitled chart has x-axis 'PC2' and y-axis 'PC3' with no labels or legend. Colour is used to show a variable d. The chart is a set of 1652 solid circle points laid out in a slightly squashed rectangle, with colours starting with one end of the rainbow on the left and smoothly transitioning the the other end of the rainbow scale at the right."
+#| echo: false
+spiral2
+```
+
+The classic swiss roll data constructed to illustrate isomap, as shown in (a) a tour, (b) lowest two principal components, (c) NLDR provided by isomap. The spiral can be discovered by many methods, including different principal compoents depending on the scaling of the data, or using projection pursuit, or nonlinear MDS. Being able to unwrap the spiral and lay out the points along a plane is achieved by isomap and LLE with careful choice of parameters. Colour indicates distance along this spiral.
+:::
+:::
+
+::: {.content-visible when-format="pdf"}
+::: {#fig-swiss-pdf layout="[[33, 33, 33]]"}
+
+![tour](images/swiss.png){width=143 fig-alt="Single projection from a rotating 3D plot where points are spread in a swiss roll shape."}
+
+```{r}
+#| fig-width: 4
+#| fig-height: 4
+#| out-width: 100%
+#| fig-cap: "PCA"
+#| fig-alt: "This is an untitled chart has x-axis 'PC2' and y-axis 'PC3' with no labels or legend. Colour is used to show a variable d. The chart is a set of 1652 solid circle points laid out in a spiral pattern, with colours starting with one end of the rainbow smoothly transitioning the the other end of the rainbow scale at the other end of the spiral."
+#| echo: false
+spiral1
+```
+
+```{r}
+#| fig-width: 4
+#| fig-height: 4
+#| out-width: 100%
+#| fig-cap: "isomap"
+#| fig-alt: "This is an untitled chart has x-axis 'PC2' and y-axis 'PC3' with no labels or legend. Colour is used to show a variable d. The chart is a set of 1652 solid circle points laid out in a slightly squashed rectangle, with colours starting with one end of the rainbow on the left and smoothly transitioning the the other end of the rainbow scale at the right."
+#| echo: false
+spiral2
+```
+
+The classic swiss roll data constructed to illustrate isomap, as shown in (a) a random tour projection, (b) lowest two principal components, (c) NLDR provided by isomap. The spiral can be discovered by many methods, including different principal compoents depending on the scaling of the data, or using projection pursuit, or nonlinear MDS. Being able to unwrap the spiral and lay out the points along a plane is achieved by isomap and LLE with careful choice of parameters. Colour indicates distance along this spiral. {{< fa play-circle >}}
+:::
+:::
+
+```{r}
+#| eval: false
+#| echo: false
+library(crosstalk)
+library(plotly)
+library(tourr)
+swiss_tbl <- as_tibble(swiss)
+spiral1 <- ggplot(swiss_tbl, 
+                  aes(x=x, 
+                      y=y, 
+                      colour=d)) +
+  geom_point() +
+  scale_colour_continuous_divergingx(palette="Zissou 1",
+       mid=median(swiss_tbl$d)) + 
+  theme_minimal() +
+  theme(aspect.ratio=1, 
+        axis.text = element_blank(),
+        legend.position = "none")
+swiss_pca <- prcomp(swiss[,1:3], scale=FALSE)
+ggscatmat(swiss_pca$x)
+ggplot(swiss_pca$x, aes(x=PC1, y=PC2)) + geom_point()
+swiss_mds <- cmdscale(dist(swiss))
+colnames(swiss_mds) <- c("mds1", "mds2")
+swiss_mds <- as_tibble(swiss_mds) |>
+  bind_cols(as_tibble(swiss))
+ggplot(swiss_mds, aes(x=mds1, y=mds2, colour=d)) +
+  geom_point() +
+  scale_colour_continuous_divergingx(palette="Zissou 1",
+       mid=median(swiss_mds$d)) + 
+  theme(aspect.ratio=1)
+swiss_nmds <- monoMDS(dist(swiss[,1:3]), 
+                      model = "local")$points
+colnames(swiss_nmds) <- c("nmds1", "nmds2")
+swiss_nmds <- as_tibble(swiss_nmds) |>
+  bind_cols(swiss_tbl)
+ggplot(swiss_nmds, aes(x=nmds1, y=nmds2, colour=d)) +
+  geom_point() +
+  scale_colour_continuous_divergingx(palette="Zissou 1",
+       mid=median(swiss_mds$d)) + 
+  theme(aspect.ratio=1)
+
+animate_xy(swiss[,1:3])
+animate_xy(swiss[,1:3], guided_tour(holes()))
+set.seed(432)
+render_gif(swiss[,1:3], 
+           grand_tour(),
+           display_xy(axes="bottomleft"),
+           gif_file = "gifs/swiss.gif",
+           frames = 500,
+           width = 300, 
+           height = 300)
+
+swiss_lle <- do.lle(swiss2,
+  ndim=2, type=c("knn", 20), #  type=c("enn", 0.5),
+  weight=FALSE)$Y
+colnames(swiss_lle) <- c("lle1", "lle2")
+swiss_lle <- as_tibble(swiss_lle) |>
+  bind_cols(swiss_tbl)
+ggplot(swiss_lle, aes(x=lle1, y=lle2, colour=d)) + 
+  geom_point() +
+  scale_colour_continuous_divergingx(palette="Zissou 1",
+       mid=median(swiss_lle$d)) + 
+  theme(aspect.ratio=1)
+
+swiss_df <- bind_cols(swiss, swiss_iso, swiss_lle)
+shared_swiss_df <- SharedData$new(swiss_df)
+p1 <- ggplot(shared_swiss_df, aes(x=iso1, y=iso2)) +
+  geom_point() 
+gp1 <- ggplotly(p1, width=500, height=500) |> 
+  highlight(on = "plotly_selected", 
+              off = "plotly_doubleclick")
+p2 <- ggplot(shared_swiss_df, aes(x=x, y=y)) +
+  geom_point() 
+gp2 <- ggplotly(p2, width=500, height=500) |> 
+  highlight(on = "plotly_selected", 
+              off = "plotly_doubleclick")
+p3 <- ggplot(shared_swiss_df, aes(x=lle1, y=lle2)) + 
+  geom_point()
+gp3 <- ggplotly(p3, width=500, height=500) |> 
+  highlight(on = "plotly_selected", 
+              off = "plotly_doubleclick")
+
+bscols(
+     gp1, gp2, gp3,
+     widths = c(4, 4, 4)
+ )
+
+swiss_df <- bind_cols(swiss, swiss_iso)
+shared_swiss_df <- SharedData$new(swiss_df)
+p1 <- ggplot(shared_swiss_df, aes(x=iso1, y=iso2)) +
+  geom_point() 
+gp1 <- ggplotly(p1, width=300, height=300) |> 
+  highlight(on = "plotly_selected", 
+              off = "plotly_doubleclick")
+p2 <- ggplot(shared_swiss_df, aes(x=x, y=y)) +
+  geom_point() 
+gp2 <- ggplotly(p2, width=300, height=300) |> 
+  highlight(on = "plotly_selected", 
+              off = "plotly_doubleclick")
+
+bscols(
+     gp1, gp2,
+     widths = c(5, 5)
+ )
+```
+
+
+\index{dimension reduction!MDS}
 \index{dimension reduction!t-SNE}
 \index{dimension reduction!UMAP}
 
+The swiss roll data is interesting in the sense that from a visual perspective it is interesting to be able to *discover* the spiral structure. Particularly this would be a more challenging if the 2D spiral was in data with more than three variables, and all the additional ones were noise (like `z` in this example). Methods like projection pursuit, PCA or MDS can discover the spiral if all variables are measured on the same scale (say -1, 1) but not standardised because the variance of the spiral shape is different from that of noise. 
+Being able to discover the manifold (here, a 2D surface matching a swiss roll) can be useful for conducting further analysis. The points are now organised according to distance relative to the manifold on which they live. This layout is like taming a lion, it feels like an achievement, but realistically it is very difficult to achieve from these methods: data scale choice or a different number of $k$ nearest neighbours, changes the layout dramatically. Organising the points into distance along the spiral could have equally been achieved by discovering the spiral, and computing radial distance, as done to produce the colouring of points in `r ifelse(knitr::is_html_output(), '@fig-swiss-html', '@fig-swiss-pdf')`. This approach would also extend beyond 3D, to any additional number of noise dimensions.
+
+## Contemporary approaches
+
+\index{software!uwot}
+\index{software!Rtsne}
+
 ```{r echo=knitr::is_html_output()}
 #| label: fig-nldr-clusters
-#| fig-cap: "Two non-linear embeddings of the non-linear clusters data: (a) t-SNE, (b) UMAP. Both suggest four clusters, with two being non-linear in some form."
-#| fig-alt: FIXME
+#| fig-cap: "Two non-linear embeddings of the non-linear clusters data: (a) t-SNE, (b) UMAP. One suggests five clusters and the other four, and also disagree on the cluster shapes."
+#| fig-alt: "This chart has two plots titled '(a) t-SNE', with x-axis 'tsne1' and y-axis 'tsne2', and '(b) UMAP' with x-axis 'umap1' anf y-axis 'umap2'. The chart '(a)' is a set of 1268 solid circle points arranged with a strip going from bottom let to top right, two C-shapes above and below the line and two small concetration of dots at the middle bottom and top. The points in chart '(b)' are arranged like a tilted smiley face."
 #| fig-width: 8
 #| fig-height: 4
+#| out-width: 100%
 #| message: false
 #| code-summary: "Code to generate the 2D non-linear representation"
 library(mulgar)
@@ -27,23 +287,41 @@ library(Rtsne)
 library(uwot)
 library(ggplot2)
 library(patchwork)
-set.seed(42)
+set.seed(44)
 cnl_tsne <- Rtsne(clusters_nonlin)
 cnl_umap <- umap(clusters_nonlin)
 n1 <- ggplot(as.data.frame(cnl_tsne$Y), aes(x=V1, y=V2)) +
   geom_point() + 
+  xlab("tsne1") +
+  ylab("tsne2") +
   ggtitle("(a) t-SNE") +
   theme_minimal() + 
-  theme(aspect.ratio=1)
+  theme(aspect.ratio=1, 
+        axis.text = element_blank())
 n2 <- ggplot(as.data.frame(cnl_umap), aes(x=V1, y=V2)) +
   geom_point() + 
+  xlab("umap1") +
+  ylab("umap2") +
   ggtitle("(b) UMAP") +
   theme_minimal() + 
-  theme(aspect.ratio=1)
+  theme(aspect.ratio=1, 
+        axis.text = element_blank())
 n1 + n2
 ```
 
-Popular methods in current use for NLDR include t-SNE [@Maaten2008] and UMAP [@McInnes2018]. The approach of t-SNE is to compare interpoint distances with a standard probability distribution (eg $t$-distribution) to exaggerate local neighbourhood differences. UMAP compares the interpoint distances with what might be expected if the data was uniformly distributed in the high-dimensions.
+Popular methods in current use for NLDR include t-SNE [@Maaten2008] and UMAP [@McInnes2018]. These approaches use a different approach for comparing the high-dimensional and low-dimensional distances, based on Kullback-Leibler divergence:
+
+$$
+C_{KL} = \sum_{i,j} p_{ij}\log\left(\frac{p_{ij}}{q_{ij}}\right)
+$$
+where $i,j$ indicate two observations in the data, and $p_{ij}, q_{ij}$ are the probability distributions of the distances in $p$ and $k$ dimensions, respectively. To obtain $p_{ij}$ the interpoint distances are computed, and normalised by dividing by $\sum_{i,j} p_{ij}$, as is done similarly to obtain $q_{ij}$. A further step in t-SNE is transforming the distances through the CDF of a specified distribution (Gaussian in $p$-D and $t$-distribution in $k$-D) to reflect differences is volume between the high and low dimensional spaces, akin to the transformation used in the sage tour (@sagetour). (See @fig-density illustrating the crowding effect.) The normalisation effectively means small distances, like distances between points that are in a cluster, even if clusters are bigger or smaller, become relatively closer in comparison with all the large distances. 
+
+In practice, the optimisation is conducted with a likelihood function:
+
+$$
+C_{LV} = \sum_{i \neq j} p_{ij} \log\left(w_{ij}\right) + \gamma \sum_{i \neq j} \log\left(w_{ij}\right)
+$$
+where $w_{ij}$ are the unnormalised similarities in the $k$-dimensional representation, and the second component weighted by $\gamma$ adds a repulsive force to push points apart. UMAP optimises a variation of $C_{LV}$. Both t-SNE and UMAP are designed with cluster structure in mind, and may provide useful low-dimensional representations of clustering in high-dimensions. 
 
 @fig-nldr-clusters shows two NLDR views of the `clusters_nonlin` data set from the `mulgar` package. Both suggest that there are four clusters, and that some clusters are non-linearly shaped. They disagree on the type of non-linear pattern, where t-SNE represents one cluster as a wavy-shape and UMAP both have a simple parabolic shape.
 
@@ -63,16 +341,16 @@ render_gif(clusters_nonlin,
 
 ::: {.content-visible when-format="html"}
 
-![Grand tour of the nonlinear clusters data set, shows four clusters. Two are very small and spherical in shape. One is large, and has a sine wave shape, and the other is fairly small with a bent rod shape.](gifs/clusters_nonlin.gif){#fig-clusters-nonlin-html}
+![Grand tour of the nonlinear clusters data set, shows four clusters. Two are very small and spherical in shape. One is large, and has a sine wave shape, and the other is fairly small with a bent rod shape.](gifs/clusters_nonlin.gif){#fig-clusters-nonlin-html fig-alt="Animating plot of four variables, where different scatterplots of the porjections show two small spherical clusters, one C-shape cluster and and S-shaped stripe of points."}
 :::
 
 ::: {.content-visible when-format="pdf"}
 
 ::: {#fig-clusters-nonlin-pdf layout-ncol=2}
 
-![](images/clusters_nonlin_60.png){width=220}
+![](images/clusters_nonlin_60.png){width=220 fig-alt="2D projection from 4D shown as a scatterplot. Points are organised with a small curve cluster at top left, a slight but large S-shape on the right, and two small circular clumps in the middle. There is a large circle with segments in overlaying the plot with a large segment labelled 'x2' pointing to 8 o'clock, 'x1' pointing to 1 o'clock, 'x3' pointing to 5:30, and smaller 'x4' pointing to 4 o'clock."}
 
-![](images/clusters_nonlin_233.png){width=220}
+![](images/clusters_nonlin_272.png){width=220 fig-alt="2D projection from 4D shown as a scatterplot. Points are organised with a large S-shape from top left to bottom right, surrounded by two small circular clumps and a small half C-shape. There is a large circle with segments in overlaying the plot with a large segment labelled 'x2' pointing to 2 o'clock, smaller 'x1' pointing to midnight, 'x3' pointing to 10 o'clock, and smaller 'x4' pointing to 6 o'clock."}
 
 Two frames from a grand tour of the nonlinear clusters data set, shows four clusters. Two are very small and spherical in shape. One is large, and has a sine wave shape, and the other is fairly small with a bent rod shape. {{< fa play-circle >}}
 :::
@@ -91,12 +369,14 @@ NLDR can provide useful low-dimensional summaries of high-dimensional structure 
 \infobox{NLDR can provide useful low-dimensional summaries of high-dimensional structure but you need to check whether it is a sensible and accurate representation by comparing with what is perceived from a tour.}
 :::
 
-## Assessing reliability of the NLDR representation 
+## Assessing an NLDR layout
 
-NLDR can produce useful low-dimensional summaries of structure in high-dimensional data, like those shown in @fig-nldr-clusters. However, there are numerous pitfalls. The fitting procedure can produce very different representations depending on the parameter choices, and even the random number seeding the fit. (You can check this by changing the `set.seed` in the code above, and by changing from the default parameters.) Also, it may not be possible to represent the high-dimensional structures faithfully in low dimensions. For these reasons, one needs to connect the NLDR view with a tour of the data, to help assess its usefulness and accuracy. For example, with this data, we would want to know which of the two curved clusters in the UMAP representation correspond to the sine wave cluster. 
+@fig-nldr-clusters shows that NLDR can produce useful low-dimensional summaries of structure in high-dimensional data. However, it can be a frustrating exercise because **very different** representations can result depending on the parameter choices, and even the random number seeding the fit. (You can check this by changing the `set.seed` in the code above, and by changing from the default parameters.) Also, it may not be possible to represent the high-dimensional structures faithfully in low dimensions. 
+
+Diagnosing a layout is an important first step to determine if it can be appropriately used in further analysis. The approach for doing this date back to the methods discussed in @ggvisjcgs. The NLDR view needs to be interactively linked to other plots of the data, and especially to a tour with the specific purpose to determine the faithfulness to the structure present in high dimensions. For example, with the data in @fig-nldr-clusters, we would want to know which of the two curved clusters in the UMAP representation correspond to the sine wave cluster.
 
 ### Using `liminal`
-\index{liminal}
+\index{software!liminal}
 
 @fig-liminal-clusters-nonlin shows how the NLDR plot can be linked to a tour view, using the `liminal` package, to better understand how well the structure of the data is represented. Here we learn that the smile in the UMAP embedding is the small bent rod cluster, and that the unibrow is the sine wave. 
 
@@ -117,15 +397,17 @@ limn_tour_link(
 
 ::: {#fig-liminal-clusters-nonlin layout-ncol=1}
 
-![Smile matches bent rod.](images/liminal-clusters-nonlin1.png){#fig-smile}
+![Smile matches bent rod.](images/liminal-clusters-nonlin1.png){#fig-smile fig-alt="Screenshot of an interface labeled 'embed + tour' displaying two side-by-side panels with abstract black curved lines on a white background. The left panel has a shaded vertical area, while the right panel shows a smaller, more condensed version of the curved line. The interface includes buttons at the bottom for 'Play,' 'Pause,' 'Restart,' and 'Controls,' with a 'Done' button in the top right corner and a 'Cancel' button in the top left corner."}
 
-![Unibrow matches sine wave.](images/liminal-clusters-nonlin2.png){#fig-unibrow}
+![Unibrow matches sine wave.](images/liminal-clusters-nonlin2.png){#fig-unibrow fi-alt="Screenshot of an interface labeled 'embed + tour,' showing two side-by-side panels with clusters of black dots forming abstract shapes on a white background. The left panel has a shaded vertical area and features a diagonal cluster of black dots. The right panel displays a denser, curved pattern of black dots resembling a distorted 'S' shape. The interface includes buttons at the bottom for 'Play,' 'Pause,' 'Restart,' and 'Controls,' with a 'Done' button in the top right and a 'Cancel' button in the top left."}
 
 Two screenshots from liminal showing which clusters match between the UMAP representation and the tour animation. The smile corresponds to the small bent rod cluster. The unibrow matches to the sine wave cluster.
 :::
 
 ### Using `detourr`
-\index{detourr}
+\index{software!detourr}
+\index{software!crosstalk}
+\index{software!plotly}
 
 @fig-detourr-clusters-nonlin shows how the linking is achieved using `detourr`. It uses a shared data object, as made possible by the `crosstalk` package, and the UMAP view is made interactive using `plotly`. 
 
@@ -166,7 +448,7 @@ bscols(
 ```
 
 
-![Screenshot from detourr showing which clusters match between the UMAP representation and the tour animation. The smile corresponds to the small bent rod cluster.](images/detourr-clusters-nonlin.png){#fig-detourr-clusters-nonlin}
+![Screenshot from detourr showing which clusters match between the UMAP representation and the tour animation. The smile corresponds to the small bent rod cluster.](images/detourr-clusters-nonlin.png){#fig-detourr-clusters-nonlin fig-alt="Screenshot of a data visualization interface displaying two scatter plots side by side. The left plot contains black and gray dots, with a dense black curved cluster near the top and a lighter scattered distribution below. The right plot is labeled with 'umapX' and 'umapY' axes and shows a more structured arrangement of points, with a distinct curved black cluster on the right and a dispersed gray cluster on the left. The interface includes toolbar icons on the left for rotation, movement, selection, and color adjustments, as well as a playback slider at the bottom."}
 
 ## Example: `fake_trees`
 \index{data!fake trees}
@@ -220,18 +502,195 @@ The t-SNE representation clearly shows the linear structures of the data, but vi
 \insightbox{The t-SNE representation clearly shows the linear structures of the data, but viewing this 10D data with the tour shows that t-SNE makes several inaccurate breaks of some of the branches. }
 :::
 
+\index{data!swiss roll}
+\index{data!penguins}
+\index{data!fake trees}
+\index{data!multicluster}
+\index{data!sketches}
+
 ## Exercises {-}
 
-1. This question uses the `penguins_sub` data 
+1. Change the seed using `set.seed` and re-run the the code used for @fig-nldr-clusters. The resulting layout changes, right? What parts are persistent between different layouts, (e.g. always four clusters, always two small circular clusters, elongated cluster curves in different ways between layouts, ...)? 
+
+2. Examine the effect of various choices when making a 2D layout of the swiss roll data, using isomap and LLE:
+
+a. Standardise the variables.
+
+b. Change the number of nearest neighbours.
+
+3. Use t-SNE and UMAP to layout the swiss roll data. How does this compare with isomap and LLE layouts?
+
+4. This question uses the `penguins_sub` data 
 
 a. Generate a 2D representation using t-SNE. Plot the points mapping the colour to species. What is most surprising? (Hint: Are the three species represented by three distinct clusters?)
 b. Re-do the t-SNE representation with different parameter choices, including using different random seeds. Are the results different each time, or do you think that they could be considered to be equivalent?
 c. Use `liminal` or `detourr` to link the t-SNE representation to a tour of the penguins. Highlight the points that have been placed in an awkward position by t-SNE from others in their species. Watch them relative to the others in their species in the tour view, and think about whether there is any rationale for the awkward placement.
 d. Try again using UMAP to make the 2D representation, and use `liminal` or  `detourr` to link with a tour to explore the result.
-2. Conduct your best t-SNE and UMAP representations of the `aflw` data. Compare and contrast what is learned relative to a tour or the principal component analysis. 
+
+5. Conduct your best t-SNE and UMAP representations of the `aflw` data. Compare and contrast what is learned relative to a tour or the principal component analysis. 
+
+6. The `cardinalR` package can be used to generate various high-dimensional shapes. Generate data with 5 irregularly shaped clusters, centering them at different points in five dimensions. Check what this looks like using a grand tour. If you were to sketch a 2D layout that describes your data, what would it look like? Use PCA, t-SNE and UMAP to make 2D layouts. Can you find a choice of parameters that comes close to your idealised sketch?
+
+7. This question uses the `multicluster` data. 
+
+a. Use the tour first. How many clusters do you see?
+
+b. Use UMAP to create a 2D layout. How well does this capture the clusters in the data?
+
+8. Use UMAP to create a 2D layout of the `sketches_train` data, `V1` to `V784`. Plot this with points coloured by `word` (what the person was asked to sketch). 
+
+::: {.content-hidden when-format="pdf"}
+::: {.hidden}
+
+## Solutions to exercises
+
+1. 
 
 ```{r}
-#| label: penguins-tsne
+#| message: false
+#| eval: false
+#| echo: false
+library(mulgar)
+library(Rtsne)
+library(uwot)
+library(ggplot2)
+library(patchwork)
+
+set.seed(1240)
+cnl_tsne <- Rtsne(clusters_nonlin)
+cnl_umap <- umap(clusters_nonlin)
+n1 <- ggplot(as.data.frame(cnl_tsne$Y), aes(x=V1, y=V2)) +
+  geom_point() + 
+  ggtitle("(a) t-SNE") +
+  theme_minimal() + 
+  theme(aspect.ratio=1)
+n2 <- ggplot(as.data.frame(cnl_umap), aes(x=V1, y=V2)) +
+  geom_point() + 
+  ggtitle("(b) UMAP") +
+  theme_minimal() + 
+  theme(aspect.ratio=1)
+n1 + n2
+```
+
+The layout changes substantially with different random seeds. The persistent information is that there are: 
+
+- four clusters, although sometimes t-SNE splits the S-shape into two pieces to make five clusters
+- two of the clusters are small and circular in shape
+- two of the clusters are bigger, but the shape varies a lot between layouts
+
+```{r}
+#| message: false
+# Answer to Q2
+library(Rdimtools)
+library(cardinalR)
+library(tsibble)
+library(ggplot2)
+library(dplyr)
+library(patchwork)
+n_obs <- 1652  
+set.seed(259)
+swiss <- swiss_roll(n_obs, num_noise = 0)
+# Standardise
+swiss_std <- apply(swiss, 2, function(x) (x-mean(x))/sd(x))
+# Compute distance from (0,0) in first two coordinates - spiral
+swiss_std <- cbind(swiss_std, sqrt(swiss[,1]^2 +
+                           swiss[,2]^2))
+colnames(swiss_std) <- c("x", "y", "z", "d")
+swiss_tbl <- as_tibble(swiss_std)
+swiss_pca <- prcomp(swiss_std[,1:3], scale=FALSE)
+swiss_tbl <- bind_cols(swiss_tbl, as_tibble(swiss_pca$x))
+spiral1 <- ggplot(swiss_tbl, 
+                  aes(x=PC1, 
+                      y=PC3, 
+                      colour=d)) +
+  geom_point() +
+  scale_colour_continuous_divergingx(palette="Zissou 1",
+       mid=median(swiss_tbl$d)) + 
+  theme_minimal() +
+  theme(aspect.ratio=1, 
+        axis.text = element_blank(),
+        legend.position = "none")
+
+swiss_iso <- do.isomap(swiss_std[,1:3],
+  ndim=2, type=c("knn", 30), 
+  weight=FALSE)$Y
+colnames(swiss_iso) <- c("iso1", "iso2")
+swiss_iso <- as_tibble(swiss_iso) |>
+  bind_cols(swiss_tbl)
+spiral2 <- ggplot(swiss_iso, 
+                  aes(x=iso1, 
+                      y=iso2, 
+                      colour=d)) + 
+  geom_point() +
+  scale_colour_continuous_divergingx(palette="Zissou 1",
+       mid=median(swiss_iso$d)) + 
+  theme_minimal() +
+  theme(aspect.ratio=1, 
+        axis.text = element_blank(),
+        legend.position = "none")
+
+spiral1 + spiral2 + plot_layout(ncol=2)
+```
+
+The spiral is in a different pair of principal components. If one also changes the `knn` parameter to 30 for isomap, the layout changes to show one end of the spiral joining with the other end.
+
+Playing with the scale of the third variable from 10-50 also changes the resulting layout.
+
+3. 
+
+```{r}
+#| message: false
+# Answer to Q3
+n_obs <- 1652  
+set.seed(259)
+swiss <- swiss_roll(n_obs, num_noise = 0)
+swiss[,3] <- swiss[,3] * 3 
+swiss <- cbind(swiss, sqrt(swiss[,1]^2 +
+                           swiss[,2]^2))
+colnames(swiss) <- c("x", "y", "z", "d")
+swiss_tbl <- as_tibble(swiss)
+set.seed(111)
+swiss_tsne <- Rtsne::Rtsne(swiss[,1:3])$Y
+colnames(swiss_tsne) <- c("tsne1", "tsne2")
+swiss_tsne <- as_tibble(swiss_tsne) |>
+  bind_cols(swiss_tbl)
+swiss_tsne <- ggplot(swiss_tsne, 
+                  aes(x=tsne1, 
+                      y=tsne2, 
+                      colour=d)) +
+  geom_point() +
+  scale_colour_continuous_divergingx(palette="Zissou 1",
+       mid=median(swiss_tbl$d)) + 
+  theme_minimal() +
+  theme(aspect.ratio=1, 
+        axis.text = element_blank(),
+        legend.position = "none")
+
+set.seed(111)
+swiss_umap <- uwot::umap(swiss[,1:3])
+colnames(swiss_umap) <- c("umap1", "umap2")
+swiss_umap <- as_tibble(swiss_umap) |>
+  bind_cols(swiss_tbl)
+swiss_umap <- ggplot(swiss_umap, 
+                  aes(x=umap1, 
+                      y=umap2, 
+                      colour=d)) +
+  geom_point() +
+  scale_colour_continuous_divergingx(palette="Zissou 1",
+       mid=median(swiss_tbl$d)) + 
+  theme_minimal() +
+  theme(aspect.ratio=1, 
+        axis.text = element_blank(),
+        legend.position = "none")
+
+swiss_tsne + swiss_umap + plot_layout(ncol=2)
+```
+
+The default settings are used. The layouts are quite different from the other NLDR. The points are grouped into *lacier* patterns. UMAP breaks it into chunks. 
+
+4. 
+
+```{r}
 #| message: false
 #| eval: false
 #| echo: false
@@ -248,6 +707,53 @@ limn_tour_link(
 )
 # The t-SNE mapping of the penguins data inaccurately splits one of the clusters. The three clusters are clearly distinct when viewed with the tour.
 ```
+
+7. There are 6 clusters. These can be hard to see with the tour because three are tiny and close together. They are easily seen in the UMAP view which shows six very separated clusters, three small and three large.
+
+```{r}
+#| message: false
+#| eval: false
+#| echo: false
+data(multicluster)
+animate_xy(multicluster[,2:11])
+
+set.seed(129)
+mc_umap <- uwot::umap(multicluster[,2:11])
+colnames(mc_umap) <- c("umap1", "umap2")
+mc_umap <- as_tibble(mc_umap)
+ggplot(mc_umap, aes(x=umap1, 
+                    y=umap2)) +
+  geom_point() +
+  theme_minimal() +
+  theme(aspect.ratio=1, 
+        axis.text = element_blank())
+```
+
+8. 
+
+```{r}
+#| message: false
+#| eval: false
+#| echo: false
+data(sketches_train)
+#animate_xy(sketches_train[,1:784])
+
+set.seed(137)
+sketches_umap <- uwot::umap(sketches_train[,1:784])
+colnames(sketches_umap) <- c("umap1", "umap2")
+sketches_umap <- as_tibble(sketches_umap) |>
+  mutate(word = sketches_train$word)
+ggplot(sketches_umap, aes(x=umap1, 
+                          y=umap2, 
+                          colour=word)) +
+  geom_point() +
+  scale_colour_discrete_divergingx(palette = "Zissou 1") +
+  theme_minimal() +
+  theme(aspect.ratio=1, 
+        axis.text = element_blank())
+```
+:::
+:::
 
 ## Project {-}
 
