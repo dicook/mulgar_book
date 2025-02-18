@@ -294,7 +294,7 @@
 
 \title{Interactively exploring high-dimensional data and models in R}
 \author{Dianne Cook and Ursula Laa}
-\date{2025-02-12}
+\date{2025-02-18}
 
 \begin{document}
 \maketitle
@@ -3244,57 +3244,149 @@ were hidden in the first four principal components.)
 \chapter{Non-linear dimension
 reduction}\label{non-linear-dimension-reduction}
 
-\section{Explanation of NLDR methods}\label{explanation-of-nldr-methods}
+Non-linear dimension reduction (NLDR) aims to find a single
+low-dimensional representation of the high-dimensional data that shows
+the main features of the data. If there are separated clusters present
+then it might be a layout where the clusters are all distinct, in a way
+that a single linear projection could not reveal. For observations
+falling on a low-dimensional non-linear manifold in high dimensions the
+NLDR might unfold or unroll it so that they are represented in a plane
+where the distances are similar to their distance along the manifold.
 
-Non-linear dimension reduction (NLDR) aims to find a low-dimensional
-representation of the high-dimensional data that shows the main features
-of the data. In statistics, it dates back to the work of Kruskal (1964a)
-on multidimensional scaling (MDS). Some techniques only require an
-interpoint similarity or distance matrix as the main ingredient, rather
-than the full data. We'll focus on when the full data is available here,
-so we can also compare structure perceived using the tour on the
-high-dimensional space, relative to structure revealed in the
-low-dimensional embedding.
+\index{manifold} \index{interpoint distance}
 
-There are many methods available for generating non-linear
-low-dimensional representations of the data. Classically, MDS minimises
-some function of the difference between two interpoint distance
-matrices, the distance between points in the high-dimensions, and in the
-low-dimensional representations using a stress function (\(C_{L2}\)):
+Most techniques only require an interpoint similarity or distance matrix
+as the main ingredient, rather than the full \(p\)-dimensional data. A
+classic example where only this information is the morse code data
+reported by Rothkopf (1957a), and available in the \texttt{xgobi}
+software (Swayne et al., 1998). The data contains the counts of the
+number of times that a letter is mistaken for another letter collected
+in an experimental study. However, here we focus on problems where the
+full \(p\)-dimensional data is available, so we can also compare
+structure perceived using the tour on the high-dimensional space,
+relative to structure revealed in the low-dimensional embedding.
+
+\infobox{A common myth is that non-linear dimension reduction captures non-linear patterns in the high-dimensional data. It may or may not do this. The term means that the methods transform the data non-linearly into a useful (or not) visual representation.}
+
+\section{Classical methods}\label{classical-methods}
+
+In statistics, methods for non-linear dimension reduction arise with
+multidimensional scaling (MDS) (Kruskal, 1964a). Classically, MDS
+minimises some function of the difference between two interpoint
+distance matrices, the distance between points in the high-dimensions,
+and in the low-dimensional representations using a stress function
+(\(C_{L2}\)):
 
 \[
 C_{L2} = \left(\sum_{i, j=1; i\neq j}^n (d_p(i,j) - d_k(i,j))^2\right)^{1/2}
 \] where \((d_p(i,j))\) are the distances between all pairs of points in
 \(p\)-dimensions, and \(d_k(i,j)\) is the distance between the points in
-the low-dimensional (\(k\)) space. PCA is a special case of MDS. The
-result from PCA is a linear projection, but generally MDS can provide
-non-linear transformations to represent unusual high-dimensional
-patterns. The choices for defining \(d_p\) are huge and including ones
-that are locally computed or globally computed. The locally computed
-choices can capture highly non-linear geometric shapes living in
-high-dimensions. Some methods modify the stress function the
-\(L_2\)-norm, by replacing the 2 with an arbitrary power. Others yet use
-transformations of the distances. A good resource for learning about MDS
-and the many choices is Borg \& Groenen (2005).
+the low-dimensional (\(k\)) space. PCA is a special case of MDS, in
+that, the first two PCs provide the solution to the above equation if
+distance is Euclidean. Each PC is a linear projection, but generally MDS
+can provide non-linear transformations to represent unusual
+high-dimensional patterns.
+
+The choices for defining \(d_p\) are many, including ones that are
+locally, using say \(k\) nearest neighbours, or globally computed.
+Distances can also be transformed using some function, including ranks
+instead of actual distance. Another approach modifies the stress
+function the \(L_2\)-norm, by replacing the 2 with an arbitrary power.
+Others yet use transformations of the distances. A good resource for
+learning about MDS and the many choices is Borg \& Groenen (2005).
+
+\index{data!swiss roll}
+
+The methods \emph{isomap} (Tenenbaum et al., 2000) and \emph{local
+linear embedding} (LLE) are two methods where local distance is used,
+and they were designed to unwrap data from a manifold.
+Figure~\ref{fig-swiss-pdf} illustrates how the results on the classic
+swiss roll data can differ according to method, in useful ways. The
+observations lie on a 2D non-linear manifold in 3D. The data is a
+manufactured example introduced to illustrate the ability of isomap and
+LLE to unwrap the swiss roll and lay out the points in a rectangle as
+though one was travelling along the surface.
+
+\index{software!Rdimtools} \index{software!cardinalR}
+\index{dimension reduction!isomap}
+\index{dimension reduction!local linear embedding (LLE)}
+
+\begin{figure}
+
+\begin{minipage}{0.33\linewidth}
+
+\includegraphics[width=1.48958in,height=\textheight,keepaspectratio]{images/swiss.png}
+
+\subcaption{\label{}tour}
+\end{minipage}%
+%
+\begin{minipage}{0.33\linewidth}
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{5-nldr_files/figure-pdf/unnamed-chunk-4-1.pdf}
+
+\subcaption{\label{}PCA}
+\end{minipage}%
+%
+\begin{minipage}{0.33\linewidth}
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{5-nldr_files/figure-pdf/unnamed-chunk-5-1.pdf}
+
+\subcaption{\label{}isomap}
+\end{minipage}%
+
+\caption{\label{fig-swiss-pdf}The classic swiss roll data constructed to
+illustrate isomap, as shown in (a) a random tour projection, (b) lowest
+two principal components, (c) NLDR provided by isomap. The spiral can be
+discovered by many methods, including different principal compoents
+depending on the scaling of the data, or using projection pursuit, or
+nonlinear MDS. Being able to unwrap the spiral and lay out the points
+along a plane is achieved by isomap and LLE with careful choice of
+parameters. Colour indicates distance along this spiral.
+\faIcon{play-circle}}
+
+\end{figure}%
 
 \index{dimension reduction!MDS} \index{dimension reduction!t-SNE}
 \index{dimension reduction!UMAP}
+
+The swiss roll data is interesting in the sense that from a visual
+perspective it is interesting to be able to \emph{discover} the spiral
+structure. Particularly this would be a more challenging if the 2D
+spiral was in data with more than three variables, and all the
+additional ones were noise (like \texttt{z} in this example). Methods
+like projection pursuit, PCA or MDS can discover the spiral if all
+variables are measured on the same scale (say -1, 1) but not
+standardised because the variance of the spiral shape is different from
+that of noise. Being able to discover the manifold (here, a 2D surface
+matching a swiss roll) can be useful for conducting further analysis.
+The points are now organised according to distance relative to the
+manifold on which they live. This layout is like taming a lion, it feels
+like an achievement, but realistically it is very difficult to achieve
+from these methods: data scale choice or a different number of \(k\)
+nearest neighbours, changes the layout dramatically. Organising the
+points into distance along the spiral could have equally been achieved
+by discovering the spiral, and computing radial distance, as done to
+produce the colouring of points in Figure~\ref{fig-swiss-pdf}. This
+approach would also extend beyond 3D, to any additional number of noise
+dimensions.
+
+\section{Contemporary approaches}\label{contemporary-approaches}
+
+\index{software!uwot} \index{software!Rtsne}
 
 \begin{figure}
 
 \centering{
 
-\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{5-nldr_files/figure-pdf/fig-nldr-clusters-1.pdf}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{5-nldr_files/figure-pdf/fig-nldr-clusters-1.pdf}
 
 }
 
 \caption{\label{fig-nldr-clusters}Two non-linear embeddings of the
-non-linear clusters data: (a) t-SNE, (b) UMAP. Both suggest four
-clusters, with two being non-linear in some form.}
+non-linear clusters data: (a) t-SNE, (b) UMAP. One suggests five
+clusters and the other four, and also disagree on the cluster shapes.}
 
 \end{figure}%
-
-\infobox{A common myth is that non-linear dimension reduction captures non-linear patterns in the high-dimensional data. It may or may not do this. It is called non-linear dimension reduction because it transforms the data non-linearly into a useful visual representation.}
 
 Popular methods in current use for NLDR include t-SNE (Maaten \& Hinton,
 2008) and UMAP (McInnes et al., 2018). These approaches use a different
@@ -3342,7 +3434,7 @@ simple parabolic shape.
 \includegraphics[width=2.29167in,height=\textheight,keepaspectratio]{images/clusters_nonlin_60.png}\end{minipage}%
 %
 \begin{minipage}{0.50\linewidth}
-\includegraphics[width=2.29167in,height=\textheight,keepaspectratio]{images/clusters_nonlin_233.png}\end{minipage}%
+\includegraphics[width=2.29167in,height=\textheight,keepaspectratio]{images/clusters_nonlin_272.png}\end{minipage}%
 
 \caption{\label{fig-clusters-nonlin-pdf}Two frames from a grand tour of
 the nonlinear clusters data set, shows four clusters. Two are very small
@@ -3363,21 +3455,26 @@ seen in the tour.
 
 \infobox{NLDR can provide useful low-dimensional summaries of high-dimensional structure but you need to check whether it is a sensible and accurate representation by comparing with what is perceived from a tour.}
 
-\section{Assessing reliability of the NLDR
-representation}\label{assessing-reliability-of-the-nldr-representation}
+\section{Assessing an NLDR layout}\label{assessing-an-nldr-layout}
 
-NLDR can produce useful low-dimensional summaries of structure in
-high-dimensional data, like those shown in
-Figure~\ref{fig-nldr-clusters}. However, there are numerous pitfalls.
-The fitting procedure can produce very different representations
-depending on the parameter choices, and even the random number seeding
-the fit. (You can check this by changing the \texttt{set.seed} in the
-code above, and by changing from the default parameters.) Also, it may
-not be possible to represent the high-dimensional structures faithfully
-in low dimensions. For these reasons, one needs to connect the NLDR view
-with a tour of the data, to help assess its usefulness and accuracy. For
-example, with this data, we would want to know which of the two curved
-clusters in the UMAP representation correspond to the sine wave cluster.
+Figure~\ref{fig-nldr-clusters} shows that NLDR can produce useful
+low-dimensional summaries of structure in high-dimensional data.
+However, it can be a frustrating exercise because \textbf{very
+different} representations can result depending on the parameter
+choices, and even the random number seeding the fit. (You can check this
+by changing the \texttt{set.seed} in the code above, and by changing
+from the default parameters.) Also, it may not be possible to represent
+the high-dimensional structures faithfully in low dimensions.
+
+Diagnosing a layout is an important first step to determine if it can be
+appropriately used in further analysis. The approach for doing this date
+back to the methods discussed in Buja et al. (2008). The NLDR view needs
+to be interactively linked to other plots of the data, and especially to
+a tour with the specific purpose to determine the faithfulness to the
+structure present in high dimensions. For example, with the data in
+Figure~\ref{fig-nldr-clusters}, we would want to know which of the two
+curved clusters in the UMAP representation correspond to the sine wave
+cluster.
 
 \subsection{\texorpdfstring{Using
 \texttt{liminal}}{Using liminal}}\label{using-liminal}
@@ -3590,6 +3687,9 @@ space. The close proximity in the t-SNE view is reasonable, though.}
 
 \insightbox{The t-SNE representation clearly shows the linear structures of the data, but viewing this 10D data with the tour shows that t-SNE makes several inaccurate breaks of some of the branches. }
 
+\index{data!swiss roll} \index{data!penguins} \index{data!fake trees}
+\index{data!multicluster}
+
 \section*{Exercises}\label{exercises-4}
 \addcontentsline{toc}{section}{Exercises}
 
@@ -3597,7 +3697,31 @@ space. The close proximity in the t-SNE view is reasonable, though.}
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
-\tightlist
+\item
+  Change the seed using \texttt{set.seed} and re-run the the code used
+  for Figure~\ref{fig-nldr-clusters}. The resulting layout changes,
+  right? What parts are persistent between different layouts,
+  (e.g.~always four clusters, always two small circular clusters,
+  elongated cluster curves in different ways between layouts, \ldots)?
+\item
+  Examine the effect of various choices when making a 2D layout of the
+  swiss roll data, using isomap and LLE:
+\end{enumerate}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\item
+  Standardise the variables.
+\item
+  Change the number of nearest neighbours.
+\end{enumerate}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{2}
+\item
+  Use t-SNE and UMAP to layout the swiss roll data. How does this
+  compare with isomap and LLE layouts?
 \item
   This question uses the \texttt{penguins\_sub} data
 \end{enumerate}
@@ -3628,12 +3752,40 @@ space. The close proximity in the t-SNE view is reasonable, though.}
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
-\setcounter{enumi}{1}
-\tightlist
+\setcounter{enumi}{4}
 \item
   Conduct your best t-SNE and UMAP representations of the \texttt{aflw}
   data. Compare and contrast what is learned relative to a tour or the
   principal component analysis.
+\item
+  The \texttt{cardinalR} package can be used to generate various
+  high-dimensional shapes. Generate data with 5 irregularly shaped
+  clusters, centering them at different points in five dimensions. Check
+  what this looks like using a grand tour. If you were to sketch a 2D
+  layout that describes your data, what would it look like? Use PCA,
+  t-SNE and UMAP to make 2D layouts. Can you find a choice of parameters
+  that comes close to your idealised sketch?
+\item
+  This question uses the \texttt{multicluster} data.
+\end{enumerate}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\item
+  Use the tour first. How many clusters do you see?
+\item
+  Use UMAP to create a 2D layout. How well does this capture the
+  clusters in the data?
+\end{enumerate}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{7}
+\tightlist
+\item
+  Use UMAP to create a 2D layout of the \texttt{sketches\_train} data,
+  \texttt{V1} to \texttt{V784}. Plot this with points coloured by
+  \texttt{word} (what the person was asked to sketch).
 \end{enumerate}
 
 \section*{Project}\label{project-2}
@@ -4177,7 +4329,8 @@ Most of the Chinstrap species were recovered also (labelled as
 \begin{Highlighting}[]
 \FunctionTok{library}\NormalTok{(detourr)}
 
-\CommentTok{\# Use a random starting basis because the first two variables make it too easy}
+\CommentTok{\# Use a random starting basis because the }
+\CommentTok{\# first two variables make it too easy}
 \NormalTok{strt }\OtherTok{\textless{}{-}}\NormalTok{ tourr}\SpecialCharTok{::}\FunctionTok{basis\_random}\NormalTok{(}\DecValTok{10}\NormalTok{, }\DecValTok{2}\NormalTok{)}
 \FunctionTok{detour}\NormalTok{(multicluster, }
        \FunctionTok{tour\_aes}\NormalTok{(}\AttributeTok{projection =} \SpecialCharTok{{-}}\NormalTok{group)) }\SpecialCharTok{|\textgreater{}}
@@ -10220,9 +10373,21 @@ datasets for venables and ripley's MASS}.
 \url{http://www.stats.ox.ac.uk/pub/MASS4/}
 
 \bibitem[\citeproctext]{ref-Ro1957}
-Rothkopf, E. Z. (1957). A {M}easure of {S}timulus {S}imilarity and
+Rothkopf, E. Z. (1957b). A {M}easure of {S}timulus {S}imilarity and
 {E}rrors in {S}ome {P}aired-associate {L}earning {T}asks. \emph{Journal
 of Experimental Psychology}, \emph{53}, 94--101.
+
+\bibitem[\citeproctext]{ref-morsecode}
+Rothkopf, E. Z. (1957a). A measure of stimulus similarity and errors in
+some paired-associate learning tasks. \emph{Journal of Experimental
+Psychology}, \emph{2}, 94--101.
+\url{https://psycnet.apa.org/doi/10.1037/h0041867}
+
+\bibitem[\citeproctext]{ref-lle}
+Roweis, S. T., \& Saul, L. K. (2000). Nonlinear {D}imensionality
+{R}eduction by {L}ocally {L}inear {E}mbedding. \emph{Science},
+\emph{290}(5500), 2323--2326.
+\url{https://doi.org/10.1126/science.290.5500.2323}
 
 \bibitem[\citeproctext]{ref-seurat4}
 Satija, R., Farrell, J. A., Gennert, D., Schier, A. F., \& Regev, A.
@@ -10231,9 +10396,9 @@ Satija, R., Farrell, J. A., Gennert, D., Schier, A. F., \& Regev, A.
 \url{https://doi.org/10.1038/nbt.3192}
 
 \bibitem[\citeproctext]{ref-places}
-Savageau, D., \& Boyer, R. (1993). \emph{Places rated almanac: Your
-guide to finding the best places to live in north america}. Prentce Hall
-Travel.
+Savageau, D., \& Boyer, R. (1993). \emph{Places {R}ated {A}lmanac:
+{Y}our {G}uide to {F}inding the {B}est {P}laces to {L}ive in {N}orth
+{A}merica}. Prentce Hall Travel.
 
 \bibitem[\citeproctext]{ref-R-geozoo}
 Schloerke, B. (2016). \emph{Geozoo: Zoo of geometric objects}.
@@ -10389,8 +10554,8 @@ Temple Lang, D., Swayne, D., Wickham, H., \& Lawrence, M. (2006).
 {GG}obi}.{\texttt{\ http://www.R-project.org}}.
 
 \bibitem[\citeproctext]{ref-isomap}
-Tenenbaum, J. B., Silva, V. de, \& Langford, J. C. (2000). A global
-geometric framework for nonlinear dimensionality reduction.
+Tenenbaum, J. B., Silva, V. de, \& Langford, J. C. (2000). A {G}lobal
+{G}eometric {F}ramework for {N}onlinear {D}imensionality {R}eduction.
 \emph{Science}, \emph{290}(5500), 2319--2323.
 \url{https://doi.org/10.1126/science.290.5500.2319}
 
