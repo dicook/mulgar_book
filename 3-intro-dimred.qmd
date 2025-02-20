@@ -162,7 +162,7 @@ d_clusters <- tibble(x = c(
 #| fig-width: 9
 #| fig-height: 6
 #| out-width: 100%
-#| fig-cap: "Other types of association: (a) nonlinear, (b) gap between subspaces, (c) barrier beyond which no values are observed, perhaps a limiting inequality constraint, (d) L-shape where is one variable is observed the other is not, (e) skewness or heterogeneous variance, (f) clustering."
+#| fig-cap: "Other types of association: (a) nonlinear, (b) gap between subspaces, (c) barrier beyond which no values are observed, perhaps a limiting inequality constraint, (d) L-shape where if one variable has a spread of values the other does not, (e) skewness or heterogeneous variance, (f) clustering."
 pn1 <- ggplot(data=d_form, aes(x=x, y=y)) +
   geom_point() +
     ggtitle("(a) Nonlinear") +
@@ -475,13 +475,14 @@ render_gif(plane_noise_outliers,
            height=200)
 
 data(plane_nonlin)
+set.seed(508)
 render_gif(plane_nonlin,          
            grand_tour(), 
            display_xy(),
            gif_file="gifs/plane_nonlin.gif",
            frames=500,
-           width=200,
-           height=200)
+           width=400,
+           height=400)
 ```
 
 
@@ -491,7 +492,7 @@ render_gif(plane_nonlin,
 
 ![Outliers](gifs/pn_outliers.gif){#fig-outlier width=200 fig-alt="Animation showing scatterplots of 2D projections from 5D. The points sometimes appear to be a plane viewed from the side, with two single points futher away. A circle with line segments indicates the projection coefficients for each variable for all projections viewed."}
 
-![Non-linear relationship](gifs/plane_nonlin.gif){#fig-nonlinear width=200200 fig-alt="Animation showing scatterplots of 2D projections from 5D. The points sometimes appear to be lying on a curve in various projections. A circle with line segments indicates the projection coefficients for each variable for all projections viewed."}
+![Non-linear relationship](gifs/plane_nonlin.gif){#fig-nonlinear width=200 fig-alt="Animation showing scatterplots of 2D projections from 5D. The points sometimes appear to be lying on a curve in various projections. A circle with line segments indicates the projection coefficients for each variable for all projections viewed."}
 
 Examples of different types of dimensionality issues: outliers (a) and non-linearity (b). In (a) you can see two points far from the others in some projections. Also the two can be seen with different movement patterns -- moving faster and different directions than the other points during the tour. Outliers will affect detection of reduced dimension, but they can be ignored when assessing dimensionality with the tour. In (b) there is a non-linear relationship between several variables, primarily with x3. Non-linear relationships may not be easily captured by other techniques but are often visible with the tour.
 :::
@@ -623,4 +624,49 @@ d_r <- d |>
 
 6. The data sets `anomaly1`,  `anomaly2`, `anomaly3`, `anomaly4`, `anomaly5` all have single anomalies. For there to be an anomaly in a data set, there must be some association between the variables, and the anomaly doesn't conform to this association pattern. Can you find them?
 
-7. XXX Use `covsim` package to simulate data
+7. Copulas are commonly used to define the covariance relationship between pairs of variables, for fixed marginal distributions. There are several R packages that enable simulating multivariate data using copula methods. The 5D `copula` datasets in the mulgar package are simulated using the `covsim` package from four different copula models: clayton, joe, frank, gauss. Each have normal marginal distributions. 
+
+a. Is the sample generated using a Gaussian copula similar to a sample from a 5D multivariate normal distribution? (You can use the `mulgar::rmvn()` function with the sample variance-covariance matrix as the `copnorm` data to simulate a multivariate normal sample. Then create a combined data set with a variable indicating the source of the sample, and examine in a grand tour.)
+
+b. Repeat a. to compare the sample from a Clayton copula with the 5D multivariate normal sample. 
+
+```{r}
+#| eval: false
+#| echo: false
+library(mulgar)
+library(tibble)
+library(dplyr)
+library(tourr)
+library(GGally)
+library(colorspace)
+set.seed(901)
+mvnorm5 <- mulgar::rmvn(n=nrow(copnorm), vc=cov(copnorm))
+colnames(mvnorm5) <- paste0("x", 1:5)
+d <- bind_rows(as_tibble(mvnorm5), as_tibble(copnorm)) |>
+  mutate(gp = factor(c(rep("norm", nrow(mvnorm5)), rep("cop", nrow(copnorm)))))
+animate_xy(d[,1:5], col=d$gp)
+GGally::ggscatmat(d, columns=1:5, color="gp", alpha=0.5) +
+  scale_color_discrete_divergingx(palette="Zissou 1")
+
+d <- bind_rows(as_tibble(mvnorm5), as_tibble(copclayton)) |>
+  mutate(gp = factor(c(rep("norm", nrow(mvnorm5)), rep("cop", nrow(copclayton)))))
+animate_xy(d[,1:5], col=d$gp)
+animate_xy(d[,1:5], guided_tour(lda_pp(d$gp)), col=d$gp)
+GGally::ggscatmat(d, columns=1:5, color="gp", alpha=0.5) +
+  scale_color_discrete_divergingx(palette="Zissou 1")
+
+d <- bind_rows(as_tibble(mvnorm5), as_tibble(copjoe)) |>
+  mutate(gp = factor(c(rep("norm", nrow(mvnorm5)), rep("cop", nrow(copjoe)))))
+animate_xy(d[,1:5], col=d$gp)
+animate_xy(d[,1:5], guided_tour(lda_pp(d$gp)), col=d$gp)
+GGally::ggscatmat(d, columns=1:5, color="gp", alpha=0.5) +
+  scale_color_discrete_divergingx(palette="Zissou 1")
+
+d <- bind_rows(as_tibble(mvnorm5), as_tibble(copfrank)) |>
+  mutate(gp = factor(c(rep("norm", nrow(mvnorm5)), rep("cop", nrow(copfrank)))))
+animate_xy(d[,1:5], col=d$gp)
+animate_xy(d[,1:5], guided_tour(lda_pp(d$gp)), col=d$gp)
+GGally::ggscatmat(d, columns=1:5, color="gp", alpha=0.5) +
+  scale_color_discrete_divergingx(palette="Zissou 1")
+```
+

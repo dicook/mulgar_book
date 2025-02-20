@@ -3122,7 +3122,7 @@ suggests three PCs.}
 
 \centering{
 
-\includegraphics[width=2.1875in,height=\textheight,keepaspectratio]{images/plane_nonlin_61.png}
+\includegraphics[width=2.1875in,height=\textheight,keepaspectratio]{images/plane_nonlin.png}
 
 }
 
@@ -3168,7 +3168,7 @@ is an unusual observation also.}
 
 \end{figure}%
 
-\infobox{One of the dangers of PCA is that interesting and curious details of the data only emerge in the lowest PCs, that are usually discarded. The tour, and examining the smaller PCs, can help to discover them.}
+\infobox{One of the dangers of PCA is that interesting and curious details of the data can captured by the lowest PCs, that are usually discarded. The tour, and examining the smaller PCs, can help to discover them.}
 
 \section*{Exercises}\label{exercises-3}
 \addcontentsline{toc}{section}{Exercises}
@@ -3206,7 +3206,62 @@ is an unusual observation also.}
   Reduce the dimension of the \texttt{sketches} data to 12 PCs. How much
   variation does this explain? Is there any obvious clustering in this
   lower dimensional space?
+\item
+  Copulas are commonly used to define the covariance relationship
+  between pairs of variables, for fixed marginal distributions. There
+  are several R packages that enable simulating multivariate data using
+  copula methods.
 \end{enumerate}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\tightlist
+\item
+  Use the \texttt{covsim} package to simulate data. The following code
+  will generate 5D data with normal marginal distributions.
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(covsim)}
+\FunctionTok{library}\NormalTok{(tidyverse)}
+\FunctionTok{library}\NormalTok{(tourr)}
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{308}\NormalTok{) }\CommentTok{\# define a target covariance}
+\NormalTok{p }\OtherTok{\textless{}{-}} \DecValTok{5}
+\CommentTok{\# Basically randomise the target covariance bc small sample}
+\NormalTok{sigma.target }\OtherTok{\textless{}{-}} \FunctionTok{cov}\NormalTok{(MASS}\SpecialCharTok{::}\FunctionTok{mvrnorm}\NormalTok{(}\DecValTok{10}\NormalTok{, }\AttributeTok{mu=}\FunctionTok{rep}\NormalTok{(}\DecValTok{0}\NormalTok{, p), }\AttributeTok{Sigma=}\FunctionTok{diag}\NormalTok{(}\DecValTok{1}\NormalTok{, p)))}
+\CommentTok{\# normal margins that match the covariances:}
+\NormalTok{marginsnorm }\OtherTok{\textless{}{-}} \FunctionTok{lapply}\NormalTok{(}\AttributeTok{X=}\FunctionTok{sqrt}\NormalTok{(}\FunctionTok{diag}\NormalTok{(sigma.target)),}\ControlFlowTok{function}\NormalTok{(X) }\FunctionTok{list}\NormalTok{(}\AttributeTok{distr=}\StringTok{"norm"}\NormalTok{, }\AttributeTok{sd=}\NormalTok{X) )}
+\NormalTok{calibrated.vine }\OtherTok{\textless{}{-}} \FunctionTok{vita}\NormalTok{(marginsnorm, }\AttributeTok{sigma.target =}\NormalTok{sigma.target, }\AttributeTok{Nmax=}\DecValTok{10}\SpecialCharTok{\^{}}\DecValTok{5}\NormalTok{, }\AttributeTok{cores=}\DecValTok{1}\NormalTok{)}
+\NormalTok{copdata }\OtherTok{\textless{}{-}}\NormalTok{ rvinecopulib}\SpecialCharTok{::}\FunctionTok{rvine}\NormalTok{(}\DecValTok{467}\NormalTok{, calibrated.vine)}
+\NormalTok{copdata }\OtherTok{\textless{}{-}} \FunctionTok{as.data.frame}\NormalTok{(copdata)}
+\NormalTok{GGally}\SpecialCharTok{::}\FunctionTok{ggscatmat}\NormalTok{(copdata)}
+\FunctionTok{cov}\NormalTok{(copdata)}
+\NormalTok{sigma.target}
+\FunctionTok{animate\_xy}\NormalTok{(copdata)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\setcounter{enumi}{1}
+\tightlist
+\item
+  The \texttt{ecoCopula} package has a function \texttt{simulate} that
+  can generate data similar to ecological abundance data using
+  discretized copulas.
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(ecoCopula)}
+\FunctionTok{data}\NormalTok{(spider)}
+\NormalTok{abund }\OtherTok{\textless{}{-}}\NormalTok{ spider}\SpecialCharTok{$}\NormalTok{abund}
+\NormalTok{spider\_mod\_ssdm }\OtherTok{=} \FunctionTok{stackedsdm}\NormalTok{(abund,}\SpecialCharTok{\textasciitilde{}}\DecValTok{1}\NormalTok{, }\AttributeTok{data =}\NormalTok{ spider}\SpecialCharTok{$}\NormalTok{x, }\AttributeTok{ncores=}\DecValTok{2}\NormalTok{)}
+\NormalTok{spid\_lv\_ssdm }\OtherTok{=} \FunctionTok{cord}\NormalTok{(spider\_mod\_ssdm)}
+\NormalTok{spider\_sim }\OtherTok{\textless{}{-}} \FunctionTok{simulate}\NormalTok{(spid\_lv\_ssdm, }\AttributeTok{nsim=}\DecValTok{1}\NormalTok{, }\AttributeTok{seed=}\DecValTok{1001}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
 
 \section*{Project}\label{project-1}
 \addcontentsline{toc}{section}{Project}

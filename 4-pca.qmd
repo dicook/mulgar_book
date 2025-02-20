@@ -746,25 +746,28 @@ animate_xy(plane_n_o_pca$x[,1:4],
 animate_xy(plane_noise_outliers,
            col=p_col,
            obs_labels=p_obs_labels)
+set.seed(446)
 render_gif(plane_noise_outliers, 
            grand_tour(), 
-           display_xy(half_range=0.8,
+           display_xy(half_range=4,
                       col=p_col,
              obs_labels=p_obs_labels),
            gif_file="gifs/plane_n_o_clr.gif",
            frames=500,
-           width=200,
-           height=200,
+           width=400,
+           height=400,
            loop=FALSE)
+set.seed(446)
 render_gif(plane_n_o_pca$x[,1:4], 
            grand_tour(), 
-           display_xy(half_range=0.8,
+           display_xy(half_range=1,
                       col=p_col,
              obs_labels=p_obs_labels),
+           rescale = TRUE,
            gif_file="gifs/plane_n_o_pca.gif",
            frames=500,
-           width=200,
-           height=200,
+           width=400,
+           height=400,
            loop=FALSE)
 ```
 
@@ -827,13 +830,14 @@ ggscree(plane_nonlin_pca, q = 5) + theme_minimal()
 #| eval: false
 #| code-summary: "Code to generate tour"
 animate_xy(plane_nonlin_pca$x[,1:3])
+set.seed(506)
 render_gif(plane_nonlin_pca$x[,1:3], 
            grand_tour(), 
-           display_xy(half_range=0.8),
+           display_xy(half_range=4.5),
            gif_file="gifs/plane_nonlin_pca.gif",
            frames=500,
-           width=200,
-           height=200)
+           width=400,
+           height=400)
 ```
 
 ::: {.content-visible when-format="html"}
@@ -850,7 +854,7 @@ Comparison of the full data and first three principal components. Non-linear rel
 ::: {.content-visible when-format="pdf"}
 ::: {#fig-plane-nonlin-pdf fig-align="center" layout-ncol=2}
 
-![All five variables](images/plane_nonlin_61.png){#fig-nonlinear2  width=210}
+![All five variables](images/plane_nonlin.png){#fig-nonlinear2  width=210}
 
 ![First three PCs](images/plane_nonlin_pca_129.png){#fig-plane-nonlin-pca width=210}
 
@@ -875,12 +879,12 @@ ggscatmat(plane_nonlin_pca$x) +
 
 ::: {.content-visible when-format="html"}
 ::: info
-One of the dangers of PCA is that interesting and curious details of the data only emerge in the lowest PCs, that are usually discarded. The tour, and examining the smaller PCs, can help to discover them.
+One of the dangers of PCA is that interesting and curious details of the data can be captured by the lowest PCs, that are usually discarded. The tour, and examining the smaller PCs, can help to discover them.
 :::
 :::
 
 ::: {.content-visible when-format="pdf"}
-\infobox{One of the dangers of PCA is that interesting and curious details of the data only emerge in the lowest PCs, that are usually discarded. The tour, and examining the smaller PCs, can help to discover them.}
+\infobox{One of the dangers of PCA is that interesting and curious details of the data can captured by the lowest PCs, that are usually discarded. The tour, and examining the smaller PCs, can help to discover them.}
 :::
 
 ## Exercises {-}
@@ -891,42 +895,6 @@ One of the dangers of PCA is that interesting and curious details of the data on
 4. Examine the `bushfires` data using a grand tour on the numeric variables, ignoring the `cause` (class) variable. Note any issues such as outliers, or skewness that might affect PCA. How many principal components would be recommended by the scree plot? Examine this PCA model with the data, and explain how well it does or doesn't fit.
 5. Use the `pca_tour` to examine the first five PCs of the `bushfires` data. How do all of the variables contribute to this reduced space?
 6. Reduce the dimension of the `sketches` data to 12 PCs. How much variation does this explain? Is there any obvious clustering in this lower dimensional space?
-7. Copulas are commonly used to define the covariance relationship between pairs of variables, for fixed marginal distributions. There are several R packages that enable simulating multivariate data using copula methods. 
-
-a. Use the `covsim` package to simulate data. The following code will generate 5D data with normal marginal distributions.  
-
-```{r}
-#| eval: false
-library(covsim)
-library(tidyverse)
-library(tourr)
-set.seed(308) # define a target covariance
-p <- 5
-# Basically randomise the target covariance bc small sample
-sigma.target <- cov(MASS::mvrnorm(10, mu=rep(0, p), Sigma=diag(1, p)))
-# normal margins that match the covariances:
-marginsnorm <- lapply(X=sqrt(diag(sigma.target)),function(X) list(distr="norm", sd=X) )
-calibrated.vine <- vita(marginsnorm, sigma.target =sigma.target, Nmax=10^5, cores=1)
-copdata <- rvinecopulib::rvine(467, calibrated.vine)
-copdata <- as.data.frame(copdata)
-GGally::ggscatmat(copdata)
-cov(copdata)
-sigma.target
-animate_xy(copdata)
-```
-
-b. The `ecoCopula` package has a function `simulate` that can generate data similar to ecological abundance data using discretised copulas. 
-
-```{r}
-#| eval: false
-library(ecoCopula)
-data(spider)
-abund <- spider$abund
-spider_mod_ssdm = stackedsdm(abund,~1, data = spider$x, ncores=2)
-spid_lv_ssdm = cord(spider_mod_ssdm)
-spider_sim <- simulate(spid_lv_ssdm, nsim=1, seed=1001)
-
-```
 
 
 ```{r}
