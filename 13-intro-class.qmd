@@ -22,6 +22,8 @@ Knowing what shapes of the classes are and how much separation there is between 
 
 \index{classification!supervised}
 
+## Beyond predictive accuracy
+
 For a long time the focus has been on methods and algorithms that focus on predictive accuracy. While this is still an ongoing aim, a substantial change has been gaining traction where being able to understand a model, to interpret it, understand how predictions are made is underway. Questions like:
 
 - Are the classes well separated in the data space, so that they
@@ -38,8 +40,8 @@ a non-linear boundary?  How do changes in the input parameters affect these boun
 #| fig-cap: "Examples of supervised classification patterns: (a) linearly separable, (b) linear but not completely separable, (c) non-linearly separable, (d) non-linear, but not completely separable."
 #| echo: false
 #| message: false
-#| fig-height: 3
-#| fig-width: 9
+#| fig-height: 2.5
+#| fig-width: 7.5
 #| out-width: 100%
 library(ggplot2)
 library(dplyr)
@@ -104,7 +106,7 @@ class3 <- ggplot(df2, aes(x=x5, y=x6, colour = cl2)) +
   geom_point(alpha=0.7) +
   scale_colour_discrete_divergingx(
       palette = "Zissou 1", nmax = 2, rev = TRUE) +
-  annotate("text", -1.95, 2.15, label="c") +
+  annotate("text", 1.95, 1.94, label="c") +
   theme(aspect.ratio=1,
         legend.position = "none",
         axis.text = element_blank(),
@@ -129,14 +131,17 @@ class4 <- ggplot(df2, aes(x=x7, y=x8, colour = cl2)) +
 print(class1 + class2 + class3 + class4 + plot_layout(ncol=4))
 ```
 
-@fig-sup-example shows some 2D examples where the two classes are (a) linearly separable, (b) not completely separable but linearly different, (c) non-linearly separable and (d) not completely separable but with a non-linear difference. We can also see that in (a) only the horizontal variable would be important for the model because the two classes are completely separable in this direction. Although the pattern in (c) is separable classes, most models would have difficulty capturing the separation. It is for this reason that it is important to understand the boundary between classes produced by a fitted model. In each of b, c, d it is likely that some observations would be misclassified. Identifying these cases, and inspecting where they are in the data space is important for understanding the model's future performance. 
+@fig-sup-example shows some 2D examples where the two classes are (a) linearly separable, (b) not completely separable but linearly different, (c) non-linearly separable and (d) not completely separable but with a non-linear difference. We can also see that in (a) only the horizontal variable would be important for the model because the two classes are completely separable in this direction. Although the data in (c) has separable classes, most models would have difficulty capturing the separation. It is for this reason that it is important to understand the boundary between classes produced by a fitted model. In each of b, c, d it is likely that some observations would be misclassified. Identifying these cases, and inspecting where they are in the data space is important for understanding the model's performance on different samples. 
 
-Explainability has been a pursuit in statistics for a long time, and includes checking model assumptions, diagnosing the fit, and assessing variable importance. Statistical models tend to impose strong assumptions on data, that may or may not be reasonable. The benefit is that the resulting model will be easy to deploy and use. In contrast, computational models that follow prescribed algorithms tend to seen as having fewer assumptions and can flexibly fit to data. However, all algorithms impose some belief that may or may not be reasonable, that need checking. 
+Explainability has been a pursuit in statistics for a long time, and includes checking model assumptions, diagnosing the fit, and assessing variable importance. Statistical models tend to impose strong assumptions on data, that may or may not be reasonable. If they are, the benefit is that the resulting model will be easy to deploy and interpret. In contrast, computational models that follow prescribed algorithms tend to seen as having fewer assumptions and can flexibly fit to data. However, all algorithms impose some belief that may or may not be reasonable, that need checking.
+
+
+## Balancing bias and variance
 
 Using a machine learning conceptual framework and associated terminology may be helpful in understanding the importance of explainability. Modeling methods are characterised by *bias* and *variance*, and *flexibility*. Imposing more beliefs or assumptions on the model fit potentially creates a more biased model. Here are some examples of the reasoning: 
 
 - In linear discriminant analysis (LDA) (@sec-lda) there is a strong assumption that classes correspond to elliptical clusters. If the data does *not* have classes with this structure the result is a biased model that does not fit the data. 
-- In contrast, tree algorithms (most commonly) operate on single variables at each split, which imposes the belief that there is no correlation between variables. If the data *does* have elliptical clusters where separations are in combinations of variables then a tree model will produce a biased model that does not effectively fit the data.
+- In contrast, tree algorithms (@sec-trees-forests) (most commonly) operate on single variables at each split, which imposes the belief that there is no correlation between variables. If the data *does* have elliptical clusters where separations are in combinations of variables then a tree model will produce a biased model that does not effectively fit the data.
 - The tree model is considered more flexible that LDA because the algorithm can be forced to keep iterating to closely fit a particular training sample. 
 - The LDA model may have high bias, but it likely generate a similar fitted model if a different sample of data was used, and thus have low variance. 
 - In contrast a tree model could be forced to have low bias for a particular sample of data, if the same algorithm was fitted to a different sample it would likely be quite different, thus be described as high variance. 
@@ -148,16 +153,391 @@ Using a machine learning conceptual framework and associated terminology may be 
 
 ::: {.content-visible when-format="html"}
 ::: info
-Knowing the shapes of the class clusters helps to assess whether a particular method will produce high or low bias. 
+Using high-dimensional visualisation to understand the shapes of the class clusters will help to assess whether a particular method will produce a high or low bias model. 
 :::
 :::
 
 ::: {.content-visible when-format="pdf"}
-\infobox{Knowing the shapes of the class clusters helps to assess whether a particular method will produce high or low bias.}
+\infobox{Using high-dimensional visualisation to understand the shapes of the class clusters will help to assess whether a particular method will produce a high or low bias model.}
 :::
 
 
-Predictive accuracy trades off these characteristics, with the best model having low bias, low variance. Ideally, being sufficiently flexible but no more than necessary.
+Predictive accuracy trades off these characteristics, with the best model having low bias, low variance. Ideally, being sufficiently flexible but no more than necessary. @fig-bias-variance illustrates these model attributes for the data used in @fig-sup-example c. There are three samples drawn from the same process, that generates the separated zig-zag clusters, and two different types of models are fitted. The training samples are shown as black points, with symbol indicating the class. The colour represents the predictions from the different fitted models. Plots a and d show one training sample; plots b and e show a second training sample; plots c and f show the third training sample. Plots a, b and c show predictions a simple statistical model, and plots d, e, f show predictions from a computational model that has few assumptions. The model fitted in a-c has high bias because it does not capture the zig-zag but low variance because it is virtually identical for all samples. The second model with fit shown in d-f has lower bias, because it more flexibly fits the zig-zag structure. But it has higher variance, because the actual model changes substantially for different training samples. Balancing this trade-off to achieve a model that has low bias and low variability is desirable. 
+
+```{r}
+#| label: fig-bias-variance
+#| fig-cap: "Illustrating bias and variance using three different samples from the same distribution (a/d, b/e, c/f) and two different models (a-c, d-f). The black points are the training samples and colour indicates predictions from the resulting fitted model. The model fitted in a-c has high bias but low variance. The model fitted in d-f has lower bias but higher variance."
+#| fig-alt: "FIX ME"
+#| echo: false
+#| message: false
+#| fig-height: 4
+#| fig-width: 6
+#| out-width: 100%
+library(MASS)
+library(rpart)
+library(classifly)
+n <- 486
+set.seed(826)
+x1 <- 2*(runif(n) - 0.5)
+x2 <- case_when(x1 < -0.4 ~ -1.2 - 3 * x1,
+                x1 > 0.2 ~ 2.4 - 3 * x1,
+                .default = 1.2 + 3 * x1)
+x1 <- 2*x1
+x2 <- x2 + rnorm(n) * 0.25
+x2[1:(n/2)] <- x2[1:(n/2)] - 1.5
+cl <- factor(c(rep("A", n/2), rep("B", n-n/2)))
+df3 <- data.frame(x1, x2, cl)
+df_lda <- lda(cl~x1+x2, data=df3)
+df_lda_bnd <- explore(df_lda, df3)
+bv1 <- ggplot() + 
+  geom_point(data=filter(df_lda_bnd, 
+                         .TYPE == "simulated"), 
+       aes(x=x1, y=x2, colour=cl), alpha=0.6) +
+  scale_colour_discrete_divergingx(palette = "Zissou 1") +
+  geom_point(data=df3, aes(x=x1, y=x2, shape=cl),
+             colour="black", alpha=0.5) +
+  scale_shape_manual(values = c(1,4)) +
+  annotate("text", 1.8, 1.9, label="a") +
+  theme_minimal() +
+  theme(aspect.ratio = 1,
+        legend.position = "none",
+        axis.title = element_blank(),
+        axis.text = element_blank())
+
+df_tree <- rpart(cl~x1+x2, data=df3, 
+   control = rpart.control(minsplit = 5, cp = 0.00001))
+df_tree_bnd <- explore(df_tree, df3)
+bv2 <- ggplot() + 
+  geom_point(data=filter(df_tree_bnd, .TYPE == "simulated"), 
+       aes(x=x1, y=x2, colour=cl), alpha=0.6) +
+  scale_colour_discrete_divergingx(palette = "Zissou 1") +
+  geom_point(data=df3, aes(x=x1, y=x2, shape=cl),
+             colour="black", alpha=0.5) +
+  scale_shape_manual(values = c(1,4)) +
+  annotate("text", 1.8, 1.9, label="d") +
+  theme_minimal() +
+  theme(aspect.ratio = 1,
+        legend.position = "none",
+        axis.title = element_blank(),
+        axis.text = element_blank())
+
+set.seed(104)
+x1 <- 2*(runif(n) - 0.5)
+x2 <- case_when(x1 < -0.4 ~ -1.2 - 3 * x1,
+                x1 > 0.2 ~ 2.4 - 3 * x1,
+                .default = 1.2 + 3 * x1)
+x1 <- 2*x1
+x2 <- x2 + rnorm(n) * 0.25
+x2[1:(n/2)] <- x2[1:(n/2)] - 1.5
+cl <- factor(c(rep("A", n/2), rep("B", n-n/2)))
+df3 <- data.frame(x1, x2, cl)
+df_lda <- lda(cl~x1+x2, data=df3)
+df_lda_bnd <- explore(df_lda, df3)
+bv3 <- ggplot() + 
+  geom_point(data=filter(df_lda_bnd, 
+                         .TYPE == "simulated"), 
+       aes(x=x1, y=x2, colour=cl), alpha=0.6) +
+  scale_colour_discrete_divergingx(palette = "Zissou 1") +
+  geom_point(data=df3, aes(x=x1, y=x2, shape=cl),
+             colour="black", alpha=0.5) +
+  scale_shape_manual(values = c(1,4)) +
+  annotate("text", 1.8, 1.9, label="b") +
+  theme_minimal() +
+  theme(aspect.ratio = 1,
+        legend.position = "none",
+        axis.title = element_blank(),
+        axis.text = element_blank())
+
+df_tree <- rpart(cl~x1+x2, data=df3, 
+   control = rpart.control(minsplit = 5, cp = 0.00001))
+df_tree_bnd <- explore(df_tree, df3)
+bv4 <- ggplot() + 
+  geom_point(data=filter(df_tree_bnd, .TYPE == "simulated"), 
+       aes(x=x1, y=x2, colour=cl), alpha=0.6) +
+  scale_colour_discrete_divergingx(palette = "Zissou 1") +
+  geom_point(data=df3, aes(x=x1, y=x2, shape=cl),
+             colour="black", alpha=0.5) +
+  scale_shape_manual(values = c(1,4)) +
+  annotate("text", 1.8, 1.9, label="e") +
+  theme_minimal() +
+  theme(aspect.ratio = 1,
+        legend.position = "none",
+        axis.title = element_blank(),
+        axis.text = element_blank())
+
+set.seed(601)
+x1 <- 2*(runif(n) - 0.5)
+x2 <- case_when(x1 < -0.4 ~ -1.2 - 3 * x1,
+                x1 > 0.2 ~ 2.4 - 3 * x1,
+                .default = 1.2 + 3 * x1)
+x1 <- 2*x1
+x2 <- x2 + rnorm(n) * 0.25
+x2[1:(n/2)] <- x2[1:(n/2)] - 1.5
+cl <- factor(c(rep("A", n/2), rep("B", n-n/2)))
+df3 <- data.frame(x1, x2, cl)
+df_lda <- lda(cl~x1+x2, data=df3)
+df_lda_bnd <- explore(df_lda, df3)
+bv5 <- ggplot() + 
+  geom_point(data=filter(df_lda_bnd, 
+                         .TYPE == "simulated"), 
+       aes(x=x1, y=x2, colour=cl), alpha=0.6) +
+  scale_colour_discrete_divergingx(palette = "Zissou 1") +
+  geom_point(data=df3, aes(x=x1, y=x2, shape=cl),
+             colour="black", alpha=0.5) +
+  scale_shape_manual(values = c(1,4)) +
+  annotate("text", 1.8, 1.9, label="c") +
+  theme_minimal() +
+  theme(aspect.ratio = 1,
+        legend.position = "none",
+        axis.title = element_blank(),
+        axis.text = element_blank())
+
+df_tree <- rpart(cl~x1+x2, data=df3, 
+   control = rpart.control(minsplit = 5, cp = 0.00001))
+df_tree_bnd <- explore(df_tree, df3)
+bv6 <- ggplot() + 
+  geom_point(data=filter(df_tree_bnd, .TYPE == "simulated"), 
+       aes(x=x1, y=x2, colour=cl), alpha=0.6) +
+  scale_colour_discrete_divergingx(palette = "Zissou 1") +
+  geom_point(data=df3, aes(x=x1, y=x2, shape=cl),
+             colour="black", alpha=0.5) +
+  scale_shape_manual(values = c(1,4)) +
+  annotate("text", 1.8, 1.9, label="f") +
+  theme_minimal() +
+  theme(aspect.ratio = 1,
+        legend.position = "none",
+        axis.title = element_blank(),
+        axis.text = element_blank())
+
+bv1 + bv3 + bv5 + bv2 + bv4 + bv6 + plot_layout(ncol=3)
+```
+
+Bias and variance are conceptual constructs. Bias is not possible to quantify unless the **true model is known**. It is theoretical, excellent for setting up simulations and comparing various models, because in these controlled scenarios they can be computed. In practice, it is not possible to compute, but high-dimensional visualisation can help. By understanding the shape of the class and separation between classes visually, it is possible to determine whether a particular method will be able ot capture this or not, and thus have low or high bias. 
+
+To understand variance, we need to know how the model fit changes when a different training samples is used to fit the model. This is achieved by dividing the training sample into folds and fitting a model to each fold.  This is more difficult to evaluate with visual methods because it would require examining multiple samples for small differences. 
+
+However, related to this is the practice of dividing the data into training and testing (or training and testing and validation) sets. The training set is used to fit the model, and the test set is used to estimate the error of the model when used on new samples. This is particularly important for computational models with few assumptions. High-dimensional visualisation can help to assess whether the training and test samples are comparable, and thus be suitable to using for the two tasks. 
+
+## How to use the tour with classification tasks
+
+The primary start to using tours with classification problems is to colour observations by the class variable. Then use the grand tour and guided tour to explore the shapes of the clusters, and separation between them. If there are many classes, start by colouring one class against all the others. 
+After a model has been fitted to the data, there are two directions for effort: (1) Labelling observations as correctly classified or not, (2) simulate a set of data in the domain of the predictors so that the model boundary can be examined. 
+`r ifelse(knitr::is_html_output(), '@fig-class-intro-html', '@fig-class-intro-pdf')` illustrates the approach, and purposes of using different tours. There are two 4D data sets. One has elliptically shaped clusters corresponding to two classes and a gap between them (a,b). The other (c,d) has one of my favourite data games to play with students. Because the class clusters are nested it is very difficult to construct a good classification model using simple methods. However, with good visualisation it is relatively easy to see the nested structure, and fit a simple and perfect model by transforming the variables using distance from the mean. The slice tour is useful for this data, and occasionally useful for detecting odd shapes of clusters. 
+
+Generally, the grand and guided tour are useful for exploring the class structure. Using the grand tour, used in (a), shows that the shape of the two clusters is elliptical, roughly the same size but oriented differently. It is also possible to see a large gap between the two clusters. This shape would suggest that some methods are technically incorrect to apply. But the large gap between clusters means that practically several simple methods would be adequate, probably, and there is no need to apply a more complex model. The guided tour, used in (b), focuses the view on separations between the classes. The primary index to use is `lda_pp()` will help to find some differences between clusters, but it is simple, and easily confused by odd cluster shapes.  
+
+::: {.content-visible when-format="html"}
+::: {#fig-class-intro-html layout-ncol=2}
+![grand tour](gifs/intro_class1.gif)
+
+![guided tour](gifs/intro_class2.gif)
+![projection display](gifs/intro_class3.gif)
+
+![slice display](gifs/intro_class4.gif)
+
+Using the tour for classification problems starts by colouring observations by the class variable. Here two different simulated 4D data sets are shown: (a,b) two classes with elliptically shaped clusters that have similar size but different orientations, and (c,d) a spherical kernel cluster inside a spherical shell. Plot (a) shows a grand tour revealing the overall elliptical shape with different orientations and the gap between the two clusters. Plot (b) shows the use of a guided tour to focus in on the gap. Plot (c) shows a grand tour of projections which hints at some difference between the two class clusters, but the slice tour (d) cuts through the projection to reveal the kernel inner cluster and the shell shape of the outside cluster.
+:::
+:::
+
+::: {.content-visible when-format="pdf"}
+::: {#fig-class-intro-pdf layout-ncol=2}
+![grand tour](images/intro_class1.png){width=200}
+
+
+![guided tour](images/intro_class2.png){width=200}
+
+![projection display](images/intro_class3.png){width=200}
+
+![slice display](images/intro_class4.png){width=200}
+
+Using the tour for classification problems starts by colouring observations by the class variable. Here two different simulated 4D data sets are shown: (a,b) two classes with elliptically shaped clusters that have similar size but different orientations, and (c,d) a spherical kernel cluster inside a spherical shell. Plot (a) shows a single projection from a grand tour showing a different orientation, and (b) shows the final projection from a guided tour which shows a big gap between the two clusters. Plots (c) and (d) show the use of the slice tour to cut through the projection and reveal the shell shape of the outside class cluster.
+:::
+:::
+
+```{r}
+#| eval: false
+#| echo: false
+library(mulgar)
+vr <- c(-0.5, -0.3, 0.0, 0.3, 0.5)
+set.seed(503)
+vc1 <- matrix(c(1.5, sample(vr, 1), sample(vr, 1), sample(vr, 1),
+               sample(vr, 1), 1.5, sample(vr, 1), sample(vr, 1),
+               sample(vr, 1), sample(vr, 1), 1.5, sample(vr, 1),
+               sample(vr, 1), sample(vr, 1), sample(vr, 1), 1.5), 
+              ncol=4, byrow=TRUE)
+vc1[1,2] <- vc1[2,1]
+vc1[1,3] <- vc1[3,1]
+vc1[1,4] <- vc1[4,1]
+vc1[2,3] <- vc1[3,2]
+vc1[2,4] <- vc1[4,2]
+vc1[3,4] <- vc1[4,3]
+g1 <- rmvn(n=335, p=4, mn=c(3, 3, 3, 3), vc=vc1)
+vc2 <- matrix(c(1, 0.6, 0.6, 0.6,
+               0.6, 1, 0.6, 0.6,
+               0.6, 0.6, 1, 0.6,
+               0.6, 0.6, 0.6, 1), ncol=4, byrow=TRUE)
+g2 <- rmvn(n=335, p=4, mn=c(3, -3, 3, -3), vc=vc2)
+g1 <- bind_cols(as.data.frame(g1), rep("A", 335))
+colnames(g1) <- c("x1", "x2", "x3", "x4", "cl")
+g2 <- bind_cols(as.data.frame(g2), rep("B", 335))
+colnames(g2) <- c("x1", "x2", "x3", "x4", "cl")
+gd <- bind_rows(g1, g2) |>
+  mutate(cl = factor(cl))
+animate_xy(gd[,1:4], col=gd$cl)
+animate_xy(gd[,1:4], guided_tour(lda_pp(gd$cl)), col=gd$cl)
+GGally::ggscatmat(gd, columns=1:4, color="cl") +
+  scale_color_discrete_divergingx(palette="Zissou 1")
+
+set.seed(645)
+render_gif(gd[,1:4], 
+           grand_tour(), 
+           display_xy(col=gd$cl, 
+                          axes="bottomleft"), 
+           gif_file = "gifs/intro_class1.gif",
+           frames=200,
+           width=400,
+           height=400)
+render_gif(gd[,1:4], 
+           guided_tour(lda_pp(gd$cl)), 
+           display_xy(col=gd$cl, 
+                          axes="bottomleft"), 
+           gif_file = "gifs/intro_class2.gif",
+           frames=200,
+           width=400,
+           height=400,
+           loop=FALSE)
+
+# Nonlinear example
+knots <- c(-0.75, -0.5, 0.1, 0.7)
+n <- 1000
+# Piece 1 has x2=-0.75
+# Piece 2 has x2=c1+5*x1 has to pass through (-0.75, -0.75) so c1=3
+# Piece 3 has x2=c2-1.5*x1 has to pass through (-0.5, 0.5) so c2=-0.25
+# Piece 4 has x2=c3+2*x1 has to pass through (0.1, -0.4) so c3=-0.6
+# Piece 5 has x2=0.8 
+x1 <- runif(n, -1, 1)
+x2 <- case_when(
+  x1 < (-0.75) ~ -0.75, 
+  between(x1, -0.75, -0.5) ~ 3+5*x1,
+  between(x1, -0.5, 0.1) ~ -0.25-1.5*x1,
+  between(x1, 0.1, 0.7) ~ -0.6+2*x1,
+  x1 > 0.7 ~ 0.8)
+border <- tibble(x1, x2) |> arrange(x1)
+
+ggplot(border, aes(x1, x2)) + 
+  geom_line() +
+  xlim(c(-1,1)) +
+  ylim(c(-1,1))
+
+n_obs <- 5000
+set.seed(401)
+d <- tibble(x1 = runif(n_obs, -1, 1),
+            x2 = runif(n_obs, -1, 1)) |>
+  mutate(cl = "A")
+d <- d |>
+  mutate(cl = case_when(
+    (x1 < (-0.75)) & (x2 < -0.75) ~ "B",
+    between(x1, -0.75, -0.5) & (x2 < 3+5*x1) ~ "B",
+    between(x1, -0.5, 0.1) & (x2 < -0.25-1.5*x1) ~ "B",
+    between(x1, 0.1, 0.7) & (x2 < -0.6+2*x1) ~ "B",
+    (x1 > 0.7) & (x2 < 0.8) ~ "B",
+    .default = "A")
+  ) |>
+  mutate(cl = factor(cl))
+
+# Build gap
+gap <- 0.1
+d <- d |> 
+  mutate(drop = case_when(
+    (x1 < (-0.75)) & (abs(x2 - (-0.75)) < gap) ~ "yes",
+    between(x1, -0.75, -0.5) & (abs(x2-(3+5*x1)) < 5*gap) ~ "yes",
+    between(x1, -0.5, 0.1) & (abs(x2 -(-0.25-1.5*x1)) < 1.5*gap) ~ "yes",
+    between(x1, 0.1, 0.7) & (abs(x2 -(-0.6+2*x1)) < 2*gap) ~ "yes",
+    (x1 > 0.7) & (abs(x2 - 0.8) < gap) ~ "yes",
+    .default = "no"))
+
+d_gap <- d |>
+  filter(drop == "no")
+ggplot() +
+  geom_point(data=d_gap, aes(x1, x2, colour=cl), alpha=0.7) +
+  scale_colour_discrete_divergingx(palette = "Zissou 1") +
+  geom_line(data=border, aes(x1, x2)) +
+  theme_minimal() +
+  theme(aspect.ratio = 1)
+
+# Raise into high-d
+d_high <- d |>
+  mutate(x3 = runif(n_obs, -1, 1),
+         x4 = runif(n_obs, -1, 1),
+         x5 = runif(n_obs, -1, 1),
+         x6 = runif(n_obs, -1, 1)) |>
+  dplyr::select(x1,x2,x3,x4,x5,x6,cl,drop)
+
+d_high_gap <- d_high |>
+  filter(drop == "no")
+
+# Make boundary a combination of variables: x1-x3, x2-x4
+theta <- pi/4
+d_high_comb <- d_high |>
+  mutate(x7 = cos(theta)*x1 + sin(theta)*x3,
+         x8 = -sin(theta)*x1 + cos(theta)*x3,
+         x9 = cos(theta)*x2 + sin(theta)*x4,
+         x10 = -sin(theta)*x2 + cos(theta)*x4) |>
+  dplyr::select(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,cl,drop)
+d_high_comb_gap <- d_high_comb |>
+  filter(drop == "no")
+
+animate_slice(d_high_comb_gap[,6:10], col=d_high_gap$cl, axes="bottomleft", v_rel=0.2)
+
+# Doesn't work
+r_breaks <- linear_breaks(5, 0, 1)
+a_breaks <- angular_breaks(10)
+eps <- estimate_eps(nrow(d_high_comb_gap), 
+                    ncol(d_high_comb_gap), 0.1 / 1, 5 * 10, 10, 
+                    r_breaks)
+idx <- slice_index(r_breaks, a_breaks, eps, bintype = "polar", 
+                   power = 1, reweight = TRUE, p = 5)
+animate_slice(d_high_comb_gap[,6:10], 
+              guided_section_tour(idx, v_rel = 0.2, max.tries = 50), 
+              v_rel = 0.2)
+
+# Try with spheres
+library(geozoo)
+set.seed(637)
+sg1 <- sphere.solid.random(n=313, p=4)$points
+sg2 <- sphere.hollow(n=323, p=4)$points * 2
+sg1 <- bind_cols(as.data.frame(sg1), as.data.frame(rep("A", 313)))
+colnames(sg1) <- c("x1", "x2", "x3", "x4", "cl")
+sg2 <- bind_cols(as.data.frame(sg2), as.data.frame(rep("B", 323)))
+colnames(sg2) <- c("x1", "x2", "x3", "x4", "cl")
+sg <- bind_rows(sg1, sg2) |>
+  mutate(cl = factor(cl))
+
+animate_xy(sg[,1:4], col=sg$cl)
+animate_slice(sg[,1:4], col=sg$cl, v_rel=1.2)
+
+set.seed(645)
+sph_path <- save_history(sg[,1:4])
+render_gif(sg[,1:4], 
+           planned_tour(sph_path), 
+           display_xy(col=sg$cl, 
+                          axes="bottomleft"), 
+           gif_file = "gifs/intro_class3.gif",
+           frames=200,
+           width=400,
+           height=400)
+render_gif(sg[,1:4], 
+           planned_tour(sph_path), 
+           display_slice(col=gd$cl, v_rel=1.2, 
+                          axes="bottomleft"), 
+           gif_file = "gifs/intro_class4.gif",
+           frames=200,
+           width=400,
+           height=400)
+```
+
+- Construct data for diagnostics, e.g. classifly
+- Slices
 
 High-dimensional visualisation can help with this. 
 
@@ -170,6 +550,15 @@ image to illustrate bias and variance and flexibility
 - discuss semi-supervised
 - continuous response
 - inadequacy of numerical goodness of fit
+- handling many classes
+- handling many variables
+
+## Interpretability: what the model sees
+
+
+- Global
+- PDP - what the model 
+- Local 
 
 \index{data!bushfires}
 \index{data!pisa}
