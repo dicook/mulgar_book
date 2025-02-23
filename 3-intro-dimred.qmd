@@ -4,36 +4,28 @@ This chapter sets up the concepts related to methods for reducing dimension such
 
 ## The meaning of dimension
 
-The number of variables, $p$, is considered to be the dimension of the data. However, the observed data may live in a lower dimensional sub-space and then not fill out the full $p$-dimensions. This implicit dimensionality is perceived in a tour using the spread of points. When the points are spread far apart, then the data is filling the space. Conversely, when the points "collapse" into a sub-region then the data is only partially filling the space, and some dimension reduction to reduce to this smaller dimensional space may be worthwhile. 
+The number of variables, $p$, is considered to be the dimension of the data. However, the observed data may live in a lower dimensional sub-space, this means the observations do not fill out the full $p$-dimensions. This implicit dimensionality is perceived in a tour using the spread of points. When the points are spread far apart, then the data is filling the space. Conversely, when the points "collapse" into a sub-region then the data is only partially filling the space, and some dimension reduction to reduce to this smaller dimensional space may be worthwhile. 
 \index{dimensionality!implicit}
 
 ::: {.content-visible when-format="html"}
 ::: info
-When exploring the implicit dimensionality of multivariate data we are looking for projections where the points do not fill the plotting canvas fully. This would indicate that the observed values do not fully populate high dimensions. 
+When exploring the implicit dimensionality of multivariate data we are looking for projections where the points do not fill the plotting canvas fully. This would indicate that the observed values do not fully populate the high dimensions. 
 :::
 :::
 
 ::: {.content-visible when-format="pdf"}
-\infobox{When exploring the implicit dimensionality of multivariate data we are looking for projections where the points do not fill the plotting canvas fully. This would indicate that the observed values do not fully populate high dimensions. }
+\infobox{When exploring the implicit dimensionality of multivariate data we are looking for projections where the points do not fill the plotting canvas fully. This would indicate that the observed values do not fully populate the high dimensions. }
 :::
 
-Let's start with some 2D examples. @fig-2D shows three plots of two variables. Plot (a) shows two variables that are strongly linearly associated[^correlation], because when `x1` is low, `x2` is low also, and conversely when `x1` is high, `x2` is also high. This can also be seen by the reduction in spread of points (or "collapse") in one direction making the data fill less than the full square of the plot. *So from this we can conclude that the data is not fully 2D.* The second step is to infer which variables contribute to this reduction in dimension. The axes for `x1` and `x2` are drawn extending from $(0,0)$ and because they both extend out of the cloud of points, in the direction away from the collapse of points we can say that they are jointly responsible for the dimension reduction. 
+Let's start with some 2D examples. @fig-2D shows three plots of two variables. Plot (a) shows two variables that are strongly linearly associated[^correlation], because when `x1` is low, `x2` is low also, and conversely when `x1` is high, `x2` is also high. This can also be seen by the reduction in spread of points (or "collapse") in one direction making the data fill less than the full square of the plot. *So from this we can conclude that the data is not fully 2D.* The second step is to infer which variables contribute to this reduction in dimension. The axes for `x1` and `x2` are drawn extending from $(0,0)$ and because they both extend out of the cloud of points, in the direction away from the collapse of points we can say that they are jointly responsible for the dimension reduction.
+\index{association}
 
-::: {.content-visible when-format="html"}
-::: info
-The way variables are scaled can affect the appearance of dimensionality. If the variables are scaled together, using global values, some variables may have smaller variance than others. Scaling variables individually shifts the focus to association between variables, as the predominant reason for reduced dimension.
-:::
-:::
-
-::: {.content-visible when-format="pdf"}
-\infobox{The way variables are scaled can affect the appearance of dimensionity. If the variables are scaled together, using global values, some variables may have smaller variance than others. Scaling variables individually shifts the focus to association between variables, as the predominant reason for reduced dimension.}
-:::
-
-@fig-2D (b) shows a pair of variables that are **not** linearly associated. Variable `x1` is more varied than `x3` but knowing the value on `x1` tells us nothing about possible values on `x3`. Before running a tour all variables are typically scaled to have equal spread. The purpose of the tour is to capture association and relationships between the variables, so any univariate differences should be removed ahead of time. @fig-2D (c) shows what this would look like when `x3` is scaled - the points are fully spread in the full square of the plot. 
+@fig-2D (b) shows a pair of variables that are **not** linearly associated. Variable `x1` is more varied than `x3` but knowing the value on `x1` tells us nothing about possible values on `x3`. Before running a tour all variables are typically scaled to have equal spread. The purpose of the tour is to capture association and relationships between the variables, so any univariate differences should be removed ahead of time. @fig-2D (c) shows what this would look like when `x3` is scaled - the points are fully spread in the full square of the plot.
+\index{nonlinearity}
 
 [^correlation]: It is generally better to use *associated*  than *correlated*. Correlation is a statistical quantity, measuring linear association. The term *associated* can be prefaced with the type of association, such as *linear* or *non-linear*. 
 
-```{r}
+```{r echo=knitr::is_html_output()}
 #| code-summary: "Code to produce 2D data examples"
 library(tibble)
 set.seed(6045)
@@ -103,6 +95,16 @@ dp3 <- ggplot(df) +
 #| fig-alt: "Three scatterplots: (a) points lie close to a straight line in the x=y direction, (b) points lie close to a horizontal line, (c) points spread out in the full plot region. There are no axis labels or scales."
 dp1 + dp2 + dp3 + plot_layout(ncol=3)
 ```
+
+::: {.content-visible when-format="html"}
+::: info
+The way variables are scaled can affect the appearance of dimensionality. If the variables are scaled together, using global values, some variables may have smaller variance than others. Scaling variables individually shifts the focus to association between variables, as the predominant reason for reduced dimension.
+:::
+:::
+
+::: {.content-visible when-format="pdf"}
+\infobox{The way variables are scaled can affect the appearance of dimensionity. If the variables are scaled together, using global values, some variables may have smaller variance than others. Scaling variables individually shifts the focus to association between variables, as the predominant reason for reduced dimension.}
+:::
 
 @fig-nonlin-2D illustrates other types of association that could indicate reduced dimensionality. Plot (a) shows a strong nonlinear association. Plots (b) and (c) show substantial regions of the data space that have no observations, which may mean there is some barrier or gap in the data generating process. The L-shape in plot (d) is a pattern where one variable only shows variability if the other variable is essentially all the same, say close to zero. It could be described as if one variable has a non-zero value then the other variable is zero. This is a very strong association pattern, but not one that is captured by correlation. Plots (e) and (f) show other types of association, one with heterogeneous variance depending on the subspace, and clustering of observations, respectively. While we might detect these visually, using dimension reduction methods with these structures can be tricky. 
 
@@ -230,7 +232,9 @@ pn1 + pn2 + pn3 + pn4 + pn5 + pn6 + plot_layout(ncol=3)
 
 ## How to perceive the dimensionality using a tour
 
-Now let's think about what this looks like with five variables. `r ifelse(knitr::is_html_output(), '@fig-dimension-html', '@fig-dimension-pdf')` shows a grand tour on five variables, with (a) data that is primarily 2D, (b) data that is primarily 3D and (c) fully 5D data.  You can see that both (a) and (b) the spread of points collapse in some projections, with it happening more in (a). In (c) the data is always spread out in the square, although it does seem to concentrate or pile in the centre. This piling is typical when projecting from high dimensions to low dimensions. The sage tour [@sagetour] makes a correction for this. 
+Now let's think about what this looks like with five variables. `r ifelse(knitr::is_html_output(), '@fig-dimension-html', '@fig-dimension-pdf')` shows a grand tour on five variables, with (a) data that is primarily 2D, (b) data that is primarily 3D and (c) fully 5D data.  You can see that both (a) and (b) the spread of points collapse in some projections, with it happening more in (a). In (c) the data is always spread out in the square, although it does seem to concentrate or pile in the centre. This piling is typical when projecting from high dimensions to low dimensions. The sage tour [@sagetour] makes a correction for this.
+\index{dimensionality!crowding}
+\index{tour!sage}
 
 ```{r echo=knitr::is_html_output()}
 #| eval: false
@@ -295,6 +299,8 @@ Single frames from different dimensional planes - 2D, 3D, 5D - displayed in a gr
 :::
 
 The next step is to determine which variables contribute. In the examples just provided, all variables are linearly associated in the 2D and 3D data. You can check this by making a scatterplot matrix, @fig-plane-scatmat.
+\index{scatterplot matrix}
+
 
 ```{r echo=knitr::is_html_output()}
 #| label: fig-plane-scatmat
@@ -495,6 +501,9 @@ render_gif(plane_nonlin,
 ![Non-linear relationship](gifs/plane_nonlin.gif){#fig-nonlinear width=200 fig-alt="Animation showing scatterplots of 2D projections from 5D. The points sometimes appear to be lying on a curve in various projections. A circle with line segments indicates the projection coefficients for each variable for all projections viewed."}
 
 Examples of different types of dimensionality issues: outliers (a) and non-linearity (b). In (a) you can see two points far from the others in some projections. Also the two can be seen with different movement patterns -- moving faster and different directions than the other points during the tour. Outliers will affect detection of reduced dimension, but they can be ignored when assessing dimensionality with the tour. In (b) there is a non-linear relationship between several variables, primarily with x3. Non-linear relationships may not be easily captured by other techniques but are often visible with the tour.
+\index{nonlinearity}
+\index{outliers}
+
 :::
 :::
 
@@ -570,7 +579,7 @@ htmlwidgets::saveWidget(pn_tour,
 
 ## Exercises {-}
 
-1. Multicollinearity is when the predictors for a model are strongly linearly associated. It can adversely affect the fitting of most models, because many possible models may be equally as good. Variable importance might be masked by correlated variables, and confidence intervals generated for linear models might be too wide. Check the for multicollinearity or other associations between the predictors in:
+1. Multicollinearity is when the predictors for a model are strongly linearly associated. It can adversely affect the fitting of most models, because many possible models may be equally good. Variable importance might be masked by correlated variables, and confidence intervals generated for linear models might be too wide. Check for multicollinearity or other associations between the predictors in:
     a. 2001 Australian election data
     b. 2016 Australian election data
 2. Examine 5D multivariate normal samples drawn from populations with a range of variance-covariance matrices.  (You can use the `mvtnorm` package to do the sampling, for example.) Examine the data using a grand tour. What changes when you change the correlation from close to zero to close to 1?  Can you see a difference between strong positive correlation and strong negative correlation?
