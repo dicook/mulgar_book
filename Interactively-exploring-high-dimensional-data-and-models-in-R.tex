@@ -1934,15 +1934,15 @@ these methods.
 
 The number of variables, \(p\), is considered to be the dimension of the
 data. However, the observed data may live in a lower dimensional
-sub-space and then not fill out the full \(p\)-dimensions. This implicit
-dimensionality is perceived in a tour using the spread of points. When
-the points are spread far apart, then the data is filling the space.
-Conversely, when the points ``collapse'' into a sub-region then the data
-is only partially filling the space, and some dimension reduction to
-reduce to this smaller dimensional space may be worthwhile.
-\index{dimensionality!implicit}
+sub-space, this means the observations do not fill out the full
+\(p\)-dimensions. This implicit dimensionality is perceived in a tour
+using the spread of points. When the points are spread far apart, then
+the data is filling the space. Conversely, when the points ``collapse''
+into a sub-region then the data is only partially filling the space, and
+some dimension reduction to reduce to this smaller dimensional space may
+be worthwhile. \index{dimensionality!implicit}
 
-\infobox{When exploring the implicit dimensionality of multivariate data we are looking for projections where the points do not fill the plotting canvas fully. This would indicate that the observed values do not fully populate high dimensions. }
+\infobox{When exploring the implicit dimensionality of multivariate data we are looking for projections where the points do not fill the plotting canvas fully. This would indicate that the observed values do not fully populate the high dimensions. }
 
 Let's start with some 2D examples. Figure~\ref{fig-2D} shows three plots
 of two variables. Plot (a) shows two variables that are strongly
@@ -1960,9 +1960,7 @@ this reduction in dimension. The axes for \texttt{x1} and \texttt{x2}
 are drawn extending from \((0,0)\) and because they both extend out of
 the cloud of points, in the direction away from the collapse of points
 we can say that they are jointly responsible for the dimension
-reduction.
-
-\infobox{The way variables are scaled can affect the appearance of dimensionity. If the variables are scaled together, using global values, some variables may have smaller variance than others. Scaling variables individually shifts the focus to association between variables, as the predominant reason for reduced dimension.}
+reduction. \index{association}
 
 Figure~\ref{fig-2D} (b) shows a pair of variables that are \textbf{not}
 linearly associated. Variable \texttt{x1} is more varied than
@@ -1973,20 +1971,7 @@ capture association and relationships between the variables, so any
 univariate differences should be removed ahead of time.
 Figure~\ref{fig-2D} (c) shows what this would look like when \texttt{x3}
 is scaled - the points are fully spread in the full square of the plot.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{library}\NormalTok{(tibble)}
-\FunctionTok{set.seed}\NormalTok{(}\DecValTok{6045}\NormalTok{)}
-\NormalTok{x1 }\OtherTok{\textless{}{-}} \FunctionTok{runif}\NormalTok{(}\DecValTok{123}\NormalTok{)}
-\NormalTok{x2 }\OtherTok{\textless{}{-}}\NormalTok{ x1 }\SpecialCharTok{+} \FunctionTok{rnorm}\NormalTok{(}\DecValTok{123}\NormalTok{, }\AttributeTok{sd=}\FloatTok{0.1}\NormalTok{)}
-\NormalTok{x3 }\OtherTok{\textless{}{-}} \FunctionTok{rnorm}\NormalTok{(}\DecValTok{123}\NormalTok{, }\AttributeTok{sd=}\FloatTok{0.2}\NormalTok{)}
-\NormalTok{df }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{(}\AttributeTok{x1 =}\NormalTok{ (x1}\SpecialCharTok{{-}}\FunctionTok{mean}\NormalTok{(x1))}\SpecialCharTok{/}\FunctionTok{sd}\NormalTok{(x1), }
-             \AttributeTok{x2 =}\NormalTok{ (x2}\SpecialCharTok{{-}}\FunctionTok{mean}\NormalTok{(x2))}\SpecialCharTok{/}\FunctionTok{sd}\NormalTok{(x2),}
-\NormalTok{             x3, }
-             \AttributeTok{x3scaled =}\NormalTok{ (x3}\SpecialCharTok{{-}}\FunctionTok{mean}\NormalTok{(x3))}\SpecialCharTok{/}\FunctionTok{sd}\NormalTok{(x3))}
-\end{Highlighting}
-\end{Shaded}
+\index{nonlinearity}
 
 \begin{figure}
 
@@ -2008,6 +1993,8 @@ collapsed, it means that this variable is partially responsible for the
 reduced dimension.}
 
 \end{figure}%
+
+\infobox{The way variables are scaled can affect the appearance of dimensionity. If the variables are scaled together, using global values, some variables may have smaller variance than others. Scaling variables individually shifts the focus to association between variables, as the predominant reason for reduced dimension.}
 
 Figure~\ref{fig-nonlin-2D} illustrates other types of association that
 could indicate reduced dimensionality. Plot (a) shows a strong nonlinear
@@ -2033,9 +2020,9 @@ dimension reduction methods with these structures can be tricky.
 
 \caption{\label{fig-nonlin-2D}Other types of association: (a) nonlinear,
 (b) gap between subspaces, (c) barrier beyond which no values are
-observed, perhaps a limiting inequality constraint, (d) L-shape where is
-one variable is observed the other is not, (e) skewness or heterogeneous
-variance, (f) clustering.}
+observed, perhaps a limiting inequality constraint, (d) L-shape where if
+one variable has a spread of values the other does not, (e) skewness or
+heterogeneous variance, (f) clustering.}
 
 \end{figure}%
 
@@ -2050,7 +2037,8 @@ points collapse in some projections, with it happening more in (a). In
 (c) the data is always spread out in the square, although it does seem
 to concentrate or pile in the centre. This piling is typical when
 projecting from high dimensions to low dimensions. The sage tour (Laa et
-al., 2022) makes a correction for this.
+al., 2022) makes a correction for this. \index{dimensionality!crowding}
+\index{tour!sage}
 
 \begin{figure}
 
@@ -2103,7 +2091,7 @@ is lower dimensional. \faIcon{play-circle}}
 The next step is to determine which variables contribute. In the
 examples just provided, all variables are linearly associated in the 2D
 and 3D data. You can check this by making a scatterplot matrix,
-Figure~\ref{fig-plane-scatmat}.
+Figure~\ref{fig-plane-scatmat}. \index{scatterplot matrix}
 
 \begin{figure}
 
@@ -2276,9 +2264,9 @@ techniques but are often visible with the tour. \faIcon{play-circle}}
 \item
   Multicollinearity is when the predictors for a model are strongly
   linearly associated. It can adversely affect the fitting of most
-  models, because many possible models may be equally as good. Variable
+  models, because many possible models may be equally good. Variable
   importance might be masked by correlated variables, and confidence
-  intervals generated for linear models might be too wide. Check the for
+  intervals generated for linear models might be too wide. Check for
   multicollinearity or other associations between the predictors in:
 
   \begin{enumerate}
@@ -2346,7 +2334,27 @@ techniques but are often visible with the tour. \faIcon{play-circle}}
   between the variables, and the anomaly doesn't conform to this
   association pattern. Can you find them?
 \item
-  XXX Use \texttt{covsim} package to simulate data
+  Copulas are commonly used to define the covariance relationship
+  between pairs of variables, for fixed marginal distributions. There
+  are several R packages that enable simulating multivariate data using
+  copula methods. The 5D \texttt{copula} datasets in the mulgar package
+  are simulated using the \texttt{covsim} package from four different
+  copula models: clayton, joe, frank, gauss. Each have normal marginal
+  distributions.
+\end{enumerate}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\item
+  Is the sample generated using a Gaussian copula similar to a sample
+  from a 5D multivariate normal distribution? (You can use the
+  \texttt{mulgar::rmvn()} function with the sample variance-covariance
+  matrix as the \texttt{copnorm} data to simulate a multivariate normal
+  sample. Then create a combined data set with a variable indicating the
+  source of the sample, and examine in a grand tour.)
+\item
+  Repeat a. to compare the sample from a Clayton copula with the 5D
+  multivariate normal sample.
 \end{enumerate}
 
 \chapter{Principal component
@@ -2357,7 +2365,7 @@ analysis}\label{principal-component-analysis}
 Reducing dimensionality using principal component analysis (PCA) dates
 back to Pearson (1901) and Hotelling (1933). The goal is to find a
 smaller set of variables, \(q (< p)\), that contain as much information
-as the original, as possible. The new set of variables, known as
+from the original as possible. The new set of variables, known as
 principal components (PCs), are linear combinations of the original
 variables. The PCs can be used to represent the data in a
 lower-dimensional space. Jolliffe \& Cadima (2016) provides a
@@ -2387,8 +2395,8 @@ PCA is very broadly useful for summarising linear association by using
 combinations of the variables that are highly correlated. However, high
 correlation can also occur when there are outliers, or clustering. PCA
 is commonly used to detect these patterns also, although this might NOT
-be a reliable way to do so. To detect clustering or anomalies, using
-more a different approach that is specifically focused on these types of
+be a reliable way to do so. To detect clustering or anomalies, using a
+different approach that is specifically focused on these types of
 patterns is advisable. To some extent capturing clustering or anomalies
 using PCA is actually finding problematic patterns that adversely
 affects conducting appropriate dimension reduction.
@@ -2403,7 +2411,7 @@ which is called \emph{projection pursuit} (PP). PP has a long history
 Jones \& Sibson (1987), Huber (1985)), and there are regularly new
 developments (e.g. E.-K. Lee \& Cook (2009), Perisic \& Posse (2005), Y.
 D. Lee et al. (2013), Loperfido (2018), Bickel et al. (2018), C. Zhang
-et al. (2023)).
+et al. (2023)). \index{dimension reduction!projection pursuit (PP)}
 
 \section{Determining how many
 dimensions}\label{determining-how-many-dimensions}
@@ -2413,8 +2421,9 @@ check whether there might be potential issues for PCA, such as skewness,
 outliers or clustering, or even non-linear dependencies.
 
 We'll start by showing PCA on the simulated data from
-Chapter~\ref{sec-dimension-overview}. The scree plots are produced using
-the \texttt{mulgar::ggscree()} function, and include a grey guideline to
+Chapter~\ref{sec-dimension-overview}. The scree plots shown in
+Figure~\ref{fig-2D-pca} are produced using the
+\texttt{mulgar::ggscree()} function, and include a grey guideline to
 help decide how many PCs are sufficient. This guideline is generated by
 taking the median value from of the eigenvalues generated by doing PCA
 on 100 samples from a standard multivariate normal distribution. Any
@@ -2554,8 +2563,9 @@ will also score well in reading and science.
 \begin{Highlighting}[]
 \FunctionTok{data}\NormalTok{(pisa)}
 \NormalTok{pisa\_std }\OtherTok{\textless{}{-}}\NormalTok{ pisa }\SpecialCharTok{|\textgreater{}}
-  \FunctionTok{filter}\NormalTok{(CNT }\SpecialCharTok{==} \StringTok{"Australia"}\NormalTok{) }\SpecialCharTok{|\textgreater{}}
-  \FunctionTok{select}\NormalTok{(}\SpecialCharTok{{-}}\NormalTok{CNT) }\SpecialCharTok{|\textgreater{}}
+\NormalTok{  dplyr}\SpecialCharTok{::}\FunctionTok{filter}\NormalTok{(CNT }\SpecialCharTok{==} \StringTok{"Australia"}\NormalTok{) }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{ungroup}\NormalTok{() }\SpecialCharTok{|\textgreater{}}
+\NormalTok{  dplyr}\SpecialCharTok{::}\FunctionTok{select}\NormalTok{(PV1MATH}\SpecialCharTok{:}\NormalTok{PV10SCIE) }\SpecialCharTok{|\textgreater{}}
   \FunctionTok{mutate\_all}\NormalTok{(mulgar}\SpecialCharTok{:::}\NormalTok{scale2)}
 \NormalTok{pisa\_pca }\OtherTok{\textless{}{-}} \FunctionTok{prcomp}\NormalTok{(pisa\_std)}
 \NormalTok{pisa\_scree }\OtherTok{\textless{}{-}} \FunctionTok{ggscree}\NormalTok{(pisa\_pca, }\AttributeTok{q =} \DecValTok{15}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{theme\_minimal}\NormalTok{()}
@@ -2622,13 +2632,13 @@ and pointing the other way.
  PV1MATH  PV2MATH  PV3MATH  PV4MATH  PV5MATH  PV6MATH 
    -0.18    -0.18    -0.18    -0.18    -0.18    -0.18 
  PV7MATH  PV8MATH  PV9MATH PV10MATH  PV1READ  PV2READ 
-   -0.18    -0.18    -0.18    -0.18    -0.19    -0.18 
+   -0.18    -0.18    -0.18    -0.18    -0.18    -0.18 
  PV3READ  PV4READ  PV5READ  PV6READ  PV7READ  PV8READ 
-   -0.19    -0.19    -0.19    -0.19    -0.19    -0.19 
+   -0.19    -0.18    -0.19    -0.19    -0.19    -0.19 
  PV9READ PV10READ  PV1SCIE  PV2SCIE  PV3SCIE  PV4SCIE 
-   -0.19    -0.19    -0.18    -0.18    -0.19    -0.18 
+   -0.19    -0.19    -0.18    -0.19    -0.19    -0.18 
  PV5SCIE  PV6SCIE  PV7SCIE  PV8SCIE  PV9SCIE PV10SCIE 
-   -0.19    -0.18    -0.19    -0.18    -0.19    -0.18 
+   -0.18    -0.19    -0.19    -0.18    -0.19    -0.18 
 \end{verbatim}
 
 \insightbox{The tour verifies that the `pisa` data is primarily 1D, indicating that a student who scores well in math, probably scores well in reading and science, too. More interestingly, the regular shape of the data strongly indicates that it is "synthetic", simulated rather than observed.}
@@ -2637,16 +2647,17 @@ and pointing the other way.
 
 \index{data!aflw}
 
-This data has player statistics for all the matches in the 2021 season.
-We would be interested to know which variables contain similar
-information, and thus might be combined into single variables. We would
-expect that many statistics group into a few small sets, such as
-offensive and defensive skills. We might also expect that some of the
-statistics are skewed, most players have low values and just a handful
-of players are stellar. It is also possible that there are some extreme
-values. These are interesting features, but they will distract from the
-main purpose of grouping the statistics. Thus the tour is used to check
-for potential problems with the data prior to conducting PCA.
+This data has player statistics for all the matches in the 2021 season
+of the Women's Australian Football League. We would be interested to
+know which variables contain similar information, and thus might be
+combined into single variables. We would expect that many statistics
+group into a few small sets, such as offensive and defensive skills. We
+might also expect that some of the statistics are skewed, most players
+have low values and just a handful of players are stellar. It is also
+possible that there are some extreme values. These are interesting
+features, but they will distract from the main purpose of grouping the
+statistics. Thus the tour is used to check for potential problems with
+the data prior to conducting PCA.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -2659,7 +2670,7 @@ for potential problems with the data prior to conducting PCA.
 \end{Highlighting}
 \end{Shaded}
 
-To look at all of the 29 player statistics in a grand tour in
+We look at all of the 29 player statistics in a grand tour in
 Figure~\ref{fig-aflw-gt-pdf}.
 
 \begin{figure}
@@ -2720,7 +2731,7 @@ variance.
 \begin{longtable}{lrrrr}
 
 \caption{\label{tbl-aflw-pcs}Coefficients for the first four PCs. PC 1
-contrasts some with PC 1, with the first having large coefficients
+contrasts some with PC 2, with the first having large coefficients
 primarily on field play statistics, and the second having large
 coefficients on the scoring statistics.}
 
@@ -2788,8 +2799,8 @@ defensive skills of a player.
 
 We could continue to interpret each PC by examining large coefficients
 to help decide how many PCs are a suitable summary of the information in
-the data. Briefly, PC 3 mixed but it is possibly a measure of worth of
-the player because \texttt{time\_pct} has a large coefficient, so
+the data. Briefly, PC 3 is mixed but it is possibly a measure of worth
+of the player because \texttt{time\_pct} has a large coefficient, so
 players that are on the field longer will contribute strongly to this
 new variable. It also has large (and opposite) contributions from
 \texttt{clearances}, \texttt{tackles}, \texttt{contested\_marks}. PC 4
@@ -2800,10 +2811,10 @@ featuring. All four PCs have useful information.
 For deeper exploration, when we tour the four PCs, we'd like to be able
 to stop and identify players. This can be done by creating a
 pre-computed animation, with additional mouse-over, made using
-\texttt{plotly}. However, it is not size-efficient, can is only feasible
-with a small number of observations. Because all of the animation frames
-with the fully projected data in each, are composed into a single
-object, which gets large very quickly.
+\texttt{plotly}. However, it is not size-efficient, and is only feasible
+with a small number of observations. This is because all of the
+animation frames, with the full projected data in each, are composed
+into a single object, which gets large very quickly.
 
 \begin{figure}
 
@@ -2878,7 +2889,7 @@ than two PCs. Occasionally you will see the biplot made for PC \(j\) vs
 PC \(k\) also. With the \texttt{pca\_tour()} function in the
 \texttt{tourr} package you can view a \(k\)-D biplot. This will display
 the \(k\) PCs with the axes displaying the original variables, and thus
-show their contribution to the PCs.
+show their contribution to the PCs. \index{biplot} \index{tour!pca}
 
 \begin{figure}
 
@@ -2968,7 +2979,7 @@ small amount of spread in all directions away from the model.
 
 \end{figure}%
 
-\insightbox{The `pisa` data fits fairly closely to the 1D PCA model. The variance of points away from the model is symmetric and relatively small. These suggest the 1D model is a reasonably summary of the test scores.}
+\insightbox{The `pisa` data fits fairly closely to the 1D PCA model. The variance of points away from the model is symmetric and relatively small. These suggest the 1D model is a reasonable summary of the test scores.}
 
 \subsection{Example: aflw}\label{example-aflw-1}
 
@@ -3017,8 +3028,9 @@ marked by colour and labels 1, 2, are clearly unusual in some
 projections. When we examine the tour of the first four PCs (as
 suggested by the scree plot) the outliers are not unusual. They are
 almost contained in the point cloud. The reason is clear when all the
-PCs are plotted, and the outliers can be seen to be clearly detected
-only in PC5, PC6 and PC7.
+PCs are plotted in a scatterplot matrix as shown in
+Figure~\ref{fig-plane-o-n-pairs}, and the outliers can be seen to be
+clearly detected only in PC5, PC6 and PC7. \index{scatterplot matrix}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -3207,62 +3219,7 @@ is an unusual observation also.}
   Reduce the dimension of the \texttt{sketches} data to 12 PCs. How much
   variation does this explain? Is there any obvious clustering in this
   lower dimensional space?
-\item
-  Copulas are commonly used to define the covariance relationship
-  between pairs of variables, for fixed marginal distributions. There
-  are several R packages that enable simulating multivariate data using
-  copula methods.
 \end{enumerate}
-
-\begin{enumerate}
-\def\labelenumi{\alph{enumi}.}
-\tightlist
-\item
-  Use the \texttt{covsim} package to simulate data. The following code
-  will generate 5D data with normal marginal distributions.
-\end{enumerate}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{library}\NormalTok{(covsim)}
-\FunctionTok{library}\NormalTok{(tidyverse)}
-\FunctionTok{library}\NormalTok{(tourr)}
-\FunctionTok{set.seed}\NormalTok{(}\DecValTok{308}\NormalTok{) }\CommentTok{\# define a target covariance}
-\NormalTok{p }\OtherTok{\textless{}{-}} \DecValTok{5}
-\CommentTok{\# Basically randomise the target covariance bc small sample}
-\NormalTok{sigma.target }\OtherTok{\textless{}{-}} \FunctionTok{cov}\NormalTok{(MASS}\SpecialCharTok{::}\FunctionTok{mvrnorm}\NormalTok{(}\DecValTok{10}\NormalTok{, }\AttributeTok{mu=}\FunctionTok{rep}\NormalTok{(}\DecValTok{0}\NormalTok{, p), }\AttributeTok{Sigma=}\FunctionTok{diag}\NormalTok{(}\DecValTok{1}\NormalTok{, p)))}
-\CommentTok{\# normal margins that match the covariances:}
-\NormalTok{marginsnorm }\OtherTok{\textless{}{-}} \FunctionTok{lapply}\NormalTok{(}\AttributeTok{X=}\FunctionTok{sqrt}\NormalTok{(}\FunctionTok{diag}\NormalTok{(sigma.target)),}\ControlFlowTok{function}\NormalTok{(X) }\FunctionTok{list}\NormalTok{(}\AttributeTok{distr=}\StringTok{"norm"}\NormalTok{, }\AttributeTok{sd=}\NormalTok{X) )}
-\NormalTok{calibrated.vine }\OtherTok{\textless{}{-}} \FunctionTok{vita}\NormalTok{(marginsnorm, }\AttributeTok{sigma.target =}\NormalTok{sigma.target, }\AttributeTok{Nmax=}\DecValTok{10}\SpecialCharTok{\^{}}\DecValTok{5}\NormalTok{, }\AttributeTok{cores=}\DecValTok{1}\NormalTok{)}
-\NormalTok{copdata }\OtherTok{\textless{}{-}}\NormalTok{ rvinecopulib}\SpecialCharTok{::}\FunctionTok{rvine}\NormalTok{(}\DecValTok{467}\NormalTok{, calibrated.vine)}
-\NormalTok{copdata }\OtherTok{\textless{}{-}} \FunctionTok{as.data.frame}\NormalTok{(copdata)}
-\NormalTok{GGally}\SpecialCharTok{::}\FunctionTok{ggscatmat}\NormalTok{(copdata)}
-\FunctionTok{cov}\NormalTok{(copdata)}
-\NormalTok{sigma.target}
-\FunctionTok{animate\_xy}\NormalTok{(copdata)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{enumerate}
-\def\labelenumi{\alph{enumi}.}
-\setcounter{enumi}{1}
-\tightlist
-\item
-  The \texttt{ecoCopula} package has a function \texttt{simulate} that
-  can generate data similar to ecological abundance data using
-  discretized copulas.
-\end{enumerate}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{library}\NormalTok{(ecoCopula)}
-\FunctionTok{data}\NormalTok{(spider)}
-\NormalTok{abund }\OtherTok{\textless{}{-}}\NormalTok{ spider}\SpecialCharTok{$}\NormalTok{abund}
-\NormalTok{spider\_mod\_ssdm }\OtherTok{=} \FunctionTok{stackedsdm}\NormalTok{(abund,}\SpecialCharTok{\textasciitilde{}}\DecValTok{1}\NormalTok{, }\AttributeTok{data =}\NormalTok{ spider}\SpecialCharTok{$}\NormalTok{x, }\AttributeTok{ncores=}\DecValTok{2}\NormalTok{)}
-\NormalTok{spid\_lv\_ssdm }\OtherTok{=} \FunctionTok{cord}\NormalTok{(spider\_mod\_ssdm)}
-\NormalTok{spider\_sim }\OtherTok{\textless{}{-}} \FunctionTok{simulate}\NormalTok{(spid\_lv\_ssdm, }\AttributeTok{nsim=}\DecValTok{1}\NormalTok{, }\AttributeTok{seed=}\DecValTok{1001}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
 
 \section*{Project}\label{project-1}
 \addcontentsline{toc}{section}{Project}
@@ -3270,12 +3227,13 @@ is an unusual observation also.}
 \markright{Project}
 
 Linear dimension reduction can optimise for other criteria, and here we
-will explore one example: the algorithm (Kandanaarachchi \& Hyndman,
-2021) implemented in the \texttt{dobin} package (Kandanaarachchi, 2022)
-finds a basis in which the first few directions are optimized for the
-detection of outliers in the data. We will examine how it performs for
-the \texttt{plane\_noise\_outliers} data (the example where outliers
-were hidden in the first four principal components.)
+will explore one example: the algorithm described in (Kandanaarachchi \&
+Hyndman, 2021) and implemented in the \texttt{dobin} package
+(Kandanaarachchi, 2022) finds a basis in which the first few directions
+are optimized for the detection of outliers in the data. We will examine
+how it performs for the \texttt{plane\_noise\_outliers} data (the
+example where outliers were hidden in the first four principal
+components.)
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -3288,9 +3246,10 @@ were hidden in the first four principal components.)
   data using default values for all parameters.
 \item
   Recall that the outliers were added in rows 101 and 102 of the data.
-  Make a scatter plots showing the projection onto the first, second and
-  third component found by \texttt{dobin}, using color to highlight the
-  outliers. Are they visible as outliers with three components?
+  Make a scatterplot matrix showing the projections onto the first,
+  second and third component found by \texttt{dobin}, using color to
+  highlight the outliers. Are they visible as outliers with three
+  components?
 \item
   Adjust the \texttt{frac} parameter of the \texttt{dobin} function to
   \texttt{frac\ =\ 0.99} and repeat the graphical evaluation from point
