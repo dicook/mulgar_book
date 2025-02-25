@@ -140,8 +140,9 @@ The `pisa` data contains simulated data from math, reading and science scores, t
 #| code-fold: false
 data(pisa)
 pisa_std <- pisa |>
-  filter(CNT == "Australia") |>
-  select(-CNT) |>
+  dplyr::filter(CNT == "Australia") |>
+  ungroup() |>
+  dplyr::select(-CNT) |>
   mutate_all(mulgar:::scale2)
 pisa_pca <- prcomp(pisa_std)
 pisa_scree <- ggscree(pisa_pca, q = 15) + theme_minimal()
