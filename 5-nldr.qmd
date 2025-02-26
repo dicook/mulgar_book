@@ -5,7 +5,7 @@ Non-linear dimension reduction (NLDR) aims to find a single low-dimensional repr
 \index{manifold}
 \index{interpoint distance}
 
-Most techniques only require an interpoint similarity or distance matrix as the main ingredient, rather than the full $p$-dimensional data. A classic example where only this information is the morse code data reported by @morsecode, and available in the `xgobi` software [@xgobi]. The data contains the counts of the number of times that a letter is mistaken for another letter collected in an experimental study. However, here we focus on problems where the full $p$-dimensional data is available, so we can also compare structure perceived using the tour on the high-dimensional space, relative to structure revealed in the low-dimensional embedding.
+Most techniques only require an interpoint similarity or distance matrix as the main ingredient, rather than the full $p$-dimensional data. A classic example where only this information is used is the morse code data reported by @morsecode, and available in the `xgobi` software [@xgobi]. The data contains the counts of the number of times that a letter is mistaken for another letter collected in an experimental study. However, here we focus on problems where the full $p$-dimensional data is available, so we can also compare structure perceived using the tour on the high-dimensional space, relative to structure revealed in the low-dimensional embedding.
 
 ::: {.content-visible when-format="html"}
 ::: info
@@ -21,14 +21,14 @@ A common myth is that non-linear dimension reduction captures non-linear pattern
 
 ## Classical methods
 
-In statistics, methods for non-linear dimension reduction arise with multidimensional scaling (MDS) [@Kr64a].  Classically, MDS minimises some function of the difference between two interpoint distance matrices, the distance between points in the high-dimensions, and in the low-dimensional representations using a stress function ($C_{L2}$):
+In statistics, methods for non-linear dimension reduction arise with multidimensional scaling (MDS) [@Kr64a].  Classically, MDS minimises some function of the difference between two interpoint distance matrices: the distance between points in the high-dimensions, and in the low-dimensional representations. This is using a stress function ($C_{L2}$):
 
 $$
 C_{L2} = \left(\sum_{i, j=1; i\neq j}^n (d_p(i,j) - d_k(i,j))^2\right)^{1/2}
 $$
-where $(d_p(i,j))$ are the distances between all pairs of points in $p$-dimensions, and $d_k(i,j)$ is the distance between the points in the low-dimensional ($k$) space. PCA is a special case of MDS, in that, the first two PCs provide the solution to the above equation if distance is Euclidean. Each PC is a linear projection, but generally MDS can provide non-linear transformations to represent unusual high-dimensional patterns. 
+where $d_p(i,j)$ are the distances between all pairs of points in $p$-dimensions, and $d_k(i,j)$ is the distance between the points in the low-dimensional ($k$) space. PCA is a special case of MDS, in that, the first two PCs provide the solution to the above equation if distance is Euclidean. Each PC is a linear projection, but generally MDS can provide non-linear transformations to represent unusual high-dimensional patterns. 
 
-The choices for defining $d_p$ are many, including ones that are locally, using say $k$ nearest neighbours, or globally computed. Distances can also be transformed using some function, including ranks instead of actual distance. Another approach modifies the stress function the $L_2$-norm, by replacing the 2 with an arbitrary power. Others yet use transformations of the distances. A good resource for learning about MDS and the many choices is @BG05.
+The choices for defining $d_p$ are many, including ones that are locally, using say $k$ nearest neighbours, or globally computed. Distances can also be transformed using some function, including ranks instead of actual distance. Another approach modifies the stress function by replacing the $L_2$-norm, by replacing the 2 with an arbitrary power. A good resource for learning about MDS and the many choices is @BG05.
 
 \index{data!swiss roll}
 
@@ -265,8 +265,21 @@ bscols(
 \index{dimension reduction!t-SNE}
 \index{dimension reduction!UMAP}
 
-The swiss roll data is interesting in the sense that from a visual perspective it is interesting to be able to *discover* the spiral structure. Particularly this would be a more challenging if the 2D spiral was in data with more than three variables, and all the additional ones were noise (like `z` in this example). Methods like projection pursuit, PCA or MDS can discover the spiral if all variables are measured on the same scale (say -1, 1) but not standardised because the variance of the spiral shape is different from that of noise. 
+The swiss roll data is interesting in the sense that from a visual perspective it is interesting to be able to *discover* the spiral structure. This would be more challenging if the 2D spiral was in data with more than three variables, and all the additional ones were noise (like `z` in this example). Methods like projection pursuit, PCA or MDS can discover the spiral if all variables are measured on the same scale (say -1, 1) but not standardised because the variance of the spiral shape is different from that of noise. 
 Being able to discover the manifold (here, a 2D surface matching a swiss roll) can be useful for conducting further analysis. The points are now organised according to distance relative to the manifold on which they live. This layout is like taming a lion, it feels like an achievement, but realistically it is very difficult to achieve from these methods: data scale choice or a different number of $k$ nearest neighbours, changes the layout dramatically. Organising the points into distance along the spiral could have equally been achieved by discovering the spiral, and computing radial distance, as done to produce the colouring of points in `r ifelse(knitr::is_html_output(), '@fig-swiss-html', '@fig-swiss-pdf')`. This approach would also extend beyond 3D, to any additional number of noise dimensions.
+
+::: {.content-visible when-format="html"}
+::: info
+When data are distributed along some non-linear manifold the tour can allow us to uncover the shape of the manifold, while NLDR might be able to flatten the manifold into a plane, to reveal structure along the manifold.
+:::
+:::
+
+::: {.content-visible when-format="pdf"}
+
+\infobox{When data are distributed along some non-linear manifold the tour can allow us to uncover the shape of the manifold, while NLDR might be able to flatten the manifold into a plane, to reveal structure along the manifold.}
+
+:::
+
 
 ## Contemporary approaches
 
@@ -314,7 +327,7 @@ Popular methods in current use for NLDR include t-SNE [@Maaten2008] and UMAP [@M
 $$
 C_{KL} = \sum_{i,j} p_{ij}\log\left(\frac{p_{ij}}{q_{ij}}\right)
 $$
-where $i,j$ indicate two observations in the data, and $p_{ij}, q_{ij}$ are the probability distributions of the distances in $p$ and $k$ dimensions, respectively. To obtain $p_{ij}$ the interpoint distances are computed, and normalised by dividing by $\sum_{i,j} p_{ij}$, as is done similarly to obtain $q_{ij}$. A further step in t-SNE is transforming the distances through the CDF of a specified distribution (Gaussian in $p$-D and $t$-distribution in $k$-D) to reflect differences is volume between the high and low dimensional spaces, akin to the transformation used in the sage tour (@sagetour). (See @fig-density illustrating the crowding effect.) The normalisation effectively means small distances, like distances between points that are in a cluster, even if clusters are bigger or smaller, become relatively closer in comparison with all the large distances. 
+where $i,j$ indicate two observations in the data, and $p_{ij}, q_{ij}$ are the probability distributions of the distances in $p$ and $k$ dimensions, respectively. To obtain $p_{ij}$ the interpoint distances are computed, and normalised by dividing by $\sum_{i,j} p_{ij}$, as is done similarly to obtain $q_{ij}$. A further step in t-SNE is transforming the distances through the CDF of a specified distribution (Gaussian in $p$-D and $t$-distribution in $k$-D) to reflect differences in volume between the high and low dimensional spaces, akin to the transformation used in the sage tour (@sagetour). (See @fig-density illustrating the crowding effect.) The normalisation effectively means small distances, like distances between points that are in a cluster, even if clusters are bigger or smaller, become relatively closer in comparison with all the large distances. 
 
 In practice, the optimisation is conducted with a likelihood function:
 
