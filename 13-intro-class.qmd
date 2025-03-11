@@ -12,12 +12,12 @@ Methods for supervised classification originated the early nineteenth century, u
 
 ::: {.content-visible when-format="html"}
 ::: info
-Knowing what shapes of the classes are and how much separation there is between these shapes helps to determine the appropriateness of a classification method. 
+Start by colouring points by the class variable, and examine whether the colour groups separate into clusters or are different in shape.  
 :::
 :::
 
 ::: {.content-visible when-format="pdf"}
-\infobox{Knowing what shapes of the classes are and how much separation there is between these shapes helps to determine the appropriateness of a classification method.}
+\infobox{Start by colouring points by the class variable, and examine whether the colour groups separate into clusters or are different in shape.}
 :::
 
 \index{classification!supervised}
@@ -133,7 +133,7 @@ print(class1 + class2 + class3 + class4 + plot_layout(ncol=4))
 
 @fig-sup-example shows some 2D examples where the two classes are (a) linearly separable, (b) not completely separable but linearly different, (c) non-linearly separable and (d) not completely separable but with a non-linear difference. We can also see that in (a) only the horizontal variable would be important for the model because the two classes are completely separable in this direction. Although the data in (c) has separable classes, most models would have difficulty capturing the separation. It is for this reason that it is important to understand the boundary between classes produced by a fitted model. In each of b, c, d it is likely that some observations would be misclassified. Identifying these cases, and inspecting where they are in the data space is important for understanding the model's performance on different samples. 
 
-Explainability has been a pursuit in statistics for a long time, and includes checking model assumptions, diagnosing the fit, and assessing variable importance. Statistical models tend to impose strong assumptions on data, that may or may not be reasonable. If they are, the benefit is that the resulting model will be easy to deploy and interpret. In contrast, computational models that follow prescribed algorithms tend to seen as having fewer assumptions and can flexibly fit to data. However, all algorithms impose some belief that may or may not be reasonable, that need checking.
+Explainability has been a pursuit in statistics for a long time, and includes checking model assumptions, diagnosing the fit, and assessing variable importance. Interpretability also motivates the emerging field called explainable artificial intelligence (XAI), which is developing methods to determine how a model makes decisions on individual cases. Statistical models tend be easy to describe and interpret because they impose strong assumptions on data, that may or may not be reasonable. In contrast, computational models that follow prescribed algorithms tend to seen as having fewer assumptions and can flexibly fit to data. However, all algorithms impose some belief that may or may not be reasonable, and this needs checking.
 
 
 ## Balancing bias and variance
@@ -153,12 +153,12 @@ Using a machine learning conceptual framework and associated terminology may be 
 
 ::: {.content-visible when-format="html"}
 ::: info
-Using high-dimensional visualisation to understand the shapes of the class clusters will help to assess whether a particular method will produce a high or low bias model. 
+Using high-dimensional visualisation to understand the shapes of the class clusters will help to assess whether a particular method will likely result in a high or low bias model. 
 :::
 :::
 
 ::: {.content-visible when-format="pdf"}
-\infobox{Using high-dimensional visualisation to understand the shapes of the class clusters will help to assess whether a particular method will produce a high or low bias model.}
+\infobox{Using high-dimensional visualisation to understand the shapes of the class clusters will help to assess whether a particular method will likely result in a high or low bias model.}
 :::
 
 
@@ -312,47 +312,17 @@ bv6 <- ggplot() +
 bv1 + bv3 + bv5 + bv2 + bv4 + bv6 + plot_layout(ncol=3)
 ```
 
-Bias and variance are conceptual constructs. Bias is not possible to quantify unless the **true model is known**. It is theoretical, excellent for setting up simulations and comparing various models, because in these controlled scenarios they can be computed. In practice, it is not possible to compute, but high-dimensional visualisation can help. By understanding the shape of the class and separation between classes visually, it is possible to determine whether a particular method will be able ot capture this or not, and thus have low or high bias. 
+Bias and variance are conceptual constructs. *Bias is not possible to quantify unless a true model is known*. It is used for setting up simulations and comparing various models, because in these controlled scenarios they can be computed. In practice, it is not possible to compute. Using high-dimensional visualisation can help with understanding the shape of the class and separation between classes, thus a better sense about whether a particular approach will be able to capture this or not, and thus have likely have low or high bias. 
 
 To understand variance, we need to know how the model fit changes when a different training samples is used to fit the model. This is achieved by dividing the training sample into folds and fitting a model to each fold.  This is more difficult to evaluate with visual methods because it would require examining multiple samples for small differences. 
 
-However, related to this is the practice of dividing the data into training and testing (or training and testing and validation) sets. The training set is used to fit the model, and the test set is used to estimate the error of the model when used on new samples. This is particularly important for computational models with few assumptions. High-dimensional visualisation can help to assess whether the training and test samples are comparable, and thus be suitable to using for the two tasks. 
+However, related to this is the practice of dividing the data into training and testing (or training and testing and validation) sets. The training set is used to fit the model, and the test set is used to estimate the error of the model when used on new samples. This is particularly important for computational models with few assumptions. High-dimensional visualisation can help to assess whether training and test samples are comparable, and thus be suitable to using for the two tasks. 
 
 ## How to use the tour with classification tasks
 
 The primary start to using tours with classification problems is to colour observations by the class variable. Then use the grand tour and guided tour to explore the shapes of the clusters, and separation between them. If there are many classes, start by colouring one class against all the others. 
 After a model has been fitted to the data, there are two directions for effort: (1) Labelling observations as correctly classified or not, (2) simulate a set of data in the domain of the predictors so that the model boundary can be examined. 
 `r ifelse(knitr::is_html_output(), '@fig-class-intro-html', '@fig-class-intro-pdf')` illustrates the approach, and purposes of using different tours. There are two 4D data sets. One has elliptically shaped clusters corresponding to two classes and a gap between them (a,b). The other (c,d) has one of my favourite data games to play with students. Because the class clusters are nested it is very difficult to construct a good classification model using simple methods. However, with good visualisation it is relatively easy to see the nested structure, and fit a simple and perfect model by transforming the variables using distance from the mean. The slice tour is useful for this data, and occasionally useful for detecting odd shapes of clusters. 
-
-Generally, the grand and guided tour are useful for exploring the class structure. Using the grand tour, used in (a), shows that the shape of the two clusters is elliptical, roughly the same size but oriented differently. It is also possible to see a large gap between the two clusters. This shape would suggest that some methods are technically incorrect to apply. But the large gap between clusters means that practically several simple methods would be adequate, probably, and there is no need to apply a more complex model. The guided tour, used in (b), focuses the view on separations between the classes. The primary index to use is `lda_pp()` will help to find some differences between clusters, but it is simple, and easily confused by odd cluster shapes.  
-
-::: {.content-visible when-format="html"}
-::: {#fig-class-intro-html layout-ncol=2}
-![grand tour](gifs/intro_class1.gif)
-
-![guided tour](gifs/intro_class2.gif)
-![projection display](gifs/intro_class3.gif)
-
-![slice display](gifs/intro_class4.gif)
-
-Using the tour for classification problems starts by colouring observations by the class variable. Here two different simulated 4D data sets are shown: (a,b) two classes with elliptically shaped clusters that have similar size but different orientations, and (c,d) a spherical kernel cluster inside a spherical shell. Plot (a) shows a grand tour revealing the overall elliptical shape with different orientations and the gap between the two clusters. Plot (b) shows the use of a guided tour to focus in on the gap. Plot (c) shows a grand tour of projections which hints at some difference between the two class clusters, but the slice tour (d) cuts through the projection to reveal the kernel inner cluster and the shell shape of the outside cluster.
-:::
-:::
-
-::: {.content-visible when-format="pdf"}
-::: {#fig-class-intro-pdf layout-ncol=2}
-![grand tour](images/intro_class1.png){width=200}
-
-
-![guided tour](images/intro_class2.png){width=200}
-
-![projection display](images/intro_class3.png){width=200}
-
-![slice display](images/intro_class4.png){width=200}
-
-Using the tour for classification problems starts by colouring observations by the class variable. Here two different simulated 4D data sets are shown: (a,b) two classes with elliptically shaped clusters that have similar size but different orientations, and (c,d) a spherical kernel cluster inside a spherical shell. Plot (a) shows a single projection from a grand tour showing a different orientation, and (b) shows the final projection from a guided tour which shows a big gap between the two clusters. Plots (c) and (d) show the use of the slice tour to cut through the projection and reveal the shell shape of the outside class cluster.
-:::
-:::
 
 ```{r}
 #| eval: false
@@ -528,7 +498,7 @@ render_gif(sg[,1:4],
            height=400)
 render_gif(sg[,1:4], 
            planned_tour(sph_path), 
-           display_slice(col=gd$cl, v_rel=1.2, 
+           display_slice(col=sg$cl, v_rel=1.2, 
                           axes="bottomleft"), 
            gif_file = "gifs/intro_class4.gif",
            frames=200,
@@ -536,29 +506,82 @@ render_gif(sg[,1:4],
            height=400)
 ```
 
-- Construct data for diagnostics, e.g. classifly
-- Slices
+::: {.content-visible when-format="html"}
+::: info
+Set up to examine data in a classification task by colouring points using the class variable. If there are many classes, this can be done by colouring one class against the rest, and sequentially working through the classes.
+:::
+:::
 
-High-dimensional visualisation can help with this. 
+::: {.content-visible when-format="pdf"}
+\infobox{Set up to examine data in a classification task by colouring points using the class variable. If there are many classes, this can be done by colouring one class against the rest, and sequentially working through the classes.}
+:::
 
-Addressing these types of queries also motivates the emerging field called explainable artificial intelligence (XAI), which goes beyond predictive accuracy to more completely satisfy the *desire to extract knowledge from data*. 
+Generally, the grand and guided tour are useful for exploring the class structure. Using the grand tour, used in (a), shows that the shape of the two clusters is elliptical, roughly the same size but oriented differently. It is also possible to see a large gap between the two clusters. This shape would suggest that some methods are technically incorrect to apply. But the large gap between clusters means that practically several simple methods would be adequate, probably, and there is no need to apply a more complex model. The guided tour, used in (b), focuses the view on separations between the classes. The primary index to use is `lda_pp()` will help to find some differences between clusters, but it is simple, and easily confused by odd cluster shapes.  
 
-Although we focus on categorical response, some of the techniques here can be modified or adapted for problems with a numeric, or continuous, response variable. With a categorical response, and numerical predictors, we map colour to the response variable and use the tour to examine the relationship between predictors, and the different classes. 
+::: {.content-visible when-format="html"}
+::: {#fig-class-intro-html layout-ncol=2}
+![grand tour](gifs/intro_class1.gif)
 
-image to illustrate bias and variance and flexibility
+![guided tour](gifs/intro_class2.gif)
+![projection display](gifs/intro_class3.gif)
+
+![slice display](gifs/intro_class4.gif)
+
+The grand tour, guided tour and slice tour are each useful for visualising class differences: (a,b) two classes with elliptically shaped clusters that have similar size but different orientations, and (c,d) a spherical kernel cluster inside a spherical shell. Plot (a) shows a grand tour revealing the overall elliptical shape with different orientations and the gap between the two clusters. Plot (b) shows the use of a guided tour to focus in on the gap. Plot (c) shows a grand tour of projections which hints at some difference between the two class clusters, but the slice tour (d) cuts through the projection to reveal the kernel inner cluster and the shell shape of the outside cluster.
+:::
+:::
+
+::: {.content-visible when-format="pdf"}
+::: {#fig-class-intro-pdf layout-ncol=2}
+![grand tour](images/intro_class1.png){width=200}
+
+
+![guided tour](images/intro_class2.png){width=200}
+
+![projection display](images/intro_class3.png){width=200}
+
+![slice display](images/intro_class4.png){width=200}
+
+The grand tour, guided tour and slice tour are each useful for visualising class differences: (a,b) two classes with elliptically shaped clusters that have similar size but different orientations, and (c,d) a spherical kernel cluster inside a spherical shell. Plot (a) shows a projection from a grand tour, and plot (b) shows the final projection from a guided tour reveals the gap. Plot (d) shows a slice tour which does better at revealing the kernel and shell of the second example, better than a regular tour (c). 
+:::
+:::
+
+
+The tour is also used to assess the fit of a model. For this, it can be helpful to generate diagnostic data by:
+
+- Augmenting the training and test data with new variables containing fitted values, as proportions or posterior probability and class predictions, an indicator variable representing an error in the prediction. This is analogous to how the `broom` [@broom] package augments data from some model objects.
+- Create a separate data table containing variable importance estimates. These can be used to choose variables to view in the tour.
+- Additionally simulating data covering the domain of predictors and predicting the response. This is used to examine and compare boundaries between classes produced by different methods. The `classifly` [@R-classifly] package can do this for many methods. Using the slice tour can be better when examining boundaries in high dimensions.
+- Augmenting the training data with XAI metrics (described in @iml) as produced by methods such as LIME, SHAP, or counterfactuals, to better understand how the model "sees" the classification. These metrics are observation-level variable importance scores that help to determine how the model arrived at the prediction for this observation. The reason to use these metrics only for the training data is because they describe the fitted model that was built from this training data. They can help to understand the fitted model in a local neighbourhood of an observation.   
+
+::: {.content-visible when-format="html"}
+::: info
+To diagnose a fitted model, augment the observed data with fitted values, local variable importance, and simulate a full domain of new observations with predictions to examine the classification boundaries it produce. 
+:::
+:::
+
+::: {.content-visible when-format="pdf"}
+\infobox{To diagnose a fitted model, augment the observed data with fitted values, local variable importance, and simulate a full domain of new observations with predictions to examine the classification boundaries it produce.}
+:::
+
+
+<!--Although we focus on categorical response, some of the techniques here can be modified or adapted for problems with a numeric, or continuous, response variable. With a categorical response, and numerical predictors, we map colour to the response variable and use the tour to examine the relationship between predictors, and the different classes. 
+
 
 - discuss semi-supervised
 - continuous response
 - inadequacy of numerical goodness of fit
 - handling many classes
-- handling many variables
+- handling many variables-->
 
+<!--
 ## Interpretability: what the model sees
 
 
 - Global
 - PDP - what the model 
 - Local 
+-->
 
 \index{data!bushfires}
 \index{data!pisa}
