@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="generator" content="quarto-1.6.33">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>18&nbsp; Exploring misclassifications – Interactively exploring high-dimensional data and models in R</title>
+<title>18&nbsp; Diagnostics for classification models – Interactively exploring high-dimensional data and models in R</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -383,16 +383,18 @@ window.Quarto = {
    
   <ul>
 <li><a href="#errors-for-a-single-model" id="toc-errors-for-a-single-model" class="nav-link active" data-scroll-target="#errors-for-a-single-model"><span class="header-section-number">18.1</span> Errors for a single model</a></li>
-  <li><a href="#comparison-between-lda-and-cnn" id="toc-comparison-between-lda-and-cnn" class="nav-link" data-scroll-target="#comparison-between-lda-and-cnn"><span class="header-section-number">18.2</span> Comparison between LDA and CNN</a></li>
-  <li><a href="#constructing-data-to-diagnose-your-model" id="toc-constructing-data-to-diagnose-your-model" class="nav-link" data-scroll-target="#constructing-data-to-diagnose-your-model"><span class="header-section-number">18.3</span> Constructing data to diagnose your model</a></li>
-  <li><a href="#explainability" id="toc-explainability" class="nav-link" data-scroll-target="#explainability"><span class="header-section-number">18.4</span> Explainability</a></li>
+  <li><a href="#local-explanations" id="toc-local-explanations" class="nav-link" data-scroll-target="#local-explanations"><span class="header-section-number">18.2</span> Local explanations</a></li>
+  <li><a href="#examining-boundaries" id="toc-examining-boundaries" class="nav-link" data-scroll-target="#examining-boundaries"><span class="header-section-number">18.3</span> Examining boundaries</a></li>
+  <li><a href="#comparison-between-lda-and-cnn" id="toc-comparison-between-lda-and-cnn" class="nav-link" data-scroll-target="#comparison-between-lda-and-cnn"><span class="header-section-number">18.4</span> Comparison between LDA and CNN</a></li>
+  <li><a href="#constructing-data-to-diagnose-your-model" id="toc-constructing-data-to-diagnose-your-model" class="nav-link" data-scroll-target="#constructing-data-to-diagnose-your-model"><span class="header-section-number">18.5</span> Constructing data to diagnose your model</a></li>
+  <li><a href="#explainability" id="toc-explainability" class="nav-link" data-scroll-target="#explainability"><span class="header-section-number">18.6</span> Explainability</a></li>
   <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises">Exercises</a></li>
   </ul><div class="toc-actions"><ul><li><a href="https://github.com/dicook/mulgar_book/edit/master/18-summary-class.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/dicook/mulgar_book/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./13-intro-class.html">Supervised classification</a></li><li class="breadcrumb-item"><a href="./18-summary-class.html"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Diagnostics for classification models</span></a></li></ol></nav><div class="quarto-title">
 <h1 class="title">
-<span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Exploring misclassifications</span>
+<span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Diagnostics for classification models</span>
 </h1>
 </div>
 
@@ -501,12 +503,305 @@ Figure&nbsp;18.1: Examining the misclassified cases (marked as solid circles) fr
 <div class="info">
 <p>Some errors are reasonable because there is overlap between the class clusters. Some errors are not reasonable because the model used is inadequate.</p>
 </div>
-</section><section id="comparison-between-lda-and-cnn" class="level2" data-number="18.2"><h2 data-number="18.2" class="anchored" data-anchor-id="comparison-between-lda-and-cnn">
-<span class="header-section-number">18.2</span> Comparison between LDA and CNN</h2>
-</section><section id="constructing-data-to-diagnose-your-model" class="level2" data-number="18.3"><h2 data-number="18.3" class="anchored" data-anchor-id="constructing-data-to-diagnose-your-model">
-<span class="header-section-number">18.3</span> Constructing data to diagnose your model</h2>
-</section><section id="explainability" class="level2" data-number="18.4"><h2 data-number="18.4" class="anchored" data-anchor-id="explainability">
-<span class="header-section-number">18.4</span> Explainability</h2>
+</section><section id="local-explanations" class="level2" data-number="18.2"><h2 data-number="18.2" class="anchored" data-anchor-id="local-explanations">
+<span class="header-section-number">18.2</span> Local explanations</h2>
+<p> </p>
+<p>It especially important to be able to interpret or explain a model, even more so when the model is complex or black-box’y. A good resource for learning about the range of methods is <span class="citation" data-cites="iml">Molnar (<a href="references.html#ref-iml" role="doc-biblioref">2022</a>)</span>. Local explanations provide some information about variables that are important for making the prediction for a particular observation. The method that we use here is Shapley value, as computed using the <code>kernelshap</code> package <span class="citation" data-cites="kernelshap">(<a href="references.html#ref-kernelshap" role="doc-biblioref">Mayer &amp; Watson, 2023</a>)</span>.</p>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Split the data intro training and testing, as done in 17-nn chapter</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org">tidyr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rsample.tidymodels.org">rsample</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidymodels.tidymodels.org">tidymodels</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tensorflow.rstudio.com/">keras</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"data/penguins_sub.rda"</span><span class="op">)</span> <span class="co"># from mulgar book</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">821</span><span class="op">)</span></span>
+<span><span class="va">p_split</span> <span class="op">&lt;-</span> <span class="va">penguins_sub</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">bl</span><span class="op">:</span><span class="va">species</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://rsample.tidymodels.org/reference/initial_split.html">initial_split</a></span><span class="op">(</span>prop <span class="op">=</span> <span class="fl">2</span><span class="op">/</span><span class="fl">3</span>, </span>
+<span>                strata<span class="op">=</span><span class="va">species</span><span class="op">)</span></span>
+<span><span class="va">p_train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rsample.tidymodels.org/reference/initial_split.html">training</a></span><span class="op">(</span><span class="va">p_split</span><span class="op">)</span></span>
+<span><span class="va">p_test</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rsample.tidymodels.org/reference/initial_split.html">testing</a></span><span class="op">(</span><span class="va">p_split</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Data needs to be matrix, and response needs to be numeric</span></span>
+<span><span class="va">p_train_x</span> <span class="op">&lt;-</span> <span class="va">p_train</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">bl</span><span class="op">:</span><span class="va">bm</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">p_train_y</span> <span class="op">&lt;-</span> <span class="va">p_train</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html">pull</a></span><span class="op">(</span><span class="va">species</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="op">)</span> </span>
+<span><span class="va">p_train_y</span> <span class="op">&lt;-</span> <span class="va">p_train_y</span><span class="op">-</span><span class="fl">1</span> <span class="co"># Needs to be 0, 1, 2</span></span>
+<span><span class="va">p_test_x</span> <span class="op">&lt;-</span> <span class="va">p_test</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">bl</span><span class="op">:</span><span class="va">bm</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">p_test_y</span> <span class="op">&lt;-</span> <span class="va">p_test</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html">pull</a></span><span class="op">(</span><span class="va">species</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="op">)</span> </span>
+<span><span class="va">p_test_y</span> <span class="op">&lt;-</span> <span class="va">p_test_y</span><span class="op">-</span><span class="fl">1</span> <span class="co"># Needs to be 0, 1, 2</span></span>
+<span></span>
+<span><span class="co"># Predict training and test set</span></span>
+<span><span class="va">p_nn_model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/keras/man/save_model_tf.html">load_model_tf</a></span><span class="op">(</span><span class="st">"data/penguins_cnn"</span><span class="op">)</span></span>
+<span><span class="va">p_train_pred</span> <span class="op">&lt;-</span> <span class="va">p_nn_model</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">p_train_x</span>, verbose <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
+<span><span class="va">p_train_pred_cat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/levels.html">levels</a></span><span class="op">(</span><span class="va">p_train</span><span class="op">$</span><span class="va">species</span><span class="op">)</span><span class="op">[</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/apply.html">apply</a></span><span class="op">(</span><span class="va">p_train_pred</span>, <span class="fl">1</span>,</span>
+<span>        <span class="va">which.max</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="va">p_train_pred_cat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span></span>
+<span>  <span class="va">p_train_pred_cat</span>,</span>
+<span>  levels<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/levels.html">levels</a></span><span class="op">(</span><span class="va">p_train</span><span class="op">$</span><span class="va">species</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">p_test_pred</span> <span class="op">&lt;-</span> <span class="va">p_nn_model</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">p_test_x</span>, verbose <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
+<span><span class="va">p_test_pred_cat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/levels.html">levels</a></span><span class="op">(</span><span class="va">p_test</span><span class="op">$</span><span class="va">species</span><span class="op">)</span><span class="op">[</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/apply.html">apply</a></span><span class="op">(</span><span class="va">p_test_pred</span>, <span class="fl">1</span>, </span>
+<span>        <span class="va">which.max</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="va">p_test_pred_cat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span></span>
+<span>  <span class="va">p_test_pred_cat</span>,</span>
+<span>  levels<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/levels.html">levels</a></span><span class="op">(</span><span class="va">p_test</span><span class="op">$</span><span class="va">species</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Explanations</span></span>
+<span><span class="co"># https://www.r-bloggers.com/2022/08/kernel-shap/</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/ModelOriented/kernelshap">kernelshap</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/ModelOriented/shapviz">shapviz</a></span><span class="op">)</span></span>
+<span><span class="va">p_explain</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/kernelshap/man/kernelshap.html">kernelshap</a></span><span class="op">(</span></span>
+<span>    <span class="va">p_nn_model</span>,</span>
+<span>    <span class="va">p_train_x</span>, </span>
+<span>    bg_X <span class="op">=</span> <span class="va">p_train_x</span>,</span>
+<span>    verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="va">p_exp_sv</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shapviz/man/shapviz.html">shapviz</a></span><span class="op">(</span><span class="va">p_explain</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/save.html">save</a></span><span class="op">(</span><span class="va">p_exp_sv</span>, file<span class="op">=</span><span class="st">"data/p_exp_sv.rda"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>A Shapley value for an observation indicates how the variable contributes to the model prediction for that observation, relative to other variables. It is an average, computed from the change in prediction when all combinations of presence or absence of other variables. In the computation, for each combination, the prediction is computed by substituting absent variables with their average value, like one might do when imputing missing values.</p>
+<p><a href="#fig-shapley-pcp" class="quarto-xref">Figure&nbsp;<span>18.2</span></a> shows the Shapley values for Gentoo observations (both training and test sets) in the penguins data, as a parallel coordinate plot. The values for the single misclassified Gentoo penguin (in the training set) is coloured orange. Overall, the Shapley values don’t vary much on <code>bl</code>, <code>bd</code> and <code>fl</code> but they do on <code>bm</code>. The effect of other variables is seems to be only important for <code>bm</code>.</p>
+<p>For the misclassified penguin, the effect of <code>bm</code> for all combinations of other variables leads to a decline in predicted value, thus less confidence in it being a Gentoo. In contrast, for this same penguin when considering the effect of <code>bl</code> the predicted value increases on average.</p>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"data/p_exp_sv.rda"</span><span class="op">)</span></span>
+<span><span class="va">p_exp_gentoo</span> <span class="op">&lt;-</span> <span class="va">p_exp_sv</span><span class="op">$</span><span class="va">Class_3</span><span class="op">$</span><span class="va">S</span></span>
+<span><span class="va">p_exp_gentoo</span> <span class="op">&lt;-</span> <span class="va">p_exp_gentoo</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html">as_tibble</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>species <span class="op">=</span> <span class="va">p_train</span><span class="op">$</span><span class="va">species</span>,</span>
+<span>         pspecies <span class="op">=</span> <span class="va">p_train_pred_cat</span>,</span>
+<span>  <span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>error <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span><span class="op">(</span><span class="va">species</span> <span class="op">==</span> <span class="va">pspecies</span>, <span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://colorspace.R-Forge.R-project.org/">colorspace</a></span><span class="op">)</span></span>
+<span><span class="va">p_exp_gentoo</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">species</span> <span class="op">==</span> <span class="st">"Gentoo"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html">pivot_longer</a></span><span class="op">(</span><span class="va">bl</span><span class="op">:</span><span class="va">bm</span>, names_to<span class="op">=</span><span class="st">"var"</span>, values_to<span class="op">=</span><span class="st">"shap"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>var <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">var</span>, levels<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"bl"</span>, <span class="st">"bd"</span>, <span class="st">"fl"</span>, <span class="st">"bm"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">var</span>, y<span class="op">=</span><span class="va">shap</span>, colour<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">error</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_quasirandom</span><span class="op">(</span>alpha<span class="op">=</span><span class="fl">0.8</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://colorspace.R-Forge.R-project.org/reference/scale_colour_discrete_divergingx.html">scale_colour_discrete_divergingx</a></span><span class="op">(</span>palette<span class="op">=</span><span class="st">"Geyser"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="co">#facet_wrap(~var) +</span></span>
+<span>  <span class="fu">xlab</span><span class="op">(</span><span class="st">""</span><span class="op">)</span> <span class="op">+</span> <span class="fu">ylab</span><span class="op">(</span><span class="st">"SHAP"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu">theme</span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://colorspace.R-Forge.R-project.org/">colorspace</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/heike/ggpcp">ggpcp</a></span><span class="op">)</span></span>
+<span><span class="va">p_exp_gentoo</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">species</span> <span class="op">==</span> <span class="st">"Gentoo"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/ggpcp/man/pcp_select.html">pcp_select</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/ggpcp/man/aes_pcp.html">aes_pcp</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/ggpcp/man/geom_pcp_axes.html">geom_pcp_axes</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/ggpcp/man/geom_pcp_boxes.html">geom_pcp_boxes</a></span><span class="op">(</span>fill<span class="op">=</span><span class="st">"grey80"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/ggpcp/man/geom_pcp.html">geom_pcp</a></span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>colour <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">error</span><span class="op">)</span><span class="op">)</span>, </span>
+<span>             linewidth <span class="op">=</span> <span class="fl">2</span>, alpha<span class="op">=</span><span class="fl">0.3</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://colorspace.R-Forge.R-project.org/reference/scale_colour_discrete_divergingx.html">scale_colour_discrete_divergingx</a></span><span class="op">(</span>palette<span class="op">=</span><span class="st">"Geyser"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">xlab</span><span class="op">(</span><span class="st">""</span><span class="op">)</span> <span class="op">+</span> <span class="fu">ylab</span><span class="op">(</span><span class="st">"SHAP"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu">theme</span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div id="fig-shapley-pcp" class="quarto-float quarto-figure quarto-figure-center anchored" alt="FIXME">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-shapley-pcp-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="18-summary-class_files/figure-html/fig-shapley-pcp-1.png" class="img-fluid figure-img" style="width:80.0%" alt="FIXME">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-shapley-pcp-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;18.2: SHAP values focused on Gentoo class, for each variable. The one misclassified penguin (orange) has a much lower value for body mass, suggesting that this variable is used differently for the prediction than for other penguins.
+</figcaption></figure>
+</div>
+</div>
+</div>
+<p>If we examine the data <a href="#fig-penguins-bl-bm-bd" class="quarto-xref">Figure&nbsp;<span>18.3</span></a> the explanation makes some sense. The misclassified penguin has an unusually small value on <code>bm</code>. That the SHAP value for <code>bm</code> was quite different pointed to this being a potential issue with the model, particularly for this penguin. This penguin’s prediction is negatively impacted by <code>bm</code> being in the model.</p>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://patchwork.data-imaginist.com">patchwork</a></span><span class="op">)</span></span>
+<span><span class="co"># Check position on bm</span></span>
+<span><span class="va">shap_proj</span> <span class="op">&lt;-</span> <span class="va">p_exp_gentoo</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">species</span> <span class="op">==</span> <span class="st">"Gentoo"</span>, <span class="va">error</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">bl</span><span class="op">:</span><span class="va">bm</span><span class="op">)</span></span>
+<span><span class="va">shap_proj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">shap_proj</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">shap_proj</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">p_exp_gentoo_proj</span> <span class="op">&lt;-</span> <span class="va">p_exp_gentoo</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html">rename</a></span><span class="op">(</span>shap_bl <span class="op">=</span> <span class="va">bl</span>, </span>
+<span>         shap_bd <span class="op">=</span> <span class="va">bd</span>,</span>
+<span>         shap_fl <span class="op">=</span> <span class="va">fl</span>, </span>
+<span>         shap_bm <span class="op">=</span> <span class="va">bm</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_cols.html">bind_cols</a></span><span class="op">(</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html">as_tibble</a></span><span class="op">(</span><span class="va">p_train_x</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>shap1 <span class="op">=</span> <span class="va">shap_proj</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">*</span><span class="va">bl</span><span class="op">+</span></span>
+<span>           <span class="va">shap_proj</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">*</span><span class="va">bd</span><span class="op">+</span></span>
+<span>           <span class="va">shap_proj</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span><span class="op">*</span><span class="va">fl</span><span class="op">+</span></span>
+<span>           <span class="va">shap_proj</span><span class="op">[</span><span class="fl">4</span><span class="op">]</span><span class="op">*</span><span class="va">bm</span><span class="op">)</span></span>
+<span><span class="va">sp1</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="va">p_exp_gentoo_proj</span>, <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">bm</span>, y<span class="op">=</span><span class="va">bl</span>, </span>
+<span>             colour<span class="op">=</span><span class="va">species</span>, </span>
+<span>             shape<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="fl">1</span><span class="op">-</span><span class="va">error</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">geom_point</span><span class="op">(</span>alpha<span class="op">=</span><span class="fl">0.8</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://colorspace.R-Forge.R-project.org/reference/scale_colour_discrete_divergingx.html">scale_colour_discrete_divergingx</a></span><span class="op">(</span>palette<span class="op">=</span><span class="st">"Zissou 1"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_shape_manual</span><span class="op">(</span><span class="st">"error"</span>, values<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">19</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu">theme</span><span class="op">(</span>aspect.ratio<span class="op">=</span><span class="fl">1</span>, legend.position<span class="op">=</span><span class="st">"bottom"</span><span class="op">)</span></span>
+<span><span class="va">sp2</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="va">p_exp_gentoo_proj</span>, <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">bm</span>, y<span class="op">=</span><span class="va">shap1</span>, </span>
+<span>             colour<span class="op">=</span><span class="va">species</span>, </span>
+<span>             shape<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="fl">1</span><span class="op">-</span><span class="va">error</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">geom_point</span><span class="op">(</span>alpha<span class="op">=</span><span class="fl">0.8</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://colorspace.R-Forge.R-project.org/reference/scale_colour_discrete_divergingx.html">scale_colour_discrete_divergingx</a></span><span class="op">(</span>palette<span class="op">=</span><span class="st">"Zissou 1"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_shape_manual</span><span class="op">(</span><span class="st">"error"</span>, values<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">19</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ylab</span><span class="op">(</span><span class="st">"SHAP"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu">theme</span><span class="op">(</span>aspect.ratio<span class="op">=</span><span class="fl">1</span>, legend.position<span class="op">=</span><span class="st">"bottom"</span><span class="op">)</span></span>
+<span><span class="va">sp2</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="va">p_exp_gentoo_proj</span>, <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">shap1</span>, </span>
+<span>             fill<span class="op">=</span><span class="va">species</span>, colour<span class="op">=</span><span class="va">species</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_density</span><span class="op">(</span>alpha<span class="op">=</span><span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_vline</span><span class="op">(</span>xintercept <span class="op">=</span> <span class="va">p_exp_gentoo_proj</span><span class="op">$</span><span class="va">shap1</span><span class="op">[</span></span>
+<span>    <span class="va">p_exp_gentoo_proj</span><span class="op">$</span><span class="va">species</span><span class="op">==</span><span class="st">"Gentoo"</span> <span class="op">&amp;</span></span>
+<span>    <span class="va">p_exp_gentoo_proj</span><span class="op">$</span><span class="va">error</span><span class="op">==</span><span class="fl">1</span><span class="op">]</span>, colour<span class="op">=</span><span class="st">"black"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://colorspace.R-Forge.R-project.org/reference/scale_colour_discrete_divergingx.html">scale_fill_discrete_divergingx</a></span><span class="op">(</span>palette<span class="op">=</span><span class="st">"Zissou 1"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://colorspace.R-Forge.R-project.org/reference/scale_colour_discrete_divergingx.html">scale_colour_discrete_divergingx</a></span><span class="op">(</span>palette<span class="op">=</span><span class="st">"Zissou 1"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu">theme</span><span class="op">(</span>aspect.ratio<span class="op">=</span><span class="fl">1</span>, legend.position<span class="op">=</span><span class="st">"bottom"</span><span class="op">)</span></span>
+<span><span class="va">sp2</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="va">p_exp_gentoo_proj</span>, <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">bm</span>, y<span class="op">=</span><span class="va">bd</span>, </span>
+<span>             colour<span class="op">=</span><span class="va">species</span>, </span>
+<span>             shape<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="fl">1</span><span class="op">-</span><span class="va">error</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">geom_point</span><span class="op">(</span>alpha<span class="op">=</span><span class="fl">0.8</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://colorspace.R-Forge.R-project.org/reference/scale_colour_discrete_divergingx.html">scale_colour_discrete_divergingx</a></span><span class="op">(</span>palette<span class="op">=</span><span class="st">"Zissou 1"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_shape_manual</span><span class="op">(</span><span class="st">"error"</span>, values<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">19</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu">theme</span><span class="op">(</span>aspect.ratio<span class="op">=</span><span class="fl">1</span>, legend.position<span class="op">=</span><span class="st">"bottom"</span><span class="op">)</span></span>
+<span><span class="va">sp1</span> <span class="op">+</span> <span class="va">sp2</span> <span class="op">+</span> <span class="fu"><a href="https://patchwork.data-imaginist.com/reference/plot_layout.html">plot_layout</a></span><span class="op">(</span>ncol<span class="op">=</span><span class="fl">2</span>, guides <span class="op">=</span> <span class="st">"collect"</span><span class="op">)</span> <span class="op">&amp;</span></span>
+<span>  <span class="fu">theme</span><span class="op">(</span>legend.position<span class="op">=</span><span class="st">"bottom"</span>,</span>
+<span>        legend.direction<span class="op">=</span><span class="st">"vertical"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div id="fig-penguins-bl-bm-bd" class="quarto-float quarto-figure quarto-figure-center anchored" alt="FIXME">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-penguins-bl-bm-bd-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="18-summary-class_files/figure-html/fig-penguins-bl-bm-bd-1.png" class="img-fluid figure-img" style="width:100.0%" alt="FIXME">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-penguins-bl-bm-bd-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;18.3: Plots of the data to help understand what the SHAP values indicate. The misclassified Gentoo penguin has an unusually low body mass value which makes it appear to be more like an Adelie penguin, particularly when considered in relation to it’s bill length.
+</figcaption></figure>
+</div>
+</div>
+</div>
+</section><section id="examining-boundaries" class="level2" data-number="18.3"><h2 data-number="18.3" class="anchored" data-anchor-id="examining-boundaries">
+<span class="header-section-number">18.3</span> Examining boundaries</h2>
+<!-- Check against LDA, suspect that `bm` is used too much in CNN model.-->
+<p><a href="#fig-penguins-lda-nn" class="quarto-xref">Figure&nbsp;<span>18.5</span></a> shows the boundaries for this NN model along with those of the LDA model.</p>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Generate grid over explanatory variables</span></span>
+<span><span class="va">p_grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html">tibble</a></span><span class="op">(</span></span>
+<span>  bl <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html">runif</a></span><span class="op">(</span><span class="fl">10000</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">min</a></span><span class="op">(</span><span class="va">penguins_sub</span><span class="op">$</span><span class="va">bl</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">max</a></span><span class="op">(</span><span class="va">penguins_sub</span><span class="op">$</span><span class="va">bl</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  bd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html">runif</a></span><span class="op">(</span><span class="fl">10000</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">min</a></span><span class="op">(</span><span class="va">penguins_sub</span><span class="op">$</span><span class="va">bd</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">max</a></span><span class="op">(</span><span class="va">penguins_sub</span><span class="op">$</span><span class="va">bd</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  fl <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html">runif</a></span><span class="op">(</span><span class="fl">10000</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">min</a></span><span class="op">(</span><span class="va">penguins_sub</span><span class="op">$</span><span class="va">fl</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">max</a></span><span class="op">(</span><span class="va">penguins_sub</span><span class="op">$</span><span class="va">fl</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  bm <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html">runif</a></span><span class="op">(</span><span class="fl">10000</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">min</a></span><span class="op">(</span><span class="va">penguins_sub</span><span class="op">$</span><span class="va">bm</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">max</a></span><span class="op">(</span><span class="va">penguins_sub</span><span class="op">$</span><span class="va">bm</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co"># Predict grid</span></span>
+<span><span class="va">p_grid_pred</span> <span class="op">&lt;-</span> <span class="va">p_nn_model</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">p_grid</span><span class="op">)</span>, verbose<span class="op">=</span><span class="fl">0</span><span class="op">)</span></span>
+<span><span class="va">p_grid_pred_cat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/levels.html">levels</a></span><span class="op">(</span><span class="va">p_train</span><span class="op">$</span><span class="va">species</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/apply.html">apply</a></span><span class="op">(</span><span class="va">p_grid_pred</span>, <span class="fl">1</span>, <span class="va">which.max</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="va">p_grid_pred_cat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">p_grid_pred_cat</span>,</span>
+<span>                          levels<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/levels.html">levels</a></span><span class="op">(</span><span class="va">p_train</span><span class="op">$</span><span class="va">species</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Project into weights from the two nodes</span></span>
+<span><span class="va">p_grid_proj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">p_grid</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">p_nn_wgts_on</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">p_grid_proj</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"nn1"</span>, <span class="st">"nn2"</span><span class="op">)</span></span>
+<span><span class="va">p_grid_proj</span> <span class="op">&lt;-</span> <span class="va">p_grid_proj</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html">as_tibble</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>species <span class="op">=</span> <span class="va">p_grid_pred_cat</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Plot</span></span>
+<span><span class="fu">ggplot</span><span class="op">(</span><span class="va">p_grid_proj</span>, <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">nn1</span>, y<span class="op">=</span><span class="va">nn2</span>, </span>
+<span>                     colour<span class="op">=</span><span class="va">species</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span>alpha<span class="op">=</span><span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span>data<span class="op">=</span><span class="va">p_all_m</span>, <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">nn1</span>, </span>
+<span>                               y<span class="op">=</span><span class="va">nn2</span>, </span>
+<span>                               shape<span class="op">=</span><span class="va">species</span><span class="op">)</span>,</span>
+<span>             inherit.aes <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://colorspace.R-Forge.R-project.org/reference/scale_colour_discrete_divergingx.html">scale_colour_discrete_divergingx</a></span><span class="op">(</span>palette<span class="op">=</span><span class="st">"Zissou 1"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_shape_manual</span><span class="op">(</span>values<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme</span><span class="op">(</span>aspect.ratio<span class="op">=</span><span class="fl">1</span>, </span>
+<span>        legend.position <span class="op">=</span> <span class="st">"bottom"</span>,</span>
+<span>        legend.title <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div id="fig-penguins-lda-nn-html" class="quarto-layout-panel">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-penguins-lda-nn-html-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-penguins-lda-nn-html" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-lda-boundary" class="quarto-float quarto-figure quarto-figure-center anchored" alt="FIX ME">
+<figure class="quarto-float quarto-subfloat-fig figure"><div aria-describedby="fig-lda-boundary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="gifs/penguins_lda_boundaries.gif" class="img-fluid figure-img" data-ref-parent="fig-penguins-lda-nn-html" alt="FIX ME" width="300">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-lda-boundary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(a) LDA model
+</figcaption></figure>
+</div>
+</div>
+<div class="quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-penguins-lda-nn-html" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-tree-boundary" class="quarto-float quarto-figure quarto-figure-center anchored" alt="FIX ME">
+<figure class="quarto-float quarto-subfloat-fig figure"><div aria-describedby="fig-tree-boundary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="gifs/penguins_nn_boundaries.gif" class="img-fluid figure-img" data-ref-parent="fig-penguins-lda-nn-html" alt="FIX ME" width="300">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-tree-boundary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(b) NN model
+</figcaption></figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-penguins-lda-nn-html-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;18.4: Comparison of the boundaries produced by the LDA (a) and the NN (b) model, using a slice tour.
+</figcaption></figure>
+</div>
+<div id="fig-penguins-lda-nn" class="quarto-layout-panel">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-penguins-lda-nn-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-penguins-lda-nn" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-lda-boundary2" class="quarto-float quarto-figure quarto-figure-center anchored" alt="FIX ME">
+<figure class="quarto-float quarto-subfloat-fig figure"><div aria-describedby="fig-lda-boundary2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/fig-lda-2D-boundaries-1.png" class="img-fluid figure-img" data-ref-parent="fig-penguins-lda-nn" alt="FIX ME" width="200">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-lda-boundary2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(a) LDA model
+</figcaption></figure>
+</div>
+</div>
+<div class="quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-penguins-lda-nn" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-nn-boundary" class="quarto-float quarto-figure quarto-figure-center anchored" alt="FIX ME">
+<figure class="quarto-float quarto-subfloat-fig figure"><div aria-describedby="fig-nn-boundary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/penguins-nn-boundaries-1.png" class="img-fluid figure-img" data-ref-parent="fig-penguins-lda-nn" alt="FIX ME" width="290">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-nn-boundary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(b) NN model
+</figcaption></figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-penguins-lda-nn-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;18.5: Comparison of the boundaries produced by the LDA (a) and the NN (b) model, using a slice tour.
+</figcaption></figure>
+</div>
+<p></p>
+</section><section id="comparison-between-lda-and-cnn" class="level2" data-number="18.4"><h2 data-number="18.4" class="anchored" data-anchor-id="comparison-between-lda-and-cnn">
+<span class="header-section-number">18.4</span> Comparison between LDA and CNN</h2>
+</section><section id="constructing-data-to-diagnose-your-model" class="level2" data-number="18.5"><h2 data-number="18.5" class="anchored" data-anchor-id="constructing-data-to-diagnose-your-model">
+<span class="header-section-number">18.5</span> Constructing data to diagnose your model</h2>
+</section><section id="explainability" class="level2" data-number="18.6"><h2 data-number="18.6" class="anchored" data-anchor-id="explainability">
+<span class="header-section-number">18.6</span> Explainability</h2>
 </section><section id="exercises" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="exercises">Exercises</h2>
 <ol type="1">
 <li>Examine misclassifications from a random forest model for the fake_trees data between cluster 1 and 0, using the
