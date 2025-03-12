@@ -21,6 +21,7 @@ Start by colouring points by the class variable, and examine whether the colour 
 :::
 
 \index{classification!supervised}
+\index{classification!accuracy}
 
 ## Beyond predictive accuracy
 
@@ -38,6 +39,7 @@ a non-linear boundary?  How do changes in the input parameters affect these boun
 ```{r}
 #| label: fig-sup-example
 #| fig-cap: "Examples of supervised classification patterns: (a) linearly separable, (b) linear but not completely separable, (c) non-linearly separable, (d) non-linear, but not completely separable."
+#| fig-alt: "A set of four scatter plots labeled (a), (b), (c), and (d), each showing two groups of data points in red and blue. The distribution of points varies across the plots. In (a), the red and blue points are relatively well separated along a diagonal trend. In (b), the separation is less clear, with more overlap between the groups. In (c) and (d), the points follow a zig-zag pattern, separated in (c) but overlapping in (d)."
 #| echo: false
 #| message: false
 #| fig-height: 2.5
@@ -106,7 +108,7 @@ class3 <- ggplot(df2, aes(x=x5, y=x6, colour = cl2)) +
   geom_point(alpha=0.7) +
   scale_colour_discrete_divergingx(
       palette = "Zissou 1", nmax = 2, rev = TRUE) +
-  annotate("text", 1.95, 1.94, label="c") +
+  annotate("text", 1.92, 2.07, label="c") +
   theme(aspect.ratio=1,
         legend.position = "none",
         axis.text = element_blank(),
@@ -167,7 +169,7 @@ Predictive accuracy trades off these characteristics, with the best model having
 ```{r}
 #| label: fig-bias-variance
 #| fig-cap: "Illustrating bias and variance using three different samples from the same distribution (a/d, b/e, c/f) and two different models (a-c, d-f). The black points are the training samples and colour indicates predictions from the resulting fitted model. The model fitted in a-c has high bias but low variance. The model fitted in d-f has lower bias but higher variance."
-#| fig-alt: "FIX ME"
+#| fig-alt: "A set of six square plots labeled (a) to (f), arranged in a 2x3 grid. Data points are overlaid as black crosses and circles. Each group follows a zig-zag pattern with crosses at top and separated from circles. The colours, red and blue, display a binary classification boundary, which is linear in (a) to (c) and different step function shapes in (d) to (f). "
 #| echo: false
 #| message: false
 #| fig-height: 4
@@ -321,8 +323,14 @@ However, related to this is the practice of dividing the data into training and 
 ## How to use the tour with classification tasks
 
 The primary start to using tours with classification problems is to colour observations by the class variable. Then use the grand tour and guided tour to explore the shapes of the clusters, and separation between them. If there are many classes, start by colouring one class against all the others. 
+
 After a model has been fitted to the data, there are two directions for effort: (1) Labelling observations as correctly classified or not, (2) simulate a set of data in the domain of the predictors so that the model boundary can be examined. 
 `r ifelse(knitr::is_html_output(), '@fig-class-intro-html', '@fig-class-intro-pdf')` illustrates the approach, and purposes of using different tours. There are two 4D data sets. One has elliptically shaped clusters corresponding to two classes and a gap between them (a,b). The other (c,d) has one of my favourite data games to play with students. Because the class clusters are nested it is very difficult to construct a good classification model using simple methods. However, with good visualisation it is relatively easy to see the nested structure, and fit a simple and perfect model by transforming the variables using distance from the mean. The slice tour is useful for this data, and occasionally useful for detecting odd shapes of clusters. 
+
+\index{tour!grand}
+\index{tour!guided}
+\index{tour!slice}
+\index{projection pursuit}
 
 ```{r}
 #| eval: false
@@ -520,14 +528,13 @@ Generally, the grand and guided tour are useful for exploring the class structur
 
 ::: {.content-visible when-format="html"}
 ::: {#fig-class-intro-html layout-ncol=2}
+![grand tour](gifs/intro_class1.gif){width=250 alt-text="Animation showing 2D projections from 4D. Two clusters, red and blue, are both elliptical oriented in different directions with a separation visible in some projections."}
 
-![grand tour](gifs/intro_class1.gif){width=250}
+![guided tour](gifs/intro_class2.gif){width=250 alt-text="Animation showing 2D projections from 4D, being steered towards a projection where the two groups are separated."}
 
-![guided tour](gifs/intro_class2.gif){width=250}
+![projection display](gifs/intro_class3.gif){width=250 alt-text="Animation showing 2D projections from 4D, with two sets of coloured groups. Both look circular in all projections but the blue group is much smaller."}
 
-![projection display](gifs/intro_class3.gif){width=250}
-
-![slice display](gifs/intro_class4.gif){width=250}
+![slice display](gifs/intro_class4.gif){width=250 alt-text="Animation showing 2D slices from 4D, with two sets of coloured groups. The red group forms an open circle, enclosing the blue group in all slices."}
 
 The grand tour, guided tour and slice tour are each useful for visualising class differences: (a,b) two classes with elliptically shaped clusters that have similar size but different orientations, and (c,d) a spherical kernel cluster inside a spherical shell. Plot (a) shows a grand tour revealing the overall elliptical shape with different orientations and the gap between the two clusters. Plot (b) shows the use of a guided tour to focus in on the gap. Plot (c) shows a grand tour of projections which hints at some difference between the two class clusters, but the slice tour (d) cuts through the projection to reveal the kernel inner cluster and the shell shape of the outside cluster.
 :::
@@ -535,14 +542,14 @@ The grand tour, guided tour and slice tour are each useful for visualising class
 
 ::: {.content-visible when-format="pdf"}
 ::: {#fig-class-intro-pdf layout-ncol=2}
-![grand tour](images/intro_class1.png){width=200}
+![grand tour](images/intro_class1.png){width=200 alt-text="A single 2D projection from 4D, from a sequence of tour projections. Two clusters, red and blue, are both elliptical oriented in different directions."}
 
 
-![guided tour](images/intro_class2.png){width=200}
+![guided tour](images/intro_class2.png){width=200 alt-text="A single 2D projection from 4D, showing the end of a guided tour. The two clusters are very separated with the red one more elongated and oriented from bottom to middle, and the blue one oriented from left middle to top. There is a circle with lines segments starting from the centre and stretching in different directions towards the edge of the circle. This indicates that all four variables contribute to this projection."}
 
-![projection display](images/intro_class3.png){width=200}
+![projection display](images/intro_class3.png){width=200 alt-text="A single 2D projection from 4D, with two sets of coloured groups. Both look circular but the blue group is much smaller."}
 
-![slice display](images/intro_class4.png){width=200}
+![slice display](images/intro_class4.png){width=200 alt-text="A single 2D slice from 4D. The red group forms an open circle, enclosing the blue group."}
 
 The grand tour, guided tour and slice tour are each useful for visualising class differences: (a,b) two classes with elliptically shaped clusters that have similar size but different orientations, and (c,d) a spherical kernel cluster inside a spherical shell. Plot (a) shows a projection from a grand tour, and plot (b) shows the final projection from a guided tour reveals the gap. Plot (d) shows a slice tour which does better at revealing the kernel and shell of the second example, better than a regular tour (c). 
 :::
