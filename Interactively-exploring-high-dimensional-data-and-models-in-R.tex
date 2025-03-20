@@ -294,7 +294,7 @@
 
 \title{Interactively exploring high-dimensional data and models in R}
 \author{Dianne Cook and Ursula Laa}
-\date{2025-03-19}
+\date{2025-03-20}
 
 \begin{document}
 \maketitle
@@ -6682,8 +6682,8 @@ variance.}
 Bias and variance are conceptual constructs. \emph{Bias is not possible
 to quantify unless a true model is known}. It is used for setting up
 simulations and comparing various models, because in these controlled
-scenarios they can be computed. In practice, it is not possible to
-compute. Using high-dimensional visualisation can help with
+scenarios bias and variance can be computed. In practice, it is not
+possible to compute. Using high-dimensional visualisation can help with
 understanding the shape of the class and separation between classes.
 This provides a better sense about whether a particular approach will be
 able to capture the shape of the boundary or not, and will thus likely
@@ -6798,17 +6798,23 @@ helpful to generate diagnostic data by:
   fitted values, as proportions or posterior probability and class
   predictions, an indicator variable representing an uncertainty in the
   prediction. This is analogous to how the \texttt{broom} (Robinson et
-  al., 2024) package augments data from some model objects.
+  al., 2024) package augments data from some model objects. Examples can
+  be seen in each of the following chapters, specifically,
+  Section~\ref{sec-lda-results}, Section~\ref{sec-svm-model}, and
+  Section~\ref{sec-nn-pred-prob}.
 \item
   Create a separate data table containing variable importance estimates.
-  These can be used for choosing variables to view in the tour.
+  These can be used for choosing variables to view in the tour. See
+  example in Section~\ref{sec-forest-var-imp}.
 \item
   Additionally simulating data covering the domain of predictors and
   predicting the response. This is used to examine and compare
   boundaries between classes produced by different methods. The
   \texttt{classifly} (Wickham, 2022) package can do this for many
   methods. Using the slice tour can be better when examining boundaries
-  in high dimensions.
+  in high dimensions. Examples can be seen in
+  Section~\ref{sec-lda-results}, Section~\ref{sec-svm-model},
+  Section~\ref{sec-class-bnd}.
 \item
   Augmenting the training data with XAI metrics (described in Molnar
   (2022)) as produced by methods such as LIME, SHAP, or counterfactuals,
@@ -6818,7 +6824,8 @@ helpful to generate diagnostic data by:
   observation. The reason to use these metrics only for the training
   data is because they describe the fitted model that was built from
   this training data. They can help to understand the fitted model in a
-  local neighbourhood of an observation.
+  local neighbourhood of an observation. See
+  Section~\ref{sec-class-explain}.
 \end{itemize}
 
 \infobox{To diagnose a fitted model, augment the observed data with fitted values, local variable importance, and simulate a full domain of new observations with predictions to examine the classification boundaries it produce.}
@@ -7313,7 +7320,7 @@ variance-covariance matches the spread of points in each group.}
 \insightbox{From the tour, we can see that the assumption of equal elliptical variance-covariance is a reasonable assumption for the penguins data. In all projections the ellipse is reasonably matching the spread of the observations.
 }
 
-\section{Examining results}\label{examining-results}
+\section{Examining results}\label{sec-lda-results}
 
 The boundaries for a classification model can be examined by:
 
@@ -7850,11 +7857,11 @@ the random forest model object. The first five rows are:
 
 \begin{verbatim}
   Adelie Chinstrap Gentoo
-1 1.0000   0.00000      0
-2 0.9598   0.04023      0
-3 0.9883   0.01170      0
-4 1.0000   0.00000      0
-5 1.0000   0.00000      0
+1 1.0000  0.000000      0
+2 0.9628  0.037234      0
+3 0.9893  0.010695      0
+4 0.9953  0.004739      0
+5 0.9946  0.005376      0
 \end{verbatim}
 
 This has three columns corresponding to the three species, but because
@@ -8010,12 +8017,12 @@ interesting to see how well the random forest model performs.
 \end{Shaded}
 
 \begin{verbatim}
-    0     1    2     3     4    5 6 7     8    9
-1 0.9 0.000 0.02 0.005 0.000 0.09 0 0 0.005 0.00
-2 0.7 0.000 0.02 0.000 0.012 0.28 0 0 0.000 0.00
-3 0.8 0.000 0.04 0.011 0.117 0.02 0 0 0.000 0.02
-4 0.9 0.000 0.01 0.000 0.006 0.07 0 0 0.006 0.00
-5 0.6 0.006 0.05 0.011 0.011 0.28 0 0 0.011 0.00
+    0 1    2    3     4    5 6 7     8    9
+1 0.8 0 0.02 0.00 0.011 0.13 0 0 0.000 0.00
+2 0.7 0 0.01 0.00 0.033 0.30 0 0 0.000 0.00
+3 0.8 0 0.05 0.00 0.128 0.01 0 0 0.000 0.03
+4 0.9 0 0.01 0.00 0.006 0.10 0 0 0.000 0.00
+5 0.6 0 0.04 0.01 0.018 0.36 0 0 0.006 0.00
 \end{verbatim}
 
 \begin{figure}
@@ -8092,16 +8099,16 @@ the accuracy and Gini metrics.}
 \toprule
 Var & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & Acc & Gini \\ 
 \midrule\addlinespace[2.5pt]
-PC1 & $0.1$ & $0.3$ & $0.4$ & $0.3$ & $0.2$ & $0.5$ & $0.4$ & $0.2$ & $0.3$ & $0.3$ & $0.30$ & $482$ \\ 
-PC2 & $0.1$ & $0.2$ & $0.2$ & $0.5$ & $0.3$ & $0.3$ & $0.2$ & $0.4$ & $0.2$ & $0.3$ & $0.28$ & $385$ \\ 
-PC3 & $0.1$ & $0.1$ & $0.1$ & $0.1$ & $0.5$ & $0.1$ & $0.1$ & $0.1$ & $0.2$ & $0.2$ & $0.16$ & $304$ \\ 
-PC4 & $0.1$ & $0.5$ & $0.1$ & $0.0$ & $0.1$ & $0.0$ & $0.4$ & $0.1$ & $0.1$ & $0.1$ & $0.15$ & $341$ \\ 
-PC5 & $0.1$ & $0.1$ & $0.3$ & $0.1$ & $0.2$ & $0.2$ & $0.1$ & $0.1$ & $0.3$ & $0.2$ & $0.18$ & $322$ \\ 
-PC6 & $0.1$ & $0.2$ & $0.2$ & $0.2$ & $0.0$ & $0.1$ & $0.0$ & $0.3$ & $0.1$ & $0.2$ & $0.16$ & $291$ \\ 
-PC7 & $0.1$ & $0.0$ & $0.2$ & $0.0$ & $0.0$ & $0.1$ & $0.1$ & $0.3$ & $0.1$ & $0.1$ & $0.11$ & $251$ \\ 
-PC8 & $0.0$ & $0.1$ & $0.0$ & $0.2$ & $0.1$ & $0.1$ & $0.0$ & $0.0$ & $0.1$ & $0.3$ & $0.10$ & $222$ \\ 
-PC9 & $0.1$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.1$ & $0.0$ & $0.02$ & $56$ \\ 
-PC10 & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.01$ & $45$ \\ 
+PC1 & $0.1$ & $0.4$ & $0.5$ & $0.3$ & $0.2$ & $0.5$ & $0.4$ & $0.2$ & $0.3$ & $0.3$ & $0.30$ & $472$ \\ 
+PC2 & $0.1$ & $0.2$ & $0.2$ & $0.5$ & $0.3$ & $0.3$ & $0.2$ & $0.4$ & $0.2$ & $0.3$ & $0.28$ & $375$ \\ 
+PC3 & $0.1$ & $0.1$ & $0.1$ & $0.1$ & $0.5$ & $0.2$ & $0.1$ & $0.1$ & $0.2$ & $0.2$ & $0.17$ & $323$ \\ 
+PC4 & $0.1$ & $0.5$ & $0.1$ & $0.0$ & $0.1$ & $0.0$ & $0.4$ & $0.2$ & $0.1$ & $0.1$ & $0.15$ & $347$ \\ 
+PC5 & $0.1$ & $0.1$ & $0.3$ & $0.1$ & $0.2$ & $0.2$ & $0.1$ & $0.1$ & $0.3$ & $0.2$ & $0.17$ & $324$ \\ 
+PC6 & $0.1$ & $0.2$ & $0.2$ & $0.2$ & $0.0$ & $0.1$ & $0.0$ & $0.3$ & $0.1$ & $0.2$ & $0.15$ & $273$ \\ 
+PC7 & $0.1$ & $0.0$ & $0.1$ & $0.0$ & $0.1$ & $0.1$ & $0.1$ & $0.3$ & $0.1$ & $0.1$ & $0.11$ & $263$ \\ 
+PC8 & $0.0$ & $0.1$ & $0.0$ & $0.2$ & $0.1$ & $0.1$ & $0.0$ & $0.0$ & $0.1$ & $0.3$ & $0.09$ & $218$ \\ 
+PC9 & $0.1$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.1$ & $0.0$ & $0.03$ & $61$ \\ 
+PC10 & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.01$ & $44$ \\ 
 \bottomrule
 
 \end{longtable}
@@ -8181,16 +8188,16 @@ not each other.
 
 \begin{verbatim}
     0   1   2   3   4   5   6   7   8   9 class.error
-0 268   4   2   3   4   4   4   3   4   4       0.107
-1  13 287   0   0   0   0   0   0   0   0       0.043
-2   8   0 290   0   2   0   0   0   0   0       0.033
-3   5   0   0 290   0   0   0   3   0   2       0.033
+0 265   7   2   5   4   4   3   2   5   3       0.117
+1  12 288   0   0   0   0   0   0   0   0       0.040
+2  10   0 288   0   2   0   0   0   0   0       0.040
+3   6   0   0 290   0   0   0   3   0   1       0.033
 4  13   0   0   0 287   0   0   0   0   0       0.043
-5  11   0   0   0   0 289   0   0   0   0       0.037
-6  14   0   0   0   0   0 285   0   1   0       0.050
-7   5   0   0   5   0   0   0 289   0   1       0.037
-8   8   0   0   0   0   0   0   0 292   0       0.027
-9   3   0   0   0   0   0   0   0   0 297       0.010
+5  12   0   0   0   0 288   0   0   0   0       0.040
+6  12   0   0   0   0   0 287   0   1   0       0.043
+7   5   0   0   4   0   0   0 290   0   1       0.033
+8   7   0   0   0   0   0   0   0 293   0       0.023
+9   8   0   0   0   0   0   0   0   0 292       0.027
 \end{verbatim}
 
 From the tour in Figure~\ref{fig-ft-cl2} we can see that clusters 1, 6,
@@ -8255,6 +8262,8 @@ relative to 6, 1 and 0 is largely due to PC5 (right).}
   most useful using a tour, and follow-up by making a scatterplot
   showing the best distinction between your chosen cluster and the other
   observations.
+\item
+  Add NLDR view comparison for bushfires or other data sets.
 \end{enumerate}
 
 \chapter{Support vector machines}\label{support-vector-machines}
@@ -8465,7 +8474,7 @@ calculation is quite robust to the data scaling.
 }
 
 \section{Examining the model components in
-high-dimensions}\label{examining-the-model-components-in-high-dimensions}
+high-dimensions}\label{sec-svm-model}
 
 For higher dimensions, the procedures are similar, with the hyperplane
 and support vectors being examined using a tour. Here we examine the
@@ -9081,8 +9090,7 @@ good illustration of this in 2D. The process of examining each of the
 node models can be useful for understanding this non-linear separation,
 also in high dimensions.
 
-\section{Examining predictive
-probabilities}\label{examining-predictive-probabilities}
+\section{Examining predictive probabilities}\label{sec-nn-pred-prob}
 
 \index{classification!predictive probabilities}
 
@@ -9487,12 +9495,11 @@ images. This however is beyond the scope of this book.
   batch normalization should improve the model performance.
 \end{enumerate}
 
-\chapter{Diagnostics for classification
-models}\label{diagnostics-for-classification-models}
+\chapter{Diagnostics for classification models}\label{sec-class-diag}
 
 \index{classification!misclassification}
 
-\section{Errors for a single model}\label{errors-for-a-single-model}
+\section{Errors for a single model}\label{sec-class-errorr}
 
 To examine misclassifications, we can create a separate variable that
 identifies the errors or not. Constructing this for each class, and
@@ -9514,7 +9521,7 @@ other two penguin species.
 
 \begin{verbatim}
           Adelie Chinstrap Gentoo class.error
-Adelie       143         3      0 0.020547945
+Adelie       142         4      0 0.027397260
 Chinstrap      4        64      0 0.058823529
 Gentoo         0         1    118 0.008403361
 \end{verbatim}
@@ -9590,7 +9597,7 @@ the two clusters.}
 \infobox{Some errors are reasonable because there is overlap between the class clusters. Some errors are not reasonable because the model used is inadequate.
 }
 
-\section{Local explanations}\label{local-explanations}
+\section{Local explanations}\label{sec-class-explain}
 
 \index{classification!local explanations} \index{classification!XAI}
 
@@ -9732,7 +9739,7 @@ it's bill length.}
 
 \end{figure}%
 
-\section{Examining boundaries}\label{examining-boundaries}
+\section{Examining boundaries}\label{sec-class-bnd}
 
 Figure~\ref{fig-penguins-lda-nn} shows the boundaries for this NN model
 along with those of the LDA model.
