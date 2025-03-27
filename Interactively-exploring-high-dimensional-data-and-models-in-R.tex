@@ -294,7 +294,7 @@
 
 \title{Interactively exploring high-dimensional data and models in R}
 \author{Dianne Cook and Ursula Laa}
-\date{2025-03-20}
+\date{2025-03-28}
 
 \begin{document}
 \maketitle
@@ -6817,7 +6817,7 @@ helpful to generate diagnostic data by:
   Section~\ref{sec-class-bnd}.
 \item
   Augmenting the training data with XAI metrics (described in Molnar
-  (2022)) as produced by methods such as LIME, SHAP, or counterfactuals,
+  (2025)) as produced by methods such as LIME, SHAP, or counterfactuals,
   to better understand how the model ``sees'' the classification. These
   metrics are observation-level variable importance scores that help to
   determine how the model arrived at the prediction for this
@@ -9521,14 +9521,14 @@ other two penguin species.
 
 \begin{verbatim}
           Adelie Chinstrap Gentoo class.error
-Adelie       142         4      0 0.027397260
+Adelie       143         3      0 0.020547945
 Chinstrap      4        64      0 0.058823529
 Gentoo         0         1    118 0.008403361
 \end{verbatim}
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{penguins\_errors }\OtherTok{\textless{}{-}}\NormalTok{ penguins\_sub }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{penguins\_errors }\OtherTok{\textless{}{-}}\NormalTok{ penguins\_sub }\SpecialCharTok{|\textgreater{}}
   \FunctionTok{mutate}\NormalTok{(}\AttributeTok{err =} \FunctionTok{ifelse}\NormalTok{(penguins\_rf}\SpecialCharTok{$}\NormalTok{predicted }\SpecialCharTok{!=}
 \NormalTok{                        penguins\_rf}\SpecialCharTok{$}\NormalTok{y, }\DecValTok{1}\NormalTok{, }\DecValTok{0}\NormalTok{))}
 \end{Highlighting}
@@ -9597,148 +9597,6 @@ the two clusters.}
 \infobox{Some errors are reasonable because there is overlap between the class clusters. Some errors are not reasonable because the model used is inadequate.
 }
 
-\section{Local explanations}\label{sec-class-explain}
-
-\index{classification!local explanations} \index{classification!XAI}
-
-It especially important to be able to interpret or explain a model, even
-more so when the model is complex or black-box'y. A good resource for
-learning about the range of methods is Molnar (2022). Local explanations
-provide some information about variables that are important for making
-the prediction for a particular observation. The method that we use here
-is Shapley value, as computed using the \texttt{kernelshap} package
-(Mayer \& Watson, 2023).
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\# Split the data intro training and testing, as done in 17{-}nn chapter}
-\FunctionTok{library}\NormalTok{(dplyr)}
-\FunctionTok{library}\NormalTok{(tidyr)}
-\FunctionTok{library}\NormalTok{(rsample)}
-\FunctionTok{library}\NormalTok{(tidymodels)}
-\FunctionTok{library}\NormalTok{(keras)}
-
-\FunctionTok{load}\NormalTok{(}\StringTok{"data/penguins\_sub.rda"}\NormalTok{) }\CommentTok{\# from mulgar book}
-
-\FunctionTok{set.seed}\NormalTok{(}\DecValTok{821}\NormalTok{)}
-\NormalTok{p\_split }\OtherTok{\textless{}{-}}\NormalTok{ penguins\_sub }\SpecialCharTok{\%\textgreater{}\%} 
-  \FunctionTok{select}\NormalTok{(bl}\SpecialCharTok{:}\NormalTok{species) }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{initial\_split}\NormalTok{(}\AttributeTok{prop =} \DecValTok{2}\SpecialCharTok{/}\DecValTok{3}\NormalTok{, }
-                \AttributeTok{strata=}\NormalTok{species)}
-\NormalTok{p\_train }\OtherTok{\textless{}{-}} \FunctionTok{training}\NormalTok{(p\_split)}
-\NormalTok{p\_test }\OtherTok{\textless{}{-}} \FunctionTok{testing}\NormalTok{(p\_split)}
-
-\CommentTok{\# Data needs to be matrix, and response needs to be numeric}
-\NormalTok{p\_train\_x }\OtherTok{\textless{}{-}}\NormalTok{ p\_train }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{select}\NormalTok{(bl}\SpecialCharTok{:}\NormalTok{bm) }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{as.matrix}\NormalTok{()}
-\NormalTok{p\_train\_y }\OtherTok{\textless{}{-}}\NormalTok{ p\_train }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{pull}\NormalTok{(species) }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{as.numeric}\NormalTok{() }
-\NormalTok{p\_train\_y }\OtherTok{\textless{}{-}}\NormalTok{ p\_train\_y}\DecValTok{{-}1} \CommentTok{\# Needs to be 0, 1, 2}
-\NormalTok{p\_test\_x }\OtherTok{\textless{}{-}}\NormalTok{ p\_test }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{select}\NormalTok{(bl}\SpecialCharTok{:}\NormalTok{bm) }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{as.matrix}\NormalTok{()}
-\NormalTok{p\_test\_y }\OtherTok{\textless{}{-}}\NormalTok{ p\_test }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{pull}\NormalTok{(species) }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{as.numeric}\NormalTok{() }
-\NormalTok{p\_test\_y }\OtherTok{\textless{}{-}}\NormalTok{ p\_test\_y}\DecValTok{{-}1} \CommentTok{\# Needs to be 0, 1, 2}
-
-\CommentTok{\# Predict training and test set}
-\NormalTok{p\_nn\_model }\OtherTok{\textless{}{-}} \FunctionTok{load\_model\_tf}\NormalTok{(}\StringTok{"data/penguins\_cnn"}\NormalTok{)}
-\NormalTok{p\_train\_pred }\OtherTok{\textless{}{-}}\NormalTok{ p\_nn\_model }\SpecialCharTok{\%\textgreater{}\%} 
-  \FunctionTok{predict}\NormalTok{(p\_train\_x, }\AttributeTok{verbose =} \DecValTok{0}\NormalTok{)}
-\NormalTok{p\_train\_pred\_cat }\OtherTok{\textless{}{-}} \FunctionTok{levels}\NormalTok{(p\_train}\SpecialCharTok{$}\NormalTok{species)[}
-  \FunctionTok{apply}\NormalTok{(p\_train\_pred, }\DecValTok{1}\NormalTok{,}
-\NormalTok{        which.max)]}
-\NormalTok{p\_train\_pred\_cat }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(}
-\NormalTok{  p\_train\_pred\_cat,}
-  \AttributeTok{levels=}\FunctionTok{levels}\NormalTok{(p\_train}\SpecialCharTok{$}\NormalTok{species))}
-
-\NormalTok{p\_test\_pred }\OtherTok{\textless{}{-}}\NormalTok{ p\_nn\_model }\SpecialCharTok{\%\textgreater{}\%} 
-  \FunctionTok{predict}\NormalTok{(p\_test\_x, }\AttributeTok{verbose =} \DecValTok{0}\NormalTok{)}
-\NormalTok{p\_test\_pred\_cat }\OtherTok{\textless{}{-}} \FunctionTok{levels}\NormalTok{(p\_test}\SpecialCharTok{$}\NormalTok{species)[}
-  \FunctionTok{apply}\NormalTok{(p\_test\_pred, }\DecValTok{1}\NormalTok{, }
-\NormalTok{        which.max)]}
-\NormalTok{p\_test\_pred\_cat }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(}
-\NormalTok{  p\_test\_pred\_cat,}
-  \AttributeTok{levels=}\FunctionTok{levels}\NormalTok{(p\_test}\SpecialCharTok{$}\NormalTok{species))}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\# Explanations}
-\CommentTok{\# https://www.r{-}bloggers.com/2022/08/kernel{-}shap/}
-\FunctionTok{library}\NormalTok{(kernelshap)}
-\FunctionTok{library}\NormalTok{(shapviz)}
-\NormalTok{p\_explain }\OtherTok{\textless{}{-}} \FunctionTok{kernelshap}\NormalTok{(}
-\NormalTok{    p\_nn\_model,}
-\NormalTok{    p\_train\_x, }
-    \AttributeTok{bg\_X =}\NormalTok{ p\_train\_x,}
-    \AttributeTok{verbose =} \ConstantTok{FALSE}
-\NormalTok{  )}
-\NormalTok{p\_exp\_sv }\OtherTok{\textless{}{-}} \FunctionTok{shapviz}\NormalTok{(p\_explain)}
-\FunctionTok{save}\NormalTok{(p\_exp\_sv, }\AttributeTok{file=}\StringTok{"data/p\_exp\_sv.rda"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-A Shapley value for an observation indicates how the variable
-contributes to the model prediction for that observation, relative to
-other variables. It is an average, computed from the change in
-prediction when all combinations of presence or absence of other
-variables. In the computation, for each combination, the prediction is
-computed by substituting absent variables with their average value, like
-one might do when imputing missing values.
-
-Figure~\ref{fig-shapley-pcp} shows the Shapley values for Gentoo
-observations (both training and test sets) in the penguins data, as a
-parallel coordinate plot. The values for the single misclassified Gentoo
-penguin (in the training set) is coloured orange. Overall, the Shapley
-values don't vary much on \texttt{bl}, \texttt{bd} and \texttt{fl} but
-they do on \texttt{bm}. The effect of other variables is seems to be
-only important for \texttt{bm}.
-
-For the misclassified penguin, the effect of \texttt{bm} for all
-combinations of other variables leads to a decline in predicted value,
-thus less confidence in it being a Gentoo. In contrast, for this same
-penguin when considering the effect of \texttt{bl} the predicted value
-increases on average.
-
-\begin{figure}
-
-\centering{
-
-\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{18-summary-class_files/figure-pdf/fig-shapley-pcp-1.pdf}
-
-}
-
-\caption{\label{fig-shapley-pcp}SHAP values focused on Gentoo class, for
-each variable. The one misclassified penguin (orange) has a much lower
-value for body mass, suggesting that this variable is used differently
-for the prediction than for other penguins.}
-
-\end{figure}%
-
-If we examine the data Figure~\ref{fig-penguins-bl-bm-bd} the
-explanation makes some sense. The misclassified penguin has an unusually
-small value on \texttt{bm}. That the SHAP value for \texttt{bm} was
-quite different pointed to this being a potential issue with the model,
-particularly for this penguin. This penguin's prediction is negatively
-impacted by \texttt{bm} being in the model.
-
-\begin{figure}
-
-\centering{
-
-\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{18-summary-class_files/figure-pdf/fig-penguins-bl-bm-bd-1.pdf}
-
-}
-
-\caption{\label{fig-penguins-bl-bm-bd}Plots of the data to help
-understand what the SHAP values indicate. The misclassified Gentoo
-penguin has an unusually low body mass value which makes it appear to be
-more like an Adelie penguin, particularly when considered in relation to
-it's bill length.}
-
-\end{figure}%
-
 \section{Examining boundaries}\label{sec-class-bnd}
 
 Figure~\ref{fig-penguins-lda-nn} shows the boundaries for this NN model
@@ -9777,25 +9635,339 @@ produced by the LDA (a) and the NN (b) model, using a slice tour.}
 
 \index{tour!slice}
 
-\section{Comparison between LDA and
-CNN}\label{comparison-between-lda-and-cnn}
+\section{Explainability}\label{sec-class-explain}
 
-\section{Constructing data to diagnose your
-model}\label{constructing-data-to-diagnose-your-model}
+\index{variable importance}
 
-\section{Explainability}\label{explainability}
+The purpose of interpreting a model is to develop an understanding of
+how the predictors are related to class differences. If the model fits
+well, then how the model sees the relationship will reliably describe
+the relationship. Ideally, one can make statements like ``class A
+differs from class B most when this combination of \(x_1\), \ldots,
+\(x_p\) is used'', or more simply ``\(x_1\) and \(x_5\) are the most
+important variables for distinguishing class A from B''.
+
+When statistical models are used, such as LDA (or logistic regression)
+boundaries between classes are linear, and the importance of variables
+are typically read from the estimated coefficients. They can be
+considered to be \emph{global}, because the relationship is the same
+throughout the data domain. The variable importance provided by random
+forests is also global importance, but they do not describe smaller
+intricacies in the (likely nonlinear) boundaries induced by the fitted
+model.
+
+If the predictors have associations, then interpreting measures of
+importance can be confounded by the associations. A variable may earn a
+low importance score but actually have a strong contribution to a class
+separation because it is associated with another predictor that has a
+high importance score. This can be detangled by examining relationships
+between predictor and response, conditional on other predictors.
+Statistical models, though, tend to have a singular focus, and even
+though two associated variables may have similar importance they will
+primarily build from only one of them. Ensemble models such as random
+forest have an advantage here because of the sub-sampling of variables
+built in to the ensemble architecture. Some elements of the ensemble
+will only have one of the two variables, so both variables should emerge
+in the diagnostics as having high importance scores.
+
+But forests build from trees which make greedy linear splits on single
+variables. If there are multiple ways to separate class clusters, trees
+and forests will grab one to use. So similarly the fitted model has
+tunnel vision for one solution.
+
+This is what explainability is attempting to assist with, what is it
+that the fitted model sees. What we see when we make plots of the data
+might differ from the model sees, which can be confusing. The role of
+explainability is to pull the fitted model apart to inspect how it has
+been built for the purposes of understanding how it will make
+predictions and how it considers the relationship between response and
+predictors.
+
+As suggested by the ruminations above, it can be messy work, requiring
+persistence and effort to develop a good understanding of any fitted
+model. Local explanation measures are designed to help, but there are a
+variety of different calculation techniques which may produce
+conflicting interpretations. In addition, local explanations are
+observation-level values, because they provide information that is only
+reliable for a local neighbourhood of a single observation.
+
+A good interpretability workflow includes:
+
+\begin{itemize}
+\tightlist
+\item
+  Displays of the fitted model, such as that generated by simulating and
+  predicting data in the full domain.
+\item
+  Plots of the training data, because the model fit depends on this set
+  of data, and thus is only interpretable based on this set. Although
+  explanations will be used with new data (like the test set) to explain
+  how they are predicted, because they are not used to build the model
+  it could be confusing for understanding the model fit.
+\item
+  Local explanations calculated in different ways.
+\end{itemize}
+
+A good resource for learning about the range of local explainability
+methods is Molnar (2025). Here we describe how to use tours in
+association with explanation metrics. Primarily for interpretability, we
+need to make plots of single (or pairs of) variables because we need to
+make explanations in terms of single variables. Tours are used to
+examine boundaries close to a point, if we are to understand local
+non-linear boundaries, so a slice tour on a small neighbourhood is
+needed. Also, when multiple variables are working together to generate a
+prediction, the radial tour to examine the influence of single variables
+on the projection can be useful.
+
+\subsection{Local explanations: SHAP}\label{local-explanations-shap}
+
+\index{classification!local explanations} \index{classification!XAI}
+
+Shapley values are computed using the \texttt{kernelshap} function in
+the \texttt{kernelshap} package (Mayer \& Watson, 2023), and
+re-organised using the \texttt{shapviz} function in the \texttt{shapviz}
+package (Mayer, 2024). A Shapley value for an observation indicates how
+the variable contributes to the model prediction for that observation,
+relative to other variables. It is an average, computed from the change
+in prediction when all combinations of presence or absence of other
+variables. In the computation, for each combination, the prediction is
+computed by substituting absent variables with their average value, like
+one might do when imputing missing values. A (larger) positive SHAP
+value indicates that the variable increases the likelihood of prediction
+to that class, and conversely a (larger) negative value indicates
+decreased likelihood of prediction to that class.
+
+\index{software!kernelshap} \index{software!shapviz}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Explanations}
+\CommentTok{\# https://www.r{-}bloggers.com/2022/08/kernel{-}shap/}
+\FunctionTok{library}\NormalTok{(kernelshap)}
+\FunctionTok{library}\NormalTok{(shapviz)}
+\NormalTok{p\_explain }\OtherTok{\textless{}{-}} \FunctionTok{kernelshap}\NormalTok{(}
+\NormalTok{    p\_nn\_model,}
+\NormalTok{    p\_train\_x, }
+    \AttributeTok{bg\_X =}\NormalTok{ p\_train\_x,}
+    \AttributeTok{verbose =} \ConstantTok{FALSE}
+\NormalTok{  )}
+\NormalTok{p\_exp\_sv }\OtherTok{\textless{}{-}} \FunctionTok{shapviz}\NormalTok{(p\_explain)}
+\FunctionTok{save}\NormalTok{(p\_exp\_sv, }\AttributeTok{file=}\StringTok{"data/p\_exp\_sv.rda"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{longtable}[]{@{}lrrrr@{}}
+
+\caption{\label{tbl-p-shap}SHAP values for the Gentoo penguin
+misclassified as Adelie.}
+
+\tabularnewline
+
+\toprule\noalign{}
+species & bl & bd & fl & bm \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Adelie & 0.06 & -0.06 & 0.04 & 0.09 \\
+Chinstrap & -0.13 & -0.05 & -0.05 & 0.02 \\
+Gentoo & 0.07 & 0.11 & 0.01 & -0.11 \\
+
+\end{longtable}
+
+Figure~\ref{fig-shap} shows the Shapley values for all the Gentoo
+observations in the \emph{training} set of penguins data, as a parallel
+coordinate plot (a) and a scatterplot matrix (b). It can be useful to
+compare the SHAP values for all the observations in a class, to
+understand differences in their predictions. A parallel coordinate plot
+is better than a scatterplot matrix here because it focuses on single
+variables, and the differences in SHAP values across the variables. The
+values for the single misclassified Gentoo penguin (in the training set)
+is coloured orange-brown. The SHAP values for this penguin are similar
+to other penguins on \texttt{bl}, \texttt{bd} and \texttt{fl} but they
+are very different on \texttt{bm}.
+
+Table~\ref{tbl-p-shap} contains the SHAP values for this penguin, for
+all three classes, and all four variables. The explanations for this
+misclassified penguin are then:
+
+\begin{itemize}
+\tightlist
+\item
+  For a high likelihood of a correct Gentoo prediction (third line) for
+  this penguin, one should consider \texttt{bd}, and possibly
+  \texttt{bl} but not the \texttt{bm} value.
+\item
+  A mistaken classification as Adelie (first line) would happen with
+  higher likelihood if the \texttt{bm} value is considered.
+\item
+  A mistaken classification as Chinstrap (second line) has a smaller
+  likelihood if \texttt{bl} is considered.
+\end{itemize}
+
+\index{parallel coordinate plot (PCP)}
+
+\begin{figure}
+
+\begin{minipage}{0.50\linewidth}
+
+\centering{
+
+\includegraphics[width=0.9\linewidth,height=\textheight,keepaspectratio]{18-summary-class_files/figure-pdf/fig-shapley-pcp-1.pdf}
+
+}
+
+\subcaption{\label{fig-shapley-pcp}Parallel coordinates}
+
+\end{minipage}%
+%
+\begin{minipage}{0.50\linewidth}
+
+\centering{
+
+\includegraphics[width=0.9\linewidth,height=\textheight,keepaspectratio]{18-summary-class_files/figure-pdf/fig-shapley-sm-1.pdf}
+
+}
+
+\subcaption{\label{fig-shapley-sm}Scatterplot matrix}
+
+\end{minipage}%
+
+\caption{\label{fig-shap}SHAP values for the training set of Gentoo
+penguins, shown as a parallel coordinate plot (a) and a scatterplot
+matrix (b). Colour indicates whether the model made a mistake in the
+prediction. The one misclassified penguin (orange brown) differs from
+other penguins primarily in its body mass value, which says that SHAP
+sees body mass as playing a role in the misclassification.}
+
+\end{figure}%
+
+If we examine the data Figure~\ref{fig-penguins-bl-bm-bd} the
+explanations make some sense. The misclassified penguin has an unusually
+small value on \texttt{bm}. That the SHAP value for \texttt{bm} was
+quite different from those of the other Gentoo penguins pointed to this
+being the potential issue with the model, particularly for this penguin.
+This penguin's prediction is negatively impacted by \texttt{bm} being in
+the model.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{18-summary-class_files/figure-pdf/fig-penguins-bl-bm-bd-1.pdf}
+
+}
+
+\caption{\label{fig-penguins-bl-bm-bd}Plots of the training data with
+misclassified observations marked to help understand what the SHAP
+values. The misclassified Gentoo penguin has an unusually low body mass
+value which makes it appear to be more like an Adelie penguin,
+particularly when considered in relation to it's bill length.}
+
+\end{figure}%
+
+This is a good point to examine the boundary between Gentoo and Adelie
+penguins. Focusing on just two classes is easier, and it is between
+these two classes that the error in classification occurs. Examining the
+boundary can be achieved by simulating a large number of points in the
+data domain and predicting the class of these points.
+Figure~\ref{fig-penguins-bndry} shows these predictions, along with the
+observed training values. The scatterplots show the same pairs of
+variables as shown in Figure~\ref{fig-penguins-bl-bm-bd}. Pixel points
+indicate the simulated data covering the data domain, and allowing the
+boundary to be examined. The observed training data is overlaid, with
+solid circles indicating an error. It's a bit messy but the most
+important part to see is that the boundary between classes is mostly in
+the vertical direction, which corresponds to cutting primarily on
+\texttt{bm}. It's not completely \texttt{bm} because there is some
+overlap of the red and blue points here, and the direction is not quite
+vertical. Particularly, with \texttt{bd} there the direction of the
+boundary is slightly oblique. (Note that the white area in the top left
+of \texttt{bl} vs \texttt{bm} actually corresponds to the Chinstrap
+prediction region, which we have removed to focus on Adelie and Gentoo.)
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{18-summary-class_files/figure-pdf/fig-penguins-bndry-1.pdf}
+
+}
+
+\caption{\label{fig-penguins-bndry}Pairwise plots of classification
+boundaries (pixel points) to examine where the misclassification
+happens. The observed training data is overlaid with solid circle
+indicating a classification error. The boundary of this model falls
+almost entirely in body mass, with small contribution of the other
+variables, as seen by the difference between the two classes being
+mostly visible in the vertical direction.}
+
+\end{figure}%
+
+The next step is to use a radial tour to very directly find the boundary
+bteween Adelie and Gentoo. It is probably reasonable to start from a
+projection that is constructed using the SHAP values, with the idea that
+this combination of variables might also reveal where the prediction to
+either class occurs. Because we have seen that \texttt{bm} plays the
+most important role in the classification, creating a 2D projection
+basis where \texttt{bm} is contrasted against a combination of the other
+variables, is our strategy for initialising the radial tour.
+Figure~\ref{fig-bndry-pdf} shows the boundary being found using the
+radial tour.
+
+\begin{figure}
+
+\begin{minipage}{0.50\linewidth}
+
+\pandocbounded{\includegraphics[keepaspectratio]{images/p_nn_bndry1.png}}
+
+\subcaption{\label{}Initial projection}
+\end{minipage}%
+%
+\begin{minipage}{0.50\linewidth}
+
+\pandocbounded{\includegraphics[keepaspectratio]{images/p_nn_bndry2.png}}
+
+\subcaption{\label{}Boundary visible}
+\end{minipage}%
+
+\caption{\label{fig-bndry-pdf}Projections taken from a radial tour used
+to investigate where the boundary falls: (a) initial projection formed
+using the SHAP values, (b) projection where the linear boundary is
+clearly visible. The boundary is almost entirely due to body mass, with
+small contributions from body depth, and a tiny contribution from bill
+length, as can be seen from the direction and magnitude of the axes.}
+
+\end{figure}%
+
+XXX Talk about
+
+\begin{itemize}
+\tightlist
+\item
+  the effect of strength of the variable in the model, for understanding
+  SHAP
+\item
+  non-linear boundaries
+\item
+  the one model as opposed to SHAP value calculations and
+\item
+  possibly almost as good or better models, eg LDA
+\end{itemize}
 
 \section*{Exercises}\label{exercises-17}
 \addcontentsline{toc}{section}{Exercises}
 
 \markright{Exercises}
 
+\index{data!fake trees} \index{data!sketches}
+
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  Examine misclassifications from a random forest model for the
-  fake\_trees data between cluster 1 and 0, using the
+  Examine misclassifications from a random forest model for the fake
+  trees data between cluster 1 and 0, using the
 
   \begin{enumerate}
   \def\labelenumii{\alph{enumii}.}
@@ -9830,6 +10002,8 @@ model}\label{constructing-data-to-diagnose-your-model}
     simplex approach. Are they as expected, points lying in the middle
     or along an edge of the simplex?
   \end{enumerate}
+\item
+  Use the LDA model with explanations to assess boundary
 \end{enumerate}
 
 \bookmarksetup{startatroot}
@@ -10622,8 +10796,12 @@ University Press.
 Martin, E. (1965). \emph{Flatland}.
 http://www.der.org/films/flatland.html.
 
+\bibitem[\citeproctext]{ref-shapviz}
+Mayer, M. (2024). \emph{{shapviz}: {SHAP} visualizations}.
+\url{https://CRAN.R-project.org/package=shapviz}
+
 \bibitem[\citeproctext]{ref-kernelshap}
-Mayer, M., \& Watson, D. (2023). \emph{Kernelshap: Kernel SHAP}.
+Mayer, M., \& Watson, D. (2023). \emph{{kernelshap}: {K}ernel {SHAP}}.
 \url{https://CRAN.R-project.org/package=kernelshap}
 
 \bibitem[\citeproctext]{ref-MY94}
@@ -10659,8 +10837,8 @@ Mock, T. (2023). \emph{gtExtras: Extending gt for beautiful HTML
 tables}. \url{https://github.com/jthomasmock/gtExtras}
 
 \bibitem[\citeproctext]{ref-iml}
-Molnar, C. (2022). \emph{Interpretable {M}achine {L}earning: A {G}uide
-for {M}aking {B}lack {B}ox {M}odels {E}xplainable (2nd ed)}.
+Molnar, C. (2025). \emph{Interpretable {M}achine {L}earning: A {G}uide
+for {M}aking {B}lack {B}ox {M}odels {E}xplainable (3rd ed)}.
 https://christophm.github.io/interpretable-ml-book/.
 
 \bibitem[\citeproctext]{ref-Moon2019}
