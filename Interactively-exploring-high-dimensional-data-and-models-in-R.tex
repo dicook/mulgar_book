@@ -9705,7 +9705,8 @@ A good interpretability workflow includes:
   how they are predicted, because they are not used to build the model
   it could be confusing for understanding the model fit.
 \item
-  Local explanations calculated in different ways.
+  Global variable importances, and local explanations calculated in
+  different ways.
 \end{itemize}
 
 A good resource for learning about the range of local explainability
@@ -9719,15 +9720,14 @@ needed. Also, when multiple variables are working together to generate a
 prediction, the radial tour to examine the influence of single variables
 on the projection can be useful.
 
-\subsection{Local explanations: SHAP}\label{local-explanations-shap}
-
 \index{classification!local explanations} \index{classification!XAI}
 
-Shapley values are computed using the \texttt{kernelshap} function in
-the \texttt{kernelshap} package (Mayer \& Watson, 2023), and
-re-organised using the \texttt{shapviz} function in the \texttt{shapviz}
-package (Mayer, 2024). A Shapley value for an observation indicates how
-the variable contributes to the model prediction for that observation,
+For illustration, we choose local explanations produced by Shapley
+values. These are computed using the \texttt{kernelshap} function in the
+\texttt{kernelshap} package (Mayer \& Watson, 2023), and re-organised
+using the \texttt{shapviz} function in the \texttt{shapviz} package
+(Mayer, 2024). A Shapley value for an observation indicates how the
+variable contributes to the model prediction for that observation,
 relative to other variables. It is an average, computed from the change
 in prediction when all combinations of presence or absence of other
 variables. In the computation, for each combination, the prediction is
@@ -9940,20 +9940,46 @@ length, as can be seen from the direction and magnitude of the axes.}
 
 \end{figure}%
 
-XXX Talk about
+So what have we learned. The SHAP values suggested numerous variables
+involved with the classification of the species. Using the tour shows
+that the separation between Adelie and Gentoo is mostly due to
+\texttt{bm}, for this fitted neural network model. The SHAP values
+over-stated the importance of the other variables. However, examining
+the SHAP values for all the training sample did help to uncover the
+reason why the one Gentoo penguin was misclassified as Adelie, its value
+of \texttt{bm} is unusual.
 
-\begin{itemize}
-\tightlist
-\item
-  the effect of strength of the variable in the model, for understanding
-  SHAP
-\item
-  non-linear boundaries
-\item
-  the one model as opposed to SHAP value calculations and
-\item
-  possibly almost as good or better models, eg LDA
-\end{itemize}
+By examining the class boundary, we also learn that this model is
+inadequate. It does not adequately use the relationship between
+\texttt{bm} and \texttt{bd} effectively as can be seen in
+Figure~\ref{fig-penguins-bndry} (middle plot). A cleaner distinction
+between Adelie and Gentoo would be achieved with a more oblique linear
+split.
+
+This example has been a relatively simple classification. The fitted
+model used linear splits to separate the classes, which was not very
+difficult to visualise. If the boundary between classes is much more
+non-linear then it might be necessary to zoom in close to the
+observation of interest, and to use a slice tour to examine the boundary
+close to the observation.
+
+What we have seen is that the SHAP values provided some insight, but the
+message was not very clear even in this simple situation. It is helpful
+to use the tour to help to explain the explainers.
+
+In general, local explanations can mislead and be inaccurate explainers
+of the model fit. If a different method was used, such as LIME,
+counterfactuals, or anchors, the results can be conflicting
+explanations. After all, they are all estimates of what the model
+thinks. We need additional tools to evaluate which is more useful.
+
+It is also important to keep in mind that they are explaining a
+particular model fit. If the model is not a good fit, then the
+explainers are explaining a bad fit (aka rubbish), and you check the
+model fit statistics to make sure that the fit is one worth explaining.
+In most applications, predictors will have some association, which means
+there may be many similarly good fits, even though the end result of
+model fitting is to pick just one.
 
 \section*{Exercises}\label{exercises-17}
 \addcontentsline{toc}{section}{Exercises}
