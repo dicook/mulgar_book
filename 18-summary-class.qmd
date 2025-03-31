@@ -1,6 +1,14 @@
 # Diagnostics for classification models {#sec-class-diag}
 \index{classification!misclassification}
 
+There are several places where visualisation can provide additional insight on the adequacy of the model fit, extending diagnostics beyond the common metrics, such as confusion matrix, accuracy, precision, loss, error, sensitivity, area under the curve (AUC), and receiver operating characteristic (ROC). 
+
+The first is to examine where the model makes errors. This can be done by marking the errors with different symbols and making plots of the data including a tour. Another approach is to use linked brushing between a representation of the confusion matrix and other plots of the data to focus on selected mistakes, similar to what was shown in comparing cluster solutions in @sec-compare-clusterings. What you are looking for is acceptable errors in neighbourhoods where the classes overlap, versus unacceptable errors where there is a big difference between classes but the architecture of the model is mismatched with the data distribution. This would indicate that the model has high bias.
+
+The second area is to examine where the model places the boundaries between classes, relative to the training sample. The purpose again is to learn where the model architecture is a good match with the data distribution. 
+
+Lastly, it is important to understand it, by determining which variables contribute most to the classification. This is probably only useful if the model fit is first established to be good, although this can also help to understand how a model has gone bad (as we'll see in @sec-class-explain). For linear boundaries interpretability can be global, applying to the entire data, as may be produced by partial dependence plots. With a highly non-linear model, there has been a rapid growth in newly designed metrics for local explainability. With interpretability, the focus is on how individual variables affect the classification, and thus methods such as the radial tour are especially useful.
+
 ## Errors for a single model {#sec-class-errorr}
 
 To examine misclassifications, we can create a separate variable that identifies the errors or not. Constructing this for each class, and exploring in small steps is helpful. Let's do this using the random forest model for the penguins fit. The random forest fit has only a few misclassifications. There are four Adelie penguins confused with Chinstrap, and similarly four Chinstrap confused with Adelie. There is one Gentoo penguin confused with a Chinstrap. This is interesting, because the Gentoo cluster is well separated from the clusters of the other two penguin species. 
@@ -66,6 +74,19 @@ render_gif(penguins_errors[,1:4],
 `r ifelse(knitr::is_html_output(), '@fig-p-errors-html', '@fig-p-errors-pdf')` shows a grand tour, and a guided tour, of the penguins data, where the misclassifications are marked by an asterisk. (If the gifs are too small to see the different glyphs, you can zoom in to make the figures larger.) It can be seen that the one Gentoo penguin that is mistaken for a Chinstrap by the forest model is always moving with its other Gentoo (yellow) family. It can occasionally be seen to be on the edge of the group, closer to the Chinstraps, in some projections in the grand tour. But in the final projection from the guided tour it is hiding well among the other Gentoos. This is an observation where a mistake has been made because of the inadequacies of the forest algorithm. Forests are only as good as the trees they are constructed from, and we have seen from @sec-trees that the splits only on single variables done by trees does not adequately utilise the covariance structure in each class. They make mistakes based on the boxy nature of the boundaries. This can carry through to the forests model. Even though many trees are combined to generate smoother boundaries, forests do not effectively utilise covariance in clusters either. The other mistakes, where Chinstrap are predicted to be Adelie, and vice versa, are more sensible. These mistaken observations can be seen to lie in the border region between the two clusters, and reflect genuine uncertainty about the classification of penguins in these two species.
 
 ::: {.content-visible when-format="html"}
+::: insight
+The random forest model is inadequate because it has made a mistake on a Gentoo penguin, where there should not be any mistakes because there is a big gap between this species and the others.
+:::
+:::
+
+::: {.content-visible when-format="pdf"}
+\insightbox{The random forest model is inadequate because it has made a mistake on a Gentoo penguin, where there should not be any mistakes because there is a big gap between this species and the others.
+}
+:::
+
+\index{classification!random forest}
+
+::: {.content-visible when-format="html"}
 ::: {#fig-p-errors-html layout-ncol=2}
 
 ![Grand tour](gifs/p_rf_errors.gif){#fig-rf-errors fig-alt="FIX ME" width=300}
@@ -79,9 +100,9 @@ Examining the misclassified cases (marked as solid circles) from a random forest
 ::: {.content-visible when-format="pdf"}
 ::: {#fig-p-errors-pdf layout-ncol=2}
 
-![Grand tour](images/p_rf_errors.png){#fig-rf-errors fig-alt="FIX ME" width=200}
+![Grand tour](images/p_rf_errors.png){#fig-rf-errors fig-alt="This image shows a scatter plot of a 2D projection from a grand tour of three different penguin species: Adelie (blue circles), Gentoo (red circles), and Chinstrap (yellow circles). The blue Adelie penguin data points are clustered on the left side, the red Gentoo penguin data points are clustered on the right side, and the yellow Chinstrap penguin data points are clustered near the top center of the plot. The bl axis is pointing to 1 o'clock, fl to 4 o'clock, a short bd pointing to 12, and bm is barely in this projection." width=200}
 
-![Guided tour](images/p_rf_errors_guided.png){#fig-rf-errors-guided fig-alt="FIX ME" width=200}
+![Guided tour](images/p_rf_errors_guided.png){#fig-rf-errors-guided fig-alt="This image shows a scatter plot of a 2D projection from a guided tour of three different penguin species: Adelie (blue circles), Gentoo (red circles), and Chinstrap (yellow circles). Adelie penguins form a cluster in the upper left, Gentoo penguins cluster in the upper right, and Chinstrap penguins cluster in the bottom center of the plot. The bl axis is pointing to 5 o'clock, bd pointing to 9 o'clock, a shorter fl to 3 o'clock, and bm ito 2 o'clock." width=200}
 
 Examining the misclassified cases (marked as asterisks) from a random forest fit to the penguins data. The one Gentoo penguin mistaken for a Chinstrap is a mistake made because the forest method suffers from the same problems as trees - cutting on single variables rather than effectively using covariance structure. The mistakes between the Adelie and Chinstrap penguins are more sensible because all of these observations lie is the bordering regions between the two clusters. {{< fa play-circle >}}
 :::
@@ -147,16 +168,16 @@ ggplot(p_grid_proj, aes(x=nn1, y=nn2,
 
 
 ::: {#fig-penguins-lda-nn layout-ncol="2"}
-![LDA model](images/fig-lda-2D-boundaries-1.png){#fig-lda-boundary2 fig-alt="FIX ME" width="200"}
+![LDA model](images/fig-lda-2D-boundaries-1.png){#fig-lda-boundary2 fig-alt="This image shows a scatter plot of penguin data of three distinct penguin species. The points are divided into three regions like a pie, with red (Gentoo) on the left, blue (Adelie) on top right, and yellow (Chinstrap) at bottom right. Black plusses, circles and triangles correspond to Gentoo, Adelie and Chinstrap respectively and roughly fall in the centre of the coloured regions." width="200"}
 
-![NN model](images/penguins-nn-boundaries-1.png){#fig-nn-boundary fig-alt="FIX ME" width="290"}
+![NN model](images/penguins-nn-boundaries-1.png){#fig-nn-boundary fig-alt="This image shows a scatter plot of penguin data of three distinct penguin species. The points are divided into three regions like a pie, with red (Gentoo) on the top left, blue (Adelie) on bottom left, and yellow (Chinstrap) at right. Black plusses, circles and triangles correspond to Gentoo, Adelie and Chinstrap respectively and roughly fall in the centre of the coloured regions." width="290"}
 
 Comparison of the boundaries produced by the LDA (a) and the NN (b) model, shown in the 2D discriminant space and the 2D hidden layer space, respectively. The LDA boundaries are very nicely placed, clearly separating the Gentoo penguins form the other two. The boundaries in the NN are poor, due to the projection generated by the hidden layer not adequately capturing the separation between Gentoo and others. The NN model should be re-fitted because it should be possible to get a model as good as the LDA model. {{< fa play-circle >}}
 :::
 
 ::: {.content-visible when-format="html"}
 
-@fig-penguins-lda-nn-html shows these boundaries in the full 4D space of the data, using a slice tour. It can be see that the LDA model provides an excellent classification of this data, but this NN model does not adequately capture the separation between classes. NN models can be tricky to fit, and typically require many fits from different random starts and picking the fit with the smallest training error to be confident that a good fit has been achieved.
+@fig-penguins-lda-nn-html shows these boundaries in the full 4D space of the data, using a slice tour. It can be see that the LDA model provides an excellent classification of this data, but this NN model does not adequately capture the separation between classes. NN models can be tricky to fit, and typically require many fits from different random starts and picking the fit with the smallest training error to be confident that a good fit has been achieved. Both of these tours use the same tour path. It makes it easier to compare the boundaries created by each model if both are showing the same projections.
 
 ::: {#fig-penguins-lda-nn-html layout-ncol="2"}
 ![LDA model](gifs/penguins_lda_boundaries.gif){#fig-lda-boundary fig-alt="FIX ME" width="300"}

@@ -294,7 +294,7 @@
 
 \title{Interactively exploring high-dimensional data and models in R}
 \author{Dianne Cook and Ursula Laa}
-\date{2025-03-30}
+\date{2025-03-31}
 
 \begin{document}
 \maketitle
@@ -6258,7 +6258,7 @@ extent of Wards linkage clustering in 2D and 4D.}
 
 \end{figure}%
 
-\section{Comparing two clusterings}\label{comparing-two-clusterings}
+\section{Comparing two clusterings}\label{sec-compare-clusterings}
 
 Each cluster analysis will result in a vector of class labels for the
 data. To compare two results we would tabulate and plot the pair of
@@ -9499,6 +9499,41 @@ images. This however is beyond the scope of this book.
 
 \index{classification!misclassification}
 
+There are several places where visualisation can provide additional
+insight on the adequacy of the model fit, extending diagnostics beyond
+the common metrics, such as confusion matrix, accuracy, precision, loss,
+error, sensitivity, area under the curve (AUC), and receiver operating
+characteristic (ROC).
+
+The first is to examine where the model makes errors. This can be done
+by marking the errors with different symbols and making plots of the
+data including a tour. Another approach is to use linked brushing
+between a representation of the confusion matrix and other plots of the
+data to focus on selected mistakes, similar to what was shown in
+comparing cluster solutions in Section~\ref{sec-compare-clusterings}.
+What you are looking for is acceptable errors in neighbourhoods where
+the classes overlap, versus unacceptable errors where there is a big
+difference between classes but the architecture of the model is
+mismatched with the data distribution. This would indicate that the
+model has high bias.
+
+The second area is to examine where the model places the boundaries
+between classes, relative to the training sample. The purpose again is
+to learn where the model architecture is a good match with the data
+distribution.
+
+Lastly, it is important to understand it, by determining which variables
+contribute most to the classification. This is probably only useful if
+the model fit is first established to be good, although this can also
+help to understand how a model has gone bad (as we'll see in
+Section~\ref{sec-class-explain}). For linear boundaries interpretability
+can be global, applying to the entire data, as may be produced by
+partial dependence plots. With a highly non-linear model, there has been
+a rapid growth in newly designed metrics for local explainability. With
+interpretability, the focus is on how individual variables affect the
+classification, and thus methods such as the radial tour are especially
+useful.
+
 \section{Errors for a single model}\label{sec-class-errorr}
 
 To examine misclassifications, we can create a separate variable that
@@ -9521,7 +9556,7 @@ other two penguin species.
 
 \begin{verbatim}
           Adelie Chinstrap Gentoo class.error
-Adelie       143         2      1 0.020547945
+Adelie       143         3      0 0.020547945
 Chinstrap      4        64      0 0.058823529
 Gentoo         0         1    118 0.008403361
 \end{verbatim}
@@ -9556,6 +9591,11 @@ and vice versa, are more sensible. These mistaken observations can be
 seen to lie in the border region between the two clusters, and reflect
 genuine uncertainty about the classification of penguins in these two
 species.
+
+\insightbox{The random forest model is inadequate because it has made a mistake on a Gentoo penguin, where there should not be any mistakes because there is a big gap between this species and the others.
+}
+
+\index{classification!random forest}
 
 \begin{figure}
 
