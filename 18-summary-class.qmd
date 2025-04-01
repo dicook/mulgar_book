@@ -1,17 +1,29 @@
 # Diagnostics for classification models {#sec-class-diag}
-\index{classification!misclassification}
 
 There are several places where visualisation can provide additional insight on the adequacy of the model fit, extending diagnostics beyond the common metrics, such as confusion matrix, accuracy, precision, loss, error, sensitivity, area under the curve (AUC), and receiver operating characteristic (ROC). 
 
+\index{classification!error}
+\index{classification!accuracy}
+\index{classification!precision}
+\index{classification!loss}
+\index{classification!sensitivity}
+\index{classification!AUC}
+\index{classification!ROC}
+
 The first is to examine where the model makes errors. This can be done by marking the errors with different symbols and making plots of the data including a tour. Another approach is to use linked brushing between a representation of the confusion matrix and other plots of the data to focus on selected mistakes, similar to what was shown in comparing cluster solutions in @sec-compare-clusterings. What you are looking for is acceptable errors in neighbourhoods where the classes overlap, versus unacceptable errors where there is a big difference between classes but the architecture of the model is mismatched with the data distribution. This would indicate that the model has high bias.
+\index{classification!bias}
 
 The second area is to examine where the model places the boundaries between classes, relative to the training sample. The purpose again is to learn where the model architecture is a good match with the data distribution. 
 
 Lastly, it is important to understand it, by determining which variables contribute most to the classification. This is probably only useful if the model fit is first established to be good, although this can also help to understand how a model has gone bad (as we'll see in @sec-class-explain). For linear boundaries interpretability can be global, applying to the entire data, as may be produced by partial dependence plots. With a highly non-linear model, there has been a rapid growth in newly designed metrics for local explainability. With interpretability, the focus is on how individual variables affect the classification, and thus methods such as the radial tour are especially useful.
+\index{tour!radial}
+\index{classification!XAI}
+\index{classification!interpretability}
 
 ## Errors for a single model {#sec-class-errorr}
 
 To examine misclassifications, we can create a separate variable that identifies the errors or not. Constructing this for each class, and exploring in small steps is helpful. Let's do this using the random forest model for the penguins fit. The random forest fit has only a few misclassifications. There are four Adelie penguins confused with Chinstrap, and similarly four Chinstrap confused with Adelie. There is one Gentoo penguin confused with a Chinstrap. This is interesting, because the Gentoo cluster is well separated from the clusters of the other two penguin species. 
+\index{classification!misclassification}
 
 ```{r echo=knitr::is_html_output()}
 #| message: false
@@ -72,6 +84,8 @@ render_gif(penguins_errors[,1:4],
 ```
 
 `r ifelse(knitr::is_html_output(), '@fig-p-errors-html', '@fig-p-errors-pdf')` shows a grand tour, and a guided tour, of the penguins data, where the misclassifications are marked by an asterisk. (If the gifs are too small to see the different glyphs, you can zoom in to make the figures larger.) It can be seen that the one Gentoo penguin that is mistaken for a Chinstrap by the forest model is always moving with its other Gentoo (yellow) family. It can occasionally be seen to be on the edge of the group, closer to the Chinstraps, in some projections in the grand tour. But in the final projection from the guided tour it is hiding well among the other Gentoos. This is an observation where a mistake has been made because of the inadequacies of the forest algorithm. Forests are only as good as the trees they are constructed from, and we have seen from @sec-trees that the splits only on single variables done by trees does not adequately utilise the covariance structure in each class. They make mistakes based on the boxy nature of the boundaries. This can carry through to the forests model. Even though many trees are combined to generate smoother boundaries, forests do not effectively utilise covariance in clusters either. The other mistakes, where Chinstrap are predicted to be Adelie, and vice versa, are more sensible. These mistaken observations can be seen to lie in the border region between the two clusters, and reflect genuine uncertainty about the classification of penguins in these two species.
+\index{tour!grand}
+\index{tour!guided}
 
 ::: {.content-visible when-format="html"}
 ::: insight
@@ -167,6 +181,17 @@ ggplot(p_grid_proj, aes(x=nn1, y=nn2,
 ```
 
 
+::: {.content-visible when-format="html"}
+::: info
+To examine boundaries, simulate data in a $p-D$ cube matching the data domain. Make plots of this data, ideally with the training sample overlaid.
+:::
+:::
+
+::: {.content-visible when-format="pdf"}
+\infobox{To examine boundaries, simulate data in a $p-D$ cube matching the data domain. Make plots of this data, ideally with the training sample overlaid.
+}
+:::
+
 ::: {#fig-penguins-lda-nn layout-ncol="2"}
 ![LDA model](images/fig-lda-2D-boundaries-1.png){#fig-lda-boundary2 fig-alt="This image shows a scatter plot of penguin data of three distinct penguin species. The points are divided into three regions like a pie, with red (Gentoo) on the left, blue (Adelie) on top right, and yellow (Chinstrap) at bottom right. Black plusses, circles and triangles correspond to Gentoo, Adelie and Chinstrap respectively and roughly fall in the centre of the coloured regions." width="200"}
 
@@ -176,15 +201,26 @@ Comparison of the boundaries produced by the LDA (a) and the NN (b) model, shown
 :::
 
 ::: {.content-visible when-format="html"}
+::: insight
+The LDA model is excellent: it captures the big gap between Gentoo and others, and divides the other two with as little overlap as possible. This NN model is inadequate, because the hidden layer dimension reduction is poor.
+:::
+:::
+
+::: {.content-visible when-format="pdf"}
+\insightbox{The LDA model is excellent: it captures the big gap between Gentoo and others, and divides the other two with as little overlap as possible. This NN model is inadequate, because the hidden layer dimension reduction is poor.
+}
+:::
+
+::: {.content-visible when-format="html"}
 
 @fig-penguins-lda-nn-html shows these boundaries in the full 4D space of the data, using a slice tour. It can be see that the LDA model provides an excellent classification of this data, but this NN model does not adequately capture the separation between classes. NN models can be tricky to fit, and typically require many fits from different random starts and picking the fit with the smallest training error to be confident that a good fit has been achieved. Both of these tours use the same tour path. It makes it easier to compare the boundaries created by each model if both are showing the same projections.
 
 ::: {#fig-penguins-lda-nn-html layout-ncol="2"}
-![LDA model](gifs/penguins_lda_boundaries.gif){#fig-lda-boundary fig-alt="FIX ME" width="300"}
+![LDA model](gifs/penguins_lda_boundaries.gif){#fig-lda-boundary fig-alt="Tour animation showing many 2D projections of points in a 4D cube. Points are divided into three regions, along oblique cuts." width="300"}
 
-![NN model](gifs/penguins_nn_boundaries.gif){#fig-tree-boundary fig-alt="FIX ME" width="300"}
+![NN model](gifs/penguins_nn_boundaries.gif){#fig-tree-boundary fig-alt="Tour animation showing many 2D projections of points in a 4D cube. Points are divided into three regions, along oblique cuts." width="300"}
 
-Comparison of the boundaries produced by the LDA (a) and the NN (b) model, using a slice tour.
+Comparison of the boundaries produced by the LDA (a) and the NN (b) model, using a slice tour shown on the same tour path. Both models produce oblique partitions, but they are very different. 
 :::
 :::
 
@@ -212,6 +248,17 @@ A good interpretability workflow includes:
 - Plots of the training data, because the model fit depends on this set of data, and thus is only interpretable based on this set. Although explanations will be used with new data (like the test set) to explain how they are predicted, because they are not used to build the model it could be confusing for understanding the model fit. 
 - Global variable importances, and local explanations calculated in different ways. 
 
+::: {.content-visible when-format="html"}
+::: info
+The variable importance and explainability measures can be used to examine the boundary produced by a classifier. They can help to find the boundary in the neighbourhood of an observation, and seeing the boundary can also help to understand what the measures are reporting about the model.
+:::
+:::
+
+::: {.content-visible when-format="pdf"}
+\infobox{The variable importance and explainability measures can be used to examine the boundary produced by a classifier. They can help to find the boundary in the neighbourhood of an observation, and seeing the boundary can also help to understand what the measures are reporting about the model.
+}
+:::
+
 A good resource for learning about the range of local explainability methods is @iml. Here we describe how to use tours in association with explanation metrics. Primarily for interpretability, we need to make plots of single (or pairs of) variables because we need to make explanations in terms of single variables. Tours are used to examine boundaries close to a point, if we are to understand local non-linear boundaries, so a slice tour on a small neighbourhood is needed. Also, when multiple variables are working together to generate a prediction, the radial tour to examine the influence of single variables on the projection can be useful.
 
 <!--
@@ -223,7 +270,8 @@ A good resource for learning about the range of local explainability methods is 
 
 <!-- ### Local explanations: SHAP-->
 
-\index{classification!local explanations} \index{classification!XAI}
+\index{classification!local explanations} 
+\index{classification!XAI}
 
 <!-- It especially important to be able to interpret or explain a model, even more so when the model is complex or black-box'y. A good resource for learning about the range of methods is @iml. Local explanations provide some information about variables that are important for making the prediction for a particular observation.
 -->
@@ -350,7 +398,7 @@ knitr::kable(p_outlier, digits=2)
 #| fig-height: 3
 #| out-width: 80%
 #| fig-cap: "SHAP values focused on Gentoo class, for each variable. The one misclassified penguin (orange) has a much lower value for body mass, suggesting that this variable is used differently for the prediction than for other penguins." 
-#| fig-alt: FIXME
+#| fig-alt: "This is an untitled chart with no subtitle or caption. It has x-axis with labels bl, bd, fl and bm. It has y-axis 'SHAP' with labels -0.25, 0.00, 0.25 and 0.50. In this chart colour is used to show factor(error). The legend that would normally indicate this has been hidden. The chart is a set of 316 big solid circle points of which about 92% can be seen. It has alpha set to 0.8."
 library(colorspace)
 p_exp_gentoo |>
   filter(species == "Gentoo") |>
@@ -409,7 +457,7 @@ p_sm <- ggpairs(d, columns = 1:4,
 #| fig-height: 4
 #| out-width: 90%
 #| fig-cap: "Parallel coordinates" 
-#| fig-alt: FIXME
+#| fig-alt: "This is an untitled chart with no subtitle or caption. It has x-axis with labels bl, bd, fl and bm, with vertical lines marking these positions. It has y-axis 'SHAP' with labels -0.25, 0.00, 0.25 and 0.50. In this chart colour is used to show the error, but there is no legend. It has linewidth set to 1.5, and alpha set to 0.3. There are 221 lines connecting points on each of the bl, bd, fl, bm axes, mostly concentrating around SHAP=0. The lines fan out on the bm axis, with the one orange-brown line dipping lower than all the green lines."
 p_pcp
 ```
 
@@ -421,7 +469,7 @@ p_pcp
 #| fig-height: 5
 #| out-width: 90%
 #| fig-cap: "Scatterplot matrix" 
-#| fig-alt: FIXME
+#| fig-alt: "A matrix of 16 plots. On the diagonal there are histograms showing the distributions of bl, bd, fl and bm, respectively. In both the upper and lower triangle the pairwise plots of the four variables are shown. Colour is mapped to error, with one point being orange-brown and the others all green. This point is most noticeably different whenever bm is displayed because it has a lower value. There are a few other outliers, that have low values for bl or high values of fl. Positive association can be seen in bl vs bd. Negative association can be seen in bl vs fl, bl vs bm, bd vs bm. Weak association is seen in bd vs fl. "
 p_sm
 ```
 
@@ -437,7 +485,7 @@ If we examine the data [@fig-penguins-bl-bm-bd] the explanations make some sense
 #| fig-height: 6
 #| out-width: 100%
 #| fig-cap: "Plots of the training data with misclassified observations marked to help understand what the SHAP values. The misclassified Gentoo penguin has an unusually low body mass value which makes it appear to be more like an Adelie penguin, particularly when considered in relation to it's bill length." 
-#| fig-alt: FIXME
+#| fig-alt: "Three scatterplots of bl, bd, fl vs bm. Colour is mapped to species. Shape is matched to error, with solid circles indicating a misclassification. There is one Gentoo error and five Adelie errors. In bd  vs bm species show a more linear separation, but some overlap in the boundary region between Adelie (blue) and Chinstrap (yellow). The misclassified Gentoo is at the bottom left edge of the Gentoo cluster. The Adelie errors are mostly in the overlapping regions between Adelie and Chinstrap, in bl vs bm, and intermixed in these clusters when they overlap in fl vs bm and bd vs bm."
 library(patchwork)
 # Check position on bm
 shap_proj <- p_exp_gentoo |>
@@ -522,7 +570,7 @@ This is a good point to examine the boundary between Gentoo and Adelie penguins.
 #| fig-height: 6
 #| out-width: 100%
 #| fig-cap: "Pairwise plots of classification boundaries (pixel points) to examine where the misclassification happens. The observed training data is overlaid with solid circle indicating a classification error. The boundary of this model falls almost entirely in body mass, with small contribution of the other variables, as seen by the difference between the two classes being mostly visible in the vertical direction." 
-#| fig-alt: FIXME
+#| fig-alt: "A set of three scatter plots showing relationships between bm (x-axis) and bl, bd, fl (y-axis), with data points color-coded by species: Adelie (blue) and Gentoo (red). Points are also marked by classification error, where error = yes (filled circles) and 'error = no' (open circles). In the first plot there is a dense distribution of data points, with a slightly curved decision boundary separating Adelie and Gentoo. Misclassified points appear mostly along this boundary. The second plot has a more linear decision boundary that does not neatly match the separation between the two species. Some misclassified points are along this boundary. If the boundary had been centred through the middle of the lower left to upper right gap then these points would be far from the boundary and unlikely to be misclassified. In the third plot the boundary is mostly linear and vertical. "
 n <- 10000
 p_sim <- tibble(bl = runif(n, min(penguins_sub$bl), max(penguins_sub$bl)),
                 bd = runif(n, min(penguins_sub$bd), max(penguins_sub$bd)),
@@ -657,6 +705,17 @@ Radial tour used to investigate where the boundary falls: (a) animated gif, (b) 
 :::
 :::
 
+::: {.content-visible when-format="html"}
+::: insights
+The SHAP values for the NN model are correct in reporting that body mass is a variable that strongly contributes to the misclassified penguin. They do not effectively take global variable importance into account, and give too much weight to bill length and body depth in the interpretation. These two variables contribute very little to the classification boundary.
+:::
+:::
+
+::: {.content-visible when-format="pdf"}
+\insightbox{The SHAP values for the NN model are correct in reporting that body mass is a variable that strongly contributes to the misclassified penguin. They do not effectively take global variable importance into account, and give too much weight to bill length and body depth in the interpretation. These two variables contribute very little to the classification boundary.
+}
+:::
+
 So what have we learned. The SHAP values suggested numerous variables involved with the classification of the species. Using the tour shows that the separation between Adelie and Gentoo is mostly due to `bm`, for this fitted neural network model. The SHAP values over-stated the importance of the other variables. However, examining the SHAP values for all the training sample did help to uncover the reason why the one Gentoo penguin was misclassified as Adelie, its value of `bm` is unusual. 
 
 By examining the class boundary, we also learn that this model is inadequate. It does not adequately use the relationship between `bm` and `bd` effectively as can be seen in @fig-penguins-bndry (middle plot). A cleaner distinction between Adelie and Gentoo would be achieved with a more oblique linear split. 
@@ -674,14 +733,19 @@ It is also important to keep in mind that they are explaining a particular model
 \index{data!fake trees}
 \index{data!sketches}
 
-1. Examine misclassifications from a random forest model for the fake trees data between cluster 1 and 0, using the 
+1. Compute the SHAP values for the LDA model and examine the Gentoo penguin that was misclassified as a Adelie by the NN model. How do these differ from those of the NN model? What does this tell us about the classification boundary produced by LDA as different from the NN model?
+2. Why should it be possible to obtain a NN fit, where the architecture has two nodes in the hidden layer to do a dimension reduction, that is at least as good as the LDA model? Re-fit the NN model, by varying the random seed, to obtain the best fit possible. Save this model fit, and compare it with the LDA model?
+3. Examine misclassifications from a random forest model for the fake trees data between cluster 1 and 0, using the 
     a. principal components
     b. votes matrix. 
 Describe where these errors relative to their true and predicted class clusters. When examining the simplex, are the misclassifications the points that are furthest from any vertices?
-2. Examine the misclassifications for the random forest model on the sketches data, focusing on cactus sketches that were mistaken for bananas. Follow up by plotting the images of these errors, and describe whether the classifier is correct that these sketches are so poor their true cactus or banana identity cannot be determined. 
-3. How do the errors from the random forest model compare with those of your best fitting CNN model? Are the the corresponding images poor sketches of cacti or bananas?
-4. Now examine the misclassifications of the sketches data in the 
+4. Examine the misclassifications for the random forest model on the sketches data, focusing on cactus sketches that were mistaken for bananas. Follow up by plotting the images of these errors, and describe whether the classifier is correct that these sketches are so poor their true cactus or banana identity cannot be determined. 
+5. How do the errors from the random forest model compare with those of your best fitting NN model? Are the the corresponding images poor sketches of cacti or bananas?
+6. Now examine the misclassifications of the sketches data in the 
     a. votes matrix from the random forest model
-    b. predictive probability distribution from the CNN model,
+    b. predictive probability distribution from the NN model,
 using the simplex approach. Are they as expected, points lying in the middle or along an edge of the simplex?
-5. Use the LDA model with explanations to assess boundary
+
+::: {content-hidden}
+2. Some NN model fit should be able to obtain the same 2D projection as the LDA model uses. Actually, it could be possible to obtain a slightly better 2D projection. The variance-covariances of the three species of penguins is not quite the same which means the LDA projection may not be the best possible separation between the three clusters. 
+:::

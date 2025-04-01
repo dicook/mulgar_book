@@ -294,7 +294,7 @@
 
 \title{Interactively exploring high-dimensional data and models in R}
 \author{Dianne Cook and Ursula Laa}
-\date{2025-03-31}
+\date{2025-04-01}
 
 \begin{document}
 \maketitle
@@ -9497,13 +9497,16 @@ images. This however is beyond the scope of this book.
 
 \chapter{Diagnostics for classification models}\label{sec-class-diag}
 
-\index{classification!misclassification}
-
 There are several places where visualisation can provide additional
 insight on the adequacy of the model fit, extending diagnostics beyond
 the common metrics, such as confusion matrix, accuracy, precision, loss,
 error, sensitivity, area under the curve (AUC), and receiver operating
 characteristic (ROC).
+
+\index{classification!error} \index{classification!accuracy}
+\index{classification!precision} \index{classification!loss}
+\index{classification!sensitivity} \index{classification!AUC}
+\index{classification!ROC}
 
 The first is to examine where the model makes errors. This can be done
 by marking the errors with different symbols and making plots of the
@@ -9515,7 +9518,7 @@ What you are looking for is acceptable errors in neighbourhoods where
 the classes overlap, versus unacceptable errors where there is a big
 difference between classes but the architecture of the model is
 mismatched with the data distribution. This would indicate that the
-model has high bias.
+model has high bias. \index{classification!bias}
 
 The second area is to examine where the model places the boundaries
 between classes, relative to the training sample. The purpose again is
@@ -9532,7 +9535,8 @@ partial dependence plots. With a highly non-linear model, there has been
 a rapid growth in newly designed metrics for local explainability. With
 interpretability, the focus is on how individual variables affect the
 classification, and thus methods such as the radial tour are especially
-useful.
+useful. \index{tour!radial} \index{classification!XAI}
+\index{classification!interpretability}
 
 \section{Errors for a single model}\label{sec-class-errorr}
 
@@ -9544,7 +9548,7 @@ misclassifications. There are four Adelie penguins confused with
 Chinstrap, and similarly four Chinstrap confused with Adelie. There is
 one Gentoo penguin confused with a Chinstrap. This is interesting,
 because the Gentoo cluster is well separated from the clusters of the
-other two penguin species.
+other two penguin species. \index{classification!misclassification}
 
 \index{classification!confusion matrix}
 
@@ -9556,7 +9560,7 @@ other two penguin species.
 
 \begin{verbatim}
           Adelie Chinstrap Gentoo class.error
-Adelie       143         3      0 0.020547945
+Adelie       143         2      1 0.020547945
 Chinstrap      4        64      0 0.058823529
 Gentoo         0         1    118 0.008403361
 \end{verbatim}
@@ -9590,7 +9594,7 @@ either. The other mistakes, where Chinstrap are predicted to be Adelie,
 and vice versa, are more sensible. These mistaken observations can be
 seen to lie in the border region between the two clusters, and reflect
 genuine uncertainty about the classification of penguins in these two
-species.
+species. \index{tour!grand} \index{tour!guided}
 
 \insightbox{The random forest model is inadequate because it has made a mistake on a Gentoo penguin, where there should not be any mistakes because there is a big gap between this species and the others.
 }
@@ -9650,6 +9654,9 @@ classes occurs in this projection. In order to get these views, data is
 simulated in the full domain of the four variables, and the class labels
 of these points are predicted.
 
+\infobox{To examine boundaries, simulate data in a $p-D$ cube matching the data domain. Make plots of this data, ideally with the training sample overlaid.
+}
+
 \begin{figure}
 
 \begin{minipage}{0.50\linewidth}
@@ -9687,6 +9694,9 @@ re-fitted because it should be possible to get a model as good as the
 LDA model. \faIcon{play-circle}}
 
 \end{figure}%
+
+\insightbox{The LDA model is excellent: it captures the big gap between Gentoo and others, and divides the other two with as little overlap as possible. This NN model is inadequate, because the hidden layer dimension reduction is poor.
+}
 
 \index{tour!slice}
 
@@ -9763,6 +9773,9 @@ A good interpretability workflow includes:
   Global variable importances, and local explanations calculated in
   different ways.
 \end{itemize}
+
+\infobox{The variable importance and explainability measures can be used to examine the boundary produced by a classifier. They can help to find the boundary in the neighbourhood of an observation, and seeing the boundary can also help to understand what the measures are reporting about the model.
+}
 
 A good resource for learning about the range of local explainability
 methods is Molnar (2025). Here we describe how to use tours in
@@ -9996,6 +10009,9 @@ length, as can be seen from the direction and magnitude of the axes.
 
 \end{figure}%
 
+\insightbox{The SHAP values for the NN model are correct in reporting that body mass is a variable that strongly contributes to the misclassified penguin. They do not effectively take global variable importance into account, and give too much weight to bill length and body depth in the interpretation. These two variables contribute very little to the classification boundary.
+}
+
 So what have we learned. The SHAP values suggested numerous variables
 involved with the classification of the species. Using the tour shows
 that the separation between Adelie and Gentoo is mostly due to
@@ -10048,6 +10064,18 @@ model fitting is to pick just one.
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
+  Compute the SHAP values for the LDA model and examine the Gentoo
+  penguin that was misclassified as a Adelie by the NN model. How do
+  these differ from those of the NN model? What does this tell us about
+  the classification boundary produced by LDA as different from the NN
+  model?
+\item
+  Why should it be possible to obtain a NN fit, where the architecture
+  has two nodes in the hidden layer to do a dimension reduction, that is
+  at least as good as the LDA model? Re-fit the NN model, by varying the
+  random seed, to obtain the best fit possible. Save this model fit, and
+  compare it with the LDA model?
+\item
   Examine misclassifications from a random forest model for the fake
   trees data between cluster 1 and 0, using the
 
@@ -10069,7 +10097,7 @@ model fitting is to pick just one.
   poor their true cactus or banana identity cannot be determined.
 \item
   How do the errors from the random forest model compare with those of
-  your best fitting CNN model? Are the the corresponding images poor
+  your best fitting NN model? Are the the corresponding images poor
   sketches of cacti or bananas?
 \item
   Now examine the misclassifications of the sketches data in the
@@ -10080,12 +10108,23 @@ model fitting is to pick just one.
   \item
     votes matrix from the random forest model
   \item
-    predictive probability distribution from the CNN model, using the
+    predictive probability distribution from the NN model, using the
     simplex approach. Are they as expected, points lying in the middle
     or along an edge of the simplex?
   \end{enumerate}
+\end{enumerate}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{1}
+\tightlist
 \item
-  Use the LDA model with explanations to assess boundary
+  Some NN model fit should be able to obtain the same 2D projection as
+  the LDA model uses. Actually, it could be possible to obtain a
+  slightly better 2D projection. The variance-covariances of the three
+  species of penguins is not quite the same which means the LDA
+  projection may not be the best possible separation between the three
+  clusters.
 \end{enumerate}
 
 \bookmarksetup{startatroot}
