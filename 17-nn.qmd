@@ -22,7 +22,7 @@ In practice, a model may have many nodes, and several hidden layers, a variety o
 
 For these examples we use the software `keras` [@keras] following the installation and tutorial details at <https://tensorflow.rstudio.com/tutorials/>. Because it is an interface to python it can be tricky to install. If this is a problem, the example code should be possible to convert to use `nnet` [@VR02] or `neuralnet` [@neuralnet]. We will use the penguins data to illustrate the fitting, because it makes it easier to understand the procedures and the fit. However, a NN is like using a jackhammer instead of a trowel to plant a seedling, more complicated than necessary to build a good classification model for this data.
 
-## Setting up the model
+## Setting up the model {#sec-nn-model}
 
 \index{classification!ANN architecture}
 
@@ -347,7 +347,7 @@ What we have shown here is a process to use the models at the nodes of the hidde
 
 When there are more nodes in the hidden layer than the number of original variables it means that the space is extended to achieve useful classifications that need more complicated non-linear boundaries. The extra nodes describe the non-linearity. @wickham2015 provides a good illustration of this in 2D. The process of examining each of the node models can be useful for understanding this non-linear separation, also in high dimensions.
 
-## Examining predictive probabilities
+## Examining predictive probabilities {#sec-nn-pred-prob}
 
 \index{classification!predictive probabilities}
 
@@ -513,6 +513,7 @@ save_model_tf(model_fashion_mnist, "data/fashion_nn")
 We have defined a flat neural network with a single hidden layer with 128 nodes. To investigate the model we can start by comparing the activations to the original input data distribution. Since both the input space and the space of activations is large, and they are of different dimensionality, we will first use principal component analysis. This simplifies the analysis, and in general we do not need the original pixel or hidden node information for the interpretation here. The comparison is using the test-subset of the data.
 
 ```{r}
+#| warning: false
 # get the fitted model
 model_fashion_mnist <- load_model_tf("data/fashion_nn")
 # observed response labels in the test set
@@ -768,7 +769,7 @@ Sketches as an example
 ```
 ## Exercises {.unnumbered}
 
-1.  The problem with the NN model fitted to the penguins is that the Gentoo are poorly classified, when they should be perfectly predictable due to the big gap between class clusters. Re-fit the NN to the penguins data, to find a better model that appropriately perfectly predicts Gentoo penguins. Support this by plotting the model (using the hidden layer), and the predictive probabilities as a ternary plot. Do the SHAP values also support that `bd` plays a stronger role in your best model? (`bd` is the main variable for distinguishing Gentoo's from the other species, particularly when used with `fl` or `bl`.)
+1.  The problem with the NN model fitted to the penguins is that the Gentoo are poorly classified, when they should be perfectly predictable due to the big gap between class clusters. Re-fit the NN, with two nodes in the hidden layer) to the penguins data, to find a better model that appropriately perfectly predicts Gentoo penguins. (You might find the easiest way to get a better model is changing the random seed and re-fitting, as illustrated in @wickham2015, Figures 21-24.) Support this by plotting the model (using the hidden layer), and the predictive probabilities as a ternary plot. Do the SHAP values also support that `bd` plays a stronger role in your best model? (`bd` is the main variable for distinguishing Gentoo's from the other species, particularly when used with `fl` or `bl`.)
 2.  For the fashion MNIST data we have seen that certain categories are more likely to be confused with each other. Select a subset of the data including only the categories Ankle boot, Sneaker and Sandal and see if you can reproduce the analysis of the penguins data in this chapter with this subset.
 3.  Can you fit a neural network that can predict the class in the fake tree data? Because the data is noisy and we do not have that many observations, it can be easy to overfit the data. Once you find a setting that works, think about what aspects of the model might be interesting for visualization. What comparisons with a random forest model could be of interest?
 4.  The sketches data could also be considered a classic image classification problem, and we have seen that we can get a reasonable accuracy with a random forest model. Because we only have a smaller number of observations (compared to the fashion MNIST data) when fitting a neural network we need to be very careful not to overfit the training data. Try fitting a flat neural network (similar to what we did for the fashion MNIST data) and check the test accuracy of the model.
