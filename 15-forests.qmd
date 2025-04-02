@@ -599,9 +599,55 @@ Although the confusion matrix suggests that class clusters are separated except 
 1. Using a grand tour compare the boundaries from the random forest model on the `penguins` data to that of (a) a default tree model, (b) an LDA model. Is it less boxy than the tree model, but still more boxy than that of the LDA model?
 2. Tinker with the parameters of the tree model to force it to fit a tree more closely to the data. Compare the boundaries from this with the default tree, and with the forest model. Is it less boxy than the default tree, but more boxy than the forest model?
 3. Fit a random forest model to the `bushfires` data using the `cause` variable as the class. It is a highly imbalanced classification problem. What is the out-of-bag error rate for the forest? Are there some classes that have lower error rate than others? Examine the 4D votes matrix with a tour, and describe the confusion between classes. This is interesting because it is difficult to accurately classify the fire ignition cause, and only some groups are often confused with each other. You should be able to see this from the 3D votes matrix. 
+
+Use this code to restrict the variables used in the model, appropriately:
+
+```{r}
+library(mulgar)
+data(bushfires)
+bushfires_sub <- bushfires[,c(5, 8:45, 48:55, 57:60)] |>
+  mutate(cause = factor(cause))
+```
+
 4. Fit a forest model to the first 21 PCs of the `sketches` data. Explore the 5D votes matrix. Why does it look star-shaped?
 5. Choose a cluster (or group of clusters) from the `fake_trees` data (2, 3, 4, 5, 7, 9) to explore in detail like done in @sec-forest-var-imp. Be sure to choose which PCs are the most useful using a tour, and follow-up by making a scatterplot showing the best distinction between your chosen cluster and the other observations. 
-6. Add NLDR view comparison for bushfires or other data sets.
+6. Using the `aflw` data (using the same subset of variables and players as used in Q3 of @sec-class-intro) compute:
+
+- a 2D representation using UMAP. (Make sure `position` is removed for the calculation.) 
+- Fit a random forest model.
+
+a. Plot the UMAP layout with points coloured by `position`.
+b. Plot the *two* most important variables as measured by the random forest model.
+c. Make a tour using the most important variables as measured by the random forest model, the top three should be enough.
+
+Discuss what is learned from each representation of the data, relative to the differences between skills of the players.
+
+You can use this code to subset the data:
+
+```{r}
+#| eval: false
+library(mulgar)
+data(aflw)
+aflw_sub <- aflw |> 
+  dplyr::filter(position %in% c("BPL", "FF", "RR")) |>
+  dplyr::mutate(position = factor(position)) |>
+  dplyr::select(goals:tackles)
+```
+
+7. There are several interesting data sets with class variables available on the [GGobi website](http://ggobi.org/book/index.html). Examine the differences between `type` of music, based on the the variables `lvar`, `lave`, `lmax`, `lfener`, `lfreq`. Fit a random forest model using `type` as the variable. (It is best to remove the "New wave" class because there are too few observations.) Using the variable importance values, make plots of the top two variables, and then tour on the top three variables. Is two or three variables suffficient to distinguish between classical and rock music types?
+
+The `music` data can be read using:
+
+```{r}
+#| echo: true
+#| eval: false
+library(readr)
+library(dplyr)
+music <- read_csv("http://ggobi.org/book/data/music-sub.csv",
+                  show_col_types = FALSE) |>
+  rename(title = `...1`) |>
+  mutate(type = factor(type))
+```
 
 ```{r}
 #| eval: false
@@ -694,6 +740,7 @@ bushfires_rf$importance |>
              decimals = 4) |>
   fmt_number(columns = Gini,
              decimals = 2)
+
 ```
 
 ```{r}
@@ -762,4 +809,33 @@ render_gif(s_rf_v_p_s[,1:5],
            obs_labels = labels),
            gif_file="gifs/sketches_votes.gif",
            frames=500)  
+```
+
+```{r}
+#| eval: false
+#| echo: false
+library(uwot)
+data(aflw)
+aflw_sub <- aflw |> 
+  filter(position %in% c("BPL", "FF", "RR")) |>
+  mutate(position = factor(position)) |>
+  select(goals:tackles, position) 
+aflw_umap <- umap(aflw_sub[,1:7], scale="scale")
+aflw_umap <- aflw_umap |> 
+  as_tibble() |>
+  rename(umap1 = V1, umap2 = V2) |>
+  mutate(position = aflw_sub$position)
+
+ggplot(aflw_umap, aes(x=umap1, y=umap2, colour=position)) +
+  geom_point(alpha = 0.8) +
+  scale_color_discrete_divergingx(palette = "Zissou 1")
+
+aflw_rf <- randomForest(position~., data=aflw_sub)
+ggplot(aflw_sub, aes(x=disposals, y=kicks, colour=position)) +
+  geom_point(alpha = 0.8) +
+  scale_color_discrete_divergingx(palette = "Zissou 1")
+
+animate_xy(aflw_sub[,c(1, 3, 5)], col=aflw_sub$position, rescale=TRUE)
+
+# We learn that an average of kicks and disposals distinguishes RR from the other two positions, and that goals distinguishes FF and BPL.
 ```

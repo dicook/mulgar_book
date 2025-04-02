@@ -6501,7 +6501,7 @@ data that examines the risk taking behavior of tourists, this is the
 \part{Supervised classification}
 
 \chapter{Introduction to supervised
-classification}\label{introduction-to-supervised-classification}
+classification}\label{sec-class-intro}
 
 Methods for supervised classification originated the early twentieth
 century, under the term \emph{discriminant analysis} (see, for example,
@@ -6855,9 +6855,9 @@ helpful to generate diagnostic data by:
 \item
   which variables might be more important, and
 \item
-  whether one should fit a linear or nonlinear classifier to separate
+  whether one should fit a linear or non-linear classifier to separate
   the groups by assessing whether the border between groups is linear or
-  nonlinear.
+  non-linear.
 \end{enumerate}
 
 \begin{enumerate}
@@ -6905,6 +6905,19 @@ helpful to generate diagnostic data by:
   the position is distinguishable based on combinations of the
   statistics.
 \end{enumerate}
+
+You can use this code to subset the data:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(mulgar)}
+\FunctionTok{data}\NormalTok{(aflw)}
+\NormalTok{aflw\_sub }\OtherTok{\textless{}{-}}\NormalTok{ aflw }\SpecialCharTok{|\textgreater{}} 
+\NormalTok{  dplyr}\SpecialCharTok{::}\FunctionTok{filter}\NormalTok{(position }\SpecialCharTok{\%in\%} \FunctionTok{c}\NormalTok{(}\StringTok{"BPL"}\NormalTok{, }\StringTok{"FF"}\NormalTok{, }\StringTok{"RR"}\NormalTok{)) }\SpecialCharTok{|\textgreater{}}
+\NormalTok{  dplyr}\SpecialCharTok{::}\FunctionTok{mutate}\NormalTok{(}\AttributeTok{position =} \FunctionTok{factor}\NormalTok{(position)) }\SpecialCharTok{|\textgreater{}}
+\NormalTok{  dplyr}\SpecialCharTok{::}\FunctionTok{select}\NormalTok{(goals}\SpecialCharTok{:}\NormalTok{tackles)}
+\end{Highlighting}
+\end{Shaded}
 
 \chapter{Linear discriminant analysis}\label{sec-lda}
 
@@ -7641,12 +7654,12 @@ dimensions can help to refine an automated rule.
 \tightlist
 \item
   For the \texttt{simple\_clusters} compute the LDA model, and make a
-  plot of the data, with points coloured by the class. Overlay
+  plot of the data, with points coloured by the true class. Overlay
   variance-covariance ellipses, and a \(+\) indicating the sample mean
   for each class. Is it reasonable to assume that the two classes are
   sampled from populations with the same variance-covariance?
 \item
-  Examine the clusters corresponding to the classes in the
+  Examine the clusters corresponding to the true classes in the
   \texttt{clusters} data set, using a tour. Based on the shape of the
   data is the assumption of equal variance-covariance reasonable?
 \item
@@ -7654,14 +7667,45 @@ dimensions can help to refine an automated rule.
   overlaid on the data in a tour on the 5D. Does it fit the variance of
   each cluster nicely?
 \item
-  Fit an LDA model to the \texttt{simple\_clusters} data. Examine the
-  boundaries produced by the model, in 2D.
+  There are several interesting data sets with class variables available
+  on the \href{http://ggobi.org/book/index.html}{GGobi website}. Examine
+  the differences between \texttt{type} of music, based on the the
+  variables \texttt{lvar}, \texttt{lave}, \texttt{lmax},
+  \texttt{lfener}, \texttt{lfreq}. (It is best to remove the ``New
+  wave'' class because there are too few observations.) Examine the
+  pooled variance-covariance for the two types of music. Does it fit the
+  variance of each cluster nicely?
+\end{enumerate}
+
+The \texttt{music} data can be read using:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(readr)}
+\FunctionTok{library}\NormalTok{(dplyr)}
+\NormalTok{music }\OtherTok{\textless{}{-}} \FunctionTok{read\_csv}\NormalTok{(}\StringTok{"http://ggobi.org/book/data/music{-}sub.csv"}\NormalTok{,}
+                  \AttributeTok{show\_col\_types =} \ConstantTok{FALSE}\NormalTok{) }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{rename}\NormalTok{(}\AttributeTok{title =} \StringTok{\textasciigrave{}}\AttributeTok{...1}\StringTok{\textasciigrave{}}\NormalTok{) }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{type =} \FunctionTok{factor}\NormalTok{(type))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{4}
+\tightlist
 \item
-  Fit an LDA model to the \texttt{clusters} data. Examine the boundaries
-  produced by the model in 5D.
+  Fit an LDA model to the \texttt{simple\_clusters} data, using the
+  \texttt{cl} variables as the class. Examine the boundaries produced by
+  the model, in 2D.
+\item
+  Fit an LDA model to the \texttt{clusters} data, using the \texttt{cl}
+  variables as the class. Examine the boundaries produced by the model
+  in 5D.
 \item
   Assess the LDA assumptions for the \texttt{multicluster} data. Is LDA
-  an appropriate model?
+  an appropriate model? Do you think it is still possible to produce a
+  useful classification for this data? Fit it to check.
 \item
   Compute the first 12 PCs of the \texttt{sketches} data. Check the
   assumption of equal, elliptical variance-covariance of the 6 groups.
@@ -7680,8 +7724,53 @@ dimensions can help to refine an automated rule.
   the priors are equal for all groups. How does the boundary between
   lightning cause fires and the other groups change?
 \item
-  XXX Question on interpretability, variable importance
+  Using the \texttt{aflw} data (using the same subset of variables and
+  players as used in Q3 of Chapter~\ref{sec-class-intro}) compute:
 \end{enumerate}
+
+\begin{itemize}
+\tightlist
+\item
+  a 2D representation using UMAP. (Make sure \texttt{position} is
+  removed for the calculation.)
+\item
+  Fit an LDA model, and predict the observations into the discriminant
+  space. (Make sure to use standardised variables so the coefficients of
+  the discriminant space can be interpreted. You may receive a warning
+  that variables are collinear, but the model should still be usable.)
+\end{itemize}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\tightlist
+\item
+  Plot the UMAP layout with points coloured by \texttt{position}.
+\item
+  Plot the data in the LDA discriminant space coloured by
+  \texttt{position}.
+\end{enumerate}
+
+Discuss what is learned from each representation of the data, relative
+to the differences between skills of the players. And also, using
+examine the coefficients of the discriminant space to explain how the
+skill sets of the player types are different.
+
+View the most important variables contributing to the discriminant space
+in a tour. Is it possible to distinguish the player types in this subset
+of variables?
+
+You can use this code to subset the data:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(mulgar)}
+\FunctionTok{data}\NormalTok{(aflw)}
+\NormalTok{aflw\_sub }\OtherTok{\textless{}{-}}\NormalTok{ aflw }\SpecialCharTok{|\textgreater{}} 
+\NormalTok{  dplyr}\SpecialCharTok{::}\FunctionTok{filter}\NormalTok{(position }\SpecialCharTok{\%in\%} \FunctionTok{c}\NormalTok{(}\StringTok{"BPL"}\NormalTok{, }\StringTok{"FF"}\NormalTok{, }\StringTok{"RR"}\NormalTok{)) }\SpecialCharTok{|\textgreater{}}
+\NormalTok{  dplyr}\SpecialCharTok{::}\FunctionTok{mutate}\NormalTok{(}\AttributeTok{position =} \FunctionTok{factor}\NormalTok{(position)) }\SpecialCharTok{|\textgreater{}}
+\NormalTok{  dplyr}\SpecialCharTok{::}\FunctionTok{select}\NormalTok{(goals}\SpecialCharTok{:}\NormalTok{tackles)}
+\end{Highlighting}
+\end{Shaded}
 
 \chapter{Trees and forests}\label{sec-trees-forests}
 
@@ -7857,11 +7946,11 @@ the random forest model object. The first five rows are:
 
 \begin{verbatim}
   Adelie Chinstrap Gentoo
-1 0.9810  0.018987      0
-2 0.9620  0.038043      0
-3 0.9947  0.005291      0
-4 1.0000  0.000000      0
-5 0.9942  0.005780      0
+1 0.9885  0.011494      0
+2 0.9515  0.048485      0
+3 0.9945  0.005495      0
+4 0.9945  0.005525      0
+5 0.9786  0.021390      0
 \end{verbatim}
 
 This has three columns corresponding to the three species, but because
@@ -8017,12 +8106,12 @@ interesting to see how well the random forest model performs.
 \end{Shaded}
 
 \begin{verbatim}
-    0 1    2    3     4     5     6 7    8    9
-1 0.9 0 0.01 0.00 0.006 0.098 0.000 0 0.01 0.00
-2 0.6 0 0.02 0.00 0.010 0.343 0.000 0 0.00 0.00
-3 0.9 0 0.02 0.01 0.094 0.006 0.000 0 0.00 0.01
-4 0.9 0 0.01 0.00 0.000 0.075 0.005 0 0.00 0.00
-5 0.6 0 0.09 0.02 0.000 0.265 0.000 0 0.02 0.00
+    0 1     2    3     4    5 6 7     8    9
+1 0.9 0 0.006 0.00 0.017 0.07 0 0 0.006 0.00
+2 0.6 0 0.017 0.00 0.017 0.36 0 0 0.000 0.00
+3 0.8 0 0.037 0.01 0.123 0.00 0 0 0.000 0.03
+4 0.9 0 0.006 0.00 0.006 0.12 0 0 0.000 0.00
+5 0.6 0 0.048 0.02 0.032 0.27 0 0 0.016 0.00
 \end{verbatim}
 
 \begin{figure}
@@ -8099,16 +8188,16 @@ the accuracy and Gini metrics.}
 \toprule
 Var & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & Acc & Gini \\ 
 \midrule\addlinespace[2.5pt]
-PC1 & $0.1$ & $0.3$ & $0.5$ & $0.3$ & $0.2$ & $0.5$ & $0.4$ & $0.2$ & $0.3$ & $0.3$ & $0.30$ & $472$ \\ 
-PC2 & $0.1$ & $0.2$ & $0.2$ & $0.5$ & $0.3$ & $0.3$ & $0.2$ & $0.4$ & $0.2$ & $0.3$ & $0.28$ & $380$ \\ 
+PC1 & $0.1$ & $0.3$ & $0.5$ & $0.3$ & $0.2$ & $0.5$ & $0.4$ & $0.2$ & $0.3$ & $0.3$ & $0.31$ & $487$ \\ 
+PC2 & $0.1$ & $0.2$ & $0.2$ & $0.5$ & $0.3$ & $0.3$ & $0.2$ & $0.4$ & $0.2$ & $0.3$ & $0.28$ & $367$ \\ 
 PC3 & $0.1$ & $0.1$ & $0.1$ & $0.1$ & $0.5$ & $0.1$ & $0.1$ & $0.1$ & $0.2$ & $0.2$ & $0.16$ & $306$ \\ 
-PC4 & $0.1$ & $0.5$ & $0.1$ & $0.0$ & $0.1$ & $0.0$ & $0.4$ & $0.2$ & $0.1$ & $0.1$ & $0.15$ & $349$ \\ 
-PC5 & $0.1$ & $0.1$ & $0.3$ & $0.1$ & $0.2$ & $0.2$ & $0.1$ & $0.1$ & $0.3$ & $0.2$ & $0.18$ & $327$ \\ 
-PC6 & $0.1$ & $0.2$ & $0.3$ & $0.2$ & $0.0$ & $0.1$ & $0.0$ & $0.3$ & $0.2$ & $0.2$ & $0.16$ & $294$ \\ 
-PC7 & $0.1$ & $0.0$ & $0.1$ & $0.0$ & $0.1$ & $0.1$ & $0.1$ & $0.3$ & $0.1$ & $0.1$ & $0.11$ & $246$ \\ 
-PC8 & $0.1$ & $0.1$ & $0.0$ & $0.2$ & $0.1$ & $0.1$ & $0.0$ & $0.0$ & $0.1$ & $0.3$ & $0.10$ & $222$ \\ 
-PC9 & $0.1$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.1$ & $0.0$ & $0.02$ & $59$ \\ 
-PC10 & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.01$ & $44$ \\ 
+PC4 & $0.1$ & $0.5$ & $0.1$ & $0.0$ & $0.1$ & $0.0$ & $0.4$ & $0.2$ & $0.1$ & $0.1$ & $0.14$ & $335$ \\ 
+PC5 & $0.1$ & $0.1$ & $0.3$ & $0.1$ & $0.2$ & $0.2$ & $0.1$ & $0.1$ & $0.3$ & $0.2$ & $0.18$ & $338$ \\ 
+PC6 & $0.1$ & $0.2$ & $0.3$ & $0.2$ & $0.0$ & $0.1$ & $0.0$ & $0.3$ & $0.1$ & $0.2$ & $0.16$ & $286$ \\ 
+PC7 & $0.1$ & $0.0$ & $0.1$ & $0.0$ & $0.1$ & $0.1$ & $0.1$ & $0.3$ & $0.1$ & $0.2$ & $0.11$ & $263$ \\ 
+PC8 & $0.0$ & $0.1$ & $0.0$ & $0.2$ & $0.1$ & $0.1$ & $0.0$ & $0.0$ & $0.1$ & $0.3$ & $0.09$ & $216$ \\ 
+PC9 & $0.1$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.1$ & $0.0$ & $0.02$ & $57$ \\ 
+PC10 & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.01$ & $43$ \\ 
 \bottomrule
 
 \end{longtable}
@@ -8188,16 +8277,16 @@ not each other.
 
 \begin{verbatim}
     0   1   2   3   4   5   6   7   8   9 class.error
-0 267   5   2   1   4   4   4   3   7   3       0.110
-1  14 286   0   0   0   0   0   0   0   0       0.047
-2   9   0 290   0   1   0   0   0   0   0       0.033
+0 266   4   2   2   3   5   4   3   8   3       0.113
+1  12 288   0   0   0   0   0   0   0   0       0.040
+2   8   0 291   0   1   0   0   0   0   0       0.030
 3   5   0   0 290   0   0   0   3   0   2       0.033
-4  12   0   0   0 288   0   0   0   0   0       0.040
+4  13   0   0   0 287   0   0   0   0   0       0.043
 5  12   0   0   0   0 288   0   0   0   0       0.040
-6  11   0   0   0   0   0 288   0   1   0       0.040
-7   4   0   0   5   0   0   0 290   0   1       0.033
+6  12   0   0   0   0   0 287   0   1   0       0.043
+7   4   0   0   5   0   0   0 289   0   2       0.037
 8   8   0   0   0   0   0   0   0 292   0       0.027
-9   7   0   0   0   0   0   0   1   0 292       0.027
+9   5   0   0   0   0   0   0   1   0 294       0.020
 \end{verbatim}
 
 From the tour in Figure~\ref{fig-ft-cl2} we can see that clusters 1, 6,
@@ -8252,6 +8341,24 @@ relative to 6, 1 and 0 is largely due to PC5 (right).}
   accurately classify the fire ignition cause, and only some groups are
   often confused with each other. You should be able to see this from
   the 3D votes matrix.
+\end{enumerate}
+
+Use this code to restrict the variables used in the model,
+appropriately:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(mulgar)}
+\FunctionTok{data}\NormalTok{(bushfires)}
+\NormalTok{bushfires\_sub }\OtherTok{\textless{}{-}}\NormalTok{ bushfires[,}\FunctionTok{c}\NormalTok{(}\DecValTok{5}\NormalTok{, }\DecValTok{8}\SpecialCharTok{:}\DecValTok{45}\NormalTok{, }\DecValTok{48}\SpecialCharTok{:}\DecValTok{55}\NormalTok{, }\DecValTok{57}\SpecialCharTok{:}\DecValTok{60}\NormalTok{)] }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{cause =} \FunctionTok{factor}\NormalTok{(cause))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{3}
+\tightlist
 \item
   Fit a forest model to the first 21 PCs of the \texttt{sketches} data.
   Explore the 5D votes matrix. Why does it look star-shaped?
@@ -8263,8 +8370,77 @@ relative to 6, 1 and 0 is largely due to PC5 (right).}
   showing the best distinction between your chosen cluster and the other
   observations.
 \item
-  Add NLDR view comparison for bushfires or other data sets.
+  Using the \texttt{aflw} data (using the same subset of variables and
+  players as used in Q3 of Chapter~\ref{sec-class-intro}) compute:
 \end{enumerate}
+
+\begin{itemize}
+\tightlist
+\item
+  a 2D representation using UMAP. (Make sure \texttt{position} is
+  removed for the calculation.)
+\item
+  Fit a random forest model.
+\end{itemize}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\tightlist
+\item
+  Plot the UMAP layout with points coloured by \texttt{position}.
+\item
+  Plot the \emph{two} most important variables as measured by the random
+  forest model.
+\item
+  Make a tour using the most important variables as measured by the
+  random forest model, the top three should be enough.
+\end{enumerate}
+
+Discuss what is learned from each representation of the data, relative
+to the differences between skills of the players.
+
+You can use this code to subset the data:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(mulgar)}
+\FunctionTok{data}\NormalTok{(aflw)}
+\NormalTok{aflw\_sub }\OtherTok{\textless{}{-}}\NormalTok{ aflw }\SpecialCharTok{|\textgreater{}} 
+\NormalTok{  dplyr}\SpecialCharTok{::}\FunctionTok{filter}\NormalTok{(position }\SpecialCharTok{\%in\%} \FunctionTok{c}\NormalTok{(}\StringTok{"BPL"}\NormalTok{, }\StringTok{"FF"}\NormalTok{, }\StringTok{"RR"}\NormalTok{)) }\SpecialCharTok{|\textgreater{}}
+\NormalTok{  dplyr}\SpecialCharTok{::}\FunctionTok{mutate}\NormalTok{(}\AttributeTok{position =} \FunctionTok{factor}\NormalTok{(position)) }\SpecialCharTok{|\textgreater{}}
+\NormalTok{  dplyr}\SpecialCharTok{::}\FunctionTok{select}\NormalTok{(goals}\SpecialCharTok{:}\NormalTok{tackles)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{6}
+\tightlist
+\item
+  There are several interesting data sets with class variables available
+  on the \href{http://ggobi.org/book/index.html}{GGobi website}. Examine
+  the differences between \texttt{type} of music, based on the the
+  variables \texttt{lvar}, \texttt{lave}, \texttt{lmax},
+  \texttt{lfener}, \texttt{lfreq}. Fit a random forest model using
+  \texttt{type} as the variable. (It is best to remove the ``New wave''
+  class because there are too few observations.) Using the variable
+  importance values, make plots of the top two variables, and then tour
+  on the top three variables. Is two or three variables suffficient to
+  distinguish between classical and rock music types?
+\end{enumerate}
+
+The \texttt{music} data can be read using:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(readr)}
+\FunctionTok{library}\NormalTok{(dplyr)}
+\NormalTok{music }\OtherTok{\textless{}{-}} \FunctionTok{read\_csv}\NormalTok{(}\StringTok{"http://ggobi.org/book/data/music{-}sub.csv"}\NormalTok{,}
+                  \AttributeTok{show\_col\_types =} \ConstantTok{FALSE}\NormalTok{) }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{rename}\NormalTok{(}\AttributeTok{title =} \StringTok{\textasciigrave{}}\AttributeTok{...1}\StringTok{\textasciigrave{}}\NormalTok{) }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{type =} \FunctionTok{factor}\NormalTok{(type))}
+\end{Highlighting}
+\end{Shaded}
 
 \chapter{Support vector machines}\label{support-vector-machines}
 

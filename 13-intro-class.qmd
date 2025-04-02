@@ -1,4 +1,4 @@
-# Introduction to supervised classification
+# Introduction to supervised classification {#sec-class-intro}
 
 <!--
 - overview of supervised classification, model structure
@@ -626,7 +626,17 @@ music <- read_csv("http://ggobi.org/book/data/music-sub.csv",
 
 4. The `aflw` data contains information on the [player positions](https://en.wikipedia.org/wiki/Australian_rules_football_positions), as well as their statistics. Subset the data to `FF` (full forward), `BPL` (back pocket left) and `RR` (ruck). Examine the differences between player statistics (goals to tackles) for these positions. Explain whether the players in these positions have different profiles on the statistics, and whether the position is distinguishable based on combinations of the statistics. 
 
+You can use this code to subset the data:
 
+```{r}
+#| eval: false
+library(mulgar)
+data(aflw)
+aflw_sub <- aflw |> 
+  dplyr::filter(position %in% c("BPL", "FF", "RR")) |>
+  dplyr::mutate(position = factor(position)) |>
+  dplyr::select(goals:tackles)
+```
 
 ```{r eval=FALSE}
 #| echo: false
@@ -654,9 +664,10 @@ animate_xy(music[,4:8], guided_tour(lda_pp(music$type)), col=music$type, rescale
 data(aflw)
 aflw_sub <- aflw |> 
   filter(position %in% c("BPL", "FF", "RR")) |>
-  mutate(position = factor(position))
-animate_xy(aflw_sub[,8:15], col=aflw_sub$position, rescale=TRUE)
-animate_xy(aflw_sub[,8:15], 
+  mutate(position = factor(position)) |>
+  select(goals:tackles)
+animate_xy(aflw_sub[,1:7], col=aflw_sub$position, rescale=TRUE)
+animate_xy(aflw_sub[,1:7], 
            guided_tour(lda_pp(aflw_sub$position)), 
            col=aflw_sub$position, 
            rescale=TRUE)
