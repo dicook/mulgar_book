@@ -100,9 +100,9 @@ render_gif(p_tree_boundaries[p_tree_boundaries$.TYPE == "simulated",1:4],
 
 ::: {#fig-penguins-lda-tree-html layout-ncol=2}
 
-![LDA model](gifs/penguins_lda_boundaries.gif){#fig-lda-boundary fig-alt="FIX ME" width=300}
+![LDA model](gifs/penguins_lda_boundaries.gif){#fig-lda-boundary fig-alt="Tour animation showing many 2D projections of points in a 4D cube. Points are divided into three regions, along oblique cuts." width=300}
 
-![Tree model](gifs/penguins_tree_boundaries.gif){#fig-tree-boundary fig-alt="FIX ME" width=300}
+![Tree model](gifs/penguins_tree_boundaries.gif){#fig-tree-boundary fig-alt="Tour animation showing many 2D projections of points in a 4D cube. Points are divided into three regions, in directions parallel to different coordinate axes, giving boxier regions than the LDA boundaries." width=300}
 
 Comparison of the boundaries produced by the LDA (a) and the tree (b) model, using a slice tour. The tree boundaries are more box-shaped than the LDA boundaries, which does not adequately capture the differences between the elliptically-shaped clusters of the penguins data.
 :::
@@ -112,9 +112,9 @@ Comparison of the boundaries produced by the LDA (a) and the tree (b) model, usi
 
 ::: {#fig-penguins-lda-tree-pdf layout-ncol=2}
 
-![LDA model](images/penguins_lda_boundaries.png){#fig-lda-boundary fig-alt="FIX ME"}
+![LDA model](images/penguins_lda_boundaries.png){#fig-lda-boundary fig-alt="This image shows a scatter plot of penguin data of three distinct penguin species. The points are divided into three regions like a pie, with red (Gentoo) at the top, blue (Adelie) on bottom right, and yellow (Chinstrap) on the left."}
 
-![Tree model](images/penguins_tree_boundaries.png){#fig-tree-boundary fig-alt="FIX ME"}
+![Tree model](images/penguins_tree_boundaries.png){#fig-tree-boundary fig-alt="This image shows a scatter plot of penguin data of three distinct penguin species. The points are divided into three boxes, with red (Gentoo) being a rectangule box at bottom left, blue (Adelie) a smaller square at top left, and yellow (Chinstrap) a smaller square at top right."}
 
 Comparison of the boundaries produced by the LDA (a) and the tree (b) model, using a slice tour. (Here only a single frame is shown.) The tree boundaries are more box-shaped than the LDA boundaries, which does not adequately capture the differences between the elliptically-shaped clusters of the penguins data.
 :::
@@ -192,8 +192,8 @@ library(geozoo)
 proj <- t(geozoo::f_helmert(3)[-1,])
 p_rf_v_p <- as.matrix(penguins_rf$votes) %*% proj
 colnames(p_rf_v_p) <- c("x1", "x2")
-p_rf_v_p <- p_rf_v_p %>%
-  as.data.frame() %>%
+p_rf_v_p <- p_rf_v_p |>
+  as.data.frame() |>
   mutate(species = penguins_sub$species)
 ```
 
@@ -239,12 +239,13 @@ render_gif(penguins_rf$votes,
 ::: {.content-visible when-format="html"}
 ::: {#fig-penguins-votes-html layout-ncol=2}
 
-![3D](gifs/penguins_rf_votes.gif){#fig-p-votes-tour fig-alt="FIX ME" width=300}
+![3D](gifs/penguins_rf_votes.gif){#fig-p-votes-tour fig-alt="Tour animation showing many 2D projections of points from 3D. Points are fall mostly on the edges of a 2D triangle in 3D. Red (Gentoo) is a tight cluster at one vertex. Blue (Adelie) and yellow (Chinstrap) concentrate at the other two vertices, with points intermixed spread all along the edge between the two vertices. There is one red point mixed with the yellow, and one blue point along the yellow-red edge, and one blue point in the middle of the triangle." width=300}
 
 ```{r eval=knitr::is_html_output()}
 #| echo: false
 #| label: fig-p-votes-ggplot-html
 #| fig-cap: 2D ternary diagram
+#| fig-alt: "Black equilateral triangle surrounding points. Points are fall mostly on the edges of a 2D triangle in 3D. Red (Gentoo) is a tight cluster at one vertex. Blue (Adelie) and yellow (Chinstrap) concentrate at the other two vertices, with points intermixed spread all along the edge between the two vertices. There is one red point mixed with the yellow, and one blue point along the yellow-red edge, and one blue point in the middle of the triangle."
 #| fig-width: 4
 #| fig-height: 4
 p_ternary
@@ -257,9 +258,9 @@ Examining the votes matrix from a random forest fit to the penguins: (a) from a 
 ::: {.content-visible when-format="pdf"}
 ::: {#fig-penguins-votes-pdf layout-ncol=2}
 
-![3D](images/penguins_rf_votes.png){#fig-p-votes-tour fig-alt="FIX ME"}
+![3D](images/penguins_rf_votes.png){#fig-p-votes-tour fig-alt="One 2D projection from a tour of the votes matrix, showing all points lie in a line. Red (Gentoo) is at the left end, blue (Adelie) is at the right end and yellow (Chinstrap) is on the middle. All three axes are pointing downwards: Gentoo to 8 o'clock, Chinstrap to 6 o'clock, Adelie to 5 o'clock."}
 
-![2D ternary diagram](images/fig-p-votes-ggplot-1.png){#fig-p-votes-ggplot-pdf fig-alt="FIX ME"}
+![2D ternary diagram](images/fig-p-votes-ggplot-1.png){#fig-p-votes-ggplot-pdf fig-alt="Black equilateral triangle surrounding points. Points are fall mostly on the edges of a 2D triangle in 3D. Red (Gentoo) is a tight cluster at one vertex. Blue (Adelie) and yellow (Chinstrap) concentrate at the other two vertices, with points intermixed spread all along the edge between the two vertices. There is one red point mixed with the yellow, and one blue point along the yellow-red edge, and one blue point in the middle of the triangle."}
 
 Examining the votes matrix from a random forest fit to the penguins: (a) in a frame from a tour of the 3D, (b) projected into 2D, to make a ternary diagram. In 3D the points can be seen to lie along a 2D plane, which is due to the constraint that the values sum to 1. From the ternary diagram, the classification can be seen to be reasonably well distinguished because points mostly lie at the vertex. There are a few penguins that are confused with a different species, as seen from the few points spread between vertices.
 :::
@@ -315,22 +316,22 @@ head(ft_rf$votes, 5)
 ::: {.content-visible when-format="html"}
 ```{r}
 #| code-fold: false
-ft_rf_votes <- ft_rf$votes %>%
-  as_tibble() %>%
+ft_rf_votes <- ft_rf$votes |>
+  as_tibble() |>
   mutate(branches = fake_trees$branches)
 
 proj <- t(geozoo::f_helmert(10)[-1,])
 f_rf_v_p <- as.matrix(ft_rf_votes[,1:10]) %*% proj
 colnames(f_rf_v_p) <- c("x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8", "x9")
-f_rf_v_p <- f_rf_v_p %>%
-  as.data.frame() %>%
+f_rf_v_p <- f_rf_v_p |>
+  as.data.frame() |>
   mutate(branches = fake_trees$branches)
 
 simp <- geozoo::simplex(p=9)
 sp <- data.frame(simp$points)
 colnames(sp) <- c("x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8", "x9")
 sp$branches = ""
-f_rf_v_p_s <- bind_rows(sp, f_rf_v_p) %>%
+f_rf_v_p_s <- bind_rows(sp, f_rf_v_p) |>
   mutate(branches = factor(branches))
 labels <- c("0" , "1", "2", "3", "4", "5", "6", "7", "8", "9",
                 rep("", 3000))
@@ -359,9 +360,9 @@ render_gif(f_rf_v_p_s[,1:9],
 
 ::: {#fig-ft-votes-html layout-ncol=2}
 
-![The 9D votes matrix for the 10 class fake_trees data in a tour.](gifs/ft_votes.gif){#fig-ft-votes-tour fig-alt="FIX ME" width=300}
+![The 9D votes matrix for the 10 class fake_trees data in a tour.](gifs/ft_votes.gif){#fig-ft-votes-tour fig-alt="Animation of 2D projections of 10D data falling inside a 10D simplex. Vertices are labelled 0-9, corresponding also to classes 0-9, and points are coloured different shades of yellow-green-purple. Edges of the simplex are dark purple. Points fall mostly along several edges. Particularly, points tend to lie on a edge connecting a vertices 1 through 9 with the 0 vertex." width=300}
 
-![Several static views from the tour revealing how clusters connect.](images/ft-votes.png){#fig-ft-votes-prj fig-alt="FIX ME" width=300}
+![Several static views from the tour revealing how clusters connect.](images/ft-votes.png){#fig-ft-votes-prj fig-alt="Four plots showing 2D projections of a 10D simplex. Vertices are labelled 0-9, corresponding also to classes 0-9, and points are coloured different shades of yellow-green-purple. Edges of the simplex are dark purple. Points fall mostly along several edges. Particularly, points tend to lie on a edge connecting a vertices 1 through 9 with the 0 vertex." width=300}
 
 A tour and several static views of the votes matrix. Lines are the edges of the 8D simplex, which bounds the shape. Points mostly concentrate in the vertices, or spread along one of the edges, which means that most observations are clearly belonging to one group, or confused with a single other group. The exception to this is class 0, which spreads in many directions.
 :::
@@ -371,7 +372,7 @@ A tour and several static views of the votes matrix. Lines are the edges of the 
 
 ::: {#fig-ft-votes-pdf layout-ncol=2}
 
-![](images/ft-votes.png){fig-alt="FIX ME" width=400}
+![](images/ft-votes.png){fig-alt="Four plots showing 2D projections of a 10D simplex. Vertices are labelled 0-9, corresponding also to classes 0-9, and points are coloured different shades of yellow-green-purple. Edges of the simplex are dark purple. Points fall mostly along several edges. Particularly, points tend to lie on a edge connecting a vertices 1 through 9 with the 0 vertex." width=400}
 
 Several static views from the tour of the votes matrix. Lines are the edges of the 8D simplex, which bounds the shape. Points mostly concentrate in the vertices, or spread along one of the edges, which means that most observations are clearly belonging to one group, or confused with a single other group. The exception to this is class 0, which spreads in many directions.
 :::
@@ -406,17 +407,17 @@ The variable importance score across all classes, and for each class is useful f
 #| label: tbl-ft-importance
 #| tbl-cap: Variable importance from the random forest fit to the fake trees data, for each of the 9 classes, and using the accuracy and Gini metrics.
 library(gt)
-ft_rf$importance %>% 
-  as_tibble(rownames="Var") %>% 
+ft_rf$importance |> 
+  as_tibble(rownames="Var") |> 
   rename(Acc=MeanDecreaseAccuracy,
-         Gini=MeanDecreaseGini) %>%
-  #arrange(desc(Gini)) %>%
-  gt() %>%
+         Gini=MeanDecreaseGini) |>
+  #arrange(desc(Gini)) |>
+  gt() |>
   fmt_number(columns = c(`0`,`1`,`2`,`3`,`4`,
                          `5`,`6`,`7`,`8`,`9`),
-             decimals = 1) %>% 
+             decimals = 1) |> 
   fmt_number(columns = Acc,
-             decimals = 2) %>%
+             decimals = 2) |>
   fmt_number(columns = Gini,
              decimals = 0)
 ```
@@ -438,7 +439,7 @@ We can use the accuracy information to choose variables to provide to the tour. 
 
 ```{r}
 #| code-fold: false
-ft_pc <- ft_pc %>%
+ft_pc <- ft_pc |>
   mutate(cl1 = factor(case_when(
                  branches == "0" ~ "0",
                  branches == "1" ~ "1",
@@ -472,7 +473,7 @@ From `r ifelse(knitr::is_html_output(), '@fig-ft-cl-html', '@fig-ft-cl-pdf')` we
 
 ::: {#fig-ft-cl-html layout-ncol=2}
 
-![Tour of most important variables for class 1.](gifs/ft_cl1.gif){#fig-ft-cl1 fig-alt="FIX ME" width=300}
+![Tour of most important variables for class 1.](gifs/ft_cl1.gif){#fig-ft-cl1 fig-alt="Animation of 2D projections of 6D data with thickish branching structure. There are 9 branches attached to a main trunk. Variables are principal components. Most of the points are yellow, one branch is green, and the main trunk is deep purple." width=300}
 
 ```{r}
 #| echo: false
@@ -481,6 +482,7 @@ From `r ifelse(knitr::is_html_output(), '@fig-ft-cl-html', '@fig-ft-cl-pdf')` we
 #| out-width: 100%
 #| label: fig-ft-cl1-pc
 #| fig-cap: PC1 and PC4 together reveal cluster 1.
+#| fig-alt: "This is an untitled chart with no subtitle or caption. It has x-axis 'PC4' with labels -5, 0 and 5. It has y-axis 'PC1' with labels -5, 0 and 5. Points are coloured by class groupings, deep purple is class 0, the main trunk, green is class 1, a branch, and all other classes are yellow. The class 1 is distinct from the other points pointing to 5 o'clock, and connected to one end of cluster 0."
 ft_pc_cl1 
 ```
 
@@ -492,10 +494,10 @@ Focusing on class 1 in the `fake_trees` data. The most important variables were 
 
 ::: {#fig-ft-cl-pdf layout-ncol=2}
 
-![](images/ft_cl1.png){fig-alt="FIX ME"}
+![](images/ft_cl1.png){fig-alt="This is scatterplot of a projection from 6D. PC1 is pointing to 5 o'clock, PC2 is pointing to 8 o'clock, PC4 is pointing to 2 o'clock, and PC6 is pointing to 3 o'clock. Points are coloured by class groupings, deep purple is class 0, the main trunk, green is class 1, a branch, and all other classes are yellow. The class 1 is distinct from the other points pointing to 2 o'clock, and connected to one end of cluster 0."}
 
 
-![](images/fig-ft-cl1-pc-1.png){fig-alt="FIX ME"} 
+![](images/fig-ft-cl1-pc-1.png){fig-alt="This is an untitled chart with no subtitle or caption. It has x-axis 'PC4' with labels -5, 0 and 5. It has y-axis 'PC1' with labels -5, 0 and 5. Points are coloured by class groupings, deep purple is class 0, the main trunk, green is class 1, a branch, and all other classes are yellow. The class 1 is distinct from the other points pointing to 5 o'clock, and connected to one end of cluster 0."} 
 
 Focusing on class 1 in the `fake_trees` data. The most important variables were PC1 and PC4. A combination of PC2 and PC4 reveals the difference between cluster 1 and all the other clusters.
 :::
@@ -517,7 +519,7 @@ ft_rf$confusion
 
 ```{r echo=knitr::is_html_output()}
 #| code-fold: false
-ft_pc <- ft_pc %>%
+ft_pc <- ft_pc |>
   mutate(cl8 = factor(case_when(
                  branches == "0" ~ "0",
                  branches == "6" ~ "6",
@@ -553,7 +555,7 @@ From the tour in @fig-ft-cl2 we can see that clusters 1, 6, and 8 share one end 
 
 ::: {#fig-ft-cl2 layout-ncol=2}
 
-![Tour of most important variables for class 1.](gifs/ft_cl8.gif){#fig-ft-cl8 fig-alt="FIX ME" width=300}
+![Tour of most important variables for class 1.](gifs/ft_cl8.gif){#fig-ft-cl8 fig-alt="Animation of 2D projections of 6D data with thickish branching structure. There are 9 branches attached to a main trunk. Variables are principal components. Most of the points are yellow, the main trunk (class 0) is deep purple, and three branches that all connect at one end are different shaes of green (classes 1, 6, 8)." width=300}
 
 ```{r}
 #| echo: false
@@ -562,6 +564,7 @@ From the tour in @fig-ft-cl2 we can see that clusters 1, 6, and 8 share one end 
 #| out-width: 100%
 #| label: fig-ft-cl8-pc
 #| fig-cap: PC1 and PC5 together mostly reveal cluster 8.
+#| fig-alt: "This is an untitled chart with no subtitle or caption. It has x-axis 'PC1' with labels -5, 0 and 5. It has y-axis 'PC6' with labels -6, -3, 0 and 3, 6. Points are coloured by class groupings, deep purple is class 0, the main trunk, the rest are branches, where light green is class 8, middle green is class 6 and dark green is class 1. All other classes are yellow. The classes 1, 6, 8 are each distinct from the other points and connected to one end of cluster 0."
 ft_pc_cl8 
 ```
 
@@ -573,9 +576,9 @@ Focusing on class 8 in the `fake_trees` data, relative to nearby clusters 1 and 
 
 ::: {#fig-ft-cl2 layout-ncol=2}
 
-![](images/ft_cl8.png){fig-alt="FIX ME"}
+![](images/ft_cl8.png){fig-alt="This is scatterplot of a projection from 6D. PC1 and PC2 are pointing to 4 o'clock, PC5 is pointing to 7 o'clock, and PC6 is pointing to 1 o'clock. Points are coloured by class groupings, deep purple is class 0, the main trunk, the rest are branches, where light green is class 8, middle green is class 6 and dark green is class 1. All other classes are yellow. The classes 1, 6, 8 are each distinct from the other points and connected to one end of cluster 0."}
 
-![](images/fig-ft-cl8-pc-1.png){fig-alt="FIX ME"}
+![](images/fig-ft-cl8-pc-1.png){fig-alt="This is an untitled chart with no subtitle or caption. It has x-axis 'PC1' with labels -5, 0 and 5. It has y-axis 'PC6' with labels -6, -3, 0 and 3, 6. Points are coloured by class groupings, deep purple is class 0, the main trunk, the rest are branches, where light green is class 8, middle green is class 6 and dark green is class 1. All other classes are yellow. The classes 1, 6, 8 are each distinct from the other points and connected to one end of cluster 0."}
 
 Focusing on class 8 in the `fake_trees` data using a tour (left) reveals that it shares an end of cluster 0 with clusters 1 and 6. A combination of PC1 and PC5 reveals that there is a difference between the observations in class 8 relative to 6, 1 and 0 is largely due to PC5 (right).
 :::
@@ -607,7 +610,7 @@ library(mulgar)
 library(tourr)
 data(bushfires)
 
-bushfires_sub <- bushfires[,c(5, 8:45, 48:55, 57:60)] %>%
+bushfires_sub <- bushfires[,c(5, 8:45, 48:55, 57:60)] |>
   mutate(cause = factor(cause))
 
 # Checking the dependencies between predictors
@@ -615,8 +618,8 @@ bushfires_pca <- prcomp(bushfires_sub[,-51],
                         scale=TRUE, retx=TRUE)
 ggscree(bushfires_pca)
 
-bushfires_pcs <- bushfires_pca$x[,1:7] %>%
-  as_tibble() %>%
+bushfires_pcs <- bushfires_pca$x[,1:7] |>
+  as_tibble() |>
   mutate(cause = factor(bushfires$cause))
 
 library(tourr)
@@ -638,8 +641,8 @@ bushfires_rf <- randomForest(cause~.,
 bushfires_rf
 
 # Create votes matrix data
-bushfires_rf_votes <- bushfires_rf$votes %>%
-  as_tibble() %>%
+bushfires_rf_votes <- bushfires_rf$votes |>
+  as_tibble() |>
   mutate(cause = bushfires_sub$cause)
 
 # Project 4D into 3D
@@ -647,8 +650,8 @@ library(geozoo)
 proj <- t(geozoo::f_helmert(4)[-1,])
 b_rf_v_p <- as.matrix(bushfires_rf_votes[,1:4]) %*% proj
 colnames(b_rf_v_p) <- c("x1", "x2", "x3")
-b_rf_v_p <- b_rf_v_p %>%
-  as.data.frame() %>%
+b_rf_v_p <- b_rf_v_p |>
+  as.data.frame() |>
   mutate(cause = bushfires_sub$cause)
   
 # Add simplex
@@ -656,7 +659,7 @@ simp <- simplex(p=3)
 sp <- data.frame(simp$points)
 colnames(sp) <- c("x1", "x2", "x3")
 sp$cause = ""
-b_rf_v_p_s <- bind_rows(sp, b_rf_v_p) %>%
+b_rf_v_p_s <- bind_rows(sp, b_rf_v_p) |>
   mutate(cause = factor(cause))
 labels <- c("accident" , "arson", 
                 "burning_off", "lightning", 
@@ -681,14 +684,14 @@ render_gif(b_rf_v_p_s[,1:3],
            frames=500)  
 
 library(gt)
-bushfires_rf$importance %>% 
-  as_tibble(rownames="Variable") %>% 
+bushfires_rf$importance |> 
+  as_tibble(rownames="Variable") |> 
   rename(Accuracy=MeanDecreaseAccuracy,
-         Gini=MeanDecreaseGini) %>%
-  arrange(desc(Gini)) %>%
-  gt() %>%
+         Gini=MeanDecreaseGini) |>
+  arrange(desc(Gini)) |>
+  gt() |>
   fmt_number(columns = c(accident, arson, burning_off, lightning, Accuracy),
-             decimals = 4) %>%
+             decimals = 4) |>
   fmt_number(columns = Gini,
              decimals = 2)
 ```
@@ -726,22 +729,22 @@ sketches_rf$importance
 # Difference PCs are more important for some classes
 # Create new binary classes to explore.
 
-sketches_rf_votes <- sketches_rf$votes %>%
-  as_tibble() %>%
+sketches_rf_votes <- sketches_rf$votes |>
+  as_tibble() |>
   mutate(word = sketches_train$word)
 
 proj <- t(geozoo::f_helmert(6)[-1,])
 s_rf_v_p <- as.matrix(sketches_rf_votes[,1:6]) %*% proj
 colnames(s_rf_v_p) <- c("x1", "x2", "x3", "x4", "x5")
-s_rf_v_p <- s_rf_v_p %>%
-  as.data.frame() %>%
+s_rf_v_p <- s_rf_v_p |>
+  as.data.frame() |>
   mutate(word = sketches_train$word)
 
 simp <- geozoo::simplex(p=5)
 sp <- data.frame(simp$points)
 colnames(sp) <- c("x1", "x2", "x3", "x4", "x5")
 sp$word = ""
-s_rf_v_p_s <- bind_rows(sp, s_rf_v_p) %>%
+s_rf_v_p_s <- bind_rows(sp, s_rf_v_p) |>
   mutate(word = factor(word))
 labels <- c("banana" , "boomerang", 
                 "cactus", "crab", "flip flops", "kangaroo",
