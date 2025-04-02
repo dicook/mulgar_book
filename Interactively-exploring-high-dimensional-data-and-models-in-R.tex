@@ -7648,6 +7648,7 @@ dimensions can help to refine an automated rule.
 
 \index{data!simple clusters} \index{data!clusters}
 \index{data!multicluster} \index{data!sketches} \index{data!bushfires}
+\index{data!aflw} \index{data!music} \index{software!uwot}
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -7772,6 +7773,18 @@ You can use this code to subset the data:
 \end{Highlighting}
 \end{Shaded}
 
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{11}
+\tightlist
+\item
+  Starting with the projection created from the discriminant space of
+  the LDA on the \texttt{aflw} data, use a radial tour to explore the
+  contributions of the variables that contribute the least. The purpose
+  is to determine whether a simpler projection can be used that
+  distinguishes the player types equally well.
+\end{enumerate}
+
 \chapter{Trees and forests}\label{sec-trees-forests}
 
 \section{Trees}\label{sec-trees}
@@ -7808,6 +7821,12 @@ between the variables within each species, which indicates that the tree
 model may not give good results for the penguins data. We'll show how
 this is the case with two variables initially, and then extend to the
 four variables.
+
+\index{software!mulgar} \index{software!rpart}
+\index{software!rpart.plot} \index{software!colorspace}
+\index{software!classifly} \index{software!ggplot2}
+\index{software!ggdendro} \index{software!patchwork}
+\index{software!ggthemes}
 
 \begin{figure}
 
@@ -7857,7 +7876,9 @@ the elliptically-shaped clusters. Overlaying the observed data on this
 display would make this clearer, but the boundaries are easier to
 examine without them.
 
-\index{tour!slice}
+\index{software!tourr}
+
+\index{tour!slice} \index{classification!boundaries}
 
 \begin{figure}
 
@@ -7925,6 +7946,8 @@ four or more classes the votes matrix needs to be examined in a tour.
 \index{classification!vote matrix}
 \index{classification!predictive probability distribution}
 
+\index{software!randomForest} \index{software!dplyr}
+
 \begin{Shaded}
 \begin{Highlighting}[]
 \FunctionTok{library}\NormalTok{(randomForest)}
@@ -7946,11 +7969,11 @@ the random forest model object. The first five rows are:
 
 \begin{verbatim}
   Adelie Chinstrap Gentoo
-1 0.9885  0.011494      0
-2 0.9515  0.048485      0
-3 0.9945  0.005495      0
-4 0.9945  0.005525      0
-5 0.9786  0.021390      0
+1 0.9838  0.016216      0
+2 0.9643  0.035714      0
+3 0.9943  0.005714      0
+4 1.0000  0.000000      0
+5 1.0000  0.000000      0
 \end{verbatim}
 
 This has three columns corresponding to the three species, but because
@@ -7983,6 +8006,8 @@ x       0.4082  0.4082 -0.8165
 
 We drop the first row, transpose it, and use matrix multiplication with
 the votes matrix to get the ternary diagram.
+
+\index{software!geozoo}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -8084,6 +8109,8 @@ Given that the branches correspond to the classes, it will be
 interesting to see how well the random forest model performs.
 \index{data!fake trees}
 
+\index{software!liminal}
+
 \begin{Shaded}
 \begin{Highlighting}[]
 \FunctionTok{library}\NormalTok{(mulgar)}
@@ -8106,12 +8133,12 @@ interesting to see how well the random forest model performs.
 \end{Shaded}
 
 \begin{verbatim}
-    0 1     2    3     4    5 6 7     8    9
-1 0.9 0 0.006 0.00 0.017 0.07 0 0 0.006 0.00
-2 0.6 0 0.017 0.00 0.017 0.36 0 0 0.000 0.00
-3 0.8 0 0.037 0.01 0.123 0.00 0 0 0.000 0.03
-4 0.9 0 0.006 0.00 0.006 0.12 0 0 0.000 0.00
-5 0.6 0 0.048 0.02 0.032 0.27 0 0 0.016 0.00
+    0     1    2    3    4    5 6 7 8    9
+1 0.9 0.000 0.03 0.00 0.00 0.07 0 0 0 0.00
+2 0.6 0.000 0.02 0.00 0.02 0.34 0 0 0 0.00
+3 0.8 0.000 0.04 0.00 0.10 0.01 0 0 0 0.03
+4 0.9 0.000 0.02 0.00 0.01 0.09 0 0 0 0.00
+5 0.6 0.006 0.06 0.01 0.01 0.30 0 0 0 0.00
 \end{verbatim}
 
 \begin{figure}
@@ -8177,6 +8204,8 @@ differences. This is particularly so when there are many variables, as
 in the fake\_trees data. We would also expect that this data will have a
 difference between importance for some classes.
 
+\index{software!gt}
+
 \begin{longtable}{lrrrrrrrrrrrr}
 
 \caption{\label{tbl-ft-importance}Variable importance from the random
@@ -8188,15 +8217,15 @@ the accuracy and Gini metrics.}
 \toprule
 Var & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & Acc & Gini \\ 
 \midrule\addlinespace[2.5pt]
-PC1 & $0.1$ & $0.3$ & $0.5$ & $0.3$ & $0.2$ & $0.5$ & $0.4$ & $0.2$ & $0.3$ & $0.3$ & $0.31$ & $487$ \\ 
-PC2 & $0.1$ & $0.2$ & $0.2$ & $0.5$ & $0.3$ & $0.3$ & $0.2$ & $0.4$ & $0.2$ & $0.3$ & $0.28$ & $367$ \\ 
-PC3 & $0.1$ & $0.1$ & $0.1$ & $0.1$ & $0.5$ & $0.1$ & $0.1$ & $0.1$ & $0.2$ & $0.2$ & $0.16$ & $306$ \\ 
-PC4 & $0.1$ & $0.5$ & $0.1$ & $0.0$ & $0.1$ & $0.0$ & $0.4$ & $0.2$ & $0.1$ & $0.1$ & $0.14$ & $335$ \\ 
-PC5 & $0.1$ & $0.1$ & $0.3$ & $0.1$ & $0.2$ & $0.2$ & $0.1$ & $0.1$ & $0.3$ & $0.2$ & $0.18$ & $338$ \\ 
-PC6 & $0.1$ & $0.2$ & $0.3$ & $0.2$ & $0.0$ & $0.1$ & $0.0$ & $0.3$ & $0.1$ & $0.2$ & $0.16$ & $286$ \\ 
-PC7 & $0.1$ & $0.0$ & $0.1$ & $0.0$ & $0.1$ & $0.1$ & $0.1$ & $0.3$ & $0.1$ & $0.2$ & $0.11$ & $263$ \\ 
-PC8 & $0.0$ & $0.1$ & $0.0$ & $0.2$ & $0.1$ & $0.1$ & $0.0$ & $0.0$ & $0.1$ & $0.3$ & $0.09$ & $216$ \\ 
-PC9 & $0.1$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.1$ & $0.0$ & $0.02$ & $57$ \\ 
+PC1 & $0.1$ & $0.4$ & $0.5$ & $0.3$ & $0.2$ & $0.5$ & $0.4$ & $0.2$ & $0.3$ & $0.3$ & $0.31$ & $484$ \\ 
+PC2 & $0.1$ & $0.2$ & $0.2$ & $0.5$ & $0.3$ & $0.3$ & $0.2$ & $0.4$ & $0.3$ & $0.3$ & $0.29$ & $388$ \\ 
+PC3 & $0.1$ & $0.1$ & $0.1$ & $0.1$ & $0.5$ & $0.1$ & $0.1$ & $0.1$ & $0.2$ & $0.2$ & $0.16$ & $312$ \\ 
+PC4 & $0.1$ & $0.5$ & $0.1$ & $0.0$ & $0.1$ & $0.0$ & $0.4$ & $0.2$ & $0.1$ & $0.1$ & $0.15$ & $342$ \\ 
+PC5 & $0.1$ & $0.1$ & $0.3$ & $0.1$ & $0.2$ & $0.2$ & $0.1$ & $0.1$ & $0.3$ & $0.2$ & $0.17$ & $320$ \\ 
+PC6 & $0.1$ & $0.2$ & $0.2$ & $0.2$ & $0.0$ & $0.1$ & $0.0$ & $0.3$ & $0.1$ & $0.2$ & $0.16$ & $289$ \\ 
+PC7 & $0.1$ & $0.0$ & $0.1$ & $0.0$ & $0.0$ & $0.1$ & $0.1$ & $0.3$ & $0.1$ & $0.2$ & $0.11$ & $242$ \\ 
+PC8 & $0.1$ & $0.1$ & $0.0$ & $0.2$ & $0.1$ & $0.1$ & $0.0$ & $0.0$ & $0.1$ & $0.3$ & $0.10$ & $220$ \\ 
+PC9 & $0.1$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.1$ & $0.0$ & $0.02$ & $61$ \\ 
 PC10 & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.01$ & $43$ \\ 
 \bottomrule
 
@@ -8277,16 +8306,16 @@ not each other.
 
 \begin{verbatim}
     0   1   2   3   4   5   6   7   8   9 class.error
-0 266   4   2   2   3   5   4   3   8   3       0.113
+0 263   5   2   2   4   4   6   4   7   3       0.123
 1  12 288   0   0   0   0   0   0   0   0       0.040
-2   8   0 291   0   1   0   0   0   0   0       0.030
-3   5   0   0 290   0   0   0   3   0   2       0.033
+2   8   0 289   0   3   0   0   0   0   0       0.037
+3   7   0   0 288   0   0   0   4   0   1       0.040
 4  13   0   0   0 287   0   0   0   0   0       0.043
-5  12   0   0   0   0 288   0   0   0   0       0.040
+5  11   0   0   0   0 289   0   0   0   0       0.037
 6  12   0   0   0   0   0 287   0   1   0       0.043
-7   4   0   0   5   0   0   0 289   0   2       0.037
-8   8   0   0   0   0   0   0   0 292   0       0.027
-9   5   0   0   0   0   0   0   1   0 294       0.020
+7   6   0   0   4   0   0   0 290   0   0       0.033
+8   7   0   0   0   0   0   0   0 293   0       0.023
+9   5   0   0   0   0   0   0   0   0 295       0.017
 \end{verbatim}
 
 From the tour in Figure~\ref{fig-ft-cl2} we can see that clusters 1, 6,
@@ -8317,6 +8346,9 @@ relative to 6, 1 and 0 is largely due to PC5 (right).}
 \addcontentsline{toc}{section}{Exercises}
 
 \markright{Exercises}
+
+\index{data!bushfires} \index{data!aflw} \index{data!music}
+\index{data!penguins} \index{data!sketches} \index{data!fake trees}
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -8430,6 +8462,8 @@ You can use this code to subset the data:
 \end{enumerate}
 
 The \texttt{music} data can be read using:
+
+\index{software!readr}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -9736,7 +9770,7 @@ other two penguin species. \index{classification!misclassification}
 
 \begin{verbatim}
           Adelie Chinstrap Gentoo class.error
-Adelie       143         2      1 0.020547945
+Adelie       142         4      0 0.027397260
 Chinstrap      4        64      0 0.058823529
 Gentoo         0         1    118 0.008403361
 \end{verbatim}
@@ -9965,6 +9999,7 @@ prediction, the radial tour to examine the influence of single variables
 on the projection can be useful.
 
 \index{classification!local explanations} \index{classification!XAI}
+\index{classification!boundaries}
 
 For illustration, we choose local explanations produced by Shapley
 values. These are computed using the \texttt{kernelshap} function in the

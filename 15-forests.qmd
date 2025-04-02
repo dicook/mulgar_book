@@ -9,6 +9,16 @@ tailored to the sample.  When applying tree methods, exploring the effects of th
 Although algorithmic models do not depend on distributional assumptions, that does not mean that every algorithm is suitable for all data.  For example, the tree model works best when all variables are independent within each class, because it does not take such dependencies into account.  Visualization can help us to determine whether a particular model should be applied.  In classification problems, it is useful to explore the cluster structure, comparing the clusters with the classes and looking for evidence of correlation within each class. 
 The plots in @fig-lda-assumptions1 and `r ifelse(knitr::is_html_output(), '@fig-penguins-lda-ellipses-html', '@fig-penguins-lda-ellipses-pdf')` shows a strong correlation between the variables within each species, which indicates that the tree model may not give good results for the penguins data. We'll show how this is the case with two variables initially, and then extend to the four variables.
 
+\index{software!mulgar}
+\index{software!rpart}
+\index{software!rpart.plot}
+\index{software!colorspace}
+\index{software!classifly}
+\index{software!ggplot2}
+\index{software!ggdendro}
+\index{software!patchwork}
+\index{software!ggthemes}
+
 ```{r echo=knitr::is_html_output()}
 #| message: false
 #| label: fig-p-bl-bd-tree
@@ -75,9 +85,12 @@ The boundaries for the tree model on all four variables of the penguins data can
 
 The prediction regions of the default fitted tree are shown in comparison to those from the LDA model. We don't show the tree diagram here, but it makes only six splits of the tree model, which is delightfully simple. However, just like the model fitted to two variables, the result is not adequate for the penguins data. The tree model generates boxy boundaries, whereas the LDA model splits the 4D cube obliquely. The boxy regions don't capture the differences between the elliptically-shaped clusters. Overlaying the observed data on this display would make this clearer, but the boundaries are easier to examine without them.
 
+\index{software!tourr}
+
 ```{r echo=knitr::is_html_output()}
 #| eval: false
 #| code-summary: "Code to make animated gifs of slice tour of boundaries"
+library(tourr)
 p_tree <- rpart(species~., data=penguins_sub[,1:5])
 rpart.plot(p_tree, box.palette="Grays")
 
@@ -95,6 +108,7 @@ render_gif(p_tree_boundaries[p_tree_boundaries$.TYPE == "simulated",1:4],
 ```
 
 \index{tour!slice} 
+\index{classification!boundaries} 
 
 ::: {.content-visible when-format="html"}
 
@@ -146,7 +160,8 @@ Here we show how to use the `randomForest` [@randomForest2002] votes matrix for 
 \index{classification!vote matrix}
 \index{classification!predictive probability distribution}
 
-
+\index{software!randomForest}
+\index{software!dplyr}
 
 ```{r}
 #| message: false
@@ -183,6 +198,8 @@ geozoo::f_helmert(3)
 ``` 
 
 We drop the first row, transpose it, and use matrix multiplication with the votes matrix to get the ternary diagram.
+
+\index{software!geozoo}
 
 ```{r}
 #| message: false
@@ -289,6 +306,8 @@ By visualising the votes matrix we can understand which observations are harder 
 
 To examine a vote matrix for a problem with more classes, we will examine the 10 class `fake_trees` data example. The full data has 100 variables, and we have seen from @sec-clust-graphics that reducing to 10 principal components allows the linear branching structure in the data to be seen. Given that the branches correspond to the classes, it will be interesting to see how well the random forest model performs.
 \index{data!fake trees}
+
+\index{software!liminal}
 
 ```{r}
 #| code-fold: false
@@ -401,6 +420,7 @@ The votes matrix for the fake trees has a striking geometric structure, with one
 
 The variable importance score across all classes, and for each class is useful for choosing variables to enter into a tour, to explore class differences. This is particularly so when there are many variables, as in the fake_trees data. We would also expect that this data will have a difference between importance for some classes.
 
+\index{software!gt}
 
 ```{r echo=knitr::is_html_output()}
 #| code-fold: false
@@ -596,6 +616,13 @@ Although the confusion matrix suggests that class clusters are separated except 
 
 ## Exercises {-}
 
+\index{data!bushfires}
+\index{data!aflw}
+\index{data!music}
+\index{data!penguins}
+\index{data!sketches}
+\index{data!fake trees}
+
 1. Using a grand tour compare the boundaries from the random forest model on the `penguins` data to that of (a) a default tree model, (b) an LDA model. Is it less boxy than the tree model, but still more boxy than that of the LDA model?
 2. Tinker with the parameters of the tree model to force it to fit a tree more closely to the data. Compare the boundaries from this with the default tree, and with the forest model. Is it less boxy than the default tree, but more boxy than the forest model?
 3. Fit a random forest model to the `bushfires` data using the `cause` variable as the class. It is a highly imbalanced classification problem. What is the out-of-bag error rate for the forest? Are there some classes that have lower error rate than others? Examine the 4D votes matrix with a tour, and describe the confusion between classes. This is interesting because it is difficult to accurately classify the fire ignition cause, and only some groups are often confused with each other. You should be able to see this from the 3D votes matrix. 
@@ -637,6 +664,8 @@ aflw_sub <- aflw |>
 7. There are several interesting data sets with class variables available on the [GGobi website](http://ggobi.org/book/index.html). Examine the differences between `type` of music, based on the the variables `lvar`, `lave`, `lmax`, `lfener`, `lfreq`. Fit a random forest model using `type` as the variable. (It is best to remove the "New wave" class because there are too few observations.) Using the variable importance values, make plots of the top two variables, and then tour on the top three variables. Is two or three variables suffficient to distinguish between classical and rock music types?
 
 The `music` data can be read using:
+
+\index{software!readr}
 
 ```{r}
 #| echo: true
