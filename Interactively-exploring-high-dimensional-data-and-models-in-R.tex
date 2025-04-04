@@ -294,7 +294,7 @@
 
 \title{Interactively exploring high-dimensional data and models in R}
 \author{Dianne Cook and Ursula Laa}
-\date{2025-04-02}
+\date{2025-04-04}
 
 \begin{document}
 \maketitle
@@ -7058,45 +7058,7 @@ Figure~\ref{fig-p-lda}).
 \index{software!colorspace} \index{software!ggplot2}
 \index{software!dplyr} \index{software!ggpubr}
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\# Check calculations from the fitted model, and equations}
-\FunctionTok{library}\NormalTok{(colorspace)}
-\FunctionTok{library}\NormalTok{(ggplot2)}
-\FunctionTok{library}\NormalTok{(dplyr)}
-\FunctionTok{library}\NormalTok{(ggpubr)}
-\CommentTok{\# Using the predicted values from the model object}
-\NormalTok{p\_lda\_pred\_x1 }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(p\_lda\_pred}\SpecialCharTok{$}\NormalTok{x)}
-\NormalTok{p\_lda\_pred\_x1}\SpecialCharTok{$}\NormalTok{species }\OtherTok{\textless{}{-}}\NormalTok{ penguins\_sub}\SpecialCharTok{$}\NormalTok{species}
-\NormalTok{p\_lda1 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(p\_lda\_pred\_x1, }
-                 \FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{LD1, }\AttributeTok{y=}\NormalTok{LD2, }
-                     \AttributeTok{colour=}\NormalTok{species)) }\SpecialCharTok{+} 
-  \FunctionTok{geom\_point}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{xlim}\NormalTok{(}\SpecialCharTok{{-}}\DecValTok{6}\NormalTok{, }\DecValTok{8}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{ylim}\NormalTok{(}\SpecialCharTok{{-}}\FloatTok{6.5}\NormalTok{, }\FloatTok{5.5}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{scale\_color\_discrete\_divergingx}\NormalTok{(}\StringTok{"Zissou 1"}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{ggtitle}\NormalTok{(}\StringTok{"(a)"}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{theme}\NormalTok{(}\AttributeTok{aspect.ratio =} \DecValTok{1}\NormalTok{, }\AttributeTok{legend.title =} \FunctionTok{element\_blank}\NormalTok{()) }
-
-\CommentTok{\# matches the calculations done manually}
-\NormalTok{p\_lda\_pred\_x2 }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\FunctionTok{as.matrix}\NormalTok{(penguins\_sub[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{]) }\SpecialCharTok{\%*\%}
-\NormalTok{                              p\_lda}\SpecialCharTok{$}\NormalTok{scaling)}
-\NormalTok{p\_lda\_pred\_x2}\SpecialCharTok{$}\NormalTok{species }\OtherTok{\textless{}{-}}\NormalTok{ penguins\_sub}\SpecialCharTok{$}\NormalTok{species}
-\NormalTok{p\_lda2 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(p\_lda\_pred\_x2, }
-                 \FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{LD1, }\AttributeTok{y=}\NormalTok{LD2, }
-                     \AttributeTok{colour=}\NormalTok{species)) }\SpecialCharTok{+} 
-  \FunctionTok{geom\_point}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{xlim}\NormalTok{(}\SpecialCharTok{{-}}\DecValTok{6}\NormalTok{, }\DecValTok{8}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{ylim}\NormalTok{(}\SpecialCharTok{{-}}\DecValTok{7}\NormalTok{, }\FloatTok{5.5}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{scale\_color\_discrete\_divergingx}\NormalTok{(}\StringTok{"Zissou 1"}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{ggtitle}\NormalTok{(}\StringTok{"(b)"}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{theme}\NormalTok{(}\AttributeTok{aspect.ratio =} \DecValTok{1}\NormalTok{, }\AttributeTok{legend.title =} \FunctionTok{element\_blank}\NormalTok{()) }
-\FunctionTok{ggarrange}\NormalTok{(p\_lda1, p\_lda2, }\AttributeTok{ncol=}\DecValTok{2}\NormalTok{, }
-          \AttributeTok{common.legend =} \ConstantTok{TRUE}\NormalTok{, }\AttributeTok{legend =} \StringTok{"bottom"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{figure}[H]
+\begin{figure}
 
 \centering{
 
@@ -9010,16 +8972,16 @@ will also be sufficient. The model specification is as follows:
 
 \CommentTok{\# Define model}
 \NormalTok{p\_nn\_model }\OtherTok{\textless{}{-}} \FunctionTok{keras\_model\_sequential}\NormalTok{()}
-\NormalTok{p\_nn\_model }\SpecialCharTok{\%\textgreater{}\%} 
+\NormalTok{p\_nn\_model }\SpecialCharTok{|\textgreater{}} 
   \FunctionTok{layer\_dense}\NormalTok{(}\AttributeTok{units =} \DecValTok{2}\NormalTok{, }\AttributeTok{activation =} \StringTok{\textquotesingle{}relu\textquotesingle{}}\NormalTok{, }
-              \AttributeTok{input\_shape =} \DecValTok{4}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} 
+              \AttributeTok{input\_shape =} \DecValTok{4}\NormalTok{) }\SpecialCharTok{|\textgreater{}} 
   \FunctionTok{layer\_dense}\NormalTok{(}\AttributeTok{units =} \DecValTok{3}\NormalTok{, }\AttributeTok{activation =} \StringTok{\textquotesingle{}softmax\textquotesingle{}}\NormalTok{)}
-\NormalTok{p\_nn\_model }\SpecialCharTok{\%\textgreater{}\%}\NormalTok{ summary}
+\NormalTok{p\_nn\_model }\SpecialCharTok{|\textgreater{}}\NormalTok{ summary}
 
 \NormalTok{loss\_fn }\OtherTok{\textless{}{-}} \FunctionTok{loss\_sparse\_categorical\_crossentropy}\NormalTok{(}
   \AttributeTok{from\_logits =} \ConstantTok{TRUE}\NormalTok{)}
 
-\NormalTok{p\_nn\_model }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{compile}\NormalTok{(}
+\NormalTok{p\_nn\_model }\SpecialCharTok{|\textgreater{}} \FunctionTok{compile}\NormalTok{(}
   \AttributeTok{optimizer =} \StringTok{"adam"}\NormalTok{,}
   \AttributeTok{loss      =}\NormalTok{ loss\_fn,}
   \AttributeTok{metrics   =} \FunctionTok{c}\NormalTok{(}\StringTok{\textquotesingle{}accuracy\textquotesingle{}}\NormalTok{)}
@@ -9105,15 +9067,15 @@ specified as a \texttt{numeric} variable, beginning with 0.
 \begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{\# Data needs to be matrix, and response needs to be numeric}
-\NormalTok{p\_train\_x }\OtherTok{\textless{}{-}}\NormalTok{ p\_train }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{select}\NormalTok{(bl}\SpecialCharTok{:}\NormalTok{bm) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{p\_train\_x }\OtherTok{\textless{}{-}}\NormalTok{ p\_train }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{select}\NormalTok{(bl}\SpecialCharTok{:}\NormalTok{bm) }\SpecialCharTok{|\textgreater{}}
   \FunctionTok{as.matrix}\NormalTok{()}
-\NormalTok{p\_train\_y }\OtherTok{\textless{}{-}}\NormalTok{ p\_train }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{pull}\NormalTok{(species) }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{as.numeric}\NormalTok{() }
+\NormalTok{p\_train\_y }\OtherTok{\textless{}{-}}\NormalTok{ p\_train }\SpecialCharTok{|\textgreater{}} \FunctionTok{pull}\NormalTok{(species) }\SpecialCharTok{|\textgreater{}} \FunctionTok{as.numeric}\NormalTok{() }
 \NormalTok{p\_train\_y }\OtherTok{\textless{}{-}}\NormalTok{ p\_train\_y}\DecValTok{{-}1} \CommentTok{\# Needs to be 0, 1, 2}
-\NormalTok{p\_test\_x }\OtherTok{\textless{}{-}}\NormalTok{ p\_test }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{select}\NormalTok{(bl}\SpecialCharTok{:}\NormalTok{bm) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{p\_test\_x }\OtherTok{\textless{}{-}}\NormalTok{ p\_test }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{select}\NormalTok{(bl}\SpecialCharTok{:}\NormalTok{bm) }\SpecialCharTok{|\textgreater{}}
   \FunctionTok{as.matrix}\NormalTok{()}
-\NormalTok{p\_test\_y }\OtherTok{\textless{}{-}}\NormalTok{ p\_test }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{pull}\NormalTok{(species) }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{as.numeric}\NormalTok{() }
+\NormalTok{p\_test\_y }\OtherTok{\textless{}{-}}\NormalTok{ p\_test }\SpecialCharTok{|\textgreater{}} \FunctionTok{pull}\NormalTok{(species) }\SpecialCharTok{|\textgreater{}} \FunctionTok{as.numeric}\NormalTok{() }
 \NormalTok{p\_test\_y }\OtherTok{\textless{}{-}}\NormalTok{ p\_test\_y}\DecValTok{{-}1} \CommentTok{\# Needs to be 0, 1, 2}
 \end{Highlighting}
 \end{Shaded}
@@ -9139,7 +9101,7 @@ ______________________________________________________________
 \begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{\# Fit model}
-\NormalTok{p\_nn\_fit }\OtherTok{\textless{}{-}}\NormalTok{ p\_nn\_model }\SpecialCharTok{\%\textgreater{}\%}\NormalTok{ keras}\SpecialCharTok{::}\FunctionTok{fit}\NormalTok{(}
+\NormalTok{p\_nn\_fit }\OtherTok{\textless{}{-}}\NormalTok{ p\_nn\_model }\SpecialCharTok{|\textgreater{}}\NormalTok{ keras}\SpecialCharTok{::}\FunctionTok{fit}\NormalTok{(}
   \AttributeTok{x =}\NormalTok{ p\_train\_x, }
   \AttributeTok{y =}\NormalTok{ p\_train\_y,}
   \AttributeTok{epochs =} \DecValTok{200}\NormalTok{,}
@@ -9169,7 +9131,7 @@ here, because they are generally not very interesting.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{p\_nn\_model }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{evaluate}\NormalTok{(p\_test\_x, p\_test\_y, }\AttributeTok{verbose =} \DecValTok{0}\NormalTok{)}
+\NormalTok{p\_nn\_model }\SpecialCharTok{|\textgreater{}} \FunctionTok{evaluate}\NormalTok{(p\_test\_x, p\_test\_y, }\AttributeTok{verbose =} \DecValTok{0}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -9260,23 +9222,6 @@ this matrix before computing the data projection.
 [4,] -0.7978314  0.5431528
 \end{verbatim}
 
-\begin{figure}
-
-\centering{
-
-\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{17-nn_files/figure-pdf/fig-hidden-layer-1.pdf}
-
-}
-
-\caption{\label{fig-hidden-layer}Plot of the data in the linear
-combinations from the two nodes in the hidden layer. The three species
-are clearly different, although with some overlap between all three. A
-main issue to notice is that there isn't a big gap between Gentoo and
-the other species, which we know is there based on our data exploration
-done in other chapters. This suggests this fitted model is sub-optimal.}
-
-\end{figure}%
-
 Figure~\ref{fig-hidden-layer} shows the data projected into the plane
 determined by the two linear combinations of the two nodes in the hidden
 layer. Training and test sets are indicated by empty and solid circles.
@@ -9300,6 +9245,27 @@ good illustration of this in 2D. The process of examining each of the
 node models can be useful for understanding this non-linear separation,
 also in high dimensions.
 
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=0.6\linewidth,height=\textheight,keepaspectratio]{17-nn_files/figure-pdf/fig-hidden-layer-1.pdf}
+
+}
+
+\caption{\label{fig-hidden-layer}Plot of the data in the linear
+combinations from the two nodes in the hidden layer. The three species
+are clearly different, although with some overlap between all three. A
+main issue to notice is that there isn't a big gap between Gentoo and
+the other species, which we know exists in 4D based on our data
+exploration done in other chapters. This suggests that this fitted model
+is sub-optimal.}
+
+\end{figure}%
+
+\insightbox{This particular fit is not good, based on what we know about the data. There should be a fit where a two node hidden layer produces a 2D representation where the difference between classes is clearer.
+}
+
 \section{Examining predictive probabilities}\label{sec-nn-pred-prob}
 
 \index{classification!predictive probabilities}
@@ -9313,7 +9279,7 @@ for the votes matrix from a random forest in Section~\ref{sec-votes}.
 \begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{\# Predict training and test set}
-\NormalTok{p\_train\_pred }\OtherTok{\textless{}{-}}\NormalTok{ p\_nn\_model }\SpecialCharTok{\%\textgreater{}\%} 
+\NormalTok{p\_train\_pred }\OtherTok{\textless{}{-}}\NormalTok{ p\_nn\_model }\SpecialCharTok{|\textgreater{}} 
   \FunctionTok{predict}\NormalTok{(p\_train\_x, }\AttributeTok{verbose =} \DecValTok{0}\NormalTok{)}
 \NormalTok{p\_train\_pred\_cat }\OtherTok{\textless{}{-}} \FunctionTok{levels}\NormalTok{(p\_train}\SpecialCharTok{$}\NormalTok{species)[}
   \FunctionTok{apply}\NormalTok{(p\_train\_pred, }\DecValTok{1}\NormalTok{,}
@@ -9335,7 +9301,7 @@ for the votes matrix from a random forest in Section~\ref{sec-votes}.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{p\_test\_pred }\OtherTok{\textless{}{-}}\NormalTok{ p\_nn\_model }\SpecialCharTok{\%\textgreater{}\%} 
+\NormalTok{p\_test\_pred }\OtherTok{\textless{}{-}}\NormalTok{ p\_nn\_model }\SpecialCharTok{|\textgreater{}} 
   \FunctionTok{predict}\NormalTok{(p\_test\_x, }\AttributeTok{verbose =} \DecValTok{0}\NormalTok{)}
 \NormalTok{p\_test\_pred\_cat }\OtherTok{\textless{}{-}} \FunctionTok{levels}\NormalTok{(p\_test}\SpecialCharTok{$}\NormalTok{species)[}
   \FunctionTok{apply}\NormalTok{(p\_test\_pred, }\DecValTok{1}\NormalTok{, }
@@ -9357,7 +9323,7 @@ for the votes matrix from a random forest in Section~\ref{sec-votes}.
 
 \begin{figure}[H]
 
-{\centering \includegraphics[width=0.7\linewidth,height=\textheight,keepaspectratio]{17-nn_files/figure-pdf/unnamed-chunk-18-1.pdf}
+{\centering \includegraphics[width=0.7\linewidth,height=\textheight,keepaspectratio]{17-nn_files/figure-pdf/unnamed-chunk-17-1.pdf}
 
 }
 
@@ -9431,15 +9397,15 @@ need to tune the model or check the validation accuracy.
 \begin{Highlighting}[]
 \CommentTok{\# defining the model}
 \NormalTok{model\_fashion\_mnist }\OtherTok{\textless{}{-}} \FunctionTok{keras\_model\_sequential}\NormalTok{()}
-\NormalTok{model\_fashion\_mnist }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{model\_fashion\_mnist }\SpecialCharTok{|\textgreater{}}
   \CommentTok{\# flatten the image data into a long vector}
-  \FunctionTok{layer\_flatten}\NormalTok{(}\AttributeTok{input\_shape =} \FunctionTok{c}\NormalTok{(}\DecValTok{28}\NormalTok{, }\DecValTok{28}\NormalTok{)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{layer\_flatten}\NormalTok{(}\AttributeTok{input\_shape =} \FunctionTok{c}\NormalTok{(}\DecValTok{28}\NormalTok{, }\DecValTok{28}\NormalTok{)) }\SpecialCharTok{|\textgreater{}}
   \CommentTok{\# hidden layer with 128 units}
-  \FunctionTok{layer\_dense}\NormalTok{(}\AttributeTok{units =} \DecValTok{128}\NormalTok{, }\AttributeTok{activation =} \StringTok{\textquotesingle{}relu\textquotesingle{}}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{layer\_dense}\NormalTok{(}\AttributeTok{units =} \DecValTok{128}\NormalTok{, }\AttributeTok{activation =} \StringTok{\textquotesingle{}relu\textquotesingle{}}\NormalTok{) }\SpecialCharTok{|\textgreater{}}
   \CommentTok{\# output layer for 10 categories}
   \FunctionTok{layer\_dense}\NormalTok{(}\AttributeTok{units =} \DecValTok{10}\NormalTok{, }\AttributeTok{activation =} \StringTok{\textquotesingle{}softmax\textquotesingle{}}\NormalTok{)}
 
-\NormalTok{model\_fashion\_mnist }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{compile}\NormalTok{(}
+\NormalTok{model\_fashion\_mnist }\SpecialCharTok{|\textgreater{}} \FunctionTok{compile}\NormalTok{(}
   \AttributeTok{optimizer =} \StringTok{\textquotesingle{}adam\textquotesingle{}}\NormalTok{,}
   \AttributeTok{loss =} \StringTok{\textquotesingle{}sparse\_categorical\_crossentropy\textquotesingle{}}\NormalTok{,}
   \AttributeTok{metrics =} \FunctionTok{c}\NormalTok{(}\StringTok{\textquotesingle{}accuracy\textquotesingle{}}\NormalTok{)}
@@ -9447,7 +9413,7 @@ need to tune the model or check the validation accuracy.
 
 \CommentTok{\# fitting the model, if we did not know the model yet we}
 \CommentTok{\# would add a validation split to diagnose the training}
-\NormalTok{model\_fashion\_mnist }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{fit}\NormalTok{(train\_images,}
+\NormalTok{model\_fashion\_mnist }\SpecialCharTok{|\textgreater{}} \FunctionTok{fit}\NormalTok{(train\_images,}
 \NormalTok{              train\_labels,}
               \AttributeTok{epochs =} \DecValTok{5}\NormalTok{)}
 \FunctionTok{save\_model\_tf}\NormalTok{(model\_fashion\_mnist, }\StringTok{"data/fashion\_nn"}\NormalTok{)}
@@ -9494,13 +9460,18 @@ here. The comparison is using the test-subset of the data.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{verbatim}
-Warning in get_plot_component(plot, "guide-box"): Multiple
-components found; returning the first one. To return all, use
-`return_all = TRUE`.
-\end{verbatim}
+\begin{figure}[H]
 
-\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{17-nn_files/figure-pdf/unnamed-chunk-22-1.png}
+{\centering \includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{17-nn_files/figure-pdf/unnamed-chunk-21-1.png}
+
+}
+
+\caption{First two PCs of the original data (left) and the activations
+(right). The activation space has done a useful transformation of the
+784 variables into a reduced dimension that reveals class clusters,
+because some cluster differences can be seen well in the first two PCs.}
+
+\end{figure}%
 
 Looking only at the first two principal components we note some clear
 differences from the transformation in the hidden layer. The
@@ -9513,44 +9484,6 @@ while in the input space we could note some overlap in the linear
 projection. To better identify differences between other groups we will
 use the tour on the first five principal components.
 
-\begin{figure}
-
-\begin{minipage}{0.50\linewidth}
-
-\begin{figure}[H]
-
-{\centering \includegraphics[width=2.08333in,height=\textheight,keepaspectratio]{images/fashion_images_gt_36.png}
-
-}
-
-\subcaption{Input space}
-
-\end{figure}%
-
-\end{minipage}%
-%
-\begin{minipage}{0.50\linewidth}
-
-\begin{figure}[H]
-
-{\centering \includegraphics[width=2.08333in,height=\textheight,keepaspectratio]{images/fashion_activation_gt_126.png}
-
-}
-
-\subcaption{Activations}
-
-\end{figure}%
-
-\end{minipage}%
-\newline
-\begin{minipage}{0.50\linewidth}
-Comparison of the test observations in the first five principal
-components of the input space (left) and in the hidden layer activations
-(right). The activation function results in more clearly defined
-grouping of the different classes.\end{minipage}%
-
-\end{figure}%
-
 As with the first two principal components we get a much more spread out
 distribution in the original space. Nevertheless we can see differences
 between the classes, and that some groups are varying along specific
@@ -9562,6 +9495,29 @@ subspace, others vary quite a bit within part of the space. For example
 we can clearly see the ``Bag'' observations as different from all other
 images, but also notice that there is a large variation within this
 class along certain directions.
+
+\begin{figure}
+
+\begin{minipage}{0.50\linewidth}
+
+\includegraphics[width=2.08333in,height=\textheight,keepaspectratio]{images/fashion_images_gt_36.png}
+
+\subcaption{\label{}Input space}
+\end{minipage}%
+%
+\begin{minipage}{0.50\linewidth}
+
+\includegraphics[width=2.08333in,height=\textheight,keepaspectratio]{images/fashion_activation_gt_126.png}
+
+\subcaption{\label{}Activations}
+\end{minipage}%
+
+\caption{\label{fig-fashion-gt-pdf}Comparison of the test observations
+in the first five principal components of the input space (left) and in
+the hidden layer activations (right). The activation function results in
+more clearly defined grouping of the different classes.}
+
+\end{figure}%
 
 Finally we will investigate the model performance through the
 misclassifications and uncertainty between classes. We start with the
@@ -9577,7 +9533,7 @@ the numeric labels, the ordering is as defined above for the labels.
 \NormalTok{        which.max)]}
 \NormalTok{predicted }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(}
 \NormalTok{  fashion\_test\_pred\_cat,}
-  \AttributeTok{levels=}\FunctionTok{levels}\NormalTok{(test\_tags)) }\SpecialCharTok{\%\textgreater{}\%}
+  \AttributeTok{levels=}\FunctionTok{levels}\NormalTok{(test\_tags)) }\SpecialCharTok{|\textgreater{}}
   \FunctionTok{as.numeric}\NormalTok{() }\SpecialCharTok{{-}} \DecValTok{1}
 \NormalTok{observed }\OtherTok{\textless{}{-}} \FunctionTok{as.numeric}\NormalTok{(test\_tags) }\SpecialCharTok{{-}}\DecValTok{1}
 \FunctionTok{table}\NormalTok{(observed, predicted)}
@@ -9611,30 +9567,31 @@ the model is uncertain about.
 \begin{figure}
 
 \begin{minipage}{0.33\linewidth}
-\includegraphics[width=1.35417in,height=\textheight,keepaspectratio]{images/fashion_confustion_gt_36.png}\end{minipage}%
+\includegraphics[width=1.35417in,height=\textheight,keepaspectratio]{images/fashion_confusion_gt_227.png}\end{minipage}%
 %
 \begin{minipage}{0.33\linewidth}
-\includegraphics[width=1.35417in,height=\textheight,keepaspectratio]{images/fashion_confusion_gt_58.png}\end{minipage}%
+\includegraphics[width=1.35417in,height=\textheight,keepaspectratio]{images/fashion_confusion_gt_258.png}\end{minipage}%
 %
 \begin{minipage}{0.33\linewidth}
-\includegraphics[width=1.35417in,height=\textheight,keepaspectratio]{images/fashion_confusion_gt_69.png}\end{minipage}%
+\includegraphics[width=1.35417in,height=\textheight,keepaspectratio]{images/fashion_confusion_gt_275.png}\end{minipage}%
 \newline
 \begin{minipage}{0.33\linewidth}
-\includegraphics[width=1.35417in,height=\textheight,keepaspectratio]{images/fashion_confusion_gt_161.png}\end{minipage}%
+\includegraphics[width=1.35417in,height=\textheight,keepaspectratio]{images/fashion_confusion_gt_342.png}\end{minipage}%
 %
 \begin{minipage}{0.33\linewidth}
-\includegraphics[width=1.35417in,height=\textheight,keepaspectratio]{images/fashion_confusion_gt_212.png}\end{minipage}%
+\includegraphics[width=1.35417in,height=\textheight,keepaspectratio]{images/fashion_confusion_gt_405.png}\end{minipage}%
 %
 \begin{minipage}{0.33\linewidth}
-\includegraphics[width=1.35417in,height=\textheight,keepaspectratio]{images/fashion_confusion_gt_333.png}\end{minipage}%
+\includegraphics[width=1.35417in,height=\textheight,keepaspectratio]{images/fashion_confusion_gt_433.png}\end{minipage}%
 
-\caption{\label{fig-fashion-confusion-split-pdf}A tour of the confusion
-matrix for the fashion MNIST test observations, focusing on a subset of
-items. Often observations get confused between two of the classes, this
-appears as points falling along one of the edges, for example some
-Shirts look more like T-shirts/tops, while others get confused with
-Coats. We can also notice that a subset of three other classes not
-mapped to colors as very separate from this group.}
+\caption{\label{fig-fashion-confusion-split-pdf}Selected projections
+from a tour of the votes matrix for the fashion MNIST test observations,
+focusing on a subset of items. Often observations get confused between
+two of the classes, this appears as points falling along one of the
+edges, for example some Shirts look more like T-shirts/tops, while
+others get confused with Coats. We can also notice that a subset of
+three other classes not mapped to colors as very separate from this
+group.}
 
 \end{figure}%
 
@@ -9653,6 +9610,9 @@ investigate which part of the image is important for a prediction, and
 this can be visualized as a heat map placed over the original image.
 This is especially interesting in the case of difficult or misclassified
 images. This however is beyond the scope of this book.
+
+\insightbox{There are subsets of misclassification. T-shirt/top, Shirt, Pullover, Coat, Dress are mutually confused. Sandals are more often considered to be sneakers. And also where there is confusion the votes take on full range, slightly confused to completely confused.
+}
 
 \section*{Exercises}\label{exercises-16}
 \addcontentsline{toc}{section}{Exercises}
