@@ -9,15 +9,10 @@ tailored to the sample.  When applying tree methods, exploring the effects of th
 Although algorithmic models do not depend on distributional assumptions, that does not mean that every algorithm is suitable for all data.  For example, the tree model works best when all variables are independent within each class, because it does not take such dependencies into account.  Visualization can help us to determine whether a particular model should be applied.  In classification problems, it is useful to explore the cluster structure, comparing the clusters with the classes and looking for evidence of correlation within each class. 
 The plots in @fig-lda-assumptions1 and `r ifelse(knitr::is_html_output(), '@fig-penguins-lda-ellipses-html', '@fig-penguins-lda-ellipses-pdf')` shows a strong correlation between the variables within each species, which indicates that the tree model may not give good results for the penguins data. We'll show how this is the case with two variables initially, and then extend to the four variables.
 
-\index{software!mulgar}
 \index{software!rpart}
 \index{software!rpart.plot}
-\index{software!colorspace}
 \index{software!classifly}
-\index{software!ggplot2}
 \index{software!ggdendro}
-\index{software!patchwork}
-\index{software!ggthemes}
 
 ```{r echo=knitr::is_html_output()}
 #| message: false
@@ -84,8 +79,6 @@ There are less strict assumptions for a non-parametric model but it is still imp
 The boundaries for the tree model on all four variables of the penguins data can be viewed similarly, by predicting a set of points randomly generated in the 4D domain of observed values. `r ifelse(knitr::is_html_output(), '@fig-penguins-lda-tree-html', '@fig-penguins-lda-tree-pdf')` shows the prediction regions for LDA and a default tree in a slice tour [@slicetour]. The slice tour is used to help see into the middle of the 4D cube. It slices the cube through the centre of the data, where the boundaries of the regions should meet. 
 
 The prediction regions of the default fitted tree are shown in comparison to those from the LDA model. We don't show the tree diagram here, but it makes only six splits of the tree model, which is delightfully simple. However, just like the model fitted to two variables, the result is not adequate for the penguins data. The tree model generates boxy boundaries, whereas the LDA model splits the 4D cube obliquely. The boxy regions don't capture the differences between the elliptically-shaped clusters. Overlaying the observed data on this display would make this clearer, but the boundaries are easier to examine without them.
-
-\index{software!tourr}
 
 ```{r echo=knitr::is_html_output()}
 #| eval: false
@@ -158,10 +151,9 @@ A random forest is a computationally intensive method, a "black box" classifier,
 
 Here we show how to use the `randomForest` [@randomForest2002] votes matrix for the penguins data to investigate confusion between classes, and observations which are problematic to classify. The votes matrix can be considered to be predictive probability distribution, where the values for each observation sum to 1. With only three classes the votes matrix is only a 2D object, and thus easy to examine. With four or more classes the votes matrix needs to be examined in a tour. 
 \index{classification!vote matrix}
-\index{classification!predictive probability distribution}
+\index{classification!predictive probabilities}
 
 \index{software!randomForest}
-\index{software!dplyr}
 
 ```{r}
 #| message: false
@@ -420,8 +412,6 @@ The votes matrix for the fake trees has a striking geometric structure, with one
 
 The variable importance score across all classes, and for each class is useful for choosing variables to enter into a tour, to explore class differences. This is particularly so when there are many variables, as in the fake_trees data. We would also expect that this data will have a difference between importance for some classes.
 
-\index{software!gt}
-
 ```{r echo=knitr::is_html_output()}
 #| code-fold: false
 #| label: tbl-ft-importance
@@ -664,8 +654,6 @@ aflw_sub <- aflw |>
 7. There are several interesting data sets with class variables available on the [GGobi website](http://ggobi.org/book/index.html). Examine the differences between `type` of music, based on the the variables `lvar`, `lave`, `lmax`, `lfener`, `lfreq`. Fit a random forest model using `type` as the variable. (It is best to remove the "New wave" class because there are too few observations.) Using the variable importance values, make plots of the top two variables, and then tour on the top three variables. Is two or three variables suffficient to distinguish between classical and rock music types?
 
 The `music` data can be read using:
-
-\index{software!readr}
 
 ```{r}
 #| echo: true

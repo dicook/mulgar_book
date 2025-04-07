@@ -294,7 +294,7 @@
 
 \title{Interactively exploring high-dimensional data and models in R}
 \author{Dianne Cook and Ursula Laa}
-\date{2025-04-04}
+\date{2025-04-07}
 
 \begin{document}
 \maketitle
@@ -1094,6 +1094,8 @@ it back, with the specific intent to learn if the pattern depends on
 this variable's contribution. If the pattern disappears when the
 variable disappears it means that this variable is vital or very
 important for defining the pattern.
+\index{tour!grand}\index{tour!guided}\index{tour!radial}
+\index{tour!manual}
 
 The Appendix~\ref{sec-toolbox} contains details on running tours,
 primarily using the \texttt{tourr} package but other software is listed.
@@ -1347,10 +1349,10 @@ to distinguish whether one is referring to the observation or a
 variable, because \(X_i\) is used to indicate observation. In
 descriptions where it is unclear we will use \(X_{i.}\) to indicate
 observation/row and \(X_{.j}\) to indicate variable/column. Also this
-will usually accompanied by qualifying words such as
+will usually be accompanied by qualifying words such as
 \textbf{observation} or \textbf{variable}.)
 
-\index{data!matrix}
+\index{data matrix}
 
 \infobox{Having notation is helpful for concise explanations of different methods, to explain how data is scaled, processed and projected for various tasks, and how different quantities are calculated from the data. }
 
@@ -1378,7 +1380,7 @@ A_{p1} & A_{p2} & \dots & A_{pd} \end{array} \right]_{p\times d}
 length 1) and \(\sum_{j=1}^p A_{jk}A_{jl}=0, k,l=1, \dots, d; k\neq l\)
 (columns represent vectors that are orthogonal to each other). In matrix
 notation, this can be written as \(A^{\top}A = I_d\).
-\index{data!projection}
+\index{data projection}
 
 Then the projected data is written as:
 
@@ -1460,7 +1462,8 @@ To make the data projection we need an orthonormal matrix:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{A }\OtherTok{\textless{}{-}} \FunctionTok{matrix}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\FloatTok{0.707}\NormalTok{,}\FloatTok{0.707}\NormalTok{,}\DecValTok{0}\NormalTok{,}\DecValTok{0}\NormalTok{,}\DecValTok{0}\NormalTok{,}\DecValTok{0}\NormalTok{,}\FloatTok{0.707}\NormalTok{,}\FloatTok{0.707}\NormalTok{), }\AttributeTok{ncol=}\DecValTok{2}\NormalTok{, }\AttributeTok{byrow=}\ConstantTok{FALSE}\NormalTok{)}
+\NormalTok{A }\OtherTok{\textless{}{-}} \FunctionTok{matrix}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\FloatTok{0.707}\NormalTok{,}\FloatTok{0.707}\NormalTok{,}\DecValTok{0}\NormalTok{,}\DecValTok{0}\NormalTok{,}\DecValTok{0}\NormalTok{,}\DecValTok{0}\NormalTok{,}\FloatTok{0.707}\NormalTok{,}\FloatTok{0.707}\NormalTok{),}
+            \AttributeTok{ncol=}\DecValTok{2}\NormalTok{, }\AttributeTok{byrow=}\ConstantTok{FALSE}\NormalTok{)}
 \NormalTok{A}
 \end{Highlighting}
 \end{Shaded}
@@ -1559,7 +1562,7 @@ the space of all projections. The tour in the \texttt{langevitour}
 different dynamic to choose the tour path, based on jostling particles.
 It doesn't need to do interpolation because changes are incremental.
 
-\index{tour!grand} \index{tour!guided}
+\index{tour!grand} \index{tour!guided} \index{tour!radial}
 
 Because space gets large as dimension increases, the wait for seeing
 interesting structure in projections when using a grand tour can be
@@ -1581,7 +1584,10 @@ W=\sum_{i=1}^g\sum_{j=1}^{n_i}
 (y_{ij}-\bar{y}_{i.})(y_{ij}-\bar{y}_{i.})'\) are the between- and
 within-group sum of squares matrices in a linear discriminant analysis,
 with \(g=\)number of groups, and \(n_i, i=1, ....g\) is the number of
-cases in each group.
+cases in each group. The notation \(\bar{y}_{i.}\) means we have
+calculated the mean value for group \(i\) across all observations
+\(n_i\), and \(\bar{y}_{..}\) is the overall mean value across all
+groups.
 
 The \emph{radial tour} (Laa et al., 2023) provides a way to assess the
 importance of any variable or combination of variables. The target basis
@@ -1596,8 +1602,10 @@ each of the variables can be tested for their importance in producing
 the structure.
 
 Each of these tour types can be run in the \texttt{tourr} package by
-setting the \texttt{tour\_path} parameter of the \texttt{animate\_XXX()}
-functions. The paths of projection bases can also be generated and saved
+setting the \texttt{tour\_path} parameter of the \texttt{animate()}
+function (and also when using specific displays via the
+\texttt{animate\_XXX()} functions, a full list is given in the
+appendix). The paths of projection bases can also be generated and saved
 to be used later with the \texttt{save\_history()} function. This is the
 manner with which to save a particular data projection, or to generate
 sequences of projections to pass to external software.
@@ -1657,6 +1665,8 @@ plotting or calculating projection pursuit indexes. Both methods
 maintain orthonormality of the bases for each step.}
 
 \end{figure}%
+
+\index{dimension reduction!projection pursuit (PP)}
 
 \subsection{Interpolating between
 targets}\label{interpolating-between-targets}
@@ -1762,8 +1772,8 @@ using the \texttt{animate\_slice()} function.
 \subcaption{\label{}slice}
 \end{minipage}%
 
-\caption{\label{fig-slicing-pdf}Slicing can cut through high density is
-useful to find hollowness in high-dimensional data, or understand
+\caption{\label{fig-slicing-pdf}Slicing can cut through high density and
+is useful to find hollowness in high-dimensional data, or understand
 limitations of fitted models. Here points on the surface of a 3D torus
 are shown using (a) projections, and (b) slices. The slicing reveals the
 hollowness of this data with the circular cuts to the donut shape.
@@ -1895,7 +1905,13 @@ because these are meaningful in any dimension.
   Roman Surface, generated by
 \end{enumerate}
 
-\texttt{rs\ \textless{}-\ geozoo::roman.surface()\$points\ \textbar{}\textgreater{}\ scale()\ \textbar{}\textgreater{}\ as.data.frame()}
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{rs }\OtherTok{\textless{}{-}}\NormalTok{ geozoo}\SpecialCharTok{::}\FunctionTok{roman.surface}\NormalTok{()}\SpecialCharTok{$}\NormalTok{points }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{scale}\NormalTok{() }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{as.data.frame}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
 
 \begin{enumerate}
 \def\labelenumi{\alph{enumi}.}
@@ -1905,7 +1921,12 @@ because these are meaningful in any dimension.
   solid 4D sphere, generated by
 \end{enumerate}
 
-\texttt{s\_solid\ \textless{}-\ geozoo::sphere.solid.random(4,\ 2000)\$points\ \textbar{}\textgreater{}\ as.data.frame()}
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{s\_solid }\OtherTok{\textless{}{-}}\NormalTok{ geozoo}\SpecialCharTok{::}\FunctionTok{sphere.solid.random}\NormalTok{(}\DecValTok{4}\NormalTok{, }\DecValTok{2000}\NormalTok{)}\SpecialCharTok{$}\NormalTok{points }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{as.data.frame}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
 
 \begin{enumerate}
 \def\labelenumi{\alph{enumi}.}
@@ -1915,7 +1936,12 @@ because these are meaningful in any dimension.
   hollow 4D sphere, generated by
 \end{enumerate}
 
-\texttt{s\_hollow\ \textless{}-\ geozoo::sphere.hollow(4,\ 2000)\$points\ \textbar{}\textgreater{}\ as.data.frame()}
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{s\_hollow }\OtherTok{\textless{}{-}}\NormalTok{ geozoo}\SpecialCharTok{::}\FunctionTok{sphere.hollow}\NormalTok{(}\DecValTok{4}\NormalTok{, }\DecValTok{2000}\NormalTok{)}\SpecialCharTok{$}\NormalTok{points }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{as.data.frame}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
 
 Use both regular tours, and the slice tours on each. What does the slice
 tour allow us to see in the Roman Surface? What is the difference
@@ -2891,7 +2917,7 @@ PC \(k\) also. With the \texttt{pca\_tour()} function in the
 \texttt{tourr} package you can view a \(k\)-D biplot. This will display
 the \(k\) PCs with the axes displaying the original variables, and thus
 show their contribution to the PCs. \index{biplot} \index{tour!pca}
-\index{software!ggfortify} \index{software!patchwork}
+\index{software!ggfortify}
 
 \begin{figure}
 
@@ -3108,7 +3134,7 @@ some important characteristics in the data.}
 \subsection{Example: Non-linear
 associations}\label{example-non-linear-associations}
 
-\index{nonlinearity}
+\index{non-linearity}
 
 Figure~\ref{fig-plane-nonlin-pdf} shows the tour of the full 5D data
 containing non-linear relationships in comparison with a tour of the
@@ -3224,8 +3250,6 @@ is an unusual observation also.}
   variation does this explain? Is there any obvious clustering in this
   lower dimensional space?
 \end{enumerate}
-
-\index{software!mulgar} \index{software!dplyr}
 
 \section*{Project}\label{project-1}
 \addcontentsline{toc}{section}{Project}
@@ -6475,7 +6499,7 @@ data that examines the risk taking behavior of tourists, this is the
 \item
   Use a projection pursuit guided tour to best separate the clusters
   identified with \(k\)-means clustering. How are the clusters related
-  to the different types of risk?
+  to the different types of risk?\index{tour!guided}
 \item
   Use the approaches from this chapter to summarize and compare the
   \(k\)-means solution to your selected hierarchical clustering results.
@@ -6988,7 +7012,7 @@ We can fit an LDA model using the \texttt{lda()} function from the
 \texttt{MASS} package. Here we have used the \texttt{penguins} data,
 assuming equal prior probability, to illustrate.
 
-\index{software!MASS} \index{software!mulgar} \index{data!penguins}
+\index{software!MASS} \index{data!penguins}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -7054,9 +7078,6 @@ The best separation between classes can be viewed from this object,
 which can be shown to match the original data projected using the
 \texttt{scaling} component of the model object (see
 Figure~\ref{fig-p-lda}).
-
-\index{software!colorspace} \index{software!ggplot2}
-\index{software!dplyr} \index{software!ggpubr}
 
 \begin{figure}
 
@@ -7327,7 +7348,6 @@ from the \texttt{classifly} package, which generates observations in the
 range of all values of\texttt{bl} and \texttt{bd} and predicts their
 class. Figure~\ref{fig-lda-2D-boundary} shows the resulting prediction
 regions, with the observed data and the sample means overlaid.
-
 \index{software!classifly}
 
 \begin{Shaded}
@@ -7784,11 +7804,8 @@ model may not give good results for the penguins data. We'll show how
 this is the case with two variables initially, and then extend to the
 four variables.
 
-\index{software!mulgar} \index{software!rpart}
-\index{software!rpart.plot} \index{software!colorspace}
-\index{software!classifly} \index{software!ggplot2}
-\index{software!ggdendro} \index{software!patchwork}
-\index{software!ggthemes}
+\index{software!rpart} \index{software!rpart.plot}
+\index{software!classifly} \index{software!ggdendro}
 
 \begin{figure}
 
@@ -7837,8 +7854,6 @@ cube obliquely. The boxy regions don't capture the differences between
 the elliptically-shaped clusters. Overlaying the observed data on this
 display would make this clearer, but the boundaries are easier to
 examine without them.
-
-\index{software!tourr}
 
 \index{tour!slice} \index{classification!boundaries}
 
@@ -7906,9 +7921,9 @@ where the values for each observation sum to 1. With only three classes
 the votes matrix is only a 2D object, and thus easy to examine. With
 four or more classes the votes matrix needs to be examined in a tour.
 \index{classification!vote matrix}
-\index{classification!predictive probability distribution}
+\index{classification!predictive probabilities}
 
-\index{software!randomForest} \index{software!dplyr}
+\index{software!randomForest}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -7931,10 +7946,10 @@ the random forest model object. The first five rows are:
 
 \begin{verbatim}
   Adelie Chinstrap Gentoo
-1 0.9838  0.016216      0
-2 0.9643  0.035714      0
-3 0.9943  0.005714      0
-4 1.0000  0.000000      0
+1 0.9948  0.005181      0
+2 0.9191  0.080925      0
+3 0.9859  0.014085      0
+4 0.9942  0.005780      0
 5 1.0000  0.000000      0
 \end{verbatim}
 
@@ -8095,12 +8110,12 @@ interesting to see how well the random forest model performs.
 \end{Shaded}
 
 \begin{verbatim}
-    0     1    2    3    4    5 6 7 8    9
-1 0.9 0.000 0.03 0.00 0.00 0.07 0 0 0 0.00
-2 0.6 0.000 0.02 0.00 0.02 0.34 0 0 0 0.00
-3 0.8 0.000 0.04 0.00 0.10 0.01 0 0 0 0.03
-4 0.9 0.000 0.02 0.00 0.01 0.09 0 0 0 0.00
-5 0.6 0.006 0.06 0.01 0.01 0.30 0 0 0 0.00
+    0     1     2     3    4    5 6 7     8     9
+1 0.9 0.000 0.005 0.000 0.01 0.09 0 0 0.005 0.000
+2 0.7 0.000 0.027 0.000 0.01 0.29 0 0 0.000 0.000
+3 0.8 0.000 0.036 0.005 0.15 0.02 0 0 0.000 0.010
+4 0.9 0.000 0.005 0.000 0.03 0.10 0 0 0.000 0.005
+5 0.6 0.006 0.074 0.023 0.01 0.23 0 0 0.011 0.000
 \end{verbatim}
 
 \begin{figure}
@@ -8166,8 +8181,6 @@ differences. This is particularly so when there are many variables, as
 in the fake\_trees data. We would also expect that this data will have a
 difference between importance for some classes.
 
-\index{software!gt}
-
 \begin{longtable}{lrrrrrrrrrrrr}
 
 \caption{\label{tbl-ft-importance}Variable importance from the random
@@ -8179,16 +8192,16 @@ the accuracy and Gini metrics.}
 \toprule
 Var & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & Acc & Gini \\ 
 \midrule\addlinespace[2.5pt]
-PC1 & $0.1$ & $0.4$ & $0.5$ & $0.3$ & $0.2$ & $0.5$ & $0.4$ & $0.2$ & $0.3$ & $0.3$ & $0.31$ & $484$ \\ 
-PC2 & $0.1$ & $0.2$ & $0.2$ & $0.5$ & $0.3$ & $0.3$ & $0.2$ & $0.4$ & $0.3$ & $0.3$ & $0.29$ & $388$ \\ 
-PC3 & $0.1$ & $0.1$ & $0.1$ & $0.1$ & $0.5$ & $0.1$ & $0.1$ & $0.1$ & $0.2$ & $0.2$ & $0.16$ & $312$ \\ 
-PC4 & $0.1$ & $0.5$ & $0.1$ & $0.0$ & $0.1$ & $0.0$ & $0.4$ & $0.2$ & $0.1$ & $0.1$ & $0.15$ & $342$ \\ 
-PC5 & $0.1$ & $0.1$ & $0.3$ & $0.1$ & $0.2$ & $0.2$ & $0.1$ & $0.1$ & $0.3$ & $0.2$ & $0.17$ & $320$ \\ 
-PC6 & $0.1$ & $0.2$ & $0.2$ & $0.2$ & $0.0$ & $0.1$ & $0.0$ & $0.3$ & $0.1$ & $0.2$ & $0.16$ & $289$ \\ 
-PC7 & $0.1$ & $0.0$ & $0.1$ & $0.0$ & $0.0$ & $0.1$ & $0.1$ & $0.3$ & $0.1$ & $0.2$ & $0.11$ & $242$ \\ 
-PC8 & $0.1$ & $0.1$ & $0.0$ & $0.2$ & $0.1$ & $0.1$ & $0.0$ & $0.0$ & $0.1$ & $0.3$ & $0.10$ & $220$ \\ 
-PC9 & $0.1$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.1$ & $0.0$ & $0.02$ & $61$ \\ 
-PC10 & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.01$ & $43$ \\ 
+PC1 & $0.1$ & $0.4$ & $0.4$ & $0.3$ & $0.2$ & $0.5$ & $0.4$ & $0.2$ & $0.3$ & $0.3$ & $0.31$ & $484$ \\ 
+PC2 & $0.1$ & $0.2$ & $0.2$ & $0.5$ & $0.3$ & $0.3$ & $0.2$ & $0.4$ & $0.2$ & $0.3$ & $0.28$ & $383$ \\ 
+PC3 & $0.1$ & $0.1$ & $0.1$ & $0.1$ & $0.5$ & $0.1$ & $0.1$ & $0.1$ & $0.2$ & $0.2$ & $0.16$ & $309$ \\ 
+PC4 & $0.1$ & $0.4$ & $0.1$ & $0.0$ & $0.1$ & $0.0$ & $0.4$ & $0.1$ & $0.1$ & $0.1$ & $0.14$ & $329$ \\ 
+PC5 & $0.1$ & $0.1$ & $0.4$ & $0.1$ & $0.2$ & $0.2$ & $0.1$ & $0.1$ & $0.3$ & $0.2$ & $0.18$ & $341$ \\ 
+PC6 & $0.1$ & $0.2$ & $0.2$ & $0.2$ & $0.0$ & $0.1$ & $0.0$ & $0.3$ & $0.1$ & $0.2$ & $0.16$ & $283$ \\ 
+PC7 & $0.1$ & $0.0$ & $0.1$ & $0.0$ & $0.0$ & $0.1$ & $0.1$ & $0.3$ & $0.1$ & $0.1$ & $0.11$ & $250$ \\ 
+PC8 & $0.0$ & $0.1$ & $0.0$ & $0.2$ & $0.1$ & $0.1$ & $0.0$ & $0.0$ & $0.1$ & $0.3$ & $0.09$ & $216$ \\ 
+PC9 & $0.1$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.1$ & $0.0$ & $0.02$ & $59$ \\ 
+PC10 & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.0$ & $0.01$ & $45$ \\ 
 \bottomrule
 
 \end{longtable}
@@ -8268,16 +8281,16 @@ not each other.
 
 \begin{verbatim}
     0   1   2   3   4   5   6   7   8   9 class.error
-0 263   5   2   2   4   4   6   4   7   3       0.123
-1  12 288   0   0   0   0   0   0   0   0       0.040
-2   8   0 289   0   3   0   0   0   0   0       0.037
-3   7   0   0 288   0   0   0   4   0   1       0.040
+0 266   5   3   2   3   4   4   4   5   4       0.113
+1  14 286   0   0   0   0   0   0   0   0       0.047
+2  10   0 288   0   2   0   0   0   0   0       0.040
+3   6   0   0 288   0   0   0   5   0   1       0.040
 4  13   0   0   0 287   0   0   0   0   0       0.043
-5  11   0   0   0   0 289   0   0   0   0       0.037
+5  12   0   0   0   0 288   0   0   0   0       0.040
 6  12   0   0   0   0   0 287   0   1   0       0.043
 7   6   0   0   4   0   0   0 290   0   0       0.033
 8   7   0   0   0   0   0   0   0 293   0       0.023
-9   5   0   0   0   0   0   0   0   0 295       0.017
+9   5   0   0   0   0   0   0   1   0 294       0.020
 \end{verbatim}
 
 From the tour in Figure~\ref{fig-ft-cl2} we can see that clusters 1, 6,
@@ -8424,8 +8437,6 @@ You can use this code to subset the data:
 \end{enumerate}
 
 The \texttt{music} data can be read using:
-
-\index{software!readr}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -8949,7 +8960,7 @@ We will use the penguins data to illustrate the fitting, because it
 makes it easier to understand the procedures and the fit. However, a NN
 is like using a jackhammer instead of a trowel to plant a seedling, more
 complicated than necessary to build a good classification model for this
-data.
+data. \index{software!keras} \index{software!tensorflow}
 
 \section{Setting up the model}\label{sec-nn-model}
 
@@ -9011,17 +9022,17 @@ terms \(a_h\).}
 
 \end{figure}%
 
+\index{software!tidymodels}
+
 \section{Checking the training/test
 split}\label{checking-the-trainingtest-split}
 
-\index{classification!training/test split}
-
-Splitting the data into training and test is an essential way to protect
-against overfitting, for most classifiers, but especially so for the
-copiously parameterised NNs. The model specified for the penguins data
-with only two nodes is unlikely to be overfitted, but it is nevertheless
-good practice to use a training set for building and a test set for
-evaluation.
+\index{classification!training/test split} Splitting the data into
+training and test is an essential way to protect against overfitting,
+for most classifiers, but especially so for the copiously parameterised
+NNs. The model specified for the penguins data with only two nodes is
+unlikely to be overfitted, but it is nevertheless good practice to use a
+training set for building and a test set for evaluation.
 
 Figure~\ref{fig-p-split-pdf} shows the tour being used to examine the
 split into training and test samples for the penguins data. Using random
@@ -9030,6 +9041,8 @@ being very similar, as can be seen here. It does happen that several
 observations in the test set are on the extremes of their class cluster,
 so it could be that the model makes errors in the neighbourhoods of
 these points.
+
+\index{data!penguins} \index{tour!grand} \index{tour!guided}
 
 \begin{figure}
 
@@ -9150,7 +9163,7 @@ The model object can be saved for later use with:
 
 \section{Extracting model components}\label{extracting-model-components}
 
-\index{classification!hidden layers}
+\index{classification!hidden layer}
 
 \infobox{View the individual node models to understand how they combine to produce the overall model.
 }
@@ -9275,6 +9288,7 @@ this NN, we can use a ternary diagram for three class problems, or
 high-dimensional simplex when there are more classes to examine the
 strength of the classification. This done in the same way that was used
 for the votes matrix from a random forest in Section~\ref{sec-votes}.
+\index{ternary diagram} \index{simplex}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -9320,6 +9334,8 @@ for the votes matrix from a random forest in Section~\ref{sec-votes}.
   Chinstrap      0        23      0
   Gentoo         1         0     39
 \end{verbatim}
+
+\index{software!geozoo}
 
 \begin{figure}[H]
 
@@ -9611,7 +9627,7 @@ this can be visualized as a heat map placed over the original image.
 This is especially interesting in the case of difficult or misclassified
 images. This however is beyond the scope of this book.
 
-\insightbox{There are subsets of misclassification. T-shirt/top, Shirt, Pullover, Coat, Dress are mutually confused. Sandals are more often considered to be sneakers. And also where there is confusion the votes take on full range, slightly confused to completely confused.
+\insightbox{There are subsets of confusion, as can be seen by both confusion matrix and votes visualisation. T-shirt/top, Shirt, Pullover, Coat, Dress are mutually confused. And some pairs are commonly confused, e.g. Sandal and Sneaker. In the votes matrix visualisation this can be seen by the concentration of points in a tetrahedron and the concentrations along some edges.
 }
 
 \section*{Exercises}\label{exercises-16}
@@ -9664,6 +9680,8 @@ images. This however is beyond the scope of this book.
   network in combination with data augmentation. In addition, using
   batch normalization should improve the model performance.
 \end{enumerate}
+
+\index{software!tfdatasets} \index{data!sketches}
 
 \chapter{Diagnostics for classification models}\label{sec-class-diag}
 
@@ -9730,7 +9748,7 @@ other two penguin species. \index{classification!misclassification}
 
 \begin{verbatim}
           Adelie Chinstrap Gentoo class.error
-Adelie       142         4      0 0.027397260
+Adelie       143         3      0 0.020547945
 Chinstrap      4        64      0 0.058823529
 Gentoo         0         1    118 0.008403361
 \end{verbatim}
