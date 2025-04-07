@@ -21,6 +21,8 @@ $$ which is a combination of two (linear) models, each of which could be examine
 In practice, a model may have many nodes, and several hidden layers, a variety of activation functions, and regularisation modifications. One should keep in mind the principle of parsimony is important when applying NNs, because it is tempting to make an overly complex, and thus over-parameterised, construction. Fitting NNs is still problematic. One would hope that fitting produces a stable result, whatever the starting seed the same parameter estimates are returned. However, this is not the case, and different, sometimes radically different, results are routinely obtained after each attempted fit [@wickham2015].
 
 For these examples we use the software `keras` [@keras] following the installation and tutorial details at <https://tensorflow.rstudio.com/tutorials/>. Because it is an interface to python it can be tricky to install. If this is a problem, the example code should be possible to convert to use `nnet` [@VR02] or `neuralnet` [@neuralnet]. We will use the penguins data to illustrate the fitting, because it makes it easier to understand the procedures and the fit. However, a NN is like using a jackhammer instead of a trowel to plant a seedling, more complicated than necessary to build a good classification model for this data.
+\index{software!keras}
+\index{software!tensorflow}
 
 ## Setting up the model {#sec-nn-model}
 
@@ -35,16 +37,16 @@ tensorflow::set_random_seed(211)
 
 # Define model
 p_nn_model <- keras_model_sequential()
-p_nn_model %>% 
+p_nn_model |> 
   layer_dense(units = 2, activation = 'relu', 
-              input_shape = 4) %>% 
+              input_shape = 4) |> 
   layer_dense(units = 3, activation = 'softmax')
-p_nn_model %>% summary
+p_nn_model |> summary
 
 loss_fn <- loss_sparse_categorical_crossentropy(
   from_logits = TRUE)
 
-p_nn_model %>% compile(
+p_nn_model |> compile(
   optimizer = "adam",
   loss      = loss_fn,
   metrics   = c('accuracy')
@@ -54,6 +56,8 @@ p_nn_model %>% compile(
 Note that `tensorflow::set_random_seed(211)` sets the seed for the model fitting so that we can obtain the same result to discuss later. It needs to be set before the model is defined in the code. The model will also be saved in order to diagnose and make predictions.
 
 ![Network architecture for the model on the penguins data. The round nodes indicate original or transformed variables, and each arrow connecting these is represented as one of the weights $w_{ih}$ in the definition. The boxes indicate the additive constant entering the nodes, and the corresponding arrows represent the terms $a_h$.](images/nn-diagram.png){#fig-nn-diagram align="center"}
+
+\index{software!tidymodels}
 
 ```{r eval=FALSE}
 #| echo: false
@@ -67,21 +71,21 @@ p_nn_spec <-
         activation = 'relu',
         penalty = 0, 
         dropout = 0,
-        epochs = 500) %>% 
+        epochs = 500) |> 
     # This model can be used for classification or regression, so set mode
-    set_mode("classification") %>% 
+    set_mode("classification") |> 
     set_engine("keras")
 
 set.seed(821)
-p_split <- penguins_sub %>% 
-  select(bl:species) %>%
+p_split <- penguins_sub |> 
+  select(bl:species) |>
   initial_split(prop = 2/3, 
                 strata=species)
 p_train <- training(p_split)
 p_test <- testing(p_split)
 
 set.seed(834)
-p_nn_model <- p_nn_spec %>% fit(species~., p_train)
+p_nn_model <- p_nn_spec |> fit(species~., p_train)
 
 p_nn_pred <- bind_cols(
     predict(p_nn_model, p_test),
@@ -95,10 +99,13 @@ p_nn_wgts <- keras::get_weights(p_nn_model, trainable=TRUE)
 ## Checking the training/test split
 
 \index{classification!training/test split}
-
 Splitting the data into training and test is an essential way to protect against overfitting, for most classifiers, but especially so for the copiously parameterised NNs. The model specified for the penguins data with only two nodes is unlikely to be overfitted, but it is nevertheless good practice to use a training set for building and a test set for evaluation.
 
 `r ifelse(knitr::is_html_output(), '@fig-p-split-html', '@fig-p-split-pdf')` shows the tour being used to examine the split into training and test samples for the penguins data. Using random sampling, particularly stratified by group, should result the two sets being very similar, as can be seen here. It does happen that several observations in the test set are on the extremes of their class cluster, so it could be that the model makes errors in the neighbourhoods of these points.
+
+\index{data!penguins}
+\index{tour!grand}
+\index{tour!guided}
 
 ```{r echo=knitr::is_html_output()}
 #| message: false
@@ -114,8 +121,8 @@ library(tourr)
 load("data/penguins_sub.rda") # from mulgar book
 
 set.seed(821)
-p_split <- penguins_sub %>% 
-  select(bl:species) %>%
+p_split <- penguins_sub |> 
+  select(bl:species) |>
   initial_split(prop = 2/3, 
                 strata=species)
 p_train <- training(p_split)
@@ -124,7 +131,7 @@ p_test <- testing(p_split)
 # Check training and test split
 p_split_check <- bind_rows(
   bind_cols(p_train, type = "train"), 
-  bind_cols(p_test, type = "test")) %>%
+  bind_cols(p_test, type = "test")) |>
   mutate(type = factor(type))
 ```
 
@@ -168,9 +175,9 @@ render_gif(p_split_check[,1:4],
 
 ::: {.content-visible when-format="html"}
 ::: {#fig-p-split-html layout-ncol="2"}
-![Grand tour](gifs/p_split.gif){#fig-split-grand fig-alt="FIX ME" width="300"}
+![Grand tour](gifs/p_split.gif){#fig-split-grand fig-alt="Animation showing a grand tour of the penguins data, with colour indicating species (red=Gentoo, blue=Adelie, yellow=Chinstrap) and shape indicating training (open circles) vs test (closed circles). The distribution of points in each group is reasonably similar regardless of projection." width="300"}
 
-![Guided tour](gifs/p_split_guided.gif){#fig-split-guided fig-alt="FIX ME" width="300"}
+![Guided tour](gifs/p_split_guided.gif){#fig-split-guided fig-alt="Animation showing a guided tour of the penguins data, with colour indicating species (red=Gentoo, blue=Adelie, yellow=Chinstrap) and shape indicating training (open circles) vs test (closed circles). The distribution of points in each group is reasonably similar regardless of projection." width="300"}
 
 Evaluating the training/test split, where we expect that the two samples should roughly match. There are a few observations in the test set that are on the outer edges of the clusters, which will likely result in the model making an error in these regions. However, the two samples roughly match.
 :::
@@ -178,9 +185,9 @@ Evaluating the training/test split, where we expect that the two samples should 
 
 ::: {.content-visible when-format="pdf"}
 ::: {#fig-p-split-pdf layout-ncol="2"}
-![Grand tour](images/p_split.png){fig-alt="FIX ME" width="220"}
+![Grand tour](images/p_split.png){fig-alt="A scatter plot of a projection showing clusters of three penguin species—Adélie (blue), Chinstrap (yellow), and Gentoo (red)—based on multiple variables. Data points are marked as either training data (open circles) or test data (filled circles). The clusters are fairly distinct, with Adélie and Chinstrap appearing closer together, while Gentoo forms a distinct group. In the bottom-left corner, there is a small inset plot displaying variable contributions, with axes labeled 'bl' pointing to 11 o'clock, 'fl' pointing to 9 o'clock, 'bd' pointing to 3 o'clock and 'bm' pointing to 5 o'clock. A legend in the top-right corner indicates species colors, while another legend at the bottom-right differentiates between training (open circles) and test (filled circles) data." width="220"}
 
-![Guided tour](images/p_split_guided.png){fig-alt="FIX ME" width="220"}
+![Guided tour](images/p_split_guided.png){fig-alt="A scatter plot of a projection showing clusters of three penguin species—Adélie (blue), Chinstrap (yellow), and Gentoo (red)—based on multiple variables. Data points are marked as either training data (open circles) or test data (filled circles). The clusters are well-separated, with Adélie and Chinstrap appearing closer together, while Gentoo forms a distinct group. In the bottom-left corner, there is a small inset plot displaying variable contributions, with axes labeled 'bl' pointing to 2 o'clock, 'fl' pointing to 4 o'clock, 'bd' pointing to 10 o'clock and 'bm' pointing to 6 o'clock. A legend in the top-right corner indicates species colors, while another legend at the bottom-right differentiates between training (open circles) and test (filled circles) data." width="220"}
 
 Evaluating the training/test split, where we expect that the two samples should roughly match. There are a few observations in the test set that are on the outer edges of the clusters, which will likely result in the model making an error in these regions. However, the two samples roughly match.
 :::
@@ -194,15 +201,15 @@ The data needs to be specially formatted for the model fitted using `keras`. The
 
 ```{r}
 # Data needs to be matrix, and response needs to be numeric
-p_train_x <- p_train %>%
-  select(bl:bm) %>%
+p_train_x <- p_train |>
+  select(bl:bm) |>
   as.matrix()
-p_train_y <- p_train %>% pull(species) %>% as.numeric() 
+p_train_y <- p_train |> pull(species) |> as.numeric() 
 p_train_y <- p_train_y-1 # Needs to be 0, 1, 2
-p_test_x <- p_test %>%
-  select(bl:bm) %>%
+p_test_x <- p_test |>
+  select(bl:bm) |>
   as.matrix()
-p_test_y <- p_test %>% pull(species) %>% as.numeric() 
+p_test_y <- p_test |> pull(species) |> as.numeric() 
 p_test_y <- p_test_y-1 # Needs to be 0, 1, 2
 ```
 
@@ -218,7 +225,7 @@ p_nn_model
 ```{r eval=FALSE}
 #| message: false
 # Fit model
-p_nn_fit <- p_nn_model %>% keras::fit(
+p_nn_fit <- p_nn_model |> keras::fit(
   x = p_train_x, 
   y = p_train_y,
   epochs = 200,
@@ -228,7 +235,7 @@ p_nn_fit <- p_nn_model %>% keras::fit(
 
 ```{r eval=FALSE, echo=FALSE}
 # Check
-p_nn_model %>% evaluate(p_test_x, p_test_y, verbose = 0)
+p_nn_model |> evaluate(p_test_x, p_test_y, verbose = 0)
 plot(p_nn_fit)
 
 keras::get_weights(p_nn_model, trainable=TRUE)
@@ -243,10 +250,9 @@ Fitting NN models is fiddly, and very different fitted models can result from re
 :::
 
 ::: {.content-visible when-format="pdf"}
-```{=tex}
+
 \infobox{Fitting NN models is fiddly, and very different fitted models can result from restarts, parameter choices, and architecture.  
 }
-```
 :::
 
 ```{r echo=knitr::is_html_output()}
@@ -262,7 +268,7 @@ p_nn_model <- load_model_tf("data/penguins_cnn")
 The fitted model that we have chosen as the final one has reasonably small loss and high accuracy. Plots of loss and accuracy across epochs showing the change during fitting can be plotted, but we don't show them here, because they are generally not very interesting.
 
 ```{r}
-p_nn_model %>% evaluate(p_test_x, p_test_y, verbose = 0)
+p_nn_model |> evaluate(p_test_x, p_test_y, verbose = 0)
 ```
 
 The model object can be saved for later use with:
@@ -273,7 +279,7 @@ save_model_tf(p_nn_model, "data/penguins_cnn")
 
 ## Extracting model components
 
-\index{classification!hidden layers}
+\index{classification!hidden layer}
 
 ::: {.content-visible when-format="html"}
 ::: info
@@ -282,10 +288,10 @@ View the individual node models to understand how they combine to produce the ov
 :::
 
 ::: {.content-visible when-format="pdf"}
-```{=tex}
+
 \infobox{View the individual node models to understand how they combine to produce the overall model.
 }
-```
+
 :::
 
 Because nodes in the hidden layers of NNs are themselves (relatively simple regression) models, it can be interesting to examine these to understand how the model is making it's predictions. Although it's rarely easy, most software will allow the coefficients for the models at these nodes to be extracted. With the penguins NN model there are two nodes, so we can extract the coefficients and plot the resulting two linear combinations to examine the separation between classes.
@@ -306,30 +312,36 @@ p_nn_wgts_on <- tourr::orthonormalise(p_nn_wgts[[1]])
 p_nn_wgts_on
 ```
 
+@fig-hidden-layer shows the data projected into the plane determined by the two linear combinations of the two nodes in the hidden layer. Training and test sets are indicated by empty and solid circles. The three species are clearly different but there is some overlap or confusion for a few penguins. The most interesting aspect to learn is that there is no big gap between the Gentoo and other species, which we know exists in the data. The model has not found this gap, and thus is likely to unfortunately and erroneously confuse some Gentoo penguins, particularly with Adelie.
+
+What we have shown here is a process to use the models at the nodes of the hidden layer to produce a reduced dimensional space where the classes are best separated, at least as determined by the model. The process will work in higher dimensions also.
+
+When there are more nodes in the hidden layer than the number of original variables it means that the space is extended to achieve useful classifications that need more complicated non-linear boundaries. The extra nodes describe the non-linearity. @wickham2015 provides a good illustration of this in 2D. The process of examining each of the node models can be useful for understanding this non-linear separation, also in high dimensions.
+
 ```{r echo=knitr::is_html_output()}
 #| code-fold: false
 #| label: fig-hidden-layer
-#| fig-cap: "Plot of the data in the linear combinations from the two nodes in the hidden layer. The three species are clearly different, although with some overlap between all three. A main issue to notice is that there isn't a big gap between Gentoo and the other species, which we know is there based on our data exploration done in other chapters. This suggests this fitted model is sub-optimal."
-#| fig-alt: FIXME
+#| fig-cap: "Plot of the data in the linear combinations from the two nodes in the hidden layer. The three species are clearly different, although with some overlap between all three. A main issue to notice is that there isn't a big gap between Gentoo and the other species, which we know exists in 4D based on our data exploration done in other chapters. This suggests that this fitted model is sub-optimal."
+#| fig-alt: "A scatter plot of a projection showing clusters of three penguin species—Adélie (blue), Chinstrap (yellow), and Gentoo (red)—based on multiple variables. Data points are marked as either training data (open circles) or test data (filled circles). Both have x-axis 'nn1' with labels -2, -1, 0, 1, 2 and 3 and y-axis 'nn2' with labels -2, -1, 0, 1 and 2. The clusters are  different but not quite separated. There is little difference between training and test sets. A legend in the top-right corner indicates species colors, while another legend at the bottom-right differentiates between training (open circles) and test (filled circles) data."
 #| fig-width: 5
 #| fig-height: 4
-#| out-width: 80%
+#| out-width: 60%
 # Hidden layer
-p_train_m <- p_train %>%
+p_train_m <- p_train |>
   mutate(nn1 = as.matrix(p_train[,1:4]) %*%
            as.matrix(p_nn_wgts_on[,1], ncol=1),
          nn2 = as.matrix(p_train[,1:4]) %*%
            matrix(p_nn_wgts_on[,2], ncol=1))
 
 # Now add the test points on.
-p_test_m <- p_test %>%
+p_test_m <- p_test |>
   mutate(nn1 = as.matrix(p_test[,1:4]) %*%
            as.matrix(p_nn_wgts_on[,1], ncol=1),
          nn2 = as.matrix(p_test[,1:4]) %*%
            matrix(p_nn_wgts_on[,2], ncol=1))
-p_train_m <- p_train_m %>%
+p_train_m <- p_train_m |>
   mutate(set = "train")
-p_test_m <- p_test_m %>%
+p_test_m <- p_test_m |>
   mutate(set = "test")
 p_all_m <- bind_rows(p_train_m, p_test_m)
 ggplot(p_all_m, aes(x=nn1, y=nn2, 
@@ -341,21 +353,30 @@ ggplot(p_all_m, aes(x=nn1, y=nn2,
   theme(aspect.ratio=1)
 ```
 
-@fig-hidden-layer shows the data projected into the plane determined by the two linear combinations of the two nodes in the hidden layer. Training and test sets are indicated by empty and solid circles. The three species are clearly different but there is some overlap or confusion for a few penguins. The most interesting aspect to learn is that there is no big gap between the Gentoo and other species, which we know exists in the data. The model has not found this gap, and thus is likely to unfortunately and erroneously confuse some Gentoo penguins, particularly with Adelie.
+::: {.content-visible when-format="html"}
+::: insight
+This particular fit is not good, based on what we know about the data. There should be a fit where a two node hidden layer produces a 2D representation where the difference between classes is clearer.
+:::
+:::
 
-What we have shown here is a process to use the models at the nodes of the hidden layer to produce a reduced dimensional space where the classes are best separated, at least as determined by the model. The process will work in higher dimensions also.
+::: {.content-visible when-format="pdf"}
 
-When there are more nodes in the hidden layer than the number of original variables it means that the space is extended to achieve useful classifications that need more complicated non-linear boundaries. The extra nodes describe the non-linearity. @wickham2015 provides a good illustration of this in 2D. The process of examining each of the node models can be useful for understanding this non-linear separation, also in high dimensions.
+\insightbox{This particular fit is not good, based on what we know about the data. There should be a fit where a two node hidden layer produces a 2D representation where the difference between classes is clearer.
+}
+:::
 
 ## Examining predictive probabilities {#sec-nn-pred-prob}
 
 \index{classification!predictive probabilities}
 
 When the predictive probabilities are returned by a model, as is done by this NN, we can use a ternary diagram for three class problems, or high-dimensional simplex when there are more classes to examine the strength of the classification. This done in the same way that was used for the votes matrix from a random forest in @sec-votes.
+\index{ternary diagram}
+\index{simplex}
+
 
 ```{r}
 # Predict training and test set
-p_train_pred <- p_nn_model %>% 
+p_train_pred <- p_nn_model |> 
   predict(p_train_x, verbose = 0)
 p_train_pred_cat <- levels(p_train$species)[
   apply(p_train_pred, 1,
@@ -365,7 +386,7 @@ p_train_pred_cat <- factor(
   levels=levels(p_train$species))
 table(p_train$species, p_train_pred_cat)
 
-p_test_pred <- p_nn_model %>% 
+p_test_pred <- p_nn_model |> 
   predict(p_test_x, verbose = 0)
 p_test_pred_cat <- levels(p_test$species)[
   apply(p_test_pred, 1, 
@@ -380,6 +401,8 @@ table(p_test$species, p_test_pred_cat)
 # predict() causes the problem, use p_nn_model(p_test_x) instead
 ```
 
+\index{software!geozoo}
+
 ```{r echo=knitr::is_html_output()}
 #| code-fold: true
 # Set up the data to make the ternary diagram
@@ -387,14 +410,14 @@ table(p_test$species, p_test_pred_cat)
 colnames(p_train_pred) <- c("Adelie", "Chinstrap", "Gentoo")
 colnames(p_test_pred) <- c("Adelie", "Chinstrap", "Gentoo")
 p_train_pred <- as_tibble(p_train_pred)
-p_train_m <- p_train_m %>%
-  mutate(pspecies = p_train_pred_cat) %>%
-  bind_cols(p_train_pred) %>%
+p_train_m <- p_train_m |>
+  mutate(pspecies = p_train_pred_cat) |>
+  bind_cols(p_train_pred) |>
   mutate(set = "train")
 p_test_pred <- as_tibble(p_test_pred)
-p_test_m <- p_test_m %>%
-  mutate(pspecies = p_test_pred_cat) %>%
-  bind_cols(p_test_pred) %>%
+p_test_m <- p_test_m |>
+  mutate(pspecies = p_test_pred_cat) |>
+  bind_cols(p_test_pred) |>
   mutate(set = "test")
 p_all_m <- bind_rows(p_train_m, p_test_m)
 
@@ -403,8 +426,8 @@ library(geozoo)
 proj <- t(geozoo::f_helmert(3)[-1,])
 p_nn_v_p <- as.matrix(p_all_m[,c("Adelie", "Chinstrap", "Gentoo")]) %*% proj
 colnames(p_nn_v_p) <- c("x1", "x2")
-p_nn_v_p <- p_nn_v_p %>%
-  as.data.frame() %>%
+p_nn_v_p <- p_nn_v_p |>
+  as.data.frame() |>
   mutate(species = p_all_m$species,
          set = p_all_m$set)
 
@@ -420,6 +443,7 @@ sp$species = sort(unique(penguins_sub$species))
 #| fig-height: 3
 #| out-width: 70%
 #| fig-cap: "Ternary diagram for the three groups of the predictive probabilities of both training ans test sets. From what we already know about the penguins data this fit is not good. Both Chinstrap and Gentoo penguins are confused with Adelie, or at risk of it. Gentoo is very well-separated from the other two species when several variables are used, and this fitted model is blind to it. One useful finding is that there is little difference between training and test sets, so the model has not been over-fitted."
+#| fig-alt: "A scatterplot where all points fall inside a 2D triangle, marked by black lines. The triangle is upside down and is equilateral. Each vertex is labelled: Chinstrap (top left), Adelie (top right), Gentoo (bottom left). Each points corresponds to a penguin, and is coloured by species. The legend at right shows the color labelling as blue (Adelie), yellow (Chinstrap), red (Gentoo), and shape labels as open circles (training) and filled circles (test). Chinstrap points are a tight cluster at their vertex. Adelie and Gentoo are not centered at the vertex but part way along towards the others vertex. This indicates the confusion between these two species. There are some yellow points mixed with blue points but not with red."
 # Plot it
 ggplot() +
   geom_segment(data=sp, aes(x=x1, y=x2, xend=x3, yend=x4)) +
@@ -443,10 +467,10 @@ If the training and test sets look similar when plotted in the model space then 
 :::
 
 ::: {.content-visible when-format="pdf"}
-```{=tex}
+
 \infobox{If the training and test sets look similar when plotted in the model space then the model is not suffering from over-fitting. 
 }
-```
+
 :::
 
 
@@ -488,15 +512,15 @@ In the next step we define the neural network and train the model. Note that bec
 ```{r eval=FALSE}
 # defining the model
 model_fashion_mnist <- keras_model_sequential()
-model_fashion_mnist %>%
+model_fashion_mnist |>
   # flatten the image data into a long vector
-  layer_flatten(input_shape = c(28, 28)) %>%
+  layer_flatten(input_shape = c(28, 28)) |>
   # hidden layer with 128 units
-  layer_dense(units = 128, activation = 'relu') %>%
+  layer_dense(units = 128, activation = 'relu') |>
   # output layer for 10 categories
   layer_dense(units = 10, activation = 'softmax')
 
-model_fashion_mnist %>% compile(
+model_fashion_mnist |> compile(
   optimizer = 'adam',
   loss = 'sparse_categorical_crossentropy',
   metrics = c('accuracy')
@@ -504,7 +528,7 @@ model_fashion_mnist %>% compile(
 
 # fitting the model, if we did not know the model yet we
 # would add a validation split to diagnose the training
-model_fashion_mnist %>% fit(train_images,
+model_fashion_mnist |> fit(train_images,
               train_labels,
               epochs = 5)
 save_model_tf(model_fashion_mnist, "data/fashion_nn")
@@ -545,6 +569,10 @@ images_pc <- as.data.frame(images_pca$x)
 ```{r echo=knitr::is_html_output(), fig.format='png'}
 #| code-fold: true
 #| code-summary: "Code to run tours"
+#| warning: false
+#| fig-cap: "First two PCs of the original data (left) and the activations (right). The activation space has done a useful transformation of the 784 variables into a reduced dimension that reveals class clusters, because some cluster differences can be seen well in the first two PCs."
+#| fig-alt: "A side-by-side comparison of two scatter plots, each showing a PC1 vs PC2 of data points color-coded by category. The left plot, titled 'Input space', represents the raw input data projected into two principal components. Data points are densely packed and overlapping, with no clear separation between categories. The right plot, titled 'Activations', shows the same data after being transformed by a neural network (e.g., through hidden layer activations). In this plot, the points are more clearly separated into distinct groups, with elongated and curved cluster structures suggesting that the network has learned to organize the data in a more class-discriminative way. Axes in both plots are labeled PC1 (x-axis) and PC2 (y-axis), and the same color scheme is used across both plots to represent consistent categories."
+#| out-width: 100%
 p2 <- ggplot(activations_pc,
        aes(PC1, PC2, color = test_tags)) +
   geom_point(size = 0.1) +
@@ -607,27 +635,30 @@ render_gif(activations_pc[,1:5],
 )
 ```
 
+
+As with the first two principal components we get a much more spread out distribution in the original space. Nevertheless we can see differences between the classes, and that some groups are varying along specific directions in that space. Overall the activations space shows tighter clusters as expected after including the ReLU activation function, but the picture is not as neat as the first two principal components would suggest. While certain groups appear very compact even in this larger subspace, others vary quite a bit within part of the space. For example we can clearly see the "Bag" observations as different from all other images, but also notice that there is a large variation within this class along certain directions.
+
 ::: {.content-visible when-format="html"}
 ::: {#fig-fashion-gt-html layout-ncol="2"}
-![Input space](gifs/fashion_images_gt.gif){#fig-fashion-input fig-alt="FIX ME" width="200"}
 
-![Activations](gifs/fashion_activations_gt.gif){#fig-fashion-activation fig-alt="FIX ME" width="200"}
+![Input space](gifs/fashion_images_gt.gif){#fig-fashion-input fig-alt="An animation showing 2D scatterplots of the first five PCs of the fashion image data. Each point represents an individual image, colored by clothing category: Ankle boot (pink), Pullover (red), Trouser (yellow), Shirt (green), Coat (teal), Sandal (light blue), Sneaker (purple), Dress (peach), Bag (orange), and T-shirt/top (magenta). Clusters are visible although muddy. In the bottom-left corner, is the axis display showing the contribution of the first five principal components in each projection. A legend on the top-right maps each color to its corresponding fashion category." width="200"}
+
+![Activations](gifs/fashion_activations_gt.gif){#fig-fashion-activation fig-alt="An animation showing 2D scatterplots of the first five PCs of the neural network activation data. Each point represents an individual image, colored by clothing category: Ankle boot (pink), Pullover (red), Trouser (yellow), Shirt (green), Coat (teal), Sandal (light blue), Sneaker (purple), Dress (peach), Bag (orange), and T-shirt/top (magenta). Clusters are visible and some are quite distinct. In the bottom-left corner, is the axis display showing the contribution of the first five principal components in each projection. A legend on the top-right maps each color to its corresponding fashion category." width="200"}
 
 Comparison of the test observations in the first five principal components of the input space (left) and in the hidden layer activations (right). The activation function results in more clearly defined grouping of the different classes.
 :::
 :::
 
 ::: {.content-visible when-format="pdf"}
-::: {layout-ncol="2"}
-![Input space](images/fashion_images_gt_36.png){fig-alt="FIX ME" width="200"}
+::: {#fig-fashion-gt-pdf layout-ncol="2"}
 
-![Activations](images/fashion_activation_gt_126.png){fig-alt="FIX ME" width="200"}
+![Input space](images/fashion_images_gt_36.png){fig-alt="A scatter plot visualising high-dimensional fashion image data projected into two dimensions. Each point represents an individual image, colored by clothing category: Ankle boot (pink), Pullover (red), Trouser (yellow), Shirt (green), Coat (teal), Sandal (light blue), Sneaker (purple), Dress (peach), Bag (orange), and T-shirt/top (magenta). Clusters are visible although muddy, with some categories (like Trouser, Coat, and Sandal) forming elongated or compact groups, while others (such as Shirt and T-shirt/top) are more dispersed and overlapping. In the bottom-left corner, is the axis display showing the contribution of the first five principal components: PC1 and PC3 point to 1 o'clock, PC2 points to 9 o'clock, PC4 points to 6 o'clock, and PC5 points to 5 o'clock. A legend on the top-right maps each color to its corresponding fashion category." width="200"}
+
+![Activations](images/fashion_activation_gt_126.png){fig-alt="A scatter plot visualising high-dimensional fashion activation data projected into two dimensions. Each point represents an individual image, colored by clothing category: Ankle boot (pink), Pullover (red), Trouser (yellow), Shirt (green), Coat (teal), Sandal (light blue), Sneaker (purple), Dress (peach), Bag (orange), and T-shirt/top (magenta). Clusters are visible, with some categories (like Trouser, Coat, and Sandal) forming distinct, elongated or compact groups, while others (such as Shirt and T-shirt/top) are more dispersed and overlapping. In the bottom-left corner, is the axis display showing the contribution of the first five principal components: PC1 points to 7 o'clock, PC2 points to 11 o'clock and PC4 points to 3 o'clock. A legend on the top-right maps each color to its corresponding fashion category." width="200"}
 
 Comparison of the test observations in the first five principal components of the input space (left) and in the hidden layer activations (right). The activation function results in more clearly defined grouping of the different classes.
 :::
 :::
-
-As with the first two principal components we get a much more spread out distribution in the original space. Nevertheless we can see differences between the classes, and that some groups are varying along specific directions in that space. Overall the activations space shows tighter clusters as expected after including the ReLU activation function, but the picture is not as neat as the first two principal components would suggest. While certain groups appear very compact even in this larger subspace, others vary quite a bit within part of the space. For example we can clearly see the "Bag" observations as different from all other images, but also notice that there is a large variation within this class along certain directions.
 
 Finally we will investigate the model performance through the misclassifications and uncertainty between classes. We start with the error matrix for the test observations. To fit the error matrix we use the numeric labels, the ordering is as defined above for the labels.
 
@@ -639,7 +670,7 @@ fashion_test_pred_cat <- levels(test_tags)[
         which.max)]
 predicted <- factor(
   fashion_test_pred_cat,
-  levels=levels(test_tags)) %>%
+  levels=levels(test_tags)) |>
   as.numeric() - 1
 observed <- as.numeric(test_tags) -1
 table(observed, predicted)
@@ -660,29 +691,31 @@ proj <- t(geozoo::f_helmert(10)[-1,])
 f_nn_v_p <- as.matrix(fashion_test_pred) %*% proj
 colnames(f_nn_v_p) <- c("x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8", "x9")
 
-f_nn_v_p <- f_nn_v_p %>%
-  as.data.frame() %>%
+f_nn_v_p <- f_nn_v_p |>
+  as.data.frame() |>
   mutate(class = test_tags)
 
 simp <- geozoo::simplex(p=9)
 sp <- data.frame(simp$points)
 colnames(sp) <- c("x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8", "x9")
 sp$class = ""
-f_nn_v_p_s <- bind_rows(sp, f_nn_v_p) %>%
+f_nn_v_p_s <- bind_rows(sp, f_nn_v_p) |>
   mutate(class = ifelse(class %in% c("T-shirt/top",
                                      "Pullover",
                                      "Shirt",
-                                     "Coat"), class, "Other")) %>%
-  mutate(class = factor(class, levels=c("T-shirt/top",
+                                     "Coat"), class, "Other")) |>
+  mutate(class = factor(class, levels=c("Other", "T-shirt/top",
                                         "Pullover",
                                         "Shirt",
-                                        "Coat",
-                                        "Other"))) 
+                                        "Coat"))) 
+labels <- c("0" , "1", "2", "3", "4", "5", "6", "7", "8", "9",
+                rep("", 10000))
 
 animate_xy(f_nn_v_p_s[,1:9], col = f_nn_v_p_s$class, 
            axes = "off", cex=0.2,
            edges = as.matrix(simp$edges),
            edges.width = 0.05,
+           obs_labels = labels, 
            palette = "Viridis")
 
 render_gif(f_nn_v_p_s[,1:9],
@@ -692,6 +725,7 @@ render_gif(f_nn_v_p_s[,1:9],
              cex=0.2,
              palette = "Viridis",
              axes="off",
+             obs_labels = labels,
              edges = as.matrix(simp$edges),
              edges.width = 0.05), 
            gif_file="gifs/fashion_confusion_gt.gif",
@@ -702,7 +736,7 @@ render_gif(f_nn_v_p_s[,1:9],
 
 ::: {.content-visible when-format="html"}
 ::: {#fig-fashion-conf-gt-html}
-![Input space](gifs/fashion_confusion_gt.gif){#fig-fashion-confusion fig-alt="FIX ME" width="400"}
+![Input space](gifs/fashion_confusion_gt.gif){#fig-fashion-confusion fig-alt="An animation of 2D scatterplots showing data in a 10D simplex with edges in light grey. Each point represents a fashion item, colored by category, and shows a tetrahedron shape containing vertices 0, 2, 3, 4, 6. Labeled vertices numbered 0 through 9 correspond to fashion item categories: T-shirt/top (blue), Pullover (green), Shirt (yellow), Coat (light green), and Other (purple). Dense connections exist between closely related categories, such as Pullover, Shirt, and Coat, suggesting misclassification potential. The 'Other' category (purple) is more dispersed across the plot, linking pairs of nodes. A legend in the top-right corner identifies the color-coded categories." width="400"}
 
 A tour of the confusion matrix for the fashion MNIST test observations, focusing on a subset of items. Often observations get confused between two of the classes, this appears as points falling along one of the edges, for example some Shirts look more like T-shirts/tops, while others get confused with Coats. We can also notice that a subset of three other classes not mapped to colors as very separate from this group.
 :::
@@ -710,19 +744,20 @@ A tour of the confusion matrix for the fashion MNIST test observations, focusing
 
 ::: {.content-visible when-format="pdf"}
 ::: {#fig-fashion-confusion-split-pdf layout-ncol="3"}
-![](images/fashion_confustion_gt_36.png){fig-alt="FIX ME" width="130"}
 
-![](images/fashion_confusion_gt_58.png){fig-alt="FIX ME" width="130"}
+![](images/fashion_confusion_gt_227.png){fig-alt="A scatter plot showing a 2D projection of data in a 10D simplex with edges in light grey. Each point represents a fashion item, colored by category, and shows a tetrahedron shape containing vertices 0, 2, 3, 4, 6. Labeled vertices numbered 0 through 9 correspond to fashion item categories: T-shirt/top (blue), Pullover (green), Shirt (yellow), Coat (light green), and Other (purple). Dense connections exist between closely related categories, such as Pullover, Shirt, and Coat, suggesting misclassification potential. The 'Other' category (purple) is more dispersed across the plot, linking pairs of nodes. A legend in the top-right corner identifies the color-coded categories." width="130"}
 
-![](images/fashion_confusion_gt_69.png){fig-alt="FIX ME" width="130"}
+![](images/fashion_confusion_gt_258.png){fig-alt="A scatter plot showing a 2D projection of data in a 10D simplex with edges in light grey. Each point represents a fashion item, colored by category. Labeled vertices numbered 0 through 9 correspond to fashion item categories: T-shirt/top (blue), Pullover (green), Shirt (yellow), Coat (light green), and Other (purple). Dense connections exist between closely related categories, such as Pullover, Shirt, and Coat, suggesting misclassification potential. The 'Other' category (purple) is more dispersed across the plot, linking pairs of nodes. A legend in the top-right corner identifies the color-coded categories." width="130"}
 
-![](images/fashion_confusion_gt_161.png){fig-alt="FIX ME" width="130"}
+![](images/fashion_confusion_gt_275.png){fig-alt="A scatter plot showing a 2D projection of data in a 10D simplex with edges in light grey. Each point represents a fashion item, colored by category. Labeled vertices numbered 0 through 9 correspond to fashion item categories: T-shirt/top (blue), Pullover (green), Shirt (yellow), Coat (light green), and Other (purple). Dense connections exist between closely related categories, such as Pullover, Shirt, and Coat, suggesting misclassification potential. The 'Other' category (purple) is more dispersed across the plot, linking pairs of nodes. A legend in the top-right corner identifies the color-coded categories." width="130"}
 
-![](images/fashion_confusion_gt_212.png){fig-alt="FIX ME" width="130"}
+![](images/fashion_confusion_gt_342.png){fig-alt="A scatter plot showing a 2D projection of data in a 10D simplex with edges in light grey. Each point represents a fashion item, colored by category. Labeled vertices numbered 0 through 9 correspond to fashion item categories: T-shirt/top (blue), Pullover (green), Shirt (yellow), Coat (light green), and Other (purple). Dense connections exist between closely related categories, such as Pullover, Shirt, and Coat, suggesting misclassification potential. The 'Other' category (purple) is more dispersed across the plot, linking pairs of nodes. A legend in the top-right corner identifies the color-coded categories." width="130"}
 
-![](images/fashion_confusion_gt_333.png){fig-alt="FIX ME" width="130"}
+![](images/fashion_confusion_gt_405.png){fig-alt="A scatter plot showing a 2D projection of data in a 10D simplex with edges in light grey. Each point represents a fashion item, colored by category. Labeled vertices numbered 0 through 9 correspond to fashion item categories: T-shirt/top (blue), Pullover (green), Shirt (yellow), Coat (light green), and Other (purple). Dense connections exist between closely related categories, such as Pullover, Shirt, and Coat, suggesting misclassification potential. The 'Other' category (purple) is more dispersed across the plot, linking pairs of nodes. A legend in the top-right corner identifies the color-coded categories." width="130"}
 
-A tour of the confusion matrix for the fashion MNIST test observations, focusing on a subset of items. Often observations get confused between two of the classes, this appears as points falling along one of the edges, for example some Shirts look more like T-shirts/tops, while others get confused with Coats. We can also notice that a subset of three other classes not mapped to colors as very separate from this group.
+![](images/fashion_confusion_gt_433.png){fig-alt="A scatter plot showing a 2D projection of data in a 10D simplex with edges in light grey. Each point represents a fashion item, colored by category, and shows a tetrahedron shape containing vertices 0, 2, 3, 4, 6. Labeled vertices numbered 0 through 9 correspond to fashion item categories: T-shirt/top (blue), Pullover (green), Shirt (yellow), Coat (light green), and Other (purple). Dense connections exist between closely related categories, such as Pullover, Shirt, and Coat, suggesting misclassification potential. The 'Other' category (purple) is more dispersed across the plot, linking pairs of nodes. A legend in the top-right corner identifies the color-coded categories." width="130"}
+
+Selected projections from a tour of the votes matrix for the fashion MNIST test observations, focusing on a subset of items. Often observations get confused between two of the classes, this appears as points falling along one of the edges, for example some Shirts look more like T-shirts/tops, while others get confused with Coats. We can also notice that a subset of three other classes not mapped to colors as very separate from this group.
 :::
 :::
 
@@ -730,43 +765,18 @@ The tour of the class probabilities shows that the model is often confused betwe
 
 For this data using explainers like SHAP is not so interesting, since the individual pixel contribution to a prediction are typically not of interest. With image classification a next step might be to further investigate which part of the image is important for a prediction, and this can be visualized as a heat map placed over the original image. This is especially interesting in the case of difficult or misclassified images. This however is beyond the scope of this book.
 
-```{=html}
-<!--
-This chapter will likely include:
+::: {.content-visible when-format="html"}
+::: insight
+There are subsets of confusion, as can be seen by both confusion matrix and votes visualisation. T-shirt/top, Shirt, Pullover, Coat, Dress are mutually confused. And some pairs are commonly confused, e.g. Sandal and Sneaker. In the votes matrix visualisation this can be seen by the concentration of points in a tetrahedron and the concentrations along some edges.
+:::
+:::
 
-- Models at nodes or epochs 
-- Predictions (like vote matrix) for training and test. It provides a visual guide to overfitting.
-- Classification boundaries comparison with other methods
-- Explainability and interpretability
+::: {.content-visible when-format="pdf"}
 
-(This paper https://distill.pub/2020/grand-tour/ has good examples)
+\insightbox{There are subsets of confusion, as can be seen by both confusion matrix and votes visualisation. T-shirt/top, Shirt, Pullover, Coat, Dress are mutually confused. And some pairs are commonly confused, e.g. Sandal and Sneaker. In the votes matrix visualisation this can be seen by the concentration of points in a tetrahedron and the concentrations along some edges.
+}
+:::
 
-NOTE: Results might vary with different knits 
-
-References keras/tensorflow book, tidymodels, interpretable machine learning, and removing the blindfold
-
-
-Outline for chapter:
-
-- Penguins data
-    - Setting up with the NN with keras
-    - Splitting training and test, checking
-    - Specifying model, choices of layers
-    - Making predictions
-    - Extracting weights
-    - Building your diagnostic data set
-    - Examine predictive probabilities with simplex
-    - Examining the nodes - like the discriminant space when its 2
-    - Misclassifications
-    - 
-
-Bushfires
-    - Model fitting when regularisation needed
-    - Overfitting
-    
-Sketches as an example  
--->
-```
 ## Exercises {.unnumbered}
 
 1.  The problem with the NN model fitted to the penguins is that the Gentoo are poorly classified, when they should be perfectly predictable due to the big gap between class clusters. Re-fit the NN, with two nodes in the hidden layer) to the penguins data, to find a better model that appropriately perfectly predicts Gentoo penguins. (You might find the easiest way to get a better model is changing the random seed and re-fitting, as illustrated in @wickham2015, Figures 21-24.) Support this by plotting the model (using the hidden layer), and the predictive probabilities as a ternary plot. Do the SHAP values also support that `bd` plays a stronger role in your best model? (`bd` is the main variable for distinguishing Gentoo's from the other species, particularly when used with `fl` or `bl`.)
@@ -774,6 +784,9 @@ Sketches as an example
 3.  Can you fit a neural network that can predict the class in the fake tree data? Because the data is noisy and we do not have that many observations, it can be easy to overfit the data. Once you find a setting that works, think about what aspects of the model might be interesting for visualization. What comparisons with a random forest model could be of interest?
 4.  The sketches data could also be considered a classic image classification problem, and we have seen that we can get a reasonable accuracy with a random forest model. Because we only have a smaller number of observations (compared to the fashion MNIST data) when fitting a neural network we need to be very careful not to overfit the training data. Try fitting a flat neural network (similar to what we did for the fashion MNIST data) and check the test accuracy of the model.
 5.  Challenge: try to design a more accurate neural network for the sketches data. Here you can investigate using a convolutional neural network in combination with data augmentation. In addition, using batch normalization should improve the model performance.
+
+\index{software!tfdatasets}
+\index{data!sketches}
 
 ```{r}
 #| eval: false
@@ -803,16 +816,16 @@ sketches_img <- formatData(sketches_train, flat = FALSE)
 
 # with a flat NN the validation error is large
 model_flat <- keras_model_sequential() 
-model_flat %>% 
-  layer_dense(units = 64, activation = 'relu', input_shape = c(784)) %>% 
-  layer_dense(units = 32, activation = 'relu') %>% 
+model_flat |> 
+  layer_dense(units = 64, activation = 'relu', input_shape = c(784)) |> 
+  layer_dense(units = 32, activation = 'relu') |> 
   layer_dense(units = 6, activation = 'softmax')
-model_flat %>% compile(
+model_flat |> compile(
   loss = 'categorical_crossentropy',
   optimizer = optimizer_adam(), # could pass in learning rate here
   metrics = c('accuracy')
 )
-history_flat <- model_flat %>% fit(
+history_flat <- model_flat |> fit(
   sketches_flat$x, sketches_flat$y, 
   epochs = 100, batch_size = 128, 
   validation_split = 0.2
@@ -820,32 +833,32 @@ history_flat <- model_flat %>% fit(
 
 # with quite a bit of work we can get something better (but still not great)
 data_augmentation <-
-  keras_model_sequential() %>%
-  layer_random_flip("horizontal") %>%
-  layer_random_rotation(0.1) %>%
+  keras_model_sequential() |>
+  layer_random_flip("horizontal") |>
+  layer_random_rotation(0.1) |>
   layer_random_zoom(0.1)
 
 library(tfdatasets)
 
 # Create a tf_dataset pipeline of augmented images (and their labels)
-train_dataset <- tensor_slices_dataset(list(sketches_img$x, sketches_img$y)) %>%
-  dataset_batch(32) %>%
+train_dataset <- tensor_slices_dataset(list(sketches_img$x, sketches_img$y)) |>
+  dataset_batch(32) |>
   dataset_map( ~ list(data_augmentation(.x), .y)) # see ?purrr::map to learn about ~ notation
 
 model_cnn <- keras_model_sequential() 
-model_cnn %>%
+model_cnn |>
   layer_conv_2d(32, kernel_size= c(3, 3),
                 activation='relu',
-                input_shape = dim(sketches_img$x)[-1]) %>%
-  layer_max_pooling_2d(2, 2) %>% # 
-  layer_batch_normalization() %>%
-  layer_conv_2d(16, c(3, 3), activation='relu') %>%
-  layer_max_pooling_2d(2, 2) %>%
-  layer_batch_normalization() %>%
-  layer_flatten() %>%
-  layer_dense(128, activation='relu') %>%
-  layer_dropout(0.2) %>%
-  layer_dense(6, activation='softmax') %>%
+                input_shape = dim(sketches_img$x)[-1]) |>
+  layer_max_pooling_2d(2, 2) |> # 
+  layer_batch_normalization() |>
+  layer_conv_2d(16, c(3, 3), activation='relu') |>
+  layer_max_pooling_2d(2, 2) |>
+  layer_batch_normalization() |>
+  layer_flatten() |>
+  layer_dense(128, activation='relu') |>
+  layer_dropout(0.2) |>
+  layer_dense(6, activation='softmax') |>
   compile(
     loss = 'categorical_crossentropy',
     optimizer = optimizer_adam(),
@@ -853,7 +866,7 @@ model_cnn %>%
   )
 
 # cannot have validation split in this setup, better to get test set
-history_cnn <- model_cnn %>% fit(
+history_cnn <- model_cnn |> fit(
   train_dataset,
   epochs = 200
 )
