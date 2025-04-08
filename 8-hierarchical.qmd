@@ -28,6 +28,7 @@ Here we will take a look at hierarchical clustering, using Wards linkage, on the
 5. Plot the clustering result, by colouring points in the plot of the data.
 
 \index{cluster analysis!dendrogram}
+\index{software!ggdendro}
 
 ```{r}
 #| label: hc-libraries
@@ -67,7 +68,9 @@ simple_clusters <- simple_clusters %>%
 
 @fig-hc-sim illustrates the hierarchical clustering approach for a simple simulated data set (a) with two well-separated clusters in 2D. The dendrogram (b) is a representation of the order that points are joined into clusters. The dendrogram strongly indicates two clusters because the two branches  representing the last join are much longer than all of the other branches. 
 
-Although, the dendrogram is usually a good summary of the steps taken by the algorithm, it can be misleading. The dendrogram might indicate a clear clustering (big differences in heights of branches) but the result may be awful. You need to check this by examining the result on the data, called model-in-the-data space by @wickham2015. 
+Although, the dendrogram is usually a good summary of the steps taken by the algorithm, it can be misleading. The dendrogram might indicate a clear clustering (big differences in heights of branches) but the result may be awful. You need to check this by examining the result on the data, called model-in-the-data space by @wickham2015.
+\index{model-in-the-data-space}
+
 
 Plot (c) shows the dendrogram in 2D, overlaid on the data. The segments show how the points are joined to make clusters. In order to represent the dendrogram this way, new points (represented by a "+" here) need to be added corresponding to the centroid of groups of points that have been joined. These are used to draw the segments between other points and other clusters. We can see that the longest (two) edges stretches across the gap between the two clusters. This corresponds to the top of the dendrogram, the two long branches where we would cut it to make the two-cluster solution. This two-cluster solution is shown in plot (d).
 
@@ -578,7 +581,7 @@ render_gif(p_s_hfly$data[p_w_hfly$data$node == 0,1:4],
            loop=FALSE)
 ```
 
-@fig-penguins-ddw and `r ifelse(knitr::is_html_output(), '@fig-penguins-hfly-html', '@fig-penguins-hfly-pdf')` show results for single linkage and wards linkage clustering of the penguins data. The 2D dendrograms are very different. Wards linkage produces a clearer indication of clusters, with a suggestion of three, or possibly four or five clusters. The dendrogram for single linkage suggests two clusters, and has the classical waterfall appearance that is often seen with this type of linkage. (If you look carefully, though, you will see it is actually a three cluster solution. At the very top of the dendrogram there is another branch connecting one observation to the other two clusters.)
+@fig-penguins-ddw and `r ifelse(knitr::is_html_output(), '@fig-penguins-hfly-html', '@fig-penguins-hfly-pdf')` show results for single linkage and Wards linkage clustering of the penguins data. The 2D dendrograms are very different. Wards linkage produces a clearer indication of clusters, with a suggestion of three, or possibly four or five clusters. The dendrogram for single linkage suggests two clusters, and has the classical waterfall appearance that is often seen with this type of linkage. (If you look carefully, though, you will see it is actually a three cluster solution. At the very top of the dendrogram there is another branch connecting one observation to the other two clusters.)
 
 `r ifelse(knitr::is_html_output(), '@fig-penguins-hfly-html', '@fig-penguins-hfly-pdf')` (a) and (b) show the dendrograms in 4D overlaid on the data. The two are starkly different. The single linkage clustering is like pins pointing to (three) centres, with some long extra edges.
 
@@ -733,12 +736,12 @@ Animation of dendrogram from Wards (top) and single (bottom) linkage clustering 
 
 ::: {.content-visible when-format="html"}
 ::: info
-Viewing the dendrograms in high-dimensions provides insight into how the observations have joined points to clusters. For example, single linkage often has edges leading to a single focal point, which might not be yield a useful clustering but might help to identify outliers. If the edges point to multiple focal points, with long edges bridging gaps in the data, the result is more likely yielding a useful clustering.
+Viewing the dendrograms in high-dimensions provides insight into how the algorithm has joined points to clusters. For example, single linkage often has edges leading to a single focal point, which might not yield a useful clustering but might help to identify outliers. If the edges point to multiple focal points, with long edges bridging gaps in the data, the result is more likely yielding a useful clustering.
 :::
 :::
 
 ::: {.content-visible when-format="pdf"}
-\infobox{Viewing the dendrograms in high-dimensions provides insight into how the observations have joined points to clusters. For example, single linkage often has edges leading to a single focal point, which might not be yield a useful clustering but might help to identify outliers. If the edges point to multiple focal points, with long edges bridging gaps in the data, the result is more likely yielding a useful clustering.}
+\infobox{Viewing the dendrograms in high-dimensions provides insight into how the algorithm has joined points to clusters. For example, single linkage often has edges leading to a single focal point, which might not yield a useful clustering but might help to identify outliers. If the edges point to multiple focal points, with long edges bridging gaps in the data, the result is more likely yielding a useful clustering.}
 :::
 
 ## Exercises {-}
@@ -748,8 +751,8 @@ Viewing the dendrograms in high-dimensions provides insight into how the observa
 3. Use hierarchical clustering with Euclidean distance and Wards linkage to split the `clusters_nonlin` data into four clusters. Look at the dendrogram in 2D and 4D. In 4D you can also include the cluster assignment as color. Does this look like a good solution?
 4. Repeat the same exercise using single linkage instead of Wards linkage. How does this solution compare to what we have found with Wards linkage? Does the solution match how you would cluster the data in a spin-and-brush approach?
 5. Argue why single linkage might not perform well for the `fake_trees` data. Which method do you think will work best with this data? Conduct hierarchical clustering with your choice of linkage method. Does the 2D dendrogram suggest 10 clusters for the 10 branches?  Take a look at the high-dimensional representation of the dendrogram. Has your chosen method captured the branches well, or not, explaining what you think worked well or poorly?
-6. What would a useful clustering of the first four PCs of the `aflw` data be? What linkage method would you expect works best to cluster it this way? Conduct the clustering. Examine the 2D dendrogram and decide on how many clusters should be used. Examine the cluster solution using a tour with points coloured by cluster.  
-7. Based on your assessment of the cluster structure in the challenge data sets, `c1`-`c7`, from the `mulgar` package, which linkage method would you recommend. Use your suggested linkage method to cluster each data set, and summarise how well it performed in detecting the clusters that you have seen.
+6. What would a useful clustering of the first four PCs of the `aflw` data be? What linkage method would you expect works best to cluster it this way? Conduct the clustering. Examine the 2D dendrogram and decide on how many clusters should be used. Examine the cluster solution using a tour with points coloured by cluster.
+7. Based on your assessment of the cluster structure in the challenge data sets, `c1`-`c7`, from the `mulgar` package, which linkage method would you recommend? Use your suggested linkage method to cluster each data set, and summarise how well it performed in detecting the clusters that you have seen.
 
 
 ```{r}
