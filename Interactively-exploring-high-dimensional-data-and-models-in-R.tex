@@ -294,7 +294,7 @@
 
 \title{Interactively exploring high-dimensional data and models in R}
 \author{Dianne Cook and Ursula Laa}
-\date{2025-04-08}
+\date{2025-04-09}
 
 \begin{document}
 \maketitle
@@ -4298,7 +4298,7 @@ steps are:
 \item
   Paint the cluster a chosen colour.
 \item
-  Repeat 1-2 until the data is grouped, and when no other separated
+  Repeat 1-3 until the data is grouped, and when no other separated
   cluster is visible in any projection. You may need to re-paint some
   points if they appear to be grouped incorrectly in a different
   projection, or paint more points that after spinning most likely
@@ -4398,10 +4398,10 @@ spin-and-brush approach using \texttt{detourr} on the penguins data.}
 \end{figure}%
 
 Figure~\ref{fig-penguins-bs-detourr} shows the stages of spin-and-brush
-on the penguins data using detourr. The final results can be examined
-and used for later analysis. Because this data came with a class
-variable, the penguin species, it is interesting to see how close the
-spin-and-brush clustering approach came to recovering these:
+on the penguins data using \texttt{detourr}. The final results can be
+examined and used for later analysis. Because this data came with a
+class variable, the penguin species, it is interesting to see how close
+the spin-and-brush clustering approach came to recovering these:
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -4442,8 +4442,8 @@ Most of the Chinstrap species were recovered also (labelled as
   \texttt{mulgar::clusters} data set.
 \item
   Use the spin-and-brush approach to identify the six clusters in the
-  \texttt{mulgar::multicluster} data set. (The code below using detourr
-  could be useful.)
+  \texttt{mulgar::multicluster} data set. (The code below using
+  \texttt{detourr} could be useful.)
 \item
   Use spin-and-brush on the challenge data sets, \texttt{c1}-\texttt{c7}
   from the \texttt{mulgar} package. How many clusters do you detect in
@@ -4472,7 +4472,12 @@ Most of the Chinstrap species were recovered also (labelled as
 \tightlist
 \item
   Use the spin-and-brush technique to identify the branches of the
-  \texttt{fake\_trees} data. The result should look something like this:
+  \texttt{fake\_trees} data. The result should look something like
+  Figure~\ref{fig-fake-trees-sb}. You can use the download button to
+  save the data with the colours. Tabulate the \texttt{branches} id
+  variable in the original data with the \texttt{colour} groups created
+  from brushing, to see how closely you have recovered the original
+  classes.
 \end{enumerate}
 
 \begin{figure}
@@ -4487,11 +4492,6 @@ Most of the Chinstrap species were recovered also (labelled as
 on fake trees data.}
 
 \end{figure}%
-
-You can use the download button to save the data with the colours.
-Tabulate the \texttt{branches} id variable in the original data with the
-\texttt{colour} groups created from brushing, to see how closely you
-have recovered the original classes.
 
 \section*{Project}\label{project-3}
 \addcontentsline{toc}{section}{Project}
@@ -4552,7 +4552,7 @@ linkage, on the \texttt{simple\_clusters} data. The steps taken are to:
   data.
 \end{enumerate}
 
-\index{cluster analysis!dendrogram}
+\index{cluster analysis!dendrogram} \index{software!ggdendro}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -4599,6 +4599,7 @@ the algorithm, it can be misleading. The dendrogram might indicate a
 clear clustering (big differences in heights of branches) but the result
 may be awful. You need to check this by examining the result on the
 data, called model-in-the-data space by Wickham et al. (2015).
+\index{model-in-the-data-space}
 
 Plot (c) shows the dendrogram in 2D, overlaid on the data. The segments
 show how the points are joined to make clusters. In order to represent
@@ -5198,7 +5199,7 @@ linkage and wards linkage clustering.
 \end{Shaded}
 
 Figure~\ref{fig-penguins-ddw} and Figure~\ref{fig-penguins-hfly-pdf}
-show results for single linkage and wards linkage clustering of the
+show results for single linkage and Wards linkage clustering of the
 penguins data. The 2D dendrograms are very different. Wards linkage
 produces a clearer indication of clusters, with a suggestion of three,
 or possibly four or five clusters. The dendrogram for single linkage
@@ -5376,7 +5377,7 @@ the three-cluster solution of each.}
 \end{Highlighting}
 \end{Shaded}
 
-\infobox{Viewing the dendrograms in high-dimensions provides insight into how the observations have joined points to clusters. For example, single linkage often has edges leading to a single focal point, which might not be yield a useful clustering but might help to identify outliers. If the edges point to multiple focal points, with long edges bridging gaps in the data, the result is more likely yielding a useful clustering.}
+\infobox{Viewing the dendrograms in high-dimensions provides insight into how the algorithm has joined points to clusters. For example, single linkage often has edges leading to a single focal point, which might not yield a useful clustering but might help to identify outliers. If the edges point to multiple focal points, with long edges bridging gaps in the data, the result is more likely yielding a useful clustering.}
 
 \section*{Exercises}\label{exercises-7}
 \addcontentsline{toc}{section}{Exercises}
@@ -5417,11 +5418,11 @@ the three-cluster solution of each.}
   \texttt{aflw} data be? What linkage method would you expect works best
   to cluster it this way? Conduct the clustering. Examine the 2D
   dendrogram and decide on how many clusters should be used. Examine the
-  cluster solution using a tour with points coloured by cluster.\\
+  cluster solution using a tour with points coloured by cluster.
 \item
   Based on your assessment of the cluster structure in the challenge
   data sets, \texttt{c1}-\texttt{c7}, from the \texttt{mulgar} package,
-  which linkage method would you recommend. Use your suggested linkage
+  which linkage method would you recommend? Use your suggested linkage
   method to cluster each data set, and summarise how well it performed
   in detecting the clusters that you have seen.
 \end{enumerate}
@@ -5431,9 +5432,9 @@ clustering}{k-means clustering}}\label{sec-kmeans}
 
 \index{cluster analysis!k-means} \index{cluster analysis!algorithms}
 
-One of the simplest and efficient techniques for clustering data is the
-\(k\)-means algorithm. The algorithm begins with a choice for \(k\), the
-number of clusters to divide the data into. It is seeded with \(k\)
+One of the simplest and most efficient techniques for clustering data is
+the \(k\)-means algorithm. The algorithm begins with a choice for \(k\),
+the number of clusters to divide the data into. It is seeded with \(k\)
 initial means, and sequentially iterates through the observations,
 assigning them to the nearest mean, and re-calculating the \(k\) means.
 It stops at a given number of iterations or when points no longer change
@@ -5803,9 +5804,24 @@ VEE, if we strictly followed the BIC choice.
 Figure~\ref{fig-penguins-mc-pdf} shows this model in a tour, and the
 best three-cluster model. You can see that the four-cluster result is
 inadequate, in various ways. One of the species (Chinstrap) does have a
-bimodal density, due to the two species, and we would expect that a four
-cluster solution might detect this. The tour shows that the
-three-cluster solution is the best match to the data shape.
+bimodal density, due to the two sexes, and we would expect that a four
+cluster solution might detect this. However, the four cluster solution
+doesn't. Instead, it splits the large group of Gentoo into two clusters.
+This does happen to roughly match the two sexes. We suspect that this is
+accidental though, and the real reason for splitting this cluster is
+more analogous to how \(k\)-means or Wards linkage hierarchical
+clustering, that a lower within-cluster variance is obtained by
+splitting a large elliptical cluster into two more spherical clusters.
+If we expected the clustering solution to include the sexes, we would
+expect that the best BIC would be 6 clusters, and the three species
+clusters would be divided into two roughly matching the two sexes in
+each species. Rather the four cluster solution is one that simply
+divides the biggest cluster into two, and doesn't truly capture the
+shape of the data. The tour shows that the three-cluster solution with
+EEE parametrisation is the best match to the data shape. It fits the
+three clusters that we can visually see and no more. Thus this is the
+parsimonious model, the simplest model that adequately captures the data
+distribution.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -5919,14 +5935,14 @@ fits the data better, even though it has a lower BIC.}
 \item
   Use model-based clustering on the challenge data sets,
   \texttt{c1}-\texttt{c7} from the \texttt{mulgar} package. Explain why
-  or why not the best model fits the cluster structure or not.
+  the best model fits the cluster structure or not.
 \end{enumerate}
 
 \chapter{Self-organizing maps}\label{sec-som}
 
 \index{cluster analysis!self-organizing maps (SOM)}
 
-A self-organizing map (SOM) Kohonen (2001) is constructed using a
+A self-organizing map (SOM) (Kohonen, 2001) is constructed using a
 constrained \(k\)-means algorithm. A 1D or 2D net is stretched through
 the data. The knots, in the net, form the cluster means, and the points
 closest to the knot are considered to belong to that cluster. The
@@ -5984,7 +6000,7 @@ original data, the 2D map, the map in \(p\)-D, with edges, and segments
 to connect points to represent the next using the \texttt{som\_model()}
 function from \texttt{mulgar}. The 2D map shows a configuration of the
 data in 2D which best displays the clusters, much like how a PCA or LDA
-plot would eb used.
+plot would be used.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -6067,14 +6083,15 @@ indicating which points to connect to draw the net.
 
 \end{minipage}%
 
-\end{figure}%
+\caption{\label{fig-penguins-som-pdf}Examining the SOM map views in 2D
+and with the data in 4D. Points are coloured by species, which was not
+used for the modeling. The 2D map shows that the \texttt{map\ 2}
+direction is primarily distinguishing the Gentoo from the others, and
+\texttt{map\ 1} is imperfectly distinguishing the Chinstrap from Adelie.
+The map in the data space shows how it is woven into the shape of the
+data.}
 
-Examining the SOM map views in 2D and with the data in 4D. Points are
-coloured by species, which was not used for the modeling. The 2D map
-shows that the \texttt{map\ 2} direction is primarily distinguishing the
-Gentoo from the others, and \texttt{map\ 1} is imperfectly
-distinguishing the Chinstrap from Adelie. The map in the data space
-shows how it is woven into the shape of the data.
+\end{figure}%
 
 The SOM fit, with a \(5\times 5\) grid, for the penguins has the data
 clustered into 25 groups. This doesn't work as a clustering technique on
@@ -9772,7 +9789,7 @@ other two penguin species. \index{classification!misclassification}
 
 \begin{verbatim}
           Adelie Chinstrap Gentoo class.error
-Adelie       143         3      0 0.020547945
+Adelie       142         4      0 0.027397260
 Chinstrap      4        64      0 0.058823529
 Gentoo         0         1    118 0.008403361
 \end{verbatim}
