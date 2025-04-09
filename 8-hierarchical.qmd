@@ -30,7 +30,7 @@ Here we will take a look at hierarchical clustering, using Wards linkage, on the
 \index{cluster analysis!dendrogram}
 \index{software!ggdendro}
 
-```{r}
+```{r echo=knitr::is_html_output()}
 #| label: hc-libraries
 #| message: FALSE
 #| code-summary: "Load libraries"
@@ -74,7 +74,7 @@ Although, the dendrogram is usually a good summary of the steps taken by the alg
 
 Plot (c) shows the dendrogram in 2D, overlaid on the data. The segments show how the points are joined to make clusters. In order to represent the dendrogram this way, new points (represented by a "+" here) need to be added corresponding to the centroid of groups of points that have been joined. These are used to draw the segments between other points and other clusters. We can see that the longest (two) edges stretches across the gap between the two clusters. This corresponds to the top of the dendrogram, the two long branches where we would cut it to make the two-cluster solution. This two-cluster solution is shown in plot (d).
 
-```{r}
+```{r echo=knitr::is_html_output()}
 #| label: fig-hc-sim
 #| eval: true
 #| code-summary: "Code to make the four plots"
@@ -148,7 +148,7 @@ Plotting the dendrogram in the data space can help you understand how the hierar
 @fig-problems shows two examples of structure in data that will confuse hierarchical clustering: nuisance variables and nuisance cases. We usually do not know that these problems exist prior to clustering the data. Discovering these iteratively as you conduct a clustering analysis is important for generating useful results. 
 
 
-```{r}
+```{r echo=knitr::is_html_output()}
 #| label: fig-problems
 #| eval: true
 #| message: false
@@ -195,7 +195,7 @@ pd1 + pd2 + plot_layout(ncol=2)
 
 If an outlier is a point that is extreme relative to other observations, an "inlier" is a point that is extreme relative to a cluster, but inside the domain of all of the observations. Nuisance observations are inliers, cases that occur between larger groups of points. If they were excluded there might be a gap between clusters. These can cause problems for clustering when distances between clusters are measured, and can be very problematic when single linkage hierarchical clustering is used. @fig-d1-s shows how nuisance observations affect single linkage but not Wards linkage hierarchical clustering.
 
-```{r}
+```{r echo=knitr::is_html_output()}
 #| label: fig-d1-s
 #| eval: true
 #| message: false
@@ -301,7 +301,7 @@ pd1s + pd1hs + pc_d1s +
 
 Nuisance variables are ones that do not contribute to the clustering, such as `x2` here. When we look at this data we see a gap between two elliptically shape clusters, with the gap being only in the horizontal direction, `x1`. When we compute the distances between points, in order to start clustering, without knowing that `x2` is a nuisance variable, points across the gap might be considered to be closer than points within the same cluster. @fig-d2-c shows how nuisance variables affects complete linkage but not Wards linkage hierarchical clustering. (Wards linkage can be affected but it isn't for this data.) Interestingly, the dendrogram for complete linkage looks ideal, that it suggests two clusters. It is not until you examine the resulting clusters in the data that you can see the error, that it has clustered across the gap.
 
-```{r}
+```{r echo=knitr::is_html_output()}
 #| label: fig-d2-c
 #| eval: true
 #| message: false
@@ -418,7 +418,7 @@ Two dendrograms might look similar but the resulting clustering can be very diff
 
 The first step with any clustering with high dimensional data is also to check the data. You typically don't know whether there are clusters, or what shape they might be, or if there are nuisance observations or variables. A pairs plot like in @fig-penguins-pairs is a nice complement to using the tour (`r ifelse(knitr::is_html_output(), '@fig-penguins-gt-html', '@fig-penguins-gt-pdf')`) for this. Here you can see three elliptical clusters, with one is further from the others.
 
-```{r}
+```{r echo=knitr::is_html_output()}
 #| label: fig-penguins-pairs
 #| message: false
 #| warning: false
@@ -432,7 +432,7 @@ ggscatmat(penguins_sub[,1:4]) +
   xlab("") + ylab("")
 ```
 
-```{r}
+```{r echo=knitr::is_html_output()}
 #| eval: false
 #| code-summary: "Code to create tour"
 set.seed(20230329)
@@ -468,14 +468,22 @@ Use a grand tour of your data to check for clusters, the shape of clusters and f
 :::
 
 ::: {.content-visible when-format="pdf"}
+::: {#fig-penguins-gt-pdf layout="[[33, 33, 33]]"}
 
-![One frame from a grand tour being used to check for clusters, the shape of clusters and for nuisance observations and variables. Here the penguins data looks like it has possibly three elliptical clusters, one more separated than the other two, with some nuisance observations.](images/penguins_gt_59.png){#fig-penguins-gt-pdf fig-alt="A scatterplot of a 2D projection. You can see three elliptical clusters, one further apart from the other two." fig.align="center"}
+![](images/penguins_gt_59.png){fig-alt="A scatterplot of a 2D projection. You can see three circular clusters, one further apart from the other two."}
+
+![](images/penguins_gt_32.png){fig-alt="A scatterplot of a 2D projection. You can see one large blob, and an outlier."}
+
+![](images/penguins_gt_105.png){fig-alt="A scatterplot of a 2D projection. You can see two clusters, one smaller and one twice the size. Both are lying along an x=-y direction."}
+
+Three frames from a grand tour being used to check for clusters, the shape of clusters and for nuisance observations and variables. Here the penguins data looks like it has possibly three elliptical clusters, one more separated than the other two, with some nuisance (outliers) observations. {{< fa play-circle >}}
+:::
 :::
 
 
 The process is the same as for the simpler example. We compute and draw the dendrogram in 2D, compute it in $p$-D and view with a tour. Here we have also chosen to examine the three cluster solution for single linkage and wards linkage clustering.
 
-```{r}
+```{r echo=knitr::is_html_output()}
 #| label: penguins-hclust
 #| code-fold: false
 p_dist <- dist(penguins_sub[,1:4])
@@ -493,7 +501,7 @@ p_w_hfly <- hierfly(p_clw, p_hcw, scale=FALSE)
 p_s_hfly <- hierfly(p_cls, p_hcs, scale=FALSE)
 ```
 
-```{r}
+```{r echo=knitr::is_html_output()}
 #| code-summary: "Code to draw dendrograms"
 # Generate the dendrograms in 2D
 p_hcw_dd <- dendro_data(p_hcw)
@@ -515,7 +523,7 @@ ps_dd <- ggplot() +
   theme_dendro()
 ```
 
-```{r}
+```{r echo=knitr::is_html_output()}
 #| label: penguins-hfly
 #| eval: FALSE
 #| code-summary: "Code to create tours of dendrogram in data"
@@ -639,7 +647,7 @@ Single linkage on the penguins has a very different joining pattern to Wards! Wh
 @fig-penguins-hfly-plotly provides HTML objects of the dendrograms, so that they can be directly compared. The same tour path is used, so the sliders allow setting the view to the same projection in each plot.
 :::
 
-```{r}
+```{r echo=knitr::is_html_output()}
 #| label: penguins-hfly-plotly
 #| eval: FALSE
 #| code-summary: "Code to make html objects of the dendrogram in 4D"

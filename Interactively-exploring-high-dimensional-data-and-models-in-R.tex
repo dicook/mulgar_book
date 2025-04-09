@@ -4556,21 +4556,6 @@ linkage, on the \texttt{simple\_clusters} data. The steps taken are to:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\FunctionTok{library}\NormalTok{(ggplot2)}
-\FunctionTok{library}\NormalTok{(mulgar)}
-\FunctionTok{library}\NormalTok{(ggdendro)}
-\FunctionTok{library}\NormalTok{(dplyr)}
-\FunctionTok{library}\NormalTok{(patchwork)}
-\FunctionTok{library}\NormalTok{(tourr)}
-\FunctionTok{library}\NormalTok{(plotly)}
-\FunctionTok{library}\NormalTok{(htmlwidgets)}
-\FunctionTok{library}\NormalTok{(colorspace)}
-\FunctionTok{library}\NormalTok{(GGally)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{Shaded}
-\begin{Highlighting}[]
 \FunctionTok{data}\NormalTok{(simple\_clusters)}
 
 \CommentTok{\# Compute hierarchical clustering with Ward\textquotesingle{}s linkage}
@@ -4611,59 +4596,7 @@ across the gap between the two clusters. This corresponds to the top of
 the dendrogram, the two long branches where we would cut it to make the
 two-cluster solution. This two-cluster solution is shown in plot (d).
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\# Plot the data}
-\NormalTok{pd }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(simple\_clusters, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{x1, }\AttributeTok{y=}\NormalTok{x2)) }\SpecialCharTok{+}
-  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{colour=}\StringTok{"\#3B99B1"}\NormalTok{, }\AttributeTok{size=}\DecValTok{2}\NormalTok{, }\AttributeTok{alpha=}\FloatTok{0.8}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{ggtitle}\NormalTok{(}\StringTok{"(a)"}\NormalTok{) }\SpecialCharTok{+} 
-  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{theme}\NormalTok{(}\AttributeTok{aspect.ratio=}\DecValTok{1}\NormalTok{) }
-
-\CommentTok{\# Plot the dendrogram}
-\NormalTok{ph }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{geom\_segment}\NormalTok{(}\AttributeTok{data=}\NormalTok{cl\_ggd}\SpecialCharTok{$}\NormalTok{segments, }
-               \FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ x, }\AttributeTok{y =}\NormalTok{ y, }
-                   \AttributeTok{xend =}\NormalTok{ xend, }\AttributeTok{yend =}\NormalTok{ yend)) }\SpecialCharTok{+} 
-  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{data=}\NormalTok{cl\_ggd}\SpecialCharTok{$}\NormalTok{labels, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{x, }\AttributeTok{y=}\NormalTok{y),}
-             \AttributeTok{colour=}\StringTok{"\#3B99B1"}\NormalTok{, }\AttributeTok{alpha=}\FloatTok{0.8}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{ggtitle}\NormalTok{(}\StringTok{"(b)"}\NormalTok{) }\SpecialCharTok{+} 
-  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{theme\_dendro}\NormalTok{()}
-
-\CommentTok{\# Plot the dendrogram on the data}
-\NormalTok{pdh }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{geom\_segment}\NormalTok{(}\AttributeTok{data=}\NormalTok{cl\_hfly}\SpecialCharTok{$}\NormalTok{segments, }
-                \FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{x, }\AttributeTok{xend=}\NormalTok{xend,}
-                    \AttributeTok{y=}\NormalTok{y, }\AttributeTok{yend=}\NormalTok{yend)) }\SpecialCharTok{+}
-  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{data=}\NormalTok{cl\_hfly}\SpecialCharTok{$}\NormalTok{data, }
-             \FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{x1, }\AttributeTok{y=}\NormalTok{x2,}
-                 \AttributeTok{shape=}\FunctionTok{factor}\NormalTok{(node),}
-                 \AttributeTok{colour=}\FunctionTok{factor}\NormalTok{(node),}
-                 \AttributeTok{size=}\DecValTok{1}\SpecialCharTok{{-}}\NormalTok{node), }\AttributeTok{alpha=}\FloatTok{0.8}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{xlab}\NormalTok{(}\StringTok{"x1"}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{ylab}\NormalTok{(}\StringTok{"x2"}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{scale\_shape\_manual}\NormalTok{(}\AttributeTok{values =} \FunctionTok{c}\NormalTok{(}\DecValTok{16}\NormalTok{, }\DecValTok{3}\NormalTok{)) }\SpecialCharTok{+}
-  \FunctionTok{scale\_colour\_manual}\NormalTok{(}\AttributeTok{values =} \FunctionTok{c}\NormalTok{(}\StringTok{"\#3B99B1"}\NormalTok{, }\StringTok{"black"}\NormalTok{)) }\SpecialCharTok{+}
-  \FunctionTok{scale\_size}\NormalTok{(}\AttributeTok{limits=}\FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{17}\NormalTok{)) }\SpecialCharTok{+}
-  \FunctionTok{ggtitle}\NormalTok{(}\StringTok{"(c)"}\NormalTok{) }\SpecialCharTok{+} 
-  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{theme}\NormalTok{(}\AttributeTok{aspect.ratio=}\DecValTok{1}\NormalTok{, }\AttributeTok{legend.position=}\StringTok{"none"}\NormalTok{)}
-
-\CommentTok{\# Plot the resulting clusters}
-\NormalTok{pc }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(simple\_clusters) }\SpecialCharTok{+}
-  \FunctionTok{geom\_point}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{x1, }\AttributeTok{y=}\NormalTok{x2, }\AttributeTok{colour=}\NormalTok{clw), }
-             \AttributeTok{size=}\DecValTok{2}\NormalTok{, }\AttributeTok{alpha=}\FloatTok{0.8}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{scale\_colour\_discrete\_divergingx}\NormalTok{(}\AttributeTok{palette =} \StringTok{"Zissou 1"}\NormalTok{,}
-                                   \AttributeTok{nmax=}\DecValTok{5}\NormalTok{, }\AttributeTok{rev=}\ConstantTok{TRUE}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{ggtitle}\NormalTok{(}\StringTok{"(d)"}\NormalTok{) }\SpecialCharTok{+} 
-  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{theme}\NormalTok{(}\AttributeTok{aspect.ratio=}\DecValTok{1}\NormalTok{, }\AttributeTok{legend.position=}\StringTok{"none"}\NormalTok{)}
-
-\NormalTok{pd }\SpecialCharTok{+}\NormalTok{ ph }\SpecialCharTok{+}\NormalTok{ pdh }\SpecialCharTok{+}\NormalTok{ pc }\SpecialCharTok{+} \FunctionTok{plot\_layout}\NormalTok{(}\AttributeTok{ncol=}\DecValTok{2}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{figure}[H]
+\begin{figure}
 
 \centering{
 
@@ -4692,46 +4625,7 @@ cases. We usually do not know that these problems exist prior to
 clustering the data. Discovering these iteratively as you conduct a
 clustering analysis is important for generating useful results.
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\# Nuisance observations}
-\FunctionTok{set.seed}\NormalTok{(}\DecValTok{20190514}\NormalTok{)}
-\NormalTok{x }\OtherTok{\textless{}{-}}\NormalTok{ (}\FunctionTok{runif}\NormalTok{(}\DecValTok{20}\NormalTok{)}\SpecialCharTok{{-}}\FloatTok{0.5}\NormalTok{)}\SpecialCharTok{*}\DecValTok{4}
-\NormalTok{y }\OtherTok{\textless{}{-}}\NormalTok{ x}
-\NormalTok{d1 }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\AttributeTok{x1 =} \FunctionTok{c}\NormalTok{(}\FunctionTok{rnorm}\NormalTok{(}\DecValTok{50}\NormalTok{, }\SpecialCharTok{{-}}\DecValTok{3}\NormalTok{), }
-                            \FunctionTok{rnorm}\NormalTok{(}\DecValTok{50}\NormalTok{, }\DecValTok{3}\NormalTok{), x),}
-                 \AttributeTok{x2 =} \FunctionTok{c}\NormalTok{(}\FunctionTok{rnorm}\NormalTok{(}\DecValTok{50}\NormalTok{, }\SpecialCharTok{{-}}\DecValTok{3}\NormalTok{), }
-                            \FunctionTok{rnorm}\NormalTok{(}\DecValTok{50}\NormalTok{, }\DecValTok{3}\NormalTok{), y),}
-                 \AttributeTok{cl =} \FunctionTok{factor}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\FunctionTok{rep}\NormalTok{(}\StringTok{"A"}\NormalTok{, }\DecValTok{50}\NormalTok{), }
-                             \FunctionTok{rep}\NormalTok{(}\StringTok{"B"}\NormalTok{, }\DecValTok{70}\NormalTok{))))}
-\NormalTok{d1 }\OtherTok{\textless{}{-}}\NormalTok{ d1 }\SpecialCharTok{\%\textgreater{}\%} 
-  \FunctionTok{mutate\_if}\NormalTok{(is.numeric, }\ControlFlowTok{function}\NormalTok{(x) (x}\SpecialCharTok{{-}}\FunctionTok{mean}\NormalTok{(x))}\SpecialCharTok{/}\FunctionTok{sd}\NormalTok{(x))}
-\NormalTok{pd1 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(}\AttributeTok{data=}\NormalTok{d1, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{x1, }\AttributeTok{y=}\NormalTok{x2)) }\SpecialCharTok{+} 
-  \FunctionTok{geom\_point}\NormalTok{() }\SpecialCharTok{+}
-    \FunctionTok{ggtitle}\NormalTok{(}\StringTok{"Nuisance observations"}\NormalTok{) }\SpecialCharTok{+} 
-  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
-    \FunctionTok{theme}\NormalTok{(}\AttributeTok{aspect.ratio=}\DecValTok{1}\NormalTok{) }
-
-\CommentTok{\# Nuisance variables}
-\FunctionTok{set.seed}\NormalTok{(}\DecValTok{20190512}\NormalTok{)}
-\NormalTok{d2 }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\AttributeTok{x1=}\FunctionTok{c}\NormalTok{(}\FunctionTok{rnorm}\NormalTok{(}\DecValTok{50}\NormalTok{, }\SpecialCharTok{{-}}\DecValTok{4}\NormalTok{), }
-                            \FunctionTok{rnorm}\NormalTok{(}\DecValTok{50}\NormalTok{, }\DecValTok{4}\NormalTok{)),}
-                 \AttributeTok{x2=}\FunctionTok{c}\NormalTok{(}\FunctionTok{rnorm}\NormalTok{(}\DecValTok{100}\NormalTok{)),}
-                 \AttributeTok{cl =} \FunctionTok{factor}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\FunctionTok{rep}\NormalTok{(}\StringTok{"A"}\NormalTok{, }\DecValTok{50}\NormalTok{), }
-                             \FunctionTok{rep}\NormalTok{(}\StringTok{"B"}\NormalTok{, }\DecValTok{50}\NormalTok{))))}
-\NormalTok{d2 }\OtherTok{\textless{}{-}}\NormalTok{ d2 }\SpecialCharTok{\%\textgreater{}\%} 
-  \FunctionTok{mutate\_if}\NormalTok{(is.numeric, }\ControlFlowTok{function}\NormalTok{(x) (x}\SpecialCharTok{{-}}\FunctionTok{mean}\NormalTok{(x))}\SpecialCharTok{/}\FunctionTok{sd}\NormalTok{(x))}
-\NormalTok{pd2 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(}\AttributeTok{data=}\NormalTok{d2, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{x1, }\AttributeTok{y=}\NormalTok{x2)) }\SpecialCharTok{+} 
-  \FunctionTok{geom\_point}\NormalTok{() }\SpecialCharTok{+}
-    \FunctionTok{ggtitle}\NormalTok{(}\StringTok{"Nuisance variables"}\NormalTok{) }\SpecialCharTok{+} 
-  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
-    \FunctionTok{theme}\NormalTok{(}\AttributeTok{aspect.ratio=}\DecValTok{1}\NormalTok{)}
-
-\NormalTok{pd1 }\SpecialCharTok{+}\NormalTok{ pd2 }\SpecialCharTok{+} \FunctionTok{plot\_layout}\NormalTok{(}\AttributeTok{ncol=}\DecValTok{2}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{figure}[H]
+\begin{figure}
 
 \centering{
 
@@ -4758,105 +4652,7 @@ very problematic when single linkage hierarchical clustering is used.
 Figure~\ref{fig-d1-s} shows how nuisance observations affect single
 linkage but not Wards linkage hierarchical clustering.
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\# Compute single linkage}
-\NormalTok{d1\_hs }\OtherTok{\textless{}{-}} \FunctionTok{hclust}\NormalTok{(}\FunctionTok{dist}\NormalTok{(d1[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{2}\NormalTok{]),}
-                \AttributeTok{method=}\StringTok{"single"}\NormalTok{)}
-\NormalTok{d1\_ggds }\OtherTok{\textless{}{-}} \FunctionTok{dendro\_data}\NormalTok{(d1\_hs, }\AttributeTok{type =} \StringTok{"triangle"}\NormalTok{)}
-\NormalTok{pd1s }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{geom\_segment}\NormalTok{(}\AttributeTok{data=}\NormalTok{d1\_ggds}\SpecialCharTok{$}\NormalTok{segments, }
-               \FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ x, }\AttributeTok{y =}\NormalTok{ y, }
-                   \AttributeTok{xend =}\NormalTok{ xend, }\AttributeTok{yend =}\NormalTok{ yend)) }\SpecialCharTok{+} 
-  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{data=}\NormalTok{d1\_ggds}\SpecialCharTok{$}\NormalTok{labels, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{x, }\AttributeTok{y=}\NormalTok{y),}
-             \AttributeTok{colour=}\StringTok{"\#3B99B1"}\NormalTok{, }\AttributeTok{alpha=}\FloatTok{0.8}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{ggtitle}\NormalTok{(}\StringTok{"(a) Single linkage dendrogram"}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{theme\_dendro}\NormalTok{()}
-
-\CommentTok{\# Compute dendrogram in data}
-\NormalTok{d1\_hflys }\OtherTok{\textless{}{-}} \FunctionTok{hierfly}\NormalTok{(d1, d1\_hs, }\AttributeTok{scale=}\ConstantTok{FALSE}\NormalTok{)}
-
-\NormalTok{pd1hs }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{geom\_segment}\NormalTok{(}\AttributeTok{data=}\NormalTok{d1\_hflys}\SpecialCharTok{$}\NormalTok{segments, }
-                \FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{x, }\AttributeTok{xend=}\NormalTok{xend,}
-                    \AttributeTok{y=}\NormalTok{y, }\AttributeTok{yend=}\NormalTok{yend)) }\SpecialCharTok{+}
-  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{data=}\NormalTok{d1\_hflys}\SpecialCharTok{$}\NormalTok{data, }
-             \FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{x1, }\AttributeTok{y=}\NormalTok{x2,}
-                 \AttributeTok{shape=}\FunctionTok{factor}\NormalTok{(node),}
-                 \AttributeTok{colour=}\FunctionTok{factor}\NormalTok{(node),}
-                 \AttributeTok{size=}\DecValTok{1}\SpecialCharTok{{-}}\NormalTok{node), }\AttributeTok{alpha=}\FloatTok{0.8}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{scale\_shape\_manual}\NormalTok{(}\AttributeTok{values =} \FunctionTok{c}\NormalTok{(}\DecValTok{16}\NormalTok{, }\DecValTok{3}\NormalTok{)) }\SpecialCharTok{+}
-  \FunctionTok{scale\_colour\_manual}\NormalTok{(}\AttributeTok{values =} \FunctionTok{c}\NormalTok{(}\StringTok{"\#3B99B1"}\NormalTok{, }\StringTok{"black"}\NormalTok{)) }\SpecialCharTok{+}
-  \FunctionTok{scale\_size}\NormalTok{(}\AttributeTok{limits=}\FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{17}\NormalTok{)) }\SpecialCharTok{+}
-  \FunctionTok{ggtitle}\NormalTok{(}\StringTok{"(b) Dendrogram in data space"}\NormalTok{) }\SpecialCharTok{+} 
-  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{theme}\NormalTok{(}\AttributeTok{aspect.ratio=}\DecValTok{1}\NormalTok{, }\AttributeTok{legend.position=}\StringTok{"none"}\NormalTok{)}
-
-\CommentTok{\# Show result}
-\NormalTok{d1 }\OtherTok{\textless{}{-}}\NormalTok{ d1 }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{cls =} \FunctionTok{factor}\NormalTok{(}\FunctionTok{cutree}\NormalTok{(d1\_hs, }\DecValTok{2}\NormalTok{)))}
-\NormalTok{pc\_d1s }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(d1) }\SpecialCharTok{+}
-  \FunctionTok{geom\_point}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{x1, }\AttributeTok{y=}\NormalTok{x2, }\AttributeTok{colour=}\NormalTok{cls), }
-             \AttributeTok{size=}\DecValTok{2}\NormalTok{, }\AttributeTok{alpha=}\FloatTok{0.8}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{scale\_colour\_discrete\_divergingx}\NormalTok{(}\AttributeTok{palette =} \StringTok{"Zissou 1"}\NormalTok{,}
-                                   \AttributeTok{nmax=}\DecValTok{4}\NormalTok{, }\AttributeTok{rev=}\ConstantTok{TRUE}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{ggtitle}\NormalTok{(}\StringTok{"(c) Two{-}cluster solution"}\NormalTok{) }\SpecialCharTok{+} 
-  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{theme}\NormalTok{(}\AttributeTok{aspect.ratio=}\DecValTok{1}\NormalTok{, }\AttributeTok{legend.position=}\StringTok{"none"}\NormalTok{)}
-
-\CommentTok{\# Compute Wards linkage}
-\NormalTok{d1\_hw }\OtherTok{\textless{}{-}} \FunctionTok{hclust}\NormalTok{(}\FunctionTok{dist}\NormalTok{(d1[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{2}\NormalTok{]),}
-                \AttributeTok{method=}\StringTok{"ward.D2"}\NormalTok{)}
-\NormalTok{d1\_ggdw }\OtherTok{\textless{}{-}} \FunctionTok{dendro\_data}\NormalTok{(d1\_hw, }\AttributeTok{type =} \StringTok{"triangle"}\NormalTok{)}
-\NormalTok{pd1w }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{geom\_segment}\NormalTok{(}\AttributeTok{data=}\NormalTok{d1\_ggdw}\SpecialCharTok{$}\NormalTok{segments, }
-               \FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ x, }\AttributeTok{y =}\NormalTok{ y, }
-                   \AttributeTok{xend =}\NormalTok{ xend, }\AttributeTok{yend =}\NormalTok{ yend)) }\SpecialCharTok{+} 
-  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{data=}\NormalTok{d1\_ggdw}\SpecialCharTok{$}\NormalTok{labels, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{x, }\AttributeTok{y=}\NormalTok{y),}
-             \AttributeTok{colour=}\StringTok{"\#3B99B1"}\NormalTok{, }\AttributeTok{alpha=}\FloatTok{0.8}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{ggtitle}\NormalTok{(}\StringTok{"(d) Ward\textquotesingle{}s linkage dendrogram"}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{theme\_dendro}\NormalTok{()}
-
-\CommentTok{\# Compute dendrogram in data}
-\NormalTok{d1\_hflyw }\OtherTok{\textless{}{-}} \FunctionTok{hierfly}\NormalTok{(d1, d1\_hw, }\AttributeTok{scale=}\ConstantTok{FALSE}\NormalTok{)}
-
-\NormalTok{pd1hw }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{geom\_segment}\NormalTok{(}\AttributeTok{data=}\NormalTok{d1\_hflyw}\SpecialCharTok{$}\NormalTok{segments, }
-                \FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{x, }\AttributeTok{xend=}\NormalTok{xend,}
-                    \AttributeTok{y=}\NormalTok{y, }\AttributeTok{yend=}\NormalTok{yend)) }\SpecialCharTok{+}
-  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{data=}\NormalTok{d1\_hflyw}\SpecialCharTok{$}\NormalTok{data, }
-             \FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{x1, }\AttributeTok{y=}\NormalTok{x2,}
-                 \AttributeTok{shape=}\FunctionTok{factor}\NormalTok{(node),}
-                 \AttributeTok{colour=}\FunctionTok{factor}\NormalTok{(node),}
-                 \AttributeTok{size=}\DecValTok{1}\SpecialCharTok{{-}}\NormalTok{node), }\AttributeTok{alpha=}\FloatTok{0.8}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{scale\_shape\_manual}\NormalTok{(}\AttributeTok{values =} \FunctionTok{c}\NormalTok{(}\DecValTok{16}\NormalTok{, }\DecValTok{3}\NormalTok{)) }\SpecialCharTok{+}
-  \FunctionTok{scale\_colour\_manual}\NormalTok{(}\AttributeTok{values =} \FunctionTok{c}\NormalTok{(}\StringTok{"\#3B99B1"}\NormalTok{, }\StringTok{"black"}\NormalTok{)) }\SpecialCharTok{+}
-  \FunctionTok{scale\_size}\NormalTok{(}\AttributeTok{limits=}\FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{17}\NormalTok{)) }\SpecialCharTok{+}
-  \FunctionTok{ggtitle}\NormalTok{(}\StringTok{"(e) Dendrogram in data space"}\NormalTok{) }\SpecialCharTok{+} 
-  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{theme}\NormalTok{(}\AttributeTok{aspect.ratio=}\DecValTok{1}\NormalTok{, }\AttributeTok{legend.position=}\StringTok{"none"}\NormalTok{)}
-
-\CommentTok{\# Show result}
-\NormalTok{d1 }\OtherTok{\textless{}{-}}\NormalTok{ d1 }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{clw =} \FunctionTok{factor}\NormalTok{(}\FunctionTok{cutree}\NormalTok{(d1\_hw, }\DecValTok{2}\NormalTok{)))}
-\NormalTok{pc\_d1w }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(d1) }\SpecialCharTok{+}
-  \FunctionTok{geom\_point}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{x1, }\AttributeTok{y=}\NormalTok{x2, }\AttributeTok{colour=}\NormalTok{clw), }
-             \AttributeTok{size=}\DecValTok{2}\NormalTok{, }\AttributeTok{alpha=}\FloatTok{0.8}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{scale\_colour\_discrete\_divergingx}\NormalTok{(}\AttributeTok{palette =} \StringTok{"Zissou 1"}\NormalTok{,}
-                                   \AttributeTok{nmax=}\DecValTok{4}\NormalTok{, }\AttributeTok{rev=}\ConstantTok{TRUE}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{ggtitle}\NormalTok{(}\StringTok{"(f) Two{-}cluster solution"}\NormalTok{) }\SpecialCharTok{+} 
-  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{theme}\NormalTok{(}\AttributeTok{aspect.ratio=}\DecValTok{1}\NormalTok{, }\AttributeTok{legend.position=}\StringTok{"none"}\NormalTok{)}
-
-\NormalTok{pd1s }\SpecialCharTok{+}\NormalTok{ pd1hs }\SpecialCharTok{+}\NormalTok{ pc\_d1s }\SpecialCharTok{+} 
-\NormalTok{  pd1w }\SpecialCharTok{+}\NormalTok{ pd1hw }\SpecialCharTok{+}\NormalTok{ pc\_d1w }\SpecialCharTok{+}
-  \FunctionTok{plot\_layout}\NormalTok{(}\AttributeTok{ncol=}\DecValTok{3}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{figure}[H]
+\begin{figure}
 
 \centering{
 
@@ -4891,105 +4687,7 @@ ideal, that it suggests two clusters. It is not until you examine the
 resulting clusters in the data that you can see the error, that it has
 clustered across the gap.
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\# Compute complete linkage}
-\NormalTok{d2\_hc }\OtherTok{\textless{}{-}} \FunctionTok{hclust}\NormalTok{(}\FunctionTok{dist}\NormalTok{(d2[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{2}\NormalTok{]),}
-                \AttributeTok{method=}\StringTok{"complete"}\NormalTok{)}
-\NormalTok{d2\_ggdc }\OtherTok{\textless{}{-}} \FunctionTok{dendro\_data}\NormalTok{(d2\_hc, }\AttributeTok{type =} \StringTok{"triangle"}\NormalTok{)}
-\NormalTok{pd2c }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{geom\_segment}\NormalTok{(}\AttributeTok{data=}\NormalTok{d2\_ggdc}\SpecialCharTok{$}\NormalTok{segments, }
-               \FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ x, }\AttributeTok{y =}\NormalTok{ y, }
-                   \AttributeTok{xend =}\NormalTok{ xend, }\AttributeTok{yend =}\NormalTok{ yend)) }\SpecialCharTok{+} 
-  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{data=}\NormalTok{d2\_ggdc}\SpecialCharTok{$}\NormalTok{labels, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{x, }\AttributeTok{y=}\NormalTok{y),}
-             \AttributeTok{colour=}\StringTok{"\#3B99B1"}\NormalTok{, }\AttributeTok{alpha=}\FloatTok{0.8}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{ggtitle}\NormalTok{(}\StringTok{"(a) Complete linkage dendrogram"}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{theme\_dendro}\NormalTok{()}
-
-\CommentTok{\# Compute dendrogram in data}
-\NormalTok{d2\_hflyc }\OtherTok{\textless{}{-}} \FunctionTok{hierfly}\NormalTok{(d2, d2\_hc, }\AttributeTok{scale=}\ConstantTok{FALSE}\NormalTok{)}
-
-\NormalTok{pd2hc }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{geom\_segment}\NormalTok{(}\AttributeTok{data=}\NormalTok{d2\_hflyc}\SpecialCharTok{$}\NormalTok{segments, }
-                \FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{x, }\AttributeTok{xend=}\NormalTok{xend,}
-                    \AttributeTok{y=}\NormalTok{y, }\AttributeTok{yend=}\NormalTok{yend)) }\SpecialCharTok{+}
-  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{data=}\NormalTok{d2\_hflyc}\SpecialCharTok{$}\NormalTok{data, }
-             \FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{x1, }\AttributeTok{y=}\NormalTok{x2,}
-                 \AttributeTok{shape=}\FunctionTok{factor}\NormalTok{(node),}
-                 \AttributeTok{colour=}\FunctionTok{factor}\NormalTok{(node),}
-                 \AttributeTok{size=}\DecValTok{1}\SpecialCharTok{{-}}\NormalTok{node), }\AttributeTok{alpha=}\FloatTok{0.8}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{scale\_shape\_manual}\NormalTok{(}\AttributeTok{values =} \FunctionTok{c}\NormalTok{(}\DecValTok{16}\NormalTok{, }\DecValTok{3}\NormalTok{)) }\SpecialCharTok{+}
-  \FunctionTok{scale\_colour\_manual}\NormalTok{(}\AttributeTok{values =} \FunctionTok{c}\NormalTok{(}\StringTok{"\#3B99B1"}\NormalTok{, }\StringTok{"black"}\NormalTok{)) }\SpecialCharTok{+}
-  \FunctionTok{scale\_size}\NormalTok{(}\AttributeTok{limits=}\FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{17}\NormalTok{)) }\SpecialCharTok{+}
-  \FunctionTok{ggtitle}\NormalTok{(}\StringTok{"(b) Dendrogram in data space"}\NormalTok{) }\SpecialCharTok{+} 
-  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{theme}\NormalTok{(}\AttributeTok{aspect.ratio=}\DecValTok{1}\NormalTok{, }\AttributeTok{legend.position=}\StringTok{"none"}\NormalTok{)}
-
-\CommentTok{\# Show result}
-\NormalTok{d2 }\OtherTok{\textless{}{-}}\NormalTok{ d2 }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{clc =} \FunctionTok{factor}\NormalTok{(}\FunctionTok{cutree}\NormalTok{(d2\_hc, }\DecValTok{2}\NormalTok{)))}
-\NormalTok{pc\_d2c }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(d2) }\SpecialCharTok{+}
-  \FunctionTok{geom\_point}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{x1, }\AttributeTok{y=}\NormalTok{x2, }\AttributeTok{colour=}\NormalTok{clc), }
-             \AttributeTok{size=}\DecValTok{2}\NormalTok{, }\AttributeTok{alpha=}\FloatTok{0.8}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{scale\_colour\_discrete\_divergingx}\NormalTok{(}\AttributeTok{palette =} \StringTok{"Zissou 1"}\NormalTok{,}
-                                   \AttributeTok{nmax=}\DecValTok{4}\NormalTok{, }\AttributeTok{rev=}\ConstantTok{TRUE}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{ggtitle}\NormalTok{(}\StringTok{"(c) Two{-}cluster solution"}\NormalTok{) }\SpecialCharTok{+} 
-  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{theme}\NormalTok{(}\AttributeTok{aspect.ratio=}\DecValTok{1}\NormalTok{, }\AttributeTok{legend.position=}\StringTok{"none"}\NormalTok{)}
-
-\CommentTok{\# Compute Wards linkage}
-\NormalTok{d2\_hw }\OtherTok{\textless{}{-}} \FunctionTok{hclust}\NormalTok{(}\FunctionTok{dist}\NormalTok{(d2[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{2}\NormalTok{]),}
-                \AttributeTok{method=}\StringTok{"ward.D2"}\NormalTok{)}
-\NormalTok{d2\_ggdw }\OtherTok{\textless{}{-}} \FunctionTok{dendro\_data}\NormalTok{(d2\_hw, }\AttributeTok{type =} \StringTok{"triangle"}\NormalTok{)}
-\NormalTok{pd2w }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{geom\_segment}\NormalTok{(}\AttributeTok{data=}\NormalTok{d2\_ggdw}\SpecialCharTok{$}\NormalTok{segments, }
-               \FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ x, }\AttributeTok{y =}\NormalTok{ y, }
-                   \AttributeTok{xend =}\NormalTok{ xend, }\AttributeTok{yend =}\NormalTok{ yend)) }\SpecialCharTok{+} 
-  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{data=}\NormalTok{d2\_ggdw}\SpecialCharTok{$}\NormalTok{labels, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{x, }\AttributeTok{y=}\NormalTok{y),}
-             \AttributeTok{colour=}\StringTok{"\#3B99B1"}\NormalTok{, }\AttributeTok{alpha=}\FloatTok{0.8}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{ggtitle}\NormalTok{(}\StringTok{"(d) Ward\textquotesingle{}s linkage dendrogram"}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{theme\_dendro}\NormalTok{()}
-
-\CommentTok{\# Compute dendrogram in data}
-\NormalTok{d2\_hflyw }\OtherTok{\textless{}{-}} \FunctionTok{hierfly}\NormalTok{(d2, d2\_hw, }\AttributeTok{scale=}\ConstantTok{FALSE}\NormalTok{)}
-
-\NormalTok{pd2hw }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{geom\_segment}\NormalTok{(}\AttributeTok{data=}\NormalTok{d2\_hflyw}\SpecialCharTok{$}\NormalTok{segments, }
-                \FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{x, }\AttributeTok{xend=}\NormalTok{xend,}
-                    \AttributeTok{y=}\NormalTok{y, }\AttributeTok{yend=}\NormalTok{yend)) }\SpecialCharTok{+}
-  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{data=}\NormalTok{d2\_hflyw}\SpecialCharTok{$}\NormalTok{data, }
-             \FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{x1, }\AttributeTok{y=}\NormalTok{x2,}
-                 \AttributeTok{shape=}\FunctionTok{factor}\NormalTok{(node),}
-                 \AttributeTok{colour=}\FunctionTok{factor}\NormalTok{(node),}
-                 \AttributeTok{size=}\DecValTok{1}\SpecialCharTok{{-}}\NormalTok{node), }\AttributeTok{alpha=}\FloatTok{0.8}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{scale\_shape\_manual}\NormalTok{(}\AttributeTok{values =} \FunctionTok{c}\NormalTok{(}\DecValTok{16}\NormalTok{, }\DecValTok{3}\NormalTok{)) }\SpecialCharTok{+}
-  \FunctionTok{scale\_colour\_manual}\NormalTok{(}\AttributeTok{values =} \FunctionTok{c}\NormalTok{(}\StringTok{"\#3B99B1"}\NormalTok{, }\StringTok{"black"}\NormalTok{)) }\SpecialCharTok{+}
-  \FunctionTok{scale\_size}\NormalTok{(}\AttributeTok{limits=}\FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{17}\NormalTok{)) }\SpecialCharTok{+}
-  \FunctionTok{ggtitle}\NormalTok{(}\StringTok{"(e) Dendrogram in data space"}\NormalTok{) }\SpecialCharTok{+} 
-  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{theme}\NormalTok{(}\AttributeTok{aspect.ratio=}\DecValTok{1}\NormalTok{, }\AttributeTok{legend.position=}\StringTok{"none"}\NormalTok{)}
-
-\CommentTok{\# Show result}
-\NormalTok{d2 }\OtherTok{\textless{}{-}}\NormalTok{ d2 }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{clw =} \FunctionTok{factor}\NormalTok{(}\FunctionTok{cutree}\NormalTok{(d2\_hw, }\DecValTok{2}\NormalTok{)))}
-\NormalTok{pc\_d2w }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(d2) }\SpecialCharTok{+}
-  \FunctionTok{geom\_point}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{x1, }\AttributeTok{y=}\NormalTok{x2, }\AttributeTok{colour=}\NormalTok{clw), }
-             \AttributeTok{size=}\DecValTok{2}\NormalTok{, }\AttributeTok{alpha=}\FloatTok{0.8}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{scale\_colour\_discrete\_divergingx}\NormalTok{(}\AttributeTok{palette =} \StringTok{"Zissou 1"}\NormalTok{,}
-                                   \AttributeTok{nmax=}\DecValTok{4}\NormalTok{, }\AttributeTok{rev=}\ConstantTok{TRUE}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{ggtitle}\NormalTok{(}\StringTok{"(f) Two{-}cluster solution"}\NormalTok{) }\SpecialCharTok{+} 
-  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{theme}\NormalTok{(}\AttributeTok{aspect.ratio=}\DecValTok{1}\NormalTok{, }\AttributeTok{legend.position=}\StringTok{"none"}\NormalTok{)}
-
-\NormalTok{pd2c }\SpecialCharTok{+}\NormalTok{ pd2hc }\SpecialCharTok{+}\NormalTok{ pc\_d2c }\SpecialCharTok{+} 
-\NormalTok{  pd2w }\SpecialCharTok{+}\NormalTok{ pd2hw }\SpecialCharTok{+}\NormalTok{ pc\_d2w }\SpecialCharTok{+}
-  \FunctionTok{plot\_layout}\NormalTok{(}\AttributeTok{ncol=}\DecValTok{3}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{figure}[H]
+\begin{figure}
 
 \centering{
 
@@ -5021,16 +4719,7 @@ nice complement to using the tour (Figure~\ref{fig-penguins-gt-pdf}) for
 this. Here you can see three elliptical clusters, with one is further
 from the others.
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{load}\NormalTok{(}\StringTok{"data/penguins\_sub.rda"}\NormalTok{)}
-\FunctionTok{ggscatmat}\NormalTok{(penguins\_sub[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{]) }\SpecialCharTok{+} 
-  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{xlab}\NormalTok{(}\StringTok{""}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{ylab}\NormalTok{(}\StringTok{""}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{figure}[H]
+\begin{figure}
 
 \centering{
 
@@ -5046,44 +4735,22 @@ observations.}
 
 \end{figure}%
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{set.seed}\NormalTok{(}\DecValTok{20230329}\NormalTok{)}
-\NormalTok{b }\OtherTok{\textless{}{-}} \FunctionTok{basis\_random}\NormalTok{(}\DecValTok{4}\NormalTok{,}\DecValTok{2}\NormalTok{)}
-\NormalTok{pt1 }\OtherTok{\textless{}{-}} \FunctionTok{save\_history}\NormalTok{(penguins\_sub[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{], }
-                    \AttributeTok{max\_bases =} \DecValTok{500}\NormalTok{, }
-                    \AttributeTok{start =}\NormalTok{ b)}
-\FunctionTok{save}\NormalTok{(pt1, }\AttributeTok{file=}\StringTok{"data/penguins\_tour\_path.rda"}\NormalTok{)}
-
-\CommentTok{\# To re{-}create the gifs}
-\FunctionTok{load}\NormalTok{(}\StringTok{"data/penguins\_tour\_path.rda"}\NormalTok{)}
-\FunctionTok{animate\_xy}\NormalTok{(penguins\_sub[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{], }
-           \AttributeTok{tour\_path =} \FunctionTok{planned\_tour}\NormalTok{(pt1), }
-           \AttributeTok{axes=}\StringTok{"off"}\NormalTok{, }\AttributeTok{rescale=}\ConstantTok{FALSE}\NormalTok{, }
-           \AttributeTok{half\_range =} \FloatTok{3.5}\NormalTok{)}
-
-\FunctionTok{render\_gif}\NormalTok{(penguins\_sub[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{], }
-           \FunctionTok{planned\_tour}\NormalTok{(pt1), }
-           \FunctionTok{display\_xy}\NormalTok{(}\AttributeTok{half\_range=}\FloatTok{0.9}\NormalTok{, }\AttributeTok{axes=}\StringTok{"off"}\NormalTok{),}
-           \AttributeTok{gif\_file=}\StringTok{"gifs/penguins\_gt.gif"}\NormalTok{,}
-           \AttributeTok{frames=}\DecValTok{500}\NormalTok{,}
-           \AttributeTok{loop=}\ConstantTok{FALSE}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
 \begin{figure}
 
-\centering{
+\begin{minipage}{0.33\linewidth}
+\pandocbounded{\includegraphics[keepaspectratio]{images/penguins_gt_59.png}}\end{minipage}%
+%
+\begin{minipage}{0.33\linewidth}
+\pandocbounded{\includegraphics[keepaspectratio]{images/penguins_gt_32.png}}\end{minipage}%
+%
+\begin{minipage}{0.33\linewidth}
+\pandocbounded{\includegraphics[keepaspectratio]{images/penguins_gt_105.png}}\end{minipage}%
 
-\pandocbounded{\includegraphics[keepaspectratio]{images/penguins_gt_59.png}}
-
-}
-
-\caption{\label{fig-penguins-gt-pdf}One frame from a grand tour being
+\caption{\label{fig-penguins-gt-pdf}Three frames from a grand tour being
 used to check for clusters, the shape of clusters and for nuisance
 observations and variables. Here the penguins data looks like it has
 possibly three elliptical clusters, one more separated than the other
-two, with some nuisance observations.}
+two, with some nuisance (outliers) observations. \faIcon{play-circle}}
 
 \end{figure}%
 
@@ -5091,112 +4758,6 @@ The process is the same as for the simpler example. We compute and draw
 the dendrogram in 2D, compute it in \(p\)-D and view with a tour. Here
 we have also chosen to examine the three cluster solution for single
 linkage and wards linkage clustering.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{p\_dist }\OtherTok{\textless{}{-}} \FunctionTok{dist}\NormalTok{(penguins\_sub[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{])}
-\NormalTok{p\_hcw }\OtherTok{\textless{}{-}} \FunctionTok{hclust}\NormalTok{(p\_dist, }\AttributeTok{method=}\StringTok{"ward.D2"}\NormalTok{)}
-\NormalTok{p\_hcs }\OtherTok{\textless{}{-}} \FunctionTok{hclust}\NormalTok{(p\_dist, }\AttributeTok{method=}\StringTok{"single"}\NormalTok{)}
-
-\NormalTok{p\_clw }\OtherTok{\textless{}{-}}\NormalTok{ penguins\_sub }\SpecialCharTok{\%\textgreater{}\%} 
-  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{cl =} \FunctionTok{factor}\NormalTok{(}\FunctionTok{cutree}\NormalTok{(p\_hcw, }\DecValTok{3}\NormalTok{))) }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{as.data.frame}\NormalTok{()}
-\NormalTok{p\_cls }\OtherTok{\textless{}{-}}\NormalTok{ penguins\_sub }\SpecialCharTok{\%\textgreater{}\%} 
-  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{cl =} \FunctionTok{factor}\NormalTok{(}\FunctionTok{cutree}\NormalTok{(p\_hcs, }\DecValTok{3}\NormalTok{))) }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{as.data.frame}\NormalTok{()}
-
-\NormalTok{p\_w\_hfly }\OtherTok{\textless{}{-}} \FunctionTok{hierfly}\NormalTok{(p\_clw, p\_hcw, }\AttributeTok{scale=}\ConstantTok{FALSE}\NormalTok{)}
-\NormalTok{p\_s\_hfly }\OtherTok{\textless{}{-}} \FunctionTok{hierfly}\NormalTok{(p\_cls, p\_hcs, }\AttributeTok{scale=}\ConstantTok{FALSE}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\# Generate the dendrograms in 2D}
-\NormalTok{p\_hcw\_dd }\OtherTok{\textless{}{-}} \FunctionTok{dendro\_data}\NormalTok{(p\_hcw)}
-\NormalTok{pw\_dd }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{geom\_segment}\NormalTok{(}\AttributeTok{data=}\NormalTok{p\_hcw\_dd}\SpecialCharTok{$}\NormalTok{segments, }
-               \FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ x, }\AttributeTok{y =}\NormalTok{ y, }
-                   \AttributeTok{xend =}\NormalTok{ xend, }\AttributeTok{yend =}\NormalTok{ yend)) }\SpecialCharTok{+} 
-  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{data=}\NormalTok{p\_hcw\_dd}\SpecialCharTok{$}\NormalTok{labels, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{x, }\AttributeTok{y=}\NormalTok{y),}
-             \AttributeTok{alpha=}\FloatTok{0.8}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{theme\_dendro}\NormalTok{()}
-
-\NormalTok{p\_hcs\_dd }\OtherTok{\textless{}{-}} \FunctionTok{dendro\_data}\NormalTok{(p\_hcs)}
-\NormalTok{ps\_dd }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{geom\_segment}\NormalTok{(}\AttributeTok{data=}\NormalTok{p\_hcs\_dd}\SpecialCharTok{$}\NormalTok{segments, }
-               \FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ x, }\AttributeTok{y =}\NormalTok{ y, }
-                   \AttributeTok{xend =}\NormalTok{ xend, }\AttributeTok{yend =}\NormalTok{ yend)) }\SpecialCharTok{+} 
-  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{data=}\NormalTok{p\_hcs\_dd}\SpecialCharTok{$}\NormalTok{labels, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{x, }\AttributeTok{y=}\NormalTok{y),}
-             \AttributeTok{alpha=}\FloatTok{0.8}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{theme\_dendro}\NormalTok{()}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{load}\NormalTok{(}\StringTok{"data/penguins\_tour\_path.rda"}\NormalTok{)}
-\NormalTok{glyphs }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\DecValTok{16}\NormalTok{, }\DecValTok{46}\NormalTok{)}
-\NormalTok{pchw }\OtherTok{\textless{}{-}}\NormalTok{ glyphs[p\_w\_hfly}\SpecialCharTok{$}\NormalTok{data}\SpecialCharTok{$}\NormalTok{node}\SpecialCharTok{+}\DecValTok{1}\NormalTok{]}
-\NormalTok{pchs }\OtherTok{\textless{}{-}}\NormalTok{ glyphs[p\_s\_hfly}\SpecialCharTok{$}\NormalTok{data}\SpecialCharTok{$}\NormalTok{node}\SpecialCharTok{+}\DecValTok{1}\NormalTok{]}
-
-\FunctionTok{animate\_xy}\NormalTok{(p\_w\_hfly}\SpecialCharTok{$}\NormalTok{data[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{], }
-           \CommentTok{\#col=colw, }
-           \AttributeTok{tour\_path =} \FunctionTok{planned\_tour}\NormalTok{(pt1),}
-           \AttributeTok{pch =}\NormalTok{ pchw,}
-           \AttributeTok{edges=}\NormalTok{p\_w\_hfly}\SpecialCharTok{$}\NormalTok{edges, }
-           \AttributeTok{axes=}\StringTok{"bottomleft"}\NormalTok{)}
-
-\FunctionTok{animate\_xy}\NormalTok{(p\_s\_hfly}\SpecialCharTok{$}\NormalTok{data[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{], }
-           \CommentTok{\#col=colw, }
-           \AttributeTok{tour\_path =} \FunctionTok{planned\_tour}\NormalTok{(pt1),}
-           \AttributeTok{pch =}\NormalTok{ pchs,}
-           \AttributeTok{edges=}\NormalTok{p\_s\_hfly}\SpecialCharTok{$}\NormalTok{edges, }
-           \AttributeTok{axes=}\StringTok{"bottomleft"}\NormalTok{)}
-
-\FunctionTok{render\_gif}\NormalTok{(p\_w\_hfly}\SpecialCharTok{$}\NormalTok{data[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{], }
-           \FunctionTok{planned\_tour}\NormalTok{(pt1),}
-           \FunctionTok{display\_xy}\NormalTok{(}\AttributeTok{half\_range=}\FloatTok{0.9}\NormalTok{,            }
-                      \AttributeTok{pch =}\NormalTok{ pchw,}
-                      \AttributeTok{edges =}\NormalTok{ p\_w\_hfly}\SpecialCharTok{$}\NormalTok{edges,}
-                      \AttributeTok{axes =} \StringTok{"off"}\NormalTok{),}
-           \AttributeTok{gif\_file=}\StringTok{"gifs/penguins\_hflyw.gif"}\NormalTok{,}
-           \AttributeTok{frames=}\DecValTok{500}\NormalTok{,}
-           \AttributeTok{loop=}\ConstantTok{FALSE}\NormalTok{)}
-
-\FunctionTok{render\_gif}\NormalTok{(p\_s\_hfly}\SpecialCharTok{$}\NormalTok{data[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{], }
-           \FunctionTok{planned\_tour}\NormalTok{(pt1), }
-           \FunctionTok{display\_xy}\NormalTok{(}\AttributeTok{half\_range=}\FloatTok{0.9}\NormalTok{,            }
-                      \AttributeTok{pch =}\NormalTok{ pchs,}
-                      \AttributeTok{edges =}\NormalTok{ p\_s\_hfly}\SpecialCharTok{$}\NormalTok{edges,}
-                      \AttributeTok{axes =} \StringTok{"off"}\NormalTok{),}
-           \AttributeTok{gif\_file=}\StringTok{"gifs/penguins\_hflys.gif"}\NormalTok{,}
-           \AttributeTok{frames=}\DecValTok{500}\NormalTok{,}
-           \AttributeTok{loop=}\ConstantTok{FALSE}\NormalTok{)}
-
-\CommentTok{\# Show three cluster solutions}
-\NormalTok{clrs }\OtherTok{\textless{}{-}} \FunctionTok{hcl.colors}\NormalTok{(}\DecValTok{3}\NormalTok{, }\StringTok{"Zissou 1"}\NormalTok{)}
-\NormalTok{w3\_col }\OtherTok{\textless{}{-}}\NormalTok{ clrs[p\_w\_hfly}\SpecialCharTok{$}\NormalTok{data}\SpecialCharTok{$}\NormalTok{cl[p\_w\_hfly}\SpecialCharTok{$}\NormalTok{data}\SpecialCharTok{$}\NormalTok{node }\SpecialCharTok{==} \DecValTok{0}\NormalTok{]]}
-\FunctionTok{render\_gif}\NormalTok{(p\_w\_hfly}\SpecialCharTok{$}\NormalTok{data[p\_w\_hfly}\SpecialCharTok{$}\NormalTok{data}\SpecialCharTok{$}\NormalTok{node }\SpecialCharTok{==} \DecValTok{0}\NormalTok{, }\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{], }
-           \FunctionTok{planned\_tour}\NormalTok{(pt1), }
-           \FunctionTok{display\_xy}\NormalTok{(}\AttributeTok{half\_range=}\FloatTok{0.9}\NormalTok{,   }
-                      \AttributeTok{col=}\NormalTok{w3\_col,}
-                      \AttributeTok{axes =} \StringTok{"off"}\NormalTok{),}
-           \AttributeTok{gif\_file=}\StringTok{"gifs/penguins\_w3.gif"}\NormalTok{,}
-           \AttributeTok{frames=}\DecValTok{500}\NormalTok{,}
-           \AttributeTok{loop=}\ConstantTok{FALSE}\NormalTok{)}
-
-\NormalTok{s3\_col }\OtherTok{\textless{}{-}}\NormalTok{ clrs[p\_s\_hfly}\SpecialCharTok{$}\NormalTok{data}\SpecialCharTok{$}\NormalTok{cl[p\_w\_hfly}\SpecialCharTok{$}\NormalTok{data}\SpecialCharTok{$}\NormalTok{node }\SpecialCharTok{==} \DecValTok{0}\NormalTok{]]}
-\FunctionTok{render\_gif}\NormalTok{(p\_s\_hfly}\SpecialCharTok{$}\NormalTok{data[p\_w\_hfly}\SpecialCharTok{$}\NormalTok{data}\SpecialCharTok{$}\NormalTok{node }\SpecialCharTok{==} \DecValTok{0}\NormalTok{,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{], }
-           \FunctionTok{planned\_tour}\NormalTok{(pt1), }
-           \FunctionTok{display\_xy}\NormalTok{(}\AttributeTok{half\_range=}\FloatTok{0.9}\NormalTok{,   }
-                      \AttributeTok{col=}\NormalTok{s3\_col,}
-                      \AttributeTok{axes =} \StringTok{"off"}\NormalTok{),}
-           \AttributeTok{gif\_file=}\StringTok{"gifs/penguins\_s3.gif"}\NormalTok{,}
-           \AttributeTok{frames=}\DecValTok{500}\NormalTok{,}
-           \AttributeTok{loop=}\ConstantTok{FALSE}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
 
 Figure~\ref{fig-penguins-ddw} and Figure~\ref{fig-penguins-hfly-pdf}
 show results for single linkage and Wards linkage clustering of the
@@ -5293,89 +4854,6 @@ the three-cluster solution of each.}
 \end{figure}%
 
 \insightbox{Single linkage on the penguins has a very different joining pattern to Wards! While Wards provides the better result, single linkage provides useful information about the data, such as emphasizing the outlier.}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{load}\NormalTok{(}\StringTok{"data/penguins\_tour\_path.rda"}\NormalTok{)}
-\CommentTok{\# Create a smaller one, for space concerns}
-\NormalTok{pt1i }\OtherTok{\textless{}{-}} \FunctionTok{interpolate}\NormalTok{(pt1[,,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{5}\NormalTok{], }\FloatTok{0.1}\NormalTok{)}
-\NormalTok{pw\_anim }\OtherTok{\textless{}{-}} \FunctionTok{render\_anim}\NormalTok{(p\_w\_hfly}\SpecialCharTok{$}\NormalTok{data,}
-                       \AttributeTok{vars=}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{,}
-                       \AttributeTok{frames=}\NormalTok{pt1i, }
-                       \AttributeTok{edges =}\NormalTok{ p\_w\_hfly}\SpecialCharTok{$}\NormalTok{edges,}
-             \AttributeTok{obs\_labels=}\FunctionTok{paste0}\NormalTok{(}\DecValTok{1}\SpecialCharTok{:}\FunctionTok{nrow}\NormalTok{(p\_w\_hfly}\SpecialCharTok{$}\NormalTok{data),}
-\NormalTok{                               p\_w\_hfly}\SpecialCharTok{$}\NormalTok{data}\SpecialCharTok{$}\NormalTok{cl))}
-
-\NormalTok{pw\_gp }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{() }\SpecialCharTok{+}
-     \FunctionTok{geom\_segment}\NormalTok{(}\AttributeTok{data=}\NormalTok{pw\_anim}\SpecialCharTok{$}\NormalTok{edges, }
-                    \FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{x, }\AttributeTok{xend=}\NormalTok{xend,}
-                        \AttributeTok{y=}\NormalTok{y, }\AttributeTok{yend=}\NormalTok{yend,}
-                        \AttributeTok{frame=}\NormalTok{frame)) }\SpecialCharTok{+}
-     \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{data=}\NormalTok{pw\_anim}\SpecialCharTok{$}\NormalTok{frames, }
-                \FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{P1, }\AttributeTok{y=}\NormalTok{P2, }
-                    \AttributeTok{frame=}\NormalTok{frame, }
-                    \AttributeTok{shape=}\FunctionTok{factor}\NormalTok{(node),}
-                    \AttributeTok{label=}\NormalTok{obs\_labels), }
-                \AttributeTok{alpha=}\FloatTok{0.8}\NormalTok{, }\AttributeTok{size=}\DecValTok{1}\NormalTok{) }\SpecialCharTok{+}
-     \FunctionTok{xlim}\NormalTok{(}\SpecialCharTok{{-}}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{ylim}\NormalTok{(}\SpecialCharTok{{-}}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{) }\SpecialCharTok{+}
-     \FunctionTok{scale\_shape\_manual}\NormalTok{(}\AttributeTok{values=}\FunctionTok{c}\NormalTok{(}\DecValTok{16}\NormalTok{, }\DecValTok{46}\NormalTok{)) }\SpecialCharTok{+}
-     \FunctionTok{coord\_equal}\NormalTok{() }\SpecialCharTok{+}
-     \FunctionTok{theme\_bw}\NormalTok{() }\SpecialCharTok{+}
-     \FunctionTok{theme}\NormalTok{(}\AttributeTok{legend.position=}\StringTok{"none"}\NormalTok{, }
-           \AttributeTok{axis.text=}\FunctionTok{element\_blank}\NormalTok{(),}
-           \AttributeTok{axis.title=}\FunctionTok{element\_blank}\NormalTok{(),}
-           \AttributeTok{axis.ticks=}\FunctionTok{element\_blank}\NormalTok{(),}
-           \AttributeTok{panel.grid=}\FunctionTok{element\_blank}\NormalTok{())}
-
-\NormalTok{pwg }\OtherTok{\textless{}{-}} \FunctionTok{ggplotly}\NormalTok{(pw\_gp, }\AttributeTok{width=}\DecValTok{450}\NormalTok{, }\AttributeTok{height=}\DecValTok{500}\NormalTok{,}
-                \AttributeTok{tooltip=}\StringTok{"label"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
-       \FunctionTok{animation\_button}\NormalTok{(}\AttributeTok{label=}\StringTok{"Go"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
-       \FunctionTok{animation\_slider}\NormalTok{(}\AttributeTok{len=}\FloatTok{0.8}\NormalTok{, }\AttributeTok{x=}\FloatTok{0.5}\NormalTok{,}
-                        \AttributeTok{xanchor=}\StringTok{"center"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
-       \FunctionTok{animation\_opts}\NormalTok{(}\AttributeTok{easing=}\StringTok{"linear"}\NormalTok{, }\AttributeTok{transition =} \DecValTok{0}\NormalTok{)}
-\NormalTok{htmlwidgets}\SpecialCharTok{::}\FunctionTok{saveWidget}\NormalTok{(pwg,}
-          \AttributeTok{file=}\StringTok{"html/penguins\_cl\_ward.html"}\NormalTok{,}
-          \AttributeTok{selfcontained =} \ConstantTok{TRUE}\NormalTok{)}
-
-\CommentTok{\# Single}
-\NormalTok{ps\_anim }\OtherTok{\textless{}{-}} \FunctionTok{render\_anim}\NormalTok{(p\_s\_hfly}\SpecialCharTok{$}\NormalTok{data, }\AttributeTok{vars=}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{,}
-                         \AttributeTok{frames=}\NormalTok{pt1i, }
-                       \AttributeTok{edges =}\NormalTok{ p\_s\_hfly}\SpecialCharTok{$}\NormalTok{edges,}
-             \AttributeTok{obs\_labels=}\FunctionTok{paste0}\NormalTok{(}\DecValTok{1}\SpecialCharTok{:}\FunctionTok{nrow}\NormalTok{(p\_s\_hfly}\SpecialCharTok{$}\NormalTok{data),}
-\NormalTok{                               p\_s\_hfly}\SpecialCharTok{$}\NormalTok{data}\SpecialCharTok{$}\NormalTok{cl))}
-
-\NormalTok{ps\_gp }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{() }\SpecialCharTok{+}
-     \FunctionTok{geom\_segment}\NormalTok{(}\AttributeTok{data=}\NormalTok{ps\_anim}\SpecialCharTok{$}\NormalTok{edges, }
-                    \FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{x, }\AttributeTok{xend=}\NormalTok{xend,}
-                        \AttributeTok{y=}\NormalTok{y, }\AttributeTok{yend=}\NormalTok{yend,}
-                        \AttributeTok{frame=}\NormalTok{frame)) }\SpecialCharTok{+}
-     \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{data=}\NormalTok{ps\_anim}\SpecialCharTok{$}\NormalTok{frames, }
-                \FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{P1, }\AttributeTok{y=}\NormalTok{P2, }
-                    \AttributeTok{frame=}\NormalTok{frame, }
-                    \AttributeTok{shape=}\FunctionTok{factor}\NormalTok{(node),}
-                    \AttributeTok{label=}\NormalTok{obs\_labels), }
-                \AttributeTok{alpha=}\FloatTok{0.8}\NormalTok{, }\AttributeTok{size=}\DecValTok{1}\NormalTok{) }\SpecialCharTok{+}
-     \FunctionTok{xlim}\NormalTok{(}\SpecialCharTok{{-}}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{ylim}\NormalTok{(}\SpecialCharTok{{-}}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{) }\SpecialCharTok{+}
-     \FunctionTok{scale\_shape\_manual}\NormalTok{(}\AttributeTok{values=}\FunctionTok{c}\NormalTok{(}\DecValTok{16}\NormalTok{, }\DecValTok{46}\NormalTok{)) }\SpecialCharTok{+}
-     \FunctionTok{coord\_equal}\NormalTok{() }\SpecialCharTok{+}
-     \FunctionTok{theme\_bw}\NormalTok{() }\SpecialCharTok{+}
-     \FunctionTok{theme}\NormalTok{(}\AttributeTok{legend.position=}\StringTok{"none"}\NormalTok{, }
-           \AttributeTok{axis.text=}\FunctionTok{element\_blank}\NormalTok{(),}
-           \AttributeTok{axis.title=}\FunctionTok{element\_blank}\NormalTok{(),}
-           \AttributeTok{axis.ticks=}\FunctionTok{element\_blank}\NormalTok{(),}
-           \AttributeTok{panel.grid=}\FunctionTok{element\_blank}\NormalTok{())}
-
-\NormalTok{psg }\OtherTok{\textless{}{-}} \FunctionTok{ggplotly}\NormalTok{(ps\_gp, }\AttributeTok{width=}\DecValTok{450}\NormalTok{, }\AttributeTok{height=}\DecValTok{500}\NormalTok{,}
-                \AttributeTok{tooltip=}\StringTok{"label"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
-       \FunctionTok{animation\_button}\NormalTok{(}\AttributeTok{label=}\StringTok{"Go"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
-       \FunctionTok{animation\_slider}\NormalTok{(}\AttributeTok{len=}\FloatTok{0.8}\NormalTok{, }\AttributeTok{x=}\FloatTok{0.5}\NormalTok{,}
-                        \AttributeTok{xanchor=}\StringTok{"center"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
-       \FunctionTok{animation\_opts}\NormalTok{(}\AttributeTok{easing=}\StringTok{"linear"}\NormalTok{, }\AttributeTok{transition =} \DecValTok{0}\NormalTok{)}
-\NormalTok{htmlwidgets}\SpecialCharTok{::}\FunctionTok{saveWidget}\NormalTok{(psg,}
-          \AttributeTok{file=}\StringTok{"html/penguins\_cl\_single.html"}\NormalTok{,}
-          \AttributeTok{selfcontained =} \ConstantTok{TRUE}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
 
 \infobox{Viewing the dendrograms in high-dimensions provides insight into how the algorithm has joined points to clusters. For example, single linkage often has edges leading to a single focal point, which might not yield a useful clustering but might help to identify outliers. If the edges point to multiple focal points, with long edges bridging gaps in the data, the result is more likely yielding a useful clustering.}
 
