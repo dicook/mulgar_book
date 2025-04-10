@@ -149,7 +149,7 @@ A random forest is a computationally intensive method, a "black box" classifier,
 
 ### Examining the votes matrix {#sec-votes}
 
-Here we show how to use the `randomForest` [@randomForest2002] votes matrix for the penguins data to investigate confusion between classes, and observations which are problematic to classify. The votes matrix can be considered to be predictive probability distribution, where the values for each observation sum to 1. With only three classes the votes matrix is only a 2D object, and thus easy to examine. With four or more classes the votes matrix needs to be examined in a tour. 
+Here we show how to use the `randomForest` [@randomForest2002] votes matrix for the penguins data to investigate confusion between classes, and observations which are problematic to classify. The votes matrix can be considered to be a predictive probability distribution, where the values for each observation sum to 1. With only three classes the votes matrix is only a 2D object, and thus easy to examine. With four or more classes the votes matrix needs to be examined in a tour. 
 \index{classification!vote matrix}
 \index{classification!predictive probabilities}
 
@@ -280,7 +280,7 @@ We can use the `geozoo` package to generate the surrounding simplex, which for 2
 
 The votes matrix reports the proportion of trees each observation is classified as each class. From the tour of the votes matrix, as in `r ifelse(knitr::is_html_output(), '@fig-penguins-votes-html', '@fig-penguins-votes-pdf')`(a), it can be seen to be 2D in 3D space. This is due to the constraint that the three proportions for each observation sum to 1. Using a Helmert matrix, this data can be projected into the 2D space, or more generally the $(g-1)$-dimensional space where it resides, shown in `r ifelse(knitr::is_html_output(), '@fig-penguins-votes-html', '@fig-penguins-votes-pdf')`(b). In 2D this is called a ternary diagram, and in higher dimensions the bounding shapes might be considered to be a simplex. The vertices of this shape correspond to $(1,0,0), (0,1,0), (0,0,1)$ (and analogously for higher dimensions), which represent perfect confidence, that an observation is classified into that group all the time.
 
-What we can see here is a concentration of points in the corners of the triangle indicates that most of the penguins are confidently classified into their correct class. Then there is more separation between the Gentoo and the others, than between Chinstrap and Adelie. That means that as a group Gentoo are more distinguishable. Only one of the Gentoo penguins has substantial confusion, mostly confused as a Chinstrap, but occasionally confused as an Adelie -- if it was only ever confused as a Chinstrap it would fall on the edge between Gentoo and Chinstrap. There are quite a few Chinstrap and Adelie penguins confused as each other, with a couple of each more confidently predicted to be the other class. This can be seen because there are points of the wrong colour close to those vertices. 
+What we can see here is a concentration of points in the corners of the triangle, this indicates that most of the penguins are confidently classified into their correct class. Then there is more separation between the Gentoo and the others, than between Chinstrap and Adelie. That means that as a group Gentoo are more distinguishable. Only one of the Gentoo penguins has substantial confusion, mostly confused as a Chinstrap, but occasionally confused as an Adelie -- if it was only ever confused as a Chinstrap it would fall on the edge between Gentoo and Chinstrap. There are quite a few Chinstrap and Adelie penguins confused as each other, with a couple of each more confidently predicted to be the other class. This can be seen because there are points of the wrong colour close to those vertices. 
 
 The votes matrix is useful for investigating the fit, but one should remember that there are some structural elements of the penguins data that don't lend themselves to tree models. Although a forest has the capacity to generate non-linear boundaries by combining predictions from multiple trees, it is still based on the boxy boundaries of trees. This makes it less suitable for the penguins data with elliptical classes. You could use the techniques from the previous section to explore the boundaries produced by the forest, and you will find that the are more boxy than the LDA models.
 \index{classification!vote matrix}
@@ -300,6 +300,7 @@ To examine a vote matrix for a problem with more classes, we will examine the 10
 \index{data!fake trees}
 
 \index{software!liminal}
+\index{dimension reduction!principal component analysis (PCA)}
 
 ```{r}
 #| code-fold: false
@@ -392,7 +393,7 @@ Several static views from the tour of the votes matrix. Lines are the edges of t
 \index{data!fake trees}
 The votes matrix is 9D, due to the 9 groups. With this many dimensions, if the cluster structure is weak, it will look messy in a tour. However, what we can see in `r ifelse(knitr::is_html_output(), '@fig-ft-votes-html', '@fig-ft-votes-pdf')` is that the structure is relatively simple, and very interesting in that it suggests a strong clustering of classes. Points are coloured by their true class. The lines represent the 8D simplex that bounds the observations, akin to the triangle in the ternary diagram.
 
-Points concentrate at the vertices, which means that most are confidently predicted to be their true class. The most spread of points is along single edges, between pairs of vertices. This means that when there is confusion it is mostly with just one other group. One vertex (0) which has connections to all other vertexes. That is, there are points stretching from this vertex to every other. It means that some observations in every other class can be confused with class 0, and class 0 observations can be confused with every other class. This information suggests that cluster 0 is central to all the other clusters. 
+Points concentrate at the vertices, which means that most are confidently predicted to be their true class. The most spread of points is along single edges, between pairs of vertices. This means that when there is confusion it is mostly with just one other group. One vertex (0) has connections to all other vertices. That is, there are points stretching from this vertex to every other. It means that some observations in every other class can be confused with class 0, and class 0 observations can be confused with every other class. This information suggests that cluster 0 is central to all the other clusters. 
 
 
 Some of this information could also be inferred from the confusion matrix for the model. However visualising the votes matrix provides more intricate details. Here we have seen that the points spread out from a vertex, with fewer and fewer the further one gets. It allows us to see the distribution of points, which is not possible from the confusion matrix alone. The same misclassification rate could be due to a variety of distributions. The visual pattern in the votes matrix is striking, and gives additional information about how the clustering distribution, and shapes of clusters, matches the class labels. It reinforces the clusters are linear extending into different dimensions in the 100D space, but really only into about 8D (as we'll see from the variable importance explanation below). We also see that nine of the clusters are all connected to a single cluster.
@@ -410,7 +411,7 @@ The votes matrix for the fake trees has a striking geometric structure, with one
 ### Using variable importance {#sec-forest-var-imp}
 \index{classification!variable importance}
 
-The variable importance score across all classes, and for each class is useful for choosing variables to enter into a tour, to explore class differences. This is particularly so when there are many variables, as in the fake_trees data. We would also expect that this data will have a difference between importance for some classes.
+The variable importance score across all classes, and for each class is useful for choosing variables to enter into a tour, to explore class differences. This is particularly so when there are many variables, as in the `fake_trees` data. We would also expect that this data will have a difference between importance for some classes.
 
 ```{r echo=knitr::is_html_output()}
 #| code-fold: false
@@ -513,7 +514,7 @@ Focusing on class 1 in the `fake_trees` data. The most important variables were 
 :::
 :::
 
-For a problem like this, it can be useful to several classes together. We've chosen to start with class 8 (light green), because from `r ifelse(knitr::is_html_output(), '@fig-ft-votes-html', '@fig-ft-votes-pdf')` it appears to have less connection with class 0, and closer connection with another class. This is class 6 (medium green). A good guess because it has one observation confused with class 8 according to the confusion matrix (printed below). 
+For a problem like this, it can be useful to look at several classes together. We've chosen to start with class 8 (light green), because from `r ifelse(knitr::is_html_output(), '@fig-ft-votes-html', '@fig-ft-votes-pdf')` it appears to have less connection with class 0, and closer connection with another class. This is class 6 (medium green) which also has one observation confused with class 8 according to the confusion matrix (printed below). 
 \index{classification!confusion matrix}
 
 When we examine these two clusters in association with class 0, we can see that there is a third cluster that is connected with clusters 6 and 8. It turns out to be cluster 1. It's confusing, because the confusion matrix would suggest that the overlap from all is with cluster 0, but not each other. 
