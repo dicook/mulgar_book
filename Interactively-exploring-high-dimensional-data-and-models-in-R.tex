@@ -4918,7 +4918,9 @@ assigning them to the nearest mean, and re-calculating the \(k\) means.
 It stops at a given number of iterations or when points no longer change
 clusters. The algorithm will tend to segment the data into roughly equal
 sized, or spherical clusters, and thus will work well if the clusters
-are separated and equally spherical in shape.
+are separated and equally spherical in shape. It is possible to get
+different solutions depending on the random seed. Often, the choice is
+to run the algorithm multiple times and choose one solution.
 
 A good place to learn ore about the \(k\)-means algorithm is Chapter 20
 of Boehmke \& Greenwell (2019). The algorithm has been in use for a long
@@ -4927,20 +4929,21 @@ Lloyd in 1957 (as described in Lloyd (1982)) and separately by Forgy
 (1965), and perhaps others as it is a very simple procedure.
 
 \infobox{The key elements to examine in a k-means clustering algorithm result  are:
-\begin{itemize}
+\begin{itemize} \itemsep 0in
 \item means 
-\item boundaries 
+\item cluster labels
 \end{itemize}}
 
 \section{Examining results in 2D}\label{examining-results-in-2d}
 
-Figure~\ref{fig-km-2D} shows the results of \(k\)-means clustering on
-the 2D \texttt{simple\_clusters} data and two variables of the penguins
-data. We can see that it works well when the clusters are spherical, but
-for the penguins data it fails because the shape of the clusters is
-elliptical. It actually makes a mistake that would not be made if we
-simply visually clustered: cluster 3 has grouped points across a gap, a
-divide that visually we would all agree should form a separation.
+Figure~\ref{fig-km-2D} shows the result of \(k\)-means clustering on two
+examples: (a) the 2D \texttt{simple\_clusters} data and (b) two
+variables of the penguins data. We can see that it works well when the
+clusters are spherical, but for the penguins data it fails because the
+shape of the clusters is elliptical. It actually makes a mistake that
+would not be made if we simply visually clustered: cluster 3 has grouped
+points across a gap, a divide that visually we would all agree should
+form a separation.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -4950,75 +4953,39 @@ divide that visually we would all agree should form a separation.
 \FunctionTok{library}\NormalTok{(colorspace)}
 \FunctionTok{library}\NormalTok{(patchwork)}
 \FunctionTok{data}\NormalTok{(}\StringTok{"simple\_clusters"}\NormalTok{)}
-\FunctionTok{load}\NormalTok{(}\StringTok{"data/penguins\_sub.rda"}\NormalTok{)}
 
 \FunctionTok{set.seed}\NormalTok{(}\DecValTok{202305}\NormalTok{)}
-\NormalTok{sc\_bl\_bd\_km }\OtherTok{\textless{}{-}} \FunctionTok{kmeans}\NormalTok{(simple\_clusters[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{2}\NormalTok{], }\AttributeTok{centers=}\DecValTok{2}\NormalTok{, }
+\NormalTok{sc\_km }\OtherTok{\textless{}{-}} \FunctionTok{kmeans}\NormalTok{(simple\_clusters[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{2}\NormalTok{], }\AttributeTok{centers=}\DecValTok{2}\NormalTok{, }
                      \AttributeTok{iter.max =} \DecValTok{50}\NormalTok{, }\AttributeTok{nstart =} \DecValTok{5}\NormalTok{)}
-\NormalTok{sc\_bl\_bd\_km\_means }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(sc\_bl\_bd\_km}\SpecialCharTok{$}\NormalTok{centers) }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{cl =} \FunctionTok{factor}\NormalTok{(}\FunctionTok{rownames}\NormalTok{(sc\_bl\_bd\_km}\SpecialCharTok{$}\NormalTok{centers)))}
-\NormalTok{sc\_bl\_bd\_km\_d }\OtherTok{\textless{}{-}}\NormalTok{ simple\_clusters[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{2}\NormalTok{] }\SpecialCharTok{\%\textgreater{}\%} 
-  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{cl =} \FunctionTok{factor}\NormalTok{(sc\_bl\_bd\_km}\SpecialCharTok{$}\NormalTok{cluster))}
+\NormalTok{sc\_km\_means }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(sc\_km}\SpecialCharTok{$}\NormalTok{centers) }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{cl =} \FunctionTok{factor}\NormalTok{(}\FunctionTok{rownames}\NormalTok{(sc\_km}\SpecialCharTok{$}\NormalTok{centers)))}
+\NormalTok{sc\_km\_d }\OtherTok{\textless{}{-}}\NormalTok{ simple\_clusters[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{2}\NormalTok{] }\SpecialCharTok{|\textgreater{}} 
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{cl =} \FunctionTok{factor}\NormalTok{(sc\_km}\SpecialCharTok{$}\NormalTok{cluster))}
 \end{Highlighting}
 \end{Shaded}
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{sc\_bl\_bd\_km\_p }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{data=}\NormalTok{sc\_bl\_bd\_km\_d, }
-             \FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{x1, }\AttributeTok{y=}\NormalTok{x2, }\AttributeTok{colour=}\NormalTok{cl), }
-             \AttributeTok{shape=}\DecValTok{16}\NormalTok{, }\AttributeTok{alpha=}\FloatTok{0.4}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{data=}\NormalTok{sc\_bl\_bd\_km\_means, }
-             \FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{x1, }\AttributeTok{y=}\NormalTok{x2, }\AttributeTok{colour=}\NormalTok{cl), }
-             \AttributeTok{shape=}\DecValTok{3}\NormalTok{, }\AttributeTok{size=}\DecValTok{5}\NormalTok{) }\SpecialCharTok{+}
-    \FunctionTok{scale\_color\_discrete\_divergingx}\NormalTok{(}\StringTok{"Zissou 1"}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{ggtitle}\NormalTok{(}\StringTok{"(a)"}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{theme}\NormalTok{(}\AttributeTok{aspect.ratio =} \DecValTok{1}\NormalTok{, }
-        \AttributeTok{legend.position =} \StringTok{"bottom"}\NormalTok{,}
-        \AttributeTok{legend.title =} \FunctionTok{element\_blank}\NormalTok{()) }
-
-\NormalTok{p\_bl\_bd\_km }\OtherTok{\textless{}{-}} \FunctionTok{kmeans}\NormalTok{(penguins\_sub[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{2}\NormalTok{], }\AttributeTok{centers=}\DecValTok{3}\NormalTok{, }
-                     \AttributeTok{iter.max =} \DecValTok{50}\NormalTok{, }\AttributeTok{nstart =} \DecValTok{5}\NormalTok{)}
-\NormalTok{p\_bl\_bd\_km\_means }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(p\_bl\_bd\_km}\SpecialCharTok{$}\NormalTok{centers) }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{cl =} \FunctionTok{factor}\NormalTok{(}\FunctionTok{rownames}\NormalTok{(p\_bl\_bd\_km}\SpecialCharTok{$}\NormalTok{centers)))}
-\NormalTok{p\_bl\_bd\_km\_d }\OtherTok{\textless{}{-}}\NormalTok{ penguins\_sub[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{2}\NormalTok{] }\SpecialCharTok{\%\textgreater{}\%} 
-  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{cl =} \FunctionTok{factor}\NormalTok{(p\_bl\_bd\_km}\SpecialCharTok{$}\NormalTok{cluster))}
-
-\NormalTok{p\_bl\_bd\_km\_p }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{data=}\NormalTok{p\_bl\_bd\_km\_d, }
-             \FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{bl, }\AttributeTok{y=}\NormalTok{bd, }\AttributeTok{colour=}\NormalTok{cl), }
-             \AttributeTok{shape=}\DecValTok{16}\NormalTok{, }\AttributeTok{alpha=}\FloatTok{0.4}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{data=}\NormalTok{p\_bl\_bd\_km\_means, }
-             \FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{bl, }\AttributeTok{y=}\NormalTok{bd, }\AttributeTok{colour=}\NormalTok{cl), }
-             \AttributeTok{shape=}\DecValTok{3}\NormalTok{, }\AttributeTok{size=}\DecValTok{5}\NormalTok{) }\SpecialCharTok{+}
-    \FunctionTok{scale\_color\_discrete\_divergingx}\NormalTok{(}\StringTok{"Zissou 1"}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{ggtitle}\NormalTok{(}\StringTok{"(b)"}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{theme}\NormalTok{(}\AttributeTok{aspect.ratio =} \DecValTok{1}\NormalTok{, }
-        \AttributeTok{legend.position =} \StringTok{"bottom"}\NormalTok{,}
-        \AttributeTok{legend.title =} \FunctionTok{element\_blank}\NormalTok{()) }
-
-\NormalTok{sc\_bl\_bd\_km\_p }\SpecialCharTok{+}\NormalTok{ p\_bl\_bd\_km\_p }\SpecialCharTok{+} \FunctionTok{plot\_layout}\NormalTok{(}\AttributeTok{ncol=}\DecValTok{2}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{figure}[H]
+\begin{figure}
 
 \centering{
 
-\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{9-kmeans_files/figure-pdf/fig-km-2D-1.pdf}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{9-kmeans_files/figure-pdf/fig-km-2D-1.pdf}
 
 }
 
 \caption{\label{fig-km-2D}Examining \(k\)-means clustering results for
-simple clusters (a) and two variables of the penguins data (b). The
-means are indicated by a \(+\). The results are perfect for the simple
-clusters but not for the penguins data. The penguin clusters are
-elliptically shaped which is not captured by \(k\)-means. Cluster 3 has
-observations grouped across a gap in the data.}
+simple clusters (a, c) and two variables of the penguins data (b, d).
+Top row is input data and bottom row shows one solution for each, with
+\(k=2\) and \(3\) respectively. The means are indicated by a \(+\).
+Points are coloured by cluster label. The results are perfect for the
+simple clusters but not for the penguins data. The penguin data is
+multimodal, with small gaps visible from the top right mode and the
+other two, and the shap of the bigger clusters is more elliptical. The
+\(k\)-means produces roughly three equal sized clusters, where cluster 3
+groups observations over small gaps in the point clouds.}
 
 \end{figure}%
+
+\insightbox{How our eyes perceive clusters is different from how $k$-means perceives clusters. We tend to tune into gaps or changes in density, but $k$-means tries to bound observations with circles (or spheres in more than two dimensions).}
 
 \section{Examining results in high
 dimensions}\label{examining-results-in-high-dimensions}
@@ -5033,46 +5000,23 @@ penguins data as shown in Figure~\ref{fig-p-km-pdf}.
 \begin{Highlighting}[]
 \NormalTok{p\_km }\OtherTok{\textless{}{-}} \FunctionTok{kmeans}\NormalTok{(penguins\_sub[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{], }\AttributeTok{centers=}\DecValTok{3}\NormalTok{, }
                      \AttributeTok{iter.max =} \DecValTok{50}\NormalTok{, }\AttributeTok{nstart =} \DecValTok{5}\NormalTok{)}
-\NormalTok{p\_km\_means }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(p\_km}\SpecialCharTok{$}\NormalTok{centers) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{p\_km\_means }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(p\_km}\SpecialCharTok{$}\NormalTok{centers) }\SpecialCharTok{|\textgreater{}}
   \FunctionTok{mutate}\NormalTok{(}\AttributeTok{cl =} \FunctionTok{factor}\NormalTok{(}\FunctionTok{rownames}\NormalTok{(p\_km}\SpecialCharTok{$}\NormalTok{centers)))}
-\NormalTok{p\_km\_d }\OtherTok{\textless{}{-}}\NormalTok{ penguins\_sub[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{] }\SpecialCharTok{\%\textgreater{}\%} 
+\NormalTok{p\_km\_d }\OtherTok{\textless{}{-}}\NormalTok{ penguins\_sub[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{] }\SpecialCharTok{|\textgreater{}} 
   \FunctionTok{mutate}\NormalTok{(}\AttributeTok{cl =} \FunctionTok{factor}\NormalTok{(p\_km}\SpecialCharTok{$}\NormalTok{cluster))}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{library}\NormalTok{(tourr)}
-\NormalTok{p\_km\_means }\OtherTok{\textless{}{-}}\NormalTok{ p\_km\_means }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{type =} \StringTok{"mean"}\NormalTok{)}
-\NormalTok{p\_km\_d }\OtherTok{\textless{}{-}}\NormalTok{ p\_km\_d }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{type =} \StringTok{"data"}\NormalTok{)}
-\NormalTok{p\_km\_all }\OtherTok{\textless{}{-}} \FunctionTok{bind\_rows}\NormalTok{(p\_km\_means, p\_km\_d)}
-\NormalTok{p\_km\_all}\SpecialCharTok{$}\NormalTok{type }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(p\_km\_all}\SpecialCharTok{$}\NormalTok{type, }\AttributeTok{levels=}\FunctionTok{c}\NormalTok{(}\StringTok{"mean"}\NormalTok{, }\StringTok{"data"}\NormalTok{))}
-\NormalTok{p\_pch }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\DecValTok{3}\NormalTok{, }\DecValTok{20}\NormalTok{)[}\FunctionTok{as.numeric}\NormalTok{(p\_km\_all}\SpecialCharTok{$}\NormalTok{type)]}
-\NormalTok{p\_cex }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\DecValTok{3}\NormalTok{, }\DecValTok{1}\NormalTok{)[}\FunctionTok{as.numeric}\NormalTok{(p\_km\_all}\SpecialCharTok{$}\NormalTok{type)]}
-\FunctionTok{animate\_xy}\NormalTok{(p\_km\_all[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{], }\AttributeTok{col=}\NormalTok{p\_km\_all}\SpecialCharTok{$}\NormalTok{cl, }
-           \AttributeTok{pch=}\NormalTok{p\_pch, }\AttributeTok{cex=}\NormalTok{p\_cex, }\AttributeTok{axes=}\StringTok{"bottomleft"}\NormalTok{)}
-\FunctionTok{render\_gif}\NormalTok{(p\_km\_all[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{],}
-           \FunctionTok{grand\_tour}\NormalTok{(),}
-           \FunctionTok{display\_xy}\NormalTok{(}\AttributeTok{col=}\NormalTok{p\_km\_all}\SpecialCharTok{$}\NormalTok{cl, }
-                      \AttributeTok{pch=}\NormalTok{p\_pch, }
-                      \AttributeTok{cex=}\NormalTok{p\_cex, }
-                      \AttributeTok{axes=}\StringTok{"bottomleft"}\NormalTok{),}
-           \AttributeTok{gif\_file=}\StringTok{"gifs/p\_km.gif"}\NormalTok{,}
-           \AttributeTok{width=}\DecValTok{400}\NormalTok{,}
-           \AttributeTok{height=}\DecValTok{400}\NormalTok{,}
-           \AttributeTok{frames=}\DecValTok{500}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
 \begin{figure}
 
-\centering{
-
-\includegraphics[width=4.16667in,height=\textheight,keepaspectratio]{images/p_km_71.png}
-
-}
+\begin{minipage}{0.33\linewidth}
+\pandocbounded{\includegraphics[keepaspectratio]{images/p_km_71.png}}\end{minipage}%
+%
+\begin{minipage}{0.33\linewidth}
+\pandocbounded{\includegraphics[keepaspectratio]{images/p_km_166.png}}\end{minipage}%
+%
+\begin{minipage}{0.33\linewidth}
+\pandocbounded{\includegraphics[keepaspectratio]{images/p_km_85.png}}\end{minipage}%
 
 \caption{\label{fig-p-km-pdf}Exploring the k-means clustering result for
 the 4D penguins data. You can see cluster 2 clearly separated from the

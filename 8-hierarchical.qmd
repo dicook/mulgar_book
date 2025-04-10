@@ -62,7 +62,7 @@ cl_ggd <- dendro_data(cl_hw, type = "triangle")
 cl_hfly <- hierfly(simple_clusters, cl_hw, scale=FALSE)
 
 # Show result
-simple_clusters <- simple_clusters %>%
+simple_clusters <- simple_clusters |>
   mutate(clw = factor(cutree(cl_hw, 2)))
 ```
 
@@ -167,7 +167,7 @@ d1 <- data.frame(x1 = c(rnorm(50, -3),
                             rnorm(50, 3), y),
                  cl = factor(c(rep("A", 50), 
                              rep("B", 70))))
-d1 <- d1 %>% 
+d1 <- d1 |> 
   mutate_if(is.numeric, function(x) (x-mean(x))/sd(x))
 pd1 <- ggplot(data=d1, aes(x=x1, y=x2)) + 
   geom_point() +
@@ -182,7 +182,7 @@ d2 <- data.frame(x1=c(rnorm(50, -4),
                  x2=c(rnorm(100)),
                  cl = factor(c(rep("A", 50), 
                              rep("B", 50))))
-d2 <- d2 %>% 
+d2 <- d2 |> 
   mutate_if(is.numeric, function(x) (x-mean(x))/sd(x))
 pd2 <- ggplot(data=d2, aes(x=x1, y=x2)) + 
   geom_point() +
@@ -239,7 +239,7 @@ pd1hs <- ggplot() +
   theme(aspect.ratio=1, legend.position="none")
 
 # Show result
-d1 <- d1 %>%
+d1 <- d1 |>
   mutate(cls = factor(cutree(d1_hs, 2)))
 pc_d1s <- ggplot(d1) +
   geom_point(aes(x=x1, y=x2, colour=cls), 
@@ -284,7 +284,7 @@ pd1hw <- ggplot() +
   theme(aspect.ratio=1, legend.position="none")
 
 # Show result
-d1 <- d1 %>%
+d1 <- d1 |>
   mutate(clw = factor(cutree(d1_hw, 2)))
 pc_d1w <- ggplot(d1) +
   geom_point(aes(x=x1, y=x2, colour=clw), 
@@ -345,7 +345,7 @@ pd2hc <- ggplot() +
   theme(aspect.ratio=1, legend.position="none")
 
 # Show result
-d2 <- d2 %>%
+d2 <- d2 |>
   mutate(clc = factor(cutree(d2_hc, 2)))
 pc_d2c <- ggplot(d2) +
   geom_point(aes(x=x1, y=x2, colour=clc), 
@@ -390,7 +390,7 @@ pd2hw <- ggplot() +
   theme(aspect.ratio=1, legend.position="none")
 
 # Show result
-d2 <- d2 %>%
+d2 <- d2 |>
   mutate(clw = factor(cutree(d2_hw, 2)))
 pc_d2w <- ggplot(d2) +
   geom_point(aes(x=x1, y=x2, colour=clw), 
@@ -492,11 +492,11 @@ p_dist <- dist(penguins_sub[,1:4])
 p_hcw <- hclust(p_dist, method="ward.D2")
 p_hcs <- hclust(p_dist, method="single")
 
-p_clw <- penguins_sub %>% 
-  mutate(cl = factor(cutree(p_hcw, 3))) %>%
+p_clw <- penguins_sub |> 
+  mutate(cl = factor(cutree(p_hcw, 3))) |>
   as.data.frame()
-p_cls <- penguins_sub %>% 
-  mutate(cl = factor(cutree(p_hcs, 3))) %>%
+p_cls <- penguins_sub |> 
+  mutate(cl = factor(cutree(p_hcs, 3))) |>
   as.data.frame()
 
 p_w_hfly <- hierfly(p_clw, p_hcw, scale=FALSE)
@@ -685,10 +685,10 @@ pw_gp <- ggplot() +
            panel.grid=element_blank())
 
 pwg <- ggplotly(pw_gp, width=450, height=500,
-                tooltip="label") %>%
-       animation_button(label="Go") %>%
+                tooltip="label") |>
+       animation_button(label="Go") |>
        animation_slider(len=0.8, x=0.5,
-                        xanchor="center") %>%
+                        xanchor="center") |>
        animation_opts(easing="linear", transition = 0)
 htmlwidgets::saveWidget(pwg,
           file="html/penguins_cl_ward.html",
@@ -723,10 +723,10 @@ ps_gp <- ggplot() +
            panel.grid=element_blank())
 
 psg <- ggplotly(ps_gp, width=450, height=500,
-                tooltip="label") %>%
-       animation_button(label="Go") %>%
+                tooltip="label") |>
+       animation_button(label="Go") |>
        animation_slider(len=0.8, x=0.5,
-                        xanchor="center") %>%
+                        xanchor="center") |>
        animation_opts(easing="linear", transition = 0)
 htmlwidgets::saveWidget(psg,
           file="html/penguins_cl_single.html",
@@ -777,9 +777,9 @@ nl_sl <- hclust(dist(clusters_nonlin,
                          method = "euclidean"),
                   method = "single")
 # assume 4 clusters
-nl_clw <- clusters_nonlin %>% 
-  as_tibble() %>%
-  mutate(cl_wl = factor(cutree(nl_wl, 4))) %>%
+nl_clw <- clusters_nonlin |> 
+  as_tibble() |>
+  mutate(cl_wl = factor(cutree(nl_wl, 4))) |>
   mutate(cl_sl = factor(cutree(nl_sl, 4))) 
 library(ggdendro)
 ggplot() +
