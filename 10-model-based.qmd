@@ -63,9 +63,11 @@ We start with two of the four real-valued variables (`bl`, `fl`) and the three `
 
 ```{r echo=knitr::is_html_output()}
 #| label: fig-penguins-bl-fl
-#| fig-cap: "Scatterplot of flipper length by bill length of the penguins data."
+#| fig-cap: "Scatterplot of flipper length by bill length of the penguins data, overlaid with density contours. Examining 2D data using a 2D density plot can help assess whether the elliptical variance-covariance model is appropriate for the data. In this case it looks reasonable."
+#| fig-alt: "The x axis is labelled bl and has tick marks at -2, -1, 0, 1, 2, 3, and the y axis is labelled fl with tick marks at -2, -1, 0, 1, 2. Black points and blue-green contour lines suggest three modes, one at bottom left, one at top right and one to the middle right. Contours are a little elliptical, except the third mode is only weakly formed."
 #| fig-width: 5
 #| fig-height: 5
+#| out-width: 60%
 #| code-summary: "Code to make plot"
 load("data/penguins_sub.rda")
 ggplot(penguins_sub, aes(x=bl, 
@@ -89,6 +91,7 @@ To draw ellipses in any dimension, a reasonable procedure is to sample points un
 #| fig-height: 4
 #| out-width: 100%
 #| fig-cap: "Summary plots from model-based clustering: (a) BIC values for clusters 2-9 of top four models, (b) variance-covariance ellipses and cluster means (+) corresponding to the best model. The best model is three-cluster EVE, which has differently shaped variance-covariances albeit the same volume and orientation."
+#| fig-alt: "Two plots side by side. The left plot is a line plot, with x axis labelled Number of clusters and ticks at 2, 3, 4, 5, 6, 7, 8, 9, and y axis labelled BIC_vals and tick marks at -1650 and -1600. There are four coloured lines with different line types labelled EEE, EVE, EVV and VVE by the legend at top right. All peak at x=3 and decline rapidly at higher values. The highest point corresponds to EVE. The plot on the right has the same axes as the previous figure, but three colour groups with no legend. There are two main types of points with the darker ones forming three ellipses overlaying the scatter cloud, centred in each colour group. There is a plus in the middle of each ellipse shape."
 # Fit the model, plot BIC, construct and plot ellipses
 penguins_BIC <- mclustBIC(penguins_sub[,c(1,3)])
 ggmc <- ggmcbic(penguins_BIC, cl=2:9, top=4) + 
@@ -128,6 +131,7 @@ Now we will examine how model-based clustering will group the penguins data usin
 #| label: fig-penguins-bic
 #| code-fold: false
 #| fig-cap: "BIC values for the top models for 2-9 clusters on the penguins data. The interpretation is mixed: if one were to choose three clusters any of the variance-covariance models would be equally as good, but the very best model is the four-cluster VEE."
+#| fig-alt: "This is a line plot, with x axis labelled Number of clusters and ticks at 2, 3, 4, 5, 6, 7, 8, 9, and y axis labelled BIC_vals and tick marks at -2600, -2550, -2500 and -2450. There are four coloured lines with different line types labelled EEE (solid brown), EVE (small yellow dashes), VEE (medium light blue dashes) and VVE (large dark blue dashes) by the legend at right. The peak is at x=4 and corresponds to VEE. This curve has high values at x=3 and 5 also. Most lines peak at x=3, with the EEE staying fairly flat up to x=9, and the other two declining."
 #| fig-width: 6
 #| fig-height: 4
 #| fig-align: "center"
@@ -215,9 +219,9 @@ render_gif(penguins_mc_data[,1:4],
 ::: {.content-visible when-format="html"}
 ::: {#fig-penguins-mc-html layout-ncol=2}
 
-![Four-cluster VEE](gifs/penguins_best_mc.gif){#fig-penguins-best_mc fig-alt="FIX ME" fig.align="center"}
+![Four-cluster VEE](gifs/penguins_best_mc.gif){#fig-penguins-best_mc fig-alt="Animation showing 2D projections from 4D. There are four colour groups and two types of points, x's and solid circles. The solid circles form elliptical shapes and the x's are more scattered. The four groups are paired into two's that are close together. There is a legend at top right marking blue as 1, light blue-green as 2, yellow as 3 and red as 4. There is no axis display, so the exact projection of the four variables cannot be determined. We can see that one cluster of points that was separated from two other clusters has been divided into two groups, probably unnecessarily." fig.align="center"}
 
-![Three-cluster EEE](gifs/penguins_simpler_mc.gif){#fig-penguins-simpler_mc fig-alt="FIX ME" fig.align="center"}
+![Three-cluster EEE](gifs/penguins_simpler_mc.gif){#fig-penguins-simpler_mc fig-alt="Another animation showing 2D projections from 4D, with only three coloured groups. The two types of points show the elliptical shapes fitting the data more snugly in all projections." fig.align="center"}
 
 Examining the model-based clustering results for the penguins data: (a) best model according to BIC value, (b) simpler three-cluster model. Dots are ellipse points, and "x" are data points. It is important to note that the three cluster solution fits the data better, even though it has a lower BIC. 
 :::
@@ -226,9 +230,9 @@ Examining the model-based clustering results for the penguins data: (a) best mod
 ::: {.content-visible when-format="pdf"}
 ::: {#fig-penguins-mc-pdf layout-ncol=2}
 
-![Four-cluster VEE](images/penguins_best_mc_60.png){#fig-penguins-best-mc fig-alt="FIX ME" fig.align="center"}
+![Four-cluster VEE](images/penguins_best_mc_60.png){#fig-penguins-best-mc fig-alt="A 2D projection from 4D, showing three separated clusters, coloured with four colours. There are two types of points, x's and solid circles. The solid circles form circular shapes and the x's are more scattered. There is a legend at top right marking blue as 1, light blue-green as 2, yellow as 3 and red as 4. The red group is completely overplotted with the yellow group.  There is no axis display, so the exact projection of the four variables cannot be determined." fig.align="center"}
 
-![Three-cluster EEE](images/penguins_simpler_mc_60.png){#fig-penguins-simpler-mc fig-alt="FIX ME" fig.align="center"}
+![Three-cluster EEE](images/penguins_simpler_mc_60.png){#fig-penguins-simpler-mc fig-alt="A 2D projection from 4D, showing three separated clusters, coloured with three colours. There are two types of points, x's and solid circles. The solid circles form circular shapes and the x's are more scattered. There is a legend at top right marking blue as 1, yellow as 2 and red as 3. These colour groups match the three clusters very closely, and the solid circles match the x's very closely, although are more concentrated. There is no axis display, so the exact projection of the four variables cannot be determined." fig.align="center"}
 
 Examining the model-based clustering results for the penguins data: (a) best model according to BIC value, (b) simpler three-cluster model. Dots are ellipse points, and "x" are data points. It is important to note that the three cluster solution fits the data better, even though it has a lower BIC. 
 :::
