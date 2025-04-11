@@ -29,9 +29,10 @@ Non-linear SVM models are interesting to examine also. Mostly one would examine 
 
 ## Components of the SVM model
 
-To illustrate the approach, we use two simple simulated data examples. Both have only two variables, and two classes. Explaining SVM is easier when there are just two groups. In the first data set the two classes have different covariances matrices, which will cause trouble for LDA, but SVM should see the gap between the two clusters and place the separating hyperplane in the middle of the gap. In the second data set the two groups are concentric circles, with the inner one solid. A non-linear SVM should be fitted to this data, which should see circular gap between the two classes. 
+To illustrate the approach, we use two simple simulated data examples. Both have only two variables, and two classes. Explaining SVM is easier when there are just two groups. In the first data set the two classes have different covariances matrices, which will cause trouble for LDA, but SVM should see the gap between the two clusters and place the separating hyperplane in the middle of the gap. In the second data set the two groups are concentric circles, with the inner one solid. A non-linear SVM should be fitted to this data, which should see the circular gap between the two classes. 
 
 Note that the `svm()` function in the `e1071` package will automatically scale observations into the range $[0,1]$. To make it easier to examine the fitted model, it is best to scale your data first, and then fit the model.
+\index{software!e1071}
 
 ```{r echo=knitr::is_html_output()}
 #| code-summary: "Code to simulate data examples"
@@ -261,6 +262,8 @@ SVM model for distinguishing the sexes of the Chinstrap penguins: (a) support ve
 :::
 \index{classification!separating hyperplane}
 \index{classification!support vectors}
+\index{data!penguins}
+
 
 ::: {.content-visible when-format="html"}
 ::: info
@@ -275,6 +278,8 @@ Mark the support vectors by point shape, and examine where these are relative to
 
 
 Examining the hyperplane in a grand tour display (`r ifelse(knitr::is_html_output(), '@fig-p-svm-html', '@fig-p-svm-pdf')`) indicates that two of the variables, `bl` and `bd`, are important for separating the two classes. We can check this interpretation using the radial tour. Using the components from the model, the coefficients of the hyperplane are: 
+\index{tour!grand}
+\index{tour!radial}
 
 
 ```{r}
@@ -282,7 +287,7 @@ Examining the hyperplane in a grand tour display (`r ifelse(knitr::is_html_outpu
 t(chinstrap_svm$SV) %*% chinstrap_svm$coefs
 ```
 
-The coefficients for `bl` and `bd` are the largest (in magnitude) which supports the the interpretation that they are most important. This vector can be used to set the starting point for radial tour, once it is normalised. Any orthonormal vector serves to turn this into a 2D projection, to visualise the boundary. 
+The coefficients for `bl` and `bd` are the largest (in magnitude) which supports the the interpretation that they are most important. This vector can be used to set the starting point for a radial tour, once it is normalised. Any orthonormal vector serves to turn this into a 2D projection, to visualise the boundary. 
 
 
 ```{r}
