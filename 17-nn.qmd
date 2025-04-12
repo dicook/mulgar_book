@@ -442,7 +442,7 @@ sp$species = sort(unique(penguins_sub$species))
 #| fig-width: 4
 #| fig-height: 3
 #| out-width: 70%
-#| fig-cap: "Ternary diagram for the three groups of the predictive probabilities of both training ans test sets. From what we already know about the penguins data this fit is not good. Both Chinstrap and Gentoo penguins are confused with Adelie, or at risk of it. Gentoo is very well-separated from the other two species when several variables are used, and this fitted model is blind to it. One useful finding is that there is little difference between training and test sets, so the model has not been over-fitted."
+#| fig-cap: "Ternary diagram for the three groups of the predictive probabilities of both training and test sets. From what we already know about the penguins data this fit is not good. Both Chinstrap and Gentoo penguins are confused with Adelie, or at risk of it. Gentoo is very well-separated from the other two species when several variables are used, and this fitted model is blind to it. One useful finding is that there is little difference between training and test sets, so the model has not been over-fitted."
 #| fig-alt: "A scatterplot where all points fall inside a 2D triangle, marked by black lines. The triangle is upside down and is equilateral. Each vertex is labelled: Chinstrap (top left), Adelie (top right), Gentoo (bottom left). Each points corresponds to a penguin, and is coloured by species. The legend at right shows the color labelling as blue (Adelie), yellow (Chinstrap), red (Gentoo), and shape labels as open circles (training) and filled circles (test). Chinstrap points are a tight cluster at their vertex. Adelie and Gentoo are not centered at the vertex but part way along towards the others vertex. This indicates the confusion between these two species. There are some yellow points mixed with blue points but not with red."
 # Plot it
 ggplot() +
@@ -535,6 +535,8 @@ save_model_tf(model_fashion_mnist, "data/fashion_nn")
 ```
 
 We have defined a flat neural network with a single hidden layer with 128 nodes. To investigate the model we can start by comparing the activations to the original input data distribution. Since both the input space and the space of activations is large, and they are of different dimensionality, we will first use principal component analysis. This simplifies the analysis, and in general we do not need the original pixel or hidden node information for the interpretation here. The comparison is using the test-subset of the data.
+\index{dimension reduction!principal component analysis (PCA)}
+
 
 ```{r}
 #| warning: false
@@ -661,6 +663,9 @@ Comparison of the test observations in the first five principal components of th
 :::
 
 Finally we will investigate the model performance through the misclassifications and uncertainty between classes. We start with the error matrix for the test observations. To fit the error matrix we use the numeric labels, the ordering is as defined above for the labels.
+\index{classification!confusion matrix}
+
+
 
 ```{r}
 fashion_test_pred <- predict(model_fashion_mnist,
@@ -678,6 +683,7 @@ table(observed, predicted)
 
 Here the labels are used as 0 - T-shirt/top, 1 - Trouser, 2 - Pullover, 3 - Dress, 4 - Coat, 5 - Sandal, 6 - Shirt, 7 - Sneaker, 8 - Bag, 9 - Ankle boot.
 From this we see that the model mainly confuses certain categories with each other, and within expected groups (e.g. different types of shoes can be confused with each other, or different types of shirts). We can further investigate this by visualizing the full probability matrix for the test observations, to see which categories the model is uncertain about.
+\index{classification!predictive probabilities}
 
 ```{r echo=knitr::is_html_output(), eval=FALSE}
 #| code-fold: true
