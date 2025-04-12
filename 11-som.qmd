@@ -14,7 +14,7 @@ A self-organising map is like a fisherwoman's net, as the net is pulled in it ca
 
 ::: {.content-visible when-format="pdf"}
 \infobox{A self-organising map is like a fisherwoman's net, as the net is pulled in it catches the fish near knots in the net. We would examine the net in 
-\begin{itemize}
+\begin{itemize} \itemsep 0in
 \item 2D to extract the fish.
 \item high-dimensions to see how it was woven through the space to catch fish.
 \end{itemize}}
@@ -24,14 +24,11 @@ A self-organising map is like a fisherwoman's net, as the net is pulled in it ca
 `r ifelse(knitr::is_html_output(), '@fig-penguins-som-html', '@fig-penguins-som-pdf')` illustrates how the SOM fits the penguins data. SOM is not ideal for clustered data where there are gaps. It is better suited for data that lies on a non-linear low-dimensional manifold. To model data like the penguins the first step is to set up a net that will cover more than the three clusters. Here we have chosen to use a $5\times 5$ rectangular grid. (The option allows for a hexagonal grid, which would make for a better tiled 2D map, but this is not useful for viewing the model in high dimensions.) Like $k$-means clustering the fitted model can change substantially depending on the initialisation, so setting a seed will ensure a consistent result. We have also initialised the positions of the knots using PCA, which stretches the net in the main two directions of variance of the data, generally giving better results. 
 
 ```{r}
-#| code-fold: false
+#| code-summary: "code to run SOM"
 #| message: false
 library(kohonen)
 library(aweSOM)
 library(mulgar)
-library(dplyr)
-library(ggplot2)
-library(colorspace)
 load("data/penguins_sub.rda")
 
 set.seed(947)
@@ -47,11 +44,14 @@ p_som <- som(as.matrix(penguins_sub[,1:4]),
 The resulting model object is used to construct an object containing the original data, the 2D map, the map in $p$-D, with edges, and segments to connect points to represent the next using the `som_model()` function from `mulgar`. The 2D map shows a configuration of the data in 2D which best displays the clusters, much like how a PCA or LDA plot would be used. 
 
 ```{r}
-#| code-fold: false
+#| code-summary: "code to generate net"
 #| message: false
+library(dplyr)
+library(ggplot2)
+library(colorspace)
 
 p_som_df_net <- som_model(p_som)
-p_som_data <- p_som_df_net$data %>% 
+p_som_data <- p_som_df_net$data |> 
   mutate(species = penguins_sub$species)
 p_som_map_p <- ggplot() +
   geom_segment(data=p_som_df_net$edges_s, 
@@ -73,16 +73,16 @@ p_som_map_p <- ggplot() +
 
 The object can also be modified into the pieces needed to show the net in $p$-D. You need the data, points marking the net, and edges indicating which points to connect to draw the net.
 
-```{r}
+```{r echo=knitr::is_html_output()}
 #| eval: false
-#| code-fold: false
+#| code-summary: "code to make gifs"
 library(tourr)
 
 # Set up data
-p_som_map <- p_som_df_net$net %>%
+p_som_map <- p_som_df_net$net |>
   mutate(species = "0", type="net")
-p_som_data <- p_som_data %>% 
-  select(bl:bm, species) %>%
+p_som_data <- p_som_data |> 
+  select(bl:bm, species) |>
   mutate(type="data", 
          species = as.character(species)) 
 p_som_map_data <- bind_rows(p_som_map, p_som_data)
@@ -91,7 +91,8 @@ p_som_map_data$type <- factor(p_som_map_data$type,
 p_som_map_data$species <- factor(p_som_map_data$species,
   levels=c("0","Adelie","Chinstrap","Gentoo"))
 p_pch <- c(46, 16)[as.numeric(p_som_map_data$type)]
-p_col <- c("black", hcl.colors(3, "Zissou 1"))[as.numeric(p_som_map_data$species)]
+p_col <- c("black", hcl.colors(3, 
+  "Zissou 1"))[as.numeric(p_som_map_data$species)]
 animate_xy(p_som_map_data[,1:4],
            col=p_col, 
            pch=p_pch,
@@ -125,6 +126,9 @@ render_gif(p_som_map_data[,1:4],
 #| echo: false
 #| label: fig-p-som2-html
 #| fig-cap: "2D map"
+#| fig-width: 5
+#| fig-height: 5
+#| out-width: 100%
 p_som_map_p
 ```
 
@@ -140,7 +144,7 @@ Examining the SOM map views in 2D and with the data in 4D. Points are coloured b
 
 
 
-![2D map](images/fig-p-som2-1.png){#fig-p-som1 fig-alt=""}
+![2D map](images/fig-p-som2-1.png){#fig-p-som1 fig-alt="" width=200 fig-align="center"}
 
 ![Map in 4D](images/p_som_47.png){#fig-p-som1 fig-alt=""}
 

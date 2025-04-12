@@ -5300,12 +5300,12 @@ equally as good, but the very best model is the four-cluster VEE.}
 \NormalTok{penguins\_cl }\OtherTok{\textless{}{-}}\NormalTok{ penguins\_sub}
 \NormalTok{penguins\_cl}\SpecialCharTok{$}\NormalTok{cl }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(penguins\_mc}\SpecialCharTok{$}\NormalTok{classification)}
 
-\NormalTok{penguins\_mc\_data }\OtherTok{\textless{}{-}}\NormalTok{ penguins\_cl }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{select}\NormalTok{(bl}\SpecialCharTok{:}\NormalTok{bm, cl) }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{type =} \StringTok{"data"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{penguins\_mc\_data }\OtherTok{\textless{}{-}}\NormalTok{ penguins\_cl }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{select}\NormalTok{(bl}\SpecialCharTok{:}\NormalTok{bm, cl) }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{type =} \StringTok{"data"}\NormalTok{) }\SpecialCharTok{|\textgreater{}}
   \FunctionTok{bind\_rows}\NormalTok{(}\FunctionTok{bind\_cols}\NormalTok{(penguins\_mce}\SpecialCharTok{$}\NormalTok{ell,}
                       \AttributeTok{type=}\FunctionTok{rep}\NormalTok{(}\StringTok{"ellipse"}\NormalTok{,}
-                               \FunctionTok{nrow}\NormalTok{(penguins\_mce}\SpecialCharTok{$}\NormalTok{ell)))) }\SpecialCharTok{\%\textgreater{}\%}
+                               \FunctionTok{nrow}\NormalTok{(penguins\_mce}\SpecialCharTok{$}\NormalTok{ell)))) }\SpecialCharTok{|\textgreater{}}
   \FunctionTok{mutate}\NormalTok{(}\AttributeTok{type =} \FunctionTok{factor}\NormalTok{(type))}
 \end{Highlighting}
 \end{Shaded}
@@ -5401,7 +5401,7 @@ where nodes are empty of points we would interpret this as a gap in the
 original data.
 
 \infobox{A self-organising map is like a fisherwoman's net, as the net is pulled in it catches the fish near knots in the net. We would examine the net in 
-\begin{itemize}
+\begin{itemize} \itemsep 0in
 \item 2D to extract the fish.
 \item high-dimensions to see how it was woven through the space to catch fish.
 \end{itemize}}
@@ -5425,9 +5425,6 @@ generally giving better results.
 \FunctionTok{library}\NormalTok{(kohonen)}
 \FunctionTok{library}\NormalTok{(aweSOM)}
 \FunctionTok{library}\NormalTok{(mulgar)}
-\FunctionTok{library}\NormalTok{(dplyr)}
-\FunctionTok{library}\NormalTok{(ggplot2)}
-\FunctionTok{library}\NormalTok{(colorspace)}
 \FunctionTok{load}\NormalTok{(}\StringTok{"data/penguins\_sub.rda"}\NormalTok{)}
 
 \FunctionTok{set.seed}\NormalTok{(}\DecValTok{947}\NormalTok{)}
@@ -5450,8 +5447,12 @@ plot would be used.
 
 \begin{Shaded}
 \begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(dplyr)}
+\FunctionTok{library}\NormalTok{(ggplot2)}
+\FunctionTok{library}\NormalTok{(colorspace)}
+
 \NormalTok{p\_som\_df\_net }\OtherTok{\textless{}{-}} \FunctionTok{som\_model}\NormalTok{(p\_som)}
-\NormalTok{p\_som\_data }\OtherTok{\textless{}{-}}\NormalTok{ p\_som\_df\_net}\SpecialCharTok{$}\NormalTok{data }\SpecialCharTok{\%\textgreater{}\%} 
+\NormalTok{p\_som\_data }\OtherTok{\textless{}{-}}\NormalTok{ p\_som\_df\_net}\SpecialCharTok{$}\NormalTok{data }\SpecialCharTok{|\textgreater{}} 
   \FunctionTok{mutate}\NormalTok{(}\AttributeTok{species =}\NormalTok{ penguins\_sub}\SpecialCharTok{$}\NormalTok{species)}
 \NormalTok{p\_som\_map\_p }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{() }\SpecialCharTok{+}
   \FunctionTok{geom\_segment}\NormalTok{(}\AttributeTok{data=}\NormalTok{p\_som\_df\_net}\SpecialCharTok{$}\NormalTok{edges\_s, }
@@ -5476,40 +5477,13 @@ The object can also be modified into the pieces needed to show the net
 in \(p\)-D. You need the data, points marking the net, and edges
 indicating which points to connect to draw the net.
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{library}\NormalTok{(tourr)}
-
-\CommentTok{\# Set up data}
-\NormalTok{p\_som\_map }\OtherTok{\textless{}{-}}\NormalTok{ p\_som\_df\_net}\SpecialCharTok{$}\NormalTok{net }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{species =} \StringTok{"0"}\NormalTok{, }\AttributeTok{type=}\StringTok{"net"}\NormalTok{)}
-\NormalTok{p\_som\_data }\OtherTok{\textless{}{-}}\NormalTok{ p\_som\_data }\SpecialCharTok{\%\textgreater{}\%} 
-  \FunctionTok{select}\NormalTok{(bl}\SpecialCharTok{:}\NormalTok{bm, species) }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{type=}\StringTok{"data"}\NormalTok{, }
-         \AttributeTok{species =} \FunctionTok{as.character}\NormalTok{(species)) }
-\NormalTok{p\_som\_map\_data }\OtherTok{\textless{}{-}} \FunctionTok{bind\_rows}\NormalTok{(p\_som\_map, p\_som\_data)}
-\NormalTok{p\_som\_map\_data}\SpecialCharTok{$}\NormalTok{type }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(p\_som\_map\_data}\SpecialCharTok{$}\NormalTok{type,}
-  \AttributeTok{levels=}\FunctionTok{c}\NormalTok{(}\StringTok{"net"}\NormalTok{, }\StringTok{"data"}\NormalTok{))}
-\NormalTok{p\_som\_map\_data}\SpecialCharTok{$}\NormalTok{species }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(p\_som\_map\_data}\SpecialCharTok{$}\NormalTok{species,}
-  \AttributeTok{levels=}\FunctionTok{c}\NormalTok{(}\StringTok{"0"}\NormalTok{,}\StringTok{"Adelie"}\NormalTok{,}\StringTok{"Chinstrap"}\NormalTok{,}\StringTok{"Gentoo"}\NormalTok{))}
-\NormalTok{p\_pch }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\DecValTok{46}\NormalTok{, }\DecValTok{16}\NormalTok{)[}\FunctionTok{as.numeric}\NormalTok{(p\_som\_map\_data}\SpecialCharTok{$}\NormalTok{type)]}
-\NormalTok{p\_col }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"black"}\NormalTok{, }\FunctionTok{hcl.colors}\NormalTok{(}\DecValTok{3}\NormalTok{, }\StringTok{"Zissou 1"}\NormalTok{))[}\FunctionTok{as.numeric}\NormalTok{(p\_som\_map\_data}\SpecialCharTok{$}\NormalTok{species)]}
-\FunctionTok{animate\_xy}\NormalTok{(p\_som\_map\_data[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{],}
-           \AttributeTok{col=}\NormalTok{p\_col, }
-           \AttributeTok{pch=}\NormalTok{p\_pch,}
-           \AttributeTok{edges=}\FunctionTok{as.matrix}\NormalTok{(p\_som\_df\_net}\SpecialCharTok{$}\NormalTok{edges), }
-           \AttributeTok{edges.col =} \StringTok{"black"}\NormalTok{,}
-           \AttributeTok{axes=}\StringTok{"bottomleft"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
 \begin{figure}
 
 \begin{minipage}{0.50\linewidth}
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{images/fig-p-som2-1.png}}
+\includegraphics[width=2.08333in,height=\textheight,keepaspectratio]{images/fig-p-som2-1.png}
 
 }
 
