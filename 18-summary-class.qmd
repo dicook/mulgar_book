@@ -238,7 +238,7 @@ If the predictors have associations, then interpreting measures of importance ca
 
 But forests build from trees which make greedy linear splits on single variables. If there are multiple ways to separate class clusters, trees and forests will grab one to use. So similarly the fitted model has tunnel vision for one solution. 
 
-This is what explainability is attempting to assist with, what is it that the fitted model sees. What we see when we make plots of the data might differ from the model sees, which can be confusing. The role of explainability is to pull the fitted model apart to inspect how it has been built for the purposes of understanding how it will make predictions and how it considers the relationship between response and predictors. 
+This is what explainability is attempting to assist with, what is it that the fitted model sees. What we see when we make plots of the data might differ from what the model sees, which can be confusing. The role of explainability is to pull the fitted model apart to inspect how it has been built for the purposes of understanding how it will make predictions and how it considers the relationship between response and predictors. 
 
 As suggested by the ruminations above, it can be messy work, requiring persistence and effort to develop a good understanding of any fitted model. Local explanation measures are designed to help, but there are a variety of different calculation techniques which may produce conflicting interpretations. In addition, local explanations are observation-level values, because they provide information that is only reliable for a local neighbourhood of a single observation.
 
@@ -380,6 +380,8 @@ knitr::kable(p_outlier, digits=2)
 ```
 
 @fig-shap shows the Shapley values for all the Gentoo observations in the *training* set of penguins data, as a parallel coordinate plot (a) and a scatterplot matrix (b). It can be useful to compare the SHAP values for all the observations in a class, to understand differences in their predictions. A parallel coordinate plot is better than a scatterplot matrix here because it focuses on single variables, and the differences in SHAP values across the variables. The values for the single misclassified Gentoo penguin (in the training set) is coloured orange-brown. The SHAP values for this penguin are similar to other penguins on `bl`, `bd` and `fl` but they are very different on `bm`. 
+\index{scatterplot matrix}
+\index{parallel coordinate plot}
 
 @tbl-p-shap contains the SHAP values for this penguin, for all three classes, and all four variables. The explanations for this misclassified penguin are then:
 
@@ -477,7 +479,7 @@ p_sm
 SHAP values for the training set of Gentoo penguins, shown as a parallel coordinate plot (a) and a scatterplot matrix (b).  Colour indicates whether the model made a mistake in the prediction. The one misclassified penguin (orange brown) differs from other penguins primarily in its body mass value, which says that SHAP sees body mass as playing a role in the misclassification.
 :::
 
-If we examine the data [@fig-penguins-bl-bm-bd] the explanations make some sense. The misclassified penguin has an unusually small value on `bm`. That the SHAP value for `bm` was quite different from those of the other Gentoo penguins pointed to this being the potential issue with the model, particularly for this penguin. This penguin's prediction is negatively impacted by `bm` being in the model.
+If we examine the data in [@fig-penguins-bl-bm-bd] the explanations make some sense. The misclassified penguin has an unusually small value on `bm`. That the SHAP value for `bm` was quite different from those of the other Gentoo penguins pointed to this being the potential issue with the model, particularly for this penguin. This penguin's prediction is negatively impacted by `bm` being in the model.
 
 ```{r echo=knitr::is_html_output()}
 #| label: fig-penguins-bl-bm-bd
@@ -646,6 +648,7 @@ bd1 + bd2 + bd3 + plot_layout(ncol=3, guides = "collect") &
 ```
 
 The next step is to use a radial tour to very directly find the boundary bteween Adelie and Gentoo. It is probably reasonable to start from a projection that is constructed using the SHAP values, with the idea that this combination of variables might also reveal where the prediction to either class occurs. Because we have seen that `bm` plays the most important role in the classification, creating a 2D projection basis where `bm` is contrasted against a combination of the other variables, is our strategy for initialising the radial tour. `r ifelse(knitr::is_html_output(), '@fig-bndry-html', '@fig-bndry-pdf')` shows the boundary being found using the radial tour.
+\index{tour!radial}
 
 ```{r}
 #| eval: false
@@ -708,16 +711,16 @@ Radial tour used to investigate where the boundary falls: (a) animated gif, (b) 
 
 ::: {.content-visible when-format="html"}
 ::: insights
-The SHAP values for the NN model are correct in reporting that body mass is a variable that strongly contributes to the misclassified penguin. They do not effectively take global variable importance into account, and give too much weight to bill length and body depth in the interpretation. These two variables contribute very little to the classification boundary.
+The SHAP values for the NN model are correct in reporting that body mass is a variable that strongly contributes to the misclassified penguin. They do not effectively take global variable importance into account, and give too much weight to bill length and flipper length in the interpretation. These two variables contribute very little to the classification boundary.
 :::
 :::
 
 ::: {.content-visible when-format="pdf"}
-\insightbox{The SHAP values for the NN model are correct in reporting that body mass is a variable that strongly contributes to the misclassified penguin. They do not effectively take global variable importance into account, and give too much weight to bill length and body depth in the interpretation. These two variables contribute very little to the classification boundary.
+\insightbox{The SHAP values for the NN model are correct in reporting that body mass is a variable that strongly contributes to the misclassified penguin. They do not effectively take global variable importance into account, and give too much weight to bill length and flipper length in the interpretation. These two variables contribute very little to the classification boundary.
 }
 :::
 
-So what have we learned. The SHAP values suggested numerous variables involved with the classification of the species. Using the tour shows that the separation between Adelie and Gentoo is mostly due to `bm`, for this fitted neural network model. The SHAP values over-stated the importance of the other variables. However, examining the SHAP values for all the training sample did help to uncover the reason why the one Gentoo penguin was misclassified as Adelie, its value of `bm` is unusual. 
+So what have we learned? The SHAP values suggested numerous variables involved with the classification of the species. Using the tour shows that the separation between Adelie and Gentoo is mostly due to `bm`, for this fitted neural network model. The SHAP values over-stated the importance of the other variables. However, examining the SHAP values for all the training sample did help to uncover the reason why the one Gentoo penguin was misclassified as Adelie, its value of `bm` is unusual. 
 
 By examining the class boundary, we also learn that this model is inadequate. It does not adequately use the relationship between `bm` and `bd` effectively as can be seen in @fig-penguins-bndry (middle plot). A cleaner distinction between Adelie and Gentoo would be achieved with a more oblique linear split. 
 
@@ -735,11 +738,12 @@ It is also important to keep in mind that they are explaining a particular model
 \index{data!sketches}
 
 1. Compute the SHAP values for the LDA model and examine the Gentoo penguin that was misclassified as a Adelie by the NN model. How do these differ from those of the NN model? What does this tell us about the classification boundary produced by LDA as different from the NN model?
-2. Why should it be possible to obtain a NN fit, where the architecture has two nodes in the hidden layer to do a dimension reduction, that is at least as good as the LDA model? Re-fit the NN model, by varying the random seed, to obtain the best fit possible. Save this model fit, and compare it with the LDA model?
+2. Why should it be possible to obtain a NN fit, where the architecture has two nodes in the hidden layer to do a dimension reduction, that is at least as good as the LDA model? Re-fit the NN model, by varying the random seed, to obtain the best fit possible. Save this model fit, and compare it with the LDA model.
 3. Examine misclassifications from a random forest model for the fake trees data between cluster 1 and 0, using the 
     a. principal components
-    b. votes matrix. 
-Describe where these errors relative to their true and predicted class clusters. When examining the simplex, are the misclassifications the points that are furthest from any vertices?
+    b. votes matrix.
+
+Describe where these show errors relative to their true and predicted class clusters. When examining the simplex, are the misclassifications the points that are furthest from any vertices?
 4. Examine the misclassifications for the random forest model on the sketches data, focusing on cactus sketches that were mistaken for bananas. Follow up by plotting the images of these errors, and describe whether the classifier is correct that these sketches are so poor their true cactus or banana identity cannot be determined. 
 5. How do the errors from the random forest model compare with those of your best fitting NN model? Are the the corresponding images poor sketches of cacti or bananas?
 6. Now examine the misclassifications of the sketches data in the 
