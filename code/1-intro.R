@@ -1,6 +1,8 @@
+## ----------------------------------------------------------------------------
 #| echo: false
 library(mulgar)
 library(ggplot2)
+library(patchwork)
 data("simple_clusters")
 
 s_p <- ggplot(simple_clusters, aes(x=x1, y=x2)) +
@@ -9,7 +11,7 @@ s_p <- ggplot(simple_clusters, aes(x=x1, y=x2)) +
   annotate("text", x=2.0, y=2.2, label="(0.707, 0.707)", angle=45) +
   annotate("text", x=2.2, y=2.0, label="most clustered", angle=45) +
   geom_abline(intercept=0, slope=-1) +
-  annotate("text", x=-1.6, y=1.8, label="(-0.707, 0.707)", angle=-45) +
+  annotate("text", x=-1.6, y=1.8, label="(0.707, -0.707)", angle=-45) +
   annotate("text", x=-1.8, y=1.6, label="no clusters", angle=-45) +
   geom_abline(intercept=0, slope=0) +
   annotate("text", x=-1.6, y=0.15, label="(1, 0)") +
@@ -19,57 +21,111 @@ s_p <- ggplot(simple_clusters, aes(x=x1, y=x2)) +
   theme(aspect.ratio=1)
 
 
+## ----------------------------------------------------------------------------
+#| echo: false
+#| message: false
+library(tourr)
+
+explain_t1 <- save_history(simple_clusters[,1:2],
+                           grand_tour(d=1),
+                           max_bases=9)
+explain_t1[,,2] <- matrix(c(1/sqrt(2), 1/sqrt(2)),
+                          ncol=1)
+explain_t1[,,3] <- matrix(c(0, 1),
+                          ncol=1)
+explain_t1[,,4] <- matrix(c(-1/sqrt(2), 1/sqrt(2)),
+                          ncol=1)
+explain_t1[,,5] <- matrix(c(-1, 0),
+                          ncol=1)
+explain_t1[,,6] <- matrix(c(-1/sqrt(2), -1/sqrt(2)),
+                          ncol=1)
+explain_t1[,,7] <- matrix(c(0, -1),
+                          ncol=1)
+explain_t1[,,8] <- matrix(c(1/sqrt(2), -1/sqrt(2)),
+                          ncol=1)
+explain_t1[,,9] <- matrix(c(1, 0),
+                          ncol=1)
+
+
+## ----------------------------------------------------------------------------
 #| echo: false
 #| eval: false
-## library(tourr)
-## 
-## explain_t1 <- save_history(simple_clusters[,1:2],
-##                            grand_tour(d=1),
-##                            max_bases=9)
-## explain_t1[,,2] <- matrix(c(1/sqrt(2), 1/sqrt(2)),
-##                           ncol=1)
-## explain_t1[,,3] <- matrix(c(0, 1),
-##                           ncol=1)
-## explain_t1[,,4] <- matrix(c(-1/sqrt(2), 1/sqrt(2)),
-##                           ncol=1)
-## explain_t1[,,5] <- matrix(c(-1, 0),
-##                           ncol=1)
-## explain_t1[,,6] <- matrix(c(-1/sqrt(2), -1/sqrt(2)),
-##                           ncol=1)
-## explain_t1[,,7] <- matrix(c(0, -1),
-##                           ncol=1)
-## explain_t1[,,8] <- matrix(c(1/sqrt(2), -1/sqrt(2)),
-##                           ncol=1)
-## explain_t1[,,9] <- matrix(c(1, 0),
-##                           ncol=1)
-## 
-## animate_dist(simple_clusters[,1:2],
-##              planned_tour(explain_t1),
-##              method="density", col="#EC5C00",
-##              scale_density = TRUE,
-##              half_range=0.8)
-## render_gif(simple_clusters[,1:2],
-##            planned_tour(explain_t1),
-##            display_dist(method="density",
-##                         col="#EC5C00",
-##                         density_max = 2,
-##                         scale_density = TRUE,
-##              half_range=0.8),
-##            gif_file = "gifs/explain_1d.gif",
-##            apf = 1/100,
-##            frames = 1000,
-##            width = 400,
-##            height = 300)
+# animate_dist(simple_clusters[,1:2],
+#              planned_tour(explain_t1),
+#              method="density", col="#EC5C00",
+#              scale_density = TRUE,
+#              half_range=0.8)
+# render_gif(simple_clusters[,1:2],
+#            planned_tour(explain_t1),
+#            display_dist(method="density",
+#                         col="#EC5C00",
+#                         density_max = 2,
+#                         scale_density = TRUE,
+#              half_range=0.8),
+#            gif_file = "gifs/explain_1d.gif",
+#            apf = 1/100,
+#            frames = 1000,
+#            width = 400,
+#            height = 300)
 
 
+## ----------------------------------------------------------------------------
 #| echo: false
 #| label: fig-explain-1D-data
 #| fig-cap: 2D data
+#| out-width: 100%
 #| fig-width: 4
 #| fig-height: 4
+#| fig-alt: "Plot shows 2D scatterplot, with lines indicating three 1D projection vectors, and their coefficients. The points form two clusters, oriented in the bottom left to top right direction."
 s_p
 
 
+## ----fig-explain-1D-pdf, eval=knitr::is_latex_output()-----------------------
+#| echo: false
+#| fig-cap: "How a tour can be used to explore high-dimensional data illustrated using (a) 2D data with two clusters and (b,c,d) 1D projections from a tour shown as a density plot. Imagine spinning a line around the centre of the data plot, with points projected orthogonally onto the line. With this data, when the line is at `x1=x2 (0.707, 0.707)` or `(-0.707, -0.707)` the clustering is the strongest. When it is at `x1=-x2  (0.707, -0.707)` there is no clustering. {{< fa play-circle >}}"
+#| fig-width: 8
+#| fig-height: 8
+#| out-width: 100%
+#| fig-env: "figure*"
+#| fig-alt: "Four plots. Top left is a scatterplot showing two circular clusters oriented in the bottom left to top right direction. Top right plot is a density plot showing bimodality. Bottom left is a density plot showing strong bimodality. Bottom right is a density plot which is almost unimodal, and symmetric, except for a small bump on the left side of the main peak."
+# p1 <- s_p + ggtitle("(a) 2D data")
+# d <- as.matrix(simple_clusters[,-3]) %*% matrix(explain_t1[,,9])
+# colnames(d) <- c("P1")
+# d <- as.data.frame(d)
+# p2 <- ggplot(d, aes(x=P1)) +
+#   geom_density(fill="#EC5C00") +
+#   xlim(c(-3,3)) + ylim(c(0, 0.5)) +
+#   ggtitle("(b) (1, 0)") +
+#   xlab("Projection") + ylab("") +
+#   theme_minimal() +
+#   theme(axis.text = element_blank(),
+#         panel.grid.major = element_blank())
+# d <- as.matrix(simple_clusters[,-3]) %*% matrix(explain_t1[,,2])
+# colnames(d) <- c("P1")
+# d <- as.data.frame(d)
+# p3 <- ggplot(d, aes(x=P1)) +
+#   geom_density(fill="#EC5C00") +
+#   xlim(c(-4,4)) + ylim(c(0, 0.5)) +
+#   ggtitle("(c) (0.707, 0.707)") +
+#   xlab("Projection") + ylab("") +
+#   theme_minimal() +
+#   theme(axis.text = element_blank(),
+#         panel.grid.major = element_blank())
+# d <- as.matrix(simple_clusters[,-3]) %*% matrix(explain_t1[,,8])
+# colnames(d) <- c("P1")
+# d <- as.data.frame(d)
+# p4 <- ggplot(d, aes(x=P1)) +
+#   geom_density(fill="#EC5C00") +
+#   xlim(c(-1.7,1.7)) + ylim(c(0, 1.2)) +
+#   ggtitle("(d) (0.707, -0.707)") +
+#   xlab("Projection") + ylab("") +
+#   theme_minimal() +
+#   theme(axis.text = element_blank(),
+#         panel.grid.major = element_blank())
+# p1 + p2 + p3 + p4 + plot_layout(ncol=2)
+
+
+## ----------------------------------------------------------------------------
 #| echo: false
 library(tourr)
 library(geozoo)
@@ -82,26 +138,28 @@ colnames(d) <- paste0("x", 1:3)
 d <- data.frame(d)
 
 
+## ----------------------------------------------------------------------------
 #| echo: false
 #| eval: false
-## animate_xy(d, little_tour(), aps=0.2)
-## 
-## explain_t2 <- save_history(d, little_tour(), 4)
-## 
-## animate_xy(d, planned_tour(explain_t2), half_range=0.7, axes="bottomleft")
-## 
-## render_gif(d,
-##            planned_tour(explain_t2),
-##            display_xy(col="#EC5C00",
-##              half_range=0.7,
-##              axes="bottomleft"),
-##            gif_file = "gifs/explain_2d.gif",
-##            apf = 1/75,
-##            frames = 1000,
-##            width = 400,
-##            height = 300)
+# animate_xy(d, little_tour(), aps=0.2)
+# 
+# explain_t2 <- save_history(d, little_tour(), 4)
+# 
+# animate_xy(d, planned_tour(explain_t2), half_range=0.7, axes="bottomleft")
+# 
+# render_gif(d,
+#            planned_tour(explain_t2),
+#            display_xy(col="#EC5C00",
+#              half_range=0.7,
+#              axes="bottomleft"),
+#            gif_file = "gifs/explain_2d.gif",
+#            apf = 1/75,
+#            frames = 1000,
+#            width = 400,
+#            height = 300)
 
 
+## ----------------------------------------------------------------------------
 #| echo: false
 explain_prj <- matrix(c(cos(ang), 0, -sin(ang), 0, 1, 0, sin(ang), 0, cos(ang)), ncol=3, byrow=T)[,1:2]
 
@@ -123,19 +181,55 @@ d_prj_p <- ggplot() +
        panel.grid=element_blank())
 
 
+## ----------------------------------------------------------------------------
 #| echo: false
 #| label: fig-explain-2D-data
 #| fig-cap: A projection revealing the hole
 #| fig-width: 4
 #| fig-height: 4
+#| fig-alt: "A scatterplot of a single 2D projection where the donut hole is visible."
 d_prj_p
 
 
+## ----fig-explain-2D-pdf, eval=knitr::is_latex_output()-----------------------
+#| echo: false
+#| fig-cap: "How a tour can be used to explore high-dimensional data illustrated by showing a sequence of random 2D projections of 3D data (a). The data has a donut shape with the hole revealed in a single 2D projection (b). Data usually arrives with a given number of observations, and when we plot it like this using a scatterplot, it is like shadows of a transparent object. {{< fa play-circle >}}"
+#| fig-width: 8
+#| fig-height: 8
+#| out-width: 100%
+#| fig-env: "figure*"
+#| fig-alt: "Two scatterplots of different linear combinations of the three variables, from data on a torus or donut shape. The one on the left shows the donut on its side, and the one on the right shows the donut hole."
+# set.seed(437)
+# explain_prj <- basis_random(3, 2)
+# 
+# d_prj <- render_proj(d, explain_prj,
+#                      position="bottomleft",
+#                      limits=1.5)
+# p5 <- ggplot() +
+#   geom_path(data=d_prj$circle, aes(x=c1, y=c2), colour="grey70") +
+#     geom_segment(data=d_prj$axes, aes(x=x1, y=y1, xend=x2, yend=y2), colour="grey70") +
+#     geom_text(data=d_prj$axes, aes(x=x2, y=y2, label=rownames(d_prj$axes)), colour="grey50") +
+#     geom_point(data=d_prj$data_prj, aes(x=P1, y=P2),
+#                col="#EC5C00", size=1.2) +
+#     xlim(-1.3,1.3) + ylim(-1.3, 1.3) +
+#   ggtitle("(a) A random projection") +
+#     theme_bw() +
+#     theme(aspect.ratio=1,
+#        axis.text=element_blank(),
+#        axis.title=element_blank(),
+#        axis.ticks=element_blank(),
+#        panel.grid=element_blank())
+# p6 <- d_prj_p + ggtitle("(b) A projection revealing the hole")
+# p5 + p6 + plot_layout(ncol=2)
+
+
+## ----------------------------------------------------------------------------
 #| label: fig-dimension-cubes
 #| echo: false
 #| fig-cap: "Space can be considered to be a high-dimensional cube. Here we have pictured a sequence of increasing dimension cubes, from 1D to 5D, as wireframes, it can be seen that as the dimension increase by one, the cube doubles."
 #| fig-width: 8
 #| fig-height: 3
+#| fig-alt: "Wireframe diagrams show 1D, 2D, 3D, 4D and 5D cubes. Half of each cube is coloured orange to show how a new dimension expands from the previous one, by doubling it. Cubes greater than 2D are shown using a projection showing the cube patterns."
 #| message: false
 #| warning: false
 # wire frame cubes
@@ -312,12 +406,14 @@ p1 + p2 + p3 + p4 + p5 +
 
 
 
+## ----------------------------------------------------------------------------
 #| label: fig-density
-#| fig-cap: "Illustration of data crowding in the low-dimensional projection as dimension increases, here from 3, 10, 100. Colour shows the number of points in each hexagon bin (pink is large, navy is small). As dimension increases the points concentrate near the centre."
+#| fig-cap: "Illustration of data crowding in the low-dimensional projection as dimension increases, here from 3, 10, 100. The samples are generated from a uniform distribution in $p$-dimensional spheres. Colour shows the number of points in each hexagon bin (pink is large, navy is small). As dimension increases the points concentrate near the centre."
 #| out-width: 95%
 #| fig-width: 6
 #| fig-height: 2
 #| fig-align: center
+#| fig-alt: "Three hexagon binned plots. The plot on the left is relatively uniform in colour, and looks like a disk, and the plot on the right has a high concentration of pink hexagons in the center, and rings of green and navy blue around the outside. The middle plot is in between the two patterns."
 #| message: false
 #| warning: false
 #| echo: false
@@ -333,7 +429,7 @@ colnames(p3) <- c("x", "y")
 colnames(p10) <- c("x", "y")
 colnames(p100) <- c("x", "y")
 
-proj_points <- as_tibble(rbind(p3, p10, p100)) %>%
+proj_points <- as_tibble(rbind(p3, p10, p100)) |>
   mutate(p = factor(c(rep("p = 3", n), rep("p = 10", n), rep("p = 100", n)), levels = c("p = 3", "p = 10", "p = 100")))
 
 
@@ -354,11 +450,13 @@ ggplot(proj_points, aes(x, y)) +
 
 
 
+## ----------------------------------------------------------------------------
 #| label: fig-example-structure
 #| fig-width: 10
 #| fig-height: 3
 #| out-width: 100%
 #| fig-cap: "Example structures that might be visible in a 2D projection that imply presence of structure in high dimensions. These include clusters, linear and non-linear association, outliers and barriers."
+#| fig-alt: "Four scatterplots showing different types of patterns you might expect to see. Plot (a) has three elliptical clusters of points, roughly lying horizontal, making a geese flying pattern. Plot (b) has a non-linear pattern looking like a horseshoe. Plot (c) has a strong negative linear association and a single outlier in the top right. Plot (d) has points lying only in the bottom triangle."
 #| echo: false
 library(mulgar)
 library(ggplot2)
@@ -374,11 +472,11 @@ plane_outliers[101,] <- c(2, 2, -2, 0, 0)
 plane_outliers[102,] <- c(0, 0, 0,-2, -2)
 
 set.seed(314)
-barrier <- data.frame(x1=runif(176)) %>%
+barrier <- data.frame(x1=runif(176)) |>
   mutate(x2=runif(176, min=0, max=1-x1))
 
 e1 <- ggplot(clusters[sample(1:300, 156),], aes(x=x3, y=x2)) +
-  geom_point(colour="#EC5C00", size=2, alpha=0.8) +
+  geom_point(colour="#EC5C00", size=2.2, alpha=0.8) +
   ggtitle("(a) gaps or clusters") +
   theme_void() +
   theme(aspect.ratio = 1,
@@ -386,7 +484,7 @@ e1 <- ggplot(clusters[sample(1:300, 156),], aes(x=x3, y=x2)) +
                                     colour="black"),
         plot.margin = margin(2, 5, 0, 5))
 e2 <- ggplot(plane_nonlin, aes(x=x1, y=x2)) +
-  geom_point(colour="#EC5C00", size=2, alpha=0.8) +
+  geom_point(colour="#EC5C00", size=2.2, alpha=0.8) +
   ggtitle("(b) non-linear association") +
   theme_void() +
   theme(aspect.ratio = 1,
@@ -395,7 +493,7 @@ e2 <- ggplot(plane_nonlin, aes(x=x1, y=x2)) +
         plot.margin = margin(0, 5, 0, 5))
 
 e3 <- ggplot(plane_outliers, aes(x=x1, y=x2)) +
-  geom_point(colour="#EC5C00", size=2, alpha=0.8) +
+  geom_point(colour="#EC5C00", size=2.2, alpha=0.8) +
   ggtitle("(c) association + outlier") +
   theme_void() +
   theme(aspect.ratio = 1,
@@ -404,7 +502,7 @@ e3 <- ggplot(plane_outliers, aes(x=x1, y=x2)) +
         plot.margin = margin(0, 5, 0, 5))
 
 e4 <- ggplot(barrier, aes(x=x1, y=x2)) +
-  geom_point(colour="#EC5C00", size=2, alpha=0.8) +
+  geom_point(colour="#EC5C00", size=2.2, alpha=0.8) +
   ggtitle("(d) barrier") +
   theme_void() +
   theme(aspect.ratio = 1,
@@ -415,108 +513,341 @@ e4 <- ggplot(barrier, aes(x=x1, y=x2)) +
 e1 + e2 + e3 + e4 + plot_layout(ncol=4)
 
 
+## ----------------------------------------------------------------------------
 #| echo: false
 #| eval: false
-## library(tourr)
-## 
-## set.seed(340)
-## render_gif(clusters[,1:5],
-##            grand_tour(),
-##            display_trails(col="#EC5C00",
-##                           axes="off",
-##                           cex=2,
-##                           half_range=0.8,
-##                           past=5),
-##            rescale=TRUE,
-##            gif_file = "gifs/trails-clusters.gif",
-##            frames=200,
-##            width=400,
-##            height=400)
-## render_gif(clusters[,1:5],
-##            grand_tour(),
-##            display_xy(col="#EC5C00",
-##                           axes="bottomleft",
-##                           cex=2,
-##                           half_range=0.8),
-##            rescale=TRUE,
-##            gif_file = "gifs/clusters-intro.gif",
-##            apf = 1/50,
-##            frames=500,
-##            width=400,
-##            height=400)
-## 
-## render_gif(plane_outliers[,1:5],
-##            grand_tour(),
-##            display_trails(col="#EC5C00",
-##                           axes="off",
-##                           cex=2,
-##                           half_range=0.8),
-##            rescale=TRUE,
-##            gif_file = "gifs/trails-outlier.gif",
-##            frames=200,
-##            width=400,
-##            height=400)
-## render_gif(plane_outliers[,1:5],
-##            grand_tour(),
-##            display_xy(col="#EC5C00",
-##                           axes="bottomleft",
-##                           cex=2,
-##                           half_range=0.8),
-##            rescale=TRUE,
-##            gif_file = "gifs/outlier-intro.gif",
-##            apf = 1/50,
-##            frames=500,
-##            width=400,
-##            height=400)
+# library(tourr)
+# 
+# set.seed(340)
+# render_gif(clusters[,1:5],
+#            grand_tour(),
+#            display_trails(col="#EC5C00",
+#                           axes="off",
+#                           cex=2,
+#                           half_range=0.8,
+#                           past=5),
+#            rescale=TRUE,
+#            gif_file = "gifs/trails_clusters.gif",
+#            frames=200,
+#            width=400,
+#            height=400)
+# render_gif(clusters[,1:5],
+#            grand_tour(),
+#            display_xy(col="#EC5C00",
+#                           axes="bottomleft",
+#                           cex=2,
+#                           half_range=0.8),
+#            rescale=TRUE,
+#            gif_file = "gifs/clusters-intro.gif",
+#            apf = 1/50,
+#            frames=500,
+#            width=400,
+#            height=400)
+# 
+# render_gif(plane_outliers[,1:5],
+#            grand_tour(),
+#            display_trails(col="#EC5C00",
+#                           axes="off",
+#                           cex=2,
+#                           half_range=0.8),
+#            rescale=TRUE,
+#            gif_file = "gifs/trails_outlier.gif",
+#            frames=200,
+#            width=400,
+#            height=400)
+# render_gif(plane_outliers[,1:5],
+#            grand_tour(),
+#            display_xy(col="#EC5C00",
+#                           axes="bottomleft",
+#                           cex=2,
+#                           half_range=0.8),
+#            rescale=TRUE,
+#            gif_file = "gifs/outlier_intro.gif",
+#            apf = 1/50,
+#            frames=500,
+#            width=400,
+#            height=400)
 
 
+## ----------------------------------------------------------------------------
+#| label: fig-penguins-scatmat
+#| echo: false
+#| fig-cap: "Scatterplot matrix of the penguins, with colour indicating the three species, Adelie, Chinstrap, Gentoo. The clusters for each species are similarly shaped in each scatterplot, and centred at different locations in some plots."
+#| fig-width: 7
+#| fig-height: 6
+#| out-width: 100%
+#| message: false
+#| fig-alt: "Diagonal shows density plots of bl, bd, fl and bm, all are apprximately unimodal and similar spread. In the latter the Gentoo density is shifted to the right, and in the first plot Adelie is to the left of the other two. Correlations for each of the three is shown in the upper right - all are positive and between 0.31 and 0.72. Lower diagonal shows scatterplots. All three species can be seen to be mostly different when bl is one variable, and Gentoo is distinct from the other two in bd vs fl and bd vs bm."
+library(tourr)
+library(mulgar)
+library(GGally)
+library(colorspace)
+data("penguins_sub")
+ggscatmat(penguins_sub, columns=1:4, col="species", alpha=0.8) +
+  scale_color_discrete_divergingx(palette = "Zissou 1") +
+  theme_minimal() +
+  theme(axis.title = element_blank(),
+        axis.text = element_blank(),
+        panel.grid = element_blank(),
+        panel.background = element_rect(fill=NA, colour="black"))
+
+
+
+## ----------------------------------------------------------------------------
 #| eval: false
 #| echo: false
-## # Answer to Q1
-## library(tourr)
-## library(geozoo)
-## set.seed(1234)
-## cube3 <- cube.solid.random(3, 500)$points
-## cube5 <- cube.solid.random(5, 500)$points
-## cube10 <- cube.solid.random(5, 500)$points
-## 
-## animate(cube3)
-## animate(cube5)
-## animate(cube10)
+# set.seed(1148)
+# p_t <- save_history(penguins_sub[, 1:4],
+#                     max = 50)
+# animate_xy(penguins_sub[, 1:4],
+#            planned_tour(p_t),
+#            col=penguins_sub$species
+#            )
+# render_gif(penguins_sub[, 1:4],
+#            planned_tour(p_t),
+#            display_xy(col=penguins_sub$species),
+#            gif_file = "gifs/penguins.gif",
+#            frames=1000,
+#            width=400,
+#            height=400
+#            )
 
 
+## ----------------------------------------------------------------------------
+#| label: do-you-have-high-d
+#| echo: false
+#| fig-cap: "Examples of 2D data that lack association, for which univariate methods are sufficient: (a) points spread uniformly in the square, (b) points spread in a circle with higher density in the middle, (c) points conentrated in the centre vertically and skewed to the right."
+#| fig-alt: "Three scatterplots of two variables. "
+#| fig-width: 9
+#| fig-height: 3
+#| out-width: 100%
+set.seed(1225)
+n <- 157
+d_not_hd <- tibble(x1 = runif(n),
+                   y1 = runif(n),
+                   x2 = rnorm(n),
+                   y2 = rnorm(n),
+                   x3 = rexp(n),
+                   y3 = rnorm(n))
+p_not_hd1 <- ggplot(d_not_hd, 
+                    aes(x=x1, y=y1)) +
+  geom_point() +
+  ggtitle("(a)") +
+  theme_minimal() +
+  theme(aspect.ratio=1,
+        panel.grid = element_blank(),
+        panel.border = element_rect(fill=NA,
+                                    colour="black"),
+        axis.title = element_blank(),
+        axis.text = element_blank())
+p_not_hd2 <- ggplot(d_not_hd, 
+                    aes(x=x2, y=y2)) +
+  geom_point() +
+  ggtitle("(b)") +
+  theme_minimal() +
+  theme(aspect.ratio=1,
+        panel.grid = element_blank(),
+        panel.border = element_rect(fill=NA,
+                                    colour="black"),
+        axis.title = element_blank(),
+        axis.text = element_blank())
+p_not_hd3 <- ggplot(d_not_hd, 
+                    aes(x=x3, y=y3)) +
+  geom_point() +
+  ggtitle("(c)") +
+  theme_minimal() +
+  theme(aspect.ratio=1,
+        panel.grid = element_blank(),
+        panel.border = element_rect(fill=NA,
+                                    colour="black"),
+        axis.title = element_blank(),
+        axis.text = element_blank())
+p_not_hd1 + p_not_hd2 + p_not_hd3 + plot_layout(ncol=3)
+
+
+## ----------------------------------------------------------------------------
+#| echo: true
+#| eval: false
+# library(readr)
+# prim7 <- read_csv("http://ggobi.org/book/data/prim7.csv",
+#                   show_col_types = FALSE)
+
+
+## ----------------------------------------------------------------------------
 #| eval: false
 #| echo: false
-## # Answer to Q3
-## library(tourr)
-## library(mvtnorm)
-## 
-## s1 <- diag(5)
-## s2 <- diag(5)
-## s2[3,4] <- 0.7
-## s2[4,3] <- 0.7
-## s3 <- s2
-## s3[1,2] <- 0.7
-## s3[2,1] <- 0.7
-## 
-## set.seed(1234)
-## d1 <- as.data.frame(rmvnorm(500, sigma = s1))
-## d2 <- as.data.frame(rmvnorm(500, sigma = s2))
-## d3 <- as.data.frame(rmvnorm(500, sigma = s3))
-## 
-## library(mulgar)
-## animate_xy(c1)
-## # four small clusters, two big clusters
-## animate_xy(c2)
-## # Six spherical clusters
-## animate_xy(c3)
-## # tetrahedron with lots of smaller triangles
-## animate_xy(c4)
-## # Two planes, and noise points
-## animate_xy(c5)
-## # Four connected curvilinear clusters
-## animate_xy(c6)
-## # Two curved clusters
-## animate_xy(c7)
-## # spiral
+# # Answer to Q1
+# library(tourr)
+# library(geozoo)
+# set.seed(1234)
+# cube3 <- cube.solid.random(3, 500)$points
+# cube5 <- cube.solid.random(5, 500)$points
+# cube10 <- cube.solid.random(5, 500)$points
+# 
+# animate_xy(cube3, axes="bottomleft")
+# animate_xy(cube5, axes="bottomleft")
+# animate_xy(cube10, axes="bottomleft")
+
+
+## ----------------------------------------------------------------------------
+#| eval: false
+#| echo: false
+# # Answer to Q3
+# library(mulgar)
+# animate_xy(c1)
+# render_gif(c1,
+#            grand_tour(),
+#            display_xy(),
+#            gif_file = "gifs/c1.gif",
+#            frames=200,
+#            start = basis_random(ncol(c1), 2),
+#            width=400,
+#            height=400)
+# # four small clusters, two big clusters
+# # linear dependence
+# animate_xy(c2)
+# render_gif(c2,
+#            grand_tour(),
+#            display_xy(),
+#            gif_file = "gifs/c2.gif",
+#            frames=200,
+#            start = basis_random(ncol(c2), 2),
+#            width=400,
+#            height=400)
+# # Six spherical clusters
+# animate_xy(c3)
+# render_gif(c3,
+#            grand_tour(),
+#            display_xy(),
+#            gif_file = "gifs/c3.gif",
+#            frames=200,
+#            start = basis_random(ncol(c3), 2),
+#            width=400,
+#            height=400)
+# # tetrahedron with lots of smaller triangles,
+# # barriers, linear dependence
+# animate_xy(c4)
+# render_gif(c4,
+#            grand_tour(),
+#            display_xy(),
+#            gif_file = "gifs/c4.gif",
+#            frames=200,
+#            start = basis_random(ncol(c4), 2),
+#            width=400,
+#            height=400)
+# # Four linear connected pieces
+# animate_xy(c5)
+# render_gif(c5,
+#            grand_tour(),
+#            display_xy(),
+#            gif_file = "gifs/c5.gif",
+#            frames=200,
+#            start = basis_random(ncol(c5), 2),
+#            width=400,
+#            height=400)
+# # Spiral in lower dimensional space
+# # Non-linear and linear dependence
+# animate_xy(c6)
+# render_gif(c6,
+#            grand_tour(),
+#            display_xy(),
+#            gif_file = "gifs/c6.gif",
+#            frames=200,
+#            start = basis_random(ncol(c6), 2),
+#            width=400,
+#            height=400)
+# # Two curved clusters
+# animate_xy(c7)
+# render_gif(c7,
+#            grand_tour(),
+#            display_xy(),
+#            gif_file = "gifs/c7.gif",
+#            frames=200,
+#            start = basis_random(ncol(c7), 2),
+#            width=400,
+#            height=400)
+# # spherical cluster, curve cluster and a lot of noise points
+
+
+## ----------------------------------------------------------------------------
+#| eval: false
+#| echo: false
+# # Answer to Q4
+# library(datasets)
+# animate_xy(USArrests)
+# animate_xy(USArrests, rescale=TRUE)
+# animate_xy(USArrests, rescale=TRUE, obs_labels=rownames(USArrests), axes="bottomleft")
+# animate_xy(swiss, rescale=TRUE)
+
+
+## ----------------------------------------------------------------------------
+#| eval: false
+#| echo: false
+# # Answer to Q5
+# library(MASS)
+# data(crabs)
+# animate_xy(crabs[,4:8], col=crabs$sp)
+# data(fgl)
+# animate_xy(fgl[,1:9], col=fgl$type, rescale=TRUE)
+
+
+## ----------------------------------------------------------------------------
+#| eval: false
+#| echo: false
+# # Answer to Q6
+# library(readr)
+# prim7 <- read_csv("http://ggobi.org/book/data/prim7.csv", show_col_types = FALSE)
+# animate_xy(prim7, rescale=TRUE)
+
+
+## ----------------------------------------------------------------------------
+#| eval: false
+#| echo: true
+# library(tidyverse)
+# library(tourr)
+# water <- read_csv("data/nigeria-water-imputed.csv")
+# set.seed(113)
+# water_sub <- water |>
+#   group_by(water_tech_category) |>
+#   sample_frac(size = 0.01)
+
+
+## ----------------------------------------------------------------------------
+#| eval: false
+#| echo: true
+# water_dist <- water_sub |>
+#   select(water_tech_category, starts_with("distance")) |>
+#   select(!contains("_NA")) |>
+#   mutate(water_tech_category = factor(water_tech_category)) |>
+#   rename(dpr = distance_to_primary_road,
+#          dsr = distance_to_secondary_road,
+#          dtr = distance_to_tertiary_road,
+#          dc = distance_to_city,
+#          dt = distance_to_town)
+# animate_xy(water_dist[,2:6], rescale=TRUE)
+
+
+## ----------------------------------------------------------------------------
+#| eval: false
+#| echo: true
+# animate_xy(water_dist[,2:6], rescale=TRUE,
+#            col=water_dist$water_tech_category)
+
+
+## ----------------------------------------------------------------------------
+#| eval: false
+#| echo: true
+# set.seed(324)
+# animate_xy(water_dist[,2:6],
+#            guided_tour(lda_pp(water_dist$water_tech_category)),
+#            rescale=TRUE,
+#            col=water_dist$water_tech_category)
+
+
+## ----------------------------------------------------------------------------
+#| eval: false
+#| echo: true
+#| code-fold: false
+# table(water$water_tech_category)/nrow(water)
+# table(water_dist$water_tech_category)/nrow(water_dist)
 

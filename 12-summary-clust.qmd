@@ -2,41 +2,60 @@
 
 \index{cluster analysis!confusion table}
 
-<!--
-- Adding cluster summary, eg means
-- Linking between confusion matrix and tour
-- Using same tour path to examine cluster colour
--->
-
 ## Summarising results
 
 The key elements for summarising cluster results are the centres of the clusters and the within-cluster variability of the observations. Adding cluster means to any plot, including tour plots, is easy. You add the additional rows, or a new data set, and set the point shape to be distinct. 
 
 Summarising the variability is difficult. For model-based clustering, the shape of the clusters is assumed to be elliptical, so $p$-dimensional ellipses can be used to show the solution, as done in @sec-mclust. Generally, it is common to plot a convex hull of the clusters, as in `r ifelse(knitr::is_html_output(), '@fig-penguins-chull-html', '@fig-penguins-chull-pdf')`. This can also be done in high-dimensions, using the R package `cxhull` to compute the $p$-D convex hull.
 
-```{r}
+```{r echo=knitr::is_html_output()}
 #| message: false
 #| code-summary: "Load libraries"
 library(mclust) 
 library(tidyr)
 library(dplyr)
 library(gt)
-library(cxhull)
+library(mulgar)
 library(ggplot2)
 library(colorspace)
 ```
 
-```{r}
+```{r echo=knitr::is_html_output()}
 #| message: false
 #| code-summary: "Code to do clustering"
-library(mclust) 
-library(tidyr)
-library(dplyr)
-library(gt)
-library(cxhull)
-library(ggplot2)
-library(colorspace)
 load("data/penguins_sub.rda")
+p_dist <- dist(penguins_sub[,1:2])
+p_hcw <- hclust(p_dist, method="ward.D2")
+p_cl <- data.frame(cl_w = cutree(p_hcw, 3))
+```
+
+
+```{r echo=knitr::is_html_output()}
+#| code-summary: "Code for convex hulls in 2D"
+psub <- penguins_sub |>
+  select(bl, bd) |>
+  mutate(cl = p_cl$cl_w)
+
+phull <- gen_chull(psub[,1:2], psub$cl)
+phull_segs <- data.frame(x = phull$data$bl[phull$edges[,1]],
+                         y = phull$data$bd[phull$edges[,1]],
+                         xend = phull$data$bl[phull$edges[,2]],
+                         yend = phull$data$bd[phull$edges[,2]],
+                         cl = phull$edge_clr)
+p_chull2D <- ggplot() +
+  geom_point(data=phull$data, aes(x=bl, y=bd, 
+                            colour=cl)) + 
+  geom_segment(data=phull_segs, aes(x=x, xend=xend,
+                                    y=y, yend=yend,
+                                    colour=cl)) +
+  scale_colour_discrete_divergingx(palette = "Zissou 1") +
+  theme_minimal() +
+  theme(aspect.ratio = 1)
+```
+
+```{r echo=knitr::is_html_output()}
+#| message: false
+#| code-summary: "Code to do clustering"
 p_dist <- dist(penguins_sub[,1:4])
 p_hcw <- hclust(p_dist, method="ward.D2")
 
@@ -45,100 +64,27 @@ p_cl <- data.frame(cl_w = cutree(p_hcw, 3))
 penguins_mc <- Mclust(penguins_sub[,1:4], 
                       G=3, 
                       modelNames = "EEE")
-p_cl <- p_cl %>% 
+p_cl <- p_cl |> 
   mutate(cl_mc = penguins_mc$classification)
-
-p_cl <- p_cl %>% 
-  mutate(cl_w_j = jitter(cl_w),
-         cl_mc_j = jitter(cl_mc))
-
-# Arranging by cluster id is important to define edges 
-penguins_cl <- penguins_sub %>%
-  mutate(cl_w = p_cl$cl_w,
-         cl_mc = p_cl$cl_mc) %>%
-  arrange(cl_w)
 ```
 
 ```{r}
-#| code-summary: "Code for convex hulls in 2D"
-
-# Penguins in 2D
-# Duplicate observations need to be removed fo convex hull calculation
-psub <- penguins_cl %>%
-  select(bl, bd) 
-dup <- duplicated(psub)
-psub <- penguins_cl %>%
-  select(bl, bd, cl_w) %>%
-  filter(!dup) %>%
-  arrange(cl_w)
-
-ncl <- psub %>%
-  count(cl_w) %>%
-  arrange(cl_w) %>%
-  mutate(cumn = cumsum(n))
-phull <- NULL
-for (i in unique(psub$cl_w)) {
-  x <- psub %>%
-    dplyr::filter(cl_w == i) %>%
-    select(bl, bd) 
-  ph <- cxhull(as.matrix(x))$edges
-  if (i > 1) {
-    ph <- ph + ncl$cumn[i-1]
-  }
-  ph <- cbind(ph, rep(i, nrow(ph)))
-  phull <- rbind(phull, ph)
-}
-phull <- as.data.frame(phull)
-colnames(phull) <- c("from", "to", "cl_w") 
-phull_segs <- data.frame(x = psub$bl[phull$from],
-                         y = psub$bd[phull$from],
-                         xend = psub$bl[phull$to],
-                         yend = psub$bd[phull$to],
-                         cl_w = phull$cl_w)
-phull_segs$cl_w <- factor(phull$cl_w) 
-psub$cl_w <- factor(psub$cl_w)
-p_chull2D <- ggplot() +
-  geom_point(data=psub, aes(x=bl, y=bd, 
-                            colour=cl_w)) + 
-  geom_segment(data=phull_segs, aes(x=x, xend=xend,
-                                    y=y, yend=yend,
-                                    colour=cl_w)) +
-  scale_colour_discrete_divergingx(palette = "Zissou 1") +
-  theme_minimal() +
-  theme(aspect.ratio = 1)
+#| code-summary: "Code to generate pD convex hull"
+phull <- gen_chull(penguins_sub[,1:4], p_cl$cl_w)
 ```
 
-```{r}
+```{r echo=knitr::is_html_output()}
 #| eval: false
 #| code-summary: "Code to generate pD convex hull and view in tour"
-  
-ncl <- penguins_cl %>%
-  count(cl_w) %>%
-  arrange(cl_w) %>%
-  mutate(cumn = cumsum(n))
-phull <- NULL
-for (i in unique(penguins_cl$cl_w)) {
-  x <- penguins_cl %>%
-    dplyr::filter(cl_w == i) 
-  ph <- cxhull(as.matrix(x[,1:4]))$edges
-  if (i > 1) {
-    ph <- ph + ncl$cumn[i-1]
-  }
-  ph <- cbind(ph, rep(i, nrow(ph)))
-  phull <- rbind(phull, ph)
-}
-phull <- as.data.frame(phull)
-colnames(phull) <- c("from", "to", "cl_w") 
-phull$cl_w <- factor(phull$cl_w)
-penguins_cl$cl_w <- factor(penguins_cl$cl_w)
-
-animate_xy(penguins_cl[,1:4], col=penguins_cl$cl_w,
-           edges=as.matrix(phull[,1:2]), edges.col=phull$cl_w)
-render_gif(penguins_cl[,1:4], 
+animate_xy(phull$data[,1:4], 
+           col=phull$data$cl,
+           edges=phull$edges, 
+           edges.col=phull$edge_clr)
+render_gif(phull$data[,1:4], 
            tour_path = grand_tour(),
-           display = display_xy(col=penguins_cl$cl_w,
-                                edges=as.matrix(phull[,1:2]),
-                                edges.col=phull$cl_w),
+           display = display_xy(col=phull$data$cl,
+                                edges=phull$edges,
+                                edges.col=phull$edge_clr),
            gif_file = "gifs/penguins_chull.gif",
            frames = 500, 
            width = 400,
@@ -209,23 +155,23 @@ Below is a comparison between the three cluster results of Wards linkage hierarc
 The two methods label the clusters differently: what Wards labels as cluster 3, model-based labels as cluster 2. The labels given by any algorithm are arbitrary, and can easily be changed to coordinate between methods. 
 
 ```{r}
-#| code-summary: "Code for confusion table"
-p_cl %>% 
-  count(cl_w, cl_mc) %>% 
+#| code-summary: "Code to make confusion table"
+p_cl |> 
+  count(cl_w, cl_mc) |> 
   pivot_wider(names_from = cl_mc, 
               values_from = n, 
-              values_fill = 0) %>%
-  gt() %>%
-  tab_spanner(label = "cl_mc", columns=c(`2`, `3`, `1`)) %>%
+              values_fill = 0) |>
+  gt() |>
+  tab_spanner(label = "cl_mc", columns=c(`2`, `3`, `1`)) |>
   cols_width(everything() ~ px(60))
 ```
 
 We can examine the disagreement by linking a plot of the table, with a tour plot. Here is how to do this with `liminal`. @fig-compare-clusters1 and @fig-compare-clusters2 show screenshots of the exploration of the eight penguins on which the methods disagree. It makes sense that there is some confusion. These penguins are part of the large clump of observations that don't separate cleanly into two clusters. The eight penguins are in the middle of this clump. Realistically, both methods result in a plausible clustering, and it is not clear how these penguins should be grouped.  
 
-```{r}
+```{r echo=knitr::is_html_output()}
 #| eval: false
 #| message: false
-#| code-summary: Code to do linked brushing with liminal
+#| code-summary: "Code to do linked brushing with liminal"
 library(liminal)
 limn_tour_link(
   p_cl[,3:4],
@@ -243,6 +189,14 @@ Linking the confusion matrix with the tour can also be accomplished with `crosst
 
 \index{software!crosstalk}
 \index{software!detourr}
+
+```{r echo=knitr::is_html_output()}
+#| message: false
+#| code-summary: "Code to prepare data for display of confusion"
+p_cl <- p_cl |> 
+  mutate(cl_w_j = jitter(cl_w),
+         cl_mc_j = jitter(cl_mc))
+```
 
 ```{r}
 #| eval: false
@@ -267,7 +221,7 @@ conf_mat <- plot_ly(p_cl_shared,
                     colors = viridis_pal(option = "D")(3),
                     height = 450) |>
   highlight(on = "plotly_selected", 
-              off = "plotly_doubleclick") %>%
+              off = "plotly_doubleclick") |>
     add_trace(type = "scatter", 
               mode = "markers")
   
@@ -317,10 +271,10 @@ risk_h_ms <- hclust(dist(risk, method = "manhattan"),
 risk_h_ew <- hclust(dist(risk, method = "euclidean"),
                   method = "ward.D2")
 # adding the clustering information to the data
-risk_clw <- risk %>% 
-  as_tibble() %>%
-  mutate(cl_h_mc = factor(cutree(risk_h_mc, 6))) %>%
-  mutate(cl_h_ms = factor(cutree(risk_h_ms, 6))) %>%
+risk_clw <- risk |> 
+  as_tibble() |>
+  mutate(cl_h_mc = factor(cutree(risk_h_mc, 6))) |>
+  mutate(cl_h_ms = factor(cutree(risk_h_ms, 6))) |>
   mutate(cl_h_ew = factor(cutree(risk_h_ew, 6)))
 # drawing 2D dendrograms
 library(ggdendro)
@@ -381,8 +335,8 @@ animate_xy(risk_hfly_ew$data[,1:6],
 
 # comparison of two solutions
 # confusion table shows quite some disagreements
-risk_clw %>% 
-  count(cl_h_mc, cl_h_ew) %>% 
+risk_clw |> 
+  count(cl_h_mc, cl_h_ew) |> 
   pivot_wider(names_from = cl_h_mc, 
               values_from = n, 
               values_fill = 0)
@@ -401,13 +355,13 @@ liminal::limn_tour_link(
 # k-means + tour with cluster means
 r_km <- kmeans(risk, centers=6, 
                      iter.max = 500, nstart = 5)
-r_km_means <- data.frame(r_km$centers) %>%
+r_km_means <- data.frame(r_km$centers) |>
   mutate(cl = factor(rownames(r_km$centers)))
-r_km_d <- as.tibble(risk) %>% 
+r_km_d <- as.tibble(risk) |> 
   mutate(cl = factor(r_km$cluster))
-r_km_means <- r_km_means %>%
+r_km_means <- r_km_means |>
   mutate(type = "mean")
-r_km_d <- r_km_d %>%
+r_km_d <- r_km_d |>
   mutate(type = "data")
 r_km_all <- bind_rows(r_km_means, r_km_d)
 r_km_all$type <- factor(r_km_all$type, levels=c("mean", "data"))
@@ -447,15 +401,15 @@ library(cxhull)
 dup <- duplicated(risk_clw[,1:6])
 risk_clw <- risk_clw[!dup,]
 risk_clw$cl_h_ew <- as.numeric(risk_clw$cl_h_ew)
-ncl_h <- risk_clw %>%
-  count(cl_h_ew) %>%
-  arrange(cl_h_ew) %>%
+ncl_h <- risk_clw |>
+  count(cl_h_ew) |>
+  arrange(cl_h_ew) |>
   mutate(cumn = cumsum(n))
 phull <- NULL
 risk_clw <- arrange(risk_clw, cl_h_ew) # this is important since this is
 # the sorting assumed when collecting the edges!
 for (i in unique(risk_clw$cl_h_ew)) {
-  x <- risk_clw %>%
+  x <- risk_clw |>
     dplyr::filter(cl_h_ew == i) 
   ph <- cxhull(as.matrix(x[,1:6]))$edges
   if (i > 1) {
@@ -476,15 +430,15 @@ animate_groupxy(risk_clw[,1:6], col=risk_clw$cl_h_ew, pch=".",
 dup <- duplicated(r_km_d[,1:6])
 r_km_d <- r_km_d[!dup,]
 r_km_d$cl <- as.numeric(r_km_d$cl)
-ncl_h <- r_km_d %>%
-  count(cl) %>%
-  arrange(cl) %>%
+ncl_h <- r_km_d |>
+  count(cl) |>
+  arrange(cl) |>
   mutate(cumn = cumsum(n))
 phull <- NULL
 r_km_d <- arrange(r_km_d, cl) # this is important since this is
 # the sorting assumed when collecting the edges!
 for (i in unique(r_km_d$cl)) {
-  x <- r_km_d %>%
+  x <- r_km_d |>
     dplyr::filter(cl == i) 
   ph <- cxhull(as.matrix(x[,1:6]))$edges
   if (i > 1) {
@@ -515,7 +469,7 @@ r_som <- som(risk,
              grid = r_grid,
              init = r_init)
 r_som_df_net <- som_model(r_som)
-r_som_map <- r_som_df_net$net %>%
+r_som_map <- r_som_df_net$net |>
   mutate(type="net")
 r_som_data <- mutate(as.tibble(risk), type = "data")
 r_som_map_data <- bind_rows(r_som_map, r_som_data)

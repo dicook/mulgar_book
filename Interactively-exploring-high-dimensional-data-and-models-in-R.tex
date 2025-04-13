@@ -294,7 +294,7 @@
 
 \title{Interactively exploring high-dimensional data and models in R}
 \author{Dianne Cook and Ursula Laa}
-\date{2025-04-11}
+\date{2025-04-13}
 
 \begin{document}
 \maketitle
@@ -4930,7 +4930,7 @@ cluster validation statistics such as those produced by the
 used in conjunction with the summary statistics, to decide on the
 optimal final value of \(k\).
 \index{cluster analysis!cluster validation statistics}
-\index{sofware!fpc}
+\index{software!fpc}
 
 \infobox{The key elements to examine in a k-means clustering algorithm result  are:
 \begin{itemize} \itemsep 0in
@@ -5581,131 +5581,7 @@ compute the \(p\)-D convex hull.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\FunctionTok{library}\NormalTok{(mclust) }
-\FunctionTok{library}\NormalTok{(tidyr)}
-\FunctionTok{library}\NormalTok{(dplyr)}
-\FunctionTok{library}\NormalTok{(gt)}
-\FunctionTok{library}\NormalTok{(cxhull)}
-\FunctionTok{library}\NormalTok{(ggplot2)}
-\FunctionTok{library}\NormalTok{(colorspace)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{library}\NormalTok{(mclust) }
-\FunctionTok{library}\NormalTok{(tidyr)}
-\FunctionTok{library}\NormalTok{(dplyr)}
-\FunctionTok{library}\NormalTok{(gt)}
-\FunctionTok{library}\NormalTok{(cxhull)}
-\FunctionTok{library}\NormalTok{(ggplot2)}
-\FunctionTok{library}\NormalTok{(colorspace)}
-\FunctionTok{load}\NormalTok{(}\StringTok{"data/penguins\_sub.rda"}\NormalTok{)}
-\NormalTok{p\_dist }\OtherTok{\textless{}{-}} \FunctionTok{dist}\NormalTok{(penguins\_sub[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{])}
-\NormalTok{p\_hcw }\OtherTok{\textless{}{-}} \FunctionTok{hclust}\NormalTok{(p\_dist, }\AttributeTok{method=}\StringTok{"ward.D2"}\NormalTok{)}
-
-\NormalTok{p\_cl }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\AttributeTok{cl\_w =} \FunctionTok{cutree}\NormalTok{(p\_hcw, }\DecValTok{3}\NormalTok{))}
-
-\NormalTok{penguins\_mc }\OtherTok{\textless{}{-}} \FunctionTok{Mclust}\NormalTok{(penguins\_sub[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{], }
-                      \AttributeTok{G=}\DecValTok{3}\NormalTok{, }
-                      \AttributeTok{modelNames =} \StringTok{"EEE"}\NormalTok{)}
-\NormalTok{p\_cl }\OtherTok{\textless{}{-}}\NormalTok{ p\_cl }\SpecialCharTok{\%\textgreater{}\%} 
-  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{cl\_mc =}\NormalTok{ penguins\_mc}\SpecialCharTok{$}\NormalTok{classification)}
-
-\NormalTok{p\_cl }\OtherTok{\textless{}{-}}\NormalTok{ p\_cl }\SpecialCharTok{\%\textgreater{}\%} 
-  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{cl\_w\_j =} \FunctionTok{jitter}\NormalTok{(cl\_w),}
-         \AttributeTok{cl\_mc\_j =} \FunctionTok{jitter}\NormalTok{(cl\_mc))}
-
-\CommentTok{\# Arranging by cluster id is important to define edges }
-\NormalTok{penguins\_cl }\OtherTok{\textless{}{-}}\NormalTok{ penguins\_sub }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{cl\_w =}\NormalTok{ p\_cl}\SpecialCharTok{$}\NormalTok{cl\_w,}
-         \AttributeTok{cl\_mc =}\NormalTok{ p\_cl}\SpecialCharTok{$}\NormalTok{cl\_mc) }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{arrange}\NormalTok{(cl\_w)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\# Penguins in 2D}
-\CommentTok{\# Duplicate observations need to be removed fo convex hull calculation}
-\NormalTok{psub }\OtherTok{\textless{}{-}}\NormalTok{ penguins\_cl }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{select}\NormalTok{(bl, bd) }
-\NormalTok{dup }\OtherTok{\textless{}{-}} \FunctionTok{duplicated}\NormalTok{(psub)}
-\NormalTok{psub }\OtherTok{\textless{}{-}}\NormalTok{ penguins\_cl }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{select}\NormalTok{(bl, bd, cl\_w) }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{filter}\NormalTok{(}\SpecialCharTok{!}\NormalTok{dup) }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{arrange}\NormalTok{(cl\_w)}
-
-\NormalTok{ncl }\OtherTok{\textless{}{-}}\NormalTok{ psub }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{count}\NormalTok{(cl\_w) }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{arrange}\NormalTok{(cl\_w) }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{cumn =} \FunctionTok{cumsum}\NormalTok{(n))}
-\NormalTok{phull }\OtherTok{\textless{}{-}} \ConstantTok{NULL}
-\ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \FunctionTok{unique}\NormalTok{(psub}\SpecialCharTok{$}\NormalTok{cl\_w)) \{}
-\NormalTok{  x }\OtherTok{\textless{}{-}}\NormalTok{ psub }\SpecialCharTok{\%\textgreater{}\%}
-\NormalTok{    dplyr}\SpecialCharTok{::}\FunctionTok{filter}\NormalTok{(cl\_w }\SpecialCharTok{==}\NormalTok{ i) }\SpecialCharTok{\%\textgreater{}\%}
-    \FunctionTok{select}\NormalTok{(bl, bd) }
-\NormalTok{  ph }\OtherTok{\textless{}{-}} \FunctionTok{cxhull}\NormalTok{(}\FunctionTok{as.matrix}\NormalTok{(x))}\SpecialCharTok{$}\NormalTok{edges}
-  \ControlFlowTok{if}\NormalTok{ (i }\SpecialCharTok{\textgreater{}} \DecValTok{1}\NormalTok{) \{}
-\NormalTok{    ph }\OtherTok{\textless{}{-}}\NormalTok{ ph }\SpecialCharTok{+}\NormalTok{ ncl}\SpecialCharTok{$}\NormalTok{cumn[i}\DecValTok{{-}1}\NormalTok{]}
-\NormalTok{  \}}
-\NormalTok{  ph }\OtherTok{\textless{}{-}} \FunctionTok{cbind}\NormalTok{(ph, }\FunctionTok{rep}\NormalTok{(i, }\FunctionTok{nrow}\NormalTok{(ph)))}
-\NormalTok{  phull }\OtherTok{\textless{}{-}} \FunctionTok{rbind}\NormalTok{(phull, ph)}
-\NormalTok{\}}
-\NormalTok{phull }\OtherTok{\textless{}{-}} \FunctionTok{as.data.frame}\NormalTok{(phull)}
-\FunctionTok{colnames}\NormalTok{(phull) }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"from"}\NormalTok{, }\StringTok{"to"}\NormalTok{, }\StringTok{"cl\_w"}\NormalTok{) }
-\NormalTok{phull\_segs }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\AttributeTok{x =}\NormalTok{ psub}\SpecialCharTok{$}\NormalTok{bl[phull}\SpecialCharTok{$}\NormalTok{from],}
-                         \AttributeTok{y =}\NormalTok{ psub}\SpecialCharTok{$}\NormalTok{bd[phull}\SpecialCharTok{$}\NormalTok{from],}
-                         \AttributeTok{xend =}\NormalTok{ psub}\SpecialCharTok{$}\NormalTok{bl[phull}\SpecialCharTok{$}\NormalTok{to],}
-                         \AttributeTok{yend =}\NormalTok{ psub}\SpecialCharTok{$}\NormalTok{bd[phull}\SpecialCharTok{$}\NormalTok{to],}
-                         \AttributeTok{cl\_w =}\NormalTok{ phull}\SpecialCharTok{$}\NormalTok{cl\_w)}
-\NormalTok{phull\_segs}\SpecialCharTok{$}\NormalTok{cl\_w }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(phull}\SpecialCharTok{$}\NormalTok{cl\_w) }
-\NormalTok{psub}\SpecialCharTok{$}\NormalTok{cl\_w }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(psub}\SpecialCharTok{$}\NormalTok{cl\_w)}
-\NormalTok{p\_chull2D }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{data=}\NormalTok{psub, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{bl, }\AttributeTok{y=}\NormalTok{bd, }
-                            \AttributeTok{colour=}\NormalTok{cl\_w)) }\SpecialCharTok{+} 
-  \FunctionTok{geom\_segment}\NormalTok{(}\AttributeTok{data=}\NormalTok{phull\_segs, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{x, }\AttributeTok{xend=}\NormalTok{xend,}
-                                    \AttributeTok{y=}\NormalTok{y, }\AttributeTok{yend=}\NormalTok{yend,}
-                                    \AttributeTok{colour=}\NormalTok{cl\_w)) }\SpecialCharTok{+}
-  \FunctionTok{scale\_colour\_discrete\_divergingx}\NormalTok{(}\AttributeTok{palette =} \StringTok{"Zissou 1"}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{theme}\NormalTok{(}\AttributeTok{aspect.ratio =} \DecValTok{1}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{ncl }\OtherTok{\textless{}{-}}\NormalTok{ penguins\_cl }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{count}\NormalTok{(cl\_w) }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{arrange}\NormalTok{(cl\_w) }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{cumn =} \FunctionTok{cumsum}\NormalTok{(n))}
-\NormalTok{phull }\OtherTok{\textless{}{-}} \ConstantTok{NULL}
-\ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \FunctionTok{unique}\NormalTok{(penguins\_cl}\SpecialCharTok{$}\NormalTok{cl\_w)) \{}
-\NormalTok{  x }\OtherTok{\textless{}{-}}\NormalTok{ penguins\_cl }\SpecialCharTok{\%\textgreater{}\%}
-\NormalTok{    dplyr}\SpecialCharTok{::}\FunctionTok{filter}\NormalTok{(cl\_w }\SpecialCharTok{==}\NormalTok{ i) }
-\NormalTok{  ph }\OtherTok{\textless{}{-}} \FunctionTok{cxhull}\NormalTok{(}\FunctionTok{as.matrix}\NormalTok{(x[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{]))}\SpecialCharTok{$}\NormalTok{edges}
-  \ControlFlowTok{if}\NormalTok{ (i }\SpecialCharTok{\textgreater{}} \DecValTok{1}\NormalTok{) \{}
-\NormalTok{    ph }\OtherTok{\textless{}{-}}\NormalTok{ ph }\SpecialCharTok{+}\NormalTok{ ncl}\SpecialCharTok{$}\NormalTok{cumn[i}\DecValTok{{-}1}\NormalTok{]}
-\NormalTok{  \}}
-\NormalTok{  ph }\OtherTok{\textless{}{-}} \FunctionTok{cbind}\NormalTok{(ph, }\FunctionTok{rep}\NormalTok{(i, }\FunctionTok{nrow}\NormalTok{(ph)))}
-\NormalTok{  phull }\OtherTok{\textless{}{-}} \FunctionTok{rbind}\NormalTok{(phull, ph)}
-\NormalTok{\}}
-\NormalTok{phull }\OtherTok{\textless{}{-}} \FunctionTok{as.data.frame}\NormalTok{(phull)}
-\FunctionTok{colnames}\NormalTok{(phull) }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"from"}\NormalTok{, }\StringTok{"to"}\NormalTok{, }\StringTok{"cl\_w"}\NormalTok{) }
-\NormalTok{phull}\SpecialCharTok{$}\NormalTok{cl\_w }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(phull}\SpecialCharTok{$}\NormalTok{cl\_w)}
-\NormalTok{penguins\_cl}\SpecialCharTok{$}\NormalTok{cl\_w }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(penguins\_cl}\SpecialCharTok{$}\NormalTok{cl\_w)}
-
-\FunctionTok{animate\_xy}\NormalTok{(penguins\_cl[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{], }\AttributeTok{col=}\NormalTok{penguins\_cl}\SpecialCharTok{$}\NormalTok{cl\_w,}
-           \AttributeTok{edges=}\FunctionTok{as.matrix}\NormalTok{(phull[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{2}\NormalTok{]), }\AttributeTok{edges.col=}\NormalTok{phull}\SpecialCharTok{$}\NormalTok{cl\_w)}
-\FunctionTok{render\_gif}\NormalTok{(penguins\_cl[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{], }
-           \AttributeTok{tour\_path =} \FunctionTok{grand\_tour}\NormalTok{(),}
-           \AttributeTok{display =} \FunctionTok{display\_xy}\NormalTok{(}\AttributeTok{col=}\NormalTok{penguins\_cl}\SpecialCharTok{$}\NormalTok{cl\_w,}
-                                \AttributeTok{edges=}\FunctionTok{as.matrix}\NormalTok{(phull[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{2}\NormalTok{]),}
-                                \AttributeTok{edges.col=}\NormalTok{phull}\SpecialCharTok{$}\NormalTok{cl\_w),}
-           \AttributeTok{gif\_file =} \StringTok{"gifs/penguins\_chull.gif"}\NormalTok{,}
-           \AttributeTok{frames =} \DecValTok{500}\NormalTok{, }
-           \AttributeTok{width =} \DecValTok{400}\NormalTok{,}
-           \AttributeTok{height =} \DecValTok{400}\NormalTok{)}
+\NormalTok{phull }\OtherTok{\textless{}{-}} \FunctionTok{gen\_chull}\NormalTok{(penguins\_sub[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{], p\_cl}\SpecialCharTok{$}\NormalTok{cl\_w)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -5755,20 +5631,20 @@ counts, and most cells with zeros. They disagree only on eight penguins.
 These eight penguins would be considered to be part of cluster 1 by
 Wards, but model-based considers them to be members of cluster 2.
 
-The two methods label them clusters differently: what Wards labels as
+The two methods label the clusters differently: what Wards labels as
 cluster 3, model-based labels as cluster 2. The labels given by any
 algorithm are arbitrary, and can easily be changed to coordinate between
 methods.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{p\_cl }\SpecialCharTok{\%\textgreater{}\%} 
-  \FunctionTok{count}\NormalTok{(cl\_w, cl\_mc) }\SpecialCharTok{\%\textgreater{}\%} 
+\NormalTok{p\_cl }\SpecialCharTok{|\textgreater{}} 
+  \FunctionTok{count}\NormalTok{(cl\_w, cl\_mc) }\SpecialCharTok{|\textgreater{}} 
   \FunctionTok{pivot\_wider}\NormalTok{(}\AttributeTok{names\_from =}\NormalTok{ cl\_mc, }
               \AttributeTok{values\_from =}\NormalTok{ n, }
-              \AttributeTok{values\_fill =} \DecValTok{0}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{gt}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{tab\_spanner}\NormalTok{(}\AttributeTok{label =} \StringTok{"cl\_mc"}\NormalTok{, }\AttributeTok{columns=}\FunctionTok{c}\NormalTok{(}\StringTok{\textasciigrave{}}\AttributeTok{2}\StringTok{\textasciigrave{}}\NormalTok{, }\StringTok{\textasciigrave{}}\AttributeTok{3}\StringTok{\textasciigrave{}}\NormalTok{, }\StringTok{\textasciigrave{}}\AttributeTok{1}\StringTok{\textasciigrave{}}\NormalTok{)) }\SpecialCharTok{\%\textgreater{}\%}
+              \AttributeTok{values\_fill =} \DecValTok{0}\NormalTok{) }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{gt}\NormalTok{() }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{tab\_spanner}\NormalTok{(}\AttributeTok{label =} \StringTok{"cl\_mc"}\NormalTok{, }\AttributeTok{columns=}\FunctionTok{c}\NormalTok{(}\StringTok{\textasciigrave{}}\AttributeTok{2}\StringTok{\textasciigrave{}}\NormalTok{, }\StringTok{\textasciigrave{}}\AttributeTok{3}\StringTok{\textasciigrave{}}\NormalTok{, }\StringTok{\textasciigrave{}}\AttributeTok{1}\StringTok{\textasciigrave{}}\NormalTok{)) }\SpecialCharTok{|\textgreater{}}
   \FunctionTok{cols\_width}\NormalTok{(}\FunctionTok{everything}\NormalTok{() }\SpecialCharTok{\textasciitilde{}} \FunctionTok{px}\NormalTok{(}\DecValTok{60}\NormalTok{))}
 \end{Highlighting}
 \end{Shaded}
@@ -5795,18 +5671,6 @@ observations that don't separate cleanly into two clusters. The eight
 penguins are in the middle of this clump. Realistically, both methods
 result in a plausible clustering, and it is not clear how these penguins
 should be grouped.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{library}\NormalTok{(liminal)}
-\FunctionTok{limn\_tour\_link}\NormalTok{(}
-\NormalTok{  p\_cl[,}\DecValTok{3}\SpecialCharTok{:}\DecValTok{4}\NormalTok{],}
-\NormalTok{  penguins\_cl,}
-  \AttributeTok{cols =}\NormalTok{ bl}\SpecialCharTok{:}\NormalTok{bm,}
-  \AttributeTok{color =}\NormalTok{ cl\_w}
-\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
 
 \begin{figure}
 
@@ -5864,7 +5728,7 @@ Linking the confusion matrix with the tour can also be accomplished with
                     \AttributeTok{colors =} \FunctionTok{viridis\_pal}\NormalTok{(}\AttributeTok{option =} \StringTok{"D"}\NormalTok{)(}\DecValTok{3}\NormalTok{),}
                     \AttributeTok{height =} \DecValTok{450}\NormalTok{) }\SpecialCharTok{|\textgreater{}}
   \FunctionTok{highlight}\NormalTok{(}\AttributeTok{on =} \StringTok{"plotly\_selected"}\NormalTok{, }
-              \AttributeTok{off =} \StringTok{"plotly\_doubleclick"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+              \AttributeTok{off =} \StringTok{"plotly\_doubleclick"}\NormalTok{) }\SpecialCharTok{|\textgreater{}}
     \FunctionTok{add\_trace}\NormalTok{(}\AttributeTok{type =} \StringTok{"scatter"}\NormalTok{, }
               \AttributeTok{mode =} \StringTok{"markers"}\NormalTok{)}
   
@@ -6213,8 +6077,7 @@ is useful for this data, and occasionally useful for detecting odd
 shapes of clusters.
 
 \index{tour!grand} \index{tour!guided} \index{tour!slice}
-\index{projection pursuit} \index{software!mulgar}
-\index{software!geozoo}
+\index{projection pursuit} \index{software!geozoo}
 
 \infobox{Set up to examine data in a classification task by colouring points using the class variable. If there are many classes, this can be done by colouring one class against the rest, and sequentially working through the classes.}
 
@@ -6364,8 +6227,6 @@ helpful to generate diagnostic data by:
   so, which variables are important. The \texttt{music} data can be read
   using: \index{data!music}
 \end{enumerate}
-
-\index{software!readr} \index{software!dplyr}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -7959,13 +7820,13 @@ have different covariances matrices, which will cause trouble for LDA,
 but SVM should see the gap between the two clusters and place the
 separating hyperplane in the middle of the gap. In the second data set
 the two groups are concentric circles, with the inner one solid. A
-non-linear SVM should be fitted to this data, which should see circular
-gap between the two classes.
+non-linear SVM should be fitted to this data, which should see the
+circular gap between the two classes.
 
 Note that the \texttt{svm()} function in the \texttt{e1071} package will
 automatically scale observations into the range \([0,1]\). To make it
 easier to examine the fitted model, it is best to scale your data first,
-and then fit the model.
+and then fit the model. \index{software!e1071}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -8185,7 +8046,7 @@ from the plane when it is seen on its side, separating the two groups.}
 \end{figure}%
 
 \index{classification!separating hyperplane}
-\index{classification!support vectors}
+\index{classification!support vectors} \index{data!penguins}
 
 \infobox{Mark the support vectors by point shape, and examine where these are relative to the difference between groups.
 }
@@ -8195,6 +8056,7 @@ Examining the hyperplane in a grand tour display
 \texttt{bl} and \texttt{bd}, are important for separating the two
 classes. We can check this interpretation using the radial tour. Using
 the components from the model, the coefficients of the hyperplane are:
+\index{tour!grand} \index{tour!radial}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -8212,9 +8074,9 @@ bm -0.2846370
 
 The coefficients for \texttt{bl} and \texttt{bd} are the largest (in
 magnitude) which supports the the interpretation that they are most
-important. This vector can be used to set the starting point for radial
-tour, once it is normalised. Any orthonormal vector serves to turn this
-into a 2D projection, to visualise the boundary.
+important. This vector can be used to set the starting point for a
+radial tour, once it is normalised. Any orthonormal vector serves to
+turn this into a 2D projection, to visualise the boundary.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -8539,7 +8401,7 @@ regions. However, the two samples roughly match.}
 
 \section{Fit the model}\label{fit-the-model}
 
-\index{classification!Fitting a NN}
+\index{classification!fitting a NN}
 
 The data needs to be specially formatted for the model fitted using
 \texttt{keras}. The explanatory variables need to be provided as a
@@ -8813,7 +8675,7 @@ for the votes matrix from a random forest in Section~\ref{sec-votes}.
 }
 
 \caption{Ternary diagram for the three groups of the predictive
-probabilities of both training ans test sets. From what we already know
+probabilities of both training and test sets. From what we already know
 about the penguins data this fit is not good. Both Chinstrap and Gentoo
 penguins are confused with Adelie, or at risk of it. Gentoo is very
 well-separated from the other two species when several variables are
@@ -8913,6 +8775,7 @@ different dimensionality, we will first use principal component
 analysis. This simplifies the analysis, and in general we do not need
 the original pixel or hidden node information for the interpretation
 here. The comparison is using the test-subset of the data.
+\index{dimension reduction!principal component analysis (PCA)}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -9008,6 +8871,7 @@ Finally we will investigate the model performance through the
 misclassifications and uncertainty between classes. We start with the
 error matrix for the test observations. To fit the error matrix we use
 the numeric labels, the ordering is as defined above for the labels.
+\index{classification!confusion matrix}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -9048,6 +8912,7 @@ types of shoes can be confused with each other, or different types of
 shirts). We can further investigate this by visualizing the full
 probability matrix for the test observations, to see which categories
 the model is uncertain about.
+\index{classification!predictive probabilities}
 
 \begin{figure}
 
