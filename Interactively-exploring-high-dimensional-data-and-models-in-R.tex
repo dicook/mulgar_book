@@ -294,7 +294,7 @@
 
 \title{Interactively exploring high-dimensional data and models in R}
 \author{Dianne Cook and Ursula Laa}
-\date{2025-04-13}
+\date{2025-04-14}
 
 \begin{document}
 \maketitle
@@ -1132,6 +1132,10 @@ points spread in a circle with higher density in the middle, (c) points
 conentrated in the centre vertically and skewed to the right.}
 
 \end{figure}%
+
+\index{data!c1-c7} \index{software!geozoo} \index{data!USArrests}
+\index{data!swiss} \index{data!crabs} \index{data!PRIM7}
+\index{data!fgl} \index{data!olive} \index{data!music} \index{data!PBC}
 
 \section*{Exercises}\label{exercises}
 \addcontentsline{toc}{section}{Exercises}
@@ -5563,20 +5567,54 @@ results}\label{sec-clust-compare}
 
 \section{Summarising results}\label{summarising-results}
 
-The key elements for summarising cluster results are the centres of the
-clusters and the within-cluster variability of the observations. Adding
-cluster means to any plot, including tour plots, is easy. You add the
-additional rows, or a new data set, and set the point shape to be
-distinct. \index{cluster analysis!summary statistics}
+It can be considered that the result of a cluster analysis is a smaller
+data set that describes the original data set more compactly,
+corresponding to the cluster centres. With this in mind, the key
+elements for summarising a cluster analysis are, for each cluster:
 
-\index{cluster analysis!convex hull} Summarising the variability is
-difficult. For model-based clustering, the shape of the clusters is
-assumed to be elliptical, so \(p\)-dimensional ellipses can be used to
-show the solution, as done in Chapter~\ref{sec-mclust}. Generally, it is
-common to plot a convex hull of the clusters, as in
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  the number of observations
+\item
+  a measure of the centre
+\item
+  some measure of the variability of observations around each centre.
+  \index{cluster analysis!summary statistics}
+\end{enumerate}
+
+With numerical data, which we have focused on here, the measure of
+centre is typically the multivariate mean. Measuring the variability can
+be more complicated. The exception is model-based clustering because it
+imposes an elliptical variance-covariance structure leaving the
+variance-covariance estimates for each cluster as suitable measures of
+3. The methods discussed in Chapter~\ref{sec-mclust} for displaying the
+corresponding ellipses in high dimensions is suitable.
+\index{variance-covariance!ellipse}
+
+For all other methods, the shape of the variance is not controlled, so
+cluster shapes can vary. Some methods have a tendency to create
+particular shapes, for example \(k\)-means and Wards linkage
+hierarchical clustering may result in spherically shapes. But more than
+likely this is not the case, the algorithm uses a ball to group
+observations but the shape of the cluster might be very different.
+Summarising the variability, though is very important, because it
+provides feedback on the strength of the clustering. A good clustering
+result makes the large data simpler, where a smaller set of points is an
+adequate summary of the data.
+
+Generally, to accommodate summarising odd-shaped clusters, it is common
+to generate the convex hull of each cluster, as shown in
 Figure~\ref{fig-penguins-chull-pdf}. This can also be done in
-high-dimensions, using the R package \texttt{cxhull} to compute the
-\(p\)-D convex hull.
+high-dimensions, using the R package \texttt{cxhull} (Laurent, 2023) to
+compute the \(p\)-D convex hull.
+
+\index{cluster analysis!convex hull}
+
+\infobox{For model-based clustering, the variability within clusters can be summarised by $p$-dimensional ellipses. Generally, a $p$-dimensional convex hull can show the variability within clusters, without assuming a specific distribution.}
+
+\index{data!penguins}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -5637,19 +5675,6 @@ cluster 3, model-based labels as cluster 2. The labels given by any
 algorithm are arbitrary, and can easily be changed to coordinate between
 methods.
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{p\_cl }\SpecialCharTok{|\textgreater{}} 
-  \FunctionTok{count}\NormalTok{(cl\_w, cl\_mc) }\SpecialCharTok{|\textgreater{}} 
-  \FunctionTok{pivot\_wider}\NormalTok{(}\AttributeTok{names\_from =}\NormalTok{ cl\_mc, }
-              \AttributeTok{values\_from =}\NormalTok{ n, }
-              \AttributeTok{values\_fill =} \DecValTok{0}\NormalTok{) }\SpecialCharTok{|\textgreater{}}
-  \FunctionTok{gt}\NormalTok{() }\SpecialCharTok{|\textgreater{}}
-  \FunctionTok{tab\_spanner}\NormalTok{(}\AttributeTok{label =} \StringTok{"cl\_mc"}\NormalTok{, }\AttributeTok{columns=}\FunctionTok{c}\NormalTok{(}\StringTok{\textasciigrave{}}\AttributeTok{2}\StringTok{\textasciigrave{}}\NormalTok{, }\StringTok{\textasciigrave{}}\AttributeTok{3}\StringTok{\textasciigrave{}}\NormalTok{, }\StringTok{\textasciigrave{}}\AttributeTok{1}\StringTok{\textasciigrave{}}\NormalTok{)) }\SpecialCharTok{|\textgreater{}}
-  \FunctionTok{cols\_width}\NormalTok{(}\FunctionTok{everything}\NormalTok{() }\SpecialCharTok{\textasciitilde{}} \FunctionTok{px}\NormalTok{(}\DecValTok{60}\NormalTok{))}
-\end{Highlighting}
-\end{Shaded}
-
 \begin{longtable*}{>{\raggedleft\arraybackslash}p{60px}>{\raggedleft\arraybackslash}p{60px}>{\raggedleft\arraybackslash}p{60px}>{\raggedleft\arraybackslash}p{60px}}
 \toprule
  & \multicolumn{3}{c}{cl\_mc} \\ 
@@ -5663,47 +5688,36 @@ cl\_w & 2 & 3 & 1 \\
 \end{longtable*}
 
 We can examine the disagreement by linking a plot of the table, with a
-tour plot. Here is how to do this with \texttt{liminal}.
-Figure~\ref{fig-compare-clusters1} and
-Figure~\ref{fig-compare-clusters2} show screenshots of the exploration
-of the eight penguins on which the methods disagree. It makes sense that
+tour plot. Linking the confusion matrix with the tour can be
+accomplished with \texttt{crosstalk} and \texttt{detourr}.
+Figure~\ref{fig-compare-clusters} show screenshots of the exploration of
+the eight penguins on which the methods disagree. It makes sense that
 there is some confusion. These penguins are part of the large clump of
 observations that don't separate cleanly into two clusters. The eight
-penguins are in the middle of this clump. Realistically, both methods
-result in a plausible clustering, and it is not clear how these penguins
-should be grouped.
+penguins are roughly in the middle of this clump, and there is no clear
+place to split this large clump. Realistically, both methods result in a
+plausible clustering.
 
 \begin{figure}
 
-\centering{
+\begin{minipage}{\linewidth}
+\includegraphics[width=4.16667in,height=\textheight,keepaspectratio]{images/compare-clusters-detourr1.png}\end{minipage}%
+\newline
+\begin{minipage}{\linewidth}
+\includegraphics[width=4.16667in,height=\textheight,keepaspectratio]{images/compare-clusters-detourr2.png}\end{minipage}%
+\newline
+\begin{minipage}{\linewidth}
+\includegraphics[width=4.16667in,height=\textheight,keepaspectratio]{images/compare-clusters-detourr4.png}\end{minipage}%
 
-\pandocbounded{\includegraphics[keepaspectratio]{images/compare-clusters1.png}}
-
-}
-
-\caption{\label{fig-compare-clusters1}Linking the confusion table with a
-tour using liminal. Points are coloured according to Wards linkage. The
-disagreement on eight penguins is with cluster 1 from Wards and cluster
-2 from model-based.}
-
-\end{figure}%
-
-\begin{figure}
-
-\centering{
-
-\pandocbounded{\includegraphics[keepaspectratio]{images/compare-clusters2.png}}
-
-}
-
-\caption{\label{fig-compare-clusters2}Highlighting the penguins where
-the methods disagree so we can see where these observations are located
-relative to the two clusters.}
+\caption{\label{fig-compare-clusters}Comparing the model-based and Wards
+hierarchical linkage solutions using linking between the confusion table
+and a tour, using detourr. Points are coloured according to the
+model-based result. The disagreement on eight penguins is with cluster 1
+from Wards and cluster 2 from model-based. These penguins fall in the
+middle of the large clump of points, where it is not possible to cleanly
+decide on a split. Both solutions are plausible.}
 
 \end{figure}%
-
-Linking the confusion matrix with the tour can also be accomplished with
-\texttt{crosstalk} and \texttt{detourr}.
 
 \index{software!crosstalk} \index{software!detourr}
 
@@ -5711,21 +5725,27 @@ Linking the confusion matrix with the tour can also be accomplished with
 \begin{Highlighting}[]
 \FunctionTok{library}\NormalTok{(crosstalk)}
 \FunctionTok{library}\NormalTok{(plotly)}
+\FunctionTok{library}\NormalTok{(detourr)}
 \FunctionTok{library}\NormalTok{(viridis)}
+\NormalTok{p\_cl }\OtherTok{\textless{}{-}}\NormalTok{ p\_cl }\SpecialCharTok{|\textgreater{}} 
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{cl\_w\_j =} \FunctionTok{jitter}\NormalTok{(cl\_w),}
+         \AttributeTok{cl\_mc\_j =} \FunctionTok{jitter}\NormalTok{(cl\_mc))}
+\NormalTok{penguins\_cl }\OtherTok{\textless{}{-}} \FunctionTok{bind\_cols}\NormalTok{(penguins\_sub, p\_cl)}
 \NormalTok{p\_cl\_shared }\OtherTok{\textless{}{-}}\NormalTok{ SharedData}\SpecialCharTok{$}\FunctionTok{new}\NormalTok{(penguins\_cl)}
 
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{1046}\NormalTok{)}
 \NormalTok{detour\_plot }\OtherTok{\textless{}{-}} \FunctionTok{detour}\NormalTok{(p\_cl\_shared, }\FunctionTok{tour\_aes}\NormalTok{(}
   \AttributeTok{projection =}\NormalTok{ bl}\SpecialCharTok{:}\NormalTok{bm,}
-  \AttributeTok{colour =}\NormalTok{ cl\_w)) }\SpecialCharTok{|\textgreater{}}
+  \AttributeTok{colour =}\NormalTok{ cl\_mc)) }\SpecialCharTok{|\textgreater{}}
     \FunctionTok{tour\_path}\NormalTok{(}\FunctionTok{grand\_tour}\NormalTok{(}\DecValTok{2}\NormalTok{), }
-                    \AttributeTok{max\_bases=}\DecValTok{50}\NormalTok{, }\AttributeTok{fps =} \DecValTok{60}\NormalTok{) }\SpecialCharTok{|\textgreater{}}
+                    \AttributeTok{max\_bases=}\DecValTok{100}\NormalTok{, }\AttributeTok{fps =} \DecValTok{60}\NormalTok{) }\SpecialCharTok{|\textgreater{}}
        \FunctionTok{show\_scatter}\NormalTok{(}\AttributeTok{alpha =} \FloatTok{0.7}\NormalTok{, }\AttributeTok{axes =} \ConstantTok{FALSE}\NormalTok{,}
                     \AttributeTok{width =} \StringTok{"100\%"}\NormalTok{, }\AttributeTok{height =} \StringTok{"450px"}\NormalTok{)}
 
 \NormalTok{conf\_mat }\OtherTok{\textless{}{-}} \FunctionTok{plot\_ly}\NormalTok{(p\_cl\_shared, }
                     \AttributeTok{x =} \SpecialCharTok{\textasciitilde{}}\NormalTok{cl\_mc\_j,}
                     \AttributeTok{y =} \SpecialCharTok{\textasciitilde{}}\NormalTok{cl\_w\_j,}
-                    \AttributeTok{color =} \SpecialCharTok{\textasciitilde{}}\NormalTok{cl\_w,}
+                    \AttributeTok{color =} \SpecialCharTok{\textasciitilde{}}\NormalTok{cl\_mc,}
                     \AttributeTok{colors =} \FunctionTok{viridis\_pal}\NormalTok{(}\AttributeTok{option =} \StringTok{"D"}\NormalTok{)(}\DecValTok{3}\NormalTok{),}
                     \AttributeTok{height =} \DecValTok{450}\NormalTok{) }\SpecialCharTok{|\textgreater{}}
   \FunctionTok{highlight}\NormalTok{(}\AttributeTok{on =} \StringTok{"plotly\_selected"}\NormalTok{, }
@@ -5739,6 +5759,11 @@ Linking the confusion matrix with the tour can also be accomplished with
 \NormalTok{ )                 }
 \end{Highlighting}
 \end{Shaded}
+
+\infobox{Linking a scatterplot showing the confusion matrix and a tour plot can help to decide whether one solution is better than another, or not.
+}
+
+\index{data!fake trees} \index{data!aflw} \index{data!c1-c7}
 
 \section*{Exercises}\label{exercises-11}
 \addcontentsline{toc}{section}{Exercises}
@@ -5763,10 +5788,23 @@ Linking the confusion matrix with the tour can also be accomplished with
   Chapter~\ref{sec-kmeans}. Which provides the most useful clustering of
   this data?
 \item
+  Compute the convex hulls for the final clustering of the \texttt{aflw}
+  data. What do you learn about the shapes of the final clusters, and
+  which variables most contribute to the difference between clusters.
+\item
   Pick your two clusterings on one of the challenge data sets,
   \texttt{c1}-\texttt{c7} from the \texttt{mulgar} package, that give
   very different results. Compare and contrast the two solutions, and
   decide which is the better solution.
+\item
+  Use model-based clustering on the \texttt{c1} data, as done in Q6
+  Chapter~\ref{sec-mclust}. Construct the summary of the best 6 cluster
+  solution, that uses ellipses to summarise each cluster. How good is
+  this fit?
+\item
+  Use Wards linkage linkage clustering for the \texttt{c4} data set.
+  Choose 5 clusters as the result. Construct the convex hulls for the
+  solution and display with a grand tour.
 \end{enumerate}
 
 \section*{Project}\label{project-4}
@@ -5806,10 +5844,10 @@ data that examines the risk taking behavior of tourists, this is the
   Using the method introduced in this chapter, compare the solution
   using Manhattan distance and complete linkage to one using Euclidean
   distance and Ward linkage. First compute a confusion table and then
-  use \texttt{liminal} to explore some of the differences. For example,
-  you should be able to see how small subsets where the two clustering
-  solutions disagree can be outlying and are grouped differently
-  depending on the choices we make.
+  use \texttt{liminal} or \texttt{detourr} to explore some of the
+  differences. For example, you should be able to see how small subsets
+  where the two clustering solutions disagree can be outlying and are
+  grouped differently depending on the choices we make.
 \item
   Selecting your preferred solution from hierarchical clustering, we
   will now compare it to what is found using \(k\)-means clustering with
@@ -5826,10 +5864,7 @@ data that examines the risk taking behavior of tourists, this is the
 \item
   Use the approaches from this chapter to summarize and compare the
   \(k\)-means solution to your selected hierarchical clustering results.
-  Are the groupings mostly similar? You can also use convex hulls to
-  better compare what part of the space is occupied. Either look at
-  subsets (selected from the liminal display) or you could facet the
-  display using \texttt{tourr::animate\_groupxy}.
+  Are the groupings mostly similar?
 \item
   Some other possible activities include examining how model-based
   methods would cluster the data. We expect it should be similar to
@@ -9265,9 +9300,9 @@ tunnel vision for one solution.
 
 This is what explainability is attempting to assist with, what is it
 that the fitted model sees. What we see when we make plots of the data
-might differ from the model sees, which can be confusing. The role of
-explainability is to pull the fitted model apart to inspect how it has
-been built for the purposes of understanding how it will make
+might differ from what the model sees, which can be confusing. The role
+of explainability is to pull the fitted model apart to inspect how it
+has been built for the purposes of understanding how it will make
 predictions and how it considers the relationship between response and
 predictors.
 
@@ -9377,7 +9412,8 @@ variables, and the differences in SHAP values across the variables. The
 values for the single misclassified Gentoo penguin (in the training set)
 is coloured orange-brown. The SHAP values for this penguin are similar
 to other penguins on \texttt{bl}, \texttt{bd} and \texttt{fl} but they
-are very different on \texttt{bm}.
+are very different on \texttt{bm}. \index{scatterplot matrix}
+\index{parallel coordinate plot}
 
 Table~\ref{tbl-p-shap} contains the SHAP values for this penguin, for
 all three classes, and all four variables. The explanations for this
@@ -9434,7 +9470,7 @@ sees body mass as playing a role in the misclassification.}
 
 \end{figure}%
 
-If we examine the data Figure~\ref{fig-penguins-bl-bm-bd} the
+If we examine the data in Figure~\ref{fig-penguins-bl-bm-bd} the
 explanations make some sense. The misclassified penguin has an unusually
 small value on \texttt{bm}. That the SHAP value for \texttt{bm} was
 quite different from those of the other Gentoo penguins pointed to this
@@ -9505,7 +9541,7 @@ most important role in the classification, creating a 2D projection
 basis where \texttt{bm} is contrasted against a combination of the other
 variables, is our strategy for initialising the radial tour.
 Figure~\ref{fig-bndry-pdf} shows the boundary being found using the
-radial tour.
+radial tour. \index{tour!radial}
 
 \begin{figure}
 
@@ -9533,10 +9569,10 @@ length, as can be seen from the direction and magnitude of the axes.
 
 \end{figure}%
 
-\insightbox{The SHAP values for the NN model are correct in reporting that body mass is a variable that strongly contributes to the misclassified penguin. They do not effectively take global variable importance into account, and give too much weight to bill length and body depth in the interpretation. These two variables contribute very little to the classification boundary.
+\insightbox{The SHAP values for the NN model are correct in reporting that body mass is a variable that strongly contributes to the misclassified penguin. They do not effectively take global variable importance into account, and give too much weight to bill length and flipper length in the interpretation. These two variables contribute very little to the classification boundary.
 }
 
-So what have we learned. The SHAP values suggested numerous variables
+So what have we learned? The SHAP values suggested numerous variables
 involved with the classification of the species. Using the tour shows
 that the separation between Adelie and Gentoo is mostly due to
 \texttt{bm}, for this fitted neural network model. The SHAP values
@@ -9598,7 +9634,7 @@ model fitting is to pick just one.
   has two nodes in the hidden layer to do a dimension reduction, that is
   at least as good as the LDA model? Re-fit the NN model, by varying the
   random seed, to obtain the best fit possible. Save this model fit, and
-  compare it with the LDA model?
+  compare it with the LDA model.
 \item
   Examine misclassifications from a random forest model for the fake
   trees data between cluster 1 and 0, using the
@@ -9609,34 +9645,24 @@ model fitting is to pick just one.
   \item
     principal components
   \item
-    votes matrix. Describe where these errors relative to their true and
-    predicted class clusters. When examining the simplex, are the
-    misclassifications the points that are furthest from any vertices?
-  \end{enumerate}
-\item
-  Examine the misclassifications for the random forest model on the
-  sketches data, focusing on cactus sketches that were mistaken for
-  bananas. Follow up by plotting the images of these errors, and
-  describe whether the classifier is correct that these sketches are so
-  poor their true cactus or banana identity cannot be determined.
-\item
-  How do the errors from the random forest model compare with those of
-  your best fitting NN model? Are the the corresponding images poor
-  sketches of cacti or bananas?
-\item
-  Now examine the misclassifications of the sketches data in the
-
-  \begin{enumerate}
-  \def\labelenumii{\alph{enumii}.}
-  \tightlist
-  \item
-    votes matrix from the random forest model
-  \item
-    predictive probability distribution from the NN model, using the
-    simplex approach. Are they as expected, points lying in the middle
-    or along an edge of the simplex?
+    votes matrix.
   \end{enumerate}
 \end{enumerate}
+
+Describe where these show errors relative to their true and predicted
+class clusters. When examining the simplex, are the misclassifications
+the points that are furthest from any vertices? 4. Examine the
+misclassifications for the random forest model on the sketches data,
+focusing on cactus sketches that were mistaken for bananas. Follow up by
+plotting the images of these errors, and describe whether the classifier
+is correct that these sketches are so poor their true cactus or banana
+identity cannot be determined. 5. How do the errors from the random
+forest model compare with those of your best fitting NN model? Are the
+the corresponding images poor sketches of cacti or bananas? 6. Now
+examine the misclassifications of the sketches data in the a. votes
+matrix from the random forest model b. predictive probability
+distribution from the NN model, using the simplex approach. Are they as
+expected, points lying in the middle or along an edge of the simplex?
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
