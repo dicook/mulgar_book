@@ -294,7 +294,7 @@
 
 \title{Interactively exploring high-dimensional data and models in R}
 \author{Dianne Cook and Ursula Laa}
-\date{2025-04-14}
+\date{2025-04-15}
 
 \begin{document}
 \maketitle
@@ -3280,8 +3280,7 @@ components.)
 
 \index{software!dobin} \index{software!GGally}
 
-\chapter{Non-linear dimension
-reduction}\label{non-linear-dimension-reduction}
+\chapter{Non-linear dimension reduction}\label{sec-nldr}
 
 Non-linear dimension reduction (NLDR) aims to find a single
 low-dimensional representation of the high-dimensional data that shows
@@ -3296,8 +3295,8 @@ where the distances are similar to their distance along the manifold.
 
 Most techniques only require an interpoint similarity or distance matrix
 as the main ingredient, rather than the full \(p\)-dimensional data. A
-classic example where only this information is the morse code data
-reported by Rothkopf (1957), and available in the \texttt{xgobi}
+classic example where only this information is used is the morse code
+data reported by Rothkopf (1957), and available in the \texttt{xgobi}
 software (Swayne et al., 1998). The data contains the counts of the
 number of times that a letter is mistaken for another letter collected
 in an experimental study. However, here we focus on problems where the
@@ -3312,13 +3311,13 @@ relative to structure revealed in the low-dimensional embedding.
 In statistics, methods for non-linear dimension reduction arise with
 multidimensional scaling (MDS) (Kruskal, 1964a). Classically, MDS
 minimises some function of the difference between two interpoint
-distance matrices, the distance between points in the high-dimensions,
-and in the low-dimensional representations using a stress function
-(\(C_{L2}\)):
+distance matrices: the distance between points in the high-dimensions,
+and in the low-dimensional representations. This is using a stress
+function (\(C_{L2}\)):
 
 \[
 C_{L2} = \left(\sum_{i, j=1; i\neq j}^n (d_p(i,j) - d_k(i,j))^2\right)^{1/2}
-\] where \((d_p(i,j))\) are the distances between all pairs of points in
+\] where \(d_p(i,j)\) are the distances between all pairs of points in
 \(p\)-dimensions, and \(d_k(i,j)\) is the distance between the points in
 the low-dimensional (\(k\)) space. PCA is a special case of MDS, in
 that, the first two PCs provide the solution to the above equation if
@@ -3330,9 +3329,9 @@ The choices for defining \(d_p\) are many, including ones that are
 locally, using say \(k\) nearest neighbours, or globally computed.
 Distances can also be transformed using some function, including ranks
 instead of actual distance. Another approach modifies the stress
-function the \(L_2\)-norm, by replacing the 2 with an arbitrary power.
-Others yet use transformations of the distances. A good resource for
-learning about MDS and the many choices is Borg \& Groenen (2005).
+function by replacing the \(L_2\)-norm, by replacing the 2 with an
+arbitrary power. A good resource for learning about MDS and the many
+choices is Borg \& Groenen (2005).
 
 \index{data!swiss roll}
 
@@ -3378,7 +3377,7 @@ illustrate isomap, as shown in (a) a random tour projection, (b) lowest
 two principal components, (c) NLDR provided by isomap. The spiral can be
 discovered by many methods, including different principal compoents
 depending on the scaling of the data, or using projection pursuit, or
-nonlinear MDS. Being able to unwrap the spiral and lay out the points
+non-linear MDS. Being able to unwrap the spiral and lay out the points
 along a plane is achieved by isomap and LLE with careful choice of
 parameters. Colour indicates distance along this spiral.
 \faIcon{play-circle}}
@@ -3387,27 +3386,30 @@ parameters. Colour indicates distance along this spiral.
 
 \index{dimension reduction!MDS} \index{dimension reduction!t-SNE}
 \index{dimension reduction!UMAP}
+\index{dimension reduction!projection pursuit (PP)}
 
 The swiss roll data is interesting in the sense that from a visual
 perspective it is interesting to be able to \emph{discover} the spiral
-structure. Particularly this would be a more challenging if the 2D
-spiral was in data with more than three variables, and all the
-additional ones were noise (like \texttt{z} in this example). Methods
-like projection pursuit, PCA or MDS can discover the spiral if all
-variables are measured on the same scale (say -1, 1) but not
-standardised because the variance of the spiral shape is different from
-that of noise. Being able to discover the manifold (here, a 2D surface
-matching a swiss roll) can be useful for conducting further analysis.
-The points are now organised according to distance relative to the
-manifold on which they live. This layout is like taming a lion, it feels
-like an achievement, but realistically it is very difficult to achieve
-from these methods: data scale choice or a different number of \(k\)
-nearest neighbours, changes the layout dramatically. Organising the
-points into distance along the spiral could have equally been achieved
-by discovering the spiral, and computing radial distance, as done to
-produce the colouring of points in Figure~\ref{fig-swiss-pdf}. This
-approach would also extend beyond 3D, to any additional number of noise
-dimensions.
+structure. This would be more challenging if the 2D spiral was in data
+with more than three variables, and all the additional ones were noise
+(like \texttt{z} in this example). Methods like projection pursuit, PCA
+or MDS can discover the spiral if all variables are measured on the same
+scale (say -1, 1) but not standardised because the variance of the
+spiral shape is different from that of noise.
+
+Being able to discover the manifold (here, a 2D surface matching a swiss
+roll) can be useful for conducting further analysis. The points are now
+organised according to distance relative to the manifold on which they
+live. This layout is like taming a lion, it feels like an achievement,
+but realistically it is very difficult to achieve from these methods:
+data scale choice or a different number of \(k\) nearest neighbours,
+changes the layout dramatically. Organising the points into distance
+along the spiral could have equally been achieved by discovering the
+spiral, and computing radial distance, as done to produce the colouring
+of points in Figure~\ref{fig-swiss-pdf}. This approach would also extend
+beyond 3D, to any additional number of noise dimensions.
+
+\infobox{When data are distributed along some non-linear manifold the tour can allow us to uncover the shape of the manifold, while NLDR might be able to flatten the manifold into a plane, to reveal structure along the manifold.}
 
 \section{Contemporary approaches}\label{contemporary-approaches}
 
@@ -3441,7 +3443,7 @@ interpoint distances are computed, and normalised by dividing by
 \(\sum_{i,j} p_{ij}\), as is done similarly to obtain \(q_{ij}\). A
 further step in t-SNE is transforming the distances through the CDF of a
 specified distribution (Gaussian in \(p\)-D and \(t\)-distribution in
-\(k\)-D) to reflect differences is volume between the high and low
+\(k\)-D) to reflect differences in volume between the high and low
 dimensional spaces, akin to the transformation used in the sage tour
 (Laa et al. (2022)). (See Figure~\ref{fig-density} illustrating the
 crowding effect.) The normalisation effectively means small distances,
@@ -3476,9 +3478,10 @@ simple parabolic shape.
 \includegraphics[width=2.29167in,height=\textheight,keepaspectratio]{images/clusters_nonlin_272.png}\end{minipage}%
 
 \caption{\label{fig-clusters-nonlin-pdf}Two frames from a grand tour of
-the nonlinear clusters data set, shows four clusters. Two are very small
-and spherical in shape. One is large, and has a sine wave shape, and the
-other is fairly small with a bent rod shape. \faIcon{play-circle}}
+the non-linear clusters data set, shows four clusters. Two are very
+small and spherical in shape. One is large, and has a sine wave shape,
+and the other is fairly small with a bent rod shape.
+\faIcon{play-circle}}
 
 \end{figure}%
 
