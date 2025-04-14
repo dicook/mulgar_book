@@ -1,4 +1,4 @@
-## ----------------------------------------------------------------------------
+## --------------------------------------------------------------------------
 #| echo: false
 library(mulgar)
 library(ggplot2)
@@ -21,7 +21,7 @@ s_p <- ggplot(simple_clusters, aes(x=x1, y=x2)) +
   theme(aspect.ratio=1)
 
 
-## ----------------------------------------------------------------------------
+## --------------------------------------------------------------------------
 #| echo: false
 #| message: false
 library(tourr)
@@ -47,7 +47,7 @@ explain_t1[,,9] <- matrix(c(1, 0),
                           ncol=1)
 
 
-## ----------------------------------------------------------------------------
+## --------------------------------------------------------------------------
 #| echo: false
 #| eval: false
 # animate_dist(simple_clusters[,1:2],
@@ -69,7 +69,7 @@ explain_t1[,,9] <- matrix(c(1, 0),
 #            height = 300)
 
 
-## ----------------------------------------------------------------------------
+## --------------------------------------------------------------------------
 #| echo: false
 #| label: fig-explain-1D-data
 #| fig-cap: 2D data
@@ -80,7 +80,7 @@ explain_t1[,,9] <- matrix(c(1, 0),
 s_p
 
 
-## ----fig-explain-1D-pdf, eval=knitr::is_latex_output()-----------------------
+## ----fig-explain-1D-pdf, eval=knitr::is_latex_output()---------------------
 #| echo: false
 #| fig-cap: "How a tour can be used to explore high-dimensional data illustrated using (a) 2D data with two clusters and (b,c,d) 1D projections from a tour shown as a density plot. Imagine spinning a line around the centre of the data plot, with points projected orthogonally onto the line. With this data, when the line is at `x1=x2 (0.707, 0.707)` or `(-0.707, -0.707)` the clustering is the strongest. When it is at `x1=-x2  (0.707, -0.707)` there is no clustering. {{< fa play-circle >}}"
 #| fig-width: 8
@@ -125,7 +125,7 @@ s_p
 # p1 + p2 + p3 + p4 + plot_layout(ncol=2)
 
 
-## ----------------------------------------------------------------------------
+## --------------------------------------------------------------------------
 #| echo: false
 library(tourr)
 library(geozoo)
@@ -138,7 +138,7 @@ colnames(d) <- paste0("x", 1:3)
 d <- data.frame(d)
 
 
-## ----------------------------------------------------------------------------
+## --------------------------------------------------------------------------
 #| echo: false
 #| eval: false
 # animate_xy(d, little_tour(), aps=0.2)
@@ -159,7 +159,7 @@ d <- data.frame(d)
 #            height = 300)
 
 
-## ----------------------------------------------------------------------------
+## --------------------------------------------------------------------------
 #| echo: false
 explain_prj <- matrix(c(cos(ang), 0, -sin(ang), 0, 1, 0, sin(ang), 0, cos(ang)), ncol=3, byrow=T)[,1:2]
 
@@ -181,7 +181,7 @@ d_prj_p <- ggplot() +
        panel.grid=element_blank())
 
 
-## ----------------------------------------------------------------------------
+## --------------------------------------------------------------------------
 #| echo: false
 #| label: fig-explain-2D-data
 #| fig-cap: A projection revealing the hole
@@ -191,7 +191,7 @@ d_prj_p <- ggplot() +
 d_prj_p
 
 
-## ----fig-explain-2D-pdf, eval=knitr::is_latex_output()-----------------------
+## ----fig-explain-2D-pdf, eval=knitr::is_latex_output()---------------------
 #| echo: false
 #| fig-cap: "How a tour can be used to explore high-dimensional data illustrated by showing a sequence of random 2D projections of 3D data (a). The data has a donut shape with the hole revealed in a single 2D projection (b). Data usually arrives with a given number of observations, and when we plot it like this using a scatterplot, it is like shadows of a transparent object. {{< fa play-circle >}}"
 #| fig-width: 8
@@ -223,7 +223,7 @@ d_prj_p
 # p5 + p6 + plot_layout(ncol=2)
 
 
-## ----------------------------------------------------------------------------
+## --------------------------------------------------------------------------
 #| label: fig-dimension-cubes
 #| echo: false
 #| fig-cap: "Space can be considered to be a high-dimensional cube. Here we have pictured a sequence of increasing dimension cubes, from 1D to 5D, as wireframes, it can be seen that as the dimension increase by one, the cube doubles."
@@ -406,7 +406,7 @@ p1 + p2 + p3 + p4 + p5 +
 
 
 
-## ----------------------------------------------------------------------------
+## --------------------------------------------------------------------------
 #| label: fig-density
 #| fig-cap: "Illustration of data crowding in the low-dimensional projection as dimension increases, here from 3, 10, 100. The samples are generated from a uniform distribution in $p$-dimensional spheres. Colour shows the number of points in each hexagon bin (pink is large, navy is small). As dimension increases the points concentrate near the centre."
 #| out-width: 95%
@@ -450,7 +450,7 @@ ggplot(proj_points, aes(x, y)) +
 
 
 
-## ----------------------------------------------------------------------------
+## --------------------------------------------------------------------------
 #| label: fig-example-structure
 #| fig-width: 10
 #| fig-height: 3
@@ -513,7 +513,7 @@ e4 <- ggplot(barrier, aes(x=x1, y=x2)) +
 e1 + e2 + e3 + e4 + plot_layout(ncol=4)
 
 
-## ----------------------------------------------------------------------------
+## --------------------------------------------------------------------------
 #| echo: false
 #| eval: false
 # library(tourr)
@@ -569,7 +569,7 @@ e1 + e2 + e3 + e4 + plot_layout(ncol=4)
 #            height=400)
 
 
-## ----------------------------------------------------------------------------
+## --------------------------------------------------------------------------
 #| label: fig-penguins-scatmat
 #| echo: false
 #| fig-cap: "Scatterplot matrix of the penguins, with colour indicating the three species, Adelie, Chinstrap, Gentoo. The clusters for each species are similarly shaped in each scatterplot, and centred at different locations in some plots."
@@ -593,7 +593,7 @@ ggscatmat(penguins_sub, columns=1:4, col="species", alpha=0.8) +
 
 
 
-## ----------------------------------------------------------------------------
+## --------------------------------------------------------------------------
 #| eval: false
 #| echo: false
 # set.seed(1148)
@@ -613,7 +613,7 @@ ggscatmat(penguins_sub, columns=1:4, col="species", alpha=0.8) +
 #            )
 
 
-## ----------------------------------------------------------------------------
+## --------------------------------------------------------------------------
 #| label: do-you-have-high-d
 #| echo: false
 #| fig-cap: "Examples of 2D data that lack association, for which univariate methods are sufficient: (a) points spread uniformly in the square, (b) points spread in a circle with higher density in the middle, (c) points conentrated in the centre vertically and skewed to the right."
@@ -665,7 +665,7 @@ p_not_hd3 <- ggplot(d_not_hd,
 p_not_hd1 + p_not_hd2 + p_not_hd3 + plot_layout(ncol=3)
 
 
-## ----------------------------------------------------------------------------
+## --------------------------------------------------------------------------
 #| echo: true
 #| eval: false
 # library(readr)
@@ -673,7 +673,7 @@ p_not_hd1 + p_not_hd2 + p_not_hd3 + plot_layout(ncol=3)
 #                   show_col_types = FALSE)
 
 
-## ----------------------------------------------------------------------------
+## --------------------------------------------------------------------------
 #| eval: false
 #| echo: false
 # # Answer to Q1
@@ -689,7 +689,7 @@ p_not_hd1 + p_not_hd2 + p_not_hd3 + plot_layout(ncol=3)
 # animate_xy(cube10, axes="bottomleft")
 
 
-## ----------------------------------------------------------------------------
+## --------------------------------------------------------------------------
 #| eval: false
 #| echo: false
 # # Answer to Q3
@@ -769,7 +769,7 @@ p_not_hd1 + p_not_hd2 + p_not_hd3 + plot_layout(ncol=3)
 # # spherical cluster, curve cluster and a lot of noise points
 
 
-## ----------------------------------------------------------------------------
+## --------------------------------------------------------------------------
 #| eval: false
 #| echo: false
 # # Answer to Q4
@@ -780,7 +780,7 @@ p_not_hd1 + p_not_hd2 + p_not_hd3 + plot_layout(ncol=3)
 # animate_xy(swiss, rescale=TRUE)
 
 
-## ----------------------------------------------------------------------------
+## --------------------------------------------------------------------------
 #| eval: false
 #| echo: false
 # # Answer to Q5
@@ -791,7 +791,7 @@ p_not_hd1 + p_not_hd2 + p_not_hd3 + plot_layout(ncol=3)
 # animate_xy(fgl[,1:9], col=fgl$type, rescale=TRUE)
 
 
-## ----------------------------------------------------------------------------
+## --------------------------------------------------------------------------
 #| eval: false
 #| echo: false
 # # Answer to Q6
@@ -800,7 +800,7 @@ p_not_hd1 + p_not_hd2 + p_not_hd3 + plot_layout(ncol=3)
 # animate_xy(prim7, rescale=TRUE)
 
 
-## ----------------------------------------------------------------------------
+## --------------------------------------------------------------------------
 #| eval: false
 #| echo: true
 # library(tidyverse)
@@ -812,7 +812,7 @@ p_not_hd1 + p_not_hd2 + p_not_hd3 + plot_layout(ncol=3)
 #   sample_frac(size = 0.01)
 
 
-## ----------------------------------------------------------------------------
+## --------------------------------------------------------------------------
 #| eval: false
 #| echo: true
 # water_dist <- water_sub |>
@@ -827,14 +827,14 @@ p_not_hd1 + p_not_hd2 + p_not_hd3 + plot_layout(ncol=3)
 # animate_xy(water_dist[,2:6], rescale=TRUE)
 
 
-## ----------------------------------------------------------------------------
+## --------------------------------------------------------------------------
 #| eval: false
 #| echo: true
 # animate_xy(water_dist[,2:6], rescale=TRUE,
 #            col=water_dist$water_tech_category)
 
 
-## ----------------------------------------------------------------------------
+## --------------------------------------------------------------------------
 #| eval: false
 #| echo: true
 # set.seed(324)
@@ -844,7 +844,7 @@ p_not_hd1 + p_not_hd2 + p_not_hd3 + plot_layout(ncol=3)
 #            col=water_dist$water_tech_category)
 
 
-## ----------------------------------------------------------------------------
+## --------------------------------------------------------------------------
 #| eval: false
 #| echo: true
 #| code-fold: false
