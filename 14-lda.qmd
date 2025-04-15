@@ -150,6 +150,7 @@ p_vc_pool <- mulgar::pooled_vc(penguins_sub[,1:4],
 p_vc_pool
 ```
 
+\index{variance-covariance!ellipse}
 This can be used to draw an ellipse corresponding to the pooled variance-covariance that is used by the LDA model.
 
 ```{r}
@@ -165,12 +166,12 @@ to check the underlying assumptions on which it depends: (1) that the cluster st
 
 ::: {.content-visible when-format="html"}
 ::: info
-To check the equal and elliptical variance-covariance assumption, generate points on the surface of an ellipse corresponding to the variance-covariance for each group. When watching these ellipses in a tour, they should similar in all projections.
+To check the equal and elliptical variance-covariance assumption, generate points on the surface of an ellipse corresponding to the variance-covariance for each group. When watching these ellipses in a tour, they should look similar in all projections.
 :::
 :::
 
 ::: {.content-visible when-format="pdf"}
-\infobox{To check the equal and elliptical variance-covariance assumption, generate points on the surface of an ellipse corresponding to the variance-covariance for each group. When watching these ellipses in a tour, they should similar in all projections.
+\infobox{To check the equal and elliptical variance-covariance assumption, generate points on the surface of an ellipse corresponding to the variance-covariance for each group. When watching these ellipses in a tour, they should look similar in all projections.
 }
 :::
 
@@ -272,7 +273,7 @@ The equal and elliptical variance-covariance assumption is reasonable for the pe
 \insightbox{The equal and elliptical variance-covariance assumption is reasonable for the penguins data because the ellipse shapes roughly match the spread of the data. It is not a suitable assumption for the bushfires data, because the spread is not elliptically-shaped and varies in size between groups.}
 :::
 
-This approach extends to any dimension. We would use the same projection sequence to view both the data and the variance-covariance ellipses, as in `r ifelse(knitr::is_html_output(), '@fig-penguins-lda-ellipses-html', '@fig-penguins-lda-ellipses-pdf')`. It can be seen that there is some difference in the shape and size of the ellipses between species, in some projections, and also with the spread of points in the projected data. However, it is the differences are small, so it would be safe to assume that the population variance-covariances are equal.
+This approach extends to any dimension. We would use the same projection sequence to view both the data and the variance-covariance ellipses, as in `r ifelse(knitr::is_html_output(), '@fig-penguins-lda-ellipses-html', '@fig-penguins-lda-ellipses-pdf')`. It can be seen that there is some difference in the shape and size of the ellipses between species, in some projections, and also with the spread of points in the projected data. However, the differences are small, so it would be safe to assume that the population variance-covariances are equal.
 
 ```{r echo=knitr::is_html_output()}
 #| message: false
@@ -323,7 +324,7 @@ Checking the assumption of equal variance-covariance matrices for the 4D penguin
 
 ![Variance-covariance ellipses](images/penguins_lda2.png){#fig-lda-4D-assumptions2 fig-alt="Single frame from a tour of the ellipses corresponding to variance-covariance matrices for each species, matching the data shown in plot (a). Each ellipse has a north-west to south-east oriention. The red group (Gentoo), at top left, is slightly smaller and more elliptical than the other two groups. The yellow cluster (Chinstrap) in the center, and the blue cluster (Adelie) on the right and more circular."}
 
-Checking the assumption of equal variance-covariance matrices for the 4D penguins data. Each ellipse corresponds to the sample variance-covariance for each species.
+Checking the assumption of equal variance-covariance matrices for the 4D penguins data. Each ellipse corresponds to the sample variance-covariance for each species. {{< fa play-circle >}}
 :::
 :::
 
@@ -429,7 +430,7 @@ Checking how the pooled variance-covariance matches the spread of points in each
 
 ![Gentoo](images/penguins_lda_pooled2.png){#fig-lda-pooled1 fig-alt="A single frame from a tour of the pooled variance-covariance ellipse overlaid on the data for the Gentoo penguins (red). The ellipse has a north-west to south-east orientation, and is relatively skinny. This roughly matches the spread of the points."}
 
-Checking how the pooled variance-covariance matches the spread of points in each group.
+Checking how the pooled variance-covariance matches the spread of points in each group. {{< fa play-circle >}}
 :::
 
 :::
@@ -503,9 +504,9 @@ p_bl_bd_lda_m1 +
 \index{classification!boundaries}
 \index{tour!slice}
 
-This approach can be readily extended to higher dimensions. One first fits the model with all four variables, and uses the `explore()` to generate points in the 4D space with predictions, generating a representation of the prediction regions. `r ifelse(knitr::is_html_output(), '@fig-penguins-lda-boundaries-html', '@fig-penguins-lda-boundaries-pdf')` (a) shows the results using a slice tour [@slicetour]. Points inside the slice are shown in larger size. The slice is made in the centre of the data, to show the boundaries in this neighbourhood. As the tour progresses we see a thin slice through the centre of the data, parallel with the projection plane. In most projections there is some small overlap of points between groups, which happens because we are examining a 4D object with 2D. The slice helps to alleviate this, allowing a focus on the boundaries in the centre of the cube. In all projections the boundaries between groups is linear, as would be expected when using LDA. We can also see that the model roughly divides the cube into three relatively equally-sized regions.
+This approach can be readily extended to higher dimensions. One first fits the model with all four variables, and uses `explore()` to generate points in the 4D space with predictions, generating a representation of the prediction regions. `r ifelse(knitr::is_html_output(), '@fig-penguins-lda-boundaries-html', '@fig-penguins-lda-boundaries-pdf')` (a) shows the results using a slice tour [@slicetour]. Points inside the slice are shown in larger size. The slice is made in the centre of the data, to show the boundaries in this neighbourhood. As the tour progresses we see a thin slice through the centre of the data, parallel with the projection plane. In most projections there is some small overlap of points between groups, which happens because we are examining a 4D object with 2D. The slice helps to alleviate this, allowing a focus on the boundaries in the centre of the cube. In all projections the boundaries between groups is linear, as would be expected when using LDA. We can also see that the model roughly divides the cube into three relatively equally-sized regions.
 
-`r ifelse(knitr::is_html_output(), '@fig-penguins-lda-boundaries-html', '@fig-penguins-lda-boundaries-pdf')` (b) shows the three prediction regions, represented by points in 4D, projected into the discriminant space. Linear boundaries neatly divide the full space, which is to be expected because the LDA model computes it's classification rules in this 2D space.  In this view the data has been overlaid and it can be seen that the boundaries produced by LDA quite nicely separate the species, albeit some confusion between Adelie and Chinstrap. Overlaying the data on the slide tour in (a) could be useful but it also adds too many parts to the plot, possibly making it more difficult to focus on the boundary. 
+`r ifelse(knitr::is_html_output(), '@fig-penguins-lda-boundaries-html', '@fig-penguins-lda-boundaries-pdf')` (b) shows the three prediction regions, represented by points in 4D, projected into the discriminant space. Linear boundaries neatly divide the full space, which is to be expected because the LDA model computes it's classification rules in this 2D space.  In this view the data has been overlaid and it can be seen that the boundaries produced by LDA quite nicely separate the species, albeit some confusion between Adelie and Chinstrap. Overlaying the data on the slice tour in (a) could be useful but it also adds too many parts to the plot, possibly making it more difficult to focus on the boundary. 
 
 \index{classification!discriminant space}
 
@@ -603,7 +604,7 @@ Examining the boundaries produced by the LDA model in the full 4D with a slice t
 p_lda_b_sub_ds_p
 ```
 
-Examining the boundaries produced by the LDA model in the full 4D with a slice tour (left shows a single frame) and in the discriminant space (right). Large points indicate observations within the slice, and dots are observations outside the slice. Focusing on the within-slice points, there is some overlap of points between regions in most views which represents the occlusion of 4D shapes when examining projections with thin slices. The linear boundaries are seen exactly in the discriminant space, that is they are orthogonal to these two dimensions.
+Examining the boundaries produced by the LDA model in the full 4D with a slice tour (left shows a single frame) and in the discriminant space (right). Large points indicate observations within the slice, and dots are observations outside the slice. Focusing on the within-slice points, there is some overlap of points between regions in most views which represents the occlusion of 4D shapes when examining projections with thin slices. The linear boundaries are seen exactly in the discriminant space, that is they are orthogonal to these two dimensions. {{< fa play-circle >}}
 :::
 :::
 
@@ -646,7 +647,7 @@ ds_proj <- tourr::orthonormalise(p_lda$scaling) |>
 #| label: tbl-ds-coef-html
 #| echo: false
 #| tbl-cap: "Coefficients of the discriminant space, original and othonormalised. LD1 is the direction where Gentoo is separated from the others, and the coefficients suggest this is due to a contrast between bd and fl/bm. LD2 is where Adelie is different from Chinstrap, which is generated by a contrast between bl and bm."
-knitr::kable(p_lda$scaling, digits=2,
+knitr::kable(ds_proj, digits=2,
              col.names = c(" ", "LD1", "LD2", "LD1", "LD2")) |>
   add_header_above(c(" " = 1, "original"=2, "orthonormal"=2))
 ```
@@ -664,7 +665,7 @@ knitr::kable(ds_proj, digits=2, format="latex",
 ```
 :::
 
-The discriminant space can be considered to be a 2D projection basis, except that it needs to be orthonormalised to be an orthonormal basis. This orthonormal basis provides the initial projection for a radial tour where each variable can be rotated out of the projection to assess its importance to the visible structure. It can also be used as the anchor basis for a local tour, where small steps to and from this projection to randomly selected nearby projections. This allows the inspection of the local neighbourhood of the discriminant space, to assess the effect of small changes in the projection basis on the visible structure. 
+The discriminant space can be considered to be a 2D projection basis, except that it needs to be orthonormalised to be an orthonormal basis. This orthonormal basis provides the initial projection for a radial tour where each variable can be rotated out of the projection to assess its importance to the visible structure. It can also be used as the anchor basis for a local tour, where small steps to and from this projection to randomly selected nearby projections are shown. This allows the inspection of the local neighbourhood of the discriminant space, to assess the effect of small changes in the projection basis on the visible structure. 
 
 \index{tour!radial}
 \index{tour!local}
@@ -742,7 +743,7 @@ The radial tour can be used to assess variable importance to the structure prese
 \infobox{The radial tour can be used to assess variable importance to the structure present, especially when predictors are strongly associated with each other.}
 :::
 
-`r ifelse(knitr::is_html_output(), '@fig-interpret-html', '@fig-interpret-pdf')` illustrates how the radial tour (a,b) and the local tour (c,d) can be used to assess the importance of variables to structure of interest in a plot. In the radial tour the interpolation runs from the projection corresponding to the discriminant space, and to a projection where one of the variables (here `bl`) has been removed. The purpose for examining `bl` is that it has a small contribution to LD1, and thus may *not* be important for separating Gentoo from the other species. We would also be assessing it's large contribution to LD2, and the separation between Adelie and Chinstrap, where we expect that it is indispensable. This is indeed what we learn. By removing `bl` there is no change to the separation between Gentoo, so it might be a simpler best 2D projection if the coefficient for Gentoo in LD1 is actually 0. However, for LD2 removing `bl` results in completely overlapping clusters for Adelie and Chinstrap, which confirms that this is the main variable that distinguishes the two species.
+`r ifelse(knitr::is_html_output(), '@fig-interpret-html', '@fig-interpret-pdf')` illustrates how the radial tour (a,b) and the local tour (c,d) can be used to assess the importance of variables to structure of interest in a plot. In the radial tour the interpolation runs from the projection corresponding to the discriminant space, and to a projection where one of the variables (here `bl`) has been removed. The purpose for examining `bl` is that it has a small contribution to LD1, and thus may *not* be important for separating Gentoo from the other species. We would also be assessing it's large contribution to LD2, and the separation between Adelie and Chinstrap, where we expect that it is indispensable. This is indeed what we learn. By removing `bl` there is no change to the separation between Gentoo, so it might be a simpler best 2D projection if the coefficient for `bl` in LD1 is actually 0. However, for LD2 removing `bl` results in completely overlapping clusters for Adelie and Chinstrap, which confirms that this is the main variable that distinguishes the two species.
 
 The local tour is used here to explore the neighbourhood of the discriminant space. We anchor the tour at the discriminant space and interpolate to many random target planes within a specified distance. It can be used to examine how the structure changes with small differences in the combination of variables. Here we can see some small improvements in distinguishing the Adelie (blue)  from Chinstrap (yellow) penguins. In the discriminant space there are about three Adelie penguins mixed among a group of Chinstrap penguins. In one change of the projection basis this can be reduced to one Adelie penguin mixed among the Chinstrap, and otherwise a neatly linear boundary could divide the clusters. This is a small improvement, but it does illustrate how visualisation in high dimensions can help to refine an automated rule.
 

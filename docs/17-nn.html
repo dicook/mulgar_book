@@ -423,31 +423,31 @@ w_{0h}\phi(a_h+\sum_{i=1}^{p} w_{ih}x_i)
 \end{aligned}
 \]</span> which is a combination of two (linear) models, each of which could be examined for their role in making predictions.</p>
 <p>In practice, a model may have many nodes, and several hidden layers, a variety of activation functions, and regularisation modifications. One should keep in mind the principle of parsimony is important when applying NNs, because it is tempting to make an overly complex, and thus over-parameterised, construction. Fitting NNs is still problematic. One would hope that fitting produces a stable result, whatever the starting seed the same parameter estimates are returned. However, this is not the case, and different, sometimes radically different, results are routinely obtained after each attempted fit <span class="citation" data-cites="wickham2015">(<a href="references.html#ref-wickham2015" role="doc-biblioref">Wickham et al., 2015</a>)</span>.</p>
-<p>For these examples we use the software <code>keras</code> <span class="citation" data-cites="keras">(<a href="references.html#ref-keras" role="doc-biblioref">Allaire &amp; Chollet, 2023</a>)</span> following the installation and tutorial details at <a href="https://tensorflow.rstudio.com/tutorials/" class="uri">https://tensorflow.rstudio.com/tutorials/</a>. Because it is an interface to python it can be tricky to install. If this is a problem, the example code should be possible to convert to use <code>nnet</code> <span class="citation" data-cites="VR02">(<a href="references.html#ref-VR02" role="doc-biblioref">Venables &amp; Ripley, 2002</a>)</span> or <code>neuralnet</code> <span class="citation" data-cites="neuralnet">(<a href="references.html#ref-neuralnet" role="doc-biblioref">Fritsch et al., 2019</a>)</span>. We will use the penguins data to illustrate the fitting, because it makes it easier to understand the procedures and the fit. However, a NN is like using a jackhammer instead of a trowel to plant a seedling, more complicated than necessary to build a good classification model for this data.</p>
+<p>For these examples we use the software <code>keras</code> <span class="citation" data-cites="keras">(<a href="references.html#ref-keras" role="doc-biblioref">Allaire &amp; Chollet, 2023</a>)</span> following the installation and tutorial details at <a href="https://tensorflow.rstudio.com/tutorials/" class="uri">https://tensorflow.rstudio.com/tutorials/</a>. Because it is an interface to python it can be tricky to install. If this is a problem, the example code should be possible to convert to use <code>nnet</code> <span class="citation" data-cites="VR02">(<a href="references.html#ref-VR02" role="doc-biblioref">Venables &amp; Ripley, 2002</a>)</span> or <code>neuralnet</code> <span class="citation" data-cites="neuralnet">(<a href="references.html#ref-neuralnet" role="doc-biblioref">Fritsch et al., 2019</a>)</span>. We will use the penguins data to illustrate the fitting, because it makes it easier to understand the procedures and the fit. However, a NN is like using a jackhammer instead of a trowel to plant a seedling, more complicated than necessary to build a good classification model for this data. </p>
 <section id="sec-nn-model" class="level2" data-number="17.1"><h2 data-number="17.1" class="anchored" data-anchor-id="sec-nn-model">
 <span class="header-section-number">17.1</span> Setting up the model</h2>
 <p></p>
 <p>A first step is to decide how many nodes the NN architecture should have, and what activation function should be used. To make these decisions, ideally you already have some knowledge of the shapes of class clusters. For the penguins classification, we have seen that it contains three elliptically shaped clusters of roughly the same size. This suggests two nodes in the hidden layer would be sufficient to separate three clusters (<a href="#fig-nn-diagram" class="quarto-xref">Figure&nbsp;<span>17.1</span></a>). Because the shapes of the clusters are convex, using linear activation (“relu”) will also be sufficient. The model specification is as follows:</p>
 <div class="cell">
-<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tensorflow.rstudio.com/">keras</a></span><span class="op">)</span></span>
-<span><span class="fu">tensorflow</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/tensorflow/man/set_random_seed.html">set_random_seed</a></span><span class="op">(</span><span class="fl">211</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Define model</span></span>
-<span><span class="va">p_nn_model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/keras/man/keras_model_sequential.html">keras_model_sequential</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="va">p_nn_model</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/keras/man/layer_dense.html">layer_dense</a></span><span class="op">(</span>units <span class="op">=</span> <span class="fl">2</span>, activation <span class="op">=</span> <span class="st">'relu'</span>, </span>
-<span>              input_shape <span class="op">=</span> <span class="fl">4</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/keras/man/layer_dense.html">layer_dense</a></span><span class="op">(</span>units <span class="op">=</span> <span class="fl">3</span>, activation <span class="op">=</span> <span class="st">'softmax'</span><span class="op">)</span></span>
-<span><span class="va">p_nn_model</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> <span class="va">summary</span></span>
-<span></span>
-<span><span class="va">loss_fn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/keras/man/loss-functions.html">loss_sparse_categorical_crossentropy</a></span><span class="op">(</span></span>
-<span>  from_logits <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">p_nn_model</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://generics.r-lib.org/reference/compile.html">compile</a></span><span class="op">(</span></span>
-<span>  optimizer <span class="op">=</span> <span class="st">"adam"</span>,</span>
-<span>  loss      <span class="op">=</span> <span class="va">loss_fn</span>,</span>
-<span>  metrics   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'accuracy'</span><span class="op">)</span></span>
-<span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(keras)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>tensorflow<span class="sc">::</span><span class="fu">set_random_seed</span>(<span class="dv">211</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Define model</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>p_nn_model <span class="ot">&lt;-</span> <span class="fu">keras_model_sequential</span>()</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>p_nn_model <span class="sc">|&gt;</span> </span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">layer_dense</span>(<span class="at">units =</span> <span class="dv">2</span>, <span class="at">activation =</span> <span class="st">'relu'</span>, </span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>              <span class="at">input_shape =</span> <span class="dv">4</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">layer_dense</span>(<span class="at">units =</span> <span class="dv">3</span>, <span class="at">activation =</span> <span class="st">'softmax'</span>)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>p_nn_model <span class="sc">|&gt;</span> summary</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>loss_fn <span class="ot">&lt;-</span> <span class="fu">loss_sparse_categorical_crossentropy</span>(</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">from_logits =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>p_nn_model <span class="sc">|&gt;</span> <span class="fu">compile</span>(</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">optimizer =</span> <span class="st">"adam"</span>,</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">loss      =</span> loss_fn,</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">metrics   =</span> <span class="fu">c</span>(<span class="st">'accuracy'</span>)</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Note that <code>tensorflow::set_random_seed(211)</code> sets the seed for the model fitting so that we can obtain the same result to discuss later. It needs to be set before the model is defined in the code. The model will also be saved in order to diagnose and make predictions.</p>
@@ -459,11 +459,12 @@ w_{0h}\phi(a_h+\sum_{i=1}^{p} w_{ih}x_i)
 Figure&nbsp;17.1: Network architecture for the model on the penguins data. The round nodes indicate original or transformed variables, and each arrow connecting these is represented as one of the weights <span class="math inline">\(w_{ih}\)</span> in the definition. The boxes indicate the additive constant entering the nodes, and the corresponding arrows represent the terms <span class="math inline">\(a_h\)</span>.
 </figcaption></figure>
 </div>
+<p></p>
 </section><section id="checking-the-trainingtest-split" class="level2" data-number="17.2"><h2 data-number="17.2" class="anchored" data-anchor-id="checking-the-trainingtest-split">
 <span class="header-section-number">17.2</span> Checking the training/test split</h2>
-<p></p>
-<p>Splitting the data into training and test is an essential way to protect against overfitting, for most classifiers, but especially so for the copiously parameterised NNs. The model specified for the penguins data with only two nodes is unlikely to be overfitted, but it is nevertheless good practice to use a training set for building and a test set for evaluation.</p>
+<p> Splitting the data into training and test is an essential way to protect against overfitting, for most classifiers, but especially so for the copiously parameterised NNs. The model specified for the penguins data with only two nodes is unlikely to be overfitted, but it is nevertheless good practice to use a training set for building and a test set for evaluation.</p>
 <p><a href="#fig-p-split-html" class="quarto-xref">Figure&nbsp;<span>17.2</span></a> shows the tour being used to examine the split into training and test samples for the penguins data. Using random sampling, particularly stratified by group, should result the two sets being very similar, as can be seen here. It does happen that several observations in the test set are on the extremes of their class cluster, so it could be that the model makes errors in the neighbourhoods of these points.</p>
+<p> </p>
 <div class="cell">
 <details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Split the data intro training and testing</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://jrnold.github.io/ggthemes/">ggthemes</a></span><span class="op">)</span></span>
@@ -477,8 +478,8 @@ Figure&nbsp;17.1: Network architecture for the model on the penguins data. The r
 <span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"data/penguins_sub.rda"</span><span class="op">)</span> <span class="co"># from mulgar book</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">821</span><span class="op">)</span></span>
-<span><span class="va">p_split</span> <span class="op">&lt;-</span> <span class="va">penguins_sub</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">bl</span><span class="op">:</span><span class="va">species</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span><span class="va">p_split</span> <span class="op">&lt;-</span> <span class="va">penguins_sub</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">bl</span><span class="op">:</span><span class="va">species</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rsample.tidymodels.org/reference/initial_split.html">initial_split</a></span><span class="op">(</span>prop <span class="op">=</span> <span class="fl">2</span><span class="op">/</span><span class="fl">3</span>, </span>
 <span>                strata<span class="op">=</span><span class="va">species</span><span class="op">)</span></span>
 <span><span class="va">p_train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rsample.tidymodels.org/reference/initial_split.html">training</a></span><span class="op">(</span><span class="va">p_split</span><span class="op">)</span></span>
@@ -487,7 +488,7 @@ Figure&nbsp;17.1: Network architecture for the model on the penguins data. The r
 <span><span class="co"># Check training and test split</span></span>
 <span><span class="va">p_split_check</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html">bind_rows</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_cols.html">bind_cols</a></span><span class="op">(</span><span class="va">p_train</span>, type <span class="op">=</span> <span class="st">"train"</span><span class="op">)</span>, </span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_cols.html">bind_cols</a></span><span class="op">(</span><span class="va">p_test</span>, type <span class="op">=</span> <span class="st">"test"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_cols.html">bind_cols</a></span><span class="op">(</span><span class="va">p_test</span>, type <span class="op">=</span> <span class="st">"test"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">type</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
@@ -531,9 +532,9 @@ Figure&nbsp;17.1: Network architecture for the model on the penguins data. The r
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-p-split-html-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="quarto-layout-row">
 <div class="quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-p-split-html" style="flex-basis: 50.0%;justify-content: flex-start;">
-<div id="fig-split-grand" class="quarto-float quarto-figure quarto-figure-center anchored" alt="FIX ME">
+<div id="fig-split-grand" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Animation showing a grand tour of the penguins data, with colour indicating species (red=Gentoo, blue=Adelie, yellow=Chinstrap) and shape indicating training (open circles) vs test (closed circles). The distribution of points in each group is reasonably similar regardless of projection.">
 <figure class="quarto-float quarto-subfloat-fig figure"><div aria-describedby="fig-split-grand-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="gifs/p_split.gif" class="img-fluid figure-img" data-ref-parent="fig-p-split-html" alt="FIX ME" width="300">
+<img src="gifs/p_split.gif" class="img-fluid figure-img" data-ref-parent="fig-p-split-html" alt="Animation showing a grand tour of the penguins data, with colour indicating species (red=Gentoo, blue=Adelie, yellow=Chinstrap) and shape indicating training (open circles) vs test (closed circles). The distribution of points in each group is reasonably similar regardless of projection." width="300">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-split-grand-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 (a) Grand tour
@@ -541,9 +542,9 @@ Figure&nbsp;17.1: Network architecture for the model on the penguins data. The r
 </div>
 </div>
 <div class="quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-p-split-html" style="flex-basis: 50.0%;justify-content: flex-start;">
-<div id="fig-split-guided" class="quarto-float quarto-figure quarto-figure-center anchored" alt="FIX ME">
+<div id="fig-split-guided" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Animation showing a guided tour of the penguins data, with colour indicating species (red=Gentoo, blue=Adelie, yellow=Chinstrap) and shape indicating training (open circles) vs test (closed circles). The distribution of points in each group is reasonably similar regardless of projection.">
 <figure class="quarto-float quarto-subfloat-fig figure"><div aria-describedby="fig-split-guided-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="gifs/p_split_guided.gif" class="img-fluid figure-img" data-ref-parent="fig-p-split-html" alt="FIX ME" width="300">
+<img src="gifs/p_split_guided.gif" class="img-fluid figure-img" data-ref-parent="fig-p-split-html" alt="Animation showing a guided tour of the penguins data, with colour indicating species (red=Gentoo, blue=Adelie, yellow=Chinstrap) and shape indicating training (open circles) vs test (closed circles). The distribution of points in each group is reasonably similar regardless of projection." width="300">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-split-guided-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 (b) Guided tour
@@ -562,15 +563,15 @@ Figure&nbsp;17.2: Evaluating the training/test split, where we expect that the t
 <p>The data needs to be specially formatted for the model fitted using <code>keras</code>. The explanatory variables need to be provided as a <code>matrix</code>, and the categorical response needs to be separate, and specified as a <code>numeric</code> variable, beginning with 0.</p>
 <div class="cell">
 <details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Data needs to be matrix, and response needs to be numeric</span></span>
-<span><span class="va">p_train_x</span> <span class="op">&lt;-</span> <span class="va">p_train</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">bl</span><span class="op">:</span><span class="va">bm</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span><span class="va">p_train_x</span> <span class="op">&lt;-</span> <span class="va">p_train</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">bl</span><span class="op">:</span><span class="va">bm</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="va">p_train_y</span> <span class="op">&lt;-</span> <span class="va">p_train</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html">pull</a></span><span class="op">(</span><span class="va">species</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="op">)</span> </span>
+<span><span class="va">p_train_y</span> <span class="op">&lt;-</span> <span class="va">p_train</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html">pull</a></span><span class="op">(</span><span class="va">species</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="op">)</span> </span>
 <span><span class="va">p_train_y</span> <span class="op">&lt;-</span> <span class="va">p_train_y</span><span class="op">-</span><span class="fl">1</span> <span class="co"># Needs to be 0, 1, 2</span></span>
-<span><span class="va">p_test_x</span> <span class="op">&lt;-</span> <span class="va">p_test</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">bl</span><span class="op">:</span><span class="va">bm</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span><span class="va">p_test_x</span> <span class="op">&lt;-</span> <span class="va">p_test</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">bl</span><span class="op">:</span><span class="va">bm</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="va">p_test_y</span> <span class="op">&lt;-</span> <span class="va">p_test</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html">pull</a></span><span class="op">(</span><span class="va">species</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="op">)</span> </span>
+<span><span class="va">p_test_y</span> <span class="op">&lt;-</span> <span class="va">p_test</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html">pull</a></span><span class="op">(</span><span class="va">species</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="op">)</span> </span>
 <span><span class="va">p_test_y</span> <span class="op">&lt;-</span> <span class="va">p_test_y</span><span class="op">-</span><span class="fl">1</span> <span class="co"># Needs to be 0, 1, 2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
@@ -592,7 +593,7 @@ ________________________________________________________________________________
 </div>
 <div class="cell">
 <details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Fit model</span></span>
-<span><span class="va">p_nn_fit</span> <span class="op">&lt;-</span> <span class="va">p_nn_model</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> <span class="fu">keras</span><span class="fu">::</span><span class="fu"><a href="https://generics.r-lib.org/reference/fit.html">fit</a></span><span class="op">(</span></span>
+<span><span class="va">p_nn_fit</span> <span class="op">&lt;-</span> <span class="va">p_nn_model</span> <span class="op">|&gt;</span> <span class="fu">keras</span><span class="fu">::</span><span class="fu"><a href="https://generics.r-lib.org/reference/fit.html">fit</a></span><span class="op">(</span></span>
 <span>  x <span class="op">=</span> <span class="va">p_train_x</span>, </span>
 <span>  y <span class="op">=</span> <span class="va">p_train_y</span>,</span>
 <span>  epochs <span class="op">=</span> <span class="fl">200</span>,</span>
@@ -615,7 +616,7 @@ ________________________________________________________________________________
 </div>
 <p>The fitted model that we have chosen as the final one has reasonably small loss and high accuracy. Plots of loss and accuracy across epochs showing the change during fitting can be plotted, but we don’t show them here, because they are generally not very interesting.</p>
 <div class="cell">
-<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_nn_model</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/pkg/tensorflow/man/evaluate.html">evaluate</a></span><span class="op">(</span><span class="va">p_test_x</span>, <span class="va">p_test_y</span>, verbose <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_nn_model</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/pkg/tensorflow/man/evaluate.html">evaluate</a></span><span class="op">(</span><span class="va">p_test_x</span>, <span class="va">p_test_y</span>, verbose <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>     loss  accuracy 
 0.2563850 0.9553571 </code></pre>
@@ -671,23 +672,26 @@ ________________________________________________________________________________
 [4,] -0.7978314  0.5431528</code></pre>
 </div>
 </div>
+<p><a href="#fig-hidden-layer" class="quarto-xref">Figure&nbsp;<span>17.3</span></a> shows the data projected into the plane determined by the two linear combinations of the two nodes in the hidden layer. Training and test sets are indicated by empty and solid circles. The three species are clearly different but there is some overlap or confusion for a few penguins. The most interesting aspect to learn is that there is no big gap between the Gentoo and other species, which we know exists in the data. The model has not found this gap, and thus is likely to unfortunately and erroneously confuse some Gentoo penguins, particularly with Adelie.</p>
+<p>What we have shown here is a process to use the models at the nodes of the hidden layer to produce a reduced dimensional space where the classes are best separated, at least as determined by the model. The process will work in higher dimensions also.</p>
+<p>When there are more nodes in the hidden layer than the number of original variables it means that the space is extended to achieve useful classifications that need more complicated non-linear boundaries. The extra nodes describe the non-linearity. <span class="citation" data-cites="wickham2015">Wickham et al. (<a href="references.html#ref-wickham2015" role="doc-biblioref">2015</a>)</span> provides a good illustration of this in 2D. The process of examining each of the node models can be useful for understanding this non-linear separation, also in high dimensions.</p>
 <div class="cell">
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Hidden layer</span></span>
-<span><span class="va">p_train_m</span> <span class="op">&lt;-</span> <span class="va">p_train</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span><span class="va">p_train_m</span> <span class="op">&lt;-</span> <span class="va">p_train</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>nn1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">p_train</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span></span>
 <span>           <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">p_nn_wgts_on</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span>, ncol<span class="op">=</span><span class="fl">1</span><span class="op">)</span>,</span>
 <span>         nn2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">p_train</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span></span>
 <span>           <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="va">p_nn_wgts_on</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span>, ncol<span class="op">=</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Now add the test points on.</span></span>
-<span><span class="va">p_test_m</span> <span class="op">&lt;-</span> <span class="va">p_test</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span><span class="va">p_test_m</span> <span class="op">&lt;-</span> <span class="va">p_test</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>nn1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">p_test</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span></span>
 <span>           <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">p_nn_wgts_on</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span>, ncol<span class="op">=</span><span class="fl">1</span><span class="op">)</span>,</span>
 <span>         nn2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">p_test</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span></span>
 <span>           <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="va">p_nn_wgts_on</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span>, ncol<span class="op">=</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">p_train_m</span> <span class="op">&lt;-</span> <span class="va">p_train_m</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span><span class="va">p_train_m</span> <span class="op">&lt;-</span> <span class="va">p_train_m</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>set <span class="op">=</span> <span class="st">"train"</span><span class="op">)</span></span>
-<span><span class="va">p_test_m</span> <span class="op">&lt;-</span> <span class="va">p_test_m</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span><span class="va">p_test_m</span> <span class="op">&lt;-</span> <span class="va">p_test_m</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>set <span class="op">=</span> <span class="st">"test"</span><span class="op">)</span></span>
 <span><span class="va">p_all_m</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html">bind_rows</a></span><span class="op">(</span><span class="va">p_train_m</span>, <span class="va">p_test_m</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">p_all_m</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">nn1</span>, y<span class="op">=</span><span class="va">nn2</span>, </span>
@@ -698,26 +702,26 @@ ________________________________________________________________________________
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>aspect.ratio<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<div id="fig-hidden-layer" class="quarto-float quarto-figure quarto-figure-center anchored" alt="FIXME">
+<div id="fig-hidden-layer" class="quarto-float quarto-figure quarto-figure-center anchored" alt="A scatter plot of a projection showing clusters of three penguin species—Adélie (blue), Chinstrap (yellow), and Gentoo (red)—based on multiple variables. Data points are marked as either training data (open circles) or test data (filled circles). Both have x-axis 'nn1' with labels -2, -1, 0, 1, 2 and 3 and y-axis 'nn2' with labels -2, -1, 0, 1 and 2. The clusters are  different but not quite separated. There is little difference between training and test sets. A legend in the top-right corner indicates species colors, while another legend at the bottom-right differentiates between training (open circles) and test (filled circles) data.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-hidden-layer-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="17-nn_files/figure-html/fig-hidden-layer-1.png" class="img-fluid figure-img" style="width:80.0%" alt="FIXME">
+<img src="17-nn_files/figure-html/fig-hidden-layer-1.png" class="img-fluid figure-img" style="width:60.0%" alt="A scatter plot of a projection showing clusters of three penguin species—Adélie (blue), Chinstrap (yellow), and Gentoo (red)—based on multiple variables. Data points are marked as either training data (open circles) or test data (filled circles). Both have x-axis 'nn1' with labels -2, -1, 0, 1, 2 and 3 and y-axis 'nn2' with labels -2, -1, 0, 1 and 2. The clusters are  different but not quite separated. There is little difference between training and test sets. A legend in the top-right corner indicates species colors, while another legend at the bottom-right differentiates between training (open circles) and test (filled circles) data.">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-hidden-layer-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;17.3: Plot of the data in the linear combinations from the two nodes in the hidden layer. The three species are clearly different, although with some overlap between all three. A main issue to notice is that there isn’t a big gap between Gentoo and the other species, which we know is there based on our data exploration done in other chapters. This suggests this fitted model is sub-optimal.
+Figure&nbsp;17.3: Plot of the data in the linear combinations from the two nodes in the hidden layer. The three species are clearly different, although with some overlap between all three. A main issue to notice is that there isn’t a big gap between Gentoo and the other species, which we know exists in 4D based on our data exploration done in other chapters. This suggests that this fitted model is sub-optimal.
 </figcaption></figure>
 </div>
 </div>
 </div>
-<p><a href="#fig-hidden-layer" class="quarto-xref">Figure&nbsp;<span>17.3</span></a> shows the data projected into the plane determined by the two linear combinations of the two nodes in the hidden layer. Training and test sets are indicated by empty and solid circles. The three species are clearly different but there is some overlap or confusion for a few penguins. The most interesting aspect to learn is that there is no big gap between the Gentoo and other species, which we know exists in the data. The model has not found this gap, and thus is likely to unfortunately and erroneously confuse some Gentoo penguins, particularly with Adelie.</p>
-<p>What we have shown here is a process to use the models at the nodes of the hidden layer to produce a reduced dimensional space where the classes are best separated, at least as determined by the model. The process will work in higher dimensions also.</p>
-<p>When there are more nodes in the hidden layer than the number of original variables it means that the space is extended to achieve useful classifications that need more complicated non-linear boundaries. The extra nodes describe the non-linearity. <span class="citation" data-cites="wickham2015">Wickham et al. (<a href="references.html#ref-wickham2015" role="doc-biblioref">2015</a>)</span> provides a good illustration of this in 2D. The process of examining each of the node models can be useful for understanding this non-linear separation, also in high dimensions.</p>
+<div class="insight">
+<p>This particular fit is not good, based on what we know about the data. There should be a fit where a two node hidden layer produces a 2D representation where the difference between classes is clearer.</p>
+</div>
 </section><section id="sec-nn-pred-prob" class="level2" data-number="17.5"><h2 data-number="17.5" class="anchored" data-anchor-id="sec-nn-pred-prob">
 <span class="header-section-number">17.5</span> Examining predictive probabilities</h2>
 <p></p>
-<p>When the predictive probabilities are returned by a model, as is done by this NN, we can use a ternary diagram for three class problems, or high-dimensional simplex when there are more classes to examine the strength of the classification. This done in the same way that was used for the votes matrix from a random forest in <a href="15-forests.html#sec-votes" class="quarto-xref"><span>Section 15.2.1</span></a>.</p>
+<p>When the predictive probabilities are returned by a model, as is done by this NN, we can use a ternary diagram for three class problems, or high-dimensional simplex when there are more classes to examine the strength of the classification. This done in the same way that was used for the votes matrix from a random forest in <a href="15-forests.html#sec-votes" class="quarto-xref"><span>Section 15.2.1</span></a>. </p>
 <div class="cell">
 <details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Predict training and test set</span></span>
-<span><span class="va">p_train_pred</span> <span class="op">&lt;-</span> <span class="va">p_nn_model</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
+<span><span class="va">p_train_pred</span> <span class="op">&lt;-</span> <span class="va">p_nn_model</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">p_train_x</span>, verbose <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
 <span><span class="va">p_train_pred_cat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/levels.html">levels</a></span><span class="op">(</span><span class="va">p_train</span><span class="op">$</span><span class="va">species</span><span class="op">)</span><span class="op">[</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/apply.html">apply</a></span><span class="op">(</span><span class="va">p_train_pred</span>, <span class="fl">1</span>,</span>
@@ -733,7 +737,7 @@ Figure&nbsp;17.3: Plot of the data in the linear combinations from the two nodes
   Chinstrap      0        45      0
   Gentoo         1         0     78</code></pre>
 </div>
-<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_test_pred</span> <span class="op">&lt;-</span> <span class="va">p_nn_model</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_test_pred</span> <span class="op">&lt;-</span> <span class="va">p_nn_model</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">p_test_x</span>, verbose <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
 <span><span class="va">p_test_pred_cat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/levels.html">levels</a></span><span class="op">(</span><span class="va">p_test</span><span class="op">$</span><span class="va">species</span><span class="op">)</span><span class="op">[</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/apply.html">apply</a></span><span class="op">(</span><span class="va">p_test_pred</span>, <span class="fl">1</span>, </span>
@@ -750,20 +754,21 @@ Figure&nbsp;17.3: Plot of the data in the linear combinations from the two nodes
   Gentoo         1         0     39</code></pre>
 </div>
 </div>
+<p></p>
 <div class="cell">
 <details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb20"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Set up the data to make the ternary diagram</span></span>
 <span><span class="co"># Join data sets</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">p_train_pred</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Adelie"</span>, <span class="st">"Chinstrap"</span>, <span class="st">"Gentoo"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">p_test_pred</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Adelie"</span>, <span class="st">"Chinstrap"</span>, <span class="st">"Gentoo"</span><span class="op">)</span></span>
 <span><span class="va">p_train_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html">as_tibble</a></span><span class="op">(</span><span class="va">p_train_pred</span><span class="op">)</span></span>
-<span><span class="va">p_train_m</span> <span class="op">&lt;-</span> <span class="va">p_train_m</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>pspecies <span class="op">=</span> <span class="va">p_train_pred_cat</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_cols.html">bind_cols</a></span><span class="op">(</span><span class="va">p_train_pred</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span><span class="va">p_train_m</span> <span class="op">&lt;-</span> <span class="va">p_train_m</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>pspecies <span class="op">=</span> <span class="va">p_train_pred_cat</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_cols.html">bind_cols</a></span><span class="op">(</span><span class="va">p_train_pred</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>set <span class="op">=</span> <span class="st">"train"</span><span class="op">)</span></span>
 <span><span class="va">p_test_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html">as_tibble</a></span><span class="op">(</span><span class="va">p_test_pred</span><span class="op">)</span></span>
-<span><span class="va">p_test_m</span> <span class="op">&lt;-</span> <span class="va">p_test_m</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>pspecies <span class="op">=</span> <span class="va">p_test_pred_cat</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_cols.html">bind_cols</a></span><span class="op">(</span><span class="va">p_test_pred</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span><span class="va">p_test_m</span> <span class="op">&lt;-</span> <span class="va">p_test_m</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>pspecies <span class="op">=</span> <span class="va">p_test_pred_cat</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_cols.html">bind_cols</a></span><span class="op">(</span><span class="va">p_test_pred</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>set <span class="op">=</span> <span class="st">"test"</span><span class="op">)</span></span>
 <span><span class="va">p_all_m</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html">bind_rows</a></span><span class="op">(</span><span class="va">p_train_m</span>, <span class="va">p_test_m</span><span class="op">)</span></span>
 <span></span>
@@ -772,8 +777,8 @@ Figure&nbsp;17.3: Plot of the data in the linear combinations from the two nodes
 <span><span class="va">proj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="fu">geozoo</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/geozoo/man/f_helmert.html">f_helmert</a></span><span class="op">(</span><span class="fl">3</span><span class="op">)</span><span class="op">[</span><span class="op">-</span><span class="fl">1</span>,<span class="op">]</span><span class="op">)</span></span>
 <span><span class="va">p_nn_v_p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">p_all_m</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Adelie"</span>, <span class="st">"Chinstrap"</span>, <span class="st">"Gentoo"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">proj</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">p_nn_v_p</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"x1"</span>, <span class="st">"x2"</span><span class="op">)</span></span>
-<span><span class="va">p_nn_v_p</span> <span class="op">&lt;-</span> <span class="va">p_nn_v_p</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span><span class="va">p_nn_v_p</span> <span class="op">&lt;-</span> <span class="va">p_nn_v_p</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>species <span class="op">=</span> <span class="va">p_all_m</span><span class="op">$</span><span class="va">species</span>,</span>
 <span>         set <span class="op">=</span> <span class="va">p_all_m</span><span class="op">$</span><span class="va">set</span><span class="op">)</span></span>
 <span></span>
@@ -800,8 +805,8 @@ Figure&nbsp;17.3: Plot of the data in the linear combinations from the two nodes
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>aspect.ratio<span class="op">=</span><span class="fl">1</span>, legend.position <span class="op">=</span> <span class="st">"right"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
-<figure class="figure"><p><img src="17-nn_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid figure-img" style="width:70.0%"></p>
-<figcaption>Ternary diagram for the three groups of the predictive probabilities of both training ans test sets. From what we already know about the penguins data this fit is not good. Both Chinstrap and Gentoo penguins are confused with Adelie, or at risk of it. Gentoo is very well-separated from the other two species when several variables are used, and this fitted model is blind to it. One useful finding is that there is little difference between training and test sets, so the model has not been over-fitted.</figcaption></figure>
+<figure class="figure"><p><img src="17-nn_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" style="width:70.0%" alt="A scatterplot where all points fall inside a 2D triangle, marked by black lines. The triangle is upside down and is equilateral. Each vertex is labelled: Chinstrap (top left), Adelie (top right), Gentoo (bottom left). Each points corresponds to a penguin, and is coloured by species. The legend at right shows the color labelling as blue (Adelie), yellow (Chinstrap), red (Gentoo), and shape labels as open circles (training) and filled circles (test). Chinstrap points are a tight cluster at their vertex. Adelie and Gentoo are not centered at the vertex but part way along towards the others vertex. This indicates the confusion between these two species. There are some yellow points mixed with blue points but not with red."></p>
+<figcaption>Ternary diagram for the three groups of the predictive probabilities of both training and test sets. From what we already know about the penguins data this fit is not good. Both Chinstrap and Gentoo penguins are confused with Adelie, or at risk of it. Gentoo is very well-separated from the other two species when several variables are used, and this fitted model is blind to it. One useful finding is that there is little difference between training and test sets, so the model has not been over-fitted.</figcaption></figure>
 </div>
 </div>
 </div>
@@ -843,15 +848,15 @@ Figure&nbsp;17.3: Plot of the data in the linear combinations from the two nodes
 <div class="cell">
 <details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb23"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># defining the model</span></span>
 <span><span class="va">model_fashion_mnist</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/keras/man/keras_model_sequential.html">keras_model_sequential</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="va">model_fashion_mnist</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span><span class="va">model_fashion_mnist</span> <span class="op">|&gt;</span></span>
 <span>  <span class="co"># flatten the image data into a long vector</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/keras/man/layer_flatten.html">layer_flatten</a></span><span class="op">(</span>input_shape <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">28</span>, <span class="fl">28</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/keras/man/layer_flatten.html">layer_flatten</a></span><span class="op">(</span>input_shape <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">28</span>, <span class="fl">28</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="co"># hidden layer with 128 units</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/keras/man/layer_dense.html">layer_dense</a></span><span class="op">(</span>units <span class="op">=</span> <span class="fl">128</span>, activation <span class="op">=</span> <span class="st">'relu'</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/keras/man/layer_dense.html">layer_dense</a></span><span class="op">(</span>units <span class="op">=</span> <span class="fl">128</span>, activation <span class="op">=</span> <span class="st">'relu'</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="co"># output layer for 10 categories</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/pkg/keras/man/layer_dense.html">layer_dense</a></span><span class="op">(</span>units <span class="op">=</span> <span class="fl">10</span>, activation <span class="op">=</span> <span class="st">'softmax'</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">model_fashion_mnist</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://generics.r-lib.org/reference/compile.html">compile</a></span><span class="op">(</span></span>
+<span><span class="va">model_fashion_mnist</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://generics.r-lib.org/reference/compile.html">compile</a></span><span class="op">(</span></span>
 <span>  optimizer <span class="op">=</span> <span class="st">'adam'</span>,</span>
 <span>  loss <span class="op">=</span> <span class="st">'sparse_categorical_crossentropy'</span>,</span>
 <span>  metrics <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'accuracy'</span><span class="op">)</span></span>
@@ -859,13 +864,13 @@ Figure&nbsp;17.3: Plot of the data in the linear combinations from the two nodes
 <span></span>
 <span><span class="co"># fitting the model, if we did not know the model yet we</span></span>
 <span><span class="co"># would add a validation split to diagnose the training</span></span>
-<span><span class="va">model_fashion_mnist</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://generics.r-lib.org/reference/fit.html">fit</a></span><span class="op">(</span><span class="va">train_images</span>,</span>
+<span><span class="va">model_fashion_mnist</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://generics.r-lib.org/reference/fit.html">fit</a></span><span class="op">(</span><span class="va">train_images</span>,</span>
 <span>              <span class="va">train_labels</span>,</span>
 <span>              epochs <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/keras/man/save_model_tf.html">save_model_tf</a></span><span class="op">(</span><span class="va">model_fashion_mnist</span>, <span class="st">"data/fashion_nn"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<p>We have defined a flat neural network with a single hidden layer with 128 nodes. To investigate the model we can start by comparing the activations to the original input data distribution. Since both the input space and the space of activations is large, and they are of different dimensionality, we will first use principal component analysis. This simplifies the analysis, and in general we do not need the original pixel or hidden node information for the interpretation here. The comparison is using the test-subset of the data.</p>
+<p>We have defined a flat neural network with a single hidden layer with 128 nodes. To investigate the model we can start by comparing the activations to the original input data distribution. Since both the input space and the space of activations is large, and they are of different dimensionality, we will first use principal component analysis. This simplifies the analysis, and in general we do not need the original pixel or hidden node information for the interpretation here. The comparison is using the test-subset of the data. </p>
 <div class="cell">
 <details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb24"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># get the fitted model</span></span>
 <span><span class="va">model_fashion_mnist</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/keras/man/save_model_tf.html">load_model_tf</a></span><span class="op">(</span><span class="st">"data/fashion_nn"</span><span class="op">)</span></span>
@@ -918,24 +923,20 @@ Figure&nbsp;17.3: Plot of the data in the linear combinations from the two nodes
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span>,</span>
 <span>          legend.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_blank</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guides.html">guides</a></span><span class="op">(</span>color <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guide_legend.html">guide_legend</a></span><span class="op">(</span>override.aes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> </span>
-<span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details><div class="cell-output cell-output-stderr">
-<pre><code>Warning in get_plot_component(plot, "guide-box"): Multiple components found;
-returning the first one. To return all, use `return_all = TRUE`.</code></pre>
-</div>
-<details class="code-fold"><summary>Code to run tours</summary><div class="sourceCode" id="cb27"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># hide plotting code</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co"># hide plotting code</span></span>
 <span><span class="fu">cowplot</span><span class="fu">::</span><span class="fu"><a href="https://wilkelab.org/cowplot/reference/plot_grid.html">plot_grid</a></span><span class="op">(</span><span class="fu">cowplot</span><span class="fu">::</span><span class="fu"><a href="https://wilkelab.org/cowplot/reference/plot_grid.html">plot_grid</a></span><span class="op">(</span><span class="va">p1</span>, <span class="va">p2</span><span class="op">)</span>, <span class="va">legend_labels</span>,</span>
 <span>                   rel_heights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">.3</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
-<div>
-<figure class="figure"><p><img src="17-nn_files/figure-html/unnamed-chunk-22-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="17-nn_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid figure-img" style="width:100.0%" alt="A side-by-side comparison of two scatter plots, each showing a PC1 vs PC2 of data points color-coded by category. The left plot, titled 'Input space', represents the raw input data projected into two principal components. Data points are densely packed and overlapping, with no clear separation between categories. The right plot, titled 'Activations', shows the same data after being transformed by a neural network (e.g., through hidden layer activations). In this plot, the points are more clearly separated into distinct groups, with elongated and curved cluster structures suggesting that the network has learned to organize the data in a more class-discriminative way. Axes in both plots are labeled PC1 (x-axis) and PC2 (y-axis), and the same color scheme is used across both plots to represent consistent categories."></p>
+<figcaption>First two PCs of the original data (left) and the activations (right). The activation space has done a useful transformation of the 784 variables into a reduced dimension that reveals class clusters, because some cluster differences can be seen well in the first two PCs.</figcaption></figure>
 </div>
 </div>
 </div>
 <p>Looking only at the first two principal components we note some clear differences from the transformation in the hidden layer. The observations seem to be more evenly spread in the input space, while in the activations space we notice grouping along specific directions. In particular the category “Bag” appears to be most different from all other classes, and the non-linear transformation in the activations space shows that they are clearly different from the shoe categories, while in the input space we could note some overlap in the linear projection. To better identify differences between other groups we will use the tour on the first five principal components.</p>
 <div class="cell">
-<details class="code-fold"><summary>Code to run tours</summary><div class="sourceCode" id="cb28"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://ggobi.github.io/tourr/reference/display_xy.html">animate_xy</a></span><span class="op">(</span><span class="va">images_pc</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>, col <span class="op">=</span> <span class="va">test_tags</span>,</span>
+<details class="code-fold"><summary>Code to run tours</summary><div class="sourceCode" id="cb26"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://ggobi.github.io/tourr/reference/display_xy.html">animate_xy</a></span><span class="op">(</span><span class="va">images_pc</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>, col <span class="op">=</span> <span class="va">test_tags</span>,</span>
 <span>        cex<span class="op">=</span><span class="fl">0.2</span>, palette <span class="op">=</span> <span class="st">"Dynamic"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://ggobi.github.io/tourr/reference/display_xy.html">animate_xy</a></span><span class="op">(</span><span class="va">activations_pc</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>, col <span class="op">=</span> <span class="va">test_tags</span>,</span>
 <span>        cex<span class="op">=</span><span class="fl">0.2</span>, palette <span class="op">=</span> <span class="st">"Dynamic"</span><span class="op">)</span></span>
@@ -964,13 +965,14 @@ returning the first one. To return all, use `return_all = TRUE`.</code></pre>
 <span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
+<p>As with the first two principal components we get a much more spread out distribution in the original space. Nevertheless we can see differences between the classes, and that some groups are varying along specific directions in that space. Overall the activations space shows tighter clusters as expected after including the ReLU activation function, but the picture is not as neat as the first two principal components would suggest. While certain groups appear very compact even in this larger subspace, others vary quite a bit within part of the space. For example we can clearly see the “Bag” observations as different from all other images, but also notice that there is a large variation within this class along certain directions.</p>
 <div id="fig-fashion-gt-html" class="quarto-layout-panel">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-fashion-gt-html-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="quarto-layout-row">
 <div class="quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-fashion-gt-html" style="flex-basis: 50.0%;justify-content: flex-start;">
-<div id="fig-fashion-input" class="quarto-float quarto-figure quarto-figure-center anchored" alt="FIX ME">
+<div id="fig-fashion-input" class="quarto-float quarto-figure quarto-figure-center anchored" alt="An animation showing 2D scatterplots of the first five PCs of the fashion image data. Each point represents an individual image, colored by clothing category: Ankle boot (pink), Pullover (red), Trouser (yellow), Shirt (green), Coat (teal), Sandal (light blue), Sneaker (purple), Dress (peach), Bag (orange), and T-shirt/top (magenta). Clusters are visible although muddy. In the bottom-left corner, is the axis display showing the contribution of the first five principal components in each projection. A legend on the top-right maps each color to its corresponding fashion category.">
 <figure class="quarto-float quarto-subfloat-fig figure"><div aria-describedby="fig-fashion-input-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="gifs/fashion_images_gt.gif" class="img-fluid figure-img" data-ref-parent="fig-fashion-gt-html" alt="FIX ME" width="200">
+<img src="gifs/fashion_images_gt.gif" class="img-fluid figure-img" data-ref-parent="fig-fashion-gt-html" alt="An animation showing 2D scatterplots of the first five PCs of the fashion image data. Each point represents an individual image, colored by clothing category: Ankle boot (pink), Pullover (red), Trouser (yellow), Shirt (green), Coat (teal), Sandal (light blue), Sneaker (purple), Dress (peach), Bag (orange), and T-shirt/top (magenta). Clusters are visible although muddy. In the bottom-left corner, is the axis display showing the contribution of the first five principal components in each projection. A legend on the top-right maps each color to its corresponding fashion category." width="200">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-fashion-input-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 (a) Input space
@@ -978,9 +980,9 @@ returning the first one. To return all, use `return_all = TRUE`.</code></pre>
 </div>
 </div>
 <div class="quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-fashion-gt-html" style="flex-basis: 50.0%;justify-content: flex-start;">
-<div id="fig-fashion-activation" class="quarto-float quarto-figure quarto-figure-center anchored" alt="FIX ME">
+<div id="fig-fashion-activation" class="quarto-float quarto-figure quarto-figure-center anchored" alt="An animation showing 2D scatterplots of the first five PCs of the neural network activation data. Each point represents an individual image, colored by clothing category: Ankle boot (pink), Pullover (red), Trouser (yellow), Shirt (green), Coat (teal), Sandal (light blue), Sneaker (purple), Dress (peach), Bag (orange), and T-shirt/top (magenta). Clusters are visible and some are quite distinct. In the bottom-left corner, is the axis display showing the contribution of the first five principal components in each projection. A legend on the top-right maps each color to its corresponding fashion category.">
 <figure class="quarto-float quarto-subfloat-fig figure"><div aria-describedby="fig-fashion-activation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="gifs/fashion_activations_gt.gif" class="img-fluid figure-img" data-ref-parent="fig-fashion-gt-html" alt="FIX ME" width="200">
+<img src="gifs/fashion_activations_gt.gif" class="img-fluid figure-img" data-ref-parent="fig-fashion-gt-html" alt="An animation showing 2D scatterplots of the first five PCs of the neural network activation data. Each point represents an individual image, colored by clothing category: Ankle boot (pink), Pullover (red), Trouser (yellow), Shirt (green), Coat (teal), Sandal (light blue), Sneaker (purple), Dress (peach), Bag (orange), and T-shirt/top (magenta). Clusters are visible and some are quite distinct. In the bottom-left corner, is the axis display showing the contribution of the first five principal components in each projection. A legend on the top-right maps each color to its corresponding fashion category." width="200">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-fashion-activation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 (b) Activations
@@ -993,17 +995,16 @@ returning the first one. To return all, use `return_all = TRUE`.</code></pre>
 Figure&nbsp;17.4: Comparison of the test observations in the first five principal components of the input space (left) and in the hidden layer activations (right). The activation function results in more clearly defined grouping of the different classes.
 </figcaption></figure>
 </div>
-<p>As with the first two principal components we get a much more spread out distribution in the original space. Nevertheless we can see differences between the classes, and that some groups are varying along specific directions in that space. Overall the activations space shows tighter clusters as expected after including the ReLU activation function, but the picture is not as neat as the first two principal components would suggest. While certain groups appear very compact even in this larger subspace, others vary quite a bit within part of the space. For example we can clearly see the “Bag” observations as different from all other images, but also notice that there is a large variation within this class along certain directions.</p>
-<p>Finally we will investigate the model performance through the misclassifications and uncertainty between classes. We start with the error matrix for the test observations. To fit the error matrix we use the numeric labels, the ordering is as defined above for the labels.</p>
+<p>Finally we will investigate the model performance through the misclassifications and uncertainty between classes. We start with the error matrix for the test observations. To fit the error matrix we use the numeric labels, the ordering is as defined above for the labels. </p>
 <div class="cell">
-<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb29"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">fashion_test_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">model_fashion_mnist</span>,</span>
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb27"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">fashion_test_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">model_fashion_mnist</span>,</span>
 <span>                             <span class="va">test_images</span>, verbose <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
 <span><span class="va">fashion_test_pred_cat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/levels.html">levels</a></span><span class="op">(</span><span class="va">test_tags</span><span class="op">)</span><span class="op">[</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/apply.html">apply</a></span><span class="op">(</span><span class="va">fashion_test_pred</span>, <span class="fl">1</span>,</span>
 <span>        <span class="va">which.max</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="va">predicted</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span></span>
 <span>  <span class="va">fashion_test_pred_cat</span>,</span>
-<span>  levels<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/levels.html">levels</a></span><span class="op">(</span><span class="va">test_tags</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  levels<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/levels.html">levels</a></span><span class="op">(</span><span class="va">test_tags</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="fl">1</span></span>
 <span><span class="va">observed</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="va">test_tags</span><span class="op">)</span> <span class="op">-</span><span class="fl">1</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="va">observed</span>, <span class="va">predicted</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1022,9 +1023,9 @@ observed    0    1    2    3    4    5    6    7    8    9
        9    0    0    0    2    0    0    0  947    0   51</code></pre>
 </div>
 </div>
-<p>Here the labels are used as 0 - T-shirt/top, 1 - Trouser, 2 - Pullover, 3 - Dress, 4 - Coat, 5 - Sandal, 6 - Shirt, 7 - Sneaker, 8 - Bag, 9 - Ankle boot. From this we see that the model mainly confuses certain categories with each other, and within expected groups (e.g.&nbsp;different types of shoes can be confused with each other, or different types of shirts). We can further investigate this by visualizing the full probability matrix for the test observations, to see which categories the model is uncertain about.</p>
+<p>Here the labels are used as 0 - T-shirt/top, 1 - Trouser, 2 - Pullover, 3 - Dress, 4 - Coat, 5 - Sandal, 6 - Shirt, 7 - Sneaker, 8 - Bag, 9 - Ankle boot. From this we see that the model mainly confuses certain categories with each other, and within expected groups (e.g.&nbsp;different types of shoes can be confused with each other, or different types of shirts). We can further investigate this by visualizing the full probability matrix for the test observations, to see which categories the model is uncertain about. </p>
 <div class="cell">
-<details class="code-fold"><summary>Code to visualize probabilities</summary><div class="sourceCode" id="cb31"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># getting the probabilities from the output layer</span></span>
+<details class="code-fold"><summary>Code to visualize probabilities</summary><div class="sourceCode" id="cb29"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># getting the probabilities from the output layer</span></span>
 <span><span class="va">fashion_test_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">model_fashion_mnist</span>,</span>
 <span>                             <span class="va">test_images</span>, verbose <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
 <span></span>
@@ -1033,29 +1034,31 @@ observed    0    1    2    3    4    5    6    7    8    9
 <span><span class="va">f_nn_v_p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">fashion_test_pred</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">proj</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">f_nn_v_p</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>, <span class="st">"x4"</span>, <span class="st">"x5"</span>, <span class="st">"x6"</span>, <span class="st">"x7"</span>, <span class="st">"x8"</span>, <span class="st">"x9"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">f_nn_v_p</span> <span class="op">&lt;-</span> <span class="va">f_nn_v_p</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span><span class="va">f_nn_v_p</span> <span class="op">&lt;-</span> <span class="va">f_nn_v_p</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>class <span class="op">=</span> <span class="va">test_tags</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">simp</span> <span class="op">&lt;-</span> <span class="fu">geozoo</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/geozoo/man/simplex.html">simplex</a></span><span class="op">(</span>p<span class="op">=</span><span class="fl">9</span><span class="op">)</span></span>
 <span><span class="va">sp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span><span class="va">simp</span><span class="op">$</span><span class="va">points</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">sp</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>, <span class="st">"x4"</span>, <span class="st">"x5"</span>, <span class="st">"x6"</span>, <span class="st">"x7"</span>, <span class="st">"x8"</span>, <span class="st">"x9"</span><span class="op">)</span></span>
 <span><span class="va">sp</span><span class="op">$</span><span class="va">class</span> <span class="op">=</span> <span class="st">""</span></span>
-<span><span class="va">f_nn_v_p_s</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html">bind_rows</a></span><span class="op">(</span><span class="va">sp</span>, <span class="va">f_nn_v_p</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span><span class="va">f_nn_v_p_s</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html">bind_rows</a></span><span class="op">(</span><span class="va">sp</span>, <span class="va">f_nn_v_p</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>class <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span><span class="op">(</span><span class="va">class</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"T-shirt/top"</span>,</span>
 <span>                                     <span class="st">"Pullover"</span>,</span>
 <span>                                     <span class="st">"Shirt"</span>,</span>
-<span>                                     <span class="st">"Coat"</span><span class="op">)</span>, <span class="va">class</span>, <span class="st">"Other"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>class <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">class</span>, levels<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"T-shirt/top"</span>,</span>
+<span>                                     <span class="st">"Coat"</span><span class="op">)</span>, <span class="va">class</span>, <span class="st">"Other"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>class <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">class</span>, levels<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Other"</span>, <span class="st">"T-shirt/top"</span>,</span>
 <span>                                        <span class="st">"Pullover"</span>,</span>
 <span>                                        <span class="st">"Shirt"</span>,</span>
-<span>                                        <span class="st">"Coat"</span>,</span>
-<span>                                        <span class="st">"Other"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> </span>
+<span>                                        <span class="st">"Coat"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> </span>
+<span><span class="va">labels</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"0"</span> , <span class="st">"1"</span>, <span class="st">"2"</span>, <span class="st">"3"</span>, <span class="st">"4"</span>, <span class="st">"5"</span>, <span class="st">"6"</span>, <span class="st">"7"</span>, <span class="st">"8"</span>, <span class="st">"9"</span>,</span>
+<span>                <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="st">""</span>, <span class="fl">10000</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://ggobi.github.io/tourr/reference/display_xy.html">animate_xy</a></span><span class="op">(</span><span class="va">f_nn_v_p_s</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">9</span><span class="op">]</span>, col <span class="op">=</span> <span class="va">f_nn_v_p_s</span><span class="op">$</span><span class="va">class</span>, </span>
 <span>           axes <span class="op">=</span> <span class="st">"off"</span>, cex<span class="op">=</span><span class="fl">0.2</span>,</span>
 <span>           edges <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">simp</span><span class="op">$</span><span class="va">edges</span><span class="op">)</span>,</span>
 <span>           edges.width <span class="op">=</span> <span class="fl">0.05</span>,</span>
+<span>           obs_labels <span class="op">=</span> <span class="va">labels</span>, </span>
 <span>           palette <span class="op">=</span> <span class="st">"Viridis"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://ggobi.github.io/tourr/reference/render_gif.html">render_gif</a></span><span class="op">(</span><span class="va">f_nn_v_p_s</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">9</span><span class="op">]</span>,</span>
@@ -1065,6 +1068,7 @@ observed    0    1    2    3    4    5    6    7    8    9
 <span>             cex<span class="op">=</span><span class="fl">0.2</span>,</span>
 <span>             palette <span class="op">=</span> <span class="st">"Viridis"</span>,</span>
 <span>             axes<span class="op">=</span><span class="st">"off"</span>,</span>
+<span>             obs_labels <span class="op">=</span> <span class="va">labels</span>,</span>
 <span>             edges <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">simp</span><span class="op">$</span><span class="va">edges</span><span class="op">)</span>,</span>
 <span>             edges.width <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span>, </span>
 <span>           gif_file<span class="op">=</span><span class="st">"gifs/fashion_confusion_gt.gif"</span>,</span>
@@ -1075,9 +1079,9 @@ observed    0    1    2    3    4    5    6    7    8    9
 </div>
 <div id="fig-fashion-conf-gt-html" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-fashion-conf-gt-html-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div id="fig-fashion-confusion" class="quarto-float quarto-figure quarto-figure-center anchored" alt="FIX ME">
+<div id="fig-fashion-confusion" class="quarto-float quarto-figure quarto-figure-center anchored" alt="An animation of 2D scatterplots showing data in a 10D simplex with edges in light grey. Each point represents a fashion item, colored by category, and shows a tetrahedron shape containing vertices 0, 2, 3, 4, 6. Labeled vertices numbered 0 through 9 correspond to fashion item categories: T-shirt/top (blue), Pullover (green), Shirt (yellow), Coat (light green), and Other (purple). Dense connections exist between closely related categories, such as Pullover, Shirt, and Coat, suggesting misclassification potential. The 'Other' category (purple) is more dispersed across the plot, linking pairs of nodes. A legend in the top-right corner identifies the color-coded categories.">
 <figure class="quarto-float quarto-subfloat-fig figure"><div aria-describedby="fig-fashion-confusion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="gifs/fashion_confusion_gt.gif" class="img-fluid figure-img" data-ref-parent="fig-fashion-conf-gt-html" alt="FIX ME" width="400">
+<img src="gifs/fashion_confusion_gt.gif" class="img-fluid figure-img" data-ref-parent="fig-fashion-conf-gt-html" alt="An animation of 2D scatterplots showing data in a 10D simplex with edges in light grey. Each point represents a fashion item, colored by category, and shows a tetrahedron shape containing vertices 0, 2, 3, 4, 6. Labeled vertices numbered 0 through 9 correspond to fashion item categories: T-shirt/top (blue), Pullover (green), Shirt (yellow), Coat (light green), and Other (purple). Dense connections exist between closely related categories, such as Pullover, Shirt, and Coat, suggesting misclassification potential. The 'Other' category (purple) is more dispersed across the plot, linking pairs of nodes. A legend in the top-right corner identifies the color-coded categories." width="400">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-fashion-confusion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 (a) Input space
@@ -1090,41 +1094,9 @@ Figure&nbsp;17.5: A tour of the confusion matrix for the fashion MNIST test obse
 </div>
 <p>The tour of the class probabilities shows that the model is often confused between two classes, this appears as points falling along one edge in the simplex. In particular for the highlighted categories we can notice some interesting patterns, where pairs of classes get confused with each other. We also see some three-way confusions, these are observations that fall on one surface triangle defined via three corners of the simplex, for example between Pullover, Shirt and Coat.</p>
 <p>For this data using explainers like SHAP is not so interesting, since the individual pixel contribution to a prediction are typically not of interest. With image classification a next step might be to further investigate which part of the image is important for a prediction, and this can be visualized as a heat map placed over the original image. This is especially interesting in the case of difficult or misclassified images. This however is beyond the scope of this book.</p>
-<!--
-This chapter will likely include:
-
-- Models at nodes or epochs 
-- Predictions (like vote matrix) for training and test. It provides a visual guide to overfitting.
-- Classification boundaries comparison with other methods
-- Explainability and interpretability
-
-(This paper https://distill.pub/2020/grand-tour/ has good examples)
-
-NOTE: Results might vary with different knits 
-
-References keras/tensorflow book, tidymodels, interpretable machine learning, and removing the blindfold
-
-
-Outline for chapter:
-
-- Penguins data
-    - Setting up with the NN with keras
-    - Splitting training and test, checking
-    - Specifying model, choices of layers
-    - Making predictions
-    - Extracting weights
-    - Building your diagnostic data set
-    - Examine predictive probabilities with simplex
-    - Examining the nodes - like the discriminant space when its 2
-    - Misclassifications
-    - 
-
-Bushfires
-    - Model fitting when regularisation needed
-    - Overfitting
-    
-Sketches as an example  
--->
+<div class="insight">
+<p>There are subsets of confusion, as can be seen by both confusion matrix and votes visualisation. T-shirt/top, Shirt, Pullover, Coat, Dress are mutually confused. And some pairs are commonly confused, e.g.&nbsp;Sandal and Sneaker. In the votes matrix visualisation this can be seen by the concentration of points in a tetrahedron and the concentrations along some edges.</p>
+</div>
 </section><section id="exercises" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="exercises">Exercises</h2>
 <ol type="1">
 <li>The problem with the NN model fitted to the penguins is that the Gentoo are poorly classified, when they should be perfectly predictable due to the big gap between class clusters. Re-fit the NN, with two nodes in the hidden layer) to the penguins data, to find a better model that appropriately perfectly predicts Gentoo penguins. (You might find the easiest way to get a better model is changing the random seed and re-fitting, as illustrated in <span class="citation" data-cites="wickham2015">Wickham et al. (<a href="references.html#ref-wickham2015" role="doc-biblioref">2015</a>)</span>, Figures 21-24.) Support this by plotting the model (using the hidden layer), and the predictive probabilities as a ternary plot. Do the SHAP values also support that <code>bd</code> plays a stronger role in your best model? (<code>bd</code> is the main variable for distinguishing Gentoo’s from the other species, particularly when used with <code>fl</code> or <code>bl</code>.)</li>
@@ -1133,6 +1105,7 @@ Sketches as an example
 <li>The sketches data could also be considered a classic image classification problem, and we have seen that we can get a reasonable accuracy with a random forest model. Because we only have a smaller number of observations (compared to the fashion MNIST data) when fitting a neural network we need to be very careful not to overfit the training data. Try fitting a flat neural network (similar to what we did for the fashion MNIST data) and check the test accuracy of the model.</li>
 <li>Challenge: try to design a more accurate neural network for the sketches data. Here you can investigate using a convolutional neural network in combination with data augmentation. In addition, using batch normalization should improve the model performance.</li>
 </ol>
+<p> </p>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list" style="display: none">
@@ -1442,6 +1415,9 @@ Haslett, J., Bradley, R., Craig, P., Unwin, A., &amp; Wills, G. (1991). <span>D<
 <div id="ref-HTF01" class="csl-entry" role="listitem">
 Hastie, T., Tibshirani, R., &amp; Friedman, J. (2001). <em>The <span>E</span>lements of <span>S</span>tatistical <span>L</span>earning</em>. Springer.
 </div>
+<div id="ref-fpc" class="csl-entry" role="listitem">
+Hennig, C. (2024). <em><span class="nocase">fpc</span>: <span>F</span>lexible <span>P</span>rocedures for <span>C</span>lustering</em>. <a href="https://CRAN.R-project.org/package=fpc">https://CRAN.R-project.org/package=fpc</a>
+</div>
 <div id="ref-hennig2015" class="csl-entry" role="listitem">
 Hennig, C., Meila, M., Murtagh, F., &amp; Rocci, R. (2015). <em>Handbook of <span>C</span>luster <span>A</span>nalysis (1st ed.)</em>. Chapman; Hall/CRC. <a href="https://doi.org/10.1201/b19706">https://doi.org/10.1201/b19706</a>
 </div>
@@ -1521,7 +1497,7 @@ Kohonen, T. (2001). <em>Self-<span>O</span>rganizing <span>M</span>aps (3rd ed)<
 Koschat, M. A., &amp; Swayne, D. F. (1996). Interactive <span>G</span>raphical <span>M</span>ethods in the <span>A</span>nalysis of <span>C</span>ustomer <span>P</span>anel <span>D</span>ata (with discussion). <em>Journal of Business and Economic Statistics</em>, <em>14</em>(1), 113–132.
 </div>
 <div id="ref-R-Rtsne" class="csl-entry" role="listitem">
-Krijthe, J. (2023). <em>Rtsne: T-distributed stochastic neighbor embedding using a barnes-hut implementation</em>. <a href="https://github.com/jkrijthe/Rtsne">https://github.com/jkrijthe/Rtsne</a>
+Krijthe, J. (2023). <em><span>Rtsne</span>: <span>T-D</span>istributed <span>S</span>tochastic <span>N</span>eighbor <span>E</span>mbedding using a <span>B</span>arnes-hut <span>I</span>mplementation</em>. <a href="https://github.com/jkrijthe/Rtsne">https://github.com/jkrijthe/Rtsne</a>
 </div>
 <div id="ref-Kr64a" class="csl-entry" role="listitem">
 Kruskal, J. B. (1964a). Multidimensional <span>S</span>caling by <span>O</span>ptimizing <span>G</span>oodness of <span>F</span>it to a <span>N</span>onmetric <span>H</span>ypothesis. <em>Psychometrika</em>, <em>29</em>, 1–27.
@@ -1629,7 +1605,7 @@ McVicar, T. (2011). <em>Near-<span>S</span>urface <span>W</span>ind <span>S</spa
 Meyer, D., Dimitriadou, E., Hornik, K., Weingessel, A., &amp; Leisch, F. (2024). <em><span class="nocase">e1071</span>: <span>M</span>isc <span>F</span>unctions of the <span>D</span>epartment of <span>S</span>tatistics, <span>P</span>robability <span>T</span>heory <span>G</span>roup (<span>F</span>ormerly: <span>E1071</span>), <span>TU Wien</span></em>. <a href="https://CRAN.R-project.org/package=e1071">https://CRAN.R-project.org/package=e1071</a>
 </div>
 <div id="ref-R-rpart.plot" class="csl-entry" role="listitem">
-Milborrow, S. (2024). <em>Rpart.plot: Plot rpart models: An enhanced version of plot.rpart</em>. <a href="http://www.milbo.org/rpart-plot/index.html">http://www.milbo.org/rpart-plot/index.html</a>
+Milborrow, S. (2024). <em><span class="nocase">rpart.plot</span>: <span>P</span>lot <span class="nocase">rpart</span> <span>M</span>odels: <span>A</span>n <span>E</span>nhanced <span>V</span>ersion of <span class="nocase">plot.rpart</span></em>. <a href="http://www.milbo.org/rpart-plot/index.html">http://www.milbo.org/rpart-plot/index.html</a>
 </div>
 <div id="ref-R-gtExtras" class="csl-entry" role="listitem">
 Mock, T. (2023). <em>gtExtras: Extending gt for beautiful HTML tables</em>. <a href="https://github.com/jthomasmock/gtExtras">https://github.com/jthomasmock/gtExtras</a>
@@ -1788,7 +1764,7 @@ Temple Lang, D., Swayne, D., Wickham, H., &amp; Lawrence, M. (2006). <em><span><
 Tenenbaum, J. B., Silva, V. de, &amp; Langford, J. C. (2000). A <span>G</span>lobal <span>G</span>eometric <span>F</span>ramework for <span>N</span>onlinear <span>D</span>imensionality <span>R</span>eduction. <em>Science</em>, <em>290</em>(5500), 2319–2323. <a href="https://doi.org/10.1126/science.290.5500.2319">https://doi.org/10.1126/science.290.5500.2319</a>
 </div>
 <div id="ref-R-rpart" class="csl-entry" role="listitem">
-Therneau, T., &amp; Atkinson, B. (2023). <em>Rpart: Recursive partitioning and regression trees</em>. <a href="https://github.com/bethatkinson/rpart">https://github.com/bethatkinson/rpart</a>
+Therneau, T., &amp; Atkinson, B. (2023). <em><span class="nocase">rpart</span>: <span>R</span>ecursive <span>P</span>artitioning and <span>R</span>egression trees</em>. <a href="https://github.com/bethatkinson/rpart">https://github.com/bethatkinson/rpart</a>
 </div>
 <div id="ref-Theus02" class="csl-entry" role="listitem">
 Theus, M. (2002). Interactive <span>D</span>ata <span>V</span>isualization <span>U</span>sing <span>M</span>ondrian. <em>Journal of Statistical Software</em>, <em>7</em>(11), http://www.jstatsoft.org.
@@ -1911,16 +1887,13 @@ Wickham, H., &amp; Cook, D. (2025). <em><span class="nocase">tourr</span>: <span
 Wickham, H., Cook, D., &amp; Hofmann, H. (2015). Visualizing <span>S</span>tatistical <span>M</span>odels: <span>R</span>emoving the <span>B</span>lindfold. <em>Statistical Analysis and Data Mining: The ASA Data Science Journal</em>, <em>8</em>(4), 203–225. <a href="https://doi.org/10.1002/sam.11271">https://doi.org/10.1002/sam.11271</a>
 </div>
 <div id="ref-tourr" class="csl-entry" role="listitem">
-Wickham, H., Cook, D., Hofmann, H., &amp; Buja, A. (2011a). <span class="nocase">tourr</span>: <span>An</span> <span>R</span> <span>Package</span> for <span>Exploring</span> <span>Multivariate</span> <span>Data</span> with <span>Projections</span>. <em>Journal of Statistical Software</em>, <em>40</em>(2). <a href="https://doi.org/10.18637/jss.v040.i02">https://doi.org/10.18637/jss.v040.i02</a>
-</div>
-<div id="ref-tourr2011" class="csl-entry" role="listitem">
-Wickham, H., Cook, D., Hofmann, H., &amp; Buja, A. (2011b). <span class="nocase">tourr</span>: An <span>R</span> package for exploring multivariate data with projections. <em>Journal of Statistical Software</em>, <em>40</em>(2), 1–18. <a href="https://doi.org/10.18637/jss.v040.i02">https://doi.org/10.18637/jss.v040.i02</a>
+Wickham, H., Cook, D., Hofmann, H., &amp; Buja, A. (2011). <span class="nocase">tourr</span>: <span>An</span> <span>R</span> <span>Package</span> for <span>Exploring</span> <span>Multivariate</span> <span>Data</span> with <span>Projections</span>. <em>Journal of Statistical Software</em>, <em>40</em>(2). <a href="https://doi.org/10.18637/jss.v040.i02">https://doi.org/10.18637/jss.v040.i02</a>
 </div>
 <div id="ref-R-dplyr" class="csl-entry" role="listitem">
-Wickham, H., François, R., Henry, L., Müller, K., &amp; Vaughan, D. (2023). <em><span class="nocase">dplyr</span>: A grammar of data manipulation</em>. <a href="https://dplyr.tidyverse.org">https://dplyr.tidyverse.org</a>
+Wickham, H., François, R., Henry, L., Müller, K., &amp; Vaughan, D. (2023). <em><span class="nocase">dplyr</span>: <span>A</span> <span>G</span>rammar of <span>D</span>ata <span>M</span>anipulation</em>. <a href="https://dplyr.tidyverse.org">https://dplyr.tidyverse.org</a>
 </div>
 <div id="ref-R-readr" class="csl-entry" role="listitem">
-Wickham, H., Hester, J., &amp; Bryan, J. (2024). <em>Readr: Read rectangular text data</em>. <a href="https://readr.tidyverse.org">https://readr.tidyverse.org</a>
+Wickham, H., Hester, J., &amp; Bryan, J. (2024). <em><span class="nocase">readr</span>: <span>R</span>ead <span>R</span>ectangular <span>T</span>ext <span>D</span>ata</em>. <a href="https://readr.tidyverse.org">https://readr.tidyverse.org</a>
 </div>
 <div id="ref-WWS99" class="csl-entry" role="listitem">
 Wilhelm, A. F. X., Wegman, E. J., &amp; Symanzik, J. (1999). Visual <span>C</span>lustering and <span>C</span>lassification: <span>T</span>he <span>O</span>ronsay <span>P</span>article <span>S</span>ize <span>D</span>ata <span>S</span>et <span>R</span>evisited. <em>Computational Statistics: Special Issue on Interactive Graphical Data Analysis</em>, <em>14</em>(1), 109–146.

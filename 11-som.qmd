@@ -1,7 +1,7 @@
 ## Self-organizing maps {#sec-som}
 \index{cluster analysis!self-organizing maps (SOM)}
 
-A self-organizing map (SOM) @Ko01 is constructed using a constrained $k$-means algorithm. A 1D or 2D net is stretched through the data. The knots, in the net, form the cluster means, and the points closest to the knot are considered to belong to that cluster. The similarity of nodes (and their corresponding clusters) is defined as proportional to their distance from one another on the net. Unlike $k$-means one would normally choose a largish net, with more nodes than expected clusters. A well-separated cluster in the data would likely be split across multiple nodes in the net. Examining the net where nodes are empty of points we would interpret this as a gap in the original data. 
+A self-organizing map (SOM) [@Ko01] is constructed using a constrained $k$-means algorithm. A 1D or 2D net is stretched through the data. The knots, in the net, form the cluster means, and the points closest to the knot are considered to belong to that cluster. The similarity of nodes (and their corresponding clusters) is defined as proportional to their distance from one another on the net. Unlike $k$-means one would normally choose a largish net, with more nodes than expected clusters. A well-separated cluster in the data would likely be split across multiple nodes in the net. Examining the net where nodes are empty of points we would interpret this as a gap in the original data. 
 
 ::: {.content-visible when-format="html"}
 ::: info
@@ -14,7 +14,7 @@ A self-organising map is like a fisherwoman's net, as the net is pulled in it ca
 
 ::: {.content-visible when-format="pdf"}
 \infobox{A self-organising map is like a fisherwoman's net, as the net is pulled in it catches the fish near knots in the net. We would examine the net in 
-\begin{itemize}
+\begin{itemize} \itemsep 0in
 \item 2D to extract the fish.
 \item high-dimensions to see how it was woven through the space to catch fish.
 \end{itemize}}
@@ -24,14 +24,11 @@ A self-organising map is like a fisherwoman's net, as the net is pulled in it ca
 `r ifelse(knitr::is_html_output(), '@fig-penguins-som-html', '@fig-penguins-som-pdf')` illustrates how the SOM fits the penguins data. SOM is not ideal for clustered data where there are gaps. It is better suited for data that lies on a non-linear low-dimensional manifold. To model data like the penguins the first step is to set up a net that will cover more than the three clusters. Here we have chosen to use a $5\times 5$ rectangular grid. (The option allows for a hexagonal grid, which would make for a better tiled 2D map, but this is not useful for viewing the model in high dimensions.) Like $k$-means clustering the fitted model can change substantially depending on the initialisation, so setting a seed will ensure a consistent result. We have also initialised the positions of the knots using PCA, which stretches the net in the main two directions of variance of the data, generally giving better results. 
 
 ```{r}
-#| code-fold: false
+#| code-summary: "code to run SOM"
 #| message: false
 library(kohonen)
 library(aweSOM)
 library(mulgar)
-library(dplyr)
-library(ggplot2)
-library(colorspace)
 load("data/penguins_sub.rda")
 
 set.seed(947)
@@ -44,14 +41,17 @@ p_som <- som(as.matrix(penguins_sub[,1:4]),
              init = p_init)
 ```
 
-The resulting model object is used to construct an object containing the original data, the 2D map, the map in $p$-D, with edges, and segments to connect points to represent the next using the `som_model()` function from `mulgar`. The 2D map shows a configuration of the data in 2D which best displays the clusters, much like how a PCA or LDA plot would eb used. 
+The resulting model object is used to construct an object containing the original data, the 2D map, the map in $p$-D, with edges, and segments to connect points to represent the next using the `som_model()` function from `mulgar`. The 2D map shows a configuration of the data in 2D which best displays the clusters, much like how a PCA or LDA plot would be used. 
 
 ```{r}
-#| code-fold: false
+#| code-summary: "code to generate net"
 #| message: false
+library(dplyr)
+library(ggplot2)
+library(colorspace)
 
 p_som_df_net <- som_model(p_som)
-p_som_data <- p_som_df_net$data %>% 
+p_som_data <- p_som_df_net$data |> 
   mutate(species = penguins_sub$species)
 p_som_map_p <- ggplot() +
   geom_segment(data=p_som_df_net$edges_s, 
@@ -73,16 +73,16 @@ p_som_map_p <- ggplot() +
 
 The object can also be modified into the pieces needed to show the net in $p$-D. You need the data, points marking the net, and edges indicating which points to connect to draw the net.
 
-```{r}
+```{r echo=knitr::is_html_output()}
 #| eval: false
-#| code-fold: false
+#| code-summary: "code to make gifs"
 library(tourr)
 
 # Set up data
-p_som_map <- p_som_df_net$net %>%
+p_som_map <- p_som_df_net$net |>
   mutate(species = "0", type="net")
-p_som_data <- p_som_data %>% 
-  select(bl:bm, species) %>%
+p_som_data <- p_som_data |> 
+  select(bl:bm, species) |>
   mutate(type="data", 
          species = as.character(species)) 
 p_som_map_data <- bind_rows(p_som_map, p_som_data)
@@ -91,7 +91,8 @@ p_som_map_data$type <- factor(p_som_map_data$type,
 p_som_map_data$species <- factor(p_som_map_data$species,
   levels=c("0","Adelie","Chinstrap","Gentoo"))
 p_pch <- c(46, 16)[as.numeric(p_som_map_data$type)]
-p_col <- c("black", hcl.colors(3, "Zissou 1"))[as.numeric(p_som_map_data$species)]
+p_col <- c("black", hcl.colors(3, 
+  "Zissou 1"))[as.numeric(p_som_map_data$species)]
 animate_xy(p_som_map_data[,1:4],
            col=p_col, 
            pch=p_pch,
@@ -125,13 +126,17 @@ render_gif(p_som_map_data[,1:4],
 #| echo: false
 #| label: fig-p-som2-html
 #| fig-cap: "2D map"
+#| fig-width: 5
+#| fig-height: 5
+#| out-width: 100%
 p_som_map_p
 ```
 
 ![Map in 4D](gifs/p_som.gif){#fig-p-som1 fig-alt=""}
-:::
+
 
 Examining the SOM map views in 2D and with the data in 4D. Points are coloured by species, which was not used for the modeling. The 2D map shows that the `map 2` direction is primarily distinguishing the Gentoo from the others, and `map 1` is imperfectly distinguishing the Chinstrap from Adelie. The map in the data space shows how it is woven into the shape of the data. 
+:::
 :::
 
 ::: {.content-visible when-format="pdf"}
@@ -139,12 +144,13 @@ Examining the SOM map views in 2D and with the data in 4D. Points are coloured b
 
 
 
-![2D map](images/fig-p-som2-1.png){#fig-p-som1 fig-alt=""}
+![2D map](images/fig-p-som2-1.png){#fig-p-som1 fig-alt="" width=200 fig-align="center"}
 
 ![Map in 4D](images/p_som_47.png){#fig-p-som1 fig-alt=""}
-:::
 
-Examining the SOM map views in 2D and with the data in 4D. Points are coloured by species, which was not used for the modeling. The 2D map shows that the `map 2` direction is primarily distinguishing the Gentoo from the others, and `map 1` is imperfectly distinguishing the Chinstrap from Adelie. The map in the data space shows how it is woven into the shape of the data. 
+
+Examining the SOM map views in 2D and with the data in 4D. Points are coloured by species, which was not used for the modeling. The 2D map shows that the `map 2` direction is primarily distinguishing the Gentoo from the others, and `map 1` is imperfectly distinguishing the Chinstrap from Adelie. The map in the data space shows how it is woven into the shape of the data. {{< fa play-circle >}}
+:::
 :::
 
 The SOM fit, with a $5\times 5$ grid, for the penguins has the data clustered into 25 groups. This doesn't work as a clustering technique on its own, if we remember that the data has three clusters corresponding to three species of penguins. Using species to colour the points helps to see what SOM has done. It has used about seven nodes to capture the separated Gentoo group. These are mostly in the `map 2` direction, which means that this direction (like a direction in PCA) is useful for distinguishing the Gentoo penguins from the others. The other two species are mixed on the map, but roughly spread out on the direction of `map 1`. 

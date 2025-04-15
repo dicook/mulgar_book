@@ -1,9 +1,10 @@
+## --------------------------------------------------------------------------
 #| label: fig-ideal-clusters
 #| echo: FALSE
 #| fig-width: 5
 #| fig-height: 5
 #| out-width: "100%"
-#| fig-cap: "Different structures in data impact cluster analysis.  When there are well-separated groups (a), it is simple to group similar observations. Even when there are not, partitioning observations into groups may still be useful. There may be nuisance observations (b) or nuisance variables (c) that affect the interpoint distance calculations and distract the clustering algorithm, and there may oddly shaped clusters (d) which are hard to numerically describe."
+#| fig-cap: "Different structures in data impact cluster analysis.  When there are well-separated groups (a), it is simple to group similar observations. Even when there are not, partitioning observations into groups may still be useful. There may be nuisance observations (b) or nuisance variables (c) that affect the interpoint distance calculations and distract the clustering algorithm, and there may be oddly shaped clusters (d) which are hard to numerically describe."
 #| message: false
 stdd <- function(x) (x-mean(x))/sd(x)
 set.seed(20230513)
@@ -86,12 +87,13 @@ p4 <- ggplot(d_odd_shapes, aes(x=x1, y=x2)) +
 print(p1 + p2 + p3 + p4 + plot_layout(ncol=2))
 
 
+## ----echo=knitr::is_html_output()------------------------------------------
 #| message: FALSE
 #| warning: false
 #| fig-width: 4
 #| fig-height: 4
-#| fig-align: center
 #| code-summary: "Code for plot"
+
 x <- data.frame(V1 = c(7.3, 7.4, 4.1),
                     V2 = c(7.6, 7.2, 4.6),
                     V3 = c(7.7, 7.3, 4.6),
@@ -112,6 +114,8 @@ pscat <- ggpairs(x, columns=1:4,
     theme(aspect.ratio=1)
 pscat
 
+
+## ----echo=knitr::is_html_output()------------------------------------------
 #| fig-width: 3
 #| fig-height: 3.4
 #| code-summary: "Code for plot"
@@ -128,6 +132,7 @@ ppar <- ggparcoord(x, columns=1:4,
 ppar
 
 
+## --------------------------------------------------------------------------
 #| echo: false
 library(mulgar)
 vc <- matrix(c(1,0.8,0.8,0.8,1,0.8,0.8,0.8,1), ncol=3, byrow=TRUE)
@@ -142,45 +147,131 @@ colnames(x) <- paste0("x", 1:3)
 x 
 
 
+## --------------------------------------------------------------------------
 #| echo: false
 rownames(vc) <- paste0("x", 1:3)
 colnames(vc) <- paste0("x", 1:3)
 vc
 
 
+## --------------------------------------------------------------------------
 #| eval: false
 #| echo: false
-## # Answers
-## library(patchwork)
-## # Euclidean
-## dist(x)
-## # Mahalanobis
-## mahalanobis(x, center=FALSE, cov=vc)
-## # manhattan
-## dist(x, "manhattan")
-## # Chebychev
-## d_ch <- matrix(0, 4, 4)
-## for (i in 1:4) {
-##   for (j in 1:4) {
-##     if (i != j)
-##       d_ch[i,j] <- abdiv::chebyshev(x[i,], x[j,])
-##   }}
-## as.dist(d_ch)
-## # Bray-Curtis
-## vegdist(x, "bray")
-## # Plot
-## x <- data.frame(x)
-## p1 <- ggplot(x) + geom_text(aes(x=x1, y=x2,
-##                                 label=rownames(x))) +
-##   geom_abline(slope=1, intercept=0) +
-##   theme(aspect.ratio=1)
-## p2 <- ggplot(x) + geom_text(aes(x=x1, y=x3,
-##                                 label=rownames(x))) +
-##   geom_abline(slope=1, intercept=0) +
-##   theme(aspect.ratio=1)
-## p3 <- ggplot(x) + geom_text(aes(x=x2, y=x3,
-##                                 label=rownames(x))) +
-##   geom_abline(slope=1, intercept=0) +
-##   theme(aspect.ratio=1)
-## p1+p2+p3+plot_layout(ncol=3)
+# # Answers
+# library(patchwork)
+# # Euclidean
+# dist(x)
+# # Mahalanobis
+# mahalanobis(x, center=FALSE, cov=vc)
+# # manhattan
+# dist(x, "manhattan")
+# # Chebychev
+# d_ch <- matrix(0, 4, 4)
+# for (i in 1:4) {
+#   for (j in 1:4) {
+#     if (i != j)
+#       d_ch[i,j] <- abdiv::chebyshev(x[i,], x[j,])
+#   }}
+# as.dist(d_ch)
+# # Bray-Curtis
+# vegdist(x, "bray")
+# # Plot
+# x <- data.frame(x)
+# p1 <- ggplot(x) + geom_text(aes(x=x1, y=x2,
+#                                 label=rownames(x))) +
+#   geom_abline(slope=1, intercept=0) +
+#   theme(aspect.ratio=1)
+# p2 <- ggplot(x) + geom_text(aes(x=x1, y=x3,
+#                                 label=rownames(x))) +
+#   geom_abline(slope=1, intercept=0) +
+#   theme(aspect.ratio=1)
+# p3 <- ggplot(x) + geom_text(aes(x=x2, y=x3,
+#                                 label=rownames(x))) +
+#   geom_abline(slope=1, intercept=0) +
+#   theme(aspect.ratio=1)
+# p1+p2+p3+plot_layout(ncol=3)
+
+
+## --------------------------------------------------------------------------
+#| echo: false
+#| message: false
+#| warning: false
+#| fig-width: 6
+#| fig-height: 6
+#| out-width: 80%
+#| label: fig-what-clusters
+#| fig-cap: "What would you consider the clusters to be?"
+library(ggplot2)
+library(dplyr)
+library(patchwork)
+library(mulgar)
+library(geozoo)
+set.seed(416)
+d1 <- rmvn(n=402, p=2)
+d1[1:66,1] <- d1[1:66,1] + 6
+d1[1:66,2] <- d1[1:66,2] + 6
+d1[67:130,1] <- d1[67:130,1] - 6
+d1[67:130,2] <- d1[67:130,2] - 6
+d1[131:197,1] <- d1[131:197,1] + 6
+d1[198:256,2] <- d1[198:256,2] - 6
+d1[257:320,1] <- d1[257:320,1] - 6
+d1[257:320,2] <- d1[257:320,2] + 6
+d1 <- as.data.frame(d1)
+cp1 <- ggplot(d1, aes(x=x1, y=x2)) + 
+  geom_point() +
+  theme_minimal() +
+  theme(aspect.ratio=1,
+        axis.text = element_blank(),
+        axis.title = element_blank(),
+        axis.ticks = element_blank(),
+        panel.background = element_rect("white"),
+        panel.border = element_rect("black", fill=NA, 
+             linewidth = 0.5))
+d2 <- as.data.frame(sphere.hollow(n=450, p=2)$points)
+colnames(d2) <- paste0("x", 1:2)
+d2[1:150,1] <- d2[1:150,1] - 0.5
+d2[151:300,1] <- d2[151:300,1] + 0.5
+d2[151:300,2] <- d2[151:300,2] + 0.1
+d2[301:450,2] <- d2[301:450,2] + sqrt(2)
+cp2 <- ggplot(d2, aes(x=x1, y=x2)) + 
+  geom_point() +
+  theme_minimal() +
+  theme(aspect.ratio=1,
+        axis.text = element_blank(),
+        axis.title = element_blank(),
+        axis.ticks = element_blank(),
+        panel.background = element_rect("white"),
+        panel.border = element_rect("black", fill=NA, 
+             linewidth = 0.5))
+x <- runif(458)
+d3 <- data.frame(x1=x, x2=3*x, x3=x, x4=x)
+d3$x3[1:174] <- d3$x1[1:174]*cos(pi/4) + d3$x2[1:174]*sin(pi/4)
+d3$x4[1:174] <- d3$x2[1:174]*cos(pi/4) - d3$x1[1:174]*sin(pi/4)
+d3$x3[175:300] <- (d3$x1[175:300]*cos(-pi/3) + d3$x2[175:300]*sin(-pi/6))/2 + 2
+d3$x4[175:300] <- (d3$x2[175:300]*cos(-pi/6) - d3$x1[175:300]*sin(-pi/3))/2 - 0.5
+cp3 <- ggplot(d3, aes(x=x3, y=x4)) + 
+  geom_point() +
+  theme_minimal() +
+  theme(aspect.ratio=1,
+        axis.text = element_blank(),
+        axis.title = element_blank(),
+        axis.ticks = element_blank(),
+        panel.background = element_rect("white"),
+        panel.border = element_rect("black", fill=NA, 
+             linewidth = 0.5))
+d4a <- as.data.frame(mobius(n=380)$points)
+colnames(d4a) <- paste0("x", 1:3)
+d4b <- as.data.frame(rmvn(n=202, p=3)/8)
+d4 <- rbind(d4a, d4b)
+cp4 <- ggplot(d4, aes(x=x1, y=x2)) + 
+  geom_point() +
+  theme_minimal() +
+  theme(aspect.ratio=1,
+        axis.text = element_blank(),
+        axis.title = element_blank(),
+        axis.ticks = element_blank(),
+        panel.background = element_rect("white"),
+        panel.border = element_rect("black", fill=NA, 
+             linewidth = 0.5))
+cp1 + cp2 + cp3 + cp4 + plot_layout(ncol=2)
 

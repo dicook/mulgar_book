@@ -474,7 +474,6 @@ bm -1.22  1.24</code></pre>
 <span><span class="va">p_lda_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">p_lda</span>, <span class="va">penguins_sub</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>The best separation between classes can be viewed from this object, which can be shown to match the original data projected using the <code>scaling</code> component of the model object (see <a href="#fig-p-lda" class="quarto-xref">Figure&nbsp;<span>14.1</span></a>).</p>
-<p> </p>
 <div class="cell">
 <details class="code-fold"><summary>Code to generate LDA plots</summary><div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Check calculations from the fitted model, and equations</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://colorspace.R-Forge.R-project.org/">colorspace</a></span><span class="op">)</span></span>
@@ -534,12 +533,12 @@ fl 0.13 0.14 0.23 0.16
 bm 0.18 0.20 0.16 0.31</code></pre>
 </div>
 </div>
-<p>This can be used to draw an ellipse corresponding to the pooled variance-covariance that is used by the LDA model.</p>
+<p> This can be used to draw an ellipse corresponding to the pooled variance-covariance that is used by the LDA model.</p>
 </section><section id="checking-assumptions" class="level2" data-number="14.2"><h2 data-number="14.2" class="anchored" data-anchor-id="checking-assumptions">
 <span class="header-section-number">14.2</span> Checking assumptions</h2>
 <p>This LDA approach is widely applicable, but it is useful to check the underlying assumptions on which it depends: (1) that the cluster structure corresponding to each class forms an ellipse, showing that the class is consistent with a sample from a multivariate normal distribution, and (2) that the variance of values around each mean is nearly the same. <a href="#fig-lda-assumptions1" class="quarto-xref">Figure&nbsp;<span>14.2</span></a> and <a href="#fig-lda-assumptions2" class="quarto-xref">Figure&nbsp;<span>14.3</span></a> illustrates two datasets, of which only one is consistent with these assumptions. Other parametric models, such as quadratic discriminant analysis or logistic regression, also depend on assumptions about the data which should be validated. </p>
 <div class="info">
-<p>To check the equal and elliptical variance-covariance assumption, generate points on the surface of an ellipse corresponding to the variance-covariance for each group. When watching these ellipses in a tour, they should similar in all projections.</p>
+<p>To check the equal and elliptical variance-covariance assumption, generate points on the surface of an ellipse corresponding to the variance-covariance for each group. When watching these ellipses in a tour, they should look similar in all projections.</p>
 </div>
 <p> </p>
 <div class="cell">
@@ -630,7 +629,7 @@ Figure&nbsp;14.3: Scatterplot of distance to cfa and road for the bushfires data
 <div class="insight">
 <p>The equal and elliptical variance-covariance assumption is reasonable for the penguins data because the ellipse shapes roughly match the spread of the data. It is not a suitable assumption for the bushfires data, because the spread is not elliptically-shaped and varies in size between groups.</p>
 </div>
-<p>This approach extends to any dimension. We would use the same projection sequence to view both the data and the variance-covariance ellipses, as in <a href="#fig-penguins-lda-ellipses-html" class="quarto-xref">Figure&nbsp;<span>14.4</span></a>. It can be seen that there is some difference in the shape and size of the ellipses between species, in some projections, and also with the spread of points in the projected data. However, it is the differences are small, so it would be safe to assume that the population variance-covariances are equal.</p>
+<p>This approach extends to any dimension. We would use the same projection sequence to view both the data and the variance-covariance ellipses, as in <a href="#fig-penguins-lda-ellipses-html" class="quarto-xref">Figure&nbsp;<span>14.4</span></a>. It can be seen that there is some difference in the shape and size of the ellipses between species, in some projections, and also with the spread of points in the projected data. However, the differences are small, so it would be safe to assume that the population variance-covariances are equal.</p>
 <div class="cell">
 <details class="code-fold"><summary>Code for making animated gifs</summary><div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/ggobi/tourr">tourr</a></span><span class="op">)</span></span>
 <span><span class="va">p_ell</span> <span class="op">&lt;-</span> <span class="cn">NULL</span></span>
@@ -794,8 +793,7 @@ Figure&nbsp;14.5: Checking how the pooled variance-covariance matches the spread
 <span>                                  prior <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">/</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">/</span><span class="fl">3</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>The fitted model means <span class="math inline">\(\bar{x}_{Adelie} = (\)</span> -0.95, 0.6<span class="math inline">\()^\top\)</span>, <span class="math inline">\(\bar{x}_{Chinstrap} = (\)</span> 0.89, 0.64<span class="math inline">\()^\top\)</span>, and <span class="math inline">\(\bar{x}_{Gentoo} = (\)</span> 0.65, -1.1<span class="math inline">\()^\top\)</span> can be added to the plots.</p>
-<p>The boundaries can be examined using the <code><a href="https://rdrr.io/pkg/classifly/man/explore.html">explore()</a></code> function from the <code>classifly</code> package, which generates observations in the range of all values of<code>bl</code> and <code>bd</code> and predicts their class. <a href="#fig-lda-2D-boundary" class="quarto-xref">Figure&nbsp;<span>14.6</span></a> shows the resulting prediction regions, with the observed data and the sample means overlaid.</p>
-<p></p>
+<p>The boundaries can be examined using the <code><a href="https://rdrr.io/pkg/classifly/man/explore.html">explore()</a></code> function from the <code>classifly</code> package, which generates observations in the range of all values of<code>bl</code> and <code>bd</code> and predicts their class. <a href="#fig-lda-2D-boundary" class="quarto-xref">Figure&nbsp;<span>14.6</span></a> shows the resulting prediction regions, with the observed data and the sample means overlaid. </p>
 <div class="cell">
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Compute points in domain of data and predict</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://had.co.nz/classifly">classifly</a></span><span class="op">)</span></span>
@@ -830,8 +828,8 @@ Figure&nbsp;14.6: Prediction regions of the LDA model for two variables of the t
 </div>
 </div>
 <p> </p>
-<p>This approach can be readily extended to higher dimensions. One first fits the model with all four variables, and uses the <code><a href="https://rdrr.io/pkg/classifly/man/explore.html">explore()</a></code> to generate points in the 4D space with predictions, generating a representation of the prediction regions. <a href="#fig-penguins-lda-boundaries-html" class="quarto-xref">Figure&nbsp;<span>14.7</span></a> (a) shows the results using a slice tour <span class="citation" data-cites="slicetour">(<a href="references.html#ref-slicetour" role="doc-biblioref">Laa et al., 2020a</a>)</span>. Points inside the slice are shown in larger size. The slice is made in the centre of the data, to show the boundaries in this neighbourhood. As the tour progresses we see a thin slice through the centre of the data, parallel with the projection plane. In most projections there is some small overlap of points between groups, which happens because we are examining a 4D object with 2D. The slice helps to alleviate this, allowing a focus on the boundaries in the centre of the cube. In all projections the boundaries between groups is linear, as would be expected when using LDA. We can also see that the model roughly divides the cube into three relatively equally-sized regions.</p>
-<p><a href="#fig-penguins-lda-boundaries-html" class="quarto-xref">Figure&nbsp;<span>14.7</span></a> (b) shows the three prediction regions, represented by points in 4D, projected into the discriminant space. Linear boundaries neatly divide the full space, which is to be expected because the LDA model computes it’s classification rules in this 2D space. In this view the data has been overlaid and it can be seen that the boundaries produced by LDA quite nicely separate the species, albeit some confusion between Adelie and Chinstrap. Overlaying the data on the slide tour in (a) could be useful but it also adds too many parts to the plot, possibly making it more difficult to focus on the boundary.</p>
+<p>This approach can be readily extended to higher dimensions. One first fits the model with all four variables, and uses <code><a href="https://rdrr.io/pkg/classifly/man/explore.html">explore()</a></code> to generate points in the 4D space with predictions, generating a representation of the prediction regions. <a href="#fig-penguins-lda-boundaries-html" class="quarto-xref">Figure&nbsp;<span>14.7</span></a> (a) shows the results using a slice tour <span class="citation" data-cites="slicetour">(<a href="references.html#ref-slicetour" role="doc-biblioref">Laa et al., 2020a</a>)</span>. Points inside the slice are shown in larger size. The slice is made in the centre of the data, to show the boundaries in this neighbourhood. As the tour progresses we see a thin slice through the centre of the data, parallel with the projection plane. In most projections there is some small overlap of points between groups, which happens because we are examining a 4D object with 2D. The slice helps to alleviate this, allowing a focus on the boundaries in the centre of the cube. In all projections the boundaries between groups is linear, as would be expected when using LDA. We can also see that the model roughly divides the cube into three relatively equally-sized regions.</p>
+<p><a href="#fig-penguins-lda-boundaries-html" class="quarto-xref">Figure&nbsp;<span>14.7</span></a> (b) shows the three prediction regions, represented by points in 4D, projected into the discriminant space. Linear boundaries neatly divide the full space, which is to be expected because the LDA model computes it’s classification rules in this 2D space. In this view the data has been overlaid and it can be seen that the boundaries produced by LDA quite nicely separate the species, albeit some confusion between Adelie and Chinstrap. Overlaying the data on the slice tour in (a) could be useful but it also adds too many parts to the plot, possibly making it more difficult to focus on the boundary.</p>
 <p></p>
 <div class="cell">
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_lda</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/MASS/man/lda.html">lda</a></span><span class="op">(</span><span class="va">species</span> <span class="op">~</span> <span class="va">.</span>, <span class="va">penguins_sub</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>, prior <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">/</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">/</span><span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
@@ -988,7 +986,7 @@ orthonormal
 </figure>
 </div>
 </div>
-<p>The discriminant space can be considered to be a 2D projection basis, except that it needs to be orthonormalised to be an orthonormal basis. This orthonormal basis provides the initial projection for a radial tour where each variable can be rotated out of the projection to assess its importance to the visible structure. It can also be used as the anchor basis for a local tour, where small steps to and from this projection to randomly selected nearby projections. This allows the inspection of the local neighbourhood of the discriminant space, to assess the effect of small changes in the projection basis on the visible structure.</p>
+<p>The discriminant space can be considered to be a 2D projection basis, except that it needs to be orthonormalised to be an orthonormal basis. This orthonormal basis provides the initial projection for a radial tour where each variable can be rotated out of the projection to assess its importance to the visible structure. It can also be used as the anchor basis for a local tour, where small steps to and from this projection to randomly selected nearby projections are shown. This allows the inspection of the local neighbourhood of the discriminant space, to assess the effect of small changes in the projection basis on the visible structure.</p>
 <p> </p>
 <div id="fig-interpret-html" class="quarto-layout-panel">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-interpret-html-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -1014,7 +1012,7 @@ Figure&nbsp;14.8: Using the radial tour (a) and local tour (b) to investigate th
 <div class="info">
 <p>The radial tour can be used to assess variable importance to the structure present, especially when predictors are strongly associated with each other.</p>
 </div>
-<p><a href="#fig-interpret-html" class="quarto-xref">Figure&nbsp;<span>14.8</span></a> illustrates how the radial tour (a,b) and the local tour (c,d) can be used to assess the importance of variables to structure of interest in a plot. In the radial tour the interpolation runs from the projection corresponding to the discriminant space, and to a projection where one of the variables (here <code>bl</code>) has been removed. The purpose for examining <code>bl</code> is that it has a small contribution to LD1, and thus may <em>not</em> be important for separating Gentoo from the other species. We would also be assessing it’s large contribution to LD2, and the separation between Adelie and Chinstrap, where we expect that it is indispensable. This is indeed what we learn. By removing <code>bl</code> there is no change to the separation between Gentoo, so it might be a simpler best 2D projection if the coefficient for Gentoo in LD1 is actually 0. However, for LD2 removing <code>bl</code> results in completely overlapping clusters for Adelie and Chinstrap, which confirms that this is the main variable that distinguishes the two species.</p>
+<p><a href="#fig-interpret-html" class="quarto-xref">Figure&nbsp;<span>14.8</span></a> illustrates how the radial tour (a,b) and the local tour (c,d) can be used to assess the importance of variables to structure of interest in a plot. In the radial tour the interpolation runs from the projection corresponding to the discriminant space, and to a projection where one of the variables (here <code>bl</code>) has been removed. The purpose for examining <code>bl</code> is that it has a small contribution to LD1, and thus may <em>not</em> be important for separating Gentoo from the other species. We would also be assessing it’s large contribution to LD2, and the separation between Adelie and Chinstrap, where we expect that it is indispensable. This is indeed what we learn. By removing <code>bl</code> there is no change to the separation between Gentoo, so it might be a simpler best 2D projection if the coefficient for <code>bl</code> in LD1 is actually 0. However, for LD2 removing <code>bl</code> results in completely overlapping clusters for Adelie and Chinstrap, which confirms that this is the main variable that distinguishes the two species.</p>
 <p>The local tour is used here to explore the neighbourhood of the discriminant space. We anchor the tour at the discriminant space and interpolate to many random target planes within a specified distance. It can be used to examine how the structure changes with small differences in the combination of variables. Here we can see some small improvements in distinguishing the Adelie (blue) from Chinstrap (yellow) penguins. In the discriminant space there are about three Adelie penguins mixed among a group of Chinstrap penguins. In one change of the projection basis this can be reduced to one Adelie penguin mixed among the Chinstrap, and otherwise a neatly linear boundary could divide the clusters. This is a small improvement, but it does illustrate how visualisation in high dimensions can help to refine an automated rule.</p>
 <div class="insight">
 <p>In the penguins data the small contribution of <code>bl</code> in the discriminant space for separating Gentoo can be ignored, or changed to zero without affecting the class difference.</p>
@@ -1022,16 +1020,52 @@ Figure&nbsp;14.8: Using the radial tour (a) and local tour (b) to investigate th
 </section><section id="exercises" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="exercises">Exercises</h2>
 <p> </p>
 <ol type="1">
-<li>For the <code>simple_clusters</code> compute the LDA model, and make a plot of the data, with points coloured by the class. Overlay variance-covariance ellipses, and a <span class="math inline">\(+\)</span> indicating the sample mean for each class. Is it reasonable to assume that the two classes are sampled from populations with the same variance-covariance?</li>
-<li>Examine the clusters corresponding to the classes in the <code>clusters</code> data set, using a tour. Based on the shape of the data is the assumption of equal variance-covariance reasonable?</li>
+<li>For the <code>simple_clusters</code> compute the LDA model, and make a plot of the data, with points coloured by the true class. Overlay variance-covariance ellipses, and a <span class="math inline">\(+\)</span> indicating the sample mean for each class. Is it reasonable to assume that the two classes are sampled from populations with the same variance-covariance?</li>
+<li>Examine the clusters corresponding to the true classes in the <code>clusters</code> data set, using a tour. Based on the shape of the data is the assumption of equal variance-covariance reasonable?</li>
 <li>Examine the pooled variance-covariance for the <code>clusters</code> data, overlaid on the data in a tour on the 5D. Does it fit the variance of each cluster nicely?</li>
-<li>Fit an LDA model to the <code>simple_clusters</code> data. Examine the boundaries produced by the model, in 2D.</li>
-<li>Fit an LDA model to the <code>clusters</code> data. Examine the boundaries produced by the model in 5D.</li>
-<li>Assess the LDA assumptions for the <code>multicluster</code> data. Is LDA an appropriate model?</li>
+<li>There are several interesting data sets with class variables available on the <a href="http://ggobi.org/book/index.html">GGobi website</a>. Examine the differences between <code>type</code> of music, based on the the variables <code>lvar</code>, <code>lave</code>, <code>lmax</code>, <code>lfener</code>, <code>lfreq</code>. (It is best to remove the “New wave” class because there are too few observations.) Examine the pooled variance-covariance for the two types of music. Does it fit the variance of each cluster nicely?</li>
+</ol>
+<p>The <code>music</code> data can be read using:</p>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb21"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://readr.tidyverse.org">readr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span></span>
+<span><span class="va">music</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html">read_csv</a></span><span class="op">(</span><span class="st">"http://ggobi.org/book/data/music-sub.csv"</span>,</span>
+<span>                  show_col_types <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html">rename</a></span><span class="op">(</span>title <span class="op">=</span> <span class="va">`...1`</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">type</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<ol start="5" type="1">
+<li>Fit an LDA model to the <code>simple_clusters</code> data, using the <code>cl</code> variables as the class. Examine the boundaries produced by the model, in 2D.</li>
+<li>Fit an LDA model to the <code>clusters</code> data, using the <code>cl</code> variables as the class. Examine the boundaries produced by the model in 5D.</li>
+<li>Assess the LDA assumptions for the <code>multicluster</code> data. Is LDA an appropriate model? Do you think it is still possible to produce a useful classification for this data? Fit it to check.</li>
 <li>Compute the first 12 PCs of the <code>sketches</code> data. Check the assumption of equal, elliptical variance-covariance of the 6 groups. Regardless of whether you decide that the assumption is satisfied or not, fit an LDA to the 12 PCs. Extract the discriminant space (the <code>x</code> component of the <code>predict</code> object), and examine the separation (or not) of the 6 groups in this 5D space. Is LDA providing a good classification model for this data?</li>
 <li>Even though the <code>bushfires</code> data does not satisfy the assumptions for LDA, fit LDA to the first five PCs. Examine the class differences in the 3D discriminant space.</li>
 <li>Compute the boundary between classes, for the LDA model where the prior probability reflects the sample size, and the LDA model where the priors are equal for all groups. How does the boundary between lightning cause fires and the other groups change?</li>
-<li>XXX Question on interpretability, variable importance</li>
+<li>Using the <code>aflw</code> data (using the same subset of variables and players as used in Q3 of <a href="13-intro-class.html" class="quarto-xref"><span>Chapter 13</span></a>) compute:</li>
+</ol>
+<ul>
+<li>a 2D representation using UMAP. (Make sure <code>position</code> is removed for the calculation.)</li>
+<li>Fit an LDA model, and predict the observations into the discriminant space. (Make sure to use standardised variables so the coefficients of the discriminant space can be interpreted. You may receive a warning that variables are collinear, but the model should still be usable.)</li>
+</ul>
+<ol type="a">
+<li>Plot the UMAP layout with points coloured by <code>position</code>.</li>
+<li>Plot the data in the LDA discriminant space coloured by <code>position</code>.</li>
+</ol>
+<p>Discuss what is learned from each representation of the data, relative to the differences between skills of the players. And also, using examine the coefficients of the discriminant space to explain how the skill sets of the player types are different.</p>
+<p>View the most important variables contributing to the discriminant space in a tour. Is it possible to distinguish the player types in this subset of variables?</p>
+<p>You can use this code to subset the data:</p>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb22"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dicook.github.io/mulgar/">mulgar</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="va">aflw</span><span class="op">)</span></span>
+<span><span class="va">aflw_sub</span> <span class="op">&lt;-</span> <span class="va">aflw</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">position</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"BPL"</span>, <span class="st">"FF"</span>, <span class="st">"RR"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>position <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">position</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">goals</span><span class="op">:</span><span class="va">tackles</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<ol start="12" type="1">
+<li>Starting with the projection created from the discriminant space of the LDA on the <code>aflw</code> data, use a radial tour to explore the contributions of the variables that contribute the least. The purpose is to determine whether a simpler projection can be used that distinguishes the player types equally well.</li>
 </ol>
 
 
@@ -1342,6 +1376,9 @@ Haslett, J., Bradley, R., Craig, P., Unwin, A., &amp; Wills, G. (1991). <span>D<
 <div id="ref-HTF01" class="csl-entry" role="listitem">
 Hastie, T., Tibshirani, R., &amp; Friedman, J. (2001). <em>The <span>E</span>lements of <span>S</span>tatistical <span>L</span>earning</em>. Springer.
 </div>
+<div id="ref-fpc" class="csl-entry" role="listitem">
+Hennig, C. (2024). <em><span class="nocase">fpc</span>: <span>F</span>lexible <span>P</span>rocedures for <span>C</span>lustering</em>. <a href="https://CRAN.R-project.org/package=fpc">https://CRAN.R-project.org/package=fpc</a>
+</div>
 <div id="ref-hennig2015" class="csl-entry" role="listitem">
 Hennig, C., Meila, M., Murtagh, F., &amp; Rocci, R. (2015). <em>Handbook of <span>C</span>luster <span>A</span>nalysis (1st ed.)</em>. Chapman; Hall/CRC. <a href="https://doi.org/10.1201/b19706">https://doi.org/10.1201/b19706</a>
 </div>
@@ -1421,7 +1458,7 @@ Kohonen, T. (2001). <em>Self-<span>O</span>rganizing <span>M</span>aps (3rd ed)<
 Koschat, M. A., &amp; Swayne, D. F. (1996). Interactive <span>G</span>raphical <span>M</span>ethods in the <span>A</span>nalysis of <span>C</span>ustomer <span>P</span>anel <span>D</span>ata (with discussion). <em>Journal of Business and Economic Statistics</em>, <em>14</em>(1), 113–132.
 </div>
 <div id="ref-R-Rtsne" class="csl-entry" role="listitem">
-Krijthe, J. (2023). <em>Rtsne: T-distributed stochastic neighbor embedding using a barnes-hut implementation</em>. <a href="https://github.com/jkrijthe/Rtsne">https://github.com/jkrijthe/Rtsne</a>
+Krijthe, J. (2023). <em><span>Rtsne</span>: <span>T-D</span>istributed <span>S</span>tochastic <span>N</span>eighbor <span>E</span>mbedding using a <span>B</span>arnes-hut <span>I</span>mplementation</em>. <a href="https://github.com/jkrijthe/Rtsne">https://github.com/jkrijthe/Rtsne</a>
 </div>
 <div id="ref-Kr64a" class="csl-entry" role="listitem">
 Kruskal, J. B. (1964a). Multidimensional <span>S</span>caling by <span>O</span>ptimizing <span>G</span>oodness of <span>F</span>it to a <span>N</span>onmetric <span>H</span>ypothesis. <em>Psychometrika</em>, <em>29</em>, 1–27.
@@ -1529,7 +1566,7 @@ McVicar, T. (2011). <em>Near-<span>S</span>urface <span>W</span>ind <span>S</spa
 Meyer, D., Dimitriadou, E., Hornik, K., Weingessel, A., &amp; Leisch, F. (2024). <em><span class="nocase">e1071</span>: <span>M</span>isc <span>F</span>unctions of the <span>D</span>epartment of <span>S</span>tatistics, <span>P</span>robability <span>T</span>heory <span>G</span>roup (<span>F</span>ormerly: <span>E1071</span>), <span>TU Wien</span></em>. <a href="https://CRAN.R-project.org/package=e1071">https://CRAN.R-project.org/package=e1071</a>
 </div>
 <div id="ref-R-rpart.plot" class="csl-entry" role="listitem">
-Milborrow, S. (2024). <em>Rpart.plot: Plot rpart models: An enhanced version of plot.rpart</em>. <a href="http://www.milbo.org/rpart-plot/index.html">http://www.milbo.org/rpart-plot/index.html</a>
+Milborrow, S. (2024). <em><span class="nocase">rpart.plot</span>: <span>P</span>lot <span class="nocase">rpart</span> <span>M</span>odels: <span>A</span>n <span>E</span>nhanced <span>V</span>ersion of <span class="nocase">plot.rpart</span></em>. <a href="http://www.milbo.org/rpart-plot/index.html">http://www.milbo.org/rpart-plot/index.html</a>
 </div>
 <div id="ref-R-gtExtras" class="csl-entry" role="listitem">
 Mock, T. (2023). <em>gtExtras: Extending gt for beautiful HTML tables</em>. <a href="https://github.com/jthomasmock/gtExtras">https://github.com/jthomasmock/gtExtras</a>
@@ -1688,7 +1725,7 @@ Temple Lang, D., Swayne, D., Wickham, H., &amp; Lawrence, M. (2006). <em><span><
 Tenenbaum, J. B., Silva, V. de, &amp; Langford, J. C. (2000). A <span>G</span>lobal <span>G</span>eometric <span>F</span>ramework for <span>N</span>onlinear <span>D</span>imensionality <span>R</span>eduction. <em>Science</em>, <em>290</em>(5500), 2319–2323. <a href="https://doi.org/10.1126/science.290.5500.2319">https://doi.org/10.1126/science.290.5500.2319</a>
 </div>
 <div id="ref-R-rpart" class="csl-entry" role="listitem">
-Therneau, T., &amp; Atkinson, B. (2023). <em>Rpart: Recursive partitioning and regression trees</em>. <a href="https://github.com/bethatkinson/rpart">https://github.com/bethatkinson/rpart</a>
+Therneau, T., &amp; Atkinson, B. (2023). <em><span class="nocase">rpart</span>: <span>R</span>ecursive <span>P</span>artitioning and <span>R</span>egression trees</em>. <a href="https://github.com/bethatkinson/rpart">https://github.com/bethatkinson/rpart</a>
 </div>
 <div id="ref-Theus02" class="csl-entry" role="listitem">
 Theus, M. (2002). Interactive <span>D</span>ata <span>V</span>isualization <span>U</span>sing <span>M</span>ondrian. <em>Journal of Statistical Software</em>, <em>7</em>(11), http://www.jstatsoft.org.
@@ -1811,16 +1848,13 @@ Wickham, H., &amp; Cook, D. (2025). <em><span class="nocase">tourr</span>: <span
 Wickham, H., Cook, D., &amp; Hofmann, H. (2015). Visualizing <span>S</span>tatistical <span>M</span>odels: <span>R</span>emoving the <span>B</span>lindfold. <em>Statistical Analysis and Data Mining: The ASA Data Science Journal</em>, <em>8</em>(4), 203–225. <a href="https://doi.org/10.1002/sam.11271">https://doi.org/10.1002/sam.11271</a>
 </div>
 <div id="ref-tourr" class="csl-entry" role="listitem">
-Wickham, H., Cook, D., Hofmann, H., &amp; Buja, A. (2011a). <span class="nocase">tourr</span>: <span>An</span> <span>R</span> <span>Package</span> for <span>Exploring</span> <span>Multivariate</span> <span>Data</span> with <span>Projections</span>. <em>Journal of Statistical Software</em>, <em>40</em>(2). <a href="https://doi.org/10.18637/jss.v040.i02">https://doi.org/10.18637/jss.v040.i02</a>
-</div>
-<div id="ref-tourr2011" class="csl-entry" role="listitem">
-Wickham, H., Cook, D., Hofmann, H., &amp; Buja, A. (2011b). <span class="nocase">tourr</span>: An <span>R</span> package for exploring multivariate data with projections. <em>Journal of Statistical Software</em>, <em>40</em>(2), 1–18. <a href="https://doi.org/10.18637/jss.v040.i02">https://doi.org/10.18637/jss.v040.i02</a>
+Wickham, H., Cook, D., Hofmann, H., &amp; Buja, A. (2011). <span class="nocase">tourr</span>: <span>An</span> <span>R</span> <span>Package</span> for <span>Exploring</span> <span>Multivariate</span> <span>Data</span> with <span>Projections</span>. <em>Journal of Statistical Software</em>, <em>40</em>(2). <a href="https://doi.org/10.18637/jss.v040.i02">https://doi.org/10.18637/jss.v040.i02</a>
 </div>
 <div id="ref-R-dplyr" class="csl-entry" role="listitem">
-Wickham, H., François, R., Henry, L., Müller, K., &amp; Vaughan, D. (2023). <em><span class="nocase">dplyr</span>: A grammar of data manipulation</em>. <a href="https://dplyr.tidyverse.org">https://dplyr.tidyverse.org</a>
+Wickham, H., François, R., Henry, L., Müller, K., &amp; Vaughan, D. (2023). <em><span class="nocase">dplyr</span>: <span>A</span> <span>G</span>rammar of <span>D</span>ata <span>M</span>anipulation</em>. <a href="https://dplyr.tidyverse.org">https://dplyr.tidyverse.org</a>
 </div>
 <div id="ref-R-readr" class="csl-entry" role="listitem">
-Wickham, H., Hester, J., &amp; Bryan, J. (2024). <em>Readr: Read rectangular text data</em>. <a href="https://readr.tidyverse.org">https://readr.tidyverse.org</a>
+Wickham, H., Hester, J., &amp; Bryan, J. (2024). <em><span class="nocase">readr</span>: <span>R</span>ead <span>R</span>ectangular <span>T</span>ext <span>D</span>ata</em>. <a href="https://readr.tidyverse.org">https://readr.tidyverse.org</a>
 </div>
 <div id="ref-WWS99" class="csl-entry" role="listitem">
 Wilhelm, A. F. X., Wegman, E. J., &amp; Symanzik, J. (1999). Visual <span>C</span>lustering and <span>C</span>lassification: <span>T</span>he <span>O</span>ronsay <span>P</span>article <span>S</span>ize <span>D</span>ata <span>S</span>et <span>R</span>evisited. <em>Computational Statistics: Special Issue on Interactive Graphical Data Analysis</em>, <em>14</em>(1), 109–146.
