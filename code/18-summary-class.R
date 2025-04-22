@@ -1,4 +1,4 @@
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| message: false
 #| code-summary: "Code to fit forest"
 library(randomForest)
@@ -10,7 +10,7 @@ penguins_rf <- randomForest(species~.,
                              importance=TRUE)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| code-fold: false
 penguins_rf$confusion
 penguins_errors <- penguins_sub |>
@@ -18,7 +18,7 @@ penguins_errors <- penguins_sub |>
                         penguins_rf$y, 1, 0))
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| eval: false
 #| code-summary: "Code to make animated gifs"
 # library(tourr)
@@ -55,7 +55,7 @@ penguins_errors <- penguins_sub |>
 # 
 
 
-## ----echo=knitr::is_html_output(), eval=FALSE------------------------------
+## ----echo=knitr::is_html_output(), eval=FALSE--------------------------------
 #| label: fig-penguins-nn-boundaries
 #| code-fold: true
 # # Generate grid over explanatory variables
@@ -95,7 +95,7 @@ penguins_errors <- penguins_sub |>
 #         legend.title = element_blank())
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| message: false
 # Split the data intro training and testing, as done in 17-nn chapter
 library(dplyr)
@@ -126,10 +126,28 @@ p_test_x <- p_test |>
 p_test_y <- p_test |> pull(species) |> as.numeric() 
 p_test_y <- p_test_y-1 # Needs to be 0, 1, 2
 
-# Predict training and test set
-p_nn_model <- load_model_tf("data/penguins_cnn")
-p_train_pred <- p_nn_model |> 
-  predict(p_train_x, verbose = 0)
+
+## ----echo=knitr::is_html_output()--------------------------------------------
+#| message: false
+#| eval: false
+# # Predict training and test set
+# # This looks like there is some machine dependency on the
+# # saved model, so predictions are saved for loading across platforms
+# p_nn_model <- load_model_tf("data/penguins_cnn")
+# p_train_pred <- p_nn_model |>
+#   predict(p_train_x, verbose = 0)
+# p_test_pred <- p_nn_model |>
+#   predict(p_test_x, verbose = 0)
+# 
+# save(p_train_pred, file="data/p_train_pred.rda")
+# save(p_test_pred, file="data/p_test_pred.rda")
+
+
+## ----echo=knitr::is_html_output()--------------------------------------------
+#| message: false
+load("data/p_train_pred.rda")
+load("data/p_test_pred.rda")
+
 p_train_pred_cat <- levels(p_train$species)[
   apply(p_train_pred, 1,
         which.max)]
@@ -137,8 +155,6 @@ p_train_pred_cat <- factor(
   p_train_pred_cat,
   levels=levels(p_train$species))
 
-p_test_pred <- p_nn_model |> 
-  predict(p_test_x, verbose = 0)
 p_test_pred_cat <- levels(p_test$species)[
   apply(p_test_pred, 1, 
         which.max)]
@@ -147,7 +163,7 @@ p_test_pred_cat <- factor(
   levels=levels(p_test$species))
 
 
-## ----eval=FALSE------------------------------------------------------------
+## ----eval=FALSE--------------------------------------------------------------
 # # Explanations
 # # https://www.r-bloggers.com/2022/08/kernel-shap/
 # library(kernelshap)
@@ -162,7 +178,7 @@ p_test_pred_cat <- factor(
 # save(p_exp_sv, file="data/p_exp_sv.rda")
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| code-fold: true
 load("data/p_exp_sv.rda")
 p_exp_gentoo <- p_exp_sv$Class_3$S
@@ -175,7 +191,7 @@ p_exp_gentoo <- p_exp_gentoo |>
   mutate(error = factor(error, labels=c("no", "yes")))
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| label: tbl-p-shap
 #| warning: false
 #| tbl-cap: "SHAP values for the Gentoo penguin misclassified as Adelie. "
@@ -191,7 +207,7 @@ p_outlier <- rbind(as.numeric(p_exp_sv$Class_1$S[p_row_id,]),
 knitr::kable(p_outlier, digits=2)
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| eval: false
 #| code-fold: true
 #| label: fig-shapley-dot
@@ -214,7 +230,7 @@ knitr::kable(p_outlier, digits=2)
 #   theme(legend.position = "none")
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| code-fold: true
 #| message: false
 #| warning: false
@@ -249,7 +265,7 @@ p_sm <- ggpairs(d, columns = 1:4,
           axis.ticks = element_blank())
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| label: fig-shapley-pcp
 #| echo: false
 #| fig-width: 4
@@ -260,7 +276,7 @@ p_sm <- ggpairs(d, columns = 1:4,
 p_pcp
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| label: fig-shapley-sm
 #| echo: false
 #| fig-width: 5
@@ -271,7 +287,7 @@ p_pcp
 p_sm
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| label: fig-penguins-bl-bm-bd
 #| code-fold: true
 #| fig-width: 8
@@ -354,7 +370,24 @@ sp1 + sp2 + sp3 + plot_layout(ncol=3, guides = "collect") &
         legend.direction = "horizontal")
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
+#| eval: false
+# # Need to do the predictions and save because saved model
+# # appears to be machine-dependent
+# n <- 10000
+# p_sim <- tibble(bl = runif(n, min(penguins_sub$bl), max(penguins_sub$bl)),
+#                 bd = runif(n, min(penguins_sub$bd), max(penguins_sub$bd)),
+#                 fl = runif(n, min(penguins_sub$fl), max(penguins_sub$fl)),
+#                 bm = runif(n, min(penguins_sub$bm), max(penguins_sub$bm))) |>
+#   as.matrix()
+# p_sim_pred <- p_nn_model |>
+#   predict(p_sim, verbose = 0)
+# colnames(p_sim_pred) <- c("Adelie", "Chinstrap", "Gentoo")
+# save(p_sim_pred, file="data/p_sim_pred.rda")
+# save(p_sim, file="data/p_sim.rda")
+
+
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| label: fig-penguins-bndry
 #| code-fold: true
 #| fig-width: 8
@@ -362,15 +395,8 @@ sp1 + sp2 + sp3 + plot_layout(ncol=3, guides = "collect") &
 #| out-width: 100%
 #| fig-cap: "Pairwise plots of classification boundaries (pixel points) to examine where the misclassification happens. The observed training data is overlaid with solid circle indicating a classification error. The boundary of this model falls almost entirely in body mass, with small contribution of the other variables, as seen by the difference between the two classes being mostly visible in the vertical direction." 
 #| fig-alt: "A set of three scatter plots showing relationships between bm (x-axis) and bl, bd, fl (y-axis), with data points color-coded by species: Adelie (blue) and Gentoo (red). Points are also marked by classification error, where error = yes (filled circles) and 'error = no' (open circles). In the first plot there is a dense distribution of data points, with a slightly curved decision boundary separating Adelie and Gentoo. Misclassified points appear mostly along this boundary. The second plot has a more linear decision boundary that does not neatly match the separation between the two species. Some misclassified points are along this boundary. If the boundary had been centred through the middle of the lower left to upper right gap then these points would be far from the boundary and unlikely to be misclassified. In the third plot the boundary is mostly linear and vertical. "
-n <- 10000
-p_sim <- tibble(bl = runif(n, min(penguins_sub$bl), max(penguins_sub$bl)),
-                bd = runif(n, min(penguins_sub$bd), max(penguins_sub$bd)),
-                fl = runif(n, min(penguins_sub$fl), max(penguins_sub$fl)),
-                bm = runif(n, min(penguins_sub$bm), max(penguins_sub$bm))) |>
-  as.matrix()
-p_sim_pred <- p_nn_model |> 
-  predict(p_sim, verbose = 0)
-colnames(p_sim_pred) <- c("Adelie", "Chinstrap", "Gentoo")
+load("data/p_sim_pred.rda")
+load("data/p_sim.rda")
 p_sim_class <- apply(p_sim_pred, 1, which.max)
 p_sim_class <- c("Adelie", "Chinstrap", "Gentoo")[p_sim_class]
 p_sim_pred <- p_sim_pred |>
@@ -386,10 +412,10 @@ p_sim_a_g <- p_sim |>
 bd1 <- p_sim_a_g |>
   ggplot() + 
     geom_point(aes(x=bm, y=bl, colour=species), shape=20, size=0.01) +
-    geom_point(data=filter(p_exp_gentoo_proj, species != "Chinstrap"),
-               aes(x=bm, y=bl, 
-               colour=species, 
-               shape=factor(error)), alpha=0.8) +
+#    geom_point(data=filter(p_exp_gentoo_proj, species != "Chinstrap"),
+#               aes(x=bm, y=bl, 
+#               colour=species, 
+#               shape=factor(error)), alpha=0.8) +
   scale_colour_discrete_divergingx(palette="Zissou 1") +
   scale_shape_manual("error", values=c(1, 19)) +
   theme_minimal() + 
@@ -435,7 +461,7 @@ bd1 + bd2 + bd3 + plot_layout(ncol=3, guides = "collect") &
 
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| eval: false
 #| echo: false
 # prj <- tourr::basis_random(4, 2)
