@@ -373,11 +373,26 @@ When the predictive probabilities are returned by a model, as is done by this NN
 \index{ternary diagram}
 \index{simplex}
 
+```{r echo=knitr::is_html_output()}
+#| message: false
+#| eval: false
+# Predict training and test set
+# This looks like there is some machine dependency on the
+# saved model, so predictions are saved for loading across platforms
+p_nn_model <- load_model_tf("data/penguins_cnn")
+p_train_pred <- p_nn_model |> 
+  predict(p_train_x, verbose = 0)
+p_test_pred <- p_nn_model |> 
+  predict(p_test_x, verbose = 0)
+
+save(p_train_pred, file="data/p_train_pred.rda")
+save(p_test_pred, file="data/p_test_pred.rda")
+```
+
 
 ```{r}
 # Predict training and test set
-p_train_pred <- p_nn_model |> 
-  predict(p_train_x, verbose = 0)
+load("data/p_train_pred.rda")
 p_train_pred_cat <- levels(p_train$species)[
   apply(p_train_pred, 1,
         which.max)]
@@ -386,8 +401,7 @@ p_train_pred_cat <- factor(
   levels=levels(p_train$species))
 table(p_train$species, p_train_pred_cat)
 
-p_test_pred <- p_nn_model |> 
-  predict(p_test_x, verbose = 0)
+load("data/p_test_pred.rda")
 p_test_pred_cat <- levels(p_test$species)[
   apply(p_test_pred, 1, 
         which.max)]

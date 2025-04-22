@@ -1,0 +1,10 @@
+# This is the code that sets up libraries and other things for each chapter
+library(colorspace)
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+library(geozoo)
+library(tourr)
+library(mulgar)
+library(patchwork)
+library(GGally)
