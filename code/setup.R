@@ -1,5 +1,4 @@
 # This is the code that sets up libraries and other things for each chapter
-library(colorspace)
 library(readr)
 library(tidyr)
 library(dplyr)
