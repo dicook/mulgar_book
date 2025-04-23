@@ -30,6 +30,11 @@ For these examples we use the software `keras` [@keras] following the installati
 
 A first step is to decide how many nodes the NN architecture should have, and what activation function should be used. To make these decisions, ideally you already have some knowledge of the shapes of class clusters. For the penguins classification, we have seen that it contains three elliptically shaped clusters of roughly the same size. This suggests two nodes in the hidden layer would be sufficient to separate three clusters (@fig-nn-diagram). Because the shapes of the clusters are convex, using linear activation ("relu") will also be sufficient. The model specification is as follows:
 
+```{r}
+#| echo: false
+source("code/setup.R")
+```
+
 ```{r eval=FALSE}
 #| echo: true
 library(keras)
@@ -110,14 +115,7 @@ Splitting the data into training and test is an essential way to protect against
 ```{r echo=knitr::is_html_output()}
 #| message: false
 # Split the data intro training and testing
-library(ggthemes)
-library(dplyr)
-library(tidyr)
 library(rsample)
-library(ggbeeswarm)
-library(tidymodels)
-library(tourr)
-
 load("data/penguins_sub.rda") # from mulgar book
 
 set.seed(821)
@@ -258,8 +256,6 @@ Fitting NN models is fiddly, and very different fitted models can result from re
 ```{r echo=knitr::is_html_output()}
 #| code-fold: true
 library(keras)
-library(ggplot2)
-library(colorspace)
 
 # load fitted model
 p_nn_model <- load_model_tf("data/penguins_cnn")
@@ -436,7 +432,6 @@ p_test_m <- p_test_m |>
 p_all_m <- bind_rows(p_train_m, p_test_m)
 
 # Add simplex to make ternary
-library(geozoo)
 proj <- t(geozoo::f_helmert(3)[-1,])
 p_nn_v_p <- as.matrix(p_all_m[,c("Adelie", "Chinstrap", "Gentoo")]) %*% proj
 colnames(p_nn_v_p) <- c("x1", "x2")
@@ -811,9 +806,6 @@ There are subsets of confusion, as can be seen by both confusion matrix and vote
 ```{r}
 #| eval: false
 #| echo: false
-library(mulgar)
-library(dplyr)
-
 data("sketches_train")
 load("data/sketches_test_labelled.rda")
 library(keras)
