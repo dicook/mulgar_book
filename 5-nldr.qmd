@@ -39,17 +39,16 @@ The methods *isomap* [@isomap] and *local linear embedding* (LLE) are two method
 \index{dimension reduction!isomap}
 \index{dimension reduction!local linear embedding (LLE)}
 
+```{r}
+#| echo: false
+source("code/setup.R")
+```
+
 ```{r echo=knitr::is_html_output()}
 #| message: false
 #| code-summary: Code for spiral plots
 library(Rdimtools)
-library(colorspace)
 library(cardinalR)
-library(tsibble)
-library(ggplot2)
-library(dplyr)
-library(patchwork)
-library(ggthemes)
 n_obs <- 1652  
 set.seed(259)
 swiss <- swiss_roll(n_obs, num_noise = 0)
@@ -157,9 +156,6 @@ The classic swiss roll data constructed to illustrate isomap, as shown in (a) a 
 ```{r}
 #| eval: false
 #| echo: false
-library(crosstalk)
-library(plotly)
-library(tourr)
 swiss_tbl <- as_tibble(swiss)
 spiral1 <- ggplot(swiss_tbl, 
                   aes(x=x, 
@@ -297,11 +293,10 @@ When data are distributed along some non-linear manifold the tour can allow us t
 #| out-width: 100%
 #| message: false
 #| code-summary: "Code to generate the 2D non-linear representation"
-library(mulgar)
+
 library(Rtsne)
 library(uwot)
-library(ggplot2)
-library(patchwork)
+
 set.seed(44)
 cnl_tsne <- Rtsne(clusters_nonlin)
 cnl_umap <- umap(clusters_nonlin)
@@ -344,7 +339,7 @@ where $w_{ij}$ are the unnormalised similarities in the $k$-dimensional represen
 #| eval: false
 #| echo: false
 #| code-summary: "Code to create animated gif"
-library(tourr)
+
 render_gif(clusters_nonlin, 
            grand_tour(),
            display_xy(),
@@ -400,7 +395,6 @@ Diagnosing a layout is an important first step to determine if it can be appropr
 #| message: FALSE
 #| eval: false
 #| code-fold: false
-library(liminal)
 umap_df <- data.frame(umapX = cnl_umap[, 1],
                       umapY = cnl_umap[, 2])
 limn_tour_link(
@@ -430,10 +424,7 @@ Two screenshots from liminal showing which clusters match between the UMAP repre
 #| message: false
 #| eval: false
 #| code-fold: false
-library(detourr)
-library(dplyr)
-library(crosstalk)
-library(plotly)
+
 umap_df <- data.frame(umapX = cnl_umap[, 1],
                       umapY = cnl_umap[, 2])
 cnl_df <- bind_cols(clusters_nonlin, umap_df)
@@ -476,8 +467,7 @@ What we can't tell is that there is a main branch from which all of the others e
 #| message: false
 #| eval: false
 #| code-summary: "Code to run liminal on the fake trees data"
-library(liminal)
-library(Rtsne)
+
 data(fake_trees)
 set.seed(2020)
 tsne <- Rtsne::Rtsne(
@@ -564,11 +554,6 @@ b. Use UMAP to create a 2D layout. How well does this capture the clusters in th
 #| message: false
 #| eval: false
 #| echo: false
-library(mulgar)
-library(Rtsne)
-library(uwot)
-library(ggplot2)
-library(patchwork)
 
 set.seed(1240)
 cnl_tsne <- Rtsne(clusters_nonlin)
@@ -597,10 +582,7 @@ The layout changes substantially with different random seeds. The persistent inf
 # Answer to Q2
 library(Rdimtools)
 library(cardinalR)
-library(tsibble)
-library(ggplot2)
-library(dplyr)
-library(patchwork)
+
 n_obs <- 1652  
 set.seed(259)
 swiss <- swiss_roll(n_obs, num_noise = 0)

@@ -25,9 +25,14 @@ Let's start with some 2D examples. @fig-2D shows three plots of two variables. P
 
 [^correlation]: It is generally better to use *associated*  than *correlated*. Correlation is a statistical quantity, measuring linear association. The term *associated* can be prefaced with the type of association, such as *linear* or *non-linear*. 
 
+
+```{r}
+#| echo: false
+source("code/setup.R")
+```
+
 ```{r echo=knitr::is_html_output()}
 #| code-summary: "Code to produce 2D data examples"
-library(tibble)
 set.seed(6045)
 x1 <- runif(123)
 x2 <- x1 + rnorm(123, sd=0.1)
@@ -42,8 +47,6 @@ df <- tibble(x1 = (x1-mean(x1))/sd(x1),
 #| echo: false
 #| warning: false
 #| message: false
-library(ggplot2)
-library(patchwork)
 dp1 <- ggplot(df) + 
   geom_point(aes(x=x1, y=x2)) +
   xlim(-2.5, 2.5) + ylim(-2.5, 2.5) +
@@ -112,8 +115,6 @@ The way variables are scaled can affect the appearance of dimensionality. If the
 #| echo: false
 #| warning: false
 #| message: false
-library(tidyr)
-library(dplyr)
 set.seed(1115)
 d_form <- tibble(x = runif(100) - 0.5) |>
   mutate(
@@ -239,7 +240,6 @@ Now let's think about what this looks like with five variables. `r ifelse(knitr:
 ```{r echo=knitr::is_html_output()}
 #| eval: false
 #| code-summary: "Code to make animated gifs"
-library(mulgar)
 data(plane)
 data(box)
 render_gif(plane,
@@ -257,7 +257,6 @@ render_gif(box,
            width=200,
            height=200)
 # Simulate full cube
-library(geozoo)
 cube5d <- data.frame(cube.solid.random(p=5, n=300)$points)
 colnames(cube5d) <- paste0("x", 1:5)
 cube5d <- data.frame(apply(cube5d, 2, function(x) (x-mean(x))/sd(x)))
@@ -312,8 +311,6 @@ The next step is to determine which variables contribute. In the examples just p
 #| message: false
 #| warning: false
 #| code-summary: Code for scatterplot matrix
-library(GGally)
-library(mulgar)
 data(plane)
 ggscatmat(plane) +
   theme(panel.background = 
@@ -359,9 +356,6 @@ The data is viewed with a grand tour in `r ifelse(knitr::is_html_output(), '@fig
 #| eval: false
 #| code-fold: true
 #| code-summary: "Code to generate animation"
-library(ggplot2)
-library(plotly)
-library(htmlwidgets)
 
 set.seed(78)
 b <- basis_random(7, 2)
@@ -524,9 +518,6 @@ Two frames from tours of examples of different types of dimensionality issues: o
 #| eval: false
 #| code-fold: true
 #| echo: false
-library(ggplot2)
-library(plotly)
-library(htmlwidgets)
 
 set.seed(78)
 b <- basis_random(7, 2)
@@ -648,12 +639,7 @@ b. Repeat a. to compare the sample from a Clayton copula with the 5D multivariat
 ```{r}
 #| eval: false
 #| echo: false
-library(mulgar)
-library(tibble)
-library(dplyr)
-library(tourr)
-library(GGally)
-library(colorspace)
+
 set.seed(901)
 mvnorm5 <- mulgar::rmvn(n=nrow(copnorm), vc=cov(copnorm))
 colnames(mvnorm5) <- paste0("x", 1:5)
