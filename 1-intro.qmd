@@ -7,7 +7,6 @@ High-dimensional data means that we have a large number of features or variables
 \index{distance metric}
 \index{vector}
 
-
 Models that operate on high-dimensional data can be thought of as decomposing observations into two sets of values, fitted values and residuals from the fit. The fitted values capture the systematic or predictable variation between variables, and can be considered a sharpened view of the data, to see through the noise in the data. The residuals capture this noise, and represent random variation. When using models for high-dimensional data, such as unsupervised or supervised classification, or dimension reduction, it is important to use visualisation to assess how well the model fits the data. If it fits well, picturing the model fit might be a clearer view of the relationships between variables.
 \index{model!fitted values}
 \index{model!residuals}
@@ -34,9 +33,11 @@ With a tour we slowly rotate the viewing direction, this allows us to see many i
 
 ```{r}
 #| echo: false
-library(mulgar)
-library(ggplot2)
-library(patchwork)
+source("code/setup.R")
+```
+
+```{r}
+#| echo: false
 data("simple_clusters")
 
 s_p <- ggplot(simple_clusters, aes(x=x1, y=x2)) +
@@ -58,8 +59,6 @@ s_p <- ggplot(simple_clusters, aes(x=x1, y=x2)) +
 ```{r}
 #| echo: false
 #| message: false
-library(tourr)
-
 explain_t1 <- save_history(simple_clusters[,1:2],
                            grand_tour(d=1),
                            max_bases=9)
@@ -174,8 +173,6 @@ p1 + p2 + p3 + p4 + plot_layout(ncol=2)
 
 ```{r}
 #| echo: false
-library(tourr)
-library(geozoo)
 set.seed(1351)
 d <- torus(3, n=4304)$points
 d <- apply(d, 2, function(x) (x-mean(x))/sd(x))
@@ -306,13 +303,6 @@ The term "high-dimensional" in this book refers to the  dimensionality of the Eu
 #| message: false
 #| warning: false
 # wire frame cubes
-library(tidyverse)
-library(ggthemes)
-library(geozoo)
-library(tourr)
-library(patchwork)
-library(ggrepel)
-
 new_d_clr <- "#E87C00"
 d_line_clr <- "#3B99B1"
 set.seed(5)
@@ -505,7 +495,6 @@ For visualisation, the curse manifests in an opposite manner. Projecting from hi
 #| message: false
 #| warning: false
 #| echo: false
-library(colorspace)
 set.seed(212)
 n <- 10000
 
@@ -582,11 +571,6 @@ with the latter being especially useful when displaying the projected data as a 
 #| fig-cap: "Example structures that might be visible in a 2D projection that imply presence of structure in high dimensions. These include clusters, linear and non-linear association, outliers and barriers."
 #| fig-alt: "Four scatterplots showing different types of patterns you might expect to see. Plot (a) has three elliptical clusters of points, roughly lying horizontal, making a geese flying pattern. Plot (b) has a non-linear pattern looking like a horseshoe. Plot (c) has a strong negative linear association and a single outlier in the top right. Plot (d) has points lying only in the bottom triangle."
 #| echo: false
-library(mulgar)
-library(ggplot2)
-library(patchwork)
-library(geozoo)
-library(dplyr)
 data("clusters")
 data("plane")
 data("plane_nonlin")
@@ -640,7 +624,6 @@ e1 + e2 + e3 + e4 + plot_layout(ncol=4)
 ```{r}
 #| echo: false
 #| eval: false
-library(tourr)
 
 set.seed(340)
 render_gif(clusters[,1:5], 
@@ -753,10 +736,6 @@ The Palmer penguins data [@horst2022] is available in the R package `palmerpengu
 #| out-width: 100%
 #| message: false
 #| fig-alt: "Diagonal shows density plots of bl, bd, fl and bm, all are apprximately unimodal and similar spread. In the latter the Gentoo density is shifted to the right, and in the first plot Adelie is to the left of the other two. Correlations for each of the three is shown in the upper right - all are positive and between 0.31 and 0.72. Lower diagonal shows scatterplots. All three species can be seen to be mostly different when bl is one variable, and Gentoo is distinct from the other two in bd vs fl and bd vs bm."
-library(tourr)
-library(mulgar)
-library(GGally)
-library(colorspace)
 data("penguins_sub")
 ggscatmat(penguins_sub, columns=1:4, col="species", alpha=0.8) +
   scale_color_discrete_divergingx(palette = "Zissou 1") +
@@ -922,8 +901,6 @@ prim7 <- read_csv("http://ggobi.org/book/data/prim7.csv",
 #| eval: false
 #| echo: false
 # Answer to Q1
-library(tourr)
-library(geozoo)
 set.seed(1234)
 cube3 <- cube.solid.random(3, 500)$points
 cube5 <- cube.solid.random(5, 500)$points
@@ -946,7 +923,6 @@ As the dimension increases, the points tend to concentrate in the centre of the 
 #| eval: false
 #| echo: false
 # Answer to Q3
-library(mulgar)
 animate_xy(c1)
 render_gif(c1, 
            grand_tour(), 
@@ -1027,7 +1003,6 @@ render_gif(c7,
 #| eval: false
 #| echo: false
 # Answer to Q4
-library(datasets)
 animate_xy(USArrests)
 animate_xy(USArrests, rescale=TRUE)
 animate_xy(USArrests, rescale=TRUE, obs_labels=rownames(USArrests), axes="bottomleft")
@@ -1046,7 +1021,6 @@ b. There are two distinct, well-separated clusters, and several outliers.
 #| eval: false
 #| echo: false
 # Answer to Q5
-library(MASS)
 data(crabs)
 animate_xy(crabs[,4:8], col=crabs$sp)
 data(fgl)
