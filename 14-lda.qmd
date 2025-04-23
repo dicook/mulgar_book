@@ -23,8 +23,6 @@ Because LDA is a parametric model it is important to check that these assumption
 }
 :::
 
-<!-- Algorithmic methods have overtaken parametric methods in the practice of supervised classification.  A parametric method such as linear discriminant analysis (LDA) yields a set of interpretable output parameters, so it leaves a clear trail helping us to understand what was done to produce the results.  An algorithmic method, on the other hand, is more or less a black box, with various input parameters that are adjusted to tune the algorithm.  The algorithm's input and output parameters do not always correspond in any obvious way to the interpretation of the results.  Because if it's simplicity, if the assumptions (approximately) hold, LDA can provide an elegant classification solution.-->
-
 ## Extracting the key elements of the model
 
 LDA builds the model on the between-group sum-of-square matrix
@@ -55,11 +53,14 @@ We can fit an LDA model using the `lda()` function from the `MASS` package. Here
 \index{data!penguins}
 
 ```{r}
+#| echo: false
+source("code/setup.R")
+```
+
+```{r}
 #| message: false
 #| code-fold: false
 # Code to fit the model
-library(mulgar)
-library(MASS)
 load("data/penguins_sub.rda")
 
 p_lda <- lda(species~bl+bd+fl+bm, 
@@ -105,10 +106,6 @@ The best separation between classes can be viewed from this object, which can be
 #| fig-alt: "Two plots labelled (a) and (b) that are the same scatterplot, except the scale in each is different. Plot (a) has x-axis LD1 with labels -4, 0, 4 and 8 has y-axis LD2 with labels -6, -3, 0, 3 and 6. Plot (b) has x-axis LD1 with labels -4, 0, 4 and 8 and y-axis LD2 with labels -4, 0 and 4. There is a legend indicating colour is used to show species, with 3 levels: Adelie shown as brilliant greenish blue colour, Chinstrap shown as brilliant yellow colour and Gentoo shown as vivid red colour. The chart is a set of 313 big solid circle points of which about 97% can be seen. Red is separated from the other two clusters, but green and yellow are overlapped."
 #| code-summary: "Code to generate LDA plots"
 # Check calculations from the fitted model, and equations
-library(colorspace)
-library(ggplot2)
-library(dplyr)
-library(ggpubr)
 # Using the predicted values from the model object
 p_lda_pred_x1 <- data.frame(p_lda_pred$x)
 p_lda_pred_x1$species <- penguins_sub$species
@@ -280,7 +277,6 @@ This approach extends to any dimension. We would use the same projection sequenc
 #| eval: false
 #| code-summary: "Code for making animated gifs"
 #| code-fold: true
-library(tourr)
 p_ell <- NULL
 for (i in unique(penguins_sub$species)) {
   x <- penguins_sub |> dplyr::filter(species == i)
@@ -479,8 +475,6 @@ The boundaries can be examined using the `explore()` function from the `classifl
 #| out-width: 70%
 #| code-fold: false
 # Compute points in domain of data and predict
-library(classifly)
-
 p_bl_bd_lda_boundaries <- explore(p_bl_bd_lda, penguins_sub)
 p_bl_bd_lda_m1 <- ggplot(p_bl_bd_lda_boundaries) +
   geom_point(aes(x=bl, y=bd, 
@@ -632,7 +626,6 @@ Interpretation using the magnitude and sign of the coefficients is accurate only
 #| echo: false
 #| message: false
 # Prepare data
-library(kableExtra)
 ds_proj <- tourr::orthonormalise(p_lda$scaling) |>
   as_tibble() |>
   rename(oLD1 = LD1, oLD2 = LD2) |>
@@ -822,10 +815,6 @@ aflw_sub <- aflw |>
 ```{r}
 #| eval: false
 #| echo: false
-library(mulgar)
-library(dplyr)
-library(tourr)
-library(MASS)
 data("sketches_train")
 sketches_pca <- prcomp(sketches_train[,1:784])
 ggscree(sketches_pca, q=25, guide=FALSE)
@@ -867,7 +856,6 @@ animate_xy(bushfires_ds[,1:3], col=bushfires_ds$cause)
 #| eval: false
 #| echo: false
 library(uwot)
-library(MASS)
 data(aflw)
 aflw_sub <- aflw |> 
   filter(position %in% c("BPL", "FF", "RR")) |>
