@@ -29,15 +29,8 @@ For model-based clustering, the variability within clusters can be summarised by
 :::
 
 ```{r echo=knitr::is_html_output()}
-#| message: false
 #| code-summary: "Load libraries"
-library(mclust) 
-library(tidyr)
-library(dplyr)
-library(gt)
-library(mulgar)
-library(ggplot2)
-library(colorspace)
+source("code/setup.R")
 ```
 
 ```{r echo=knitr::is_html_output()}
@@ -117,8 +110,6 @@ render_gif(phull$data[,1:4],
 #| echo: false
 
 # This code is checking that convex hull works
-library(geozoo)
-
 cb <- cube.solid.random(p=4, n=1000)$points
 phull <- cxhull(cb)$edges
 
@@ -196,7 +187,6 @@ We can examine the disagreement by linking a plot of the table, with a tour plot
 #| message: false
 #| echo: false
 #| code-summary: "Code to do linked brushing with liminal"
-library(liminal)
 penguins_cl <- bind_cols(penguins_sub, p_cl)
 p_cl <- p_cl |>
   mutate(cl_w_j = jitter(cl_w),
@@ -228,10 +218,6 @@ Comparing the model-based and Wards hierarchical linkage solutions using linking
 #| eval: false
 #| echo: true
 #| code-summary: "Code to do interactive graphics"
-library(crosstalk)
-library(plotly)
-library(detourr)
-library(viridis)
 p_cl <- p_cl |> 
   mutate(cl_w_j = jitter(cl_w),
          cl_mc_j = jitter(cl_mc))
@@ -294,8 +280,6 @@ Linking a scatterplot showing the confusion matrix and a tour plot can help to d
 ```{r}
 #| eval: false
 #| echo: false
-library(mulgar)
-library(tourr)
 animate_xy(c4[,c(1:4, 6)])
 c4_hc <- hclust(dist(c4[,c(1:4, 6)]), method="ward.D2")
 plot(c4_hc)
@@ -334,10 +318,8 @@ Most of the time your data will not neatly separate into clusters, but partition
 #| echo: false
 #| message: false
 #| warning: false
-library(tidyverse)
 risk <- readRDS("data/risk_MSA.rds")
 # looking at the data
-library(tourr)
 animate_xy(risk)
 # hierarchical clustering solutions
 risk_h_mc <- hclust(dist(risk, method = "manhattan"),
@@ -353,7 +335,6 @@ risk_clw <- risk |>
   mutate(cl_h_ms = factor(cutree(risk_h_ms, 6))) |>
   mutate(cl_h_ew = factor(cutree(risk_h_ew, 6)))
 # drawing 2D dendrograms
-library(ggdendro)
 ggplot() +
   geom_segment(data=dendro_data(risk_h_mc)$segments, 
                aes(x = x, y = y, 
@@ -370,7 +351,6 @@ ggplot() +
                    xend = xend, yend = yend)) + 
   theme_dendro()
 # dendrogram in the data space
-library(mulgar)
 risk_hfly_mc <- hierfly(risk_clw, risk_h_mc, scale=FALSE)
 risk_hfly_ms <- hierfly(risk_clw, risk_h_ms, scale=FALSE)
 risk_hfly_ew <- hierfly(risk_clw, risk_h_ew, scale=FALSE)
