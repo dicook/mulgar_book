@@ -25,8 +25,8 @@ Lastly, it is important to understand it, by determining which variables contrib
 To examine misclassifications, we can create a separate variable that identifies the errors or not. Constructing this for each class, and exploring in small steps is helpful. Let's do this using the random forest model for the penguins fit. The random forest fit has only a few misclassifications. There are four Adelie penguins confused with Chinstrap, and similarly four Chinstrap confused with Adelie. There is one Gentoo penguin confused with a Chinstrap. This is interesting, because the Gentoo cluster is well separated from the clusters of the other two penguin species. 
 \index{classification!misclassification}
 
-```{r}
-#| echo: false
+```{r echo=knitr::is_html_output()}
+#| code-summary: "Load libraries"
 source("code/setup.R")
 ```
 
@@ -263,21 +263,9 @@ The variable importance and explainability measures can be used to examine the b
 
 A good resource for learning about the range of local explainability methods is @iml. Here we describe how to use tours in association with explanation metrics. Primarily for interpretability, we need to make plots of single (or pairs of) variables because we need to make explanations in terms of single variables. Tours are used to examine boundaries close to a point, if we are to understand local non-linear boundaries, so a slice tour on a small neighbourhood is needed. Also, when multiple variables are working together to generate a prediction, the radial tour to examine the influence of single variables on the projection can be useful.
 
-<!--
-- global importance
-- partial dependence profiles
-- local explainers, explanation
-- usage: and handling disagreements-->
-
-
-<!-- ### Local explanations: SHAP-->
-
 \index{classification!local explanations} 
 \index{classification!XAI}
 \index{classification!boundaries} 
-
-<!-- It especially important to be able to interpret or explain a model, even more so when the model is complex or black-box'y. A good resource for learning about the range of methods is @iml. Local explanations provide some information about variables that are important for making the prediction for a particular observation.
--->
 
 For illustration, we choose local explanations produced by Shapley values. These are computed using the `kernelshap` function in the `kernelshap` package [@kernelshap], and re-organised using the `shapviz` function in the `shapviz` package [@shapviz]. A Shapley value for an observation indicates how the variable contributes to the model prediction for that observation, relative to other variables. It is an average, computed from the change in prediction when all combinations of presence or absence of other variables. In the computation, for each combination, the prediction is computed by substituting absent variables with their average value, like one might do when imputing missing values. A (larger) positive SHAP value indicates that the variable increases the likelihood of prediction to that class, and conversely a (larger) negative value indicates decreased likelihood of prediction to that class.
 
@@ -389,8 +377,6 @@ knitr::kable(p_outlier, digits=2)
 - For a high likelihood of a correct Gentoo prediction (third line) for this penguin, one should consider `bd`, and possibly `bl` but not the `bm` value.
 - A mistaken classification as Adelie (first line) would happen with higher likelihood if the `bm` value is considered.
 - A mistaken classification as Chinstrap (second line) has a smaller likelihood if `bl` is considered.
-
-<!-- For the misclassified penguin, the effect of `bm` for all combinations of other variables leads to a decline in predicted value, thus less confidence in it being a Gentoo. In contrast, for this same penguin when considering the effect of `bl` the predicted value increases on average.-->
 
 \index{parallel coordinate plot (PCP)}
 
