@@ -1,20 +1,16 @@
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
+#| code-summary: "Load libraries"
+source("code/setup.R")
+
+
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| label: hc-libraries
 #| message: FALSE
 #| code-summary: "Load libraries"
-library(ggplot2)
-library(mulgar)
 library(ggdendro)
-library(dplyr)
-library(patchwork)
-library(tourr)
-library(plotly)
-library(htmlwidgets)
-library(colorspace)
-library(GGally)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| eval: true
 #| code-fold: false
 #| message: false
@@ -34,7 +30,7 @@ simple_clusters <- simple_clusters |>
   mutate(clw = factor(cutree(cl_hw, 2)))
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| label: fig-hc-sim
 #| eval: true
 #| code-summary: "Code to make the four plots"
@@ -93,7 +89,7 @@ pc <- ggplot(simple_clusters) +
 pd + ph + pdh + pc + plot_layout(ncol=2)
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| label: fig-problems
 #| eval: true
 #| message: false
@@ -138,7 +134,7 @@ pd2 <- ggplot(data=d2, aes(x=x1, y=x2)) +
 pd1 + pd2 + plot_layout(ncol=2)
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| label: fig-d1-s
 #| eval: true
 #| message: false
@@ -147,6 +143,7 @@ pd1 + pd2 + plot_layout(ncol=2)
 #| fig-width: 9
 #| fig-height: 7
 #| out-width: 100%
+#| fig-alt: "Six plots in a 2x3 layout. The first column (a, d) shows two dendrograms, with labels 'Single linkage dendrogram' and 'Wards linkage dendrogram' respectively, where (a) is really messy like a dense willow tree and (b) is really clean with two main branches, and then smaller branches off each. The middle column (b, e) has scatterplots with lines joining the points, and the right column (c, f) has scatterplots where the points are coloured. In c all points but one are red, and in f it is roughly equal numbers of red and yellow forming each end of the dumbbell."
 #| code-summary: "Code to make plots"
 # Compute single linkage
 d1_hs <- hclust(dist(d1[,1:2]),
@@ -243,7 +240,7 @@ pd1s + pd1hs + pc_d1s +
   plot_layout(ncol=3)
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| label: fig-d2-c
 #| eval: true
 #| message: false
@@ -347,7 +344,7 @@ pd2c + pd2hc + pc_d2c +
   plot_layout(ncol=3)
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| label: fig-penguins-pairs
 #| message: false
 #| warning: false
@@ -361,7 +358,7 @@ ggscatmat(penguins_sub[,1:4]) +
   xlab("") + ylab("")
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| eval: false
 #| code-summary: "Code to create tour"
 # set.seed(20230329)
@@ -386,7 +383,7 @@ ggscatmat(penguins_sub[,1:4]) +
 #            loop=FALSE)
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| label: penguins-hclust
 #| code-fold: false
 p_dist <- dist(penguins_sub[,1:4])
@@ -404,7 +401,7 @@ p_w_hfly <- hierfly(p_clw, p_hcw, scale=FALSE)
 p_s_hfly <- hierfly(p_cls, p_hcs, scale=FALSE)
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| code-summary: "Code to draw dendrograms"
 # Generate the dendrograms in 2D
 p_hcw_dd <- dendro_data(p_hcw)
@@ -426,7 +423,7 @@ ps_dd <- ggplot() +
   theme_dendro()
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| label: penguins-hfly
 #| eval: FALSE
 #| code-summary: "Code to create tours of dendrogram in data"
@@ -492,15 +489,14 @@ ps_dd <- ggplot() +
 #            loop=FALSE)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| label: fig-penguins-ddw
 #| fig-cap: Wards linkage (left) and single linkage (right). 
 #| echo: FALSE
-library(patchwork)
 print(pw_dd + ps_dd + plot_layout(ncol=2))
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| label: penguins-hfly-plotly
 #| eval: FALSE
 #| code-summary: "Code to make html objects of the dendrogram in 4D"
@@ -584,7 +580,7 @@ print(pw_dd + ps_dd + plot_layout(ncol=2))
 #           selfcontained = TRUE)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| eval: false
 #| echo: false
 #| message: false
@@ -600,7 +596,6 @@ print(pw_dd + ps_dd + plot_layout(ncol=2))
 #   as_tibble() |>
 #   mutate(cl_wl = factor(cutree(nl_wl, 4))) |>
 #   mutate(cl_sl = factor(cutree(nl_sl, 4)))
-# library(ggdendro)
 # ggplot() +
 #   geom_segment(data=dendro_data(nl_wl)$segments,
 #                aes(x = x, y = y,

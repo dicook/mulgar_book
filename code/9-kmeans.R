@@ -1,11 +1,11 @@
+## ----echo=knitr::is_html_output()--------------------------------------------
+#| code-summary: "Load libraries"
+source("code/setup.R")
+
+
 ## ----------------------------------------------------------------------------
 #| code-fold: false
 #| message: false
-library(mulgar)
-library(ggplot2)
-library(dplyr)
-library(colorspace)
-library(patchwork)
 data("simple_clusters")
 
 set.seed(202305)
@@ -96,7 +96,6 @@ p_km_d <- penguins_sub[,1:4] |>
 ## ----echo=knitr::is_html_output()--------------------------------------------
 #| eval: false
 #| code-summary: "Code to make animated gifs"
-# library(tourr)
 # p_km_means <- p_km_means |>
 #   mutate(type = "mean")
 # p_km_d <- p_km_d |>

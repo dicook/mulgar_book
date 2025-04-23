@@ -1,6 +1,10 @@
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
+#| code-summary: "Load libraries"
+source("code/setup.R")
+
+
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| code-summary: "Code to produce 2D data examples"
-library(tibble)
 set.seed(6045)
 x1 <- runif(123)
 x2 <- x1 + rnorm(123, sd=0.1)
@@ -11,12 +15,10 @@ df <- tibble(x1 = (x1-mean(x1))/sd(x1),
              x3scaled = (x3-mean(x3))/sd(x3))
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| echo: false
 #| warning: false
 #| message: false
-library(ggplot2)
-library(patchwork)
 dp1 <- ggplot(df) + 
   geom_point(aes(x=x1, y=x2)) +
   xlim(-2.5, 2.5) + ylim(-2.5, 2.5) +
@@ -58,7 +60,7 @@ dp3 <- ggplot(df) +
         panel.border = element_rect(colour="black", fill=NA))
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| label: fig-2D
 #| echo: false
 #| fig-width: 9
@@ -69,12 +71,10 @@ dp3 <- ggplot(df) +
 dp1 + dp2 + dp3 + plot_layout(ncol=3)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| echo: false
 #| warning: false
 #| message: false
-library(tidyr)
-library(dplyr)
 set.seed(1115)
 d_form <- tibble(x = runif(100) - 0.5) |>
   mutate(
@@ -119,7 +119,7 @@ d_clusters <- tibble(x = c(
 
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| label: fig-nonlin-2D
 #| echo: false
 #| fig-width: 9
@@ -191,10 +191,9 @@ pn6 <- ggplot(data=d_clusters, aes(x=x, y=y)) +
 pn1 + pn2 + pn3 + pn4 + pn5 + pn6 + plot_layout(ncol=3)
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| eval: false
 #| code-summary: "Code to make animated gifs"
-# library(mulgar)
 # data(plane)
 # data(box)
 # render_gif(plane,
@@ -212,7 +211,6 @@ pn1 + pn2 + pn3 + pn4 + pn5 + pn6 + plot_layout(ncol=3)
 #            width=200,
 #            height=200)
 # # Simulate full cube
-# library(geozoo)
 # cube5d <- data.frame(cube.solid.random(p=5, n=300)$points)
 # colnames(cube5d) <- paste0("x", 1:5)
 # cube5d <- data.frame(apply(cube5d, 2, function(x) (x-mean(x))/sd(x)))
@@ -225,7 +223,7 @@ pn1 + pn2 + pn3 + pn4 + pn5 + pn6 + plot_layout(ncol=3)
 #            height=200)
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| label: fig-plane-scatmat
 #| fig-cap: "Scatterplot matrix of plane data. You can see that x1-x3 are strongly linearly associated, and also x4 and x5. When you watch the tour of this data, any time the data collapses into a line you should see only (x1, x2, x3) or (x4, x5). When combinations of x1 and x4 or x5 show, the data should be spread out." 
 #| fig-alt: "A five-by-five scatterplot matrix, with scatterplots in the lower triangle, correlaton printed in the upper triangle and density plots shown on the diagonal. Plots of x1 vs x2, x1 vs x3, x2 vs x3, and x4 vs x5 have strong positive or negative correlation. The remaining pairs of variables have no association."
@@ -235,8 +233,6 @@ pn1 + pn2 + pn3 + pn4 + pn5 + pn6 + plot_layout(ncol=3)
 #| message: false
 #| warning: false
 #| code-summary: Code for scatterplot matrix
-library(GGally)
-library(mulgar)
 data(plane)
 ggscatmat(plane) +
   theme(panel.background = 
@@ -245,7 +241,7 @@ ggscatmat(plane) +
     axis.ticks = element_blank())
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| code-fold: false
 # Add two pure noise dimensions to the plane
 plane_noise <- plane
@@ -255,7 +251,7 @@ plane_noise <- data.frame(apply(plane_noise, 2,
     function(x) (x-mean(x))/sd(x)))
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| label: fig-plane-noise-scatter
 #| fig-cap: "Scatterplots showing two additional noise variables that are not associated with any of the first five variables."
 #| fig-alt: "Two rows of scatterplots showing x6 and x7 against x1-x5. The points are spread out in the full plotting region, although x6 has one point with an unusually low value."
@@ -271,15 +267,12 @@ ggduo(plane_noise, columnsX = 1:5, columnsY = 6:7,
     axis.ticks = element_blank())
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| label: plane-plotly
 #| eval: false
 #| code-fold: true
 #| code-summary: "Code to generate animation"
-# library(ggplot2)
-# library(plotly)
-# library(htmlwidgets)
-# 
+
 # set.seed(78)
 # b <- basis_random(7, 2)
 # pn_t <- tourr::save_history(plane_noise,
@@ -329,14 +322,14 @@ ggduo(plane_noise, columnsX = 1:5, columnsY = 6:7,
 #           selfcontained = TRUE)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 # Add several outliers to the plane_noise data
 plane_noise_outliers <- plane_noise
 plane_noise_outliers[101,] <- c(2, 2, -2, 0, 0, 0, 0)
 plane_noise_outliers[102,] <- c(0, 0, 0,-2, -2, 0, 0)
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| label: fig-plane-noise-outlier
 #| fig-cap: "Scatterplot matrix of the plane with noise data, with two added outliers in variables with strong correlation."
 #| fig-alt: "A five-by-five scatterplot matrix, with scatterplots in the lower triangle, correlaton printed in the upper triangle and density plots shown on the diagonal. Plots of x1 vs x2, x1 vs x3, x2 vs x3, and x4 vs x5 have strong positive or negative correlation, with an outlier in the corner of the plot. The remaining pairs of variables have no association, and thus also no outliers."
@@ -352,7 +345,7 @@ ggscatmat(plane_noise_outliers, columns = 1:5) +
     axis.ticks = element_blank())
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| eval: false
 #| code-summary: "Code to generate animated gif"
 # render_gif(plane_noise_outliers,
@@ -374,15 +367,12 @@ ggscatmat(plane_noise_outliers, columns = 1:5) +
 #            height=400)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| label: fig-plane-outliers
 #| eval: false
 #| code-fold: true
 #| echo: false
-# library(ggplot2)
-# library(plotly)
-# library(htmlwidgets)
-# 
+
 # set.seed(78)
 # b <- basis_random(7, 2)
 # pn_t <- tourr::save_history(plane_noise_outliers,
@@ -432,7 +422,7 @@ ggscatmat(plane_noise_outliers, columns = 1:5) +
 #           selfcontained = TRUE)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| eval: false
 #| echo: false
 # # Answer to Q2
@@ -453,7 +443,7 @@ ggscatmat(plane_noise_outliers, columns = 1:5) +
 # d3 <- as.data.frame(rmvnorm(500, sigma = s3))
 
 
-## ----eval=FALSE------------------------------------------------------------
+## ----eval=FALSE--------------------------------------------------------------
 # library(tidyverse)
 # library(tourr)
 # library(GGally)
@@ -474,15 +464,10 @@ ggscatmat(plane_noise_outliers, columns = 1:5) +
 #          x4 = -sin(pi/6)*x2 + cos(pi/6)*x4)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| eval: false
 #| echo: false
-# library(mulgar)
-# library(tibble)
-# library(dplyr)
-# library(tourr)
-# library(GGally)
-# library(colorspace)
+
 # set.seed(901)
 # mvnorm5 <- mulgar::rmvn(n=nrow(copnorm), vc=cov(copnorm))
 # colnames(mvnorm5) <- paste0("x", 1:5)

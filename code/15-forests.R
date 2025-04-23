@@ -1,4 +1,9 @@
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
+#| code-summary: "Load libraries"
+source("code/setup.R")
+
+
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| message: false
 #| label: fig-p-bl-bd-tree
 #| fig-width: 6
@@ -7,16 +12,6 @@
 #| code-summary: "Draw tree and model boundaries"
 #| fig-cap: "The association between variables in the penguins data causes problems for fitting a tree model. Although the model, computed using only bl and bd, is simple (left), the fit is poor (right) because it doesn't adequately utilise combinations of variables."
 #| fig-alt: "Tree diagram with top split bl<0.3004, leading to Adelie branch, second split at bd >= -0.4138, leading to Gentoo branch, and final split at bl< 0.1476, leading to Adelie and Chinstrap branches. The scatterplot at right shows bd vs bl, with three predictive region partitions, and the data is overplotted. The elliptical spreads of data points crosses the rectangular partitions in places."
-library(mulgar)
-library(rpart)
-library(rpart.plot)
-library(colorspace)
-library(classifly)
-library(ggplot2)
-library(ggdendro)
-library(patchwork)
-library(ggthemes)
-
 load("data/penguins_sub.rda")
 p_bl_bd_tree <- rpart(species~bl+bd, data=penguins_sub)
 #f1 <- rpart.plot(p_bl_bd_tree, box.palette="Grays")
@@ -47,10 +42,9 @@ f2 <- ggplot(p_bl_bd_tree_boundaries) +
 f1 + f2 + plot_layout(ncol=2)
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| eval: false
 #| code-summary: "Code to make animated gifs of slice tour of boundaries"
-# library(tourr)
 # p_tree <- rpart(species~., data=penguins_sub[,1:5])
 # rpart.plot(p_tree, box.palette="Grays")
 # 
@@ -67,39 +61,36 @@ f1 + f2 + plot_layout(ncol=2)
 #            )
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| message: false
 #| code-fold: false
-library(randomForest)
-library(dplyr)
 penguins_rf <- randomForest(species~.,
                              data=penguins_sub[,1:5],
                              importance=TRUE)
 
 
-## ----echo=knitr::is_html_output(), eval=knitr::is_html_output()------------
+## ----echo=knitr::is_html_output(), eval=knitr::is_html_output()--------------
 penguins_rf
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| echo: false
 options(digits=4)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 head(penguins_rf$votes, 5)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| code-summary: "Code to compute Helmert matrix"
 geozoo::f_helmert(3)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| message: false
 #| code-fold: false
 # Project 4D into 3D
-library(geozoo)
 proj <- t(geozoo::f_helmert(3)[-1,])
 p_rf_v_p <- as.matrix(penguins_rf$votes) %*% proj
 colnames(p_rf_v_p) <- c("x1", "x2")
@@ -108,7 +99,7 @@ p_rf_v_p <- p_rf_v_p |>
   mutate(species = penguins_sub$species)
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| code-fold: false
 # Add simplex
 simp <- simplex(p=2)
@@ -128,7 +119,7 @@ p_ternary <- ggplot() +
   theme(aspect.ratio=1, legend.position="none")
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| eval: false
 #| code-summary: "Code to generate animated gifs"
 # # Look at the votes matrix, in its 3D space
@@ -146,7 +137,7 @@ p_ternary <- ggplot() +
 # )
 
 
-## ----eval=knitr::is_html_output()------------------------------------------
+## ----eval=knitr::is_html_output()--------------------------------------------
 #| echo: false
 #| label: fig-p-votes-ggplot-html
 #| fig-cap: 2D ternary diagram
@@ -156,30 +147,27 @@ p_ternary <- ggplot() +
 p_ternary
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| code-fold: false
-library(mulgar)
-library(dplyr)
-library(liminal)
 ft_pca <- prcomp(fake_trees[,1:100], 
                  scale=TRUE, retx=TRUE)
 ft_pc <- as.data.frame(ft_pca$x[,1:10])
 ft_pc$branches <- fake_trees$branches
-library(randomForest)
+
 ft_rf <- randomForest(branches~., data=ft_pc, 
                             importance=TRUE)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| echo: false
 options(digits=1)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 head(ft_rf$votes, 5)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| code-fold: false
 ft_rf_votes <- ft_rf$votes |>
   as_tibble() |>
@@ -202,7 +190,7 @@ labels <- c("0" , "1", "2", "3", "4", "5", "6", "7", "8", "9",
                 rep("", 3000))
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| eval: false
 #| code-summary: "Code to make animated gifs"
 # animate_xy(f_rf_v_p_s[,1:9], col = f_rf_v_p_s$branches,
@@ -220,11 +208,10 @@ labels <- c("0" , "1", "2", "3", "4", "5", "6", "7", "8", "9",
 #            frames=500)
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| code-fold: false
 #| label: tbl-ft-importance
-#| tbl-cap: Variable importance from the random forest fit to the fake trees data, for each of the 9 classes, and using the accuracy and Gini metrics.
-library(gt)
+#| tbl-cap: "Variable importance from the random forest fit to the fake trees data, for each of the 9 classes, and using the accuracy and Gini metrics."
 ft_rf$importance |> 
   as_tibble(rownames="Var") |> 
   rename(Acc=MeanDecreaseAccuracy,
@@ -240,7 +227,7 @@ ft_rf$importance |>
              decimals = 0)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| code-fold: false
 ft_pc <- ft_pc |>
   mutate(cl1 = factor(case_when(
@@ -250,7 +237,7 @@ ft_pc <- ft_pc |>
   )))
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| eval: false
 #| code-summary: "Code to make animated gifs"
 # animate_xy(ft_pc[,c("PC1", "PC2", "PC4", "PC6")], col=ft_pc$cl1, palette="Viridis")
@@ -261,7 +248,7 @@ ft_pc <- ft_pc |>
 #            frames=500)
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| code-summary: "Code to make plot"
 ft_pc_cl1 <- ggplot(ft_pc, aes(x=PC4, y=PC1, col=cl1)) +
   geom_point(alpha=0.7, size=1) +
@@ -270,7 +257,7 @@ ft_pc_cl1 <- ggplot(ft_pc, aes(x=PC4, y=PC1, col=cl1)) +
   theme(aspect.ratio = 1)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| echo: false
 #| fig-width: 4
 #| fig-height: 4
@@ -281,16 +268,16 @@ ft_pc_cl1 <- ggplot(ft_pc, aes(x=PC4, y=PC1, col=cl1)) +
 ft_pc_cl1 
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| echo: false
 options(digits=2)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 ft_rf$confusion
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| code-fold: false
 ft_pc <- ft_pc |>
   mutate(cl8 = factor(case_when(
@@ -302,7 +289,7 @@ ft_pc <- ft_pc |>
   )))
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| eval: false
 #| code-summary: "Code to make animated gif"
 # animate_xy(ft_pc[,c("PC1", "PC2", "PC4", "PC5", "PC6")], col=ft_pc$cl8, palette="Viridis")
@@ -313,7 +300,7 @@ ft_pc <- ft_pc |>
 #            frames=500)
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| code-summary: "Code to make plot"
 ft_pc_cl8 <- ggplot(ft_pc, aes(x=PC1, y=PC5, col=cl8)) +
   geom_point(alpha=0.7, size=1) +
@@ -322,7 +309,7 @@ ft_pc_cl8 <- ggplot(ft_pc, aes(x=PC1, y=PC5, col=cl8)) +
   theme(aspect.ratio = 1)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| echo: false
 #| fig-width: 4
 #| fig-height: 4
@@ -333,14 +320,13 @@ ft_pc_cl8 <- ggplot(ft_pc, aes(x=PC1, y=PC5, col=cl8)) +
 ft_pc_cl8 
 
 
-## --------------------------------------------------------------------------
-library(mulgar)
+## ----------------------------------------------------------------------------
 data(bushfires)
 bushfires_sub <- bushfires[,c(5, 8:45, 48:55, 57:60)] |>
   mutate(cause = factor(cause))
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| eval: false
 # library(mulgar)
 # data(aflw)
@@ -350,7 +336,7 @@ bushfires_sub <- bushfires[,c(5, 8:45, 48:55, 57:60)] |>
 #   dplyr::select(goals:tackles)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| echo: true
 #| eval: false
 # library(readr)
@@ -361,11 +347,9 @@ bushfires_sub <- bushfires[,c(5, 8:45, 48:55, 57:60)] |>
 #   mutate(type = factor(type))
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| eval: false
 #| echo: false
-# library(mulgar)
-# library(tourr)
 # data(bushfires)
 # 
 # bushfires_sub <- bushfires[,c(5, 8:45, 48:55, 57:60)] |>
@@ -380,7 +364,6 @@ bushfires_sub <- bushfires[,c(5, 8:45, 48:55, 57:60)] |>
 #   as_tibble() |>
 #   mutate(cause = factor(bushfires$cause))
 # 
-# library(tourr)
 # animate_xy(bushfires_pcs[,1:7],
 #            guided_tour(lda_pp(bushfires_pcs$cause)),
 #            col=bushfires_pcs$cause)
@@ -392,7 +375,6 @@ bushfires_sub <- bushfires[,c(5, 8:45, 48:55, 57:60)] |>
 # ggplot(bushfires, aes(x=FOREST)) + geom_density()
 # ggplot(bushfires, aes(x=arf28)) + geom_density()
 # 
-# library(randomForest)
 # bushfires_rf <- randomForest(cause~.,
 #                              data=bushfires_sub,
 #                              importance=TRUE)
@@ -404,7 +386,6 @@ bushfires_sub <- bushfires[,c(5, 8:45, 48:55, 57:60)] |>
 #   mutate(cause = bushfires_sub$cause)
 # 
 # # Project 4D into 3D
-# library(geozoo)
 # proj <- t(geozoo::f_helmert(4)[-1,])
 # b_rf_v_p <- as.matrix(bushfires_rf_votes[,1:4]) %*% proj
 # colnames(b_rf_v_p) <- c("x1", "x2", "x3")
@@ -441,7 +422,6 @@ bushfires_sub <- bushfires[,c(5, 8:45, 48:55, 57:60)] |>
 #            gif_file="gifs/bushfires_votes.gif",
 #            frames=500)
 # 
-# library(gt)
 # bushfires_rf$importance |>
 #   as_tibble(rownames="Variable") |>
 #   rename(Accuracy=MeanDecreaseAccuracy,
@@ -455,7 +435,7 @@ bushfires_sub <- bushfires[,c(5, 8:45, 48:55, 57:60)] |>
 # 
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| eval: false
 #| echo: false
 # # Answer to Q3
@@ -464,22 +444,19 @@ bushfires_sub <- bushfires[,c(5, 8:45, 48:55, 57:60)] |>
 # We can see that most of the observations lie on the face of lightning, arson and accident. The handful of the burning_off observations lie off this plane, in the direction of burning-off, so are less confused with the other three classes. This could be expected because burning off is highly regulated, and tends to occur before the bushfire season is at risk of starting. The arson cases are hard to classify, frequently confused with lightning or accident, and occasionally burning off. Lightning and accident have many more observations that are confidently classified correctly.
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| eval: false
 #| echo: false
-# library(mulgar)
-# library(dplyr)
 # data("sketches_train")
 # sketches_pca <- prcomp(sketches_train[,1:784])
 # ggscree(sketches_pca, q=25, guide=FALSE)
 # sketches_pc <- as.data.frame(sketches_pca$x[,1:21])
 # sketches_pc$word <- sketches_train$word
 # 
-# library(tourr)
 # animate_xy(sketches_pc[,1:6],
 #            tour=guided_tour(lda_pp(sketches_pc$word)),
 #            col=sketches_pc$word)
-# library(randomForest)
+# 
 # sketches_rf <- randomForest(word~., data=sketches_pc,
 #                             mtry=5, ntree=2500,
 #                             importance=TRUE)
@@ -523,7 +500,7 @@ bushfires_sub <- bushfires[,c(5, 8:45, 48:55, 57:60)] |>
 #            frames=500)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| eval: false
 #| echo: false
 # library(uwot)

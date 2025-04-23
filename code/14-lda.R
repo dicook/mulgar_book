@@ -1,9 +1,12 @@
-## --------------------------------------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
+#| code-summary: "Load libraries"
+source("code/setup.R")
+
+
+## ----------------------------------------------------------------------------
 #| message: false
 #| code-fold: false
 # Code to fit the model
-library(mulgar)
-library(MASS)
 load("data/penguins_sub.rda")
 
 p_lda <- lda(species~bl+bd+fl+bm, 
@@ -13,25 +16,25 @@ options(digits=2)
 # p_lda
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| code-fold: false
 # Extract the sample means
 p_lda$means
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| code-fold: false
 # Extract the discriminant space
 p_lda$scaling
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| code-fold: false
 # Extract the fitted values
 p_lda_pred <- predict(p_lda, penguins_sub)
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| label: fig-p-lda
 #| warning: false
 #| fig-cap: "Penguins projected into the 2D discriminant space, done two ways: (a) using the predicted values, (b) directly projecting using the model component. The scale is different but the projected data is identical in shape."
@@ -41,10 +44,6 @@ p_lda_pred <- predict(p_lda, penguins_sub)
 #| fig-alt: "Two plots labelled (a) and (b) that are the same scatterplot, except the scale in each is different. Plot (a) has x-axis LD1 with labels -4, 0, 4 and 8 has y-axis LD2 with labels -6, -3, 0, 3 and 6. Plot (b) has x-axis LD1 with labels -4, 0, 4 and 8 and y-axis LD2 with labels -4, 0 and 4. There is a legend indicating colour is used to show species, with 3 levels: Adelie shown as brilliant greenish blue colour, Chinstrap shown as brilliant yellow colour and Gentoo shown as vivid red colour. The chart is a set of 313 big solid circle points of which about 97% can be seen. Red is separated from the other two clusters, but green and yellow are overlapped."
 #| code-summary: "Code to generate LDA plots"
 # Check calculations from the fitted model, and equations
-library(colorspace)
-library(ggplot2)
-library(dplyr)
-library(ggpubr)
 # Using the predicted values from the model object
 p_lda_pred_x1 <- data.frame(p_lda_pred$x)
 p_lda_pred_x1$species <- penguins_sub$species
@@ -76,7 +75,7 @@ ggarrange(p_lda1, p_lda2, ncol=2,
 
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| code-fold: false
 # Compute pooled variance-covariance
 p_vc_pool <- mulgar::pooled_vc(penguins_sub[,1:4],
@@ -84,13 +83,13 @@ p_vc_pool <- mulgar::pooled_vc(penguins_sub[,1:4],
 p_vc_pool
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| echo: false
 #| eval: false
 # ginv(as.matrix(p_vc_pool))
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 # Generate ellipses for each group's variance-covariance
 p_ell <- NULL
 for (i in unique(penguins_sub$species)) {
@@ -101,7 +100,7 @@ for (i in unique(penguins_sub$species)) {
 }
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| label: fig-lda-assumptions1
 #| fig-cap: "Scatterplot of flipper length by bill length of the penguins data, and corresponding variance-covariance ellipses. There is a small amount of difference between the ellipses, but they are similar enough to be confident in assuming the population variance-covariances are equal."
 #| message: false
@@ -132,7 +131,7 @@ ggarrange(lda1, lda2, ncol=2,
           common.legend = TRUE, legend = "bottom")
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| label: fig-lda-assumptions2
 #| fig-cap: "Scatterplot of distance to cfa and road for the bushfires data, and corresponding variance-covariance ellipses. There is a lot of difference between the shapes and the orientation of the ellipses, so it cannot be assumed that the population variance-covariances are equal."
 #| message: false
@@ -173,12 +172,11 @@ ggarrange(lda3, lda4, ncol=2,
 
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| message: false
 #| eval: false
 #| code-summary: "Code for making animated gifs"
 #| code-fold: true
-# library(tourr)
 # p_ell <- NULL
 # for (i in unique(penguins_sub$species)) {
 #   x <- penguins_sub |> dplyr::filter(species == i)
@@ -203,7 +201,7 @@ ggarrange(lda3, lda4, ncol=2,
 #            loop=FALSE)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| message: false
 #| code-summary: "Code for adding ellipses to data"
 #| code-fold: true
@@ -241,7 +239,7 @@ shapes <- c(3, 4, 20)
 p_pch <- shapes[p_lda_all$type]
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| eval: false
 #| message: false
 #| code-summary: "Code to generate animated gifs"
@@ -268,14 +266,14 @@ p_pch <- shapes[p_lda_all$type]
 #            loop=FALSE)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| message: false
 #| code-fold: false
 p_bl_bd_lda <- lda(species~bl+bd, data=penguins_sub, 
                                   prior = c(1/3, 1/3, 1/3))
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| message: false
 #| label: fig-lda-2D-boundary
 #| fig-cap: "Prediction regions of the LDA model for two variables of the three species of penguins indicated by the small points. Large points are the observations, and the sample mean of each species is represented by the plus. The boundaries between groups can be seen to be roughly half-way between the means, taking the elliptical spread into account, and mostly distinguishes the three species."
@@ -285,8 +283,6 @@ p_bl_bd_lda <- lda(species~bl+bd, data=penguins_sub,
 #| out-width: 70%
 #| code-fold: false
 # Compute points in domain of data and predict
-library(classifly)
-
 p_bl_bd_lda_boundaries <- explore(p_bl_bd_lda, penguins_sub)
 p_bl_bd_lda_m1 <- ggplot(p_bl_bd_lda_boundaries) +
   geom_point(aes(x=bl, y=bd, 
@@ -307,13 +303,13 @@ p_bl_bd_lda_m1 +
              size=3) 
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| code-fold: false
 p_lda <- lda(species ~ ., penguins_sub[,1:5], prior = c(1/3, 1/3, 1/3))
 p_lda_boundaries <- explore(p_lda, penguins_sub)
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| eval: false
 #| code-summary: "Code for generating slice tour"
 # # Code to run the tour
@@ -335,7 +331,7 @@ p_lda_boundaries <- explore(p_lda, penguins_sub)
 #            )
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| code-summary: "Code for projecting into LDA space"
 # Project the boundaries into the 2D discriminant space
 p_lda_b_sub <- p_lda_boundaries[
@@ -360,7 +356,7 @@ p_lda_b_sub_ds_p <- ggplot(p_lda_b_sub_ds,
         legend.title = element_blank()) 
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| echo: false
 #| label: fig-lda-2D-boundaries
 #| fig-width: 5
@@ -370,7 +366,7 @@ p_lda_b_sub_ds_p <- ggplot(p_lda_b_sub_ds,
 p_lda_b_sub_ds_p
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| echo: false
 #| eval: false
 #| fig-width: 5
@@ -382,11 +378,10 @@ p_lda_b_sub_ds_p
 # p_lda_b_sub_ds_p
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| echo: false
 #| message: false
 # Prepare data
-library(kableExtra)
 ds_proj <- tourr::orthonormalise(p_lda$scaling) |>
   as_tibble() |>
   rename(oLD1 = LD1, oLD2 = LD2) |>
@@ -395,7 +390,7 @@ ds_proj <- tourr::orthonormalise(p_lda$scaling) |>
   dplyr::select(var, LD1, LD2, oLD1, oLD2)
 
 
-## ----eval=knitr::is_html_output()------------------------------------------
+## ----eval=knitr::is_html_output()--------------------------------------------
 #| label: tbl-ds-coef-html
 #| echo: false
 #| tbl-cap: "Coefficients of the discriminant space, original and othonormalised. LD1 is the direction where Gentoo is separated from the others, and the coefficients suggest this is due to a contrast between bd and fl/bm. LD2 is where Adelie is different from Chinstrap, which is generated by a contrast between bl and bm."
@@ -404,7 +399,7 @@ knitr::kable(ds_proj, digits=2,
   add_header_above(c(" " = 1, "original"=2, "orthonormal"=2))
 
 
-## ----eval=knitr::is_latex_output()-----------------------------------------
+## ----eval=knitr::is_latex_output()-------------------------------------------
 #| label: tbl-ds-coef-pdf
 #| echo: false
 #| tbl-cap: "Coefficients of the discriminant space, original and othonormalised. LD1 is the direction where Gentoo is separated from the others, and the coefficients suggest this is due to a contrast between bd and fl/bm. LD2 is where Adelie is different from Chinstrap, which is generated by a contrast between bl and bm."
@@ -413,7 +408,7 @@ knitr::kable(ds_proj, digits=2,
 #   add_header_above(c(" " = 1, "original"=2, "orthonormal"=2))
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| eval: false
 #| echo: false
 # animate_xy(penguins_sub[, 1:4],
@@ -431,7 +426,7 @@ knitr::kable(ds_proj, digits=2,
 #            )
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| eval: false
 #| echo: false
 # set.seed(458)
@@ -451,7 +446,7 @@ knitr::kable(ds_proj, digits=2,
 #            )
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| echo: true
 #| eval: false
 # library(readr)
@@ -462,7 +457,7 @@ knitr::kable(ds_proj, digits=2,
 #   mutate(type = factor(type))
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| eval: false
 # library(mulgar)
 # data(aflw)
@@ -472,13 +467,9 @@ knitr::kable(ds_proj, digits=2,
 #   dplyr::select(goals:tackles)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| eval: false
 #| echo: false
-# library(mulgar)
-# library(dplyr)
-# library(tourr)
-# library(MASS)
 # data("sketches_train")
 # sketches_pca <- prcomp(sketches_train[,1:784])
 # ggscree(sketches_pca, q=25, guide=FALSE)
@@ -516,11 +507,10 @@ knitr::kable(ds_proj, digits=2,
 # 
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| eval: false
 #| echo: false
 # library(uwot)
-# library(MASS)
 # data(aflw)
 # aflw_sub <- aflw |>
 #   filter(position %in% c("BPL", "FF", "RR")) |>

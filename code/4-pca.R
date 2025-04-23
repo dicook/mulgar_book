@@ -1,16 +1,17 @@
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
+#| code-summary: "Load libraries"
+source("code/setup.R")
+
+
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| message: false
 #| error: false
 #| warning: false
 #| code-summary: "Code to make scree plots"
 # Conduct PCA and make the scree plot for 
 # the 2-, 3- and 5-D planar data
-library(dplyr)
-library(ggplot2)
-library(mulgar)
 data(plane)
 data(box)
-library(geozoo)
 cube5d <- data.frame(cube.solid.random(p=5, n=300)$points)
 colnames(cube5d) <- paste0("x", 1:5)
 cube5d <- data.frame(apply(cube5d, 2, 
@@ -32,12 +33,12 @@ c_scree <- ggscree(c_pca, q = 5) +
   ylim(c(0,3))
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| label: tbl-plane-pcs
 #| tbl-cap: "Coefficients for the first two PCs for the plane data."
 #| code-summary: "Code to print PC coefficients"
 #| warning: false
-library(gt)
+
 p_pca$rotation[,1:2] |>
   as_tibble(rownames="Variable") |> 
   gt() |>
@@ -45,7 +46,7 @@ p_pca$rotation[,1:2] |>
              decimals = 2)
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| label: tbl-box-pcs
 #| tbl-cap: "Coefficients for the first three PCs for the box data."
 #| code-summary: "Code to print PC coefficients"
@@ -56,7 +57,7 @@ b_pca$rotation[,1:3] |>
              decimals = 2)
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| label: fig-plane-noise-scree
 #| message: false
 #| code-summary: "Code to make scree plot"
@@ -73,7 +74,7 @@ n_scree <- ggscree(pn_pca, q = 7) +
   ylim(c(0,3))
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| label: fig-2D-pca
 #| echo: false
 #| warning: false
@@ -83,11 +84,10 @@ n_scree <- ggscree(pn_pca, q = 7) +
 #| out-width: 100%
 #| fig-cap: "Scree plots for the three simulated data sets shown in Figure 3.2, and the data where extra noise variables are added. The 2D in 5D (a) is clearly recognised by PCA to be 2D because the variance drops substantially between 2-3 principal components. The 3D in 5D (b) is possibly 3D because the variance drops from 3-4 principal components. The fully 5D data (c) has no drop in variance, and all values are close to the typical value one would observe if the data was fully 5D. When the additional noise variables are added to the 2D data it becomes 4D in 7D, and the scree plot indicates that around 3-4 PCs would be suitable."
 #| fig-alt: "Four line plots laid out in 2x2. In (a) the line drops from 3 to 2 to 0 from x=1,2,3. In (b) the line drops from 2 to 1.5 to 1 to 0.25 and stays there as x goes from 1 to 5. In (c) the black line stays around 1 for all values of x. In (d) the black line drops from 3 to 2 to 1 for x=1, 2, 3, and then drops to 0 at x=4."
-library(patchwork)
 p_scree + b_scree + c_scree + n_scree + plot_layout(ncol=2)
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| label: tbl-plane-noise-pcs
 #| tbl-cap: "Coefficients for PCs 1-4 of the plane plus noise data."
 #| code-summary: "Code to print PC coefficients"
@@ -98,7 +98,7 @@ pn_pca$rotation[,1:4] |>
              decimals = 2)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| code-fold: false
 data(pisa)
 pisa_std <- pisa |>
@@ -110,13 +110,13 @@ pisa_pca <- prcomp(pisa_std)
 pisa_scree <- ggscree(pisa_pca, q = 15) + theme_minimal()
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| code-fold: true
 #| eval: FALSE
 # animate_xy(pisa_std, half_range=1)
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| code-fold: false
 #| eval: FALSE
 # render_gif(pisa_std,
@@ -129,7 +129,7 @@ pisa_scree <- ggscree(pisa_pca, q = 15) + theme_minimal()
 #            loop=FALSE)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| label: fig-pisa-scree-html
 #| eval: true
 #| message: false
@@ -142,12 +142,12 @@ pisa_scree <- ggscree(pisa_pca, q = 15) + theme_minimal()
 pisa_scree
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| code-summary: "Code to print PC coefficients"
 round(pisa_pca$rotation[,1], 2)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| label: pca-libraries
 #| eval: TRUE
 #| echo: TRUE
@@ -155,7 +155,6 @@ round(pisa_pca$rotation[,1], 2)
 #| error: FALSE
 #| warning: FALSE
 #| code-fold: false
-library(tourr)
 data(aflw)
 aflw_std <- aflw |>
   mutate_if(is.numeric, function(x) (x-
@@ -163,7 +162,7 @@ aflw_std <- aflw |>
       sd(x, na.rm=TRUE))
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| label: aflw-gt
 #| eval: false
 #| code-summary: "Code to generate tour"
@@ -176,10 +175,10 @@ aflw_std <- aflw |>
 #            loop=FALSE)
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| label: fig-aflw-pca
 #| fig-cap: "Scree plot showing decay in variance of PCs. There are sharp drops for the first four PCs, and then smaller declines."
-#| alt-text: "Scree plot showing variance vertically against PC number horizontally. Variance drops from close to 10 for PC 1 to about 1.2 for PC 4 then slowly decays through to PC 29."
+#| fig-alt: "Scree plot showing variance vertically against PC number horizontally. Variance drops from close to 10 for PC 1 to about 1.2 for PC 4 then slowly decays through to PC 29."
 #| fig-width: 6
 #| fig-height: 4
 #| out-width: 80%
@@ -192,11 +191,10 @@ aflw_pca <- prcomp(aflw_std[,7:35],
 ggscree(aflw_pca, q = 29) + theme_minimal()
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| label: tbl-aflw-pcs
 #| tbl-cap: "Coefficients for the first four PCs. PC 1 contrasts some with PC 2, with the first having large coefficients primarily on field play statistics, and the second having large coefficients on the scoring statistics."
 #| code-summary: "Code to print PC coefficients"
-library(gt)
 aflw_pca$rotation[,1:4] |>
   as_tibble(rownames="Variable") |> 
   arrange(desc(PC1), desc(PC2), desc(PC3)) |>
@@ -205,12 +203,10 @@ aflw_pca$rotation[,1:4] |>
              decimals = 2)
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| label: aflw-plotly
 #| eval: false
 #| code-summary: "Code to make tour animation"
-# library(plotly)
-# library(htmlwidgets)
 # set.seed(20)
 # b <- basis_random(4, 2)
 # aflw_pct <- tourr::save_history(aflw_pca$x[,1:4],
@@ -264,7 +260,7 @@ aflw_pca$rotation[,1:4] |>
 #           selfcontained = TRUE)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| eval: false
 #| echo: false
 # animate_pca(aflw_pca$x[,1:5],
@@ -276,7 +272,7 @@ aflw_pca$rotation[,1:4] |>
 #  animate_xy(aflw_pca$x[,1:5])
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| message: false
 #| warning: false
 #| code-summary: "Code to generate interactive plot of frame 18"
@@ -301,7 +297,7 @@ pg18 <- ggplot() +
     panel.grid=element_blank())
 
 
-## ----eval=knitr::is_html_output()------------------------------------------
+## ----eval=knitr::is_html_output()--------------------------------------------
 #| label: fig-aflw-pcaplots-html
 #| message: false
 #| warning: false
@@ -310,11 +306,10 @@ pg18 <- ggplot() +
 #| fig-width: 5
 #| fig-height: 4
 #| out-width: 80%
-library(plotly)
 ggplotly(pg18, width=500, height=500)
 
 
-## ----eval=knitr::is_latex_output()-----------------------------------------
+## ----eval=knitr::is_latex_output()-------------------------------------------
 #| label: fig-aflw-pcaplots-pdf
 #| echo: false
 #| message: false
@@ -335,7 +330,7 @@ ggplotly(pg18, width=500, height=500)
 #             vjust = 1.2)
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| label: fig-plane-biplot
 #| fig-cap: "Biplots of the plane (a) and plane + noise (b) data. All five variables contribute strongly to the two principal components in (a): PC1 is primarily `x1`, `x2` and `x3` and PC2 is primarily `x4` and `x5`. In (b) the same four variables contribute in almost the same way, with variables `x6` and `x7` contributing very little. The data was constructed this way, that these two dimensions were purely noise."
 #| fig-alt: "Two scatterplots with black dots representing individual data points projected onto the first two principal components. Red arrows originate from the center and point outward, representing variable loadings. In plot (a), the x-axis is labeled PC1 (57.61%) and the y-axis is labeled PC2 (37.36%), indicating the proportion of variance explained by each component. In plot (b), PC1 accounts for 41.22% of the variance and PC2 for 28.21%. The red arrows are labeled X1 through X6, showing how variables contribute to the principal components."
@@ -343,8 +338,6 @@ ggplotly(pg18, width=500, height=500)
 #| fig-width: 8
 #| fig-height: 4
 #| out-width: 100%
-library(ggfortify)
-library(patchwork)
 plane_pca <- prcomp(plane)
 pl1 <- autoplot(plane_pca, loadings = TRUE, 
          loadings.label = TRUE) + 
@@ -360,7 +353,7 @@ pl2 <- autoplot(plane_noise_pca, loadings = TRUE,
 pl1 + pl2
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| eval: false
 #| code-summary: Code for model-in-the-data
 # plane_m <- pca_model(plane_pca)
@@ -398,7 +391,7 @@ pl1 + pl2
 #            loop=FALSE)
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| eval: false
 #| code-summary: Code for model-in-the-data
 # pisa_model <- pca_model(pisa_pca, d=1, s=2)
@@ -419,7 +412,7 @@ pl1 + pl2
 #            loop=FALSE)
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| eval: false
 #| code-summary: Code for model-in-the-data
 # aflw_model <- pca_model(aflw_pca, d=4, s=1)
@@ -444,14 +437,14 @@ pl1 + pl2
 #            loop=FALSE)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| echo: false
 plane_noise_outliers <- plane_noise
 plane_noise_outliers[101,] <- c(2, 2, -2, 0, 0, 0, 0)
 plane_noise_outliers[102,] <- c(0, 0, 0,-2, -2, 0, 0)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| label: fig-plane-n-o-scree
 #| code-summary: Code for screeplot
 #| fig-cap: "Scree plot of the planar data with noise and an outlier. It is almost the same as the data without the outliers." 
@@ -463,7 +456,7 @@ plane_n_o_pca <- prcomp(plane_noise_outliers)
 ggscree(plane_n_o_pca, q = 7) + theme_minimal()
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| eval: false
 #| code-summary: "Code to generate tours"
 # clrs <- hcl.colors(12, "Zissou 1")
@@ -501,7 +494,7 @@ ggscree(plane_n_o_pca, q = 7) + theme_minimal()
 #            loop=FALSE)
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| label: fig-plane-o-n-pairs
 #| message: false
 #| warning: false
@@ -511,13 +504,12 @@ ggscree(plane_n_o_pca, q = 7) + theme_minimal()
 #| fig-cap: "From the scatterplot matrix we can see that the outliers are present in PC5, PC6 and PC7. That means by reducing the dimensionality to the first four PCs the model has missed some important characteristics in the data."
 #| fig-alt: "Matrix layout of pairwise plots of seven variables, as scatterplots in the lower triangle, density plots on the diagonal, and text showing correlation in the upper triangle. Outliers are visible in all scatterplots containing PCs 5, 6 and 7. Otherwise little association between variables."
 #| code-summary: "Code to make scatterplot matrix"
-library(GGally)
 ggscatmat(plane_n_o_pca$x) + theme_minimal() +
   theme(axis.title = element_blank(),
         axis.text = element_blank())
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| label: fig-plane-nonlin-scree
 #| code-summary: Code for screeplot
 #| fig-cap: "Scree plot of the non-linear data suggests three PCs." 
@@ -531,7 +523,7 @@ plane_nonlin_pca <- prcomp(plane_nonlin)
 ggscree(plane_nonlin_pca, q = 5) + theme_minimal()
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| eval: false
 #| code-summary: "Code to generate tour"
 # animate_xy(plane_nonlin_pca$x[,1:3])
@@ -545,7 +537,7 @@ ggscree(plane_nonlin_pca, q = 5) + theme_minimal()
 #            height=400)
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| label: fig-plane-nonlin-pairs
 #| message: false
 #| warning: false
@@ -562,21 +554,18 @@ ggscatmat(plane_nonlin_pca$x) +
         axis.text = element_blank())
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| label: aflw-pairs
 #| eval: false
 #| echo: false
 #| message: false
 #| warning: false
-# library(GGally)
 # ggscatmat(aflw_pca$x, columns=1:4)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| eval: false
 #| echo: false
-# library(mulgar)
-# library(dplyr)
 # data(bushfires)
 # bushfires_std <- bushfires |>
 #   dplyr::select(`rf`:`log_dist_road`) |>
@@ -598,13 +587,12 @@ ggscatmat(plane_nonlin_pca$x) +
 # 
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| eval: false
 #| echo: false
 #| message: false
 #| warning: false
 # library(dobin)
-# library(GGally)
 # dobin_pno_1 <- as.data.frame(dobin(plane_noise_outliers)$coords)
 # dobin_pno_1$outlier <- c(rep("no", 100), rep("yes", 2))
 # ggscatmat(dobin_pno_1, columns = 1:3, color = "outlier")

@@ -1,4 +1,4 @@
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| code-fold: false
 X <- matrix(c(1.1, 1.3, 1.4, 1.2, 
               2.7, 2.6, 2.4, 2.5, 
@@ -7,48 +7,49 @@ X <- matrix(c(1.1, 1.3, 1.4, 1.2,
 X
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| code-fold: false
 X[,2]
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| code-fold: false
 X[2,]
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| code-fold: false
 X[3,2]
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| code-fold: false
 A <- matrix(c(0.707,0.707,0,0,0,0,0.707,0.707),
             ncol=2, byrow=FALSE)
 A
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| code-fold: false
 sum(A[,1]^2)
 sum(A[,1]*A[,2])
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| code-fold: false
 X %*% A
 
 
-## --------------------------------------------------------------------------
+## ----echo=FALSE--------------------------------------------------------------
+#| code-summary: "Load libraries"
+source("code/setup.R")
+
+
+## ----------------------------------------------------------------------------
 #| eval: false
 #| echo: false
 # # This code is to generate the gifs, but not the best to
 # # start users on.
-# library(tourr)
-# library(mulgar)
-# library(ggplot2)
-# library(colorspace)
 # data("penguins_sub")
 # set.seed(1148)
 # p_t_grand <- save_history(penguins_sub[, 1:4],
@@ -101,7 +102,7 @@ X %*% A
 #            )
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| eval: false
 #| echo: false
 # # This code is generates sequences of projections to demonstrate differences between methods.
@@ -169,7 +170,6 @@ X %*% A
 # rd3$data_prj$species <- penguins_sub$species
 # rd3_plt <- plot_tour_projection(rd3)
 # # Make plots and save to png
-# library(gridExtra)
 # grid.arrange(gr1_plt, gr2_plt, gr3_plt, ncol=3)
 # grid.arrange(gd1_plt, gd2_plt, gd3_plt, ncol=3)
 # grid.arrange(rd1_plt, rd2_plt, rd3_plt, ncol=3)
@@ -188,10 +188,9 @@ X %*% A
 #         panel.grid.minor = element_blank())
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| echo: false
 #| eval: false
-# library(tourr)
 # animate_dist(flea[, 1:6],
 #              method="histogram",
 #              bw=0.1, scale_density=TRUE)
@@ -205,11 +204,9 @@ X %*% A
 #             label_x_pos = 0)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| echo: false
 #| eval: false
-# library(tourr)
-# library(geozoo)
 # set.seed(1351)
 # d <- torus(3, n=4304)$points
 # d <- apply(d, 2, function(x) (x-mean(x))/sd(x))
@@ -237,11 +234,9 @@ X %*% A
 #            height = 400)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| echo: false
 #| eval: false
-# library(tourr)
-# library(mulgar)
 # data(aflw)
 # aflw_labels <- ifelse(aflw$surname %in%
 #                         c("Vescio", "Bowers", "Davey"), aflw$surname, "")
@@ -260,12 +255,9 @@ X %*% A
 #            height=400)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| echo: false
 #| eval: false
-# library(compositions)
-# library(geozoo)
-# library(dplyr)
 # data("Firework")
 # # Five components
 # # Check
@@ -315,7 +307,7 @@ X %*% A
 # 
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| eval: false
 #| echo: true
 # rs <- geozoo::roman.surface()$points |>
@@ -323,27 +315,24 @@ X %*% A
 #   as.data.frame()
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| eval: false
 #| echo: true
 # s_solid <- geozoo::sphere.solid.random(4, 2000)$points |>
 #   as.data.frame()
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| eval: false
 #| echo: true
 # s_hollow <- geozoo::sphere.hollow(4, 2000)$points |>
 #   as.data.frame()
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| eval: false
 #| echo: false
-# library(tourr)
-# library(mulgar)
-# library(ggplot2)
-# library(geozoo)
+# source("code/setup.R")
 # # Answer to Q1
 # set.seed(110)
 # m <- matrix(rnorm(10), ncol = 2)
@@ -413,7 +402,6 @@ X %*% A
 #   geom_point() +
 #   theme(aspect.ratio=1,
 #         legend.position="none")
-# library(patchwork)
 # p1 + p2 + p3 + p4 + plot_layout(ncol=4)
 # # They look ALMOST identical. These are very small interpolation steps, and the data changes very little between each one.
 # 

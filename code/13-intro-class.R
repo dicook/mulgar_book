@@ -1,4 +1,9 @@
-## --------------------------------------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
+#| code-summary: "Load libraries"
+source("code/setup.R")
+
+
+## ----------------------------------------------------------------------------
 #| label: fig-sup-example
 #| fig-cap: "Examples of supervised classification patterns: (a) linearly separable, (b) linear but not completely separable, (c) non-linearly separable, (d) non-linear, but not completely separable."
 #| fig-alt: "A set of four scatter plots labeled (a), (b), (c), and (d), each showing two groups of data points in red and blue. The distribution of points varies across the plots. In (a), the red and blue points are relatively well separated along a diagonal trend. In (b), the separation is less clear, with more overlap between the groups. In (c) and (d), the points follow a zig-zag pattern, separated in (c) but overlapping in (d)."
@@ -7,10 +12,6 @@
 #| fig-height: 2.5
 #| fig-width: 7.5
 #| out-width: 100%
-library(ggplot2)
-library(dplyr)
-library(colorspace)
-library(patchwork)
 set.seed(524)
 x1 <- runif(176) + 0.5
 x1[1:61] <- x1[1:61] - 1.2
@@ -95,7 +96,7 @@ class4 <- ggplot(df2, aes(x=x7, y=x8, colour = cl2)) +
 print(class1 + class2 + class3 + class4 + plot_layout(ncol=4))
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| label: fig-bias-variance
 #| fig-cap: "Illustrating bias and variance using three different samples (black points) from the same distribution (in the columns) and two different model fits (rows). Colour indicates predictions from the resulting fitted model. The model used in a-c does not capture the zig-zag clusters, but is virtually the same regardless of training sample: it has high bias but low variance. The model used in d-f captures the zig-zag reasonably, but the boundary differs substantially between training samples: it has low bias but high variance."
 #| fig-alt: "A set of six square plots labeled (a) to (f), arranged in a 2x3 grid. Data points are overlaid as black crosses and circles. Each group follows a zig-zag pattern with crosses at top and separated from circles. The colours, red and blue, display a binary classification boundary, which is linear in (a) to (c) and different step function shapes in (d) to (f). "
@@ -104,9 +105,6 @@ print(class1 + class2 + class3 + class4 + plot_layout(ncol=4))
 #| fig-height: 4
 #| fig-width: 6
 #| out-width: 100%
-library(MASS)
-library(rpart)
-library(classifly)
 n <- 486
 set.seed(826)
 x1 <- 2*(runif(n) - 0.5)
@@ -243,10 +241,9 @@ bv6 <- ggplot() +
 bv1 + bv3 + bv5 + bv2 + bv4 + bv6 + plot_layout(ncol=3)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| eval: false
 #| echo: false
-# library(mulgar)
 # vr <- c(-0.5, -0.3, 0.0, 0.3, 0.5)
 # set.seed(503)
 # vc1 <- matrix(c(1.5, sample(vr, 1), sample(vr, 1), sample(vr, 1),
@@ -391,7 +388,6 @@ bv1 + bv3 + bv5 + bv2 + bv4 + bv6 + plot_layout(ncol=3)
 #               v_rel = 0.2)
 # 
 # # Try with spheres
-# library(geozoo)
 # set.seed(637)
 # sg1 <- sphere.solid.random(n=313, p=4)$points
 # sg2 <- sphere.hollow(n=323, p=4)$points * 2
@@ -425,7 +421,7 @@ bv1 + bv3 + bv5 + bv2 + bv4 + bv6 + plot_layout(ncol=3)
 #            height=400)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| echo: true
 #| eval: false
 # library(readr)
@@ -436,7 +432,7 @@ bv1 + bv3 + bv5 + bv2 + bv4 + bv6 + plot_layout(ncol=3)
 #   mutate(type = factor(type))
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| eval: false
 # library(mulgar)
 # data(aflw)
@@ -446,11 +442,8 @@ bv1 + bv3 + bv5 + bv2 + bv4 + bv6 + plot_layout(ncol=3)
 #   dplyr::select(goals:tackles)
 
 
-## ----eval=FALSE------------------------------------------------------------
+## ----eval=FALSE--------------------------------------------------------------
 #| echo: false
-# library(mulgar)
-# library(tourr)
-# library(dplyr)
 # data(bushfires)
 # b_sub <- bushfires |>
 #   select(se, maxt, mint, log_dist_road, cause) |>

@@ -1,14 +1,13 @@
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
+#| code-summary: "Load libraries"
+source("code/setup.R")
+
+
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| message: false
 #| code-summary: Code for spiral plots
 library(Rdimtools)
-library(colorspace)
 library(cardinalR)
-library(tsibble)
-library(ggplot2)
-library(dplyr)
-library(patchwork)
-library(ggthemes)
 n_obs <- 1652  
 set.seed(259)
 swiss <- swiss_roll(n_obs, num_noise = 0)
@@ -55,7 +54,7 @@ spiral2 <- ggplot(swiss_iso,
 #spiral1 + spiral2 + plot_layout(ncol=2)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| fig-width: 4
 #| fig-height: 4
 #| out-width: 100%
@@ -65,7 +64,7 @@ spiral2 <- ggplot(swiss_iso,
 spiral1
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| fig-width: 4
 #| fig-height: 4
 #| out-width: 100%
@@ -75,7 +74,7 @@ spiral1
 spiral2
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| fig-width: 4
 #| fig-height: 4
 #| out-width: 100%
@@ -85,7 +84,7 @@ spiral2
 spiral1
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| fig-width: 4
 #| fig-height: 4
 #| out-width: 100%
@@ -95,12 +94,9 @@ spiral1
 spiral2
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| eval: false
 #| echo: false
-# library(crosstalk)
-# library(plotly)
-# library(tourr)
 # swiss_tbl <- as_tibble(swiss)
 # spiral1 <- ggplot(swiss_tbl,
 #                   aes(x=x,
@@ -201,7 +197,7 @@ spiral2
 #  )
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| label: fig-nldr-clusters
 #| fig-cap: "Two non-linear embeddings of the non-linear clusters data: (a) t-SNE, (b) UMAP. One suggests five clusters and the other four, and also disagree on the cluster shapes."
 #| fig-alt: "This chart has two plots titled '(a) t-SNE', with x-axis 'tsne1' and y-axis 'tsne2', and '(b) UMAP' with x-axis 'umap1' anf y-axis 'umap2'. The chart '(a)' is a set of 1268 solid circle points arranged with a strip going from bottom let to top right, two C-shapes above and below the line and two small concetration of dots at the middle bottom and top. The points in chart '(b)' are arranged like a tilted smiley face."
@@ -210,11 +206,10 @@ spiral2
 #| out-width: 100%
 #| message: false
 #| code-summary: "Code to generate the 2D non-linear representation"
-library(mulgar)
+
 library(Rtsne)
 library(uwot)
-library(ggplot2)
-library(patchwork)
+
 set.seed(44)
 cnl_tsne <- Rtsne(clusters_nonlin)
 cnl_umap <- umap(clusters_nonlin)
@@ -237,11 +232,11 @@ n2 <- ggplot(as.data.frame(cnl_umap), aes(x=V1, y=V2)) +
 n1 + n2
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| eval: false
 #| echo: false
 #| code-summary: "Code to create animated gif"
-# library(tourr)
+
 # render_gif(clusters_nonlin,
 #            grand_tour(),
 #            display_xy(),
@@ -251,11 +246,10 @@ n1 + n2
 #            height = 300)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| message: FALSE
 #| eval: false
 #| code-fold: false
-# library(liminal)
 # umap_df <- data.frame(umapX = cnl_umap[, 1],
 #                       umapY = cnl_umap[, 2])
 # limn_tour_link(
@@ -265,14 +259,11 @@ n1 + n2
 # )
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| message: false
 #| eval: false
 #| code-fold: false
-# library(detourr)
-# library(dplyr)
-# library(crosstalk)
-# library(plotly)
+
 # umap_df <- data.frame(umapX = cnl_umap[, 1],
 #                       umapY = cnl_umap[, 2])
 # cnl_df <- bind_cols(clusters_nonlin, umap_df)
@@ -301,12 +292,11 @@ n1 + n2
 #  )
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| message: false
 #| eval: false
 #| code-summary: "Code to run liminal on the fake trees data"
-# library(liminal)
-# library(Rtsne)
+
 # data(fake_trees)
 # set.seed(2020)
 # tsne <- Rtsne::Rtsne(
@@ -322,16 +312,11 @@ n1 + n2
 # )
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| message: false
 #| eval: false
 #| echo: false
-# library(mulgar)
-# library(Rtsne)
-# library(uwot)
-# library(ggplot2)
-# library(patchwork)
-# 
+
 # set.seed(1240)
 # cnl_tsne <- Rtsne(clusters_nonlin)
 # cnl_umap <- umap(clusters_nonlin)
@@ -348,15 +333,12 @@ n1 + n2
 # n1 + n2
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| message: false
 # Answer to Q2
 library(Rdimtools)
 library(cardinalR)
-library(tsibble)
-library(ggplot2)
-library(dplyr)
-library(patchwork)
+
 n_obs <- 1652  
 set.seed(259)
 swiss <- swiss_roll(n_obs, num_noise = 0)
@@ -402,7 +384,7 @@ spiral2 <- ggplot(swiss_iso,
 spiral1 + spiral2 + plot_layout(ncol=2)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| message: false
 # Answer to Q3
 n_obs <- 1652  
@@ -450,7 +432,7 @@ swiss_umap <- ggplot(swiss_umap,
 swiss_tsne + swiss_umap + plot_layout(ncol=2)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| message: false
 #| eval: false
 #| echo: false
@@ -468,7 +450,7 @@ swiss_tsne + swiss_umap + plot_layout(ncol=2)
 # # The t-SNE mapping of the penguins data inaccurately splits one of the clusters. The three clusters are clearly distinct when viewed with the tour.
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| message: false
 #| eval: false
 #| echo: false
@@ -487,7 +469,7 @@ swiss_tsne + swiss_umap + plot_layout(ncol=2)
 #         axis.text = element_blank())
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| message: false
 #| eval: false
 #| echo: false
@@ -509,7 +491,7 @@ swiss_tsne + swiss_umap + plot_layout(ncol=2)
 #         axis.text = element_blank())
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| label: pbmc
 #| message: false
 #| eval: false

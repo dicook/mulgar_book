@@ -1,18 +1,9 @@
-## ----echo=knitr::is_html_output()------------------------------------------
-#| label: mc-libraries
-#| message: FALSE
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| code-summary: "Load libraries"
-library(dplyr)
-library(kableExtra)
-library(ggplot2)
-library(mclust)
-library(mulgar)
-library(patchwork)
-library(colorspace)
-library(tourr)
+source("code/setup.R")
 
 
-## ----eval=knitr::is_html_output()------------------------------------------
+## ----eval=knitr::is_html_output()--------------------------------------------
 #| label: tbl-covariances-html
 #| tbl-cap: "Parameterizations of the covariance matrix."
 #| echo: FALSE
@@ -22,7 +13,7 @@ readr::read_csv('misc/mclust-covariances-html.csv') |>
   kableExtra::kable_styling(full_width = FALSE)
 
 
-## ----eval=knitr::is_latex_output()-----------------------------------------
+## ----eval=knitr::is_latex_output()-------------------------------------------
 #| label: tbl-covariances-pdf
 #| tbl-cap: "Parameterizations of the covariance matrix."
 #| echo: FALSE
@@ -34,7 +25,7 @@ readr::read_csv('misc/mclust-covariances-html.csv') |>
 #   kableExtra::kable_styling(full_width = FALSE)
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| label: fig-penguins-bl-fl
 #| fig-cap: "Scatterplot of flipper length by bill length of the penguins data, overlaid with density contours. Examining 2D data using a 2D density plot can help assess whether the elliptical variance-covariance model is appropriate for the data. In this case it looks reasonable."
 #| fig-alt: "The x axis is labelled bl and has tick marks at -2, -1, 0, 1, 2, 3, and the y axis is labelled fl with tick marks at -2, -1, 0, 1, 2. Black points and blue-green contour lines suggest three modes, one at bottom left, one at top right and one to the middle right. Contours are a little elliptical, except the third mode is only weakly formed."
@@ -52,7 +43,7 @@ ggplot(penguins_sub, aes(x=bl,
   theme(aspect.ratio = 1)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| label: fig-penguins-bl-fl-mc
 #| message: FALSE
 #| code-fold: false
@@ -90,7 +81,7 @@ ggell <- ggplot() +
 ggmc + ggell + plot_layout(ncol=2)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| label: fig-penguins-bic
 #| code-fold: false
 #| fig-cap: "BIC values for the top models for 2-9 clusters on the penguins data. The interpretation is mixed: if one were to choose three clusters any of the variance-covariance models would be equally as good, but the very best model is the four-cluster VEE."
@@ -105,7 +96,7 @@ ggmc <- ggmcbic(penguins_BIC, cl=2:9, top=7) +
 ggmc
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| label: best-mclust
 #| code-fold: false
 penguins_mc <- Mclust(penguins_sub[,1:4], 
@@ -124,7 +115,7 @@ penguins_mc_data <- penguins_cl |>
   mutate(type = factor(type))
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| eval: FALSE
 #| label: simpler-mclust
 #| code-summary: "Code to make animated gifs"
@@ -179,7 +170,7 @@ penguins_mc_data <- penguins_cl |>
 #            loop=FALSE)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| eval: FALSE
 #| echo: FALSE
 # # Its surprising that the four cluster solution didn't

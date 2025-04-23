@@ -1,8 +1,11 @@
 ## ----echo=knitr::is_html_output()--------------------------------------------
+#| code-summary: "Load libraries"
+source("code/setup.R")
+
+
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| message: false
 #| code-summary: "Code to fit forest"
-library(randomForest)
-library(dplyr)
 load("data/penguins_sub.rda")
 
 penguins_rf <- randomForest(species~.,
@@ -21,7 +24,6 @@ penguins_errors <- penguins_sub |>
 ## ----echo=knitr::is_html_output()--------------------------------------------
 #| eval: false
 #| code-summary: "Code to make animated gifs"
-# library(tourr)
 # symbols <- c(1, 16)
 # p_pch <- symbols[penguins_errors$err+1]
 # p_cex <- rep(1, length(p_pch))
@@ -98,8 +100,6 @@ penguins_errors <- penguins_sub |>
 ## ----echo=knitr::is_html_output()--------------------------------------------
 #| message: false
 # Split the data intro training and testing, as done in 17-nn chapter
-library(dplyr)
-library(tidyr)
 library(rsample)
 library(tidymodels)
 library(keras)
@@ -125,22 +125,6 @@ p_test_x <- p_test |>
   as.matrix()
 p_test_y <- p_test |> pull(species) |> as.numeric() 
 p_test_y <- p_test_y-1 # Needs to be 0, 1, 2
-
-
-## ----echo=knitr::is_html_output()--------------------------------------------
-#| message: false
-#| eval: false
-# # Predict training and test set
-# # This looks like there is some machine dependency on the
-# # saved model, so predictions are saved for loading across platforms
-# p_nn_model <- load_model_tf("data/penguins_cnn")
-# p_train_pred <- p_nn_model |>
-#   predict(p_train_x, verbose = 0)
-# p_test_pred <- p_nn_model |>
-#   predict(p_test_x, verbose = 0)
-# 
-# save(p_train_pred, file="data/p_train_pred.rda")
-# save(p_test_pred, file="data/p_test_pred.rda")
 
 
 ## ----echo=knitr::is_html_output()--------------------------------------------
@@ -216,7 +200,6 @@ knitr::kable(p_outlier, digits=2)
 #| out-width: 80%
 #| fig-cap: "SHAP values focused on Gentoo class, for each variable. The one misclassified penguin (orange) has a much lower value for body mass, suggesting that this variable is used differently for the prediction than for other penguins." 
 #| fig-alt: "This is an untitled chart with no subtitle or caption. It has x-axis with labels bl, bd, fl and bm. It has y-axis 'SHAP' with labels -0.25, 0.00, 0.25 and 0.50. In this chart colour is used to show factor(error). The legend that would normally indicate this has been hidden. The chart is a set of 316 big solid circle points of which about 92% can be seen. It has alpha set to 0.8."
-# library(colorspace)
 # p_exp_gentoo |>
 #   filter(species == "Gentoo") |>
 #   pivot_longer(bl:bm, names_to="var", values_to="shap") |>
@@ -234,9 +217,6 @@ knitr::kable(p_outlier, digits=2)
 #| code-fold: true
 #| message: false
 #| warning: false
-library(colorspace)
-library(ggpcp)
-library(GGally)
 p_pcp <- p_exp_gentoo |>
   filter(species == "Gentoo") |>
   pcp_select(1:4) |>
@@ -295,7 +275,6 @@ p_sm
 #| out-width: 100%
 #| fig-cap: "Plots of the training data with misclassified observations marked to help understand what the SHAP values. The misclassified Gentoo penguin has an unusually low body mass value which makes it appear to be more like an Adelie penguin, particularly when considered in relation to it's bill length." 
 #| fig-alt: "Three scatterplots of bl, bd, fl vs bm. Colour is mapped to species. Shape is matched to error, with solid circles indicating a misclassification. There is one Gentoo error and five Adelie errors. In bd  vs bm species show a more linear separation, but some overlap in the boundary region between Adelie (blue) and Chinstrap (yellow). The misclassified Gentoo is at the bottom left edge of the Gentoo cluster. The Adelie errors are mostly in the overlapping regions between Adelie and Chinstrap, in bl vs bm, and intermixed in these clusters when they overlap in fl vs bm and bd vs bm."
-library(patchwork)
 # Check position on bm
 shap_proj <- p_exp_gentoo |>
   filter(species == "Gentoo", error == "yes") |>

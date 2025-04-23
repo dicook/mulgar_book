@@ -1,9 +1,13 @@
-## --------------------------------------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
+#| code-summary: "Load libraries"
+source("code/setup.R")
+
+
+## ----------------------------------------------------------------------------
 #| code-summary: "code to run SOM"
 #| message: false
 library(kohonen)
 library(aweSOM)
-library(mulgar)
 load("data/penguins_sub.rda")
 
 set.seed(947)
@@ -16,13 +20,9 @@ p_som <- som(as.matrix(penguins_sub[,1:4]),
              init = p_init)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| code-summary: "code to generate net"
 #| message: false
-library(dplyr)
-library(ggplot2)
-library(colorspace)
-
 p_som_df_net <- som_model(p_som)
 p_som_data <- p_som_df_net$data |> 
   mutate(species = penguins_sub$species)
@@ -44,11 +44,9 @@ p_som_map_p <- ggplot() +
         axis.text = element_blank())
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| eval: false
 #| code-summary: "code to make gifs"
-# library(tourr)
-# 
 # # Set up data
 # p_som_map <- p_som_df_net$net |>
 #   mutate(species = "0", type="net")
@@ -72,7 +70,7 @@ p_som_map_p <- ggplot() +
 #            axes="bottomleft")
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| echo: false
 #| eval: false
 # render_gif(p_som_map_data[,1:4],
@@ -89,10 +87,11 @@ p_som_map_p <- ggplot() +
 # )
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| echo: false
 #| label: fig-p-som2-html
 #| fig-cap: "2D map"
+#| fig-alt: "Scatterplot on a 5x5 black grid, where points are spread a little at each node. The x axis is labelled 'map 1' and has no numbers, and the y axis is labelled 'map 2' and has no numbers. Points are coloured blue, yellow and red matching penguin species Adeli, Chinstrap and Gentoo. The top left is mostly blue, top right mostly yellow and bottom is mostly red."
 #| fig-width: 5
 #| fig-height: 5
 #| out-width: 100%

@@ -1,10 +1,16 @@
-## --------------------------------------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
+#| code-summary: "Load libraries"
+source("code/setup.R")
+
+
+## ----------------------------------------------------------------------------
 #| label: fig-ideal-clusters
 #| echo: FALSE
 #| fig-width: 5
 #| fig-height: 5
 #| out-width: "100%"
 #| fig-cap: "Different structures in data impact cluster analysis.  When there are well-separated groups (a), it is simple to group similar observations. Even when there are not, partitioning observations into groups may still be useful. There may be nuisance observations (b) or nuisance variables (c) that affect the interpoint distance calculations and distract the clustering algorithm, and there may be oddly shaped clusters (d) which are hard to numerically describe."
+#| fig-alt: "Four scatterplots in a 2x2 layout labelled a-d, with blue points. There are three circular clusters in a, and b looks like a gym barbell oriented from lower left to upper right. In c there are two elliptical clumps oriented top to bottom side-by side, and in d there is a small circular clump above a curved clump that looks like a smile."
 #| message: false
 stdd <- function(x) (x-mean(x))/sd(x)
 set.seed(20230513)
@@ -38,8 +44,6 @@ d_odd_shapes <-
   data.frame(x1=stdd(d_odd_shapes[,1]),
              x2=stdd(d_odd_shapes[,2]))
 
-library(ggplot2)
-library(patchwork)
 p1 <- ggplot(d_sep_cl, aes(x=x1, y=x2)) + 
   geom_point(colour="#3B99B1", alpha=0.7) + 
   annotate("text", -2.5, 2.5, label="a") +
@@ -87,21 +91,20 @@ p4 <- ggplot(d_odd_shapes, aes(x=x1, y=x2)) +
 print(p1 + p2 + p3 + p4 + plot_layout(ncol=2))
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| message: FALSE
 #| warning: false
 #| fig-width: 4
 #| fig-height: 4
 #| code-summary: "Code for plot"
+#| fig-alt: "4x4 matrix of plots with scatterplots of three points in the lower and upper triangle. The diagonal has labels V1, V2, V3, V4. The three points are coloured, with yellow at bottom left, and blue and light green close to each other at top right."
 
 x <- data.frame(V1 = c(7.3, 7.4, 4.1),
                     V2 = c(7.6, 7.2, 4.6),
                     V3 = c(7.7, 7.3, 4.6),
                     V4 = c(8.0, 7.2, 4.8),
                     point = factor(c("a1", "a2", "a3")))
-library(GGally)
-library(colorspace)
-library(gridExtra)
+
 pscat <- ggpairs(x, columns=1:4,
                  upper=list(continuous="points"),
                  diag=list(continuous="blankDiag"),
@@ -115,10 +118,11 @@ pscat <- ggpairs(x, columns=1:4,
 pscat
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| fig-width: 3
 #| fig-height: 3.4
 #| code-summary: "Code for plot"
+#| fig-alt: "Line plot with x axis having ticks at V1, V2, V3, V4, and no labels or ticks on the y axis. There are three coloured lines labelled a1 (blue), a2 (light green) and a3 (yellow) by the legend on the right. Two lines (a1, a3) have the same pattern, up, flat, up, and the other has a down, up, down pattern."
 ppar <- ggparcoord(x, columns=1:4, 
                    groupColumn = 5, 
                    scale = "globalminmax") +
@@ -132,7 +136,7 @@ ppar <- ggparcoord(x, columns=1:4,
 ppar
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| echo: false
 library(mulgar)
 vc <- matrix(c(1,0.8,0.8,0.8,1,0.8,0.8,0.8,1), ncol=3, byrow=TRUE)
@@ -147,18 +151,18 @@ colnames(x) <- paste0("x", 1:3)
 x 
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| echo: false
 rownames(vc) <- paste0("x", 1:3)
 colnames(vc) <- paste0("x", 1:3)
 vc
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| eval: false
 #| echo: false
 # # Answers
-# library(patchwork)
+# 
 # # Euclidean
 # dist(x)
 # # Mahalanobis
@@ -174,7 +178,7 @@ vc
 #   }}
 # as.dist(d_ch)
 # # Bray-Curtis
-# vegdist(x, "bray")
+# vegan::vegdist(x, "bray")
 # # Plot
 # x <- data.frame(x)
 # p1 <- ggplot(x) + geom_text(aes(x=x1, y=x2,
@@ -192,7 +196,7 @@ vc
 # p1+p2+p3+plot_layout(ncol=3)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| echo: false
 #| message: false
 #| warning: false
@@ -201,11 +205,7 @@ vc
 #| out-width: 80%
 #| label: fig-what-clusters
 #| fig-cap: "What would you consider the clusters to be?"
-library(ggplot2)
-library(dplyr)
-library(patchwork)
-library(mulgar)
-library(geozoo)
+
 set.seed(416)
 d1 <- rmvn(n=402, p=2)
 d1[1:66,1] <- d1[1:66,1] + 6
