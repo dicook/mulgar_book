@@ -39,6 +39,7 @@ We'll start by showing PCA on the simulated data from @sec-dimension-overview. T
 
 ```{r echo=knitr::is_html_output()}
 #| code-summary: "Load libraries"
+#| message: false
 source("code/setup.R")
 ```
 
@@ -313,6 +314,12 @@ ggscree(aflw_pca, q = 29) + theme_minimal()
 
 From the scree plot in @fig-aflw-pca, we see a sharp drop from one to two, two to three and then smaller drops. After four PCs the variance drops again at six PCs and then gradually decays. We will choose four PCs to examine more closely. This explains `r round(summary(aflw_pca)$importance[3,4]*100,1)`% of the variance.
 
+When there are as many variables as this, it can be hard to digest the combinations of variables most contributing to each PC. Rearranging the table by sorting on a selected PC can help. @tbl-aflw-pcs has been sorted according to the PC 1 coefficients.
+
+PC 1 is primarily composed of `disposals`, `possessions`, `kicks`, `metres`, `uncontested`, `contested`, .... primarily the field play statistics! It is quite common in PCA for the first PC to be a combination of all variables, which suggests that there is one main direction of variation in the data. Here it is not quite that. PCA suggests that the primary variation is through a combination of field skills, or basic football playing skills.
+
+Thus the second PC contrasts the first, because it is primarily a combination of `shots`, `goals`, `marks_in50`, `accuracy`, and `behinds` contrasted against `rebounds_in50` and `intercepts`. The positive coefficients are primary offensive skills and the negative coefficients are defensive skills. This PC is reasonable measure of the offensive vs defensive skills of a player.
+
 ```{r echo=knitr::is_html_output()}
 #| label: tbl-aflw-pcs
 #| tbl-cap: "Coefficients for the first four PCs. PC 1 contrasts some with PC 2, with the first having large coefficients primarily on field play statistics, and the second having large coefficients on the scoring statistics."
@@ -324,12 +331,6 @@ aflw_pca$rotation[,1:4] |>
   fmt_number(columns = c(PC1, PC2, PC3, PC4),
              decimals = 2)
 ```
-
-When there are as many variables as this, it can be hard to digest the combinations of variables most contributing to each PC. Rearranging the table by sorting on a selected PC can help. @tbl-aflw-pcs has been sorted according to the PC 1 coefficients.
-
-PC 1 is primarily composed of `disposals`, `possessions`, `kicks`, `metres`, `uncontested`, `contested`, .... primarily the field play statistics! It is quite common in PCA for the first PC to be a combination of all variables, which suggests that there is one main direction of variation in the data. Here it is not quite that. PCA suggests that the primary variation is through a combination of field skills, or basic football playing skills.
-
-Thus the second PC contrasts the first, because it is primarily a combination of `shots`, `goals`, `marks_in50`, `accuracy`, and `behinds` contrasted against `rebounds_in50` and `intercepts`. The positive coefficients are primary offensive skills and the negative coefficients are defensive skills. This PC is reasonable measure of the offensive vs defensive skills of a player.
 
 \index{dimension reduction!interpretation}
 
