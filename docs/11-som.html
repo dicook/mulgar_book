@@ -412,9 +412,18 @@ window.Quarto = {
 </div>
 <p><a href="#fig-penguins-som-html" class="quarto-xref">Figure&nbsp;<span>11.1</span></a> illustrates how the SOM fits the penguins data. SOM is not ideal for clustered data where there are gaps. It is better suited for data that lies on a non-linear low-dimensional manifold. To model data like the penguins the first step is to set up a net that will cover more than the three clusters. Here we have chosen to use a <span class="math inline">\(5\times 5\)</span> rectangular grid. (The option allows for a hexagonal grid, which would make for a better tiled 2D map, but this is not useful for viewing the model in high dimensions.) Like <span class="math inline">\(k\)</span>-means clustering the fitted model can change substantially depending on the initialisation, so setting a seed will ensure a consistent result. We have also initialised the positions of the knots using PCA, which stretches the net in the main two directions of variance of the data, generally giving better results.</p>
 <div class="cell">
-<details class="code-fold"><summary>code to run SOM</summary><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">kohonen</span><span class="op">)</span></span>
+<details class="code-fold"><summary>Load libraries</summary><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/source.html">source</a></span><span class="op">(</span><span class="st">"code/setup.R"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stderr">
+<pre><code>Warning in rgl.init(initValue, onlyNULL): RGL: unable to open X11 display</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: 'rgl.init' failed, will use the null device.
+See '?rgl.useNULL' for ways to avoid this warning.</code></pre>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold"><summary>code to run SOM</summary><div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">kohonen</span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">aweSOM</span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dicook.github.io/mulgar/">mulgar</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"data/penguins_sub.rda"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">947</span><span class="op">)</span></span>
@@ -427,45 +436,39 @@ window.Quarto = {
 <span>             init <span class="op">=</span> <span class="va">p_init</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<p>The resulting model object is used to construct an object containing the original data, the 2D map, the map in <span class="math inline">\(p\)</span>-D, with edges, and segments to connect points to represent the next using the <code><a href="https://dicook.github.io/mulgar/reference/som_model.html">som_model()</a></code> function from <code>mulgar</code>. The 2D map shows a configuration of the data in 2D which best displays the clusters, much like how a PCA or LDA plot would be used.</p>
+<p>The resulting model object is used to construct an object containing the original data, the 2D map, the map in <span class="math inline">\(p\)</span>-D, with edges, and segments to connect points to represent the next using the <code>som_model()</code> function from <code>mulgar</code>. The 2D map shows a configuration of the data in 2D which best displays the clusters, much like how a PCA or LDA plot would be used.</p>
 <div class="cell">
-<details class="code-fold"><summary>code to generate net</summary><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://colorspace.R-Forge.R-project.org/">colorspace</a></span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">p_som_df_net</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dicook.github.io/mulgar/reference/som_model.html">som_model</a></span><span class="op">(</span><span class="va">p_som</span><span class="op">)</span></span>
+<details class="code-fold"><summary>code to generate net</summary><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_som_df_net</span> <span class="op">&lt;-</span> <span class="fu">som_model</span><span class="op">(</span><span class="va">p_som</span><span class="op">)</span></span>
 <span><span class="va">p_som_data</span> <span class="op">&lt;-</span> <span class="va">p_som_df_net</span><span class="op">$</span><span class="va">data</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>species <span class="op">=</span> <span class="va">penguins_sub</span><span class="op">$</span><span class="va">species</span><span class="op">)</span></span>
-<span><span class="va">p_som_map_p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_segment.html">geom_segment</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">p_som_df_net</span><span class="op">$</span><span class="va">edges_s</span>, </span>
-<span>               <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">x</span>, xend<span class="op">=</span><span class="va">xend</span>, y<span class="op">=</span><span class="va">y</span>, </span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>species <span class="op">=</span> <span class="va">penguins_sub</span><span class="op">$</span><span class="va">species</span><span class="op">)</span></span>
+<span><span class="va">p_som_map_p</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_segment</span><span class="op">(</span>data<span class="op">=</span><span class="va">p_som_df_net</span><span class="op">$</span><span class="va">edges_s</span>, </span>
+<span>               <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">x</span>, xend<span class="op">=</span><span class="va">xend</span>, y<span class="op">=</span><span class="va">y</span>, </span>
 <span>                   yend<span class="op">=</span><span class="va">yend</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">p_som_data</span>, </span>
-<span>             <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">map1</span>, y<span class="op">=</span><span class="va">map2</span>, </span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span>data<span class="op">=</span><span class="va">p_som_data</span>, </span>
+<span>             <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">map1</span>, y<span class="op">=</span><span class="va">map2</span>, </span>
 <span>                 colour<span class="op">=</span><span class="va">species</span><span class="op">)</span>, </span>
 <span>             size<span class="op">=</span><span class="fl">3</span>, alpha<span class="op">=</span><span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">xlab</a></span><span class="op">(</span><span class="st">"map 1"</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ylab</a></span><span class="op">(</span><span class="st">"map 2"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://colorspace.R-Forge.R-project.org/reference/scale_colour_discrete_divergingx.html">scale_color_discrete_divergingx</a></span><span class="op">(</span></span>
+<span>  <span class="fu">xlab</span><span class="op">(</span><span class="st">"map 1"</span><span class="op">)</span> <span class="op">+</span> <span class="fu">ylab</span><span class="op">(</span><span class="st">"map 2"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_color_discrete_divergingx</span><span class="op">(</span></span>
 <span>    palette<span class="op">=</span><span class="st">"Zissou 1"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>aspect.ratio <span class="op">=</span> <span class="fl">1</span>, </span>
+<span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme</span><span class="op">(</span>aspect.ratio <span class="op">=</span> <span class="fl">1</span>, </span>
 <span>        legend.position <span class="op">=</span> <span class="st">"bottom"</span>,</span>
-<span>        legend.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_blank</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>        axis.text <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_blank</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span>        legend.title <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span>,</span>
+<span>        axis.text <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>The object can also be modified into the pieces needed to show the net in <span class="math inline">\(p\)</span>-D. You need the data, points marking the net, and edges indicating which points to connect to draw the net.</p>
 <div class="cell">
-<details class="code-fold"><summary>code to make gifs</summary><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/ggobi/tourr">tourr</a></span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Set up data</span></span>
+<details class="code-fold"><summary>code to make gifs</summary><div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Set up data</span></span>
 <span><span class="va">p_som_map</span> <span class="op">&lt;-</span> <span class="va">p_som_df_net</span><span class="op">$</span><span class="va">net</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>species <span class="op">=</span> <span class="st">"0"</span>, type<span class="op">=</span><span class="st">"net"</span><span class="op">)</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>species <span class="op">=</span> <span class="st">"0"</span>, type<span class="op">=</span><span class="st">"net"</span><span class="op">)</span></span>
 <span><span class="va">p_som_data</span> <span class="op">&lt;-</span> <span class="va">p_som_data</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">bl</span><span class="op">:</span><span class="va">bm</span>, <span class="va">species</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>type<span class="op">=</span><span class="st">"data"</span>, </span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">bl</span><span class="op">:</span><span class="va">bm</span>, <span class="va">species</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>type<span class="op">=</span><span class="st">"data"</span>, </span>
 <span>         species <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">species</span><span class="op">)</span><span class="op">)</span> </span>
-<span><span class="va">p_som_map_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html">bind_rows</a></span><span class="op">(</span><span class="va">p_som_map</span>, <span class="va">p_som_data</span><span class="op">)</span></span>
+<span><span class="va">p_som_map_data</span> <span class="op">&lt;-</span> <span class="fu">bind_rows</span><span class="op">(</span><span class="va">p_som_map</span>, <span class="va">p_som_data</span><span class="op">)</span></span>
 <span><span class="va">p_som_map_data</span><span class="op">$</span><span class="va">type</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">p_som_map_data</span><span class="op">$</span><span class="va">type</span>,</span>
 <span>  levels<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"net"</span>, <span class="st">"data"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">p_som_map_data</span><span class="op">$</span><span class="va">species</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">p_som_map_data</span><span class="op">$</span><span class="va">species</span>,</span>
@@ -473,7 +476,7 @@ window.Quarto = {
 <span><span class="va">p_pch</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">46</span>, <span class="fl">16</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="va">p_som_map_data</span><span class="op">$</span><span class="va">type</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="va">p_col</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"black"</span>, <span class="fu"><a href="https://rdrr.io/r/grDevices/palettes.html">hcl.colors</a></span><span class="op">(</span><span class="fl">3</span>, </span>
 <span>  <span class="st">"Zissou 1"</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="va">p_som_map_data</span><span class="op">$</span><span class="va">species</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="fu"><a href="https://ggobi.github.io/tourr/reference/display_xy.html">animate_xy</a></span><span class="op">(</span><span class="va">p_som_map_data</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,</span>
+<span><span class="fu">animate_xy</span><span class="op">(</span><span class="va">p_som_map_data</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,</span>
 <span>           col<span class="op">=</span><span class="va">p_col</span>, </span>
 <span>           pch<span class="op">=</span><span class="va">p_pch</span>,</span>
 <span>           edges<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">p_som_df_net</span><span class="op">$</span><span class="va">edges</span><span class="op">)</span>, </span>
@@ -486,9 +489,9 @@ window.Quarto = {
 <div class="quarto-layout-row">
 <div class="cell quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-penguins-som-html" style="flex-basis: 50.0%;justify-content: flex-start;">
 <div class="cell-output-display quarto-layout-cell-subref" data-ref-parent="fig-penguins-som-html">
-<div id="fig-p-som2-html" class="quarto-float quarto-figure quarto-figure-center anchored">
+<div id="fig-p-som2-html" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Scatterplot on a 5x5 black grid, where points are spread a little at each node. The x axis is labelled 'map 1' and has no numbers, and the y axis is labelled 'map 2' and has no numbers. Points are coloured blue, yellow and red matching penguin species Adeli, Chinstrap and Gentoo. The top left is mostly blue, top right mostly yellow and bottom is mostly red.">
 <figure class="quarto-float quarto-subfloat-fig figure"><div aria-describedby="fig-p-som2-html-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="11-som_files/figure-html/fig-p-som2-html-1.png" class="img-fluid figure-img" style="width:100.0%" data-ref-parent="fig-penguins-som-html">
+<img src="11-som_files/figure-html/fig-p-som2-html-1.png" class="img-fluid figure-img" style="width:100.0%" data-ref-parent="fig-penguins-som-html" alt="Scatterplot on a 5x5 black grid, where points are spread a little at each node. The x axis is labelled 'map 1' and has no numbers, and the y axis is labelled 'map 2' and has no numbers. Points are coloured blue, yellow and red matching penguin species Adeli, Chinstrap and Gentoo. The top left is mostly blue, top right mostly yellow and bottom is mostly red.">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-p-som2-html-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 (a) 2D map
@@ -497,9 +500,9 @@ window.Quarto = {
 </div>
 </div>
 <div class="quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-penguins-som-html" style="flex-basis: 50.0%;justify-content: flex-start;">
-<div id="fig-p-som1" class="quarto-float quarto-figure quarto-figure-center anchored" alt="">
+<div id="fig-p-som1" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Animation showing 2D projections from 4D of the penguins data, with points coloured according to species. Overlaid is a wireframe net, which stretches within and across the clusters. A circle and segment display shows the coefficients for each projection at bottom left.">
 <figure class="quarto-float quarto-subfloat-fig figure"><div aria-describedby="fig-p-som1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="gifs/p_som.gif" class="img-fluid figure-img" data-ref-parent="fig-penguins-som-html" alt="">
+<img src="gifs/p_som.gif" class="img-fluid figure-img" data-ref-parent="fig-penguins-som-html" alt="Animation showing 2D projections from 4D of the penguins data, with points coloured according to species. Overlaid is a wireframe net, which stretches within and across the clusters. A circle and segment display shows the coefficients for each projection at bottom left.">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-p-som1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 (b) Map in 4D
@@ -579,7 +582,7 @@ Becker, R., Cleveland, W. S., &amp; Shyu, M.-J. (1996). <span>T</span>he <span>V
 Bederson, B. B., &amp; Schneiderman, B. (2003). <em>The <span>C</span>raft of <span>I</span>nformation <span>V</span>isualization: <span>R</span>eadings and <span>R</span>eflections</em>. Morgan Kaufmann.
 </div>
 <div id="ref-BellmanRichard1961" class="csl-entry" role="listitem">
-Bellman, R. (1961). <em>Adaptive <span>C</span>ontrol <span>P</span>rocesses: <span>A</span> <span>G</span>guided <span>T</span>our</em>.
+Bellman, R. (1961). <em>Adaptive <span>C</span>ontrol <span>P</span>rocesses: <span>A</span> <span>G</span>uided <span>T</span>our</em>.
 </div>
 <div id="ref-bickel2018" class="csl-entry" role="listitem">
 Bickel, P. J., Kur, G., &amp; Nadler, B. (2018). Projection <span>P</span>ursuit in <span>H</span>igh <span>D</span>imensions. <em>Proceedings of the National Academy of Sciences</em>, <em>115</em>, 9151–9156. <a href="https://doi.org/10.1073/pnas.1801177115">https://doi.org/10.1073/pnas.1801177115</a>
@@ -684,7 +687,7 @@ Cook, D., Buja, A., Cabrera, J., &amp; Hurley, C. (1995). Grand <span>T</span>ou
 Cook, D., Hofmann, H., Lee, E.-K., Yang, H., Nikolau, B., &amp; Wurtele, E. (2007). Exploring <span>G</span>ene <span>E</span>xpression <span>D</span>ata, <span>U</span>sing <span>P</span>lots. <em>Journal of Data Science</em>, <em>5</em>(2), 151–182.
 </div>
 <div id="ref-R-mulgar" class="csl-entry" role="listitem">
-Cook, D., &amp; Laa, U. (2025). <em>Mulgar: Functions for pre-processing data for multivariate data visualisation using tours</em>. <a href="https://dicook.github.io/mulgar/">https://dicook.github.io/mulgar/</a>
+Cook, D., &amp; Laa, U. (2025). <em><span class="nocase">mulgar</span>: <span>F</span>unctions for <span>P</span>re-<span>P</span>rocessing <span>D</span>ata for <span>M</span>ultivariate data <span>V</span>isualisation using <span>T</span>ours</em>. <a href="https://dicook.github.io/mulgar/">https://dicook.github.io/mulgar/</a>
 </div>
 <div id="ref-CLBW06" class="csl-entry" role="listitem">
 Cook, D., Lee, E.-K., Buja, A., &amp; Wickham, H. (2006). <span>G</span>rand <span>T</span>ours, <span>P</span>rojection <span>P</span>ursuit <span>G</span>uided <span>T</span>ours and <span>M</span>anual <span>C</span>ontrols. In C.-H. Chen, W. Härdle, &amp; A. Unwin (Eds.), <em>Handbook of <span>D</span>ata <span>V</span>isualization</em>. Springer. <a href="https://doi.org/10.1007/978-3-540-33037-0">https://doi.org/10.1007/978-3-540-33037-0</a>
@@ -855,7 +858,7 @@ Horikoshi, M., &amp; Tang, Y. (2024). <em><span class="nocase">ggfortify</span>:
 Horst, A. M., Hill, A. P., &amp; Gorman, K. B. (2022). Palmer <span>A</span>rchipelago <span>P</span>enguins <span>D</span>ata in the palmerpenguins <span>R</span> <span>P</span>ackage - <span>A</span>n <span>A</span>lternative to <span>A</span>nderson’s <span>I</span>rises. <em>The R Journal</em>, <em>14</em>, 244–254. <a href="https://doi.org/10.32614/RJ-2022-020">https://doi.org/10.32614/RJ-2022-020</a>
 </div>
 <div id="ref-R-palmerpenguins" class="csl-entry" role="listitem">
-Horst, A., Hill, A., &amp; Gorman, K. (2022). <em>Palmerpenguins: Palmer archipelago (antarctica) penguin data</em>. <a href="https://allisonhorst.github.io/palmerpenguins/">https://allisonhorst.github.io/palmerpenguins/</a>
+Horst, A., Hill, A., &amp; Gorman, K. (2022). <em><span class="nocase">palmerpenguins</span>: <span>P</span>almer <span>A</span>rchipelago (<span>A</span>ntarctica) <span>P</span>enguin <span>D</span>ata</em>. <a href="https://allisonhorst.github.io/palmerpenguins/">https://allisonhorst.github.io/palmerpenguins/</a>
 </div>
 <div id="ref-hotelling-pca" class="csl-entry" role="listitem">
 Hotelling, H. (1933). Analysis of a <span>C</span>omplex of <span>S</span>tatistical <span>V</span>ariables into <span>P</span>rincipal <span>C</span>omponents. <em>Journal of Educational Psychology</em>, <em>24</em>(6), 417--441. <a href="https://doi.org/10.1037/h0071325">https://doi.org/10.1037/h0071325</a>
@@ -1041,7 +1044,7 @@ OpenStreetMap contributors. (2020). <em><span class="nocase">Planet Dump Retriev
 Pearson, K. (1901). LIII. On <span>L</span>ines and <span>P</span>lanes of <span>C</span>losest <span>F</span>it to <span>S</span>ystems of <span>P</span>oints in <span>S</span>pace. <em>The London, Edinburgh, and Dublin Philosophical Magazine and Journal of Science</em>, <em>2</em>(11), 559–572. <a href="https://doi.org/10.1080/14786440109462720">https://doi.org/10.1080/14786440109462720</a>
 </div>
 <div id="ref-R-patchwork" class="csl-entry" role="listitem">
-Pedersen, T. L. (2024). <em>Patchwork: The composer of plots</em>. <a href="https://patchwork.data-imaginist.com">https://patchwork.data-imaginist.com</a>
+Pedersen, T. L. (2024). <em><span class="nocase">patchwork</span>: <span>T</span>he <span>C</span>omposer of <span>P</span>lots</em>. <a href="https://patchwork.data-imaginist.com">https://patchwork.data-imaginist.com</a>
 </div>
 <div id="ref-perisic2009" class="csl-entry" role="listitem">
 Perisic, I., &amp; Posse, C. (2005). Projection <span>P</span>ursuit <span>I</span>ndices <span>B</span>ased on the <span>E</span>mpirical <span>D</span>istribution <span>F</span>unction. <em>Journal of Computational and Graphical Statistics</em>, <em>14</em>(3), 700–715. <a href="https://doi.org/10.1198/106186005X69440">https://doi.org/10.1198/106186005X69440</a>
@@ -1074,7 +1077,7 @@ Rao, C. R., Wegman, E. J., &amp; Solka, J. L. (Eds.). (2006). <em>Handbook of <s
 Ripley, B. (1996). <em>Pattern <span>R</span>ecognition and <span>N</span>eural <span>N</span>etworks</em>. Cambridge University Press.
 </div>
 <div id="ref-R-nnet" class="csl-entry" role="listitem">
-Ripley, B. (2023). <em>Nnet: Feed-forward neural networks and multinomial log-linear models</em>. <a href="http://www.stats.ox.ac.uk/pub/MASS4/">http://www.stats.ox.ac.uk/pub/MASS4/</a>
+Ripley, B. (2023). <em><span class="nocase">nnet</span>: <span>F</span>eed-<span>F</span>orward <span>N</span>eural <span>N</span>etworks and <span>M</span>ultinomial <span>L</span>og-<span>L</span>inear <span>M</span>odels</em>. <a href="http://www.stats.ox.ac.uk/pub/MASS4/">http://www.stats.ox.ac.uk/pub/MASS4/</a>
 </div>
 <div id="ref-R-MASS" class="csl-entry" role="listitem">
 Ripley, B., &amp; Venables, B. (2024). <em>MASS: Support functions and datasets for venables and ripley’s MASS</em>. <a href="http://www.stats.ox.ac.uk/pub/MASS4/">http://www.stats.ox.ac.uk/pub/MASS4/</a>
@@ -1113,7 +1116,7 @@ Shepard, R. N. (1962). The <span>A</span>nalysis of <span>P</span>roximities: <s
 Sievert, C. (2020). <em>Interactive <span>W</span>eb-<span>B</span>ased <span>D</span>ata <span>V</span>isualization with <span>R</span>, plotly, and shiny</em>. Chapman; Hall/CRC. <a href="https://plotly-r.com">https://plotly-r.com</a>
 </div>
 <div id="ref-R-plotly" class="csl-entry" role="listitem">
-Sievert, C., Parmer, C., Hocking, T., Chamberlain, S., Ram, K., Corvellec, M., &amp; Despouy, P. (2024). <em>Plotly: Create interactive web graphics via plotly.js</em>. <a href="https://plotly-r.com">https://plotly-r.com</a>
+Sievert, C., Parmer, C., Hocking, T., Chamberlain, S., Ram, K., Corvellec, M., &amp; Despouy, P. (2024). <em><span class="nocase">plotly</span>: <span>C</span>reate <span>I</span>nteractive <span>W</span>eb <span>G</span>raphics via <span class="nocase">plotly.js</span></em>. <a href="https://plotly-r.com">https://plotly-r.com</a>
 </div>
 <div id="ref-R-gtsummary" class="csl-entry" role="listitem">
 Sjoberg, D. D., Larmarange, J., Curry, M., Lavery, J., Whiting, K., &amp; Zabor, E. C. (2024). <em>Gtsummary: Presentation-ready data summary and analytic result tables</em>. <a href="https://github.com/ddsjoberg/gtsummary">https://github.com/ddsjoberg/gtsummary</a>
@@ -1131,7 +1134,7 @@ Sparks, A. H., Carroll, J., Goldie, J., Marchiori, D., Melloy, P., Padgham, M., 
 Spence, R. (2007). <em>Information <span>V</span>isualization: <span>D</span>esign for <span>I</span>nteraction</em>. Prentice Hall.
 </div>
 <div id="ref-colorspace2009b" class="csl-entry" role="listitem">
-Stauffer, R., Mayr, G. J., Dabernig, M., &amp; Zeileis, A. (2009). Somewhere over the rainbow: How to make effective use of colors in meteorological visualizations. <em>Bulletin of the American Meteorological Society</em>, <em>96</em>(2), 203–216. <a href="https://doi.org/10.1175/BAMS-D-13-00155.1">https://doi.org/10.1175/BAMS-D-13-00155.1</a>
+Stauffer, R., Mayr, G. J., Dabernig, M., &amp; Zeileis, A. (2009). <span>S</span>omewhere over the <span>R</span>ainbow: <span>H</span>ow to <span>M</span>ake <span>E</span>ffective <span>U</span>se of <span>C</span>olors in <span>M</span>eteorological <span>V</span>isualizations. <em>Bulletin of the American Meteorological Society</em>, <em>96</em>(2), 203–216. <a href="https://doi.org/10.1175/BAMS-D-13-00155.1">https://doi.org/10.1175/BAMS-D-13-00155.1</a>
 </div>
 <div id="ref-seurat2" class="csl-entry" role="listitem">
 Stuart, T., Butler, A., Hoffman, P., Hafemeister, C., Papalexi, E., III, W. M. M., Hao, Y., Stoeckius, M., Smibert, P., &amp; Satija, R. (2019). Comprehensive <span>I</span>ntegration of <span>S</span>ingle-<span>C</span>ell <span>D</span>ata. <em>Cell</em>, <em>177</em>, 1888–1902. <a href="https://doi.org/10.1016/j.cell.2019.05.031">https://doi.org/10.1016/j.cell.2019.05.031</a>
@@ -1200,7 +1203,7 @@ Tierney, N., &amp; Cook, D. (2023a). Expanding <span>T</span>idy <span>D</span>a
 Tierney, N., &amp; Cook, D. (2023b). Expanding <span>T</span>idy <span>D</span>ata <span>P</span>rinciples to <span>F</span>acilitate <span>M</span>issing <span>D</span>ata <span>E</span>xploration, <span>V</span>isualization and <span>A</span>ssessment of <span>I</span>mputations. <em>Journal of Statistical Software</em>, <em>105</em>(7), 1–31. <a href="https://doi.org/10.18637/jss.v105.i07">https://doi.org/10.18637/jss.v105.i07</a>
 </div>
 <div id="ref-R-naniar" class="csl-entry" role="listitem">
-Tierney, N., Cook, D., McBain, M., &amp; Fay, C. (2024). <em>Naniar: Data structures, summaries, and visualisations for missing data</em>. <a href="https://github.com/njtierney/naniar">https://github.com/njtierney/naniar</a>
+Tierney, N., Cook, D., McBain, M., &amp; Fay, C. (2024). <em><span class="nocase">naniar</span>: <span>D</span>ata <span>S</span>tructures, <span>S</span>ummaries, and <span>V</span>isualisations for <span>M</span>issing <span>D</span>ata</em>. <a href="https://github.com/njtierney/naniar">https://github.com/njtierney/naniar</a>
 </div>
 <div id="ref-To52" class="csl-entry" role="listitem">
 Torgerson, W. S. (1952). Multidimensional <span>S</span>caling. 1. <span>T</span>heory and <span>M</span>ethod. <em>Psychometrika</em>, <em>17</em>, 401–419.
@@ -1329,7 +1332,7 @@ Young, F. W., Valero-Mora, P. M., &amp; Friendly, M. (2006). <em>Visual <span>S<
 Zeileis, A., Fisher, J. C., Hornik, K., Ihaka, R., McWhite, C. D., Murrell, P., Stauffer, R., &amp; Wilke, C. O. (2020). <span class="nocase">colorspace</span>: A toolbox for manipulating and assessing colors and palettes. <em>Journal of Statistical Software</em>, <em>96</em>(1), 1–49. <a href="https://doi.org/10.18637/jss.v096.i01">https://doi.org/10.18637/jss.v096.i01</a>
 </div>
 <div id="ref-colorspace2009a" class="csl-entry" role="listitem">
-Zeileis, A., Hornik, K., &amp; Murrell, P. (2009). Escaping <span>RGB</span>land: Selecting colors for statistical graphics. <em>Computational Statistics &amp; Data Analysis</em>, <em>53</em>(9), 3259–3270. <a href="https://doi.org/10.1016/j.csda.2008.11.033">https://doi.org/10.1016/j.csda.2008.11.033</a>
+Zeileis, A., Hornik, K., &amp; Murrell, P. (2009). Escaping <span>RGB</span>land: <span>S</span>electing <span>C</span>olors for <span>S</span>tatistical <span>G</span>raphics. <em>Computational Statistics &amp; Data Analysis</em>, <em>53</em>(9), 3259–3270. <a href="https://doi.org/10.1016/j.csda.2008.11.033">https://doi.org/10.1016/j.csda.2008.11.033</a>
 </div>
 <div id="ref-zhang2023" class="csl-entry" role="listitem">
 Zhang, C., Ye, J., &amp; Wang, X. (2023). A <span>C</span>omputational <span>P</span>erspective on <span>P</span>rojection <span>P</span>ursuit in <span>H</span>igh <span>D</span>imensions: <span>F</span>easible or <span>I</span>nfeasible <span>F</span>eature <span>E</span>xtraction. <em>International Statistical Review</em>, <em>91</em>(1), 140–161. <a href="https://doi.org/10.1111/insr.12517">https://doi.org/10.1111/insr.12517</a>

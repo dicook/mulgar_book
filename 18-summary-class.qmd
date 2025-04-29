@@ -26,10 +26,14 @@ To examine misclassifications, we can create a separate variable that identifies
 \index{classification!misclassification}
 
 ```{r echo=knitr::is_html_output()}
+#| code-summary: "Load libraries"
+#| message: false
+source("code/setup.R")
+```
+
+```{r echo=knitr::is_html_output()}
 #| message: false
 #| code-summary: "Code to fit forest"
-library(randomForest)
-library(dplyr)
 load("data/penguins_sub.rda")
 
 penguins_rf <- randomForest(species~.,
@@ -49,7 +53,6 @@ penguins_errors <- penguins_sub |>
 ```{r echo=knitr::is_html_output()}
 #| eval: false
 #| code-summary: "Code to make animated gifs"
-library(tourr)
 symbols <- c(1, 16)
 p_pch <- symbols[penguins_errors$err+1]
 p_cex <- rep(1, length(p_pch))
@@ -261,29 +264,15 @@ The variable importance and explainability measures can be used to examine the b
 
 A good resource for learning about the range of local explainability methods is @iml. Here we describe how to use tours in association with explanation metrics. Primarily for interpretability, we need to make plots of single (or pairs of) variables because we need to make explanations in terms of single variables. Tours are used to examine boundaries close to a point, if we are to understand local non-linear boundaries, so a slice tour on a small neighbourhood is needed. Also, when multiple variables are working together to generate a prediction, the radial tour to examine the influence of single variables on the projection can be useful.
 
-<!--
-- global importance
-- partial dependence profiles
-- local explainers, explanation
-- usage: and handling disagreements-->
-
-
-<!-- ### Local explanations: SHAP-->
-
 \index{classification!local explanations} 
 \index{classification!XAI}
 \index{classification!boundaries} 
-
-<!-- It especially important to be able to interpret or explain a model, even more so when the model is complex or black-box'y. A good resource for learning about the range of methods is @iml. Local explanations provide some information about variables that are important for making the prediction for a particular observation.
--->
 
 For illustration, we choose local explanations produced by Shapley values. These are computed using the `kernelshap` function in the `kernelshap` package [@kernelshap], and re-organised using the `shapviz` function in the `shapviz` package [@shapviz]. A Shapley value for an observation indicates how the variable contributes to the model prediction for that observation, relative to other variables. It is an average, computed from the change in prediction when all combinations of presence or absence of other variables. In the computation, for each combination, the prediction is computed by substituting absent variables with their average value, like one might do when imputing missing values. A (larger) positive SHAP value indicates that the variable increases the likelihood of prediction to that class, and conversely a (larger) negative value indicates decreased likelihood of prediction to that class.
 
 ```{r echo=knitr::is_html_output()}
 #| message: false
 # Split the data intro training and testing, as done in 17-nn chapter
-library(dplyr)
-library(tidyr)
 library(rsample)
 library(tidymodels)
 library(keras)
@@ -309,11 +298,14 @@ p_test_x <- p_test |>
   as.matrix()
 p_test_y <- p_test |> pull(species) |> as.numeric() 
 p_test_y <- p_test_y-1 # Needs to be 0, 1, 2
+```
 
-# Predict training and test set
-p_nn_model <- load_model_tf("data/penguins_cnn")
-p_train_pred <- p_nn_model |> 
-  predict(p_train_x, verbose = 0)
+
+```{r echo=knitr::is_html_output()}
+#| message: false
+load("data/p_train_pred.rda")
+load("data/p_test_pred.rda")
+
 p_train_pred_cat <- levels(p_train$species)[
   apply(p_train_pred, 1,
         which.max)]
@@ -321,8 +313,6 @@ p_train_pred_cat <- factor(
   p_train_pred_cat,
   levels=levels(p_train$species))
 
-p_test_pred <- p_nn_model |> 
-  predict(p_test_x, verbose = 0)
 p_test_pred_cat <- levels(p_test$species)[
   apply(p_test_pred, 1, 
         which.max)]
@@ -389,8 +379,6 @@ knitr::kable(p_outlier, digits=2)
 - A mistaken classification as Adelie (first line) would happen with higher likelihood if the `bm` value is considered.
 - A mistaken classification as Chinstrap (second line) has a smaller likelihood if `bl` is considered.
 
-<!-- For the misclassified penguin, the effect of `bm` for all combinations of other variables leads to a decline in predicted value, thus less confidence in it being a Gentoo. In contrast, for this same penguin when considering the effect of `bl` the predicted value increases on average.-->
-
 \index{parallel coordinate plot (PCP)}
 
 ```{r echo=knitr::is_html_output()}
@@ -402,7 +390,6 @@ knitr::kable(p_outlier, digits=2)
 #| out-width: 80%
 #| fig-cap: "SHAP values focused on Gentoo class, for each variable. The one misclassified penguin (orange) has a much lower value for body mass, suggesting that this variable is used differently for the prediction than for other penguins." 
 #| fig-alt: "This is an untitled chart with no subtitle or caption. It has x-axis with labels bl, bd, fl and bm. It has y-axis 'SHAP' with labels -0.25, 0.00, 0.25 and 0.50. In this chart colour is used to show factor(error). The legend that would normally indicate this has been hidden. The chart is a set of 316 big solid circle points of which about 92% can be seen. It has alpha set to 0.8."
-library(colorspace)
 p_exp_gentoo |>
   filter(species == "Gentoo") |>
   pivot_longer(bl:bm, names_to="var", values_to="shap") |>
@@ -420,9 +407,6 @@ p_exp_gentoo |>
 #| code-fold: true
 #| message: false
 #| warning: false
-library(colorspace)
-library(ggpcp)
-library(GGally)
 p_pcp <- p_exp_gentoo |>
   filter(species == "Gentoo") |>
   pcp_select(1:4) |>
@@ -489,7 +473,6 @@ If we examine the data in [@fig-penguins-bl-bm-bd] the explanations make some se
 #| out-width: 100%
 #| fig-cap: "Plots of the training data with misclassified observations marked to help understand what the SHAP values. The misclassified Gentoo penguin has an unusually low body mass value which makes it appear to be more like an Adelie penguin, particularly when considered in relation to it's bill length." 
 #| fig-alt: "Three scatterplots of bl, bd, fl vs bm. Colour is mapped to species. Shape is matched to error, with solid circles indicating a misclassification. There is one Gentoo error and five Adelie errors. In bd  vs bm species show a more linear separation, but some overlap in the boundary region between Adelie (blue) and Chinstrap (yellow). The misclassified Gentoo is at the bottom left edge of the Gentoo cluster. The Adelie errors are mostly in the overlapping regions between Adelie and Chinstrap, in bl vs bm, and intermixed in these clusters when they overlap in fl vs bm and bd vs bm."
-library(patchwork)
 # Check position on bm
 shap_proj <- p_exp_gentoo |>
   filter(species == "Gentoo", error == "yes") |>
@@ -567,13 +550,9 @@ sp1 + sp2 + sp3 + plot_layout(ncol=3, guides = "collect") &
 This is a good point to examine the boundary between Gentoo and Adelie penguins. Focusing on just two classes is easier, and it is between these two classes that the error in classification occurs. Examining the boundary can be achieved by simulating a large number of points in the data domain and predicting the class of these points. @fig-penguins-bndry shows these predictions, along with the observed training values. The scatterplots show the same pairs of variables as shown in @fig-penguins-bl-bm-bd. Pixel points indicate the simulated data covering the data domain, and allowing the boundary to be examined. The observed training data is overlaid, with solid circles indicating an error. It's a bit messy but the most important part to see is that the boundary between classes is mostly in the vertical direction, which corresponds to cutting primarily on `bm`. It's not completely `bm` because there is some overlap of the red and blue points here, and the direction is not quite vertical. Particularly, with `bd` there the direction of the boundary is slightly oblique. (Note that the white area in the top left of `bl` vs `bm` actually corresponds to the Chinstrap prediction region, which we have removed to focus on Adelie and Gentoo.)
 
 ```{r echo=knitr::is_html_output()}
-#| label: fig-penguins-bndry
-#| code-fold: true
-#| fig-width: 8
-#| fig-height: 6
-#| out-width: 100%
-#| fig-cap: "Pairwise plots of classification boundaries (pixel points) to examine where the misclassification happens. The observed training data is overlaid with solid circle indicating a classification error. The boundary of this model falls almost entirely in body mass, with small contribution of the other variables, as seen by the difference between the two classes being mostly visible in the vertical direction." 
-#| fig-alt: "A set of three scatter plots showing relationships between bm (x-axis) and bl, bd, fl (y-axis), with data points color-coded by species: Adelie (blue) and Gentoo (red). Points are also marked by classification error, where error = yes (filled circles) and 'error = no' (open circles). In the first plot there is a dense distribution of data points, with a slightly curved decision boundary separating Adelie and Gentoo. Misclassified points appear mostly along this boundary. The second plot has a more linear decision boundary that does not neatly match the separation between the two species. Some misclassified points are along this boundary. If the boundary had been centred through the middle of the lower left to upper right gap then these points would be far from the boundary and unlikely to be misclassified. In the third plot the boundary is mostly linear and vertical. "
+#| eval: false
+# Need to do the predictions and save because saved model
+# appears to be machine-dependent
 n <- 10000
 p_sim <- tibble(bl = runif(n, min(penguins_sub$bl), max(penguins_sub$bl)),
                 bd = runif(n, min(penguins_sub$bd), max(penguins_sub$bd)),
@@ -583,6 +562,20 @@ p_sim <- tibble(bl = runif(n, min(penguins_sub$bl), max(penguins_sub$bl)),
 p_sim_pred <- p_nn_model |> 
   predict(p_sim, verbose = 0)
 colnames(p_sim_pred) <- c("Adelie", "Chinstrap", "Gentoo")
+save(p_sim_pred, file="data/p_sim_pred.rda")
+save(p_sim, file="data/p_sim.rda")
+```
+
+```{r echo=knitr::is_html_output()}
+#| label: fig-penguins-bndry
+#| code-fold: true
+#| fig-width: 8
+#| fig-height: 6
+#| out-width: 100%
+#| fig-cap: "Pairwise plots of classification boundaries (pixel points) to examine where the misclassification happens. The observed training data is overlaid with solid circle indicating a classification error. The boundary of this model falls almost entirely in body mass, with small contribution of the other variables, as seen by the difference between the two classes being mostly visible in the vertical direction." 
+#| fig-alt: "A set of three scatter plots showing relationships between bm (x-axis) and bl, bd, fl (y-axis), with data points color-coded by species: Adelie (blue) and Gentoo (red). Points are also marked by classification error, where error = yes (filled circles) and 'error = no' (open circles). In the first plot there is a dense distribution of data points, with a slightly curved decision boundary separating Adelie and Gentoo. Misclassified points appear mostly along this boundary. The second plot has a more linear decision boundary that does not neatly match the separation between the two species. Some misclassified points are along this boundary. If the boundary had been centred through the middle of the lower left to upper right gap then these points would be far from the boundary and unlikely to be misclassified. In the third plot the boundary is mostly linear and vertical. "
+load("data/p_sim_pred.rda")
+load("data/p_sim.rda")
 p_sim_class <- apply(p_sim_pred, 1, which.max)
 p_sim_class <- c("Adelie", "Chinstrap", "Gentoo")[p_sim_class]
 p_sim_pred <- p_sim_pred |>
@@ -598,10 +591,10 @@ p_sim_a_g <- p_sim |>
 bd1 <- p_sim_a_g |>
   ggplot() + 
     geom_point(aes(x=bm, y=bl, colour=species), shape=20, size=0.01) +
-    geom_point(data=filter(p_exp_gentoo_proj, species != "Chinstrap"),
-               aes(x=bm, y=bl, 
-               colour=species, 
-               shape=factor(error)), alpha=0.8) +
+#    geom_point(data=filter(p_exp_gentoo_proj, species != "Chinstrap"),
+#               aes(x=bm, y=bl, 
+#               colour=species, 
+#               shape=factor(error)), alpha=0.8) +
   scale_colour_discrete_divergingx(palette="Zissou 1") +
   scale_shape_manual("error", values=c(1, 19)) +
   theme_minimal() + 
@@ -699,7 +692,7 @@ Projections taken from a radial tour used to investigate where the boundary fall
 :::
 
 ::: {.content-visible when-format="html"}
-::: {#fig-bndry--html layout="[[50, 50]]"}
+::: {#fig-bndry-html layout="[[50, 50]]"}
 
 ![Radial tour](gifs/p_nn_bndry.gif)
 

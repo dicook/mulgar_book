@@ -429,25 +429,35 @@ w_{0h}\phi(a_h+\sum_{i=1}^{p} w_{ih}x_i)
 <p></p>
 <p>A first step is to decide how many nodes the NN architecture should have, and what activation function should be used. To make these decisions, ideally you already have some knowledge of the shapes of class clusters. For the penguins classification, we have seen that it contains three elliptically shaped clusters of roughly the same size. This suggests two nodes in the hidden layer would be sufficient to separate three clusters (<a href="#fig-nn-diagram" class="quarto-xref">Figure&nbsp;<span>17.1</span></a>). Because the shapes of the clusters are convex, using linear activation (“relu”) will also be sufficient. The model specification is as follows:</p>
 <div class="cell">
-<details class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(keras)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>tensorflow<span class="sc">::</span><span class="fu">set_random_seed</span>(<span class="dv">211</span>)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Define model</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>p_nn_model <span class="ot">&lt;-</span> <span class="fu">keras_model_sequential</span>()</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>p_nn_model <span class="sc">|&gt;</span> </span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">layer_dense</span>(<span class="at">units =</span> <span class="dv">2</span>, <span class="at">activation =</span> <span class="st">'relu'</span>, </span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>              <span class="at">input_shape =</span> <span class="dv">4</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">layer_dense</span>(<span class="at">units =</span> <span class="dv">3</span>, <span class="at">activation =</span> <span class="st">'softmax'</span>)</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>p_nn_model <span class="sc">|&gt;</span> summary</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>loss_fn <span class="ot">&lt;-</span> <span class="fu">loss_sparse_categorical_crossentropy</span>(</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">from_logits =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>p_nn_model <span class="sc">|&gt;</span> <span class="fu">compile</span>(</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">optimizer =</span> <span class="st">"adam"</span>,</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">loss      =</span> loss_fn,</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">metrics   =</span> <span class="fu">c</span>(<span class="st">'accuracy'</span>)</span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details class="code-fold"><summary>Load libraries</summary><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/source.html">source</a></span><span class="op">(</span><span class="st">"code/setup.R"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stderr">
+<pre><code>Warning in rgl.init(initValue, onlyNULL): RGL: unable to open X11 display</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: 'rgl.init' failed, will use the null device.
+See '?rgl.useNULL' for ways to avoid this warning.</code></pre>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(keras)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>tensorflow<span class="sc">::</span><span class="fu">set_random_seed</span>(<span class="dv">211</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Define model</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>p_nn_model <span class="ot">&lt;-</span> <span class="fu">keras_model_sequential</span>()</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>p_nn_model <span class="sc">|&gt;</span> </span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">layer_dense</span>(<span class="at">units =</span> <span class="dv">2</span>, <span class="at">activation =</span> <span class="st">'relu'</span>, </span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>              <span class="at">input_shape =</span> <span class="dv">4</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">layer_dense</span>(<span class="at">units =</span> <span class="dv">3</span>, <span class="at">activation =</span> <span class="st">'softmax'</span>)</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>p_nn_model <span class="sc">|&gt;</span> summary</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>loss_fn <span class="ot">&lt;-</span> <span class="fu">loss_sparse_categorical_crossentropy</span>(</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">from_logits =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>p_nn_model <span class="sc">|&gt;</span> <span class="fu">compile</span>(</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">optimizer =</span> <span class="st">"adam"</span>,</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">loss      =</span> loss_fn,</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">metrics   =</span> <span class="fu">c</span>(<span class="st">'accuracy'</span>)</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Note that <code>tensorflow::set_random_seed(211)</code> sets the seed for the model fitting so that we can obtain the same result to discuss later. It needs to be set before the model is defined in the code. The model will also be saved in order to diagnose and make predictions.</p>
@@ -466,45 +476,38 @@ Figure&nbsp;17.1: Network architecture for the model on the penguins data. The r
 <p><a href="#fig-p-split-html" class="quarto-xref">Figure&nbsp;<span>17.2</span></a> shows the tour being used to examine the split into training and test samples for the penguins data. Using random sampling, particularly stratified by group, should result the two sets being very similar, as can be seen here. It does happen that several observations in the test set are on the extremes of their class cluster, so it could be that the model makes errors in the neighbourhoods of these points.</p>
 <p> </p>
 <div class="cell">
-<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Split the data intro training and testing</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://jrnold.github.io/ggthemes/">ggthemes</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org">tidyr</a></span><span class="op">)</span></span>
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Split the data intro training and testing</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rsample.tidymodels.org">rsample</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/eclarke/ggbeeswarm">ggbeeswarm</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidymodels.tidymodels.org">tidymodels</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/ggobi/tourr">tourr</a></span><span class="op">)</span></span>
-<span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"data/penguins_sub.rda"</span><span class="op">)</span> <span class="co"># from mulgar book</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">821</span><span class="op">)</span></span>
 <span><span class="va">p_split</span> <span class="op">&lt;-</span> <span class="va">penguins_sub</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">bl</span><span class="op">:</span><span class="va">species</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">bl</span><span class="op">:</span><span class="va">species</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rsample.tidymodels.org/reference/initial_split.html">initial_split</a></span><span class="op">(</span>prop <span class="op">=</span> <span class="fl">2</span><span class="op">/</span><span class="fl">3</span>, </span>
 <span>                strata<span class="op">=</span><span class="va">species</span><span class="op">)</span></span>
 <span><span class="va">p_train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rsample.tidymodels.org/reference/initial_split.html">training</a></span><span class="op">(</span><span class="va">p_split</span><span class="op">)</span></span>
 <span><span class="va">p_test</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rsample.tidymodels.org/reference/initial_split.html">testing</a></span><span class="op">(</span><span class="va">p_split</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Check training and test split</span></span>
-<span><span class="va">p_split_check</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html">bind_rows</a></span><span class="op">(</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_cols.html">bind_cols</a></span><span class="op">(</span><span class="va">p_train</span>, type <span class="op">=</span> <span class="st">"train"</span><span class="op">)</span>, </span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_cols.html">bind_cols</a></span><span class="op">(</span><span class="va">p_test</span>, type <span class="op">=</span> <span class="st">"test"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">type</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="va">p_split_check</span> <span class="op">&lt;-</span> <span class="fu">bind_rows</span><span class="op">(</span></span>
+<span>  <span class="fu">bind_cols</span><span class="op">(</span><span class="va">p_train</span>, type <span class="op">=</span> <span class="st">"train"</span><span class="op">)</span>, </span>
+<span>  <span class="fu">bind_cols</span><span class="op">(</span><span class="va">p_test</span>, type <span class="op">=</span> <span class="st">"test"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">type</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell">
-<details class="code-fold"><summary>Code to run tours</summary><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://ggobi.github.io/tourr/reference/display_xy.html">animate_xy</a></span><span class="op">(</span><span class="va">p_split_check</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, </span>
+<details class="code-fold"><summary>Code to run tours</summary><div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">animate_xy</span><span class="op">(</span><span class="va">p_split_check</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, </span>
 <span>           col<span class="op">=</span><span class="va">p_split_check</span><span class="op">$</span><span class="va">species</span>,</span>
 <span>           pch<span class="op">=</span><span class="va">p_split_check</span><span class="op">$</span><span class="va">type</span>, </span>
 <span>           shapeset<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">16</span>,<span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://ggobi.github.io/tourr/reference/display_xy.html">animate_xy</a></span><span class="op">(</span><span class="va">p_split_check</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, </span>
-<span>           <span class="fu"><a href="https://ggobi.github.io/tourr/reference/guided_tour.html">guided_tour</a></span><span class="op">(</span><span class="fu"><a href="https://ggobi.github.io/tourr/reference/lda_pp.html">lda_pp</a></span><span class="op">(</span><span class="va">p_split_check</span><span class="op">$</span><span class="va">species</span><span class="op">)</span><span class="op">)</span>,</span>
+<span><span class="fu">animate_xy</span><span class="op">(</span><span class="va">p_split_check</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, </span>
+<span>           <span class="fu">guided_tour</span><span class="op">(</span><span class="fu">lda_pp</span><span class="op">(</span><span class="va">p_split_check</span><span class="op">$</span><span class="va">species</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>           col<span class="op">=</span><span class="va">p_split_check</span><span class="op">$</span><span class="va">species</span>,</span>
 <span>           pch<span class="op">=</span><span class="va">p_split_check</span><span class="op">$</span><span class="va">type</span>, </span>
 <span>           shapeset<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">16</span>,<span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://ggobi.github.io/tourr/reference/render_gif.html">render_gif</a></span><span class="op">(</span><span class="va">p_split_check</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,</span>
-<span>           <span class="fu"><a href="https://ggobi.github.io/tourr/reference/grand_tour.html">grand_tour</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>           <span class="fu"><a href="https://ggobi.github.io/tourr/reference/display_xy.html">display_xy</a></span><span class="op">(</span> </span>
+<span><span class="fu">render_gif</span><span class="op">(</span><span class="va">p_split_check</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,</span>
+<span>           <span class="fu">grand_tour</span><span class="op">(</span><span class="op">)</span>,</span>
+<span>           <span class="fu">display_xy</span><span class="op">(</span> </span>
 <span>             col<span class="op">=</span><span class="va">p_split_check</span><span class="op">$</span><span class="va">species</span>, </span>
 <span>             pch<span class="op">=</span><span class="va">p_split_check</span><span class="op">$</span><span class="va">type</span>, </span>
 <span>             shapeset<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">16</span>,<span class="fl">1</span><span class="op">)</span>,</span>
@@ -514,9 +517,9 @@ Figure&nbsp;17.1: Network architecture for the model on the penguins data. The r
 <span>           frames<span class="op">=</span><span class="fl">500</span>,</span>
 <span>           loop<span class="op">=</span><span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://ggobi.github.io/tourr/reference/render_gif.html">render_gif</a></span><span class="op">(</span><span class="va">p_split_check</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,</span>
-<span>           <span class="fu"><a href="https://ggobi.github.io/tourr/reference/guided_tour.html">guided_tour</a></span><span class="op">(</span><span class="fu"><a href="https://ggobi.github.io/tourr/reference/lda_pp.html">lda_pp</a></span><span class="op">(</span><span class="va">p_split_check</span><span class="op">$</span><span class="va">species</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>           <span class="fu"><a href="https://ggobi.github.io/tourr/reference/display_xy.html">display_xy</a></span><span class="op">(</span> </span>
+<span><span class="fu">render_gif</span><span class="op">(</span><span class="va">p_split_check</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,</span>
+<span>           <span class="fu">guided_tour</span><span class="op">(</span><span class="fu">lda_pp</span><span class="op">(</span><span class="va">p_split_check</span><span class="op">$</span><span class="va">species</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>           <span class="fu">display_xy</span><span class="op">(</span> </span>
 <span>             col<span class="op">=</span><span class="va">p_split_check</span><span class="op">$</span><span class="va">species</span>, </span>
 <span>             pch<span class="op">=</span><span class="va">p_split_check</span><span class="op">$</span><span class="va">type</span>, </span>
 <span>             shapeset<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">16</span>,<span class="fl">1</span><span class="op">)</span>,</span>
@@ -562,16 +565,16 @@ Figure&nbsp;17.2: Evaluating the training/test split, where we expect that the t
 <p></p>
 <p>The data needs to be specially formatted for the model fitted using <code>keras</code>. The explanatory variables need to be provided as a <code>matrix</code>, and the categorical response needs to be separate, and specified as a <code>numeric</code> variable, beginning with 0.</p>
 <div class="cell">
-<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Data needs to be matrix, and response needs to be numeric</span></span>
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Data needs to be matrix, and response needs to be numeric</span></span>
 <span><span class="va">p_train_x</span> <span class="op">&lt;-</span> <span class="va">p_train</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">bl</span><span class="op">:</span><span class="va">bm</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">bl</span><span class="op">:</span><span class="va">bm</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="va">p_train_y</span> <span class="op">&lt;-</span> <span class="va">p_train</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html">pull</a></span><span class="op">(</span><span class="va">species</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="op">)</span> </span>
+<span><span class="va">p_train_y</span> <span class="op">&lt;-</span> <span class="va">p_train</span> <span class="op">|&gt;</span> <span class="fu">pull</span><span class="op">(</span><span class="va">species</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="op">)</span> </span>
 <span><span class="va">p_train_y</span> <span class="op">&lt;-</span> <span class="va">p_train_y</span><span class="op">-</span><span class="fl">1</span> <span class="co"># Needs to be 0, 1, 2</span></span>
 <span><span class="va">p_test_x</span> <span class="op">&lt;-</span> <span class="va">p_test</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">bl</span><span class="op">:</span><span class="va">bm</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">bl</span><span class="op">:</span><span class="va">bm</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="va">p_test_y</span> <span class="op">&lt;-</span> <span class="va">p_test</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html">pull</a></span><span class="op">(</span><span class="va">species</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="op">)</span> </span>
+<span><span class="va">p_test_y</span> <span class="op">&lt;-</span> <span class="va">p_test</span> <span class="op">|&gt;</span> <span class="fu">pull</span><span class="op">(</span><span class="va">species</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="op">)</span> </span>
 <span><span class="va">p_test_y</span> <span class="op">&lt;-</span> <span class="va">p_test_y</span><span class="op">-</span><span class="fl">1</span> <span class="co"># Needs to be 0, 1, 2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
@@ -592,7 +595,7 @@ ________________________________________________________________________________
 </div>
 </div>
 <div class="cell">
-<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Fit model</span></span>
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Fit model</span></span>
 <span><span class="va">p_nn_fit</span> <span class="op">&lt;-</span> <span class="va">p_nn_model</span> <span class="op">|&gt;</span> <span class="fu">keras</span><span class="fu">::</span><span class="fu"><a href="https://generics.r-lib.org/reference/fit.html">fit</a></span><span class="op">(</span></span>
 <span>  x <span class="op">=</span> <span class="va">p_train_x</span>, </span>
 <span>  y <span class="op">=</span> <span class="va">p_train_y</span>,</span>
@@ -606,9 +609,7 @@ ________________________________________________________________________________
 <p>Fitting NN models is fiddly, and very different fitted models can result from restarts, parameter choices, and architecture.</p>
 </div>
 <div class="cell">
-<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tensorflow.rstudio.com/">keras</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://colorspace.R-Forge.R-project.org/">colorspace</a></span><span class="op">)</span></span>
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tensorflow.rstudio.com/">keras</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># load fitted model</span></span>
 <span><span class="va">p_nn_model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/keras/man/save_model_tf.html">load_model_tf</a></span><span class="op">(</span><span class="st">"data/penguins_cnn"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -616,7 +617,7 @@ ________________________________________________________________________________
 </div>
 <p>The fitted model that we have chosen as the final one has reasonably small loss and high accuracy. Plots of loss and accuracy across epochs showing the change during fitting can be plotted, but we don’t show them here, because they are generally not very interesting.</p>
 <div class="cell">
-<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_nn_model</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/pkg/tensorflow/man/evaluate.html">evaluate</a></span><span class="op">(</span><span class="va">p_test_x</span>, <span class="va">p_test_y</span>, verbose <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_nn_model</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/pkg/tensorflow/man/evaluate.html">evaluate</a></span><span class="op">(</span><span class="va">p_test_x</span>, <span class="va">p_test_y</span>, verbose <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>     loss  accuracy 
 0.2563850 0.9553571 </code></pre>
@@ -624,7 +625,7 @@ ________________________________________________________________________________
 </div>
 <p>The model object can be saved for later use with:</p>
 <div class="cell">
-<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/keras/man/save_model_tf.html">save_model_tf</a></span><span class="op">(</span><span class="va">p_nn_model</span>, <span class="st">"data/penguins_cnn"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/keras/man/save_model_tf.html">save_model_tf</a></span><span class="op">(</span><span class="va">p_nn_model</span>, <span class="st">"data/penguins_cnn"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section><section id="extracting-model-components" class="level2" data-number="17.4"><h2 data-number="17.4" class="anchored" data-anchor-id="extracting-model-components">
@@ -635,7 +636,7 @@ ________________________________________________________________________________
 </div>
 <p>Because nodes in the hidden layers of NNs are themselves (relatively simple regression) models, it can be interesting to examine these to understand how the model is making it’s predictions. Although it’s rarely easy, most software will allow the coefficients for the models at these nodes to be extracted. With the penguins NN model there are two nodes, so we can extract the coefficients and plot the resulting two linear combinations to examine the separation between classes.</p>
 <div class="cell">
-<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Extract hidden layer model weights</span></span>
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Extract hidden layer model weights</span></span>
 <span><span class="va">p_nn_wgts</span> <span class="op">&lt;-</span> <span class="fu">keras</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/keras/man/get_weights.html">get_weights</a></span><span class="op">(</span><span class="va">p_nn_model</span>, trainable<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">p_nn_wgts</span> </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
@@ -661,7 +662,7 @@ ________________________________________________________________________________
 <p>The linear coefficients for the first node in the model are 0.62, 0.19, -0.17, -0.89, and the second node in the model are 1.33, -0.02, -0.3, -0.37. We can use these like we used the linear discriminants in LDA to make a 2D view of the data, where the model is separating the three species. The constants 0.13, -0.09 are not important for this. They are only useful for drawing the location of the boundaries between classes produced by the model.</p>
 <p>These two sets of model coefficients provide linear combinations of the original variables. Together, they define a plane on which the data is projected to view the classification produced by the model. Ideally, though this plane should be defined using an orthonormal basis otherwise the shape of the data distribution might be warped. So we orthonormalise this matrix before computing the data projection.</p>
 <div class="cell">
-<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Orthonormalise the weights to make 2D projection</span></span>
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Orthonormalise the weights to make 2D projection</span></span>
 <span><span class="va">p_nn_wgts_on</span> <span class="op">&lt;-</span> <span class="fu">tourr</span><span class="fu">::</span><span class="fu"><a href="https://ggobi.github.io/tourr/reference/orthonormalise.html">orthonormalise</a></span><span class="op">(</span><span class="va">p_nn_wgts</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="va">p_nn_wgts_on</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
@@ -676,31 +677,31 @@ ________________________________________________________________________________
 <p>What we have shown here is a process to use the models at the nodes of the hidden layer to produce a reduced dimensional space where the classes are best separated, at least as determined by the model. The process will work in higher dimensions also.</p>
 <p>When there are more nodes in the hidden layer than the number of original variables it means that the space is extended to achieve useful classifications that need more complicated non-linear boundaries. The extra nodes describe the non-linearity. <span class="citation" data-cites="wickham2015">Wickham et al. (<a href="references.html#ref-wickham2015" role="doc-biblioref">2015</a>)</span> provides a good illustration of this in 2D. The process of examining each of the node models can be useful for understanding this non-linear separation, also in high dimensions.</p>
 <div class="cell">
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Hidden layer</span></span>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Hidden layer</span></span>
 <span><span class="va">p_train_m</span> <span class="op">&lt;-</span> <span class="va">p_train</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>nn1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">p_train</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>nn1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">p_train</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span></span>
 <span>           <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">p_nn_wgts_on</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span>, ncol<span class="op">=</span><span class="fl">1</span><span class="op">)</span>,</span>
 <span>         nn2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">p_train</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span></span>
 <span>           <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="va">p_nn_wgts_on</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span>, ncol<span class="op">=</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Now add the test points on.</span></span>
 <span><span class="va">p_test_m</span> <span class="op">&lt;-</span> <span class="va">p_test</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>nn1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">p_test</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>nn1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">p_test</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span></span>
 <span>           <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">p_nn_wgts_on</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span>, ncol<span class="op">=</span><span class="fl">1</span><span class="op">)</span>,</span>
 <span>         nn2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">p_test</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span></span>
 <span>           <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="va">p_nn_wgts_on</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span>, ncol<span class="op">=</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">p_train_m</span> <span class="op">&lt;-</span> <span class="va">p_train_m</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>set <span class="op">=</span> <span class="st">"train"</span><span class="op">)</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>set <span class="op">=</span> <span class="st">"train"</span><span class="op">)</span></span>
 <span><span class="va">p_test_m</span> <span class="op">&lt;-</span> <span class="va">p_test_m</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>set <span class="op">=</span> <span class="st">"test"</span><span class="op">)</span></span>
-<span><span class="va">p_all_m</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html">bind_rows</a></span><span class="op">(</span><span class="va">p_train_m</span>, <span class="va">p_test_m</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">p_all_m</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">nn1</span>, y<span class="op">=</span><span class="va">nn2</span>, </span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>set <span class="op">=</span> <span class="st">"test"</span><span class="op">)</span></span>
+<span><span class="va">p_all_m</span> <span class="op">&lt;-</span> <span class="fu">bind_rows</span><span class="op">(</span><span class="va">p_train_m</span>, <span class="va">p_test_m</span><span class="op">)</span></span>
+<span><span class="fu">ggplot</span><span class="op">(</span><span class="va">p_all_m</span>, <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">nn1</span>, y<span class="op">=</span><span class="va">nn2</span>, </span>
 <span>                     colour<span class="op">=</span><span class="va">species</span>, shape<span class="op">=</span><span class="va">set</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://colorspace.R-Forge.R-project.org/reference/scale_colour_discrete_divergingx.html">scale_colour_discrete_divergingx</a></span><span class="op">(</span>palette<span class="op">=</span><span class="st">"Zissou 1"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html">scale_shape_manual</a></span><span class="op">(</span>values<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">16</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>aspect.ratio<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span>  <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_colour_discrete_divergingx</span><span class="op">(</span>palette<span class="op">=</span><span class="st">"Zissou 1"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_shape_manual</span><span class="op">(</span>values<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">16</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme</span><span class="op">(</span>aspect.ratio<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div id="fig-hidden-layer" class="quarto-float quarto-figure quarto-figure-center anchored" alt="A scatter plot of a projection showing clusters of three penguin species—Adélie (blue), Chinstrap (yellow), and Gentoo (red)—based on multiple variables. Data points are marked as either training data (open circles) or test data (filled circles). Both have x-axis 'nn1' with labels -2, -1, 0, 1, 2 and 3 and y-axis 'nn2' with labels -2, -1, 0, 1 and 2. The clusters are  different but not quite separated. There is little difference between training and test sets. A legend in the top-right corner indicates species colors, while another legend at the bottom-right differentiates between training (open circles) and test (filled circles) data.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-hidden-layer-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -720,9 +721,22 @@ Figure&nbsp;17.3: Plot of the data in the linear combinations from the two nodes
 <p></p>
 <p>When the predictive probabilities are returned by a model, as is done by this NN, we can use a ternary diagram for three class problems, or high-dimensional simplex when there are more classes to examine the strength of the classification. This done in the same way that was used for the votes matrix from a random forest in <a href="15-forests.html#sec-votes" class="quarto-xref"><span>Section 15.2.1</span></a>. </p>
 <div class="cell">
-<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Predict training and test set</span></span>
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb19"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Predict training and test set</span></span>
+<span><span class="co"># This looks like there is some machine dependency on the</span></span>
+<span><span class="co"># saved model, so predictions are saved for loading across platforms</span></span>
+<span><span class="va">p_nn_model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/keras/man/save_model_tf.html">load_model_tf</a></span><span class="op">(</span><span class="st">"data/penguins_cnn"</span><span class="op">)</span></span>
 <span><span class="va">p_train_pred</span> <span class="op">&lt;-</span> <span class="va">p_nn_model</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">p_train_x</span>, verbose <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
+<span><span class="va">p_test_pred</span> <span class="op">&lt;-</span> <span class="va">p_nn_model</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">p_test_x</span>, verbose <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/save.html">save</a></span><span class="op">(</span><span class="va">p_train_pred</span>, file<span class="op">=</span><span class="st">"data/p_train_pred.rda"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/save.html">save</a></span><span class="op">(</span><span class="va">p_test_pred</span>, file<span class="op">=</span><span class="st">"data/p_test_pred.rda"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb20"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Predict training and test set</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"data/p_train_pred.rda"</span><span class="op">)</span></span>
 <span><span class="va">p_train_pred_cat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/levels.html">levels</a></span><span class="op">(</span><span class="va">p_train</span><span class="op">$</span><span class="va">species</span><span class="op">)</span><span class="op">[</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/apply.html">apply</a></span><span class="op">(</span><span class="va">p_train_pred</span>, <span class="fl">1</span>,</span>
 <span>        <span class="va">which.max</span><span class="op">)</span><span class="op">]</span></span>
@@ -737,8 +751,7 @@ Figure&nbsp;17.3: Plot of the data in the linear combinations from the two nodes
   Chinstrap      0        45      0
   Gentoo         1         0     78</code></pre>
 </div>
-<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_test_pred</span> <span class="op">&lt;-</span> <span class="va">p_nn_model</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">p_test_x</span>, verbose <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb22"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"data/p_test_pred.rda"</span><span class="op">)</span></span>
 <span><span class="va">p_test_pred_cat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/levels.html">levels</a></span><span class="op">(</span><span class="va">p_test</span><span class="op">$</span><span class="va">species</span><span class="op">)</span><span class="op">[</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/apply.html">apply</a></span><span class="op">(</span><span class="va">p_test_pred</span>, <span class="fl">1</span>, </span>
 <span>        <span class="va">which.max</span><span class="op">)</span><span class="op">]</span></span>
@@ -756,30 +769,29 @@ Figure&nbsp;17.3: Plot of the data in the linear combinations from the two nodes
 </div>
 <p></p>
 <div class="cell">
-<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb20"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Set up the data to make the ternary diagram</span></span>
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb24"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Set up the data to make the ternary diagram</span></span>
 <span><span class="co"># Join data sets</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">p_train_pred</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Adelie"</span>, <span class="st">"Chinstrap"</span>, <span class="st">"Gentoo"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">p_test_pred</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Adelie"</span>, <span class="st">"Chinstrap"</span>, <span class="st">"Gentoo"</span><span class="op">)</span></span>
-<span><span class="va">p_train_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html">as_tibble</a></span><span class="op">(</span><span class="va">p_train_pred</span><span class="op">)</span></span>
+<span><span class="va">p_train_pred</span> <span class="op">&lt;-</span> <span class="fu">as_tibble</span><span class="op">(</span><span class="va">p_train_pred</span><span class="op">)</span></span>
 <span><span class="va">p_train_m</span> <span class="op">&lt;-</span> <span class="va">p_train_m</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>pspecies <span class="op">=</span> <span class="va">p_train_pred_cat</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_cols.html">bind_cols</a></span><span class="op">(</span><span class="va">p_train_pred</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>set <span class="op">=</span> <span class="st">"train"</span><span class="op">)</span></span>
-<span><span class="va">p_test_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html">as_tibble</a></span><span class="op">(</span><span class="va">p_test_pred</span><span class="op">)</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>pspecies <span class="op">=</span> <span class="va">p_train_pred_cat</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">bind_cols</span><span class="op">(</span><span class="va">p_train_pred</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>set <span class="op">=</span> <span class="st">"train"</span><span class="op">)</span></span>
+<span><span class="va">p_test_pred</span> <span class="op">&lt;-</span> <span class="fu">as_tibble</span><span class="op">(</span><span class="va">p_test_pred</span><span class="op">)</span></span>
 <span><span class="va">p_test_m</span> <span class="op">&lt;-</span> <span class="va">p_test_m</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>pspecies <span class="op">=</span> <span class="va">p_test_pred_cat</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_cols.html">bind_cols</a></span><span class="op">(</span><span class="va">p_test_pred</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>set <span class="op">=</span> <span class="st">"test"</span><span class="op">)</span></span>
-<span><span class="va">p_all_m</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html">bind_rows</a></span><span class="op">(</span><span class="va">p_train_m</span>, <span class="va">p_test_m</span><span class="op">)</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>pspecies <span class="op">=</span> <span class="va">p_test_pred_cat</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">bind_cols</span><span class="op">(</span><span class="va">p_test_pred</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>set <span class="op">=</span> <span class="st">"test"</span><span class="op">)</span></span>
+<span><span class="va">p_all_m</span> <span class="op">&lt;-</span> <span class="fu">bind_rows</span><span class="op">(</span><span class="va">p_train_m</span>, <span class="va">p_test_m</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Add simplex to make ternary</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://schloerke.github.io/geozoo/">geozoo</a></span><span class="op">)</span></span>
 <span><span class="va">proj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="fu">geozoo</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/geozoo/man/f_helmert.html">f_helmert</a></span><span class="op">(</span><span class="fl">3</span><span class="op">)</span><span class="op">[</span><span class="op">-</span><span class="fl">1</span>,<span class="op">]</span><span class="op">)</span></span>
 <span><span class="va">p_nn_v_p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">p_all_m</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Adelie"</span>, <span class="st">"Chinstrap"</span>, <span class="st">"Gentoo"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">proj</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">p_nn_v_p</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"x1"</span>, <span class="st">"x2"</span><span class="op">)</span></span>
 <span><span class="va">p_nn_v_p</span> <span class="op">&lt;-</span> <span class="va">p_nn_v_p</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>species <span class="op">=</span> <span class="va">p_all_m</span><span class="op">$</span><span class="va">species</span>,</span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>species <span class="op">=</span> <span class="va">p_all_m</span><span class="op">$</span><span class="va">species</span>,</span>
 <span>         set <span class="op">=</span> <span class="va">p_all_m</span><span class="op">$</span><span class="va">set</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">simp</span> <span class="op">&lt;-</span> <span class="fu">geozoo</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/geozoo/man/simplex.html">simplex</a></span><span class="op">(</span>p<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span>
@@ -789,23 +801,23 @@ Figure&nbsp;17.3: Plot of the data in the linear combinations from the two nodes
 </details>
 </div>
 <div class="cell">
-<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb21"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Plot it</span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_segment.html">geom_segment</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">sp</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">x1</span>, y<span class="op">=</span><span class="va">x2</span>, xend<span class="op">=</span><span class="va">x3</span>, yend<span class="op">=</span><span class="va">x4</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_text.html">geom_text</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">sp</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">x1</span>, y<span class="op">=</span><span class="va">x2</span>, label<span class="op">=</span><span class="va">species</span><span class="op">)</span>,</span>
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb25"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Plot it</span></span>
+<span><span class="fu">ggplot</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_segment</span><span class="op">(</span>data<span class="op">=</span><span class="va">sp</span>, <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">x1</span>, y<span class="op">=</span><span class="va">x2</span>, xend<span class="op">=</span><span class="va">x3</span>, yend<span class="op">=</span><span class="va">x4</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_text</span><span class="op">(</span>data<span class="op">=</span><span class="va">sp</span>, <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">x1</span>, y<span class="op">=</span><span class="va">x2</span>, label<span class="op">=</span><span class="va">species</span><span class="op">)</span>,</span>
 <span>            nudge_x<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">0.1</span>, <span class="fl">0.15</span>, <span class="fl">0</span><span class="op">)</span>,</span>
 <span>            nudge_y<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.05</span>, <span class="op">-</span><span class="fl">0.05</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">p_nn_v_p</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">x1</span>, y<span class="op">=</span><span class="va">x2</span>, </span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span>data<span class="op">=</span><span class="va">p_nn_v_p</span>, <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">x1</span>, y<span class="op">=</span><span class="va">x2</span>, </span>
 <span>                                colour<span class="op">=</span><span class="va">species</span>,</span>
 <span>                                shape<span class="op">=</span><span class="va">set</span><span class="op">)</span>, </span>
 <span>             size<span class="op">=</span><span class="fl">2</span>, alpha<span class="op">=</span><span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://colorspace.R-Forge.R-project.org/reference/scale_colour_discrete_divergingx.html">scale_color_discrete_divergingx</a></span><span class="op">(</span>palette<span class="op">=</span><span class="st">"Zissou 1"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html">scale_shape_manual</a></span><span class="op">(</span>values<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">19</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="http://jrnold.github.io/ggthemes/reference/theme_map.html">theme_map</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>aspect.ratio<span class="op">=</span><span class="fl">1</span>, legend.position <span class="op">=</span> <span class="st">"right"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span>  <span class="fu">scale_color_discrete_divergingx</span><span class="op">(</span>palette<span class="op">=</span><span class="st">"Zissou 1"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_shape_manual</span><span class="op">(</span>values<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">19</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme_map</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme</span><span class="op">(</span>aspect.ratio<span class="op">=</span><span class="fl">1</span>, legend.position <span class="op">=</span> <span class="st">"right"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
-<figure class="figure"><p><img src="17-nn_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" style="width:70.0%" alt="A scatterplot where all points fall inside a 2D triangle, marked by black lines. The triangle is upside down and is equilateral. Each vertex is labelled: Chinstrap (top left), Adelie (top right), Gentoo (bottom left). Each points corresponds to a penguin, and is coloured by species. The legend at right shows the color labelling as blue (Adelie), yellow (Chinstrap), red (Gentoo), and shape labels as open circles (training) and filled circles (test). Chinstrap points are a tight cluster at their vertex. Adelie and Gentoo are not centered at the vertex but part way along towards the others vertex. This indicates the confusion between these two species. There are some yellow points mixed with blue points but not with red."></p>
+<figure class="figure"><p><img src="17-nn_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid figure-img" style="width:70.0%" alt="A scatterplot where all points fall inside a 2D triangle, marked by black lines. The triangle is upside down and is equilateral. Each vertex is labelled: Chinstrap (top left), Adelie (top right), Gentoo (bottom left). Each points corresponds to a penguin, and is coloured by species. The legend at right shows the color labelling as blue (Adelie), yellow (Chinstrap), red (Gentoo), and shape labels as open circles (training) and filled circles (test). Chinstrap points are a tight cluster at their vertex. Adelie and Gentoo are not centered at the vertex but part way along towards the others vertex. This indicates the confusion between these two species. There are some yellow points mixed with blue points but not with red."></p>
 <figcaption>Ternary diagram for the three groups of the predictive probabilities of both training and test sets. From what we already know about the penguins data this fit is not good. Both Chinstrap and Gentoo penguins are confused with Adelie, or at risk of it. Gentoo is very well-separated from the other two species when several variables are used, and this fitted model is blind to it. One useful finding is that there is little difference between training and test sets, so the model has not been over-fitted.</figcaption></figure>
 </div>
 </div>
@@ -818,7 +830,7 @@ Figure&nbsp;17.3: Plot of the data in the linear combinations from the two nodes
 <p>To see how these methods apply in the setting where we have a large number of variables, observations and classes we will look at a neural network that predicts the category for the fashion MNIST data. The code for designing and fitting the model is following the tutorial available from https://tensorflow.rstudio.com/tutorials/keras/classification and you can find additional information there. Below we only replicate the steps needed to build the model from scratch. We also note that a similar investigation was presented in <span class="citation" data-cites="li2020visualizing">Li et al. (<a href="references.html#ref-li2020visualizing" role="doc-biblioref">2020</a>)</span>, with a focus on investigating the model at different epochs during the training. </p>
 <p>The first step is to download and prepare the data. Here we scale the observations to range between zero and one, and we define the label names.</p>
 <div class="cell">
-<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb22"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tensorflow.rstudio.com/">keras</a></span><span class="op">)</span></span>
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb26"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tensorflow.rstudio.com/">keras</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># download the data</span></span>
 <span><span class="va">fashion_mnist</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/keras/man/dataset_fashion_mnist.html">dataset_fashion_mnist</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -846,7 +858,7 @@ Figure&nbsp;17.3: Plot of the data in the linear combinations from the two nodes
 </div>
 <p>In the next step we define the neural network and train the model. Note that because we have many observations, even a very simple structure returns a good model. And because this example is well-known, we do not need to tune the model or check the validation accuracy.</p>
 <div class="cell">
-<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb23"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># defining the model</span></span>
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb27"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># defining the model</span></span>
 <span><span class="va">model_fashion_mnist</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/keras/man/keras_model_sequential.html">keras_model_sequential</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">model_fashion_mnist</span> <span class="op">|&gt;</span></span>
 <span>  <span class="co"># flatten the image data into a long vector</span></span>
@@ -872,7 +884,7 @@ Figure&nbsp;17.3: Plot of the data in the linear combinations from the two nodes
 </div>
 <p>We have defined a flat neural network with a single hidden layer with 128 nodes. To investigate the model we can start by comparing the activations to the original input data distribution. Since both the input space and the space of activations is large, and they are of different dimensionality, we will first use principal component analysis. This simplifies the analysis, and in general we do not need the original pixel or hidden node information for the interpretation here. The comparison is using the test-subset of the data. </p>
 <div class="cell">
-<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb24"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># get the fitted model</span></span>
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb28"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># get the fitted model</span></span>
 <span><span class="va">model_fashion_mnist</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/keras/man/save_model_tf.html">load_model_tf</a></span><span class="op">(</span><span class="st">"data/fashion_nn"</span><span class="op">)</span></span>
 <span><span class="co"># observed response labels in the test set</span></span>
 <span><span class="va">test_tags</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">class_names</span><span class="op">[</span><span class="va">test_labels</span> <span class="op">+</span> <span class="fl">1</span><span class="op">]</span>,</span>
@@ -901,49 +913,49 @@ Figure&nbsp;17.3: Plot of the data in the linear combinations from the two nodes
 </details>
 </div>
 <div class="cell">
-<details class="code-fold"><summary>Code to run tours</summary><div class="sourceCode" id="cb25"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">activations_pc</span>,</span>
-<span>       <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span><span class="va">PC1</span>, <span class="va">PC2</span>, color <span class="op">=</span> <span class="va">test_tags</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ggtitle</a></span><span class="op">(</span><span class="st">"Activations"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://colorspace.R-Forge.R-project.org/reference/scale_colour_discrete_qualitative.html">scale_color_discrete_qualitative</a></span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"Dynamic"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span>, aspect.ratio <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<details class="code-fold"><summary>Code to run tours</summary><div class="sourceCode" id="cb29"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="va">activations_pc</span>,</span>
+<span>       <span class="fu">aes</span><span class="op">(</span><span class="va">PC1</span>, <span class="va">PC2</span>, color <span class="op">=</span> <span class="va">test_tags</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span>size <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggtitle</span><span class="op">(</span><span class="st">"Activations"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_color_discrete_qualitative</span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"Dynamic"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme_bw</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme</span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span>, aspect.ratio <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">p1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">images_pc</span>,</span>
-<span>       <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span><span class="va">PC1</span>, <span class="va">PC2</span>, color <span class="op">=</span> <span class="va">test_tags</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ggtitle</a></span><span class="op">(</span><span class="st">"Input space"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://colorspace.R-Forge.R-project.org/reference/scale_colour_discrete_qualitative.html">scale_color_discrete_qualitative</a></span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"Dynamic"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span>, aspect.ratio <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">p1</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="va">images_pc</span>,</span>
+<span>       <span class="fu">aes</span><span class="op">(</span><span class="va">PC1</span>, <span class="va">PC2</span>, color <span class="op">=</span> <span class="va">test_tags</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span>size <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggtitle</span><span class="op">(</span><span class="st">"Input space"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_color_discrete_qualitative</span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"Dynamic"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme_bw</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme</span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span>, aspect.ratio <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">legend_labels</span> <span class="op">&lt;-</span> <span class="fu">cowplot</span><span class="fu">::</span><span class="fu"><a href="https://wilkelab.org/cowplot/reference/get_legend.html">get_legend</a></span><span class="op">(</span></span>
 <span>  <span class="va">p1</span> <span class="op">+</span> </span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guides.html">guides</a></span><span class="op">(</span>color <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guide_legend.html">guide_legend</a></span><span class="op">(</span>nrow <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span>,</span>
-<span>          legend.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_blank</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guides.html">guides</a></span><span class="op">(</span>color <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guide_legend.html">guide_legend</a></span><span class="op">(</span>override.aes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> </span>
+<span>    <span class="fu">guides</span><span class="op">(</span>color <span class="op">=</span> <span class="fu">guide_legend</span><span class="op">(</span>nrow <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">theme</span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span>,</span>
+<span>          legend.title <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">guides</span><span class="op">(</span>color <span class="op">=</span> <span class="fu">guide_legend</span><span class="op">(</span>override.aes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> </span>
 <span><span class="op">)</span></span>
 <span><span class="co"># hide plotting code</span></span>
 <span><span class="fu">cowplot</span><span class="fu">::</span><span class="fu"><a href="https://wilkelab.org/cowplot/reference/plot_grid.html">plot_grid</a></span><span class="op">(</span><span class="fu">cowplot</span><span class="fu">::</span><span class="fu"><a href="https://wilkelab.org/cowplot/reference/plot_grid.html">plot_grid</a></span><span class="op">(</span><span class="va">p1</span>, <span class="va">p2</span><span class="op">)</span>, <span class="va">legend_labels</span>,</span>
 <span>                   rel_heights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">.3</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
-<figure class="figure"><p><img src="17-nn_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid figure-img" style="width:100.0%" alt="A side-by-side comparison of two scatter plots, each showing a PC1 vs PC2 of data points color-coded by category. The left plot, titled 'Input space', represents the raw input data projected into two principal components. Data points are densely packed and overlapping, with no clear separation between categories. The right plot, titled 'Activations', shows the same data after being transformed by a neural network (e.g., through hidden layer activations). In this plot, the points are more clearly separated into distinct groups, with elongated and curved cluster structures suggesting that the network has learned to organize the data in a more class-discriminative way. Axes in both plots are labeled PC1 (x-axis) and PC2 (y-axis), and the same color scheme is used across both plots to represent consistent categories."></p>
+<figure class="figure"><p><img src="17-nn_files/figure-html/unnamed-chunk-23-1.png" class="img-fluid figure-img" style="width:100.0%" alt="A side-by-side comparison of two scatter plots, each showing a PC1 vs PC2 of data points color-coded by category. The left plot, titled 'Input space', represents the raw input data projected into two principal components. Data points are densely packed and overlapping, with no clear separation between categories. The right plot, titled 'Activations', shows the same data after being transformed by a neural network (e.g., through hidden layer activations). In this plot, the points are more clearly separated into distinct groups, with elongated and curved cluster structures suggesting that the network has learned to organize the data in a more class-discriminative way. Axes in both plots are labeled PC1 (x-axis) and PC2 (y-axis), and the same color scheme is used across both plots to represent consistent categories."></p>
 <figcaption>First two PCs of the original data (left) and the activations (right). The activation space has done a useful transformation of the 784 variables into a reduced dimension that reveals class clusters, because some cluster differences can be seen well in the first two PCs.</figcaption></figure>
 </div>
 </div>
 </div>
 <p>Looking only at the first two principal components we note some clear differences from the transformation in the hidden layer. The observations seem to be more evenly spread in the input space, while in the activations space we notice grouping along specific directions. In particular the category “Bag” appears to be most different from all other classes, and the non-linear transformation in the activations space shows that they are clearly different from the shoe categories, while in the input space we could note some overlap in the linear projection. To better identify differences between other groups we will use the tour on the first five principal components.</p>
 <div class="cell">
-<details class="code-fold"><summary>Code to run tours</summary><div class="sourceCode" id="cb26"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://ggobi.github.io/tourr/reference/display_xy.html">animate_xy</a></span><span class="op">(</span><span class="va">images_pc</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>, col <span class="op">=</span> <span class="va">test_tags</span>,</span>
+<details class="code-fold"><summary>Code to run tours</summary><div class="sourceCode" id="cb30"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">animate_xy</span><span class="op">(</span><span class="va">images_pc</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>, col <span class="op">=</span> <span class="va">test_tags</span>,</span>
 <span>        cex<span class="op">=</span><span class="fl">0.2</span>, palette <span class="op">=</span> <span class="st">"Dynamic"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://ggobi.github.io/tourr/reference/display_xy.html">animate_xy</a></span><span class="op">(</span><span class="va">activations_pc</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>, col <span class="op">=</span> <span class="va">test_tags</span>,</span>
+<span><span class="fu">animate_xy</span><span class="op">(</span><span class="va">activations_pc</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>, col <span class="op">=</span> <span class="va">test_tags</span>,</span>
 <span>        cex<span class="op">=</span><span class="fl">0.2</span>, palette <span class="op">=</span> <span class="st">"Dynamic"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://ggobi.github.io/tourr/reference/render_gif.html">render_gif</a></span><span class="op">(</span><span class="va">images_pc</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>,</span>
-<span>           <span class="fu"><a href="https://ggobi.github.io/tourr/reference/grand_tour.html">grand_tour</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>           <span class="fu"><a href="https://ggobi.github.io/tourr/reference/display_xy.html">display_xy</a></span><span class="op">(</span> </span>
+<span><span class="fu">render_gif</span><span class="op">(</span><span class="va">images_pc</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>,</span>
+<span>           <span class="fu">grand_tour</span><span class="op">(</span><span class="op">)</span>,</span>
+<span>           <span class="fu">display_xy</span><span class="op">(</span> </span>
 <span>             col<span class="op">=</span><span class="va">test_tags</span>, </span>
 <span>             cex<span class="op">=</span><span class="fl">0.2</span>,</span>
 <span>             palette <span class="op">=</span> <span class="st">"Dynamic"</span>,</span>
@@ -952,9 +964,9 @@ Figure&nbsp;17.3: Plot of the data in the linear combinations from the two nodes
 <span>           frames<span class="op">=</span><span class="fl">500</span>,</span>
 <span>           loop<span class="op">=</span><span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://ggobi.github.io/tourr/reference/render_gif.html">render_gif</a></span><span class="op">(</span><span class="va">activations_pc</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>,</span>
-<span>           <span class="fu"><a href="https://ggobi.github.io/tourr/reference/grand_tour.html">grand_tour</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>           <span class="fu"><a href="https://ggobi.github.io/tourr/reference/display_xy.html">display_xy</a></span><span class="op">(</span> </span>
+<span><span class="fu">render_gif</span><span class="op">(</span><span class="va">activations_pc</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>,</span>
+<span>           <span class="fu">grand_tour</span><span class="op">(</span><span class="op">)</span>,</span>
+<span>           <span class="fu">display_xy</span><span class="op">(</span> </span>
 <span>             col<span class="op">=</span><span class="va">test_tags</span>, </span>
 <span>             cex<span class="op">=</span><span class="fl">0.2</span>,</span>
 <span>             palette <span class="op">=</span> <span class="st">"Dynamic"</span>,</span>
@@ -997,7 +1009,7 @@ Figure&nbsp;17.4: Comparison of the test observations in the first five principa
 </div>
 <p>Finally we will investigate the model performance through the misclassifications and uncertainty between classes. We start with the error matrix for the test observations. To fit the error matrix we use the numeric labels, the ordering is as defined above for the labels. </p>
 <div class="cell">
-<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb27"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">fashion_test_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">model_fashion_mnist</span>,</span>
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb31"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">fashion_test_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">model_fashion_mnist</span>,</span>
 <span>                             <span class="va">test_images</span>, verbose <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
 <span><span class="va">fashion_test_pred_cat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/levels.html">levels</a></span><span class="op">(</span><span class="va">test_tags</span><span class="op">)</span><span class="op">[</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/apply.html">apply</a></span><span class="op">(</span><span class="va">fashion_test_pred</span>, <span class="fl">1</span>,</span>
@@ -1025,7 +1037,7 @@ observed    0    1    2    3    4    5    6    7    8    9
 </div>
 <p>Here the labels are used as 0 - T-shirt/top, 1 - Trouser, 2 - Pullover, 3 - Dress, 4 - Coat, 5 - Sandal, 6 - Shirt, 7 - Sneaker, 8 - Bag, 9 - Ankle boot. From this we see that the model mainly confuses certain categories with each other, and within expected groups (e.g.&nbsp;different types of shoes can be confused with each other, or different types of shirts). We can further investigate this by visualizing the full probability matrix for the test observations, to see which categories the model is uncertain about. </p>
 <div class="cell">
-<details class="code-fold"><summary>Code to visualize probabilities</summary><div class="sourceCode" id="cb29"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># getting the probabilities from the output layer</span></span>
+<details class="code-fold"><summary>Code to visualize probabilities</summary><div class="sourceCode" id="cb33"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># getting the probabilities from the output layer</span></span>
 <span><span class="va">fashion_test_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">model_fashion_mnist</span>,</span>
 <span>                             <span class="va">test_images</span>, verbose <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
 <span></span>
@@ -1036,34 +1048,34 @@ observed    0    1    2    3    4    5    6    7    8    9
 <span></span>
 <span><span class="va">f_nn_v_p</span> <span class="op">&lt;-</span> <span class="va">f_nn_v_p</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>class <span class="op">=</span> <span class="va">test_tags</span><span class="op">)</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>class <span class="op">=</span> <span class="va">test_tags</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">simp</span> <span class="op">&lt;-</span> <span class="fu">geozoo</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/geozoo/man/simplex.html">simplex</a></span><span class="op">(</span>p<span class="op">=</span><span class="fl">9</span><span class="op">)</span></span>
 <span><span class="va">sp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span><span class="va">simp</span><span class="op">$</span><span class="va">points</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">sp</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>, <span class="st">"x4"</span>, <span class="st">"x5"</span>, <span class="st">"x6"</span>, <span class="st">"x7"</span>, <span class="st">"x8"</span>, <span class="st">"x9"</span><span class="op">)</span></span>
 <span><span class="va">sp</span><span class="op">$</span><span class="va">class</span> <span class="op">=</span> <span class="st">""</span></span>
-<span><span class="va">f_nn_v_p_s</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html">bind_rows</a></span><span class="op">(</span><span class="va">sp</span>, <span class="va">f_nn_v_p</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>class <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span><span class="op">(</span><span class="va">class</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"T-shirt/top"</span>,</span>
+<span><span class="va">f_nn_v_p_s</span> <span class="op">&lt;-</span> <span class="fu">bind_rows</span><span class="op">(</span><span class="va">sp</span>, <span class="va">f_nn_v_p</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>class <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span><span class="op">(</span><span class="va">class</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"T-shirt/top"</span>,</span>
 <span>                                     <span class="st">"Pullover"</span>,</span>
 <span>                                     <span class="st">"Shirt"</span>,</span>
 <span>                                     <span class="st">"Coat"</span><span class="op">)</span>, <span class="va">class</span>, <span class="st">"Other"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>class <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">class</span>, levels<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Other"</span>, <span class="st">"T-shirt/top"</span>,</span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>class <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">class</span>, levels<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Other"</span>, <span class="st">"T-shirt/top"</span>,</span>
 <span>                                        <span class="st">"Pullover"</span>,</span>
 <span>                                        <span class="st">"Shirt"</span>,</span>
 <span>                                        <span class="st">"Coat"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> </span>
 <span><span class="va">labels</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"0"</span> , <span class="st">"1"</span>, <span class="st">"2"</span>, <span class="st">"3"</span>, <span class="st">"4"</span>, <span class="st">"5"</span>, <span class="st">"6"</span>, <span class="st">"7"</span>, <span class="st">"8"</span>, <span class="st">"9"</span>,</span>
 <span>                <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="st">""</span>, <span class="fl">10000</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://ggobi.github.io/tourr/reference/display_xy.html">animate_xy</a></span><span class="op">(</span><span class="va">f_nn_v_p_s</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">9</span><span class="op">]</span>, col <span class="op">=</span> <span class="va">f_nn_v_p_s</span><span class="op">$</span><span class="va">class</span>, </span>
+<span><span class="fu">animate_xy</span><span class="op">(</span><span class="va">f_nn_v_p_s</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">9</span><span class="op">]</span>, col <span class="op">=</span> <span class="va">f_nn_v_p_s</span><span class="op">$</span><span class="va">class</span>, </span>
 <span>           axes <span class="op">=</span> <span class="st">"off"</span>, cex<span class="op">=</span><span class="fl">0.2</span>,</span>
 <span>           edges <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">simp</span><span class="op">$</span><span class="va">edges</span><span class="op">)</span>,</span>
 <span>           edges.width <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>           obs_labels <span class="op">=</span> <span class="va">labels</span>, </span>
 <span>           palette <span class="op">=</span> <span class="st">"Viridis"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://ggobi.github.io/tourr/reference/render_gif.html">render_gif</a></span><span class="op">(</span><span class="va">f_nn_v_p_s</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">9</span><span class="op">]</span>,</span>
-<span>           <span class="fu"><a href="https://ggobi.github.io/tourr/reference/grand_tour.html">grand_tour</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>           <span class="fu"><a href="https://ggobi.github.io/tourr/reference/display_xy.html">display_xy</a></span><span class="op">(</span> </span>
+<span><span class="fu">render_gif</span><span class="op">(</span><span class="va">f_nn_v_p_s</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">9</span><span class="op">]</span>,</span>
+<span>           <span class="fu">grand_tour</span><span class="op">(</span><span class="op">)</span>,</span>
+<span>           <span class="fu">display_xy</span><span class="op">(</span> </span>
 <span>             col<span class="op">=</span><span class="va">f_nn_v_p_s</span><span class="op">$</span><span class="va">class</span>, </span>
 <span>             cex<span class="op">=</span><span class="fl">0.2</span>,</span>
 <span>             palette <span class="op">=</span> <span class="st">"Viridis"</span>,</span>
@@ -1164,7 +1176,7 @@ Becker, R., Cleveland, W. S., &amp; Shyu, M.-J. (1996). <span>T</span>he <span>V
 Bederson, B. B., &amp; Schneiderman, B. (2003). <em>The <span>C</span>raft of <span>I</span>nformation <span>V</span>isualization: <span>R</span>eadings and <span>R</span>eflections</em>. Morgan Kaufmann.
 </div>
 <div id="ref-BellmanRichard1961" class="csl-entry" role="listitem">
-Bellman, R. (1961). <em>Adaptive <span>C</span>ontrol <span>P</span>rocesses: <span>A</span> <span>G</span>guided <span>T</span>our</em>.
+Bellman, R. (1961). <em>Adaptive <span>C</span>ontrol <span>P</span>rocesses: <span>A</span> <span>G</span>uided <span>T</span>our</em>.
 </div>
 <div id="ref-bickel2018" class="csl-entry" role="listitem">
 Bickel, P. J., Kur, G., &amp; Nadler, B. (2018). Projection <span>P</span>ursuit in <span>H</span>igh <span>D</span>imensions. <em>Proceedings of the National Academy of Sciences</em>, <em>115</em>, 9151–9156. <a href="https://doi.org/10.1073/pnas.1801177115">https://doi.org/10.1073/pnas.1801177115</a>
@@ -1269,7 +1281,7 @@ Cook, D., Buja, A., Cabrera, J., &amp; Hurley, C. (1995). Grand <span>T</span>ou
 Cook, D., Hofmann, H., Lee, E.-K., Yang, H., Nikolau, B., &amp; Wurtele, E. (2007). Exploring <span>G</span>ene <span>E</span>xpression <span>D</span>ata, <span>U</span>sing <span>P</span>lots. <em>Journal of Data Science</em>, <em>5</em>(2), 151–182.
 </div>
 <div id="ref-R-mulgar" class="csl-entry" role="listitem">
-Cook, D., &amp; Laa, U. (2025). <em>Mulgar: Functions for pre-processing data for multivariate data visualisation using tours</em>. <a href="https://dicook.github.io/mulgar/">https://dicook.github.io/mulgar/</a>
+Cook, D., &amp; Laa, U. (2025). <em><span class="nocase">mulgar</span>: <span>F</span>unctions for <span>P</span>re-<span>P</span>rocessing <span>D</span>ata for <span>M</span>ultivariate data <span>V</span>isualisation using <span>T</span>ours</em>. <a href="https://dicook.github.io/mulgar/">https://dicook.github.io/mulgar/</a>
 </div>
 <div id="ref-CLBW06" class="csl-entry" role="listitem">
 Cook, D., Lee, E.-K., Buja, A., &amp; Wickham, H. (2006). <span>G</span>rand <span>T</span>ours, <span>P</span>rojection <span>P</span>ursuit <span>G</span>uided <span>T</span>ours and <span>M</span>anual <span>C</span>ontrols. In C.-H. Chen, W. Härdle, &amp; A. Unwin (Eds.), <em>Handbook of <span>D</span>ata <span>V</span>isualization</em>. Springer. <a href="https://doi.org/10.1007/978-3-540-33037-0">https://doi.org/10.1007/978-3-540-33037-0</a>
@@ -1440,7 +1452,7 @@ Horikoshi, M., &amp; Tang, Y. (2024). <em><span class="nocase">ggfortify</span>:
 Horst, A. M., Hill, A. P., &amp; Gorman, K. B. (2022). Palmer <span>A</span>rchipelago <span>P</span>enguins <span>D</span>ata in the palmerpenguins <span>R</span> <span>P</span>ackage - <span>A</span>n <span>A</span>lternative to <span>A</span>nderson’s <span>I</span>rises. <em>The R Journal</em>, <em>14</em>, 244–254. <a href="https://doi.org/10.32614/RJ-2022-020">https://doi.org/10.32614/RJ-2022-020</a>
 </div>
 <div id="ref-R-palmerpenguins" class="csl-entry" role="listitem">
-Horst, A., Hill, A., &amp; Gorman, K. (2022). <em>Palmerpenguins: Palmer archipelago (antarctica) penguin data</em>. <a href="https://allisonhorst.github.io/palmerpenguins/">https://allisonhorst.github.io/palmerpenguins/</a>
+Horst, A., Hill, A., &amp; Gorman, K. (2022). <em><span class="nocase">palmerpenguins</span>: <span>P</span>almer <span>A</span>rchipelago (<span>A</span>ntarctica) <span>P</span>enguin <span>D</span>ata</em>. <a href="https://allisonhorst.github.io/palmerpenguins/">https://allisonhorst.github.io/palmerpenguins/</a>
 </div>
 <div id="ref-hotelling-pca" class="csl-entry" role="listitem">
 Hotelling, H. (1933). Analysis of a <span>C</span>omplex of <span>S</span>tatistical <span>V</span>ariables into <span>P</span>rincipal <span>C</span>omponents. <em>Journal of Educational Psychology</em>, <em>24</em>(6), 417--441. <a href="https://doi.org/10.1037/h0071325">https://doi.org/10.1037/h0071325</a>
@@ -1626,7 +1638,7 @@ OpenStreetMap contributors. (2020). <em><span class="nocase">Planet Dump Retriev
 Pearson, K. (1901). LIII. On <span>L</span>ines and <span>P</span>lanes of <span>C</span>losest <span>F</span>it to <span>S</span>ystems of <span>P</span>oints in <span>S</span>pace. <em>The London, Edinburgh, and Dublin Philosophical Magazine and Journal of Science</em>, <em>2</em>(11), 559–572. <a href="https://doi.org/10.1080/14786440109462720">https://doi.org/10.1080/14786440109462720</a>
 </div>
 <div id="ref-R-patchwork" class="csl-entry" role="listitem">
-Pedersen, T. L. (2024). <em>Patchwork: The composer of plots</em>. <a href="https://patchwork.data-imaginist.com">https://patchwork.data-imaginist.com</a>
+Pedersen, T. L. (2024). <em><span class="nocase">patchwork</span>: <span>T</span>he <span>C</span>omposer of <span>P</span>lots</em>. <a href="https://patchwork.data-imaginist.com">https://patchwork.data-imaginist.com</a>
 </div>
 <div id="ref-perisic2009" class="csl-entry" role="listitem">
 Perisic, I., &amp; Posse, C. (2005). Projection <span>P</span>ursuit <span>I</span>ndices <span>B</span>ased on the <span>E</span>mpirical <span>D</span>istribution <span>F</span>unction. <em>Journal of Computational and Graphical Statistics</em>, <em>14</em>(3), 700–715. <a href="https://doi.org/10.1198/106186005X69440">https://doi.org/10.1198/106186005X69440</a>
@@ -1659,7 +1671,7 @@ Rao, C. R., Wegman, E. J., &amp; Solka, J. L. (Eds.). (2006). <em>Handbook of <s
 Ripley, B. (1996). <em>Pattern <span>R</span>ecognition and <span>N</span>eural <span>N</span>etworks</em>. Cambridge University Press.
 </div>
 <div id="ref-R-nnet" class="csl-entry" role="listitem">
-Ripley, B. (2023). <em>Nnet: Feed-forward neural networks and multinomial log-linear models</em>. <a href="http://www.stats.ox.ac.uk/pub/MASS4/">http://www.stats.ox.ac.uk/pub/MASS4/</a>
+Ripley, B. (2023). <em><span class="nocase">nnet</span>: <span>F</span>eed-<span>F</span>orward <span>N</span>eural <span>N</span>etworks and <span>M</span>ultinomial <span>L</span>og-<span>L</span>inear <span>M</span>odels</em>. <a href="http://www.stats.ox.ac.uk/pub/MASS4/">http://www.stats.ox.ac.uk/pub/MASS4/</a>
 </div>
 <div id="ref-R-MASS" class="csl-entry" role="listitem">
 Ripley, B., &amp; Venables, B. (2024). <em>MASS: Support functions and datasets for venables and ripley’s MASS</em>. <a href="http://www.stats.ox.ac.uk/pub/MASS4/">http://www.stats.ox.ac.uk/pub/MASS4/</a>
@@ -1698,7 +1710,7 @@ Shepard, R. N. (1962). The <span>A</span>nalysis of <span>P</span>roximities: <s
 Sievert, C. (2020). <em>Interactive <span>W</span>eb-<span>B</span>ased <span>D</span>ata <span>V</span>isualization with <span>R</span>, plotly, and shiny</em>. Chapman; Hall/CRC. <a href="https://plotly-r.com">https://plotly-r.com</a>
 </div>
 <div id="ref-R-plotly" class="csl-entry" role="listitem">
-Sievert, C., Parmer, C., Hocking, T., Chamberlain, S., Ram, K., Corvellec, M., &amp; Despouy, P. (2024). <em>Plotly: Create interactive web graphics via plotly.js</em>. <a href="https://plotly-r.com">https://plotly-r.com</a>
+Sievert, C., Parmer, C., Hocking, T., Chamberlain, S., Ram, K., Corvellec, M., &amp; Despouy, P. (2024). <em><span class="nocase">plotly</span>: <span>C</span>reate <span>I</span>nteractive <span>W</span>eb <span>G</span>raphics via <span class="nocase">plotly.js</span></em>. <a href="https://plotly-r.com">https://plotly-r.com</a>
 </div>
 <div id="ref-R-gtsummary" class="csl-entry" role="listitem">
 Sjoberg, D. D., Larmarange, J., Curry, M., Lavery, J., Whiting, K., &amp; Zabor, E. C. (2024). <em>Gtsummary: Presentation-ready data summary and analytic result tables</em>. <a href="https://github.com/ddsjoberg/gtsummary">https://github.com/ddsjoberg/gtsummary</a>
@@ -1716,7 +1728,7 @@ Sparks, A. H., Carroll, J., Goldie, J., Marchiori, D., Melloy, P., Padgham, M., 
 Spence, R. (2007). <em>Information <span>V</span>isualization: <span>D</span>esign for <span>I</span>nteraction</em>. Prentice Hall.
 </div>
 <div id="ref-colorspace2009b" class="csl-entry" role="listitem">
-Stauffer, R., Mayr, G. J., Dabernig, M., &amp; Zeileis, A. (2009). Somewhere over the rainbow: How to make effective use of colors in meteorological visualizations. <em>Bulletin of the American Meteorological Society</em>, <em>96</em>(2), 203–216. <a href="https://doi.org/10.1175/BAMS-D-13-00155.1">https://doi.org/10.1175/BAMS-D-13-00155.1</a>
+Stauffer, R., Mayr, G. J., Dabernig, M., &amp; Zeileis, A. (2009). <span>S</span>omewhere over the <span>R</span>ainbow: <span>H</span>ow to <span>M</span>ake <span>E</span>ffective <span>U</span>se of <span>C</span>olors in <span>M</span>eteorological <span>V</span>isualizations. <em>Bulletin of the American Meteorological Society</em>, <em>96</em>(2), 203–216. <a href="https://doi.org/10.1175/BAMS-D-13-00155.1">https://doi.org/10.1175/BAMS-D-13-00155.1</a>
 </div>
 <div id="ref-seurat2" class="csl-entry" role="listitem">
 Stuart, T., Butler, A., Hoffman, P., Hafemeister, C., Papalexi, E., III, W. M. M., Hao, Y., Stoeckius, M., Smibert, P., &amp; Satija, R. (2019). Comprehensive <span>I</span>ntegration of <span>S</span>ingle-<span>C</span>ell <span>D</span>ata. <em>Cell</em>, <em>177</em>, 1888–1902. <a href="https://doi.org/10.1016/j.cell.2019.05.031">https://doi.org/10.1016/j.cell.2019.05.031</a>
@@ -1785,7 +1797,7 @@ Tierney, N., &amp; Cook, D. (2023a). Expanding <span>T</span>idy <span>D</span>a
 Tierney, N., &amp; Cook, D. (2023b). Expanding <span>T</span>idy <span>D</span>ata <span>P</span>rinciples to <span>F</span>acilitate <span>M</span>issing <span>D</span>ata <span>E</span>xploration, <span>V</span>isualization and <span>A</span>ssessment of <span>I</span>mputations. <em>Journal of Statistical Software</em>, <em>105</em>(7), 1–31. <a href="https://doi.org/10.18637/jss.v105.i07">https://doi.org/10.18637/jss.v105.i07</a>
 </div>
 <div id="ref-R-naniar" class="csl-entry" role="listitem">
-Tierney, N., Cook, D., McBain, M., &amp; Fay, C. (2024). <em>Naniar: Data structures, summaries, and visualisations for missing data</em>. <a href="https://github.com/njtierney/naniar">https://github.com/njtierney/naniar</a>
+Tierney, N., Cook, D., McBain, M., &amp; Fay, C. (2024). <em><span class="nocase">naniar</span>: <span>D</span>ata <span>S</span>tructures, <span>S</span>ummaries, and <span>V</span>isualisations for <span>M</span>issing <span>D</span>ata</em>. <a href="https://github.com/njtierney/naniar">https://github.com/njtierney/naniar</a>
 </div>
 <div id="ref-To52" class="csl-entry" role="listitem">
 Torgerson, W. S. (1952). Multidimensional <span>S</span>caling. 1. <span>T</span>heory and <span>M</span>ethod. <em>Psychometrika</em>, <em>17</em>, 401–419.
@@ -1914,7 +1926,7 @@ Young, F. W., Valero-Mora, P. M., &amp; Friendly, M. (2006). <em>Visual <span>S<
 Zeileis, A., Fisher, J. C., Hornik, K., Ihaka, R., McWhite, C. D., Murrell, P., Stauffer, R., &amp; Wilke, C. O. (2020). <span class="nocase">colorspace</span>: A toolbox for manipulating and assessing colors and palettes. <em>Journal of Statistical Software</em>, <em>96</em>(1), 1–49. <a href="https://doi.org/10.18637/jss.v096.i01">https://doi.org/10.18637/jss.v096.i01</a>
 </div>
 <div id="ref-colorspace2009a" class="csl-entry" role="listitem">
-Zeileis, A., Hornik, K., &amp; Murrell, P. (2009). Escaping <span>RGB</span>land: Selecting colors for statistical graphics. <em>Computational Statistics &amp; Data Analysis</em>, <em>53</em>(9), 3259–3270. <a href="https://doi.org/10.1016/j.csda.2008.11.033">https://doi.org/10.1016/j.csda.2008.11.033</a>
+Zeileis, A., Hornik, K., &amp; Murrell, P. (2009). Escaping <span>RGB</span>land: <span>S</span>electing <span>C</span>olors for <span>S</span>tatistical <span>G</span>raphics. <em>Computational Statistics &amp; Data Analysis</em>, <em>53</em>(9), 3259–3270. <a href="https://doi.org/10.1016/j.csda.2008.11.033">https://doi.org/10.1016/j.csda.2008.11.033</a>
 </div>
 <div id="ref-zhang2023" class="csl-entry" role="listitem">
 Zhang, C., Ye, J., &amp; Wang, X. (2023). A <span>C</span>omputational <span>P</span>erspective on <span>P</span>rojection <span>P</span>ursuit in <span>H</span>igh <span>D</span>imensions: <span>F</span>easible or <span>I</span>nfeasible <span>F</span>eature <span>E</span>xtraction. <em>International Statistical Review</em>, <em>91</em>(1), 140–161. <a href="https://doi.org/10.1111/insr.12517">https://doi.org/10.1111/insr.12517</a>

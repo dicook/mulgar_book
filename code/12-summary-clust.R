@@ -1,16 +1,9 @@
-## ----echo=knitr::is_html_output()------------------------------------------
-#| message: false
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| code-summary: "Load libraries"
-library(mclust) 
-library(tidyr)
-library(dplyr)
-library(gt)
-library(mulgar)
-library(ggplot2)
-library(colorspace)
+source("code/setup.R")
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| message: false
 #| code-summary: "Code to do clustering"
 load("data/penguins_sub.rda")
@@ -19,7 +12,7 @@ p_hcw <- hclust(p_dist, method="ward.D2")
 p_cl <- data.frame(cl_w = cutree(p_hcw, 3))
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| code-summary: "Code for convex hulls in 2D"
 psub <- penguins_sub |>
   select(bl, bd) |>
@@ -42,7 +35,7 @@ p_chull2D <- ggplot() +
   theme(aspect.ratio = 1)
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| message: false
 #| code-summary: "Code to do clustering"
 p_dist <- dist(penguins_sub[,1:4])
@@ -57,12 +50,12 @@ p_cl <- p_cl |>
   mutate(cl_mc = penguins_mc$classification)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| code-summary: "Code to generate pD convex hull"
 phull <- gen_chull(penguins_sub[,1:4], p_cl$cl_w)
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| eval: false
 #| code-summary: "Code to generate pD convex hull and view in tour"
 # animate_xy(phull$data[,1:4],
@@ -80,13 +73,11 @@ phull <- gen_chull(penguins_sub[,1:4], p_cl$cl_w)
 #            height = 400)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| eval: false
 #| echo: false
 
 # # This code is checking that convex hull works
-# library(geozoo)
-# 
 # cb <- cube.solid.random(p=4, n=1000)$points
 # phull <- cxhull(cb)$edges
 # 
@@ -102,16 +93,17 @@ phull <- gen_chull(penguins_sub[,1:4], p_cl$cl_w)
 # animate_xy(as.data.frame(sph), edges=sph_phull)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| label: fig-penguin-hull-2D-html
 #| echo: false
 #| fig-width: 4
 #| fig-height: 4
 #| fig-cap: "2D"
+#| fig-alt: "Scatterplot with x axis labelled 'bl' and grid lines at -2, -1, 0, 1, 2, 3, and y axis labelled 'bd' and grid lines at -2, -1, 0, 1, 2. Points are coloured blue, yellow and red matching clusters 1, 2, 3, as indicated by the legend at top right. Lines connect points marking the convex hull of each cluster. Blue group is slightly rectangular at top left. Yellow group is wedge-shaped at bottom right, and red group is like a rounded square at top right. All convex hulls overlap in the middle of the plot."
 p_chull2D 
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| code-summary: "Code to make confusion table"
 p_cl |> 
   count(cl_w, cl_mc) |> 
@@ -123,12 +115,11 @@ p_cl |>
   cols_width(everything() ~ px(60))
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| eval: false
 #| message: false
 #| echo: false
 #| code-summary: "Code to do linked brushing with liminal"
-# library(liminal)
 # penguins_cl <- bind_cols(penguins_sub, p_cl)
 # p_cl <- p_cl |>
 #   mutate(cl_w_j = jitter(cl_w),
@@ -141,14 +132,10 @@ p_cl |>
 # )
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| eval: false
 #| echo: true
 #| code-summary: "Code to do interactive graphics"
-# library(crosstalk)
-# library(plotly)
-# library(detourr)
-# library(viridis)
 # p_cl <- p_cl |>
 #   mutate(cl_w_j = jitter(cl_w),
 #          cl_mc_j = jitter(cl_mc))
@@ -181,11 +168,9 @@ p_cl |>
 #  )
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| eval: false
 #| echo: false
-# library(mulgar)
-# library(tourr)
 # animate_xy(c4[,c(1:4, 6)])
 # c4_hc <- hclust(dist(c4[,c(1:4, 6)]), method="ward.D2")
 # plot(c4_hc)
@@ -202,15 +187,13 @@ p_cl |>
 # 
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| eval: false
 #| echo: false
 #| message: false
 #| warning: false
-# library(tidyverse)
 # risk <- readRDS("data/risk_MSA.rds")
 # # looking at the data
-# library(tourr)
 # animate_xy(risk)
 # # hierarchical clustering solutions
 # risk_h_mc <- hclust(dist(risk, method = "manhattan"),
@@ -226,7 +209,6 @@ p_cl |>
 #   mutate(cl_h_ms = factor(cutree(risk_h_ms, 6))) |>
 #   mutate(cl_h_ew = factor(cutree(risk_h_ew, 6)))
 # # drawing 2D dendrograms
-# library(ggdendro)
 # ggplot() +
 #   geom_segment(data=dendro_data(risk_h_mc)$segments,
 #                aes(x = x, y = y,
@@ -243,7 +225,6 @@ p_cl |>
 #                    xend = xend, yend = yend)) +
 #   theme_dendro()
 # # dendrogram in the data space
-# library(mulgar)
 # risk_hfly_mc <- hierfly(risk_clw, risk_h_mc, scale=FALSE)
 # risk_hfly_ms <- hierfly(risk_clw, risk_h_ms, scale=FALSE)
 # risk_hfly_ew <- hierfly(risk_clw, risk_h_ew, scale=FALSE)

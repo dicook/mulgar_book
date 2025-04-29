@@ -1,13 +1,5 @@
 # Introduction to supervised classification {#sec-class-intro}
 
-<!--
-- overview of supervised classification, model structure
-- refer to the ISLR language
-- basics of training/testing for model building
-- model components needed from all
-- common tasks: checking clusters relative to class labels, looking at boundaries
--->
-
 Methods for supervised classification originated in the early twentieth century, under the term *discriminant analysis* (see, for example, @Fi36). The late 1900s and 2000s has seen an explosion of research with many new methods emerging, especially addressing the increased collection of data, and storage in databases. The fundamental goals and approaches remain the same: to be able to accurately predict the class labels using a model developed from a categorical response variable and multivariate predictors. In contrast to unsupervised classification, the class label (categorical response variable) is known, in the training sample. The training sample is used to build the prediction model, and also to estimate the accuracy, or inversely error, of the model for future data. 
 
 \index{classification!training sample}
@@ -37,6 +29,12 @@ a non-linear boundary?  How do changes in the input parameters affect these boun
 - What cases are misclassified, or have more uncertain predictions?  Are there places in the data space where predictions are especially good or bad?
 - Which predictors most contribute to the model predictions? Is it possible to reduce the set of explanatory variables?
 
+```{r echo=knitr::is_html_output()}
+#| code-summary: "Load libraries"
+#| message: false
+source("code/setup.R")
+```
+
 ```{r}
 #| label: fig-sup-example
 #| fig-cap: "Examples of supervised classification patterns: (a) linearly separable, (b) linear but not completely separable, (c) non-linearly separable, (d) non-linear, but not completely separable."
@@ -46,10 +44,6 @@ a non-linear boundary?  How do changes in the input parameters affect these boun
 #| fig-height: 2.5
 #| fig-width: 7.5
 #| out-width: 100%
-library(ggplot2)
-library(dplyr)
-library(colorspace)
-library(patchwork)
 set.seed(524)
 x1 <- runif(176) + 0.5
 x1[1:61] <- x1[1:61] - 1.2
@@ -176,9 +170,6 @@ Predictive accuracy trades off these characteristics, with the best model having
 #| fig-height: 4
 #| fig-width: 6
 #| out-width: 100%
-library(MASS)
-library(rpart)
-library(classifly)
 n <- 486
 set.seed(826)
 x1 <- 2*(runif(n) - 0.5)
@@ -336,10 +327,10 @@ After a model has been fitted to the data, there are two directions for effort: 
 \index{tour!slice}
 \index{projection pursuit}
 \index{software!geozoo}
+
 ```{r}
 #| eval: false
 #| echo: false
-library(mulgar)
 vr <- c(-0.5, -0.3, 0.0, 0.3, 0.5)
 set.seed(503)
 vc1 <- matrix(c(1.5, sample(vr, 1), sample(vr, 1), sample(vr, 1),
@@ -484,7 +475,6 @@ animate_slice(d_high_comb_gap[,6:10],
               v_rel = 0.2)
 
 # Try with spheres
-library(geozoo)
 set.seed(637)
 sg1 <- sphere.solid.random(n=313, p=4)$points
 sg2 <- sphere.hollow(n=323, p=4)$points * 2
@@ -641,9 +631,6 @@ aflw_sub <- aflw |>
 
 ```{r eval=FALSE}
 #| echo: false
-library(mulgar)
-library(tourr)
-library(dplyr)
 data(bushfires)
 b_sub <- bushfires |>
   select(se, maxt, mint, log_dist_road, cause) |>

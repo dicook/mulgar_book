@@ -1,11 +1,11 @@
-## --------------------------------------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
+#| code-summary: "Load libraries"
+source("code/setup.R")
+
+
+## ----------------------------------------------------------------------------
 #| code-fold: false
 #| message: false
-library(mulgar)
-library(ggplot2)
-library(dplyr)
-library(colorspace)
-library(patchwork)
 data("simple_clusters")
 
 set.seed(202305)
@@ -17,7 +17,7 @@ sc_km_d <- simple_clusters[,1:2] |>
   mutate(cl = factor(sc_km$cluster))
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| label: fig-km-2D
 #| fig-cap: "Examining $k$-means clustering results for simple clusters (a, c) and two variables of the penguins data (b, d). Top row is input data and bottom row shows one solution for each, with $k=2$ and $3$ respectively. The means are indicated by a $+$. Points are coloured by cluster label. The results are perfect for the simple clusters but not for the penguins data. The penguin data is multimodal, with small gaps visible from the top right mode and the other two, and the shap of the bigger clusters is more elliptical. The $k$-means produces roughly three equal sized clusters, where cluster 3 groups observations over small gaps in the point clouds."
 #| fig-alt: "Four panels of scatterplots labelled rowwise a-d. The top two are uncoloured, and the bottom two have coloured points. Each coloured group has one point displayed as a plus. Plot c has two circular separated clusters located at lower left and upper right, which are coloured red and blue. They correspond to labels 1 and 2 as shown by the legend at the bottom. Plot d has three coloured groups, blue, yellow, red labelled as 1, 2, 3, respectively. The red group occupies the top right quadrant of the square plot space, and some of the points are on both sides of a small gap where there are no points. The yellow group occupy the bottom right quadrant, and the blue group occupy the top left quadrant. The botton left is empty of points."
@@ -49,6 +49,7 @@ sc_km_p2 <- ggplot() +
         legend.title = element_blank()) 
 
 load("data/penguins_sub.rda")
+set.seed(1012)
 p_bl_bd_km <- kmeans(penguins_sub[,c(1,2)], centers=3, 
                      iter.max = 50, nstart = 5)
 p_bl_bd_km_means <- data.frame(p_bl_bd_km$centers) |>
@@ -82,7 +83,7 @@ p_bl_bd_km_p2 <- ggplot() +
 sc_km_p1 + p_bl_bd_km_p1  + sc_km_p2 + p_bl_bd_km_p2 + plot_layout(ncol=2)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| code-fold: false
 p_km <- kmeans(penguins_sub[,1:4], centers=3, 
                      iter.max = 50, nstart = 5)
@@ -92,10 +93,9 @@ p_km_d <- penguins_sub[,1:4] |>
   mutate(cl = factor(p_km$cluster))
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| eval: false
 #| code-summary: "Code to make animated gifs"
-# library(tourr)
 # p_km_means <- p_km_means |>
 #   mutate(type = "mean")
 # p_km_d <- p_km_d |>

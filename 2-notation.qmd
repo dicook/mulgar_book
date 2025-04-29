@@ -133,7 +133,7 @@ The notation convention used throughout the book is:
 ::: {.content-visible when-format="pdf"}
 
 \infobox{The notation convention used throughout the book is:
-\begin{itemize}
+\begin{itemize} \itemsep 0in
 \item n = number of observations
 \item p = number of variables, dimension of data
 \item d = dimension of the projection
@@ -150,11 +150,14 @@ The notation convention used throughout the book is:
 Although there are a variety of different tour types, they are (almost) all composed of three core building blocks: a set of target projection bases, a method for interpolating between them and the method to display the projected data. The manner that the target planes are chosen primarily determines the type of tour. `r ifelse(knitr::is_html_output(), '@fig-tour-types-html', '@fig-tour-types-pdf')` illustrates three main tour types: grand, guided and radial. The appendix has a list of the many others. 
 
 ::: {.content-visible when-format="html"}
-::: {.info-box}
+::: info
+
 Tours are composed from three elements:
+
 - a set of target projection bases
 - an interpolation method
 - the method to display the projected data
+
 :::
 :::
 
@@ -162,7 +165,7 @@ Tours are composed from three elements:
 
 \infobox{
 Tours are composed from three elements:
-\begin{itemize}
+\begin{itemize} \itemsep 0in
 \item a set of target projection bases
 \item an interpolation method
 \item the method to display the projected data
@@ -176,15 +179,17 @@ The original tour was called the *grand tour* [@As85]. In a grand tour, the targ
 \index{tour!guided}
 \index{tour!radial}
 
+```{r echo=FALSE}
+#| code-summary: "Load libraries"
+#| message: false
+source("code/setup.R")
+```
+
 ```{r}
 #| eval: false
 #| echo: false
 # This code is to generate the gifs, but not the best to 
 # start users on. 
-library(tourr)
-library(mulgar)
-library(ggplot2)
-library(colorspace)
 data("penguins_sub")
 set.seed(1148)
 p_t_grand <- save_history(penguins_sub[, 1:4], 
@@ -305,7 +310,6 @@ rd3 <- render_proj(penguins_sub[, 1:4], prj)
 rd3$data_prj$species <- penguins_sub$species
 rd3_plt <- plot_tour_projection(rd3)
 # Make plots and save to png
-library(gridExtra)
 grid.arrange(gr1_plt, gr2_plt, gr3_plt, ncol=3)
 grid.arrange(gd1_plt, gd2_plt, gd3_plt, ncol=3)
 grid.arrange(rd1_plt, rd2_plt, rd3_plt, ncol=3)
@@ -392,7 +396,6 @@ When $d>2$, even though it primarily academic, some possible choices are to use 
 ```{r}
 #| echo: false
 #| eval: false
-library(tourr)
 animate_dist(flea[, 1:6], 
              method="histogram", 
              bw=0.1, scale_density=TRUE)
@@ -421,8 +424,6 @@ Adjustments to the display are useful for some problems. The crowding problem wh
 ```{r}
 #| echo: false
 #| eval: false
-library(tourr)
-library(geozoo)
 set.seed(1351)
 d <- torus(3, n=4304)$points
 d <- apply(d, 2, function(x) (x-mean(x))/sd(x))
@@ -480,8 +481,6 @@ It can also be useful to add layers to the data, such as summary statistics, lab
 ```{r}
 #| echo: false
 #| eval: false
-library(tourr)
-library(mulgar)
 data(aflw)
 aflw_labels <- ifelse(aflw$surname %in% 
                         c("Vescio", "Bowers", "Davey"), aflw$surname, "")
@@ -503,9 +502,6 @@ render_gif(aflw[,8:11],
 ```{r}
 #| echo: false
 #| eval: false
-library(compositions)
-library(geozoo)
-library(dplyr)
 data("Firework")
 # Five components
 # Check
@@ -631,10 +627,7 @@ Use both regular tours, and the slice tours on each. What does the slice tour al
 ```{r}
 #| eval: false
 #| echo: false
-library(tourr)
-library(mulgar)
-library(ggplot2)
-library(geozoo)
+source("code/setup.R")
 # Answer to Q1
 set.seed(110)
 m <- matrix(rnorm(10), ncol = 2)
@@ -704,7 +697,6 @@ p4 <- ggplot(clusters_proj, aes(p1, p2, color = clusters$cl)) +
   geom_point() +
   theme(aspect.ratio=1,
         legend.position="none")
-library(patchwork)
 p1 + p2 + p3 + p4 + plot_layout(ncol=4)
 # They look ALMOST identical. These are very small interpolation steps, and the data changes very little between each one. 
 

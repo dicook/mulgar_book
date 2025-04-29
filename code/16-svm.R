@@ -1,11 +1,11 @@
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
+#| code-summary: "Load libraries"
+source("code/setup.R")
+
+
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| code-summary: "Code to simulate data examples"
 # Toy examples
-library(mulgar)
-library(ggplot2)
-library(geozoo)
-library(tourr)
-
 set.seed(1071)
 n1 <- 162
 vc1 <- matrix(c(1, -0.7, -0.7, 1), ncol=2, byrow=TRUE)
@@ -26,7 +26,7 @@ df2 <- data.frame(x1=mulgar:::scale2(c(dc1[,1], dc2[,1])),
                                rep("B", n2))))
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| code-fold: false
 #| message: false
 library(classifly)
@@ -43,15 +43,13 @@ df2_svm <- svm(cl~., data=df2,
 df2_svm_e <- explore(df2_svm, df2)
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| label: fig-svm-toy
 #| fig-cap: "SVM classifier fit overlaid on two simulated data examples: (a) groups with different variance-covariance, fitted using a linear kernel, (b) groups with non-linear separation, fitted using a radial kernel. The band of points shown as '+' mark the SVM boundary, and points marked by 'x' are the support vectors used to define the boundary. "
 #| fig-width: 8
 #| fig-height: 4
 #| out-width: 100%
 #| code-summary: "Code to make plots"
-library(patchwork)
-library(colorspace)
 s1 <- ggplot() + 
   geom_point(data=df1, aes(x=x1, y=x2, colour=cl),
              shape=20) +
@@ -81,39 +79,38 @@ s2 <- ggplot() +
 s1+s2
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| code-fold: false
 df1_svm$index
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| code-fold: false
 df1_svm$coefs
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| code-fold: false
 df1_svm$rho
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| code-fold: false
 w = t(df1_svm$SV) %*% df1_svm$coefs
 w
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| eval: false
 #| code-fold: false
 # s1 + geom_abline(intercept=df1_svm$rho/w[2],
 #                  slope=-w[1]/w[2])
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| code-fold: false
 #| warning: false
 #| message: false
-library(dplyr)
 load("data/penguins_sub.rda")
 chinstrap <- penguins_sub %>%
   filter(species == "Chinstrap") %>%
@@ -126,7 +123,7 @@ chinstrap_svm <- svm(sex~., data=chinstrap,
 chinstrap_svm_e <- explore(chinstrap_svm, chinstrap)
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| eval: false
 #| code-summary: "Code to make the tours"
 # # Tour raw data
@@ -165,12 +162,12 @@ chinstrap_svm_e <- explore(chinstrap_svm, chinstrap)
 #            frames=500)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| code-fold: false
 t(chinstrap_svm$SV) %*% chinstrap_svm$coefs
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| code-fold: false
 set.seed(1022)
 prj1 <- mulgar::norm_vec(t(chinstrap_svm$SV) %*%
@@ -180,7 +177,7 @@ prj <- orthonormalise(cbind(prj1, prj2))
 prj
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| eval: false
 #| code-summary: "Code to conduct the radial tours"
 # animate_xy(chinstrap_svm_e[!chinstrap_svm_e$.BOUNDARY,1:4],
@@ -221,15 +218,9 @@ prj
 #            frames=500)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| eval: false
 #| echo: false
-# library(mulgar)
-# library(tourr)
-# library(tidyverse)
-# library(MASS)
-# library(e1071)
-# library(classifly)
 # data(bushfires)
 # 
 # bushfires_sub <- dplyr::select(bushfires, log_dist_cfa,

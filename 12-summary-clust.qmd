@@ -29,15 +29,9 @@ For model-based clustering, the variability within clusters can be summarised by
 :::
 
 ```{r echo=knitr::is_html_output()}
-#| message: false
 #| code-summary: "Load libraries"
-library(mclust) 
-library(tidyr)
-library(dplyr)
-library(gt)
-library(mulgar)
-library(ggplot2)
-library(colorspace)
+#| message: false
+source("code/setup.R")
 ```
 
 ```{r echo=knitr::is_html_output()}
@@ -117,8 +111,6 @@ render_gif(phull$data[,1:4],
 #| echo: false
 
 # This code is checking that convex hull works
-library(geozoo)
-
 cb <- cube.solid.random(p=4, n=1000)$points
 phull <- cxhull(cb)$edges
 
@@ -145,10 +137,11 @@ animate_xy(as.data.frame(sph), edges=sph_phull)
 #| fig-width: 4
 #| fig-height: 4
 #| fig-cap: "2D"
+#| fig-alt: "Scatterplot with x axis labelled 'bl' and grid lines at -2, -1, 0, 1, 2, 3, and y axis labelled 'bd' and grid lines at -2, -1, 0, 1, 2. Points are coloured blue, yellow and red matching clusters 1, 2, 3, as indicated by the legend at top right. Lines connect points marking the convex hull of each cluster. Blue group is slightly rectangular at top left. Yellow group is wedge-shaped at bottom right, and red group is like a rounded square at top right. All convex hulls overlap in the middle of the plot."
 p_chull2D 
 ```
 
-![4D](gifs/penguins_chull.gif){#fig-penguins-chull-pD}
+![4D](gifs/penguins_chull.gif){#fig-penguins-chull-pD fig-alt="Animation of 2D projections from a tour, showing lines connecting points to show the convex hull in four dimensions for the three clusters. The lines look dense, but do capture the extent of the points in every projection shown. The three clusters 1, 2, 3 are coloured blue, yellow and red, as indicated by the legend at top right. The yellow group's convex hull is separated from the other two, but the red and blue overlap a little."}
 :::
 
 Convex hulls summarising the extent of Wards linkage clustering in 2D and 4D.
@@ -159,9 +152,9 @@ Convex hulls summarising the extent of Wards linkage clustering in 2D and 4D.
 ::: {#fig-penguins-chull-pdf layout-ncol=2}
 
 
-![2D](images/fig-penguin-hull-2D-1.png){#fig-penguins-chull-2D-pdf}
+![2D](images/fig-penguin-hull-2D-1.png){#fig-penguins-chull-2D-pdf fig-alt="Scatterplot with x axis labelled 'bl' and grid lines at -2, -1, 0, 1, 2, 3, and y axis labelled 'bd' and grid lines at -2, -1, 0, 1, 2. Points are coloured blue, yellow and red matching clusters 1, 2, 3, as indicated by the legend at top right. Lines connect points marking the convex hull of each cluster. Blue group is slightly rectangular at top left. Yellow group is wedge-shaped at bottom right, and red group is like a rounded square at top right. All convex hulls overlap in the middle of the plot."}
 
-![4D](images/penguins_chull_105.png){#fig-penguins-chull-pD}
+![4D](images/penguins_chull_105.png){#fig-penguins-chull-pD fig-alt="A single 2D projection from a tour, showing lines connecting points to show the convex hull in four dimensions for the three clusters. The lines look dense, but do capture the extent of the points in every projection shown. The three clusters 1, 2, 3 are coloured blue, yellow and red, as indicated by the legend at top right. In this projection all three convex hulls overlap."}
 
 Convex hulls summarising the extent of Wards linkage clustering in 2D and 4D. {{< fa play-circle >}}
 :::
@@ -195,7 +188,6 @@ We can examine the disagreement by linking a plot of the table, with a tour plot
 #| message: false
 #| echo: false
 #| code-summary: "Code to do linked brushing with liminal"
-library(liminal)
 penguins_cl <- bind_cols(penguins_sub, p_cl)
 p_cl <- p_cl |>
   mutate(cl_w_j = jitter(cl_w),
@@ -210,11 +202,11 @@ limn_tour_link(
 
 ::: {#fig-compare-clusters fig-align="center" layout-ncol=1}
 
-![](images/compare-clusters-detourr1.png){fig-alt="" width=400}
+![](images/compare-clusters-detourr1.png){fig-alt="Screenshot showing scatterplot on the left and jittered dotplot of the confusion table at right. Points are coloured using the viridis palette running from yellow to green to deep purple. The scatterplot of the confusion matrix shows groups of points at (1,1), (2,1), (3,2) and (2,3). The group at (2,1) is small, and are the points where the two clusterings disagree." width=400}
 
-![](images/compare-clusters-detourr2.png){fig-alt="" width=400}
+![](images/compare-clusters-detourr2.png){fig-alt="Screenshot showing scatterplot on the left and jittered dotplot of the confusion table at right. The points at (2,1) in the confusion table are highlighted and all others very faint. These can be seen in the scatterplot at left to be in the middle of the overlap between the green and purple clusters, 1 and 2." width=400}
 
-![](images/compare-clusters-detourr4.png){fig-alt="" width=400}
+![](images/compare-clusters-detourr4.png){fig-alt="Screenshot showing scatterplot of a different 2D projection on the left and jittered dotplot of the confusion table at right. The points at (2,1) in the confusion table are highlighted and all others very faint. Again, these can be seen in the scatterplot at left to be in the middle of the overlap between the green and purple clusters, 1 and 2." width=400}
 
 Comparing the model-based and Wards hierarchical linkage solutions using linking between the confusion table and a tour, using detourr. Points are coloured according to the model-based result. The disagreement on eight penguins is with cluster 1 from Wards and cluster 2 from model-based. These penguins fall in the middle of the large clump of points, where it is not possible to cleanly decide on a split. Both solutions are plausible.
 :::
@@ -227,10 +219,6 @@ Comparing the model-based and Wards hierarchical linkage solutions using linking
 #| eval: false
 #| echo: true
 #| code-summary: "Code to do interactive graphics"
-library(crosstalk)
-library(plotly)
-library(detourr)
-library(viridis)
 p_cl <- p_cl |> 
   mutate(cl_w_j = jitter(cl_w),
          cl_mc_j = jitter(cl_mc))
@@ -293,8 +281,6 @@ Linking a scatterplot showing the confusion matrix and a tour plot can help to d
 ```{r}
 #| eval: false
 #| echo: false
-library(mulgar)
-library(tourr)
 animate_xy(c4[,c(1:4, 6)])
 c4_hc <- hclust(dist(c4[,c(1:4, 6)]), method="ward.D2")
 plot(c4_hc)
@@ -333,10 +319,8 @@ Most of the time your data will not neatly separate into clusters, but partition
 #| echo: false
 #| message: false
 #| warning: false
-library(tidyverse)
 risk <- readRDS("data/risk_MSA.rds")
 # looking at the data
-library(tourr)
 animate_xy(risk)
 # hierarchical clustering solutions
 risk_h_mc <- hclust(dist(risk, method = "manhattan"),
@@ -352,7 +336,6 @@ risk_clw <- risk |>
   mutate(cl_h_ms = factor(cutree(risk_h_ms, 6))) |>
   mutate(cl_h_ew = factor(cutree(risk_h_ew, 6)))
 # drawing 2D dendrograms
-library(ggdendro)
 ggplot() +
   geom_segment(data=dendro_data(risk_h_mc)$segments, 
                aes(x = x, y = y, 
@@ -369,7 +352,6 @@ ggplot() +
                    xend = xend, yend = yend)) + 
   theme_dendro()
 # dendrogram in the data space
-library(mulgar)
 risk_hfly_mc <- hierfly(risk_clw, risk_h_mc, scale=FALSE)
 risk_hfly_ms <- hierfly(risk_clw, risk_h_ms, scale=FALSE)
 risk_hfly_ew <- hierfly(risk_clw, risk_h_ew, scale=FALSE)

@@ -30,6 +30,12 @@ For these examples we use the software `keras` [@keras] following the installati
 
 A first step is to decide how many nodes the NN architecture should have, and what activation function should be used. To make these decisions, ideally you already have some knowledge of the shapes of class clusters. For the penguins classification, we have seen that it contains three elliptically shaped clusters of roughly the same size. This suggests two nodes in the hidden layer would be sufficient to separate three clusters (@fig-nn-diagram). Because the shapes of the clusters are convex, using linear activation ("relu") will also be sufficient. The model specification is as follows:
 
+```{r echo=knitr::is_html_output()}
+#| code-summary: "Load libraries"
+#| message: false
+source("code/setup.R")
+```
+
 ```{r eval=FALSE}
 #| echo: true
 library(keras)
@@ -110,14 +116,7 @@ Splitting the data into training and test is an essential way to protect against
 ```{r echo=knitr::is_html_output()}
 #| message: false
 # Split the data intro training and testing
-library(ggthemes)
-library(dplyr)
-library(tidyr)
 library(rsample)
-library(ggbeeswarm)
-library(tidymodels)
-library(tourr)
-
 load("data/penguins_sub.rda") # from mulgar book
 
 set.seed(821)
@@ -258,8 +257,6 @@ Fitting NN models is fiddly, and very different fitted models can result from re
 ```{r echo=knitr::is_html_output()}
 #| code-fold: true
 library(keras)
-library(ggplot2)
-library(colorspace)
 
 # load fitted model
 p_nn_model <- load_model_tf("data/penguins_cnn")
@@ -373,11 +370,26 @@ When the predictive probabilities are returned by a model, as is done by this NN
 \index{ternary diagram}
 \index{simplex}
 
+```{r echo=knitr::is_html_output()}
+#| message: false
+#| eval: false
+# Predict training and test set
+# This looks like there is some machine dependency on the
+# saved model, so predictions are saved for loading across platforms
+p_nn_model <- load_model_tf("data/penguins_cnn")
+p_train_pred <- p_nn_model |> 
+  predict(p_train_x, verbose = 0)
+p_test_pred <- p_nn_model |> 
+  predict(p_test_x, verbose = 0)
+
+save(p_train_pred, file="data/p_train_pred.rda")
+save(p_test_pred, file="data/p_test_pred.rda")
+```
+
 
 ```{r}
 # Predict training and test set
-p_train_pred <- p_nn_model |> 
-  predict(p_train_x, verbose = 0)
+load("data/p_train_pred.rda")
 p_train_pred_cat <- levels(p_train$species)[
   apply(p_train_pred, 1,
         which.max)]
@@ -386,8 +398,7 @@ p_train_pred_cat <- factor(
   levels=levels(p_train$species))
 table(p_train$species, p_train_pred_cat)
 
-p_test_pred <- p_nn_model |> 
-  predict(p_test_x, verbose = 0)
+load("data/p_test_pred.rda")
 p_test_pred_cat <- levels(p_test$species)[
   apply(p_test_pred, 1, 
         which.max)]
@@ -422,7 +433,6 @@ p_test_m <- p_test_m |>
 p_all_m <- bind_rows(p_train_m, p_test_m)
 
 # Add simplex to make ternary
-library(geozoo)
 proj <- t(geozoo::f_helmert(3)[-1,])
 p_nn_v_p <- as.matrix(p_all_m[,c("Adelie", "Chinstrap", "Gentoo")]) %*% proj
 colnames(p_nn_v_p) <- c("x1", "x2")
@@ -797,9 +807,6 @@ There are subsets of confusion, as can be seen by both confusion matrix and vote
 ```{r}
 #| eval: false
 #| echo: false
-library(mulgar)
-library(dplyr)
-
 data("sketches_train")
 load("data/sketches_test_labelled.rda")
 library(keras)

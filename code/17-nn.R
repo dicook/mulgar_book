@@ -1,4 +1,9 @@
-## ----eval=FALSE------------------------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
+#| code-summary: "Load libraries"
+source("code/setup.R")
+
+
+## ----eval=FALSE--------------------------------------------------------------
 #| echo: true
 # library(keras)
 # tensorflow::set_random_seed(211)
@@ -21,7 +26,7 @@
 # )
 
 
-## ----eval=FALSE------------------------------------------------------------
+## ----eval=FALSE--------------------------------------------------------------
 #| echo: false
 # # tidymodels approach does not allow extracting weights
 # library(keras)
@@ -58,17 +63,10 @@
 # 
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| message: false
 # Split the data intro training and testing
-library(ggthemes)
-library(dplyr)
-library(tidyr)
 library(rsample)
-library(ggbeeswarm)
-library(tidymodels)
-library(tourr)
-
 load("data/penguins_sub.rda") # from mulgar book
 
 set.seed(821)
@@ -86,7 +84,7 @@ p_split_check <- bind_rows(
   mutate(type = factor(type))
 
 
-## ----echo=knitr::is_html_output(), eval=FALSE------------------------------
+## ----echo=knitr::is_html_output(), eval=FALSE--------------------------------
 #| code-fold: true
 #| code-summary: "Code to run tours"
 # animate_xy(p_split_check[,1:4],
@@ -124,7 +122,7 @@ p_split_check <- bind_rows(
 # )
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 # Data needs to be matrix, and response needs to be numeric
 p_train_x <- p_train |>
   select(bl:bm) |>
@@ -138,14 +136,14 @@ p_test_y <- p_test |> pull(species) |> as.numeric()
 p_test_y <- p_test_y-1 # Needs to be 0, 1, 2
 
 
-## ----echo=FALSE------------------------------------------------------------
+## ----echo=FALSE--------------------------------------------------------------
 #| message: false
 library(keras)
 p_nn_model <- load_model_tf("data/penguins_cnn")
 p_nn_model
 
 
-## ----eval=FALSE------------------------------------------------------------
+## ----eval=FALSE--------------------------------------------------------------
 #| message: false
 # # Fit model
 # p_nn_fit <- p_nn_model |> keras::fit(
@@ -156,7 +154,7 @@ p_nn_model
 # )
 
 
-## ----eval=FALSE, echo=FALSE------------------------------------------------
+## ----eval=FALSE, echo=FALSE--------------------------------------------------
 # # Check
 # p_nn_model |> evaluate(p_test_x, p_test_y, verbose = 0)
 # plot(p_nn_fit)
@@ -164,37 +162,35 @@ p_nn_model
 # keras::get_weights(p_nn_model, trainable=TRUE)
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| code-fold: true
 library(keras)
-library(ggplot2)
-library(colorspace)
 
 # load fitted model
 p_nn_model <- load_model_tf("data/penguins_cnn")
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 p_nn_model |> evaluate(p_test_x, p_test_y, verbose = 0)
 
 
-## ----eval=FALSE------------------------------------------------------------
+## ----eval=FALSE--------------------------------------------------------------
 # save_model_tf(p_nn_model, "data/penguins_cnn")
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 # Extract hidden layer model weights
 p_nn_wgts <- keras::get_weights(p_nn_model, trainable=TRUE)
 p_nn_wgts 
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 # Orthonormalise the weights to make 2D projection
 p_nn_wgts_on <- tourr::orthonormalise(p_nn_wgts[[1]])
 p_nn_wgts_on
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| code-fold: false
 #| label: fig-hidden-layer
 #| fig-cap: "Plot of the data in the linear combinations from the two nodes in the hidden layer. The three species are clearly different, although with some overlap between all three. A main issue to notice is that there isn't a big gap between Gentoo and the other species, which we know exists in 4D based on our data exploration done in other chapters. This suggests that this fitted model is sub-optimal."
@@ -229,10 +225,25 @@ ggplot(p_all_m, aes(x=nn1, y=nn2,
   theme(aspect.ratio=1)
 
 
-## --------------------------------------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
+#| message: false
+#| eval: false
+# # Predict training and test set
+# # This looks like there is some machine dependency on the
+# # saved model, so predictions are saved for loading across platforms
+# p_nn_model <- load_model_tf("data/penguins_cnn")
+# p_train_pred <- p_nn_model |>
+#   predict(p_train_x, verbose = 0)
+# p_test_pred <- p_nn_model |>
+#   predict(p_test_x, verbose = 0)
+# 
+# save(p_train_pred, file="data/p_train_pred.rda")
+# save(p_test_pred, file="data/p_test_pred.rda")
+
+
+## ----------------------------------------------------------------------------
 # Predict training and test set
-p_train_pred <- p_nn_model |> 
-  predict(p_train_x, verbose = 0)
+load("data/p_train_pred.rda")
 p_train_pred_cat <- levels(p_train$species)[
   apply(p_train_pred, 1,
         which.max)]
@@ -241,8 +252,7 @@ p_train_pred_cat <- factor(
   levels=levels(p_train$species))
 table(p_train$species, p_train_pred_cat)
 
-p_test_pred <- p_nn_model |> 
-  predict(p_test_x, verbose = 0)
+load("data/p_test_pred.rda")
 p_test_pred_cat <- levels(p_test$species)[
   apply(p_test_pred, 1, 
         which.max)]
@@ -252,11 +262,11 @@ p_test_pred_cat <- factor(
 table(p_test$species, p_test_pred_cat)
 
 
-## ----echo=FALSE, eval=FALSE------------------------------------------------
+## ----echo=FALSE, eval=FALSE--------------------------------------------------
 # # predict() causes the problem, use p_nn_model(p_test_x) instead
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| code-fold: true
 # Set up the data to make the ternary diagram
 # Join data sets
@@ -275,7 +285,6 @@ p_test_m <- p_test_m |>
 p_all_m <- bind_rows(p_train_m, p_test_m)
 
 # Add simplex to make ternary
-library(geozoo)
 proj <- t(geozoo::f_helmert(3)[-1,])
 p_nn_v_p <- as.matrix(p_all_m[,c("Adelie", "Chinstrap", "Gentoo")]) %*% proj
 colnames(p_nn_v_p) <- c("x1", "x2")
@@ -290,7 +299,7 @@ colnames(sp) <- c("x1", "x2", "x3", "x4")
 sp$species = sort(unique(penguins_sub$species))
 
 
-## ----echo=knitr::is_html_output()------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
 #| code-fold: true
 #| fig-width: 4
 #| fig-height: 3
@@ -313,7 +322,7 @@ ggplot() +
   theme(aspect.ratio=1, legend.position = "right")
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 library(keras)
 
 # download the data
@@ -340,7 +349,7 @@ train_images <- train_images / 255
 test_images <- test_images / 255
 
 
-## ----eval=FALSE------------------------------------------------------------
+## ----eval=FALSE--------------------------------------------------------------
 # # defining the model
 # model_fashion_mnist <- keras_model_sequential()
 # model_fashion_mnist |>
@@ -365,7 +374,7 @@ test_images <- test_images / 255
 # save_model_tf(model_fashion_mnist, "data/fashion_nn")
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| warning: false
 # get the fitted model
 model_fashion_mnist <- load_model_tf("data/fashion_nn")
@@ -395,7 +404,7 @@ images_pca <- prcomp(as.data.frame(test_images_flat))
 images_pc <- as.data.frame(images_pca$x)
 
 
-## ----echo=knitr::is_html_output(), fig.format='png'------------------------
+## ----echo=knitr::is_html_output(), fig.format='png'--------------------------
 #| code-fold: true
 #| code-summary: "Code to run tours"
 #| warning: false
@@ -430,7 +439,7 @@ cowplot::plot_grid(cowplot::plot_grid(p1, p2), legend_labels,
                    rel_heights = c(1, .3), nrow = 2)
 
 
-## ----echo=knitr::is_html_output(), eval=FALSE------------------------------
+## ----echo=knitr::is_html_output(), eval=FALSE--------------------------------
 #| code-fold: true
 #| code-summary: "Code to run tours"
 # animate_xy(images_pc[,1:5], col = test_tags,
@@ -462,7 +471,7 @@ cowplot::plot_grid(cowplot::plot_grid(p1, p2), legend_labels,
 # )
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 fashion_test_pred <- predict(model_fashion_mnist,
                              test_images, verbose = 0)
 fashion_test_pred_cat <- levels(test_tags)[
@@ -476,7 +485,7 @@ observed <- as.numeric(test_tags) -1
 table(observed, predicted)
 
 
-## ----echo=knitr::is_html_output(), eval=FALSE------------------------------
+## ----echo=knitr::is_html_output(), eval=FALSE--------------------------------
 #| code-fold: true
 #| code-summary: "Code to visualize probabilities"
 # # getting the probabilities from the output layer
@@ -531,12 +540,9 @@ table(observed, predicted)
 # )
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| eval: false
 #| echo: false
-# library(mulgar)
-# library(dplyr)
-# 
 # data("sketches_train")
 # load("data/sketches_test_labelled.rda")
 # library(keras)

@@ -429,58 +429,66 @@ C_{L2} = \left(\sum_{i, j=1; i\neq j}^n (d_p(i,j) - d_k(i,j))^2\right)^{1/2}
 <p>The methods <em>isomap</em> <span class="citation" data-cites="isomap">(<a href="references.html#ref-isomap" role="doc-biblioref">Tenenbaum et al., 2000</a>)</span> and <em>local linear embedding</em> (LLE) are two methods where local distance is used, and they were designed to unwrap data from a manifold. <a href="#fig-swiss-html" class="quarto-xref">Figure&nbsp;<span>5.1</span></a> illustrates how the results on the classic swiss roll data can differ according to method, in useful ways. The observations lie on a 2D non-linear manifold in 3D. The data is a manufactured example introduced to illustrate the ability of isomap and LLE to unwrap the swiss roll and lay out the points in a rectangle as though one was travelling along the surface.</p>
 <p> </p>
 <div class="cell">
-<details class="code-fold"><summary>Code for spiral plots</summary><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://www.kisungyou.com/Rdimtools/">Rdimtools</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://colorspace.R-Forge.R-project.org/">colorspace</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/JayaniLakshika/cardinalR">cardinalR</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tsibble.tidyverts.org">tsibble</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://patchwork.data-imaginist.com">patchwork</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://jrnold.github.io/ggthemes/">ggthemes</a></span><span class="op">)</span></span>
+<details class="code-fold"><summary>Load libraries</summary><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/source.html">source</a></span><span class="op">(</span><span class="st">"code/setup.R"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold"><summary>Code for spiral plots</summary><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://www.kisungyou.com/Rdimtools/">Rdimtools</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://jayanilakshika.github.io/cardinalR">cardinalR</a></span><span class="op">)</span></span>
 <span><span class="va">n_obs</span> <span class="op">&lt;-</span> <span class="fl">1652</span>  </span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">259</span><span class="op">)</span></span>
-<span><span class="va">swiss</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/cardinalR/man/swiss_roll.html">swiss_roll</a></span><span class="op">(</span><span class="va">n_obs</span>, num_noise <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
+<span><span class="va">swiss</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://jayanilakshika.github.io/cardinalR/reference/gen_swissRoll.html">gen_swissroll</a></span><span class="op">(</span><span class="va">n_obs</span>, p<span class="op">=</span><span class="fl">3</span><span class="op">)</span></span>
 <span><span class="co"># Standardising ruins structure</span></span>
 <span><span class="co"># swiss &lt;- apply(swiss, 2, function(x) (x-mean(x))/sd(x))</span></span>
-<span><span class="va">swiss</span><span class="op">[</span>,<span class="fl">3</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">swiss</span><span class="op">[</span>,<span class="fl">3</span><span class="op">]</span> <span class="op">*</span> <span class="fl">3</span> <span class="co"># This scale produces more recognisable results</span></span>
 <span><span class="co"># Compute distance from (0,0) in first two coordinates - spiral</span></span>
-<span><span class="va">swiss</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span><span class="op">(</span><span class="va">swiss</span>, <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="va">swiss</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span><span class="op">^</span><span class="fl">2</span> <span class="op">+</span></span>
-<span>                           <span class="va">swiss</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">swiss</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"x"</span>, <span class="st">"y"</span>, <span class="st">"z"</span>, <span class="st">"d"</span><span class="op">)</span></span>
-<span><span class="va">swiss_tbl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html">as_tibble</a></span><span class="op">(</span><span class="va">swiss</span><span class="op">)</span></span>
+<span><span class="va">swiss</span> <span class="op">&lt;-</span> <span class="va">swiss</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>x3 <span class="op">=</span> <span class="va">x3</span> <span class="op">*</span> <span class="fl">9</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>d <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="va">x1</span><span class="op">^</span><span class="fl">2</span> <span class="op">+</span> <span class="co"># More recognisable results</span></span>
+<span>                  <span class="va">x2</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">swiss_pca</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/prcomp.html">prcomp</a></span><span class="op">(</span><span class="va">swiss</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span>, scale<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="va">swiss_tbl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_cols.html">bind_cols</a></span><span class="op">(</span><span class="va">swiss_tbl</span>, <span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html">as_tibble</a></span><span class="op">(</span><span class="va">swiss_pca</span><span class="op">$</span><span class="va">x</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">spiral1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">swiss_tbl</span>, </span>
-<span>                  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">PC2</span>, </span>
+<span><span class="va">swiss_tbl</span> <span class="op">&lt;-</span> <span class="fu">bind_cols</span><span class="op">(</span><span class="va">swiss</span>, <span class="fu">as_tibble</span><span class="op">(</span><span class="va">swiss_pca</span><span class="op">$</span><span class="va">x</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">spiral1</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="va">swiss_tbl</span>, </span>
+<span>                  <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">PC2</span>, </span>
 <span>                      y<span class="op">=</span><span class="va">PC3</span>, </span>
 <span>                      colour<span class="op">=</span><span class="va">d</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://colorspace.R-Forge.R-project.org/reference/scale_colour_continuous_divergingx.html">scale_colour_continuous_divergingx</a></span><span class="op">(</span>palette<span class="op">=</span><span class="st">"Zissou 1"</span>,</span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_colour_continuous_divergingx</span><span class="op">(</span>palette<span class="op">=</span><span class="st">"Zissou 1"</span>,</span>
 <span>       mid<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/median.html">median</a></span><span class="op">(</span><span class="va">swiss_tbl</span><span class="op">$</span><span class="va">d</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>aspect.ratio<span class="op">=</span><span class="fl">1</span>, </span>
-<span>        axis.text <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_blank</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme</span><span class="op">(</span>aspect.ratio<span class="op">=</span><span class="fl">1</span>, </span>
+<span>        axis.text <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span>,</span>
 <span>        legend.position <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">swiss_iso</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://kisungyou.com/Rdimtools/reference/nonlinear_ISOMAP.html">do.isomap</a></span><span class="op">(</span><span class="va">swiss</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span>,</span>
 <span>  ndim<span class="op">=</span><span class="fl">2</span>, type<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"knn"</span>, <span class="fl">10</span><span class="op">)</span>, </span>
 <span>  weight<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span><span class="op">$</span><span class="va">Y</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">swiss_iso</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"iso1"</span>, <span class="st">"iso2"</span><span class="op">)</span></span>
-<span><span class="va">swiss_iso</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html">as_tibble</a></span><span class="op">(</span><span class="va">swiss_iso</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_cols.html">bind_cols</a></span><span class="op">(</span><span class="va">swiss_tbl</span><span class="op">)</span></span>
-<span><span class="va">spiral2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">swiss_iso</span>, </span>
-<span>                  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">iso1</span>, </span>
+<span><span class="va">swiss_iso</span> <span class="op">&lt;-</span> <span class="fu">as_tibble</span><span class="op">(</span><span class="va">swiss_iso</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">bind_cols</span><span class="op">(</span><span class="va">swiss_tbl</span><span class="op">)</span></span>
+<span><span class="va">spiral2</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="va">swiss_iso</span>, </span>
+<span>                  <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">iso1</span>, </span>
 <span>                      y<span class="op">=</span><span class="va">iso2</span>, </span>
 <span>                      colour<span class="op">=</span><span class="va">d</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://colorspace.R-Forge.R-project.org/reference/scale_colour_continuous_divergingx.html">scale_colour_continuous_divergingx</a></span><span class="op">(</span>palette<span class="op">=</span><span class="st">"Zissou 1"</span>,</span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_colour_continuous_divergingx</span><span class="op">(</span>palette<span class="op">=</span><span class="st">"Zissou 1"</span>,</span>
 <span>       mid<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/median.html">median</a></span><span class="op">(</span><span class="va">swiss_iso</span><span class="op">$</span><span class="va">d</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>aspect.ratio<span class="op">=</span><span class="fl">1</span>, </span>
-<span>        axis.text <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_blank</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>        legend.position <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co">#spiral1 + spiral2 + plot_layout(ncol=2)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme</span><span class="op">(</span>aspect.ratio<span class="op">=</span><span class="fl">1</span>, </span>
+<span>        axis.text <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span>,</span>
+<span>        legend.position <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold"><summary>Code for making tours</summary><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">animate_xy</span><span class="op">(</span><span class="va">swiss</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="fu">animate_xy</span><span class="op">(</span><span class="va">swiss</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span>, <span class="fu">guided_tour</span><span class="op">(</span><span class="fu">holes</span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">432</span><span class="op">)</span></span>
+<span><span class="fu">render_gif</span><span class="op">(</span><span class="va">swiss</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span>, </span>
+<span>           <span class="fu">grand_tour</span><span class="op">(</span><span class="op">)</span>,</span>
+<span>           <span class="fu">display_xy</span><span class="op">(</span>axes<span class="op">=</span><span class="st">"bottomleft"</span><span class="op">)</span>,</span>
+<span>           gif_file <span class="op">=</span> <span class="st">"gifs/swiss.gif"</span>,</span>
+<span>           frames <span class="op">=</span> <span class="fl">500</span>,</span>
+<span>           width <span class="op">=</span> <span class="fl">300</span>, </span>
+<span>           height <span class="op">=</span> <span class="fl">300</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div id="fig-swiss-html" class="quarto-layout-panel">
@@ -495,7 +503,7 @@ C_{L2} = \left(\sum_{i, j=1; i\neq j}^n (d_p(i,j) - d_k(i,j))^2\right)^{1/2}
 <div class="cell quarto-layout-cell" style="flex-basis: 33.3%;justify-content: flex-start;">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
-<figure class="figure"><p><img src="5-nldr_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" style="width:100.0%" alt="This is an untitled chart has x-axis 'PC2' and y-axis 'PC3' with no labels or legend. Colour is used to show a variable d. The chart is a set of 1652 solid circle points laid out in a spiral pattern, with colours starting with one end of the rainbow smoothly transitioning the the other end of the rainbow scale at the other end of the spiral."></p>
+<figure class="figure"><p><img src="5-nldr_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" style="width:100.0%" alt="This is an untitled chart has x-axis 'PC2' and y-axis 'PC3' with no labels or legend. Colour is used to show a variable d. The chart is a set of 1652 solid circle points laid out in a spiral pattern, with colours starting with one end of the rainbow smoothly transitioning the the other end of the rainbow scale at the other end of the spiral."></p>
 <figcaption>PCA</figcaption></figure>
 </div>
 </div>
@@ -503,7 +511,7 @@ C_{L2} = \left(\sum_{i, j=1; i\neq j}^n (d_p(i,j) - d_k(i,j))^2\right)^{1/2}
 <div class="cell quarto-layout-cell" style="flex-basis: 33.3%;justify-content: flex-start;">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
-<figure class="figure"><p><img src="5-nldr_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" style="width:100.0%" alt="This is an untitled chart has x-axis 'PC2' and y-axis 'PC3' with no labels or legend. Colour is used to show a variable d. The chart is a set of 1652 solid circle points laid out in a slightly squashed rectangle, with colours starting with one end of the rainbow on the left and smoothly transitioning the the other end of the rainbow scale at the right."></p>
+<figure class="figure"><p><img src="5-nldr_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" style="width:100.0%" alt="This is an untitled chart has x-axis 'PC2' and y-axis 'PC3' with no labels or legend. Colour is used to show a variable d. The chart is a set of 1652 solid circle points laid out in a slightly squashed rectangle, with colours starting with one end of the rainbow on the left and smoothly transitioning the the other end of the rainbow scale at the right."></p>
 <figcaption>isomap</figcaption></figure>
 </div>
 </div>
@@ -524,30 +532,28 @@ Figure&nbsp;5.1: The classic swiss roll data constructed to illustrate isomap, a
 <span class="header-section-number">5.2</span> Contemporary approaches</h2>
 <p> </p>
 <div class="cell">
-<details class="code-fold"><summary>Code to generate the 2D non-linear representation</summary><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dicook.github.io/mulgar/">mulgar</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jkrijthe/Rtsne">Rtsne</a></span><span class="op">)</span></span>
+<details class="code-fold"><summary>Code to generate the 2D non-linear representation</summary><div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jkrijthe/Rtsne">Rtsne</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jlmelville/uwot">uwot</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://patchwork.data-imaginist.com">patchwork</a></span><span class="op">)</span></span>
+<span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">44</span><span class="op">)</span></span>
 <span><span class="va">cnl_tsne</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/Rtsne/man/Rtsne.html">Rtsne</a></span><span class="op">(</span><span class="va">clusters_nonlin</span><span class="op">)</span></span>
 <span><span class="va">cnl_umap</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://jlmelville.github.io/uwot/reference/umap.html">umap</a></span><span class="op">(</span><span class="va">clusters_nonlin</span><span class="op">)</span></span>
-<span><span class="va">n1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="va">cnl_tsne</span><span class="op">$</span><span class="va">Y</span><span class="op">)</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">V1</span>, y<span class="op">=</span><span class="va">V2</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">xlab</a></span><span class="op">(</span><span class="st">"tsne1"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ylab</a></span><span class="op">(</span><span class="st">"tsne2"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ggtitle</a></span><span class="op">(</span><span class="st">"(a) t-SNE"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>aspect.ratio<span class="op">=</span><span class="fl">1</span>, </span>
-<span>        axis.text <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_blank</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">n2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="va">cnl_umap</span><span class="op">)</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">V1</span>, y<span class="op">=</span><span class="va">V2</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">xlab</a></span><span class="op">(</span><span class="st">"umap1"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ylab</a></span><span class="op">(</span><span class="st">"umap2"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ggtitle</a></span><span class="op">(</span><span class="st">"(b) UMAP"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>aspect.ratio<span class="op">=</span><span class="fl">1</span>, </span>
-<span>        axis.text <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_blank</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">n1</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="va">cnl_tsne</span><span class="op">$</span><span class="va">Y</span><span class="op">)</span>, <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">V1</span>, y<span class="op">=</span><span class="va">V2</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu">xlab</span><span class="op">(</span><span class="st">"tsne1"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ylab</span><span class="op">(</span><span class="st">"tsne2"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggtitle</span><span class="op">(</span><span class="st">"(a) t-SNE"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu">theme</span><span class="op">(</span>aspect.ratio<span class="op">=</span><span class="fl">1</span>, </span>
+<span>        axis.text <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">n2</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="va">cnl_umap</span><span class="op">)</span>, <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">V1</span>, y<span class="op">=</span><span class="va">V2</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu">xlab</span><span class="op">(</span><span class="st">"umap1"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ylab</span><span class="op">(</span><span class="st">"umap2"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggtitle</span><span class="op">(</span><span class="st">"(b) UMAP"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu">theme</span><span class="op">(</span>aspect.ratio<span class="op">=</span><span class="fl">1</span>, </span>
+<span>        axis.text <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">n1</span> <span class="op">+</span> <span class="va">n2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div id="fig-nldr-clusters" class="quarto-float quarto-figure quarto-figure-center anchored" alt="This chart has two plots titled '(a) t-SNE', with x-axis 'tsne1' and y-axis 'tsne2', and '(b) UMAP' with x-axis 'umap1' anf y-axis 'umap2'. The chart '(a)' is a set of 1268 solid circle points arranged with a strip going from bottom let to top right, two C-shapes above and below the line and two small concetration of dots at the middle bottom and top. The points in chart '(b)' are arranged like a tilted smiley face.">
@@ -591,10 +597,9 @@ Figure&nbsp;5.3: Grand tour of the non-linear clusters data set, shows four clus
 <p></p>
 <p><a href="#fig-liminal-clusters-nonlin" class="quarto-xref">Figure&nbsp;<span>5.4</span></a> shows how the NLDR plot can be linked to a tour view, using the <code>liminal</code> package, to better understand how well the structure of the data is represented. Here we learn that the smile in the UMAP embedding is the small bent rod cluster, and that the unibrow is the sine wave.</p>
 <div class="cell">
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sa-lee/liminal/">liminal</a></span><span class="op">)</span></span>
-<span><span class="va">umap_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>umapX <span class="op">=</span> <span class="va">cnl_umap</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span>,</span>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">umap_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>umapX <span class="op">=</span> <span class="va">cnl_umap</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span>,</span>
 <span>                      umapY <span class="op">=</span> <span class="va">cnl_umap</span><span class="op">[</span>, <span class="fl">2</span><span class="op">]</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://sa-lee.github.io/liminal/reference/limn_tour_link.html">limn_tour_link</a></span><span class="op">(</span></span>
+<span><span class="fu">limn_tour_link</span><span class="op">(</span></span>
 <span>  <span class="va">umap_df</span>,</span>
 <span>  <span class="va">clusters_nonlin</span>,</span>
 <span>  cols <span class="op">=</span> <span class="va">x1</span><span class="op">:</span><span class="va">x4</span></span>
@@ -637,33 +642,29 @@ Figure&nbsp;5.4: Two screenshots from liminal showing which clusters match betwe
 <p> </p>
 <p><a href="#fig-detourr-clusters-nonlin" class="quarto-xref">Figure&nbsp;<span>5.5</span></a> shows how the linking is achieved using <code>detourr</code>. It uses a shared data object, as made possible by the <code>crosstalk</code> package, and the UMAP view is made interactive using <code>plotly</code>.</p>
 <div class="cell">
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://casperhart.github.io/detourr/">detourr</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/crosstalk/">crosstalk</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://plotly-r.com">plotly</a></span><span class="op">)</span></span>
-<span><span class="va">umap_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>umapX <span class="op">=</span> <span class="va">cnl_umap</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span>,</span>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">umap_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>umapX <span class="op">=</span> <span class="va">cnl_umap</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span>,</span>
 <span>                      umapY <span class="op">=</span> <span class="va">cnl_umap</span><span class="op">[</span>, <span class="fl">2</span><span class="op">]</span><span class="op">)</span></span>
-<span><span class="va">cnl_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_cols.html">bind_cols</a></span><span class="op">(</span><span class="va">clusters_nonlin</span>, <span class="va">umap_df</span><span class="op">)</span></span>
-<span><span class="va">shared_cnl</span> <span class="op">&lt;-</span> <span class="va"><a href="https://rdrr.io/pkg/crosstalk/man/SharedData.html">SharedData</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">cnl_df</span><span class="op">)</span></span>
+<span><span class="va">cnl_df</span> <span class="op">&lt;-</span> <span class="fu">bind_cols</span><span class="op">(</span><span class="va">clusters_nonlin</span>, <span class="va">umap_df</span><span class="op">)</span></span>
+<span><span class="va">shared_cnl</span> <span class="op">&lt;-</span> <span class="va">SharedData</span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">cnl_df</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">detour_plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://casperhart.github.io/detourr/reference/detour.html">detour</a></span><span class="op">(</span><span class="va">shared_cnl</span>, <span class="fu"><a href="https://casperhart.github.io/detourr/reference/tour_aes.html">tour_aes</a></span><span class="op">(</span></span>
-<span>  projection <span class="op">=</span> <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html">starts_with</a></span><span class="op">(</span><span class="st">"x"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="https://casperhart.github.io/detourr/reference/tour_path.html">tour_path</a></span><span class="op">(</span><span class="fu"><a href="https://ggobi.github.io/tourr/reference/grand_tour.html">grand_tour</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span>, </span>
+<span><span class="va">detour_plot</span> <span class="op">&lt;-</span> <span class="fu">detour</span><span class="op">(</span><span class="va">shared_cnl</span>, <span class="fu">tour_aes</span><span class="op">(</span></span>
+<span>  projection <span class="op">=</span> <span class="fu">starts_with</span><span class="op">(</span><span class="st">"x"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu">tour_path</span><span class="op">(</span><span class="fu">grand_tour</span><span class="op">(</span><span class="fl">2</span><span class="op">)</span>, </span>
 <span>                    max_bases<span class="op">=</span><span class="fl">50</span>, fps <span class="op">=</span> <span class="fl">60</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>       <span class="fu"><a href="https://casperhart.github.io/detourr/reference/show_scatter.html">show_scatter</a></span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.7</span>, axes <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>       <span class="fu">show_scatter</span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.7</span>, axes <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>                    width <span class="op">=</span> <span class="st">"100%"</span>, height <span class="op">=</span> <span class="st">"450px"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">umap_plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/plotly/man/plot_ly.html">plot_ly</a></span><span class="op">(</span><span class="va">shared_cnl</span>,</span>
+<span><span class="va">umap_plot</span> <span class="op">&lt;-</span> <span class="fu">plot_ly</span><span class="op">(</span><span class="va">shared_cnl</span>,</span>
 <span>                    x <span class="op">=</span> <span class="op">~</span><span class="va">umapX</span>, </span>
 <span>                    y <span class="op">=</span> <span class="op">~</span><span class="va">umapY</span>,</span>
 <span>                    color <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/AsIs.html">I</a></span><span class="op">(</span><span class="st">"black"</span><span class="op">)</span>,</span>
-<span>                    height <span class="op">=</span> <span class="fl">450</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/pkg/plotly/man/highlight.html">highlight</a></span><span class="op">(</span>on <span class="op">=</span> <span class="st">"plotly_selected"</span>, </span>
-<span>              off <span class="op">=</span> <span class="st">"plotly_doubleclick"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/pkg/plotly/man/add_trace.html">add_trace</a></span><span class="op">(</span>type <span class="op">=</span> <span class="st">"scatter"</span>, </span>
+<span>                    height <span class="op">=</span> <span class="fl">450</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>    <span class="fu">highlight</span><span class="op">(</span>on <span class="op">=</span> <span class="st">"plotly_selected"</span>, </span>
+<span>              off <span class="op">=</span> <span class="st">"plotly_doubleclick"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>    <span class="fu">add_trace</span><span class="op">(</span>type <span class="op">=</span> <span class="st">"scatter"</span>, </span>
 <span>              mode <span class="op">=</span> <span class="st">"markers"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/crosstalk/man/bscols.html">bscols</a></span><span class="op">(</span></span>
+<span><span class="fu">bscols</span><span class="op">(</span></span>
 <span>     <span class="va">detour_plot</span>, <span class="va">umap_plot</span>,</span>
 <span>     widths <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">6</span><span class="op">)</span></span>
 <span> <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -683,16 +684,14 @@ Figure&nbsp;5.5: Screenshot from detourr showing which clusters match between th
 <p><a href="#fig-liminal-trees" class="quarto-xref">Figure&nbsp;<span>5.6</span></a> shows a more complex example, using the <code>fake_trees</code> data. We know that the 10D data has a main branch, and 9 branches (clusters) attached to it, based on our explorations in the earlier chapters. The t-SNE view, where points are coloured by the known branch ids, is very helpful for seeing the linear branch structure.</p>
 <p>What we can’t tell is that there is a main branch from which all of the others extend. We also can’t tell which of the clusters corresponds to this branch. Linking the plot with a tour helps with this. Although, not shown in the sequence of snapshots in <a href="#fig-liminal-trees" class="quarto-xref">Figure&nbsp;<span>5.6</span></a>, the main branch is actually the dark blue cluster, which is separated into three pieces by t-SNE.</p>
 <div class="cell">
-<details class="code-fold"><summary>Code to run liminal on the fake trees data</summary><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sa-lee/liminal/">liminal</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jkrijthe/Rtsne">Rtsne</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="va">fake_trees</span><span class="op">)</span></span>
+<details class="code-fold"><summary>Code to run liminal on the fake trees data</summary><div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="va">fake_trees</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">2020</span><span class="op">)</span></span>
 <span><span class="va">tsne</span> <span class="op">&lt;-</span> <span class="fu">Rtsne</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/Rtsne/man/Rtsne.html">Rtsne</a></span><span class="op">(</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">fake_trees</span>,</span>
 <span>                <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html">starts_with</a></span><span class="op">(</span><span class="st">"dim"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">tsne_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>tsneX <span class="op">=</span> <span class="va">tsne</span><span class="op">$</span><span class="va">Y</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span>,</span>
 <span>                      tsneY <span class="op">=</span> <span class="va">tsne</span><span class="op">$</span><span class="va">Y</span><span class="op">[</span>, <span class="fl">2</span><span class="op">]</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://sa-lee.github.io/liminal/reference/limn_tour_link.html">limn_tour_link</a></span><span class="op">(</span></span>
+<span><span class="fu">limn_tour_link</span><span class="op">(</span></span>
 <span>  <span class="va">tsne_df</span>,</span>
 <span>  <span class="va">fake_trees</span>,</span>
 <span>  cols <span class="op">=</span> <span class="va">dim1</span><span class="op">:</span><span class="va">dim10</span>,</span>
@@ -839,7 +838,7 @@ Becker, R., Cleveland, W. S., &amp; Shyu, M.-J. (1996). <span>T</span>he <span>V
 Bederson, B. B., &amp; Schneiderman, B. (2003). <em>The <span>C</span>raft of <span>I</span>nformation <span>V</span>isualization: <span>R</span>eadings and <span>R</span>eflections</em>. Morgan Kaufmann.
 </div>
 <div id="ref-BellmanRichard1961" class="csl-entry" role="listitem">
-Bellman, R. (1961). <em>Adaptive <span>C</span>ontrol <span>P</span>rocesses: <span>A</span> <span>G</span>guided <span>T</span>our</em>.
+Bellman, R. (1961). <em>Adaptive <span>C</span>ontrol <span>P</span>rocesses: <span>A</span> <span>G</span>uided <span>T</span>our</em>.
 </div>
 <div id="ref-bickel2018" class="csl-entry" role="listitem">
 Bickel, P. J., Kur, G., &amp; Nadler, B. (2018). Projection <span>P</span>ursuit in <span>H</span>igh <span>D</span>imensions. <em>Proceedings of the National Academy of Sciences</em>, <em>115</em>, 9151–9156. <a href="https://doi.org/10.1073/pnas.1801177115">https://doi.org/10.1073/pnas.1801177115</a>
@@ -944,7 +943,7 @@ Cook, D., Buja, A., Cabrera, J., &amp; Hurley, C. (1995). Grand <span>T</span>ou
 Cook, D., Hofmann, H., Lee, E.-K., Yang, H., Nikolau, B., &amp; Wurtele, E. (2007). Exploring <span>G</span>ene <span>E</span>xpression <span>D</span>ata, <span>U</span>sing <span>P</span>lots. <em>Journal of Data Science</em>, <em>5</em>(2), 151–182.
 </div>
 <div id="ref-R-mulgar" class="csl-entry" role="listitem">
-Cook, D., &amp; Laa, U. (2025). <em>Mulgar: Functions for pre-processing data for multivariate data visualisation using tours</em>. <a href="https://dicook.github.io/mulgar/">https://dicook.github.io/mulgar/</a>
+Cook, D., &amp; Laa, U. (2025). <em><span class="nocase">mulgar</span>: <span>F</span>unctions for <span>P</span>re-<span>P</span>rocessing <span>D</span>ata for <span>M</span>ultivariate data <span>V</span>isualisation using <span>T</span>ours</em>. <a href="https://dicook.github.io/mulgar/">https://dicook.github.io/mulgar/</a>
 </div>
 <div id="ref-CLBW06" class="csl-entry" role="listitem">
 Cook, D., Lee, E.-K., Buja, A., &amp; Wickham, H. (2006). <span>G</span>rand <span>T</span>ours, <span>P</span>rojection <span>P</span>ursuit <span>G</span>uided <span>T</span>ours and <span>M</span>anual <span>C</span>ontrols. In C.-H. Chen, W. Härdle, &amp; A. Unwin (Eds.), <em>Handbook of <span>D</span>ata <span>V</span>isualization</em>. Springer. <a href="https://doi.org/10.1007/978-3-540-33037-0">https://doi.org/10.1007/978-3-540-33037-0</a>
@@ -1115,7 +1114,7 @@ Horikoshi, M., &amp; Tang, Y. (2024). <em><span class="nocase">ggfortify</span>:
 Horst, A. M., Hill, A. P., &amp; Gorman, K. B. (2022). Palmer <span>A</span>rchipelago <span>P</span>enguins <span>D</span>ata in the palmerpenguins <span>R</span> <span>P</span>ackage - <span>A</span>n <span>A</span>lternative to <span>A</span>nderson’s <span>I</span>rises. <em>The R Journal</em>, <em>14</em>, 244–254. <a href="https://doi.org/10.32614/RJ-2022-020">https://doi.org/10.32614/RJ-2022-020</a>
 </div>
 <div id="ref-R-palmerpenguins" class="csl-entry" role="listitem">
-Horst, A., Hill, A., &amp; Gorman, K. (2022). <em>Palmerpenguins: Palmer archipelago (antarctica) penguin data</em>. <a href="https://allisonhorst.github.io/palmerpenguins/">https://allisonhorst.github.io/palmerpenguins/</a>
+Horst, A., Hill, A., &amp; Gorman, K. (2022). <em><span class="nocase">palmerpenguins</span>: <span>P</span>almer <span>A</span>rchipelago (<span>A</span>ntarctica) <span>P</span>enguin <span>D</span>ata</em>. <a href="https://allisonhorst.github.io/palmerpenguins/">https://allisonhorst.github.io/palmerpenguins/</a>
 </div>
 <div id="ref-hotelling-pca" class="csl-entry" role="listitem">
 Hotelling, H. (1933). Analysis of a <span>C</span>omplex of <span>S</span>tatistical <span>V</span>ariables into <span>P</span>rincipal <span>C</span>omponents. <em>Journal of Educational Psychology</em>, <em>24</em>(6), 417--441. <a href="https://doi.org/10.1037/h0071325">https://doi.org/10.1037/h0071325</a>
@@ -1301,7 +1300,7 @@ OpenStreetMap contributors. (2020). <em><span class="nocase">Planet Dump Retriev
 Pearson, K. (1901). LIII. On <span>L</span>ines and <span>P</span>lanes of <span>C</span>losest <span>F</span>it to <span>S</span>ystems of <span>P</span>oints in <span>S</span>pace. <em>The London, Edinburgh, and Dublin Philosophical Magazine and Journal of Science</em>, <em>2</em>(11), 559–572. <a href="https://doi.org/10.1080/14786440109462720">https://doi.org/10.1080/14786440109462720</a>
 </div>
 <div id="ref-R-patchwork" class="csl-entry" role="listitem">
-Pedersen, T. L. (2024). <em>Patchwork: The composer of plots</em>. <a href="https://patchwork.data-imaginist.com">https://patchwork.data-imaginist.com</a>
+Pedersen, T. L. (2024). <em><span class="nocase">patchwork</span>: <span>T</span>he <span>C</span>omposer of <span>P</span>lots</em>. <a href="https://patchwork.data-imaginist.com">https://patchwork.data-imaginist.com</a>
 </div>
 <div id="ref-perisic2009" class="csl-entry" role="listitem">
 Perisic, I., &amp; Posse, C. (2005). Projection <span>P</span>ursuit <span>I</span>ndices <span>B</span>ased on the <span>E</span>mpirical <span>D</span>istribution <span>F</span>unction. <em>Journal of Computational and Graphical Statistics</em>, <em>14</em>(3), 700–715. <a href="https://doi.org/10.1198/106186005X69440">https://doi.org/10.1198/106186005X69440</a>
@@ -1334,7 +1333,7 @@ Rao, C. R., Wegman, E. J., &amp; Solka, J. L. (Eds.). (2006). <em>Handbook of <s
 Ripley, B. (1996). <em>Pattern <span>R</span>ecognition and <span>N</span>eural <span>N</span>etworks</em>. Cambridge University Press.
 </div>
 <div id="ref-R-nnet" class="csl-entry" role="listitem">
-Ripley, B. (2023). <em>Nnet: Feed-forward neural networks and multinomial log-linear models</em>. <a href="http://www.stats.ox.ac.uk/pub/MASS4/">http://www.stats.ox.ac.uk/pub/MASS4/</a>
+Ripley, B. (2023). <em><span class="nocase">nnet</span>: <span>F</span>eed-<span>F</span>orward <span>N</span>eural <span>N</span>etworks and <span>M</span>ultinomial <span>L</span>og-<span>L</span>inear <span>M</span>odels</em>. <a href="http://www.stats.ox.ac.uk/pub/MASS4/">http://www.stats.ox.ac.uk/pub/MASS4/</a>
 </div>
 <div id="ref-R-MASS" class="csl-entry" role="listitem">
 Ripley, B., &amp; Venables, B. (2024). <em>MASS: Support functions and datasets for venables and ripley’s MASS</em>. <a href="http://www.stats.ox.ac.uk/pub/MASS4/">http://www.stats.ox.ac.uk/pub/MASS4/</a>
@@ -1373,7 +1372,7 @@ Shepard, R. N. (1962). The <span>A</span>nalysis of <span>P</span>roximities: <s
 Sievert, C. (2020). <em>Interactive <span>W</span>eb-<span>B</span>ased <span>D</span>ata <span>V</span>isualization with <span>R</span>, plotly, and shiny</em>. Chapman; Hall/CRC. <a href="https://plotly-r.com">https://plotly-r.com</a>
 </div>
 <div id="ref-R-plotly" class="csl-entry" role="listitem">
-Sievert, C., Parmer, C., Hocking, T., Chamberlain, S., Ram, K., Corvellec, M., &amp; Despouy, P. (2024). <em>Plotly: Create interactive web graphics via plotly.js</em>. <a href="https://plotly-r.com">https://plotly-r.com</a>
+Sievert, C., Parmer, C., Hocking, T., Chamberlain, S., Ram, K., Corvellec, M., &amp; Despouy, P. (2024). <em><span class="nocase">plotly</span>: <span>C</span>reate <span>I</span>nteractive <span>W</span>eb <span>G</span>raphics via <span class="nocase">plotly.js</span></em>. <a href="https://plotly-r.com">https://plotly-r.com</a>
 </div>
 <div id="ref-R-gtsummary" class="csl-entry" role="listitem">
 Sjoberg, D. D., Larmarange, J., Curry, M., Lavery, J., Whiting, K., &amp; Zabor, E. C. (2024). <em>Gtsummary: Presentation-ready data summary and analytic result tables</em>. <a href="https://github.com/ddsjoberg/gtsummary">https://github.com/ddsjoberg/gtsummary</a>
@@ -1391,7 +1390,7 @@ Sparks, A. H., Carroll, J., Goldie, J., Marchiori, D., Melloy, P., Padgham, M., 
 Spence, R. (2007). <em>Information <span>V</span>isualization: <span>D</span>esign for <span>I</span>nteraction</em>. Prentice Hall.
 </div>
 <div id="ref-colorspace2009b" class="csl-entry" role="listitem">
-Stauffer, R., Mayr, G. J., Dabernig, M., &amp; Zeileis, A. (2009). Somewhere over the rainbow: How to make effective use of colors in meteorological visualizations. <em>Bulletin of the American Meteorological Society</em>, <em>96</em>(2), 203–216. <a href="https://doi.org/10.1175/BAMS-D-13-00155.1">https://doi.org/10.1175/BAMS-D-13-00155.1</a>
+Stauffer, R., Mayr, G. J., Dabernig, M., &amp; Zeileis, A. (2009). <span>S</span>omewhere over the <span>R</span>ainbow: <span>H</span>ow to <span>M</span>ake <span>E</span>ffective <span>U</span>se of <span>C</span>olors in <span>M</span>eteorological <span>V</span>isualizations. <em>Bulletin of the American Meteorological Society</em>, <em>96</em>(2), 203–216. <a href="https://doi.org/10.1175/BAMS-D-13-00155.1">https://doi.org/10.1175/BAMS-D-13-00155.1</a>
 </div>
 <div id="ref-seurat2" class="csl-entry" role="listitem">
 Stuart, T., Butler, A., Hoffman, P., Hafemeister, C., Papalexi, E., III, W. M. M., Hao, Y., Stoeckius, M., Smibert, P., &amp; Satija, R. (2019). Comprehensive <span>I</span>ntegration of <span>S</span>ingle-<span>C</span>ell <span>D</span>ata. <em>Cell</em>, <em>177</em>, 1888–1902. <a href="https://doi.org/10.1016/j.cell.2019.05.031">https://doi.org/10.1016/j.cell.2019.05.031</a>
@@ -1460,7 +1459,7 @@ Tierney, N., &amp; Cook, D. (2023a). Expanding <span>T</span>idy <span>D</span>a
 Tierney, N., &amp; Cook, D. (2023b). Expanding <span>T</span>idy <span>D</span>ata <span>P</span>rinciples to <span>F</span>acilitate <span>M</span>issing <span>D</span>ata <span>E</span>xploration, <span>V</span>isualization and <span>A</span>ssessment of <span>I</span>mputations. <em>Journal of Statistical Software</em>, <em>105</em>(7), 1–31. <a href="https://doi.org/10.18637/jss.v105.i07">https://doi.org/10.18637/jss.v105.i07</a>
 </div>
 <div id="ref-R-naniar" class="csl-entry" role="listitem">
-Tierney, N., Cook, D., McBain, M., &amp; Fay, C. (2024). <em>Naniar: Data structures, summaries, and visualisations for missing data</em>. <a href="https://github.com/njtierney/naniar">https://github.com/njtierney/naniar</a>
+Tierney, N., Cook, D., McBain, M., &amp; Fay, C. (2024). <em><span class="nocase">naniar</span>: <span>D</span>ata <span>S</span>tructures, <span>S</span>ummaries, and <span>V</span>isualisations for <span>M</span>issing <span>D</span>ata</em>. <a href="https://github.com/njtierney/naniar">https://github.com/njtierney/naniar</a>
 </div>
 <div id="ref-To52" class="csl-entry" role="listitem">
 Torgerson, W. S. (1952). Multidimensional <span>S</span>caling. 1. <span>T</span>heory and <span>M</span>ethod. <em>Psychometrika</em>, <em>17</em>, 401–419.
@@ -1589,7 +1588,7 @@ Young, F. W., Valero-Mora, P. M., &amp; Friendly, M. (2006). <em>Visual <span>S<
 Zeileis, A., Fisher, J. C., Hornik, K., Ihaka, R., McWhite, C. D., Murrell, P., Stauffer, R., &amp; Wilke, C. O. (2020). <span class="nocase">colorspace</span>: A toolbox for manipulating and assessing colors and palettes. <em>Journal of Statistical Software</em>, <em>96</em>(1), 1–49. <a href="https://doi.org/10.18637/jss.v096.i01">https://doi.org/10.18637/jss.v096.i01</a>
 </div>
 <div id="ref-colorspace2009a" class="csl-entry" role="listitem">
-Zeileis, A., Hornik, K., &amp; Murrell, P. (2009). Escaping <span>RGB</span>land: Selecting colors for statistical graphics. <em>Computational Statistics &amp; Data Analysis</em>, <em>53</em>(9), 3259–3270. <a href="https://doi.org/10.1016/j.csda.2008.11.033">https://doi.org/10.1016/j.csda.2008.11.033</a>
+Zeileis, A., Hornik, K., &amp; Murrell, P. (2009). Escaping <span>RGB</span>land: <span>S</span>electing <span>C</span>olors for <span>S</span>tatistical <span>G</span>raphics. <em>Computational Statistics &amp; Data Analysis</em>, <em>53</em>(9), 3259–3270. <a href="https://doi.org/10.1016/j.csda.2008.11.033">https://doi.org/10.1016/j.csda.2008.11.033</a>
 </div>
 <div id="ref-zhang2023" class="csl-entry" role="listitem">
 Zhang, C., Ye, J., &amp; Wang, X. (2023). A <span>C</span>omputational <span>P</span>erspective on <span>P</span>rojection <span>P</span>ursuit in <span>H</span>igh <span>D</span>imensions: <span>F</span>easible or <span>I</span>nfeasible <span>F</span>eature <span>E</span>xtraction. <em>International Statistical Review</em>, <em>91</em>(1), 140–161. <a href="https://doi.org/10.1111/insr.12517">https://doi.org/10.1111/insr.12517</a>

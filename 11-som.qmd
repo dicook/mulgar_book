@@ -23,12 +23,17 @@ A self-organising map is like a fisherwoman's net, as the net is pulled in it ca
 
 `r ifelse(knitr::is_html_output(), '@fig-penguins-som-html', '@fig-penguins-som-pdf')` illustrates how the SOM fits the penguins data. SOM is not ideal for clustered data where there are gaps. It is better suited for data that lies on a non-linear low-dimensional manifold. To model data like the penguins the first step is to set up a net that will cover more than the three clusters. Here we have chosen to use a $5\times 5$ rectangular grid. (The option allows for a hexagonal grid, which would make for a better tiled 2D map, but this is not useful for viewing the model in high dimensions.) Like $k$-means clustering the fitted model can change substantially depending on the initialisation, so setting a seed will ensure a consistent result. We have also initialised the positions of the knots using PCA, which stretches the net in the main two directions of variance of the data, generally giving better results. 
 
+```{r echo=knitr::is_html_output()}
+#| code-summary: "Load libraries"
+#| message: false
+source("code/setup.R")
+```
+
 ```{r}
 #| code-summary: "code to run SOM"
 #| message: false
 library(kohonen)
 library(aweSOM)
-library(mulgar)
 load("data/penguins_sub.rda")
 
 set.seed(947)
@@ -46,10 +51,6 @@ The resulting model object is used to construct an object containing the origina
 ```{r}
 #| code-summary: "code to generate net"
 #| message: false
-library(dplyr)
-library(ggplot2)
-library(colorspace)
-
 p_som_df_net <- som_model(p_som)
 p_som_data <- p_som_df_net$data |> 
   mutate(species = penguins_sub$species)
@@ -76,8 +77,6 @@ The object can also be modified into the pieces needed to show the net in $p$-D.
 ```{r echo=knitr::is_html_output()}
 #| eval: false
 #| code-summary: "code to make gifs"
-library(tourr)
-
 # Set up data
 p_som_map <- p_som_df_net$net |>
   mutate(species = "0", type="net")
@@ -126,13 +125,14 @@ render_gif(p_som_map_data[,1:4],
 #| echo: false
 #| label: fig-p-som2-html
 #| fig-cap: "2D map"
+#| fig-alt: "Scatterplot on a 5x5 black grid, where points are spread a little at each node. The x axis is labelled 'map 1' and has no numbers, and the y axis is labelled 'map 2' and has no numbers. Points are coloured blue, yellow and red matching penguin species Adeli, Chinstrap and Gentoo. The top left is mostly blue, top right mostly yellow and bottom is mostly red."
 #| fig-width: 5
 #| fig-height: 5
 #| out-width: 100%
 p_som_map_p
 ```
 
-![Map in 4D](gifs/p_som.gif){#fig-p-som1 fig-alt=""}
+![Map in 4D](gifs/p_som.gif){#fig-p-som1 fig-alt="Animation showing 2D projections from 4D of the penguins data, with points coloured according to species. Overlaid is a wireframe net, which stretches within and across the clusters. A circle and segment display shows the coefficients for each projection at bottom left."}
 
 
 Examining the SOM map views in 2D and with the data in 4D. Points are coloured by species, which was not used for the modeling. The 2D map shows that the `map 2` direction is primarily distinguishing the Gentoo from the others, and `map 1` is imperfectly distinguishing the Chinstrap from Adelie. The map in the data space shows how it is woven into the shape of the data. 
@@ -144,9 +144,9 @@ Examining the SOM map views in 2D and with the data in 4D. Points are coloured b
 
 
 
-![2D map](images/fig-p-som2-1.png){#fig-p-som1 fig-alt="" width=200 fig-align="center"}
+![2D map](images/fig-p-som2-1.png){#fig-p-som1 fig-alt="Scatterplot on a 5x5 black grid, where points are spread a little at each node. The x axis is labelled 'map 1' and has no numbers, and the y axis is labelled 'map 2' and has no numbers. Points are coloured blue, yellow and red matching penguin species Adeli, Chinstrap and Gentoo. The top left is mostly blue, top right mostly yellow and bottom is mostly red." width=200 fig-align="center"}
 
-![Map in 4D](images/p_som_47.png){#fig-p-som1 fig-alt=""}
+![Map in 4D](images/p_som_47.png){#fig-p-som1 fig-alt="A single 2D projection from 4D of the penguins data, with points coloured according to species. Overlaid is a wireframe net, which stretches within and across the clusters. A circle and segment display shows the coefficients for each projection at bottom left."}
 
 
 Examining the SOM map views in 2D and with the data in 4D. Points are coloured by species, which was not used for the modeling. The 2D map shows that the `map 2` direction is primarily distinguishing the Gentoo from the others, and `map 1` is imperfectly distinguishing the Chinstrap from Adelie. The map in the data space shows how it is woven into the shape of the data. {{< fa play-circle >}}

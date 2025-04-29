@@ -1,7 +1,11 @@
-## --------------------------------------------------------------------------
+## ----echo=knitr::is_html_output()--------------------------------------------
+#| code-summary: "Load libraries"
+source("code/setup.R")
+
+
+## ----------------------------------------------------------------------------
 #| eval: false
 #| code-fold: false
-# library(detourr)
 # grDevices::hcl.colors(3, palette="Zissou 1")
 # detour(penguins_sub[,1:4],
 #        tour_aes(projection = bl:bm)) |>
@@ -11,20 +15,18 @@
 #                     axes = FALSE)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| message: false
 #| code-summary: "Code to make confusion matrix"
-library(readr)
 load("data/penguins_sub.rda")
 detourr_penguins <- read_csv("data/detourr_penguins.csv")
 table(penguins_sub$species, detourr_penguins$colour)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| eval: false
 #| code-fold: false
-# library(detourr)
-# 
+
 # # Use a random starting basis because the
 # # first two variables make it too easy
 # strt <- tourr::basis_random(10, 2)
@@ -36,12 +38,9 @@ table(penguins_sub$species, detourr_penguins$colour)
 #                     axes = FALSE)
 
 
-## --------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 #| eval: false
 #| echo: false
-# library(detourr)
-# library(liminal)
-# library(mulgar)
 # data("fake_trees")
 # 
 # # Original data is 100D, so need to reduce dimension using PCA first

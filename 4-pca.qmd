@@ -38,18 +38,20 @@ We'll start by showing PCA on the simulated data from @sec-dimension-overview. T
 \index{dimension reduction!scree plot}
 
 ```{r echo=knitr::is_html_output()}
+#| code-summary: "Load libraries"
+#| message: false
+source("code/setup.R")
+```
+
+```{r echo=knitr::is_html_output()}
 #| message: false
 #| error: false
 #| warning: false
 #| code-summary: "Code to make scree plots"
 # Conduct PCA and make the scree plot for 
 # the 2-, 3- and 5-D planar data
-library(dplyr)
-library(ggplot2)
-library(mulgar)
 data(plane)
 data(box)
-library(geozoo)
 cube5d <- data.frame(cube.solid.random(p=5, n=300)$points)
 colnames(cube5d) <- paste0("x", 1:5)
 cube5d <- data.frame(apply(cube5d, 2, 
@@ -82,7 +84,7 @@ The next step is to look at the coefficients for the selected number of PCs. @tb
 #| tbl-cap: "Coefficients for the first two PCs for the plane data."
 #| code-summary: "Code to print PC coefficients"
 #| warning: false
-library(gt)
+
 p_pca$rotation[,1:2] |>
   as_tibble(rownames="Variable") |> 
   gt() |>
@@ -130,7 +132,6 @@ n_scree <- ggscree(pn_pca, q = 7) +
 #| out-width: 100%
 #| fig-cap: "Scree plots for the three simulated data sets shown in Figure 3.2, and the data where extra noise variables are added. The 2D in 5D (a) is clearly recognised by PCA to be 2D because the variance drops substantially between 2-3 principal components. The 3D in 5D (b) is possibly 3D because the variance drops from 3-4 principal components. The fully 5D data (c) has no drop in variance, and all values are close to the typical value one would observe if the data was fully 5D. When the additional noise variables are added to the 2D data it becomes 4D in 7D, and the scree plot indicates that around 3-4 PCs would be suitable."
 #| fig-alt: "Four line plots laid out in 2x2. In (a) the line drops from 3 to 2 to 0 from x=1,2,3. In (b) the line drops from 2 to 1.5 to 1 to 0.25 and stays there as x goes from 1 to 5. In (c) the black line stays around 1 for all values of x. In (d) the black line drops from 3 to 2 to 1 for x=1, 2, 3, and then drops to 0 at x=4."
-library(patchwork)
 p_scree + b_scree + c_scree + n_scree + plot_layout(ncol=2)
 ```
 
@@ -247,7 +248,6 @@ This data has player statistics for all the matches in the 2021 season of the Wo
 #| error: FALSE
 #| warning: FALSE
 #| code-fold: false
-library(tourr)
 data(aflw)
 aflw_std <- aflw |>
   mutate_if(is.numeric, function(x) (x-
@@ -314,11 +314,16 @@ ggscree(aflw_pca, q = 29) + theme_minimal()
 
 From the scree plot in @fig-aflw-pca, we see a sharp drop from one to two, two to three and then smaller drops. After four PCs the variance drops again at six PCs and then gradually decays. We will choose four PCs to examine more closely. This explains `r round(summary(aflw_pca)$importance[3,4]*100,1)`% of the variance.
 
+When there are as many variables as this, it can be hard to digest the combinations of variables most contributing to each PC. Rearranging the table by sorting on a selected PC can help. @tbl-aflw-pcs has been sorted according to the PC 1 coefficients.
+
+PC 1 is primarily composed of `disposals`, `possessions`, `kicks`, `metres`, `uncontested`, `contested`, .... primarily the field play statistics! It is quite common in PCA for the first PC to be a combination of all variables, which suggests that there is one main direction of variation in the data. Here it is not quite that. PCA suggests that the primary variation is through a combination of field skills, or basic football playing skills.
+
+Thus the second PC contrasts the first, because it is primarily a combination of `shots`, `goals`, `marks_in50`, `accuracy`, and `behinds` contrasted against `rebounds_in50` and `intercepts`. The positive coefficients are primary offensive skills and the negative coefficients are defensive skills. This PC is reasonable measure of the offensive vs defensive skills of a player.
+
 ```{r echo=knitr::is_html_output()}
 #| label: tbl-aflw-pcs
 #| tbl-cap: "Coefficients for the first four PCs. PC 1 contrasts some with PC 2, with the first having large coefficients primarily on field play statistics, and the second having large coefficients on the scoring statistics."
 #| code-summary: "Code to print PC coefficients"
-library(gt)
 aflw_pca$rotation[,1:4] |>
   as_tibble(rownames="Variable") |> 
   arrange(desc(PC1), desc(PC2), desc(PC3)) |>
@@ -326,12 +331,6 @@ aflw_pca$rotation[,1:4] |>
   fmt_number(columns = c(PC1, PC2, PC3, PC4),
              decimals = 2)
 ```
-
-When there are as many variables as this, it can be hard to digest the combinations of variables most contributing to each PC. Rearranging the table by sorting on a selected PC can help. @tbl-aflw-pcs has been sorted according to the PC 1 coefficients.
-
-PC 1 is primarily composed of `disposals`, `possessions`, `kicks`, `metres`, `uncontested`, `contested`, .... primarily the field play statistics! It is quite common in PCA for the first PC to be a combination of all variables, which suggests that there is one main direction of variation in the data. Here it is not quite that. PCA suggests that the primary variation is through a combination of field skills, or basic football playing skills.
-
-Thus the second PC contrasts the first, because it is primarily a combination of `shots`, `goals`, `marks_in50`, `accuracy`, and `behinds` contrasted against `rebounds_in50` and `intercepts`. The positive coefficients are primary offensive skills and the negative coefficients are defensive skills. This PC is reasonable measure of the offensive vs defensive skills of a player.
 
 \index{dimension reduction!interpretation}
 
@@ -347,8 +346,6 @@ The result is shown in @fig-aflw-pcatour. We can see that the shape of the four 
 #| label: aflw-plotly
 #| eval: false
 #| code-summary: "Code to make tour animation"
-library(plotly)
-library(htmlwidgets)
 set.seed(20)
 b <- basis_random(4, 2)
 aflw_pct <- tourr::save_history(aflw_pca$x[,1:4], 
@@ -459,7 +456,6 @@ pg18 <- ggplot() +
 #| fig-width: 5
 #| fig-height: 4
 #| out-width: 80%
-library(plotly)
 ggplotly(pg18, width=500, height=500)
 ```
 :::
@@ -524,8 +520,6 @@ It is common to show the model, that is the data projected into the $k$-D model 
 #| fig-width: 8
 #| fig-height: 4
 #| out-width: 100%
-library(ggfortify)
-library(patchwork)
 plane_pca <- prcomp(plane)
 pl1 <- autoplot(plane_pca, loadings = TRUE, 
          loadings.label = TRUE) + 
@@ -830,7 +824,6 @@ Examining the handling of outliers in the PCA of the planar data with noise vari
 #| fig-cap: "From the scatterplot matrix we can see that the outliers are present in PC5, PC6 and PC7. That means by reducing the dimensionality to the first four PCs the model has missed some important characteristics in the data."
 #| fig-alt: "Matrix layout of pairwise plots of seven variables, as scatterplots in the lower triangle, density plots on the diagonal, and text showing correlation in the upper triangle. Outliers are visible in all scatterplots containing PCs 5, 6 and 7. Otherwise little association between variables."
 #| code-summary: "Code to make scatterplot matrix"
-library(GGally)
 ggscatmat(plane_n_o_pca$x) + theme_minimal() +
   theme(axis.title = element_blank(),
         axis.text = element_blank())
@@ -936,15 +929,12 @@ One of the dangers of PCA is that interesting and curious details of the data ca
 #| echo: false
 #| message: false
 #| warning: false
-library(GGally)
 ggscatmat(aflw_pca$x, columns=1:4)
 ```
 
 ```{r}
 #| eval: false
 #| echo: false
-library(mulgar)
-library(dplyr)
 data(bushfires)
 bushfires_std <- bushfires |>
   dplyr::select(`rf`:`log_dist_road`) |>
@@ -984,7 +974,6 @@ Linear dimension reduction can optimise for other criteria, and here we will exp
 #| message: false
 #| warning: false
 library(dobin)
-library(GGally)
 dobin_pno_1 <- as.data.frame(dobin(plane_noise_outliers)$coords)
 dobin_pno_1$outlier <- c(rep("no", 100), rep("yes", 2))
 ggscatmat(dobin_pno_1, columns = 1:3, color = "outlier")
