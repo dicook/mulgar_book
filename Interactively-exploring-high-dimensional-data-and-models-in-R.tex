@@ -295,7 +295,7 @@
 
 \title{Interactively exploring high-dimensional data and models in R}
 \author{Dianne Cook and Ursula Laa}
-\date{2025-04-28}
+\date{2025-05-03}
 
 \begin{document}
 \maketitle
@@ -1868,7 +1868,7 @@ because these are meaningful in any dimension.
   Using the saved path, generate the interpolation between the target
   planes, using \texttt{interpolate()}. How many bases are in the tour
   path? Plot the first four in set of planes, and explain what is
-  happening. Save tour path, extract basis and plot data
+  happening.
 \item
   Repeat \texttt{save\_history()} but use a holes index guided tour.
   Plot the final projection. Does the guided tour find the three
@@ -3225,6 +3225,9 @@ is an unusual observation also.}
 
 \infobox{One of the dangers of PCA is that interesting and curious details of the data can captured by the lowest PCs, that are usually discarded. The tour, and examining the smaller PCs, can help to discover them.}
 
+\index{data!aflw} \index{data!sketches} \index{data!bushfires}
+\index{data!anomaly}
+
 \section*{Exercises}\label{exercises-3}
 \addcontentsline{toc}{section}{Exercises}
 
@@ -3234,33 +3237,57 @@ is an unusual observation also.}
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  Make a scatterplot matrix of the first four PCs of the \texttt{aflw}
-  data. Is the branch pattern visible in any pair?
+  This question is about the \texttt{aflw} data.
+
+  \begin{enumerate}
+  \def\labelenumii{\alph{enumii}.}
+  \tightlist
+  \item
+    Make a scatterplot matrix of the first four PCs of the \texttt{aflw}
+    data. Is the branch pattern visible in any pair?
+  \item
+    Construct five new variables to measure these skills offense,
+    defense, playing time, ball movement, errors. Using the tour,
+    examine the relationship between these variables. Map out how a few
+    players could be characterised based on these directions of skills.
+  \item
+    Symmetrise any \texttt{aflw} variables that have skewed
+    distributions using a log or square root transformation. Then re-do
+    the PCA. What do we learn that is different about associations
+    between the skill variables?
+  \end{enumerate}
 \item
-  Construct five new variables to measure these skills offense, defense,
-  playing time, ball movement, errors. Using the tour, examine the
-  relationship between these variables. Map out how a few players could
-  be characterised based on these directions of skills.
+  This question is about the \texttt{bushfires} data.
+
+  \begin{enumerate}
+  \def\labelenumii{\alph{enumii}.}
+  \tightlist
+  \item
+    using a grand tour on the numeric variables, ignoring the
+    \texttt{cause} (class) variable. Note any issues such as outliers,
+    or skewness that might affect PCA.
+  \item
+    How many principal components would be recommended by the scree
+    plot? Examine this PCA model with the data, and explain how well it
+    does or doesn't fit.
+  \item
+    Use the \texttt{pca\_tour} to examine the first five PCs of the
+    \texttt{bushfires} data. How do all of the variables contribute to
+    this reduced space?
+  \end{enumerate}
 \item
-  Symmetrise any \texttt{aflw} variables that have skewed distributions
-  using a log or square root transformation. Then re-do the PCA. What do
-  we learn that is different about associations between the skill
-  variables?
+  Reduce the dimension of the \texttt{sketches\_train} data to 12 PCs.
+  How much variation does this explain? Is there any obvious clustering
+  in this lower dimensional space?
 \item
-  Examine the \texttt{bushfires} data using a grand tour on the numeric
-  variables, ignoring the \texttt{cause} (class) variable. Note any
-  issues such as outliers, or skewness that might affect PCA. How many
-  principal components would be recommended by the scree plot? Examine
-  this PCA model with the data, and explain how well it does or doesn't
-  fit.
+  For each of the \texttt{anomaly} data sets. Check if the anomaly is
+  visible in the first \(k\) PCs, where \(k\) is determined by usual
+  methods such as the scree plot, using a tour. If it is not, find which
+  PC it falls in, if any.
 \item
-  Use the \texttt{pca\_tour} to examine the first five PCs of the
-  \texttt{bushfires} data. How do all of the variables contribute to
-  this reduced space?
-\item
-  Reduce the dimension of the \texttt{sketches} data to 12 PCs. How much
-  variation does this explain? Is there any obvious clustering in this
-  lower dimensional space?
+  Compute PCA for the \texttt{multicluster} data. How many PCs would be
+  recommended by the scree plot? From the tour, what is not visible in
+  this set, and how many more would you need to add to better see it?
 \end{enumerate}
 
 \section*{Project}\label{project-1}
@@ -3761,57 +3788,50 @@ space. The close proximity in the t-SNE view is reasonable, though.}
 \item
   Examine the effect of various choices when making a 2D layout of the
   swiss roll data, using isomap and LLE:
-\end{enumerate}
 
-\begin{enumerate}
-\def\labelenumi{\alph{enumi}.}
-\item
-  Standardise the variables.
-\item
-  Change the number of nearest neighbours.
-\end{enumerate}
-
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\setcounter{enumi}{2}
-\item
-  Use t-SNE and UMAP to layout the swiss roll data. How does this
-  compare with isomap and LLE layouts?
+  \begin{enumerate}
+  \def\labelenumii{\alph{enumii}.}
+  \tightlist
+  \item
+    Standardise the variables.
+  \item
+    Change the number of nearest neighbours.
+  \item
+    Use t-SNE and UMAP to layout the swiss roll data. How does this
+    compare with isomap and LLE layouts?
+  \end{enumerate}
 \item
   This question uses the \texttt{penguins\_sub} data
-\end{enumerate}
 
-\begin{enumerate}
-\def\labelenumi{\alph{enumi}.}
-\tightlist
-\item
-  Generate a 2D representation using t-SNE. Plot the points mapping the
-  colour to species. What is most surprising? (Hint: Are the three
-  species represented by three distinct clusters?)
-\item
-  Re-do the t-SNE representation with different parameter choices,
-  including using different random seeds. Are the results different each
-  time, or do you think that they could be considered to be equivalent?
-\item
-  Use \texttt{liminal} or \texttt{detourr} to link the t-SNE
-  representation to a tour of the penguins. Highlight the points that
-  have been placed in an awkward position by t-SNE from others in their
-  species. Watch them relative to the others in their species in the
-  tour view, and think about whether there is any rationale for the
-  awkward placement.
-\item
-  Try again using UMAP to make the 2D representation, and use
-  \texttt{liminal} or \texttt{detourr} to link with a tour to explore
-  the result.
-\end{enumerate}
-
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\setcounter{enumi}{4}
+  \begin{enumerate}
+  \def\labelenumii{\alph{enumii}.}
+  \tightlist
+  \item
+    Generate a 2D representation using t-SNE. Plot the points mapping
+    the colour to species. What is most surprising? (Hint: Are the three
+    species represented by three distinct clusters?)
+  \item
+    Re-do the t-SNE representation with different parameter choices,
+    including using different random seeds. Are the results different
+    each time, or do you think that they could be considered to be
+    equivalent?
+  \item
+    Use \texttt{liminal} or \texttt{detourr} to link the t-SNE
+    representation to a tour of the penguins. Highlight the points that
+    have been placed in an awkward position by t-SNE from others in
+    their species. Watch them relative to the others in their species in
+    the tour view, and think about whether there is any rationale for
+    the awkward placement.
+  \item
+    Try again using UMAP to make the 2D representation, and use
+    \texttt{liminal} or \texttt{detourr} to link with a tour to explore
+    the result.
+  \end{enumerate}
 \item
   Conduct your best t-SNE and UMAP representations of the \texttt{aflw}
-  data. Compare and contrast what is learned relative to a tour or the
-  principal component analysis.
+  data. Compare and contrast what is learned relative to the first two
+  principal components, and a tour. Use \texttt{liminal} or
+  \texttt{detourr} to link with a tour to help you answer.
 \item
   The \texttt{cardinalR} package can be used to generate various
   high-dimensional shapes. Generate data with 5 irregularly shaped
@@ -3822,25 +3842,26 @@ space. The close proximity in the t-SNE view is reasonable, though.}
   that comes close to your idealised sketch?
 \item
   This question uses the \texttt{multicluster} data.
-\end{enumerate}
 
-\begin{enumerate}
-\def\labelenumi{\alph{enumi}.}
-\item
-  Use the tour first. How many clusters do you see?
-\item
-  Use UMAP to create a 2D layout. How well does this capture the
-  clusters in the data?
-\end{enumerate}
-
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\setcounter{enumi}{7}
-\tightlist
+  \begin{enumerate}
+  \def\labelenumii{\alph{enumii}.}
+  \tightlist
+  \item
+    Use the tour first. How many clusters do you see?
+  \item
+    Use UMAP to create a 2D layout. How well does this capture the
+    clusters in the data?
+  \item
+    Use \texttt{liminal} or \texttt{detourr} to link with a tour to
+    explain how the layout does or doesn't capture the clusters.
+  \end{enumerate}
 \item
   Use UMAP to create a 2D layout of the \texttt{sketches\_train} data,
   \texttt{V1} to \texttt{V784}. Plot this with points coloured by
-  \texttt{word} (what the person was asked to sketch).
+  \texttt{word} (what the person was asked to sketch). Use
+  \texttt{liminal} or \texttt{detourr} to link with a tour to help you
+  answer. How well does the layout show clusters corresponding to the
+  different classes?
 \end{enumerate}
 
 \section*{Project}\label{project-2}
@@ -4185,57 +4206,60 @@ and examples are shown in this chapter.
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  Use the following data to answer these questions:
+  Use the data and variance-covariance matrix given below to answer
+  these questions:
+
+  \begin{enumerate}
+  \def\labelenumii{\alph{enumii}.}
+  \tightlist
+  \item
+    Compute the Euclidean distance between cases \texttt{a1},
+    \texttt{a2}, \texttt{a3}, \texttt{a4}.
+  \item
+    Compute the correlation distance (as defined above) between cases
+    \texttt{a1}, \texttt{a2}, \texttt{a3}, \texttt{a4}.
+  \item
+    Which two points have the (a) biggest (b) smallest Mahalanobis
+    (statistical) distance, assuming that the covariance matrix is
+    \(\Sigma\). (The base function \texttt{mahalanobis()} will calculate
+    this in R. Technically this gives distance between each case and the
+    mean vector.)
+  \item
+    Is the ordering of distance between cases the same if Manhattan
+    distance is used instead of Euclidean?
+  \item
+    Compute the Chebychev distance between cases \texttt{a1},
+    \texttt{a2}, \texttt{a3}, \texttt{a4}.
+  \item
+    Compute Bray-Curtis distance between cases \texttt{a1}, \texttt{a2},
+    \texttt{a3}, \texttt{a4}.
+  \item
+    Make a plot of the data, and write a paragraph describing how the
+    different distance metrics agree and disagree on how close or far
+    the cases are from each other.
+  \end{enumerate}
 \end{enumerate}
 
-\begin{verbatim}
-     x1   x2   x3
-a1 0.13 0.21 0.09
-a2 0.91 0.95 0.85
-a3 0.62 0.73 0.65
-a4 0.21 0.92 0.43
-\end{verbatim}
+\begin{longtable}[]{@{}lrrr@{}}
+\toprule\noalign{}
+& x1 & x2 & x3 \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+a1 & 0.13 & 0.21 & 0.09 \\
+a2 & 0.91 & 0.95 & 0.85 \\
+a3 & 0.62 & 0.73 & 0.65 \\
+a4 & 0.21 & 0.92 & 0.43 \\
+\end{longtable}
 
-\begin{enumerate}
-\def\labelenumi{\alph{enumi}.}
-\item
-  Compute the Euclidean distance between cases \texttt{a1}, \texttt{a2},
-  \texttt{a3}, \texttt{a4}.
-\item
-  Compute the correlation distance (as defined above) between cases
-  \texttt{a1}, \texttt{a2}, \texttt{a3}, \texttt{a4}.
-\item
-  Which two points have the (a) biggest (b) smallest Mahalanobis
-  (statistical) distance, assuming that the covariance matrix is:
-\end{enumerate}
-
-\begin{verbatim}
-    x1  x2  x3
-x1 1.0 0.8 0.8
-x2 0.8 1.0 0.8
-x3 0.8 0.8 1.0
-\end{verbatim}
-
-(The base function \texttt{mahalanobis()} will calculate this in R.
-Technically this gives distance between each case and the mean vector.)
-
-\begin{enumerate}
-\def\labelenumi{\alph{enumi}.}
-\setcounter{enumi}{3}
-\item
-  Is the ordering of distance between cases the same if Manhattan
-  distance is used instead of Euclidean?
-\item
-  Compute the Chebychev distance between cases \texttt{a1}, \texttt{a2},
-  \texttt{a3}, \texttt{a4}.
-\item
-  Compute Bray-Curtis distance between cases \texttt{a1}, \texttt{a2},
-  \texttt{a3}, \texttt{a4}.
-\item
-  Make a plot of the data, and write a paragraph describing how the
-  different distance metrics agree and disagree on how close or far the
-  cases are from each other.
-\end{enumerate}
+\[
+\Sigma = \left[\begin{array}{ccc}
+  1.00 & 0.80 & 0.80 \\
+  0.80 & 1.00 & 0.80 \\
+  0.80 & 0.80 & 1.00
+\end{array}\right]
+\]
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -4248,7 +4272,7 @@ Technically this gives distance between each case and the mean vector.)
   result from each method would match your sketches.)
 \end{enumerate}
 
-\begin{figure}
+\begin{figure}[H]
 
 \centering{
 
@@ -4271,17 +4295,17 @@ to be?}
   account for a cluster analysis?
 \item
   Generate data using the \texttt{cardinalR} package that contains:
-\end{enumerate}
 
-\begin{enumerate}
-\def\labelenumi{\alph{enumi}.}
-\tightlist
-\item
-  Four Gaussian well-separated clusters
-\item
-  Data containing with three clusters that are circle shapes
-\item
-  Your choice
+  \begin{enumerate}
+  \def\labelenumii{\alph{enumii}.}
+  \tightlist
+  \item
+    Four Gaussian well-separated clusters
+  \item
+    Data containing with three clusters that are circle shapes
+  \item
+    Your choice
+  \end{enumerate}
 \end{enumerate}
 
 For which ones do you observe clearly separated clusters? Do you notice
@@ -4801,7 +4825,7 @@ emphasizes it, bringing it more strongly to our attention.
 
 \end{figure}%
 
-\begin{figure}
+\begin{figure}[H]
 
 \begin{minipage}{0.50\linewidth}
 
@@ -6215,6 +6239,7 @@ helpful to generate diagnostic data by:
 \infobox{To diagnose a fitted model, augment the observed data with fitted values, local variable importance, and simulate a full domain of new observations with predictions to examine the classification boundaries it produced.}
 
 \index{data!bushfires} \index{data!pisa} \index{data!aflw}
+\index{tour!grand}\index{tour!guided}
 
 \section*{Exercises}\label{exercises-12}
 \addcontentsline{toc}{section}{Exercises}
@@ -6223,31 +6248,24 @@ helpful to generate diagnostic data by:
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
-\tightlist
 \item
   Using just the variables \texttt{se}, \texttt{maxt}, \texttt{mint},
   \texttt{log\_dist\_road}, and ``accident'' or ``lightning'' causes, in
   the \texttt{bushfires} data use the tour (grand or guided using
   \texttt{lda\_pp}) to decide
-  \index{data!bushfires}\index{tour!grand}\index{tour!guided}
-\end{enumerate}
 
-\begin{enumerate}
-\def\labelenumi{\alph{enumi}.}
-\tightlist
-\item
-  whether the two classes are separable,
-\item
-  which variables might be more important, and
-\item
-  whether one should fit a linear or non-linear classifier to separate
-  the groups by assessing whether the border between groups is linear or
-  non-linear.
-\end{enumerate}
-
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\setcounter{enumi}{1}
+  \begin{enumerate}
+  \def\labelenumii{\alph{enumii}.}
+  \tightlist
+  \item
+    whether the two classes are separable,
+  \item
+    which variables might be more important, and
+  \item
+    whether one should fit a linear or non-linear classifier to separate
+    the groups by assessing whether the border between groups is linear
+    or non-linear.
+  \end{enumerate}
 \item
   Make a 10\% sample of the \texttt{pisa} data, stratified by the two
   countries, and examine the first 5 math scores
@@ -8253,7 +8271,7 @@ forcing some coefficients to zero.
   together. What can you learn from this?
 \item
   From the \texttt{sketches\_train} data select all observations of
-  class banana or boomerang For this subset use PCA to find the first 5
+  class banana or boomerang. For this subset use PCA to find the first 5
   PCs. Fit two SVM models: once with linear kernel and once with radial
   kernel and default value for the gamma parameter. Compare the number
   of misclassified observations in the training data for the two
@@ -9117,7 +9135,7 @@ other two penguin species. \index{classification!misclassification}
 
 \begin{verbatim}
           Adelie Chinstrap Gentoo class.error
-Adelie       142         4      0 0.027397260
+Adelie       143         2      1 0.020547945
 Chinstrap      4        64      0 0.058823529
 Gentoo         0         1    118 0.008403361
 \end{verbatim}
@@ -11290,194 +11308,6 @@ projections if allowed to run for some time. The guided tour will
 quickly converge to an optimal projection, so will cover only a small
 part of the overall space.
 
-\begin{verbatim}
-
-Attaching package: 'dplyr'
-\end{verbatim}
-
-\begin{verbatim}
-The following objects are masked from 'package:stats':
-
-    filter, lag
-\end{verbatim}
-
-\begin{verbatim}
-The following objects are masked from 'package:base':
-
-    intersect, setdiff, setequal, union
-\end{verbatim}
-
-\begin{verbatim}
-Registered S3 method overwritten by 'GGally':
-  method from   
-  +.gg   ggplot2
-\end{verbatim}
-
-\begin{verbatim}
-
-Attaching package: 'ggpcp'
-\end{verbatim}
-
-\begin{verbatim}
-The following object is masked from 'package:GGally':
-
-    nasa
-\end{verbatim}
-
-\begin{verbatim}
-
-Attaching package: 'tourr'
-\end{verbatim}
-
-\begin{verbatim}
-The following object is masked from 'package:GGally':
-
-    flea
-\end{verbatim}
-
-\begin{verbatim}
-Loading required package: viridisLite
-\end{verbatim}
-
-\begin{verbatim}
-Package 'mclust' version 6.1.1
-Type 'citation("mclust")' for citing this R package in publications.
-\end{verbatim}
-
-\begin{verbatim}
-
-Attaching package: 'MASS'
-\end{verbatim}
-
-\begin{verbatim}
-The following object is masked from 'package:patchwork':
-
-    area
-\end{verbatim}
-
-\begin{verbatim}
-The following object is masked from 'package:dplyr':
-
-    select
-\end{verbatim}
-
-\begin{verbatim}
-
-Attaching package: 'mvtnorm'
-\end{verbatim}
-
-\begin{verbatim}
-The following object is masked from 'package:mclust':
-
-    dmvnorm
-\end{verbatim}
-
-\begin{verbatim}
-
-Attaching package: 'gridExtra'
-\end{verbatim}
-
-\begin{verbatim}
-The following object is masked from 'package:dplyr':
-
-    combine
-\end{verbatim}
-
-\begin{verbatim}
-
-Attaching package: 'plotly'
-\end{verbatim}
-
-\begin{verbatim}
-The following object is masked from 'package:MASS':
-
-    select
-\end{verbatim}
-
-\begin{verbatim}
-The following object is masked from 'package:ggplot2':
-
-    last_plot
-\end{verbatim}
-
-\begin{verbatim}
-The following object is masked from 'package:stats':
-
-    filter
-\end{verbatim}
-
-\begin{verbatim}
-The following object is masked from 'package:graphics':
-
-    layout
-\end{verbatim}
-
-\begin{verbatim}
-randomForest 4.7-1.2
-\end{verbatim}
-
-\begin{verbatim}
-Type rfNews() to see new features/changes/bug fixes.
-\end{verbatim}
-
-\begin{verbatim}
-
-Attaching package: 'randomForest'
-\end{verbatim}
-
-\begin{verbatim}
-The following object is masked from 'package:gridExtra':
-
-    combine
-\end{verbatim}
-
-\begin{verbatim}
-The following object is masked from 'package:ggplot2':
-
-    margin
-\end{verbatim}
-
-\begin{verbatim}
-The following object is masked from 'package:dplyr':
-
-    combine
-\end{verbatim}
-
-\begin{verbatim}
-
-Attaching package: 'e1071'
-\end{verbatim}
-
-\begin{verbatim}
-The following objects are masked from 'package:tourr':
-
-    interpolate, skewness
-\end{verbatim}
-
-\begin{verbatim}
-
-Attaching package: 'kableExtra'
-\end{verbatim}
-
-\begin{verbatim}
-The following object is masked from 'package:dplyr':
-
-    group_rows
-\end{verbatim}
-
-\begin{verbatim}
-[conflicted] Will prefer dplyr::filter over any other
-package.
-[conflicted] Will prefer dplyr::select over any other
-package.
-[conflicted] Will prefer dplyr::slice over any other package.
-[conflicted] Will prefer palmerpenguins::penguins over any
-other package.
-[conflicted] Will prefer tourr::flea over any other package.
-[conflicted] Will prefer geozoo::simplex over any other
-package.
-\end{verbatim}
-
 \index{software!ferrn}
 
 \begin{figure}
@@ -12585,12 +12415,12 @@ https://satijalab.org/seurat/articles/pbmc3k\_tutorial.html.
 \chapter{Links to Book Code and Additional Data}\label{book-data}
 
 The code and data and an RStudio project can be downloaded from the book
-GitHub repo https://github.com/dicook/mulgar\_book/.
+GitHub repo: https://github.com/dicook/mulgar\_book/.
 
 \section{Additional data}\label{additional-data}
 
 Table~\ref{tbl-datalinks-pdf} lists additional data available on the
-book web site at https://github.com/dicook/mulgar\_book.
+book web site.
 
 \begin{table}
 
@@ -12624,7 +12454,7 @@ Filename & Description & Chapter\\
 \section{Code files}\label{code-files}
 
 Table~\ref{tbl-codelinks-pdf} lists additional data available on the
-book web site at https://dicook.github.io/mulgar\_book/code.
+book web site.
 
 \begin{table}
 
