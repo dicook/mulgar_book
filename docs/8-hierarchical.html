@@ -423,20 +423,14 @@ window.Quarto = {
 <p> </p>
 <div class="cell">
 <details class="code-fold"><summary>Load libraries</summary><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/source.html">source</a></span><span class="op">(</span><span class="st">"code/setup.R"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details><div class="cell-output cell-output-stderr">
-<pre><code>Warning in rgl.init(initValue, onlyNULL): RGL: unable to open X11 display</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: 'rgl.init' failed, will use the null device.
-See '?rgl.useNULL' for ways to avoid this warning.</code></pre>
-</div>
-</div>
-<div class="cell">
-<details class="code-fold"><summary>Load libraries</summary><div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://andrie.github.io/ggdendro/">ggdendro</a></span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell">
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="va">simple_clusters</span><span class="op">)</span></span>
+<details class="code-fold"><summary>Load libraries</summary><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://andrie.github.io/ggdendro/">ggdendro</a></span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="va">simple_clusters</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Compute hierarchical clustering with Ward's linkage</span></span>
 <span><span class="va">cl_hw</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/hclust.html">hclust</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/dist.html">dist</a></span><span class="op">(</span><span class="va">simple_clusters</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span>,</span>
@@ -454,7 +448,7 @@ See '?rgl.useNULL' for ways to avoid this warning.</code></pre>
 <p>Although, the dendrogram is usually a good summary of the steps taken by the algorithm, it can be misleading. The dendrogram might indicate a clear clustering (big differences in heights of branches) but the result may be awful. You need to check this by examining the result on the data, called model-in-the-data space by <span class="citation" data-cites="wickham2015">Wickham et al. (<a href="references.html#ref-wickham2015" role="doc-biblioref">2015</a>)</span>. </p>
 <p>Plot (c) shows the dendrogram in 2D, overlaid on the data. The segments show how the points are joined to make clusters. In order to represent the dendrogram this way, new points (represented by a “+” here) need to be added corresponding to the centroid of groups of points that have been joined. These are used to draw the segments between other points and other clusters. We can see that the longest (two) edges stretches across the gap between the two clusters. This corresponds to the top of the dendrogram, the two long branches where we would cut it to make the two-cluster solution. This two-cluster solution is shown in plot (d).</p>
 <div class="cell">
-<details class="code-fold"><summary>Code to make the four plots</summary><div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Plot the data</span></span>
+<details class="code-fold"><summary>Code to make the four plots</summary><div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Plot the data</span></span>
 <span><span class="va">pd</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="va">simple_clusters</span>, <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">x1</span>, y<span class="op">=</span><span class="va">x2</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">geom_point</span><span class="op">(</span>colour<span class="op">=</span><span class="st">"#3B99B1"</span>, size<span class="op">=</span><span class="fl">2</span>, alpha<span class="op">=</span><span class="fl">0.8</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">ggtitle</span><span class="op">(</span><span class="st">"(a)"</span><span class="op">)</span> <span class="op">+</span> </span>
@@ -519,7 +513,7 @@ Figure&nbsp;8.1: Hierarchical clustering on simulated data: (a) data, (b) dendro
 <span class="header-section-number">8.2</span> Common patterns which confuse clustering algorithms</h2>
 <p><a href="#fig-problems" class="quarto-xref">Figure&nbsp;<span>8.2</span></a> shows two examples of structure in data that will confuse hierarchical clustering: nuisance variables and nuisance cases. We usually do not know that these problems exist prior to clustering the data. Discovering these iteratively as you conduct a clustering analysis is important for generating useful results.</p>
 <div class="cell">
-<details class="code-fold"><summary>Code to make plots</summary><div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Nuisance observations</span></span>
+<details class="code-fold"><summary>Code to make plots</summary><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Nuisance observations</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">20190514</span><span class="op">)</span></span>
 <span><span class="va">x</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html">runif</a></span><span class="op">(</span><span class="fl">20</span><span class="op">)</span><span class="op">-</span><span class="fl">0.5</span><span class="op">)</span><span class="op">*</span><span class="fl">4</span></span>
 <span><span class="va">y</span> <span class="op">&lt;-</span> <span class="va">x</span></span>
@@ -566,7 +560,7 @@ Figure&nbsp;8.2: Two examples of data structure that causes problems for hierarc
 </div>
 <p>If an outlier is a point that is extreme relative to other observations, an “inlier” is a point that is extreme relative to a cluster, but inside the domain of all of the observations. Nuisance observations are inliers, cases that occur between larger groups of points. If they were excluded there might be a gap between clusters. These can cause problems for clustering when distances between clusters are measured, and can be very problematic when single linkage hierarchical clustering is used. <a href="#fig-d1-s" class="quarto-xref">Figure&nbsp;<span>8.3</span></a> shows how nuisance observations affect single linkage but not Wards linkage hierarchical clustering.</p>
 <div class="cell">
-<details class="code-fold"><summary>Code to make plots</summary><div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Compute single linkage</span></span>
+<details class="code-fold"><summary>Code to make plots</summary><div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Compute single linkage</span></span>
 <span><span class="va">d1_hs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/hclust.html">hclust</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/dist.html">dist</a></span><span class="op">(</span><span class="va">d1</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span>,</span>
 <span>                method<span class="op">=</span><span class="st">"single"</span><span class="op">)</span></span>
 <span><span class="va">d1_ggds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://andrie.github.io/ggdendro/reference/dendro_data.html">dendro_data</a></span><span class="op">(</span><span class="va">d1_hs</span>, type <span class="op">=</span> <span class="st">"triangle"</span><span class="op">)</span></span>
@@ -672,7 +666,7 @@ Figure&nbsp;8.3: The effect of nuisance observations on single linkage (a, b, c)
 </div>
 <p>Nuisance variables are ones that do not contribute to the clustering, such as <code>x2</code> here. When we look at this data we see a gap between two elliptically shape clusters, with the gap being only in the horizontal direction, <code>x1</code>. When we compute the distances between points, in order to start clustering, without knowing that <code>x2</code> is a nuisance variable, points across the gap might be considered to be closer than points within the same cluster. <a href="#fig-d2-c" class="quarto-xref">Figure&nbsp;<span>8.4</span></a> shows how nuisance variables affects complete linkage but not Wards linkage hierarchical clustering. (Wards linkage can be affected but it isn’t for this data.) Interestingly, the dendrogram for complete linkage looks ideal, that it suggests two clusters. It is not until you examine the resulting clusters in the data that you can see the error, that it has clustered across the gap.</p>
 <div class="cell">
-<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Compute complete linkage</span></span>
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Compute complete linkage</span></span>
 <span><span class="va">d2_hc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/hclust.html">hclust</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/dist.html">dist</a></span><span class="op">(</span><span class="va">d2</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span>,</span>
 <span>                method<span class="op">=</span><span class="st">"complete"</span><span class="op">)</span></span>
 <span><span class="va">d2_ggdc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://andrie.github.io/ggdendro/reference/dendro_data.html">dendro_data</a></span><span class="op">(</span><span class="va">d2_hc</span>, type <span class="op">=</span> <span class="st">"triangle"</span><span class="op">)</span></span>
@@ -783,7 +777,7 @@ Figure&nbsp;8.4: Complete linkage clustering (a, b, c) on nuisance variables in 
 <span class="header-section-number">8.3</span> Dendrograms in high-dimensions</h2>
 <p>The first step with any clustering with high dimensional data is also to check the data. You typically don’t know whether there are clusters, or what shape they might be, or if there are nuisance observations or variables. A pairs plot like in <a href="#fig-penguins-pairs" class="quarto-xref">Figure&nbsp;<span>8.5</span></a> is a nice complement to using the tour (<a href="#fig-penguins-gt-html" class="quarto-xref">Figure&nbsp;<span>8.6</span></a>) for this. Here you can see three elliptical clusters, with one is further from the others.</p>
 <div class="cell">
-<details class="code-fold"><summary>Code for scatterplot matrix</summary><div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"data/penguins_sub.rda"</span><span class="op">)</span></span>
+<details class="code-fold"><summary>Code for scatterplot matrix</summary><div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"data/penguins_sub.rda"</span><span class="op">)</span></span>
 <span><span class="fu">ggscatmat</span><span class="op">(</span><span class="va">penguins_sub</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span> <span class="op">+</span> </span>
 <span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">xlab</span><span class="op">(</span><span class="st">""</span><span class="op">)</span> <span class="op">+</span> <span class="fu">ylab</span><span class="op">(</span><span class="st">""</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -799,7 +793,7 @@ Figure&nbsp;8.5: Make a scatterplot matrix to check for the presence of clusteri
 </div>
 </div>
 <div class="cell">
-<details class="code-fold"><summary>Code to create tour</summary><div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">20230329</span><span class="op">)</span></span>
+<details class="code-fold"><summary>Code to create tour</summary><div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">20230329</span><span class="op">)</span></span>
 <span><span class="va">b</span> <span class="op">&lt;-</span> <span class="fu">basis_random</span><span class="op">(</span><span class="fl">4</span>,<span class="fl">2</span><span class="op">)</span></span>
 <span><span class="va">pt1</span> <span class="op">&lt;-</span> <span class="fu">save_history</span><span class="op">(</span><span class="va">penguins_sub</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, </span>
 <span>                    max_bases <span class="op">=</span> <span class="fl">500</span>, </span>
@@ -821,7 +815,7 @@ Figure&nbsp;8.5: Make a scatterplot matrix to check for the presence of clusteri
 <span>           loop<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div id="fig-penguins-gt-html" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Tour of many linear projections of the penguins data. You can see three elliptical clusters, one further apart from the other two." data-fig.align="center">
+<div id="fig-penguins-gt-html" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig.align="center" alt="Tour of many linear projections of the penguins data. You can see three elliptical clusters, one further apart from the other two.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-penguins-gt-html-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="gifs/penguins_gt.gif" class="img-fluid figure-img" data-fig.align="center" alt="Tour of many linear projections of the penguins data. You can see three elliptical clusters, one further apart from the other two.">
 </div>
@@ -831,7 +825,7 @@ Figure&nbsp;8.6: Use a grand tour of your data to check for clusters, the shape 
 </div>
 <p>The process is the same as for the simpler example. We compute and draw the dendrogram in 2D, compute it in <span class="math inline">\(p\)</span>-D and view with a tour. Here we have also chosen to examine the three cluster solution for single linkage and wards linkage clustering.</p>
 <div class="cell">
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_dist</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/dist.html">dist</a></span><span class="op">(</span><span class="va">penguins_sub</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_dist</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/dist.html">dist</a></span><span class="op">(</span><span class="va">penguins_sub</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="va">p_hcw</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/hclust.html">hclust</a></span><span class="op">(</span><span class="va">p_dist</span>, method<span class="op">=</span><span class="st">"ward.D2"</span><span class="op">)</span></span>
 <span><span class="va">p_hcs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/hclust.html">hclust</a></span><span class="op">(</span><span class="va">p_dist</span>, method<span class="op">=</span><span class="st">"single"</span><span class="op">)</span></span>
 <span></span>
@@ -846,7 +840,7 @@ Figure&nbsp;8.6: Use a grand tour of your data to check for clusters, the shape 
 <span><span class="va">p_s_hfly</span> <span class="op">&lt;-</span> <span class="fu">hierfly</span><span class="op">(</span><span class="va">p_cls</span>, <span class="va">p_hcs</span>, scale<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<details class="code-fold"><summary>Code to draw dendrograms</summary><div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Generate the dendrograms in 2D</span></span>
+<details class="code-fold"><summary>Code to draw dendrograms</summary><div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Generate the dendrograms in 2D</span></span>
 <span><span class="va">p_hcw_dd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://andrie.github.io/ggdendro/reference/dendro_data.html">dendro_data</a></span><span class="op">(</span><span class="va">p_hcw</span><span class="op">)</span></span>
 <span><span class="va">pw_dd</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">geom_segment</span><span class="op">(</span>data<span class="op">=</span><span class="va">p_hcw_dd</span><span class="op">$</span><span class="va">segments</span>, </span>
@@ -867,7 +861,7 @@ Figure&nbsp;8.6: Use a grand tour of your data to check for clusters, the shape 
 </details>
 </div>
 <div class="cell">
-<details class="code-fold"><summary>Code to create tours of dendrogram in data</summary><div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"data/penguins_tour_path.rda"</span><span class="op">)</span></span>
+<details class="code-fold"><summary>Code to create tours of dendrogram in data</summary><div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"data/penguins_tour_path.rda"</span><span class="op">)</span></span>
 <span><span class="va">glyphs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">16</span>, <span class="fl">46</span><span class="op">)</span></span>
 <span><span class="va">pchw</span> <span class="op">&lt;-</span> <span class="va">glyphs</span><span class="op">[</span><span class="va">p_w_hfly</span><span class="op">$</span><span class="va">data</span><span class="op">$</span><span class="va">node</span><span class="op">+</span><span class="fl">1</span><span class="op">]</span></span>
 <span><span class="va">pchs</span> <span class="op">&lt;-</span> <span class="va">glyphs</span><span class="op">[</span><span class="va">p_s_hfly</span><span class="op">$</span><span class="va">data</span><span class="op">$</span><span class="va">node</span><span class="op">+</span><span class="fl">1</span><span class="op">]</span></span>
@@ -1000,7 +994,7 @@ Figure&nbsp;8.8: Dendrograms for Wards and single linkage of the penguins data, 
 </div>
 <p><a href="#fig-penguins-hfly-plotly" class="quarto-xref">Figure&nbsp;<span>8.9</span></a> provides HTML objects of the dendrograms, so that they can be directly compared. The same tour path is used, so the sliders allow setting the view to the same projection in each plot.</p>
 <div class="cell">
-<details class="code-fold"><summary>Code to make html objects of the dendrogram in 4D</summary><div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"data/penguins_tour_path.rda"</span><span class="op">)</span></span>
+<details class="code-fold"><summary>Code to make html objects of the dendrogram in 4D</summary><div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"data/penguins_tour_path.rda"</span><span class="op">)</span></span>
 <span><span class="co"># Create a smaller one, for space concerns</span></span>
 <span><span class="va">pt1i</span> <span class="op">&lt;-</span> <span class="fu">interpolate</span><span class="op">(</span><span class="va">pt1</span><span class="op">[</span>,,<span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>, <span class="fl">0.1</span><span class="op">)</span></span>
 <span><span class="va">pw_anim</span> <span class="op">&lt;-</span> <span class="fu">render_anim</span><span class="op">(</span><span class="va">p_w_hfly</span><span class="op">$</span><span class="va">data</span>,</span>
