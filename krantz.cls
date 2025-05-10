@@ -995,30 +995,49 @@
     }
 
 
-\def\draw@part#1#2{%
-  \addpenalty{-\@highpenalty}%
-  \vskip1em plus\p@
-  \@tempdima1.5em
-  \begingroup
-    \parindent\z@\rightskip\@pnumwidth
-    \parfillskip-\rightskip
-    \bfseries
-    \leavevmode
-    \advance\leftskip\@tempdima
-    \hskip-\leftskip
-    {#1\hfil}\nobreak
-      \if@pdf
-      \else
-        \hfil\nobreak\hb@xt@\@pnumwidth{\hss #2}%
-\fi
-    \par
-    \penalty\@highpenalty\endgroup}
-
-\let\toc@draw\relax
+%\def\draw@part#1#2{%
+%  \addpenalty{-\@highpenalty}%
+%  \vskip1em plus\p@
+%  \@tempdima1.5em
+%  \begingroup
+%    \parindent\z@\rightskip\@pnumwidth
+%    \parfillskip-\rightskip
+%    \bfseries
+%    \leavevmode
+%    \advance\leftskip\@tempdima
+%    \hskip-\leftskip
+%    {#1\hfil}\nobreak
+%      \if@pdf
+%      \else
+%        \hfil\nobreak\hb@xt@\@pnumwidth{\hss #2}%
+%\fi
+%    \par
+%    \penalty\@highpenalty\endgroup}
 %
-\def\l@part#1#2{%
-\toc@draw
- \gdef\toc@draw{\draw@part{\large #1}{\large #2}}}
+%\let\toc@draw\relax
+%%
+%\def\l@part#1#2{%
+%\toc@draw
+% \gdef\toc@draw{\draw@part{\large #1}{\large #2}}}
+
+\newcommand*\l@part[2]{%
+  \ifnum \c@tocdepth >-2\relax
+    \addpenalty{-\@highpenalty}%
+    \addvspace{2.25em \@plus\p@}%
+    \setlength\@tempdima{3em}%
+    \begingroup
+      \parindent \z@ \rightskip \@pnumwidth
+      \parfillskip -\@pnumwidth
+      {\leavevmode
+       \large \bfseries #1\hfil
+       \hb@xt@\@pnumwidth{\hss #2%
+                          \kern-\p@\kern\p@}}\par
+       \nobreak
+         \global\@nobreaktrue
+         \everypar{\global\@nobreakfalse\everypar{}}%
+    \endgroup
+  \fi}
+
 
 \newcommand*\l@fm[2]{%
   \ifnum \c@tocdepth >\m@ne
