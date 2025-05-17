@@ -64,16 +64,16 @@ gd3$data_prj$species <- penguins_sub$species
 rownames(gd3$axes) <- paste0("x", 1:4)
 gd3_plt <- plot_tour_projection(gd3)
 p1 <- gd1_plt + gd2_plt + gd3_plt + plot_layout(ncol=3)
-ggsave("front-cover1.png", p1, 
+ggsave("front-page/front-cover1.png", p1, 
        background = "transparent", 
        width=9, height=3, units="cm")
-ggsave("front-cover1a.png", gd1_plt, 
+ggsave("front-page/front-cover1a.png", gd1_plt, 
        background = "transparent", 
        width=6, height=6, units="cm")
-ggsave("front-cover1b.png", gd2_plt, 
+ggsave("front-page/front-cover1b.png", gd2_plt, 
        background = "transparent", 
        width=6, height=6, units="cm")
-ggsave("front-cover1c.png", gd3_plt, 
+ggsave("front-page/front-cover1c.png", gd3_plt, 
        background = "transparent", 
        width=6, height=6, units="cm")
 
@@ -141,7 +141,7 @@ glda_plt <- ggplot() +
         panel.background = element_rect(fill='transparent',
                                         colour="white"))
 
-ggsave("front-cover2a.png", glda_plt, 
+ggsave("front-page/front-cover2a.png", glda_plt, 
        background = "transparent", 
        width=6, height=6, units="cm")
 
@@ -191,7 +191,7 @@ grf_err_plt <- ggplot() +
         panel.background = element_rect(fill='transparent',
                                         colour="white"))
 
-ggsave("front-cover2b.png", grf_err_plt, 
+ggsave("front-page/front-cover2b.png", grf_err_plt, 
        background = "transparent", 
        width=6, height=6, units="cm")
 
@@ -241,6 +241,71 @@ gsvm_plt <- ggplot() +
         panel.background = element_rect(fill='transparent',
                                         colour="white"))
 
-ggsave("front-cover2c.png", gsvm_plt, 
+ggsave("front-page/front-cover2c.png", gsvm_plt, 
+       background = "transparent", 
+       width=6, height=6, units="cm")
+
+# Boundary between three classes
+p_lda_e <- explore(p_lda, penguins_sub)
+prj <- matrix(p_t_guided[,,5], ncol=2)
+glda <- render_proj(p_lda_e[, 1:4], prj)
+glda$data_prj$species <- p_lda_e$species
+glda$data_prj$.TYPE <- p_lda_e$.TYPE
+glda$data_prj$.BOUNDARY <- p_lda_e$.BOUNDARY
+rownames(glda$axes) <- paste0("x", 1:4)
+glda$data_prj <- glda$data_prj[!p_lda_e$.BOUNDARY,]
+glda_plt <- ggplot() +
+  geom_path(data=glda$circle, aes(x=c1, y=c2), colour = "white") +
+  geom_segment(data=glda$axes, 
+               aes(x=x1, y=y1, xend=x2, yend=y2), colour = "white") +
+  geom_point(data=glda$data_prj, 
+             aes(x=P1, y=P2, 
+                 colour=species, 
+                 shape=.TYPE)) +
+  xlim(-1,1) + ylim(-1, 1) +
+  scale_color_manual("", values = clrs) +
+  scale_shape_manual("", values = c(3, 20)) +
+  theme_minimal() +
+  theme(aspect.ratio=1,
+        legend.position = "none",
+        axis.text=element_blank(),
+        axis.title=element_blank(),
+        axis.ticks=element_blank(),
+        panel.grid=element_blank(),
+        panel.background = element_rect(fill='transparent',
+                                        colour="white"))
+
+ggsave("front-page/front-cover2c.png", glda_plt, 
+       background = "transparent", 
+       width=6, height=6, units="cm")
+
+# Ternary diagram
+proj <- t(geozoo::f_helmert(3)[-1,])
+p_rf_v_p <- as.matrix(penguins_rf$votes) %*% proj
+colnames(p_rf_v_p) <- c("x1", "x2")
+p_rf_v_p <- p_rf_v_p |>
+  as.data.frame() |>
+  mutate(species = penguins_sub$species)
+simp <- simplex(p=2)
+sp <- data.frame(cbind(simp$points), simp$points[c(2,3,1),])
+colnames(sp) <- c("x1", "x2", "x3", "x4")
+sp$species = sort(unique(penguins_sub$species))
+p_ternary <- ggplot() +
+  geom_segment(data=sp, aes(x=x1, y=x2, xend=x3, yend=x4), 
+               colour = "white") +
+  #geom_text(data=sp, aes(x=x1, y=x2, label=paste0("g", 1:3)),
+  #          nudge_x=c(-0.06, 0.07, 0),
+  #          nudge_y=c(0.05, 0.05, -0.05), colour = "white") +
+  geom_point(data=p_rf_v_p, aes(x=x1, y=x2, 
+                                colour=species), 
+             size=3, alpha=0.5) +
+  scale_color_manual("", values = clrs) +
+  xlim(c(-0.8, 0.8)) + ylim(c(-1, 0.5)) +
+  theme_map() +
+  theme(aspect.ratio=1, legend.position="none",
+        panel.background = element_rect(fill='transparent',
+                                        colour="white"))
+
+ggsave("front-page/front-cover2d.png", p_ternary, 
        background = "transparent", 
        width=6, height=6, units="cm")
