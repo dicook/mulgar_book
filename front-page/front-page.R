@@ -298,7 +298,7 @@ p_ternary <- ggplot() +
   #          nudge_y=c(0.05, 0.05, -0.05), colour = "white") +
   geom_point(data=p_rf_v_p, aes(x=x1, y=x2, 
                                 colour=species), 
-             size=3, alpha=0.5) +
+             size=2) +
   scale_color_manual("", values = clrs) +
   xlim(c(-0.8, 0.8)) + ylim(c(-1, 0.5)) +
   theme_map() +
