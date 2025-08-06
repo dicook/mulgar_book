@@ -9,6 +9,8 @@ library(MASS)
 library(randomForest)
 library(e1071)
 library(classifly)
+library(geozoo)
+library(ggthemes)
 data("penguins_sub")
 
 set.seed(1209)
@@ -69,12 +71,30 @@ ggsave("front-page/front-cover1.png", p1,
        width=9, height=3, units="cm")
 ggsave("front-page/front-cover1a.png", gd1_plt, 
        background = "transparent", 
-       width=6, height=6, units="cm")
+       width=1500, height=1500, units="px")
+ggsave("front-page/front-cover1a.svg", gd1_plt, 
+       bg = "transparent", 
+       width=1500, height=1500, units="px")
+ggsave("front-page/front-cover1a.tiff", gd1_plt, 
+       bg = "transparent", 
+       width=1500, height=1500, units="px")
 ggsave("front-page/front-cover1b.png", gd2_plt, 
        background = "transparent", 
+       width=1500, height=1500, units="px")
+ggsave("front-page/front-cover1b.svg", gd2_plt, 
+       bg = "transparent", 
+       width=6, height=6, units="cm")
+ggsave("front-page/front-cover1b.tiff", gd2_plt, 
+       bg = "transparent", 
        width=6, height=6, units="cm")
 ggsave("front-page/front-cover1c.png", gd3_plt, 
        background = "transparent", 
+       width=1500, height=1500, units="px")
+ggsave("front-page/front-cover1c.svg", gd3_plt, 
+       bg = "transparent", 
+       width=6, height=6, units="cm")
+ggsave("front-page/front-cover1c.tiff", gd3_plt, 
+       bg = "transparent", 
        width=6, height=6, units="cm")
 
 # LDA
@@ -143,7 +163,13 @@ glda_plt <- ggplot() +
 
 ggsave("front-page/front-cover2a.png", glda_plt, 
        background = "transparent", 
-       width=6, height=6, units="cm")
+       width=1500, height=1500, units="px")
+ggsave("front-page/front-cover2a.svg", glda_plt, 
+       bg = "transparent", 
+       width=1500, height=1500, units="px")
+ggsave("front-page/front-cover2a.tiff", glda_plt, 
+       bg = "transparent", 
+       width=1500, height=1500, units="px")
 
 # Errors from a model
 penguins_rf <- randomForest(species~.,
@@ -162,9 +188,9 @@ rf_err_prj <- animate_xy(penguins_errors[,1:4],
                          col=penguins_errors$species,
                          pch=p_pch, cex=p_cex)
 
-rf_err_prj$basis[338][[1]]
+rf_err_prj$basis[319][[1]]
 
-grf_err <- render_proj(penguins_errors[,1:4], rf_err_prj$basis[338][[1]])
+grf_err <- render_proj(penguins_errors[,1:4], rf_err_prj$basis[319][[1]])
 grf_err$data_prj$species <- penguins_errors$species
 grf_err$data_prj$err <- penguins_errors$err
 rownames(grf_err$axes) <- paste0("x", 1:4)
@@ -193,12 +219,18 @@ grf_err_plt <- ggplot() +
 
 ggsave("front-page/front-cover2b.png", grf_err_plt, 
        background = "transparent", 
-       width=6, height=6, units="cm")
+       width=1500, height=1500, units="px")
+ggsave("front-page/front-cover2b.svg", grf_err_plt, 
+       bg = "transparent", 
+       width=1500, height=1500, units="px")
+ggsave("front-page/front-cover2b.tiff", grf_err_plt, 
+       bg = "transparent", 
+       width=1500, height=1500, units="px")
 
 # Boundary between two classes
 chinstrap <- penguins_sub |>
-  filter(species == "Chinstrap") |>
-  select(-species) |>
+  dplyr::filter(species == "Chinstrap") |>
+  dplyr::select(-species) |>
   mutate_if(is.numeric, mulgar:::scale2)
 chinstrap_svm <- svm(sex~., data=chinstrap, 
                      kernel="linear",
@@ -243,7 +275,13 @@ gsvm_plt <- ggplot() +
 
 ggsave("front-page/front-cover2c.png", gsvm_plt, 
        background = "transparent", 
-       width=6, height=6, units="cm")
+       width=1500, height=1500, units="px")
+ggsave("front-page/front-cover2c.svg", gsvm_plt, 
+       bg = "transparent", 
+       width=1500, height=1500, units="px")
+ggsave("front-page/front-cover2c.tiff", gsvm_plt, 
+       bg = "transparent", 
+       width=1500, height=1500, units="px")
 
 # Boundary between three classes
 p_lda_e <- explore(p_lda, penguins_sub)
@@ -277,7 +315,13 @@ glda_plt <- ggplot() +
 
 ggsave("front-page/front-cover2c.png", glda_plt, 
        background = "transparent", 
-       width=6, height=6, units="cm")
+       width=1500, height=1500, units="px")
+ggsave("front-page/front-cover2c.svg", glda_plt, 
+       bg = "transparent", 
+       width=1500, height=1500, units="px")
+ggsave("front-page/front-cover2c.tiff", glda_plt, 
+       bg = "transparent", 
+       width=1500, height=1500, units="px")
 
 # Ternary diagram
 proj <- t(geozoo::f_helmert(3)[-1,])
@@ -286,7 +330,7 @@ colnames(p_rf_v_p) <- c("x1", "x2")
 p_rf_v_p <- p_rf_v_p |>
   as.data.frame() |>
   mutate(species = penguins_sub$species)
-simp <- simplex(p=2)
+simp <- geozoo::simplex(p=2)
 sp <- data.frame(cbind(simp$points), simp$points[c(2,3,1),])
 colnames(sp) <- c("x1", "x2", "x3", "x4")
 sp$species = sort(unique(penguins_sub$species))
@@ -308,4 +352,10 @@ p_ternary <- ggplot() +
 
 ggsave("front-page/front-cover2d.png", p_ternary, 
        background = "transparent", 
-       width=6, height=6, units="cm")
+       width=1500, height=1500, units="px")
+ggsave("front-page/front-cover2d.svg", p_ternary, 
+       bg = "transparent", 
+       width=1500, height=1500, units="px")
+ggsave("front-page/front-cover2d.tiff", p_ternary, 
+       bg = "transparent", 
+       width=1500, height=1500, units="px")
