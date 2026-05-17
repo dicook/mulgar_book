@@ -17,6 +17,7 @@ p_cl <- data.frame(cl_w = cutree(p_hcw, 3))
 psub <- penguins_sub |>
   select(bl, bd) |>
   mutate(cl = p_cl$cl_w)
+psub <- psub[!duplicated(psub),]
 
 phull <- gen_chull(psub[,1:2], psub$cl)
 phull_segs <- data.frame(x = phull$data$bl[phull$edges[,1]],

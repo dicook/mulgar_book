@@ -50,6 +50,7 @@ p_cl <- data.frame(cl_w = cutree(p_hcw, 3))
 psub <- penguins_sub |>
   select(bl, bd) |>
   mutate(cl = p_cl$cl_w)
+psub <- psub[!duplicated(psub),]
 
 phull <- gen_chull(psub[,1:2], psub$cl)
 phull_segs <- data.frame(x = phull$data$bl[phull$edges[,1]],
@@ -454,7 +455,6 @@ liminal::limn_tour_link(
 # using convex hull in the data space
 # need to do one at a time since there is too much going on
 # starting with hierarchical clustering solution
-library(cxhull)
 dup <- duplicated(risk_clw[,1:6])
 risk_clw <- risk_clw[!dup,]
 risk_clw$cl_h_ew <- as.numeric(risk_clw$cl_h_ew)

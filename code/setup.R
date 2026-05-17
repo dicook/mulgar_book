@@ -44,3 +44,10 @@ conflicts_prefer(tourr::flea)
 conflicts_prefer(geozoo::simplex)
 conflicts_prefer(ggplot2::margin)
 conflicts_prefer(tourr::interpolate)
+
+if (requireNamespace("cxhull", quietly = TRUE)) {
+  library(cxhull)
+  source("code/gen-chull.R")
+} else {
+  message("Install cxhull with devtools::install_github('stla/cxhull')")
+}
