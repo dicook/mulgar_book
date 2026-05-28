@@ -418,16 +418,10 @@ window.Quarto = {
 <p><a href="#fig-penguins-som-html" class="quarto-xref">Figure&nbsp;<span>11.1</span></a> illustrates how the SOM fits the penguins data. SOM is not ideal for clustered data where there are gaps. It is better suited for data that lies on a non-linear low-dimensional manifold. To model data like the penguins the first step is to set up a net that will cover more than the three clusters. Here we have chosen to use a <span class="math inline">\(5\times 5\)</span> rectangular grid. (The option allows for a hexagonal grid, which would make for a better tiled 2D map, but this is not useful for viewing the model in high dimensions.) Like <span class="math inline">\(k\)</span>-means clustering the fitted model can change substantially depending on the initialisation, so setting a seed will ensure a consistent result. We have also initialised the positions of the knots using PCA, which stretches the net in the main two directions of variance of the data, generally giving better results.</p>
 <div class="cell">
 <details class="code-fold"><summary>Load libraries</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/source.html">source</a></span><span class="op">(</span><span class="st">"code/setup.R"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details><div class="cell-output cell-output-stderr">
-<pre><code>Warning in rgl.init(initValue, onlyNULL): RGL: unable to open X11 display</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: 'rgl.init' failed, will use the null device.
-See '?rgl.useNULL' for ways to avoid this warning.</code></pre>
-</div>
+</details>
 </div>
 <div class="cell">
-<details class="code-fold"><summary>code to run SOM</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">kohonen</span><span class="op">)</span></span>
+<details class="code-fold"><summary>code to run SOM</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">kohonen</span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">aweSOM</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"data/penguins_sub.rda"</span><span class="op">)</span></span>
 <span></span>
@@ -443,7 +437,7 @@ See '?rgl.useNULL' for ways to avoid this warning.</code></pre>
 </div>
 <p>The resulting model object is used to construct an object containing the original data, the 2D map, the map in <span class="math inline">\(p\)</span>-D, with edges, and segments to connect points to represent the next using the <code>som_model()</code> function from <code>mulgar</code>. The 2D map shows a configuration of the data in 2D which best displays the clusters, much like how a PCA or LDA plot would be used.</p>
 <div class="cell">
-<details class="code-fold"><summary>code to generate net</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_som_df_net</span> <span class="op">&lt;-</span> <span class="fu">som_model</span><span class="op">(</span><span class="va">p_som</span><span class="op">)</span></span>
+<details class="code-fold"><summary>code to generate net</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_som_df_net</span> <span class="op">&lt;-</span> <span class="fu">som_model</span><span class="op">(</span><span class="va">p_som</span><span class="op">)</span></span>
 <span><span class="va">p_som_data</span> <span class="op">&lt;-</span> <span class="va">p_som_df_net</span><span class="op">$</span><span class="va">data</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu">mutate</span><span class="op">(</span>species <span class="op">=</span> <span class="va">penguins_sub</span><span class="op">$</span><span class="va">species</span><span class="op">)</span></span>
 <span><span class="va">p_som_map_p</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
@@ -466,7 +460,7 @@ See '?rgl.useNULL' for ways to avoid this warning.</code></pre>
 </div>
 <p>The object can also be modified into the pieces needed to show the net in <span class="math inline">\(p\)</span>-D. You need the data, points marking the net, and edges indicating which points to connect to draw the net.</p>
 <div class="cell">
-<details class="code-fold"><summary>code to make gifs</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Set up data</span></span>
+<details class="code-fold"><summary>code to make gifs</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Set up data</span></span>
 <span><span class="va">p_som_map</span> <span class="op">&lt;-</span> <span class="va">p_som_df_net</span><span class="op">$</span><span class="va">net</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">mutate</span><span class="op">(</span>species <span class="op">=</span> <span class="st">"0"</span>, type<span class="op">=</span><span class="st">"net"</span><span class="op">)</span></span>
 <span><span class="va">p_som_data</span> <span class="op">&lt;-</span> <span class="va">p_som_data</span> <span class="op">|&gt;</span> </span>

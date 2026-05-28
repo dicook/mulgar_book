@@ -578,8 +578,6 @@ Figure&nbsp;17.2: Evaluating the training/test split, where we expect that the t
 </details>
 </div>
 <p>The specified model is reasonably simple, four input variables, two nodes in the hidden layer and a three column binary matrix for output. This corresponds to 5+5+3+3+3=19 parameters.</p>
-<div class="cell">
-<div class="cell-output cell-output-stdout">
 <pre><code>Model: "sequential"
 ________________________________________________________________________________
  Layer (type)                       Output Shape                    Param #     
@@ -591,8 +589,6 @@ Total params: 19 (76.00 Byte)
 Trainable params: 19 (76.00 Byte)
 Non-trainable params: 0 (0.00 Byte)
 ________________________________________________________________________________</code></pre>
-</div>
-</div>
 <div class="cell">
 <details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Fit model</span></span>
 <span><span class="va">p_nn_fit</span> <span class="op">&lt;-</span> <span class="va">p_nn_model</span> <span class="op">|&gt;</span> <span class="fu">keras</span><span class="fu">::</span><span class="fu"><a href="https://generics.r-lib.org/reference/fit.html">fit</a></span><span class="op">(</span></span>
@@ -617,14 +613,11 @@ ________________________________________________________________________________
 <p>The fitted model that we have chosen as the final one has reasonably small loss and high accuracy. Plots of loss and accuracy across epochs showing the change during fitting can be plotted, but we don’t show them here, because they are generally not very interesting.</p>
 <div class="cell">
 <details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_nn_model</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/pkg/tensorflow/man/evaluate.html">evaluate</a></span><span class="op">(</span><span class="va">p_test_x</span>, <span class="va">p_test_y</span>, verbose <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details><div class="cell-output cell-output-stdout">
-<pre><code>     loss  accuracy 
-0.2563850 0.9553571 </code></pre>
-</div>
+</details>
 </div>
 <p>The model object can be saved for later use with:</p>
 <div class="cell">
-<details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/keras/man/save_model_tf.html">save_model_tf</a></span><span class="op">(</span><span class="va">p_nn_model</span>, <span class="st">"data/penguins_cnn"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/keras/man/save_model_tf.html">save_model_tf</a></span><span class="op">(</span><span class="va">p_nn_model</span>, <span class="st">"data/penguins_cnn"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 </section><section id="extracting-model-components" class="level2" data-number="17.4"><h2 data-number="17.4" class="anchored" data-anchor-id="extracting-model-components">
@@ -635,8 +628,13 @@ ________________________________________________________________________________
 </div>
 <p>Because nodes in the hidden layers of NNs are themselves (relatively simple regression) models, it can be interesting to examine these to understand how the model is making it’s predictions. Although it’s rarely easy, most software will allow the coefficients for the models at these nodes to be extracted. With the penguins NN model there are two nodes, so we can extract the coefficients and plot the resulting two linear combinations to examine the separation between classes.</p>
 <div class="cell">
-<details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Extract hidden layer model weights</span></span>
-<span><span class="va">p_nn_wgts</span> <span class="op">&lt;-</span> <span class="fu">keras</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/keras/man/get_weights.html">get_weights</a></span><span class="op">(</span><span class="va">p_nn_model</span>, trainable<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
+<details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Extract hidden layer model weights</span></span>
+<span><span class="va">p_nn_wgts</span> <span class="op">&lt;-</span> <span class="fu">keras</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/keras/man/get_weights.html">get_weights</a></span><span class="op">(</span><span class="va">p_nn_model</span>, trainable<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Show hidden layer model weights</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"data/p_nn_wgts.rda"</span><span class="op">)</span></span>
 <span><span class="va">p_nn_wgts</span> </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[[1]]
@@ -816,7 +814,7 @@ Figure&nbsp;17.3: Plot of the data in the linear combinations from the two nodes
 <span>  <span class="fu">theme</span><span class="op">(</span>aspect.ratio<span class="op">=</span><span class="fl">1</span>, legend.position <span class="op">=</span> <span class="st">"right"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details><div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
-<figure class="figure"><p><img src="17-nn_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid figure-img" style="width:70.0%" alt="A scatterplot where all points fall inside a 2D triangle, marked by black lines. The triangle is upside down and is equilateral. Each vertex is labelled: Chinstrap (top left), Adelie (top right), Gentoo (bottom left). Each points corresponds to a penguin, and is coloured by species. The legend at right shows the color labelling as blue (Adelie), yellow (Chinstrap), red (Gentoo), and shape labels as open circles (training) and filled circles (test). Chinstrap points are a tight cluster at their vertex. Adelie and Gentoo are not centered at the vertex but part way along towards the others vertex. This indicates the confusion between these two species. There are some yellow points mixed with blue points but not with red."></p>
+<figure class="figure"><p><img src="17-nn_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid figure-img" style="width:70.0%" alt="A scatterplot where all points fall inside a 2D triangle, marked by black lines. The triangle is upside down and is equilateral. Each vertex is labelled: Chinstrap (top left), Adelie (top right), Gentoo (bottom left). Each points corresponds to a penguin, and is coloured by species. The legend at right shows the color labelling as blue (Adelie), yellow (Chinstrap), red (Gentoo), and shape labels as open circles (training) and filled circles (test). Chinstrap points are a tight cluster at their vertex. Adelie and Gentoo are not centered at the vertex but part way along towards the others vertex. This indicates the confusion between these two species. There are some yellow points mixed with blue points but not with red."></p>
 <figcaption>Ternary diagram for the three groups of the predictive probabilities of both training and test sets. From what we already know about the penguins data this fit is not good. Both Chinstrap and Gentoo penguins are confused with Adelie, or at risk of it. Gentoo is very well-separated from the other two species when several variables are used, and this fitted model is blind to it. One useful finding is that there is little difference between training and test sets, so the model has not been over-fitted.</figcaption></figure>
 </div>
 </div>
@@ -829,10 +827,10 @@ Figure&nbsp;17.3: Plot of the data in the linear combinations from the two nodes
 <p>To see how these methods apply in the setting where we have a large number of variables, observations and classes we will look at a neural network that predicts the category for the fashion MNIST data. The code for designing and fitting the model is following the tutorial available from https://tensorflow.rstudio.com/tutorials/keras/classification and you can find additional information there. Below we only replicate the steps needed to build the model from scratch. We also note that a similar investigation was presented in <span class="citation" data-cites="li2020visualizing">Li et al. (<a href="references.html#ref-li2020visualizing" role="doc-biblioref">2020</a>)</span>, with a focus on investigating the model at different epochs during the training. </p>
 <p>The first step is to download and prepare the data. Here we scale the observations to range between zero and one, and we define the label names.</p>
 <div class="cell">
-<details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tensorflow.rstudio.com/">keras</a></span><span class="op">)</span></span>
+<details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://keras3.posit.co/">keras3</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># download the data</span></span>
-<span><span class="va">fashion_mnist</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/keras/man/dataset_fashion_mnist.html">dataset_fashion_mnist</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">fashion_mnist</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://keras3.posit.co/reference/dataset_fashion_mnist.html">dataset_fashion_mnist</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># split into input variables and response</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">train_images</span>, <span class="va">train_labels</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/pkg/zeallot/man/operator.html">%&lt;-%</a></span> <span class="va">fashion_mnist</span><span class="op">$</span><span class="va">train</span></span>
@@ -858,14 +856,14 @@ Figure&nbsp;17.3: Plot of the data in the linear combinations from the two nodes
 <p>In the next step we define the neural network and train the model. Note that because we have many observations, even a very simple structure returns a good model. And because this example is well-known, we do not need to tune the model or check the validation accuracy.</p>
 <div class="cell">
 <details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># defining the model</span></span>
-<span><span class="va">model_fashion_mnist</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/keras/man/keras_model_sequential.html">keras_model_sequential</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">model_fashion_mnist</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://keras3.posit.co/reference/keras_model_sequential.html">keras_model_sequential</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">model_fashion_mnist</span> <span class="op">|&gt;</span></span>
 <span>  <span class="co"># flatten the image data into a long vector</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/keras/man/layer_flatten.html">layer_flatten</a></span><span class="op">(</span>input_shape <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">28</span>, <span class="fl">28</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://keras3.posit.co/reference/layer_flatten.html">layer_flatten</a></span><span class="op">(</span>input_shape <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">28</span>, <span class="fl">28</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="co"># hidden layer with 128 units</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/keras/man/layer_dense.html">layer_dense</a></span><span class="op">(</span>units <span class="op">=</span> <span class="fl">128</span>, activation <span class="op">=</span> <span class="st">'relu'</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://keras3.posit.co/reference/layer_dense.html">layer_dense</a></span><span class="op">(</span>units <span class="op">=</span> <span class="fl">128</span>, activation <span class="op">=</span> <span class="st">'relu'</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="co"># output layer for 10 categories</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/keras/man/layer_dense.html">layer_dense</a></span><span class="op">(</span>units <span class="op">=</span> <span class="fl">10</span>, activation <span class="op">=</span> <span class="st">'softmax'</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://keras3.posit.co/reference/layer_dense.html">layer_dense</a></span><span class="op">(</span>units <span class="op">=</span> <span class="fl">10</span>, activation <span class="op">=</span> <span class="st">'softmax'</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">model_fashion_mnist</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://generics.r-lib.org/reference/compile.html">compile</a></span><span class="op">(</span></span>
 <span>  optimizer <span class="op">=</span> <span class="st">'adam'</span>,</span>
@@ -891,7 +889,7 @@ Figure&nbsp;17.3: Plot of the data in the linear combinations from the two nodes
 <span></span>
 <span><span class="co"># calculate activation for the hidden layer, this can be done</span></span>
 <span><span class="co"># within the keras framework</span></span>
-<span><span class="va">activations_model_fashion</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/keras/man/keras_model.html">keras_model</a></span><span class="op">(</span></span>
+<span><span class="va">activations_model_fashion</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://keras3.posit.co/reference/keras_model.html">keras_model</a></span><span class="op">(</span></span>
 <span>  inputs <span class="op">=</span> <span class="va">model_fashion_mnist</span><span class="op">$</span><span class="va">input</span>,</span>
 <span>  outputs <span class="op">=</span> <span class="va">model_fashion_mnist</span><span class="op">$</span><span class="va">layers</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">output</span></span>
 <span><span class="op">)</span></span>
@@ -912,7 +910,22 @@ Figure&nbsp;17.3: Plot of the data in the linear combinations from the two nodes
 </details>
 </div>
 <div class="cell">
-<details class="code-fold"><summary>Code to run tours</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="va">activations_pc</span>,</span>
+<details class="code-fold"><summary>Code to run PCA</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"data/activations_fashion.rda"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">test_tags</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">class_names</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="va">fashion_test</span><span class="op">$</span><span class="va">Label</span><span class="op">)</span><span class="op">]</span>,</span>
+<span>                    levels <span class="op">=</span> <span class="va">class_names</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># PCA for activations</span></span>
+<span><span class="va">activations_pca</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/prcomp.html">prcomp</a></span><span class="op">(</span><span class="va">activations_fashion</span><span class="op">)</span></span>
+<span><span class="va">activations_pc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="va">activations_pca</span><span class="op">$</span><span class="va">x</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># PCA on the original data</span></span>
+<span><span class="va">images_pca</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/prcomp.html">prcomp</a></span><span class="op">(</span><span class="va">fashion_test</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">784</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="va">images_pc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="va">images_pca</span><span class="op">$</span><span class="va">x</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold"><summary>Code to run tours</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="va">activations_pc</span>,</span>
 <span>       <span class="fu">aes</span><span class="op">(</span><span class="va">PC1</span>, <span class="va">PC2</span>, color <span class="op">=</span> <span class="va">test_tags</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">geom_point</span><span class="op">(</span>size <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">ggtitle</span><span class="op">(</span><span class="st">"Activations"</span><span class="op">)</span> <span class="op">+</span></span>
@@ -940,14 +953,14 @@ Figure&nbsp;17.3: Plot of the data in the linear combinations from the two nodes
 <span>                   rel_heights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">.3</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details><div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
-<figure class="figure"><p><img src="17-nn_files/figure-html/unnamed-chunk-23-1.png" class="img-fluid figure-img" style="width:100.0%" alt="A side-by-side comparison of two scatter plots, each showing a PC1 vs PC2 of data points color-coded by category. The left plot, titled 'Input space', represents the raw input data projected into two principal components. Data points are densely packed and overlapping, with no clear separation between categories. The right plot, titled 'Activations', shows the same data after being transformed by a neural network (e.g., through hidden layer activations). In this plot, the points are more clearly separated into distinct groups, with elongated and curved cluster structures suggesting that the network has learned to organize the data in a more class-discriminative way. Axes in both plots are labeled PC1 (x-axis) and PC2 (y-axis), and the same color scheme is used across both plots to represent consistent categories."></p>
+<figure class="figure"><p><img src="17-nn_files/figure-html/unnamed-chunk-27-1.png" class="img-fluid figure-img" style="width:100.0%" alt="A side-by-side comparison of two scatter plots, each showing a PC1 vs PC2 of data points color-coded by category. The left plot, titled 'Input space', represents the raw input data projected into two principal components. Data points are densely packed and overlapping, with no clear separation between categories. The right plot, titled 'Activations', shows the same data after being transformed by a neural network (e.g., through hidden layer activations). In this plot, the points are more clearly separated into distinct groups, with elongated and curved cluster structures suggesting that the network has learned to organize the data in a more class-discriminative way. Axes in both plots are labeled PC1 (x-axis) and PC2 (y-axis), and the same color scheme is used across both plots to represent consistent categories."></p>
 <figcaption>First two PCs of the original data (left) and the activations (right). The activation space has done a useful transformation of the 784 variables into a reduced dimension that reveals class clusters, because some cluster differences can be seen well in the first two PCs.</figcaption></figure>
 </div>
 </div>
 </div>
 <p>Looking only at the first two principal components we note some clear differences from the transformation in the hidden layer. The observations seem to be more evenly spread in the input space, while in the activations space we notice grouping along specific directions. In particular the category “Bag” appears to be most different from all other classes, and the non-linear transformation in the activations space shows that they are clearly different from the shoe categories, while in the input space we could note some overlap in the linear projection. To better identify differences between other groups we will use the tour on the first five principal components.</p>
 <div class="cell">
-<details class="code-fold"><summary>Code to run tours</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">animate_xy</span><span class="op">(</span><span class="va">images_pc</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>, col <span class="op">=</span> <span class="va">test_tags</span>,</span>
+<details class="code-fold"><summary>Code to run tours</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">animate_xy</span><span class="op">(</span><span class="va">images_pc</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>, col <span class="op">=</span> <span class="va">test_tags</span>,</span>
 <span>        cex<span class="op">=</span><span class="fl">0.2</span>, palette <span class="op">=</span> <span class="st">"Dynamic"</span><span class="op">)</span></span>
 <span><span class="fu">animate_xy</span><span class="op">(</span><span class="va">activations_pc</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>, col <span class="op">=</span> <span class="va">test_tags</span>,</span>
 <span>        cex<span class="op">=</span><span class="fl">0.2</span>, palette <span class="op">=</span> <span class="st">"Dynamic"</span><span class="op">)</span></span>
@@ -1008,7 +1021,7 @@ Figure&nbsp;17.4: Comparison of the test observations in the first five principa
 </div>
 <p>Finally we will investigate the model performance through the misclassifications and uncertainty between classes. We start with the error matrix for the test observations. To fit the error matrix we use the numeric labels, the ordering is as defined above for the labels. </p>
 <div class="cell">
-<details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">fashion_test_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">model_fashion_mnist</span>,</span>
+<details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">fashion_test_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">model_fashion_mnist</span>,</span>
 <span>                             <span class="va">test_images</span>, verbose <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
 <span><span class="va">fashion_test_pred_cat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/levels.html">levels</a></span><span class="op">(</span><span class="va">test_tags</span><span class="op">)</span><span class="op">[</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/apply.html">apply</a></span><span class="op">(</span><span class="va">fashion_test_pred</span>, <span class="fl">1</span>,</span>
@@ -1019,7 +1032,8 @@ Figure&nbsp;17.4: Comparison of the test observations in the first five principa
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="fl">1</span></span>
 <span><span class="va">observed</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="va">test_tags</span><span class="op">)</span> <span class="op">-</span><span class="fl">1</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="va">observed</span>, <span class="va">predicted</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details><div class="cell-output cell-output-stdout">
+</details>
+</div>
 <pre><code>        predicted
 observed    0    1    2    3    4    5    6    7    8    9
        0  128    0   84  719   10    0   51    7    1    0
@@ -1032,11 +1046,9 @@ observed    0    1    2    3    4    5    6    7    8    9
        7    0    0    0    0    0    0    0 1000    0    0
        8   17    1   78  102   49    0    5  730   16    2
        9    0    0    0    2    0    0    0  947    0   51</code></pre>
-</div>
-</div>
 <p>Here the labels are used as 0 - T-shirt/top, 1 - Trouser, 2 - Pullover, 3 - Dress, 4 - Coat, 5 - Sandal, 6 - Shirt, 7 - Sneaker, 8 - Bag, 9 - Ankle boot. From this we see that the model mainly confuses certain categories with each other, and within expected groups (e.g.&nbsp;different types of shoes can be confused with each other, or different types of shirts). We can further investigate this by visualizing the full probability matrix for the test observations, to see which categories the model is uncertain about. </p>
 <div class="cell">
-<details class="code-fold"><summary>Code to visualize probabilities</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># getting the probabilities from the output layer</span></span>
+<details class="code-fold"><summary>Code to visualize probabilities</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># getting the probabilities from the output layer</span></span>
 <span><span class="va">fashion_test_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">model_fashion_mnist</span>,</span>
 <span>                             <span class="va">test_images</span>, verbose <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
 <span></span>

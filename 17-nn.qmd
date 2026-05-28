@@ -36,8 +36,9 @@ A first step is to decide how many nodes the NN architecture should have, and wh
 source("code/setup.R")
 ```
 
-```{r eval=FALSE}
+```{r}
 #| echo: true
+#| eval: false
 library(keras)
 tensorflow::set_random_seed(211)
 
@@ -65,8 +66,9 @@ Note that `tensorflow::set_random_seed(211)` sets the seed for the model fitting
 
 \index{software!tidymodels}
 
-```{r eval=FALSE}
+```{r}
 #| echo: false
+#| eval: false
 # tidymodels approach does not allow extracting weights
 library(keras)
 library(tidymodels)
@@ -134,9 +136,10 @@ p_split_check <- bind_rows(
   mutate(type = factor(type))
 ```
 
-```{r echo=knitr::is_html_output(), eval=FALSE}
+```{r echo=knitr::is_html_output()}
 #| code-fold: true
 #| code-summary: "Code to run tours"
+#| eval: false
 animate_xy(p_split_check[,1:4], 
            col=p_split_check$species,
            pch=p_split_check$type, 
@@ -216,13 +219,29 @@ The specified model is reasonably simple, four input variables, two nodes in the
 
 ```{r echo=FALSE}
 #| message: false
+#| eval: false
 library(keras)
 p_nn_model <- load_model_tf("data/penguins_cnn")
 p_nn_model
 ```
 
-```{r eval=FALSE}
+```
+Model: "sequential"
+________________________________________________________________________________
+ Layer (type)                       Output Shape                    Param #     
+================================================================================
+ dense_1 (Dense)                    (None, 2)                       10          
+ dense (Dense)                      (None, 3)                       9           
+================================================================================
+Total params: 19 (76.00 Byte)
+Trainable params: 19 (76.00 Byte)
+Non-trainable params: 0 (0.00 Byte)
+________________________________________________________________________________
+```
+
+```{r}
 #| message: false
+#| eval: false
 # Fit model
 p_nn_fit <- p_nn_model |> keras::fit(
   x = p_train_x, 
@@ -232,7 +251,9 @@ p_nn_fit <- p_nn_model |> keras::fit(
 )
 ```
 
-```{r eval=FALSE, echo=FALSE}
+```{r}
+#| eval: false
+#| echo: false
 # Check
 p_nn_model |> evaluate(p_test_x, p_test_y, verbose = 0)
 plot(p_nn_fit)
@@ -255,6 +276,7 @@ Fitting NN models is fiddly, and very different fitted models can result from re
 :::
 
 ```{r echo=knitr::is_html_output()}
+#| eval: false
 #| code-fold: true
 library(keras)
 
@@ -265,12 +287,14 @@ p_nn_model <- load_model_tf("data/penguins_cnn")
 The fitted model that we have chosen as the final one has reasonably small loss and high accuracy. Plots of loss and accuracy across epochs showing the change during fitting can be plotted, but we don't show them here, because they are generally not very interesting.
 
 ```{r}
+#| eval: false
 p_nn_model |> evaluate(p_test_x, p_test_y, verbose = 0)
 ```
 
 The model object can be saved for later use with:
 
-```{r eval=FALSE}
+```{r}
+#| eval: false
 save_model_tf(p_nn_model, "data/penguins_cnn")
 ```
 
@@ -294,8 +318,14 @@ View the individual node models to understand how they combine to produce the ov
 Because nodes in the hidden layers of NNs are themselves (relatively simple regression) models, it can be interesting to examine these to understand how the model is making it's predictions. Although it's rarely easy, most software will allow the coefficients for the models at these nodes to be extracted. With the penguins NN model there are two nodes, so we can extract the coefficients and plot the resulting two linear combinations to examine the separation between classes.
 
 ```{r}
+#| eval: false
 # Extract hidden layer model weights
 p_nn_wgts <- keras::get_weights(p_nn_model, trainable=TRUE)
+```
+
+```{r}
+# Show hidden layer model weights
+load("data/p_nn_wgts.rda")
 p_nn_wgts 
 ```
 
@@ -408,7 +438,9 @@ p_test_pred_cat <- factor(
 table(p_test$species, p_test_pred_cat)
 ```
 
-```{r echo=FALSE, eval=FALSE}
+```{r}
+#| echo: false
+#| eval: false
 # predict() causes the problem, use p_nn_model(p_test_x) instead
 ```
 
@@ -491,7 +523,8 @@ To see how these methods apply in the setting where we have a large number of va
 The first step is to download and prepare the data. Here we scale the observations to range between zero and one, and we define the label names.
 
 ```{r}
-library(keras)
+#| eval: false
+library(keras3)
 
 # download the data
 fashion_mnist <- dataset_fashion_mnist()
@@ -517,9 +550,46 @@ train_images <- train_images / 255
 test_images <- test_images / 255
 ```
 
+```{r}
+#| echo: false
+#| eval: false
+# Use the sne data to get a copy of the data
+# so code does not depend on keras which has changed massively
+#vdevtools::install_github("jlmelville/snedata")
+library(snedata)
+fashion_mnist <- download_fashion_mnist()
+
+# Split (Note this is generally not a good way to split, but this data is setup to be split this way)
+fashion_train <- head(fashion_mnist, 60000)
+fashion_test  <- tail(fashion_mnist, 10000)
+
+# Save a local copy of the test data so that book compilation
+# doesn't download a new set every time
+save(fashion_test, file="data/fashion_test.rda")
+```
+
+```{r}
+#| echo: false
+load("data/fashion_test.rda")
+
+# for interpretation we also define the category names
+class_names = c('T-shirt/top',
+                'Trouser',
+                'Pullover',
+                'Dress',
+                'Coat',
+                'Sandal',
+                'Shirt',
+                'Sneaker',
+                'Bag',
+                'Ankle boot')
+
+```
+
 In the next step we define the neural network and train the model. Note that because we have many observations, even a very simple structure returns a good model. And because this example is well-known, we do not need to tune the model or check the validation accuracy.
 
-```{r eval=FALSE}
+```{r}
+#| eval: false
 # defining the model
 model_fashion_mnist <- keras_model_sequential()
 model_fashion_mnist |>
@@ -549,6 +619,7 @@ We have defined a flat neural network with a single hidden layer with 128 nodes.
 
 
 ```{r}
+#| eval: false
 #| warning: false
 # get the fitted model
 model_fashion_mnist <- load_model_tf("data/fashion_nn")
@@ -575,6 +646,23 @@ activations_pc <- as.data.frame(activations_pca$x)
 test_images_flat <- test_images
 dim(test_images_flat) <- c(nrow(test_images_flat), 784)
 images_pca <- prcomp(as.data.frame(test_images_flat))
+images_pc <- as.data.frame(images_pca$x)
+```
+
+```{r}
+#| code-fold: true
+#| code-summary: "Code to run PCA"
+load("data/activations_fashion.rda")
+
+test_tags <- factor(class_names[as.numeric(fashion_test$Label)],
+                    levels = class_names)
+
+# PCA for activations
+activations_pca <- prcomp(activations_fashion)
+activations_pc <- as.data.frame(activations_pca$x)
+
+# PCA on the original data
+images_pca <- prcomp(fashion_test[,1:784])
 images_pc <- as.data.frame(images_pca$x)
 ```
 
@@ -615,7 +703,8 @@ cowplot::plot_grid(cowplot::plot_grid(p1, p2), legend_labels,
 
 Looking only at the first two principal components we note some clear differences from the transformation in the hidden layer. The observations seem to be more evenly spread in the input space, while in the activations space we notice grouping along specific directions. In particular the category "Bag" appears to be most different from all other classes, and the non-linear transformation in the activations space shows that they are clearly different from the shoe categories, while in the input space we could note some overlap in the linear projection. To better identify differences between other groups we will use the tour on the first five principal components.
 
-```{r echo=knitr::is_html_output(), eval=FALSE}
+```{r echo=knitr::is_html_output()}
+#| eval: false
 #| code-fold: true
 #| code-summary: "Code to run tours"
 animate_xy(images_pc[,1:5], col = test_tags,
@@ -678,6 +767,7 @@ Finally we will investigate the model performance through the misclassifications
 
 
 ```{r}
+#| eval: false
 fashion_test_pred <- predict(model_fashion_mnist,
                              test_images, verbose = 0)
 fashion_test_pred_cat <- levels(test_tags)[
@@ -691,11 +781,27 @@ observed <- as.numeric(test_tags) -1
 table(observed, predicted)
 ```
 
+```
+        predicted
+observed    0    1    2    3    4    5    6    7    8    9
+       0  128    0   84  719   10    0   51    7    1    0
+       1    0   42   15  941    0    0    0    2    0    0
+       2    6    0  824   38  121    0    3    8    0    0
+       3    1    0   14  976    8    0    1    0    0    0
+       4    1    0  205  181  605    0    0    8    0    0
+       5    1    0    0    2    0   77    0  902    1   17
+       6   24    0  231  282  405    0   44   12    2    0
+       7    0    0    0    0    0    0    0 1000    0    0
+       8   17    1   78  102   49    0    5  730   16    2
+       9    0    0    0    2    0    0    0  947    0   51
+```
+
 Here the labels are used as 0 - T-shirt/top, 1 - Trouser, 2 - Pullover, 3 - Dress, 4 - Coat, 5 - Sandal, 6 - Shirt, 7 - Sneaker, 8 - Bag, 9 - Ankle boot.
 From this we see that the model mainly confuses certain categories with each other, and within expected groups (e.g. different types of shoes can be confused with each other, or different types of shirts). We can further investigate this by visualizing the full probability matrix for the test observations, to see which categories the model is uncertain about.
 \index{classification!predictive probabilities}
 
-```{r echo=knitr::is_html_output(), eval=FALSE}
+```{r echo=knitr::is_html_output()}
+#| eval: false
 #| code-fold: true
 #| code-summary: "Code to visualize probabilities"
 # getting the probabilities from the output layer
