@@ -2,10 +2,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.30">
+<meta name="generator" content="quarto-1.9.30">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <title>12&nbsp; Summarising and comparing clustering results – Interactively exploring high-dimensional data and models in R</title>
 <style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
 div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -90,10 +93,10 @@ div.csl-indent {
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-de070a7b0ab54f8780927367ac907214.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-b6a8276bf55561bdbc268162d41bd1f7.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-500a5d93a5fbe3ec46dd1cb8b883cbc3.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
+<link href="site_libs/bootstrap/bootstrap-e194f9b77bef675d061b88ac12283f50.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
   "collapse-after": 3,
@@ -119,7 +122,7 @@ div.csl-indent {
     "search-submit-button-title": "Submit",
     "search-label": "Search"
   }
-}</script><script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script><script type="text/javascript">
+}</script><script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script><script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script><script type="text/javascript">
 const typesetMath = (el) => {
   if (window.MathJax) {
     // MathJax Typeset
@@ -130,7 +133,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -422,21 +425,22 @@ window.Quarto = {
 <p>For model-based clustering, the variability within clusters can be summarised by <span class="math inline">\(p\)</span>-dimensional ellipses. Generally, a <span class="math inline">\(p\)</span>-dimensional convex hull can show the variability within clusters, without assuming a specific distribution.</p>
 </div>
 <div class="cell">
-<details class="code-fold"><summary>Load libraries</summary><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/source.html">source</a></span><span class="op">(</span><span class="st">"code/setup.R"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details class="code-fold"><summary>Load libraries</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/source.html">source</a></span><span class="op">(</span><span class="st">"code/setup.R"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <div class="cell">
-<details class="code-fold"><summary>Code to do clustering</summary><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"data/penguins_sub.rda"</span><span class="op">)</span></span>
+<details class="code-fold"><summary>Code to do clustering</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"data/penguins_sub.rda"</span><span class="op">)</span></span>
 <span><span class="va">p_dist</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/dist.html">dist</a></span><span class="op">(</span><span class="va">penguins_sub</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="va">p_hcw</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/hclust.html">hclust</a></span><span class="op">(</span><span class="va">p_dist</span>, method<span class="op">=</span><span class="st">"ward.D2"</span><span class="op">)</span></span>
-<span><span class="va">p_cl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>cl_w <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/cutree.html">cutree</a></span><span class="op">(</span><span class="va">p_hcw</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="va">p_cl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>cl_w <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/cutree.html">cutree</a></span><span class="op">(</span><span class="va">p_hcw</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <p></p>
 <div class="cell">
-<details class="code-fold"><summary>Code for convex hulls in 2D</summary><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">psub</span> <span class="op">&lt;-</span> <span class="va">penguins_sub</span> <span class="op">|&gt;</span></span>
+<details class="code-fold"><summary>Code for convex hulls in 2D</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">psub</span> <span class="op">&lt;-</span> <span class="va">penguins_sub</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">select</span><span class="op">(</span><span class="va">bl</span>, <span class="va">bd</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">mutate</span><span class="op">(</span>cl <span class="op">=</span> <span class="va">p_cl</span><span class="op">$</span><span class="va">cl_w</span><span class="op">)</span></span>
+<span><span class="va">psub</span> <span class="op">&lt;-</span> <span class="va">psub</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/duplicated.html">duplicated</a></span><span class="op">(</span><span class="va">psub</span><span class="op">)</span>,<span class="op">]</span></span>
 <span></span>
 <span><span class="va">phull</span> <span class="op">&lt;-</span> <span class="fu">gen_chull</span><span class="op">(</span><span class="va">psub</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span>, <span class="va">psub</span><span class="op">$</span><span class="va">cl</span><span class="op">)</span></span>
 <span><span class="va">phull_segs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">phull</span><span class="op">$</span><span class="va">data</span><span class="op">$</span><span class="va">bl</span><span class="op">[</span><span class="va">phull</span><span class="op">$</span><span class="va">edges</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span><span class="op">]</span>,</span>
@@ -452,11 +456,11 @@ window.Quarto = {
 <span>                                    colour<span class="op">=</span><span class="va">cl</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">scale_colour_discrete_divergingx</span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"Zissou 1"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">theme</span><span class="op">(</span>aspect.ratio <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span>  <span class="fu">theme</span><span class="op">(</span>aspect.ratio <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <div class="cell">
-<details class="code-fold"><summary>Code to do clustering</summary><div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_dist</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/dist.html">dist</a></span><span class="op">(</span><span class="va">penguins_sub</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span></span>
+<details class="code-fold"><summary>Code to do clustering</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_dist</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/dist.html">dist</a></span><span class="op">(</span><span class="va">penguins_sub</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="va">p_hcw</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/hclust.html">hclust</a></span><span class="op">(</span><span class="va">p_dist</span>, method<span class="op">=</span><span class="st">"ward.D2"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">p_cl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>cl_w <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/cutree.html">cutree</a></span><span class="op">(</span><span class="va">p_hcw</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
@@ -465,15 +469,15 @@ window.Quarto = {
 <span>                      G<span class="op">=</span><span class="fl">3</span>, </span>
 <span>                      modelNames <span class="op">=</span> <span class="st">"EEE"</span><span class="op">)</span></span>
 <span><span class="va">p_cl</span> <span class="op">&lt;-</span> <span class="va">p_cl</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu">mutate</span><span class="op">(</span>cl_mc <span class="op">=</span> <span class="va">penguins_mc</span><span class="op">$</span><span class="va">classification</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span>  <span class="fu">mutate</span><span class="op">(</span>cl_mc <span class="op">=</span> <span class="va">penguins_mc</span><span class="op">$</span><span class="va">classification</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <div class="cell">
-<details class="code-fold"><summary>Code to generate pD convex hull</summary><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">phull</span> <span class="op">&lt;-</span> <span class="fu">gen_chull</span><span class="op">(</span><span class="va">penguins_sub</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, <span class="va">p_cl</span><span class="op">$</span><span class="va">cl_w</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details class="code-fold"><summary>Code to generate pD convex hull</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">phull</span> <span class="op">&lt;-</span> <span class="fu">gen_chull</span><span class="op">(</span><span class="va">penguins_sub</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, <span class="va">p_cl</span><span class="op">$</span><span class="va">cl_w</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <div class="cell">
-<details class="code-fold"><summary>Code to generate pD convex hull and view in tour</summary><div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">animate_xy</span><span class="op">(</span><span class="va">phull</span><span class="op">$</span><span class="va">data</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, </span>
+<details class="code-fold"><summary>Code to generate pD convex hull and view in tour</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">animate_xy</span><span class="op">(</span><span class="va">phull</span><span class="op">$</span><span class="va">data</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, </span>
 <span>           col<span class="op">=</span><span class="va">phull</span><span class="op">$</span><span class="va">data</span><span class="op">$</span><span class="va">cl</span>,</span>
 <span>           edges<span class="op">=</span><span class="va">phull</span><span class="op">$</span><span class="va">edges</span>, </span>
 <span>           edges.col<span class="op">=</span><span class="va">phull</span><span class="op">$</span><span class="va">edge_clr</span><span class="op">)</span></span>
@@ -485,7 +489,7 @@ window.Quarto = {
 <span>           gif_file <span class="op">=</span> <span class="st">"gifs/penguins_chull.gif"</span>,</span>
 <span>           frames <span class="op">=</span> <span class="fl">500</span>, </span>
 <span>           width <span class="op">=</span> <span class="fl">400</span>,</span>
-<span>           height <span class="op">=</span> <span class="fl">400</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span>           height <span class="op">=</span> <span class="fl">400</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <div id="fig-penguins-chull-html" class="quarto-layout-panel">
@@ -527,32 +531,32 @@ Figure&nbsp;12.1
 <p>Below is a comparison between the three cluster results of Wards linkage hierarchical clustering (rows) and model-based clustering (columns). The two methods mostly agree, as seen from the three cells with large counts, and most cells with zeros. They disagree only on eight penguins. These eight penguins would be considered to be part of cluster 1 by Wards, but model-based considers them to be members of cluster 2.</p>
 <p>The two methods label the clusters differently: what Wards labels as cluster 3, model-based labels as cluster 2. The labels given by any algorithm are arbitrary, and can easily be changed to coordinate between methods.</p>
 <div class="cell">
-<details class="code-fold"><summary>Code to make confusion table</summary><div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_cl</span> <span class="op">|&gt;</span> </span>
+<details class="code-fold"><summary>Code to make confusion table</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_cl</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu">count</span><span class="op">(</span><span class="va">cl_w</span>, <span class="va">cl_mc</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu">pivot_wider</span><span class="op">(</span>names_from <span class="op">=</span> <span class="va">cl_mc</span>, </span>
 <span>              values_from <span class="op">=</span> <span class="va">n</span>, </span>
 <span>              values_fill <span class="op">=</span> <span class="fl">0</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">gt</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">tab_spanner</span><span class="op">(</span>label <span class="op">=</span> <span class="st">"cl_mc"</span>, columns<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">`2`</span>, <span class="va">`3`</span>, <span class="va">`1`</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">cols_width</span><span class="op">(</span><span class="fu">everything</span><span class="op">(</span><span class="op">)</span> <span class="op">~</span> <span class="fu">px</span><span class="op">(</span><span class="fl">60</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span>  <span class="fu">cols_width</span><span class="op">(</span><span class="fu">everything</span><span class="op">(</span><span class="op">)</span> <span class="op">~</span> <span class="fu">px</span><span class="op">(</span><span class="fl">60</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details><div class="cell-output-display">
-<div id="vqcncmklor" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#vqcncmklor table {
+<div id="jpjpmvwcfu" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#jpjpmvwcfu table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#vqcncmklor thead, #vqcncmklor tbody, #vqcncmklor tfoot, #vqcncmklor tr, #vqcncmklor td, #vqcncmklor th {
+#jpjpmvwcfu thead, #jpjpmvwcfu tbody, #jpjpmvwcfu tfoot, #jpjpmvwcfu tr, #jpjpmvwcfu td, #jpjpmvwcfu th {
   border-style: none;
 }
 
-#vqcncmklor p {
+#jpjpmvwcfu p {
   margin: 0;
   padding: 0;
 }
 
-#vqcncmklor .gt_table {
+#jpjpmvwcfu .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -578,12 +582,12 @@ Figure&nbsp;12.1
   border-left-color: #D3D3D3;
 }
 
-#vqcncmklor .gt_caption {
+#jpjpmvwcfu .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#vqcncmklor .gt_title {
+#jpjpmvwcfu .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -595,7 +599,7 @@ Figure&nbsp;12.1
   border-bottom-width: 0;
 }
 
-#vqcncmklor .gt_subtitle {
+#jpjpmvwcfu .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -607,7 +611,7 @@ Figure&nbsp;12.1
   border-top-width: 0;
 }
 
-#vqcncmklor .gt_heading {
+#jpjpmvwcfu .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -619,13 +623,13 @@ Figure&nbsp;12.1
   border-right-color: #D3D3D3;
 }
 
-#vqcncmklor .gt_bottom_border {
+#jpjpmvwcfu .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#vqcncmklor .gt_col_headings {
+#jpjpmvwcfu .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -640,7 +644,7 @@ Figure&nbsp;12.1
   border-right-color: #D3D3D3;
 }
 
-#vqcncmklor .gt_col_heading {
+#jpjpmvwcfu .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -660,7 +664,7 @@ Figure&nbsp;12.1
   overflow-x: hidden;
 }
 
-#vqcncmklor .gt_column_spanner_outer {
+#jpjpmvwcfu .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -672,15 +676,15 @@ Figure&nbsp;12.1
   padding-right: 4px;
 }
 
-#vqcncmklor .gt_column_spanner_outer:first-child {
+#jpjpmvwcfu .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#vqcncmklor .gt_column_spanner_outer:last-child {
+#jpjpmvwcfu .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#vqcncmklor .gt_column_spanner {
+#jpjpmvwcfu .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -692,11 +696,11 @@ Figure&nbsp;12.1
   width: 100%;
 }
 
-#vqcncmklor .gt_spanner_row {
+#jpjpmvwcfu .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#vqcncmklor .gt_group_heading {
+#jpjpmvwcfu .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -722,7 +726,7 @@ Figure&nbsp;12.1
   text-align: left;
 }
 
-#vqcncmklor .gt_empty_group_heading {
+#jpjpmvwcfu .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -737,15 +741,15 @@ Figure&nbsp;12.1
   vertical-align: middle;
 }
 
-#vqcncmklor .gt_from_md > :first-child {
+#jpjpmvwcfu .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#vqcncmklor .gt_from_md > :last-child {
+#jpjpmvwcfu .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#vqcncmklor .gt_row {
+#jpjpmvwcfu .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -764,7 +768,7 @@ Figure&nbsp;12.1
   overflow-x: hidden;
 }
 
-#vqcncmklor .gt_stub {
+#jpjpmvwcfu .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -777,7 +781,7 @@ Figure&nbsp;12.1
   padding-right: 5px;
 }
 
-#vqcncmklor .gt_stub_row_group {
+#jpjpmvwcfu .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -791,15 +795,15 @@ Figure&nbsp;12.1
   vertical-align: top;
 }
 
-#vqcncmklor .gt_row_group_first td {
+#jpjpmvwcfu .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#vqcncmklor .gt_row_group_first th {
+#jpjpmvwcfu .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#vqcncmklor .gt_summary_row {
+#jpjpmvwcfu .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -809,16 +813,16 @@ Figure&nbsp;12.1
   padding-right: 5px;
 }
 
-#vqcncmklor .gt_first_summary_row {
+#jpjpmvwcfu .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#vqcncmklor .gt_first_summary_row.thick {
+#jpjpmvwcfu .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#vqcncmklor .gt_last_summary_row {
+#jpjpmvwcfu .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -828,7 +832,7 @@ Figure&nbsp;12.1
   border-bottom-color: #D3D3D3;
 }
 
-#vqcncmklor .gt_grand_summary_row {
+#jpjpmvwcfu .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -838,7 +842,7 @@ Figure&nbsp;12.1
   padding-right: 5px;
 }
 
-#vqcncmklor .gt_first_grand_summary_row {
+#jpjpmvwcfu .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -848,7 +852,7 @@ Figure&nbsp;12.1
   border-top-color: #D3D3D3;
 }
 
-#vqcncmklor .gt_last_grand_summary_row_top {
+#jpjpmvwcfu .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -858,11 +862,11 @@ Figure&nbsp;12.1
   border-bottom-color: #D3D3D3;
 }
 
-#vqcncmklor .gt_striped {
+#jpjpmvwcfu .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#vqcncmklor .gt_table_body {
+#jpjpmvwcfu .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -871,7 +875,7 @@ Figure&nbsp;12.1
   border-bottom-color: #D3D3D3;
 }
 
-#vqcncmklor .gt_footnotes {
+#jpjpmvwcfu .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -885,7 +889,7 @@ Figure&nbsp;12.1
   border-right-color: #D3D3D3;
 }
 
-#vqcncmklor .gt_footnote {
+#jpjpmvwcfu .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -894,7 +898,7 @@ Figure&nbsp;12.1
   padding-right: 5px;
 }
 
-#vqcncmklor .gt_sourcenotes {
+#jpjpmvwcfu .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -908,7 +912,7 @@ Figure&nbsp;12.1
   border-right-color: #D3D3D3;
 }
 
-#vqcncmklor .gt_sourcenote {
+#jpjpmvwcfu .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -916,76 +920,76 @@ Figure&nbsp;12.1
   padding-right: 5px;
 }
 
-#vqcncmklor .gt_left {
+#jpjpmvwcfu .gt_left {
   text-align: left;
 }
 
-#vqcncmklor .gt_center {
+#jpjpmvwcfu .gt_center {
   text-align: center;
 }
 
-#vqcncmklor .gt_right {
+#jpjpmvwcfu .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#vqcncmklor .gt_font_normal {
+#jpjpmvwcfu .gt_font_normal {
   font-weight: normal;
 }
 
-#vqcncmklor .gt_font_bold {
+#jpjpmvwcfu .gt_font_bold {
   font-weight: bold;
 }
 
-#vqcncmklor .gt_font_italic {
+#jpjpmvwcfu .gt_font_italic {
   font-style: italic;
 }
 
-#vqcncmklor .gt_super {
+#jpjpmvwcfu .gt_super {
   font-size: 65%;
 }
 
-#vqcncmklor .gt_footnote_marks {
+#jpjpmvwcfu .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#vqcncmklor .gt_asterisk {
+#jpjpmvwcfu .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#vqcncmklor .gt_indent_1 {
+#jpjpmvwcfu .gt_indent_1 {
   text-indent: 5px;
 }
 
-#vqcncmklor .gt_indent_2 {
+#jpjpmvwcfu .gt_indent_2 {
   text-indent: 10px;
 }
 
-#vqcncmklor .gt_indent_3 {
+#jpjpmvwcfu .gt_indent_3 {
   text-indent: 15px;
 }
 
-#vqcncmklor .gt_indent_4 {
+#jpjpmvwcfu .gt_indent_4 {
   text-indent: 20px;
 }
 
-#vqcncmklor .gt_indent_5 {
+#jpjpmvwcfu .gt_indent_5 {
   text-indent: 25px;
 }
 
-#vqcncmklor .katex-display {
+#jpjpmvwcfu .katex-display {
   display: inline-flex !important;
   margin-bottom: 0.75em !important;
 }
 
-#vqcncmklor div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+#jpjpmvwcfu div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
   height: 0px !important;
 }
 </style>
-<table class="gt_table caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+<table class="gt_table caption-top table table-sm table-striped small" data-quarto-bootstrap="false">
 <thead>
 <tr class="gt_col_headings gt_spanner_row header">
 <th rowspan="2" id="cl_w" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">cl_w</th>
@@ -1048,7 +1052,7 @@ Figure&nbsp;12.2: Comparing the model-based and Wards hierarchical linkage solut
 </div>
 <p> </p>
 <div class="cell">
-<details class="code-fold"><summary>Code to do interactive graphics</summary><div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_cl</span> <span class="op">&lt;-</span> <span class="va">p_cl</span> <span class="op">|&gt;</span> </span>
+<details class="code-fold"><summary>Code to do interactive graphics</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_cl</span> <span class="op">&lt;-</span> <span class="va">p_cl</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu">mutate</span><span class="op">(</span>cl_w_j <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/jitter.html">jitter</a></span><span class="op">(</span><span class="va">cl_w</span><span class="op">)</span>,</span>
 <span>         cl_mc_j <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/jitter.html">jitter</a></span><span class="op">(</span><span class="va">cl_mc</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">penguins_cl</span> <span class="op">&lt;-</span> <span class="fu">bind_cols</span><span class="op">(</span><span class="va">penguins_sub</span>, <span class="va">p_cl</span><span class="op">)</span></span>
@@ -1077,7 +1081,7 @@ Figure&nbsp;12.2: Comparing the model-based and Wards hierarchical linkage solut
 <span><span class="fu">bscols</span><span class="op">(</span></span>
 <span>     <span class="va">detour_plot</span>, <span class="va">conf_mat</span>,</span>
 <span>     widths <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">6</span><span class="op">)</span></span>
-<span> <span class="op">)</span>                 </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span> <span class="op">)</span>                 </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <div class="info">
@@ -1289,7 +1293,7 @@ Cortes, C., Pregibon, D., &amp; Volinsky, C. (2003). Computational <span>M</span
 Cortes, C., &amp; Vapnik, V. N. (1995). Support-<span>V</span>ector <span>N</span>etworks. <em>Machine Learning</em>, <em>20</em>(3), 273–297.
 </div>
 <div id="ref-Oc1885" class="csl-entry" role="listitem">
-d’Ocagne, M. (1885). <em><span>C</span>oordonnées <span>P</span>arallèles et <span>A</span>xiales: <span>M</span>éthode de <span>T</span>ransformation <span>G</span>éométrique et <span>P</span>rocédé <span>N</span>ouveau de <span>C</span>alcul <span>G</span>raphique dÉduits de la <span>C</span>onsidération des <span>C</span>oordonnées <span>P</span>aralléles</em>. Gauthier-Villars.
+<span class="nocase">d’Ocagne, M.</span> (1885). <em><span>C</span>oordonnées <span>P</span>arallèles et <span>A</span>xiales: <span>M</span>éthode de <span>T</span>ransformation <span>G</span>éométrique et <span>P</span>rocédé <span>N</span>ouveau de <span>C</span>alcul <span>G</span>raphique dÉduits de la <span>C</span>onsidération des <span>C</span>oordonnées <span>P</span>aralléles</em>. Gauthier-Villars.
 </div>
 <div id="ref-Dalgaard2002" class="csl-entry" role="listitem">
 Dalgaard, P. (2002). <em>Introductory <span>S</span>tatistics with <span>R</span></em>. Springer.
@@ -1298,7 +1302,7 @@ Dalgaard, P. (2002). <em>Introductory <span>S</span>tatistics with <span>R</span
 Dasu, T., Swayne, D. F., &amp; Poole, D. (2005). Grouping <span>M</span>ultivariate <span>T</span>ime <span>S</span>eries: A <span>C</span>ase <span>S</span>tudy. <em>Proceedings of the IEEE Workshop on <span>T</span>emporal <span>D</span>ata <span>M</span>ining: <span>A</span>lgorithms, <span>T</span>heory and <span>A</span>pplications, in Conjunction with the Conference on Data Mining, Houston, November 27, 2005</em>, 25–32.
 </div>
 <div id="ref-R-ggdendro" class="csl-entry" role="listitem">
-de Vries, A., &amp; Ripley, B. D. (2024). <em><span class="nocase">ggdendro</span>: <span>C</span>reate <span>D</span>endrograms and <span>T</span>ree <span>D</span>iagrams <span>U</span>sing <span class="nocase">ggplot2</span></em>. <a href="https://andrie.github.io/ggdendro/">https://andrie.github.io/ggdendro/</a>
+<span class="nocase">de Vries, A., &amp; Ripley, B. D.</span> (2024). <em><span class="nocase">ggdendro</span>: <span>C</span>reate <span>D</span>endrograms and <span>T</span>ree <span>D</span>iagrams <span>U</span>sing <span class="nocase">ggplot2</span></em>. <a href="https://andrie.github.io/ggdendro/">https://andrie.github.io/ggdendro/</a>
 </div>
 <div id="ref-fireorigin" class="csl-entry" role="listitem">
 Department of Environment, Land, Water &amp; Planning. (2019). <em><span class="nocase">Fire Origins - Current and Historical</span></em>. <a href="https://discover.data.vic.gov.au/dataset/fire-origins-current-and-historical">https://discover.data.vic.gov.au/dataset/fire-origins-current-and-historical</a>
@@ -1523,10 +1527,7 @@ Laa, U., Aumann, A., Cook, D., &amp; Valencia, G. (2023). New and <span>S</span>
 Laa, U., Cook, D., &amp; Lee, S. (2022). Burning <span>S</span>age: <span>R</span>eversing the <span>C</span>urse of <span>D</span>imensionality in the <span>V</span>isualization of <span>H</span>igh-<span>D</span>imensional <span>D</span>ata. <em>Journal of Computational and Graphical Statistics</em>, <em>31</em>(1), 40–49. <a href="https://doi.org/10.1080/10618600.2021.1963264">https://doi.org/10.1080/10618600.2021.1963264</a>
 </div>
 <div id="ref-slicetour" class="csl-entry" role="listitem">
-Laa, U., Cook, D., &amp; Valencia, G. (2020a). A <span>S</span>lice <span>T</span>our for <span>F</span>inding <span>H</span>ollowness in <span>H</span>igh-<span>D</span>imensional <span>D</span>ata. <em>Journal of Computational and Graphical Statistics</em>, <em>29</em>(3), 681–687. <a href="https://doi.org/10.1080/10618600.2020.1777140">https://doi.org/10.1080/10618600.2020.1777140</a>
-</div>
-<div id="ref-tourr2020" class="csl-entry" role="listitem">
-Laa, U., Cook, D., &amp; Valencia, G. (2020b). A <span>S</span>lice <span>T</span>our for <span>F</span>inding <span>H</span>ollowness in <span>H</span>igh-<span>D</span>imensional <span>D</span>ata. <em>Journal of Computational and Graphical Statistics</em>, <em>29</em>(3), 681–687. <a href="https://doi.org/10.1080/10618600.2020.1777140">https://doi.org/10.1080/10618600.2020.1777140</a>
+Laa, U., Cook, D., &amp; Valencia, G. (2020). A <span>S</span>lice <span>T</span>our for <span>F</span>inding <span>H</span>ollowness in <span>H</span>igh-<span>D</span>imensional <span>D</span>ata. <em>Journal of Computational and Graphical Statistics</em>, <em>29</em>(3), 681–687. <a href="https://doi.org/10.1080/10618600.2020.1777140">https://doi.org/10.1080/10618600.2020.1777140</a>
 </div>
 <div id="ref-helmert" class="csl-entry" role="listitem">
 Lancaster, H. O. (1965). The <span>H</span>elmert <span>M</span>atrices. <em>The American Mathematical Monthly</em>, <em>72</em>(1), 4–12.
@@ -1820,13 +1821,13 @@ Urbanek, S., &amp; Theus, M. (2003). <span class="nocase">iPlots</span>: <span>H
 Vaidyanathan, R., Xie, Y., Allaire, J., Cheng, J., Sievert, C., &amp; Russell, K. (2023). <em>Htmlwidgets: HTML widgets for r</em>. <a href="https://github.com/ramnathv/htmlwidgets">https://github.com/ramnathv/htmlwidgets</a>
 </div>
 <div id="ref-R-compositions" class="csl-entry" role="listitem">
-van den Boogaart, K. G., Tolosana-Delgado, R., &amp; Bren, M. (2024). <em><span class="nocase">compositions</span>: <span>C</span>ompositional <span>D</span>ata <span>A</span>nalysis</em>. <a href="http://www.stat.boogaart.de/compositions/">http://www.stat.boogaart.de/compositions/</a>
+<span class="nocase">van den Boogaart, K. G., Tolosana-Delgado, R., &amp; Bren, M.</span> (2024). <em><span class="nocase">compositions</span>: <span>C</span>ompositional <span>D</span>ata <span>A</span>nalysis</em>. <a href="http://www.stat.boogaart.de/compositions/">http://www.stat.boogaart.de/compositions/</a>
 </div>
 <div id="ref-Rtsne2014" class="csl-entry" role="listitem">
-van der Maaten, L. J. P. (2014). Accelerating <span class="nocase">t-SNE</span> using <span>T</span>ree-<span>B</span>ased lgorithms. <em>Journal of Machine Learning Research</em>, <em>15</em>, 3221–3245.
+<span class="nocase">van der Maaten, L. J. P.</span> (2014). Accelerating <span class="nocase">t-SNE</span> using <span>T</span>ree-<span>B</span>ased lgorithms. <em>Journal of Machine Learning Research</em>, <em>15</em>, 3221–3245.
 </div>
 <div id="ref-Rtsne2008" class="csl-entry" role="listitem">
-van der Maaten, L. J. P., &amp; Hinton, G. E. (2008). Visualizing <span>H</span>igh-<span>D</span>imensional <span>D</span>ata using <span class="nocase">t-SNE</span>. <em>Journal of Machine Learning Research</em>, <em>9</em>, 2579–2605.
+<span class="nocase">van der Maaten, L. J. P., &amp; Hinton, G. E.</span> (2008). Visualizing <span>H</span>igh-<span>D</span>imensional <span>D</span>ata using <span class="nocase">t-SNE</span>. <em>Journal of Machine Learning Research</em>, <em>9</em>, 2579–2605.
 </div>
 <div id="ref-Va99" class="csl-entry" role="listitem">
 Vapnik, V. N. (1999). <em>The <span>N</span>ature of <span>S</span>tatistical <span>L</span>earning <span>T</span>heory</em>. Springer.
@@ -1880,7 +1881,7 @@ Wickham, H. (2016). <em><span class="nocase">ggplot2</span>: <span>E</span>legan
 Wickham, H. (2022). <em><span class="nocase">classifly</span>: <span>E</span>xplore <span>C</span>lassification <span>M</span>odels in <span>H</span>igh <span>D</span>imensions</em>. <a href="http://had.co.nz/classifly">http://had.co.nz/classifly</a>
 </div>
 <div id="ref-R-ggplot2" class="csl-entry" role="listitem">
-Wickham, H., Chang, W., Henry, L., Pedersen, T. L., Takahashi, K., Wilke, C., Woo, K., Yutani, H., Dunnington, D., &amp; van den Brand, T. (2024). <em><span class="nocase">ggplot2</span>: <span>C</span>reate <span>E</span>legant <span>D</span>ata <span>V</span>isualisations <span>U</span>sing the <span>G</span>rammar of <span>G</span>raphics</em>. <a href="https://ggplot2.tidyverse.org">https://ggplot2.tidyverse.org</a>
+<span class="nocase">Wickham, H., Chang, W., Henry, L., Pedersen, T. L., Takahashi, K., Wilke, C., Woo, K., Yutani, H., Dunnington, D., &amp; van den Brand, T.</span> (2024). <em><span class="nocase">ggplot2</span>: <span>C</span>reate <span>E</span>legant <span>D</span>ata <span>V</span>isualisations <span>U</span>sing the <span>G</span>rammar of <span>G</span>raphics</em>. <a href="https://ggplot2.tidyverse.org">https://ggplot2.tidyverse.org</a>
 </div>
 <div id="ref-R-tourr" class="csl-entry" role="listitem">
 Wickham, H., &amp; Cook, D. (2025). <em><span class="nocase">tourr</span>: <span>T</span>our <span>M</span>ethods for <span>M</span>ultivariate <span>D</span>ata <span>V</span>isualisation</em>. <a href="https://github.com/ggobi/tourr">https://github.com/ggobi/tourr</a>
@@ -1982,13 +1983,14 @@ Zhu, H. (2024). <em>kableExtra: Construct complex table with kable and pipe synt
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy

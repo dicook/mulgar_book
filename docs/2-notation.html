@@ -2,10 +2,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.6.33">
+<meta name="generator" content="quarto-1.9.30">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <title>2&nbsp; Technical details – Interactively exploring high-dimensional data and models in R</title>
 <style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
 div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -18,8 +21,9 @@ ul.task-list li input[type="checkbox"] {
   vertical-align: middle;
 }
 /* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -30,7 +34,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -83,15 +87,16 @@ div.csl-indent {
 <link href="./3-intro-dimred.html" rel="next">
 <link href="./1-intro.html" rel="prev">
 <link href="./cover.png" rel="icon" type="image/png">
-<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-07ba0ad10f5680c660e360ac31d2f3b6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-b6a8276bf55561bdbc268162d41bd1f7.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-f9f98161c7b4448b9568ea5662a0cac7.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
+<link href="site_libs/bootstrap/bootstrap-e194f9b77bef675d061b88ac12283f50.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
   "collapse-after": 3,
@@ -117,7 +122,7 @@ div.csl-indent {
     "search-submit-button-title": "Submit",
     "search-label": "Search"
   }
-}</script><script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script><script type="text/javascript">
+}</script><script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script><script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script><script type="text/javascript">
 const typesetMath = (el) => {
   if (window.MathJax) {
     // MathJax Typeset
@@ -128,7 +133,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -144,7 +149,7 @@ window.Quarto = {
 };
 </script>
 </head>
-<body class="nav-sidebar floating">
+<body class="nav-sidebar floating quarto-light">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top"><nav class="quarto-secondary-nav"><div class="container-fluid d-flex">
@@ -448,11 +453,11 @@ y_{n1} &amp; y_{n2} &amp; \dots &amp; y_{nd} \end{array} \right]_{n\times d}
 <p>where <span class="math inline">\(y_{ij} = \sum_{k=1}^p X_{ik}A_{kj}\)</span>. Note that we are using <span class="math inline">\(Y\)</span> as the projected data here, as well as it possibly being used for a response variable. Where necessary, this will be clarified with words in the text, when notation is used in explanations later.</p>
 <p>When using R, if we only have the data corresponding to <span class="math inline">\(X\)</span> it makes sense to use a <code>matrix</code> object. However, if the response variable is included and it is categorical, then we might use a <code>data.frame</code> or a <code>tibble</code> which can accommodate non-numerical values. Then to work with the data, we can use the base R methods:</p>
 <div class="cell">
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1.1</span>, <span class="fl">1.3</span>, <span class="fl">1.4</span>, <span class="fl">1.2</span>, </span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1.1</span>, <span class="fl">1.3</span>, <span class="fl">1.4</span>, <span class="fl">1.2</span>, </span>
 <span>              <span class="fl">2.7</span>, <span class="fl">2.6</span>, <span class="fl">2.4</span>, <span class="fl">2.5</span>, </span>
 <span>              <span class="fl">3.5</span>, <span class="fl">3.4</span>, <span class="fl">3.2</span>, <span class="fl">3.6</span><span class="op">)</span>, </span>
 <span>            ncol<span class="op">=</span><span class="fl">4</span>, byrow<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="va">X</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="va">X</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>     [,1] [,2] [,3] [,4]
 [1,]  1.1  1.3  1.4  1.2
@@ -462,30 +467,30 @@ y_{n1} &amp; y_{n2} &amp; \dots &amp; y_{nd} \end{array} \right]_{n\times d}
 </div>
 <p>which is a data matrix with <span class="math inline">\(n=3, p=4\)</span> and to extract a column (variable):</p>
 <div class="cell">
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">X</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">X</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 1.3 2.6 3.4</code></pre>
 </div>
 </div>
 <p>or a row (observation):</p>
 <div class="cell">
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">X</span><span class="op">[</span><span class="fl">2</span>,<span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">X</span><span class="op">[</span><span class="fl">2</span>,<span class="op">]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 2.7 2.6 2.4 2.5</code></pre>
 </div>
 </div>
 <p>or an individual cell (value):</p>
 <div class="cell">
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">X</span><span class="op">[</span><span class="fl">3</span>,<span class="fl">2</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">X</span><span class="op">[</span><span class="fl">3</span>,<span class="fl">2</span><span class="op">]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 3.4</code></pre>
 </div>
 </div>
 <p>To make the data projection we need an orthonormal matrix:</p>
 <div class="cell">
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">A</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0.707</span>,<span class="fl">0.707</span>,<span class="fl">0</span>,<span class="fl">0</span>,<span class="fl">0</span>,<span class="fl">0</span>,<span class="fl">0.707</span>,<span class="fl">0.707</span><span class="op">)</span>,</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">A</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0.707</span>,<span class="fl">0.707</span>,<span class="fl">0</span>,<span class="fl">0</span>,<span class="fl">0</span>,<span class="fl">0</span>,<span class="fl">0.707</span>,<span class="fl">0.707</span><span class="op">)</span>,</span>
 <span>            ncol<span class="op">=</span><span class="fl">2</span>, byrow<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="va">A</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="va">A</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>      [,1]  [,2]
 [1,] 0.707 0.000
@@ -496,18 +501,18 @@ y_{n1} &amp; y_{n2} &amp; \dots &amp; y_{nd} \end{array} \right]_{n\times d}
 </div>
 <p>You can check that it is orthonormal by</p>
 <div class="cell">
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">A</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">A</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.999698</code></pre>
 </div>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">A</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span><span class="op">*</span><span class="va">A</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">A</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span><span class="op">*</span><span class="va">A</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0</code></pre>
 </div>
 </div>
 <p>and compute the projected data using matrix multiplication:</p>
 <div class="cell">
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">X</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">A</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">X</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">A</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>       [,1]   [,2]
 [1,] 1.6968 1.8382
@@ -535,7 +540,7 @@ y_{n1} &amp; y_{n2} &amp; \dots &amp; y_{nd} \end{array} \right]_{n\times d}
 </div>
 <p>The original tour was called the <em>grand tour</em> <span class="citation" data-cites="As85">(<a href="references.html#ref-As85" role="doc-biblioref">Asimov, 1985</a>)</span>. In a grand tour, the target bases are chosen randomly from all possible projections. The reason to use a grand tour is to get an overview of the data quickly - it is possible to discover relationships between variables that were not pre-conceived. The particular grand tour available in the <code>tourr</code> package also has the feature that all projections are equally likely to be viewed, and it efficiently covers the space of all projections. The tour in the <code>langevitour</code> <span class="citation" data-cites="langevitour">(<a href="references.html#ref-langevitour" role="doc-biblioref">Harrison, 2023</a>)</span> software is similar to a grand tour but uses a different dynamic to choose the tour path, based on jostling particles. It doesn’t need to do interpolation because changes are incremental.</p>
 <p> </p>
-<p>Because space gets large as dimension increases, the wait for seeing interesting structure in projections when using a grand tour can be long. So if you have an idea of the types of structure that would be interesting to observe using a <em>guided tour</em> <span class="citation" data-cites="CBCH95">(<a href="references.html#ref-CBCH95" role="doc-biblioref">Cook et al., 1995</a>)</span> may help. A guided tour chooses target bases according to some function describing interesting, and the tour path follows an optimisation of this function. For example, the <code>LDA</code> index <span class="citation" data-cites="LCKL05">(<a href="references.html#ref-LCKL05" role="doc-biblioref">E.-K. Lee et al., 2005</a>)</span> is a function that describes the separation between known classes in a projection, and is defined as follows:</p>
+<p>Because space gets large as dimension increases, the wait for seeing interesting structure in projections when using a grand tour can be long. So if you have an idea of the types of structure that would be interesting to observe using a <em>guided tour</em> <span class="citation" data-cites="CBCH95">(<a href="references.html#ref-CBCH95" role="doc-biblioref">Cook et al., 1995</a>)</span> may help. A guided tour chooses target bases according to some function describing interesting structures, and the tour path follows an optimisation of this function. For example, the <code>LDA</code> index <span class="citation" data-cites="LCKL05">(<a href="references.html#ref-LCKL05" role="doc-biblioref">E.-K. Lee et al., 2005</a>)</span> is a function that describes the separation between known classes in a projection, and is defined as follows:</p>
 <p><span class="math display">\[\begin{eqnarray*}
 I_{\rm LDA}(A) = 1- \frac{|A'WA|}{|A'(W+B)A|}
 \end{eqnarray*}\]</span></p>
@@ -587,7 +592,7 @@ Figure&nbsp;2.2: Two different types of interpolation to a target: (a) geodesic 
 <p></p>
 </section><section id="interpolating-between-targets" class="level3" data-number="2.2.2"><h3 data-number="2.2.2" class="anchored" data-anchor-id="interpolating-between-targets">
 <span class="header-section-number">2.2.2</span> Interpolating between targets</h3>
-<p>Interpolating from the current basis to the target basis is most commonly achieved using geodesic interpolation. This type of interpolation (described in <span class="citation" data-cites="BCAH05">Buja et al. (<a href="references.html#ref-BCAH05" role="doc-biblioref">2005</a>)</span>) has especially important properties: (1) it is plane-to-plane so follows the shortest path, and (2) maintains orthonormality of the basis at each step when <span class="math inline">\(d&gt;1\)</span>. The plane-to-plane movement operates like video stabilisation, by removing the within-plane spin, so you can focus on structure without distracting movement. However, when using the guided tour if the index is not rotationally invariant, for example, if based on correlation or splines, it can be important respect a particular orientation. For this rare situation, using Givens interpolation, available in the <code>woylier</code> package <span class="citation" data-cites="R-woylier">(<a href="references.html#ref-R-woylier" role="doc-biblioref">Batsaikhan et al., 2024</a>)</span> can be helpful. <a href="#fig-interpolation" class="quarto-xref">Figure&nbsp;<span>2.2</span></a> illustrates the difference.</p>
+<p>Interpolating from the current basis to the target basis is most commonly achieved using geodesic interpolation. This type of interpolation (described in <span class="citation" data-cites="BCAH05">Buja et al. (<a href="references.html#ref-BCAH05" role="doc-biblioref">2005</a>)</span>) has especially important properties: (1) it is plane-to-plane so follows the shortest path, and (2) maintains orthonormality of the basis at each step when <span class="math inline">\(d&gt;1\)</span>. The plane-to-plane movement operates like video stabilisation, by removing the within-plane spin, so you can focus on structure without distracting movement. However, when using the guided tour if the index is not rotationally invariant, for example, if based on correlation or splines, it can be important to respect a particular orientation. For this rare situation, using Givens interpolation, available in the <code>woylier</code> package <span class="citation" data-cites="R-woylier">(<a href="references.html#ref-R-woylier" role="doc-biblioref">Batsaikhan et al., 2024</a>)</span> can be helpful. <a href="#fig-interpolation" class="quarto-xref">Figure&nbsp;<span>2.2</span></a> illustrates the difference.</p>
 </section><section id="displaying-the-projected-data" class="level3" data-number="2.2.3"><h3 data-number="2.2.3" class="anchored" data-anchor-id="displaying-the-projected-data">
 <span class="header-section-number">2.2.3</span> Displaying the projected data</h3>
 <p>Based on the dimension of the projection basis there are natural ways to display the projected data. If <span class="math inline">\(d=2\)</span> it is most common that we would use a scatterplot, as shown in <a href="#fig-tour-types-html" class="quarto-xref">Figure&nbsp;<span>2.1</span></a>.</p>
@@ -614,7 +619,7 @@ Figure&nbsp;2.2: Two different types of interpolation to a target: (a) geodesic 
 Figure&nbsp;2.3: Different choices for displaying projected data: (a) histogram, (b) ordered dotplot. In each case the projected data is 1D. In the histogram, the lines at the bottom of the display correspond to the projection basis. For the ordered dotplot, each point corresponds to a US city which has been measured on several criteria such as housing, climate, crime, and education. The lines at the bottom correspond the coefficients for each of these ratings in the projection basis.
 </figcaption></figure>
 </div>
-<p>Adjustments to the display are useful for some problems. The crowding problem where points concentrate as dimension increases can be alleviated with a transformation of the projected data documented in <span class="citation" data-cites="sagetour">Laa et al. (<a href="references.html#ref-sagetour" role="doc-biblioref">2022</a>)</span> and available with the <code>animate_sage()</code> function. When the data is particularly dense, for example, simulated data filling out a full <span class="math inline">\(p\)</span>-dimensional cube from a fitted model generated to understand the fit, it can be useful to use slicing <span class="citation" data-cites="slicetour">(<a href="references.html#ref-slicetour" role="doc-biblioref">Laa et al., 2020a</a>)</span>. Slicing will fade out observations beyond a given distance from the centre of the data, relative to the projection. <a href="#fig-slicing-html" class="quarto-xref">Figure&nbsp;<span>2.4</span></a> illustrates the slice display available using the <code>animate_slice()</code> function.</p>
+<p>Adjustments to the display are useful for some problems. The crowding problem where points concentrate as dimension increases can be alleviated with a transformation of the projected data documented in <span class="citation" data-cites="sagetour">Laa et al. (<a href="references.html#ref-sagetour" role="doc-biblioref">2022</a>)</span> and available with the <code>animate_sage()</code> function. When the data is particularly dense, for example, simulated data filling out a full <span class="math inline">\(p\)</span>-dimensional cube from a fitted model generated to understand the fit, it can be useful to use slicing <span class="citation" data-cites="slicetour">(<a href="references.html#ref-slicetour" role="doc-biblioref">Laa et al., 2020</a>)</span>. Slicing will fade out observations beyond a given distance from the centre of the data, relative to the projection. <a href="#fig-slicing-html" class="quarto-xref">Figure&nbsp;<span>2.4</span></a> illustrates the slice display available using the <code>animate_slice()</code> function.</p>
 <div id="fig-slicing-html" class="quarto-layout-panel">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-slicing-html-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="quarto-layout-row">
@@ -636,7 +641,7 @@ Figure&nbsp;2.3: Different choices for displaying projected data: (a) histogram,
 Figure&nbsp;2.4: Slicing can cut through high density is useful to find hollowness in high-dimensional data, or understand limitations of fitted models. Here points on the surface of a 3D torus are shown using (a) projections, and (b) slices. The slicing reveals the hollowness of this data with the circular cuts to the donut shape.
 </figcaption></figure>
 </div>
-<p>It can also be useful to add layers to the data, such as summary statistics, labels for selected observations, or connecting points with lines to represent model fits. <a href="#fig-adornments-html" class="quarto-xref">Figure&nbsp;<span>2.5</span></a> illustrates two use cases. In (a) labels for specific players are shown when examining player statistics in the <code>aflw</code> data. All three were named best players in the 2021 AFLW season, Bowers and Davey were equal best and fairest, and Vescio was awarded best goal kicker. All three have quite different player statistics profiles. The play of Bowers and Davey differs in the number of handballs and kicks - Davey tends to distribute the ball with handballs, while Bowers tends to kick. In (b) the lines indicate constraints. This is compositional data where each row adds to 1. It is the <code>Fireworks</code> data from the <code>compositions</code> <span class="citation" data-cites="R-compositions">(<a href="references.html#ref-R-compositions" role="doc-biblioref">van den Boogaart et al., 2024</a>)</span> package, and measures the mixtures of five different ingredients. We can see that it is relatively equal mixtures because all are very centred within the constraints. We can also see points banding into stripes, suggesting that there are just a small number of firework recipes.</p>
+<p>It can also be useful to add layers to the data, such as summary statistics, labels for selected observations, or connecting points with lines to represent model fits. <a href="#fig-adornments-html" class="quarto-xref">Figure&nbsp;<span>2.5</span></a> illustrates two use cases. In (a) labels for specific players are shown when examining player statistics in the <code>aflw</code> data. All three were named best players in the 2021 AFLW season, Bowers and Davey were equal best and fairest, and Vescio was awarded best goal kicker. All three have quite different player statistics profiles. The play of Bowers and Davey differs in the number of handballs and kicks - Davey tends to distribute the ball with handballs, while Bowers tends to kick. In (b) the lines indicate constraints. This is compositional data where each row adds to 1. It is the <code>Fireworks</code> data from the <code>compositions</code> <span class="citation" data-cites="R-compositions">(<a href="references.html#ref-R-compositions" role="doc-biblioref"><span class="nocase">van den Boogaart et al.</span>, 2024</a>)</span> package, and measures the mixtures of five different ingredients. We can see that it is relatively equal mixtures because all are very centred within the constraints. We can also see points banding into stripes, suggesting that there are just a small number of firework recipes.</p>
 <p> </p>
 <div id="fig-adornments-html" class="quarto-layout-panel">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-adornments-html-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -677,25 +682,25 @@ Figure&nbsp;2.5: It is sometimes useful to overlay additional information, such 
 <li>Roman Surface, generated by</li>
 </ol>
 <div class="cell">
-<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">rs</span> <span class="op">&lt;-</span> <span class="fu">geozoo</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/geozoo/man/roman.surface.html">roman.surface</a></span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">points</span> <span class="op">|&gt;</span></span>
+<details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">rs</span> <span class="op">&lt;-</span> <span class="fu">geozoo</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/geozoo/man/roman.surface.html">roman.surface</a></span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">points</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/scale.html">scale</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <ol start="2" type="a">
 <li>solid 4D sphere, generated by</li>
 </ol>
 <div class="cell">
-<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">s_solid</span> <span class="op">&lt;-</span> <span class="fu">geozoo</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/geozoo/man/sphere.solid.random.html">sphere.solid.random</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">2000</span><span class="op">)</span><span class="op">$</span><span class="va">points</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">s_solid</span> <span class="op">&lt;-</span> <span class="fu">geozoo</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/geozoo/man/sphere.solid.random.html">sphere.solid.random</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">2000</span><span class="op">)</span><span class="op">$</span><span class="va">points</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <ol start="3" type="a">
 <li>hollow 4D sphere, generated by</li>
 </ol>
 <div class="cell">
-<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb19"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">s_hollow</span> <span class="op">&lt;-</span> <span class="fu">geozoo</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/geozoo/man/sphere.hollow.html">sphere.hollow</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">2000</span><span class="op">)</span><span class="op">$</span><span class="va">points</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">s_hollow</span> <span class="op">&lt;-</span> <span class="fu">geozoo</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/geozoo/man/sphere.hollow.html">sphere.hollow</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">2000</span><span class="op">)</span><span class="op">$</span><span class="va">points</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <p>Use both regular tours, and the slice tours on each. What does the slice tour allow us to see in the Roman Surface? What is the difference between the solid and hollow spheres?</p>
@@ -880,7 +885,7 @@ Cortes, C., Pregibon, D., &amp; Volinsky, C. (2003). Computational <span>M</span
 Cortes, C., &amp; Vapnik, V. N. (1995). Support-<span>V</span>ector <span>N</span>etworks. <em>Machine Learning</em>, <em>20</em>(3), 273–297.
 </div>
 <div id="ref-Oc1885" class="csl-entry" role="listitem">
-d’Ocagne, M. (1885). <em><span>C</span>oordonnées <span>P</span>arallèles et <span>A</span>xiales: <span>M</span>éthode de <span>T</span>ransformation <span>G</span>éométrique et <span>P</span>rocédé <span>N</span>ouveau de <span>C</span>alcul <span>G</span>raphique dÉduits de la <span>C</span>onsidération des <span>C</span>oordonnées <span>P</span>aralléles</em>. Gauthier-Villars.
+<span class="nocase">d’Ocagne, M.</span> (1885). <em><span>C</span>oordonnées <span>P</span>arallèles et <span>A</span>xiales: <span>M</span>éthode de <span>T</span>ransformation <span>G</span>éométrique et <span>P</span>rocédé <span>N</span>ouveau de <span>C</span>alcul <span>G</span>raphique dÉduits de la <span>C</span>onsidération des <span>C</span>oordonnées <span>P</span>aralléles</em>. Gauthier-Villars.
 </div>
 <div id="ref-Dalgaard2002" class="csl-entry" role="listitem">
 Dalgaard, P. (2002). <em>Introductory <span>S</span>tatistics with <span>R</span></em>. Springer.
@@ -889,7 +894,7 @@ Dalgaard, P. (2002). <em>Introductory <span>S</span>tatistics with <span>R</span
 Dasu, T., Swayne, D. F., &amp; Poole, D. (2005). Grouping <span>M</span>ultivariate <span>T</span>ime <span>S</span>eries: A <span>C</span>ase <span>S</span>tudy. <em>Proceedings of the IEEE Workshop on <span>T</span>emporal <span>D</span>ata <span>M</span>ining: <span>A</span>lgorithms, <span>T</span>heory and <span>A</span>pplications, in Conjunction with the Conference on Data Mining, Houston, November 27, 2005</em>, 25–32.
 </div>
 <div id="ref-R-ggdendro" class="csl-entry" role="listitem">
-de Vries, A., &amp; Ripley, B. D. (2024). <em><span class="nocase">ggdendro</span>: <span>C</span>reate <span>D</span>endrograms and <span>T</span>ree <span>D</span>iagrams <span>U</span>sing <span class="nocase">ggplot2</span></em>. <a href="https://andrie.github.io/ggdendro/">https://andrie.github.io/ggdendro/</a>
+<span class="nocase">de Vries, A., &amp; Ripley, B. D.</span> (2024). <em><span class="nocase">ggdendro</span>: <span>C</span>reate <span>D</span>endrograms and <span>T</span>ree <span>D</span>iagrams <span>U</span>sing <span class="nocase">ggplot2</span></em>. <a href="https://andrie.github.io/ggdendro/">https://andrie.github.io/ggdendro/</a>
 </div>
 <div id="ref-fireorigin" class="csl-entry" role="listitem">
 Department of Environment, Land, Water &amp; Planning. (2019). <em><span class="nocase">Fire Origins - Current and Historical</span></em>. <a href="https://discover.data.vic.gov.au/dataset/fire-origins-current-and-historical">https://discover.data.vic.gov.au/dataset/fire-origins-current-and-historical</a>
@@ -1114,10 +1119,7 @@ Laa, U., Aumann, A., Cook, D., &amp; Valencia, G. (2023). New and <span>S</span>
 Laa, U., Cook, D., &amp; Lee, S. (2022). Burning <span>S</span>age: <span>R</span>eversing the <span>C</span>urse of <span>D</span>imensionality in the <span>V</span>isualization of <span>H</span>igh-<span>D</span>imensional <span>D</span>ata. <em>Journal of Computational and Graphical Statistics</em>, <em>31</em>(1), 40–49. <a href="https://doi.org/10.1080/10618600.2021.1963264">https://doi.org/10.1080/10618600.2021.1963264</a>
 </div>
 <div id="ref-slicetour" class="csl-entry" role="listitem">
-Laa, U., Cook, D., &amp; Valencia, G. (2020a). A <span>S</span>lice <span>T</span>our for <span>F</span>inding <span>H</span>ollowness in <span>H</span>igh-<span>D</span>imensional <span>D</span>ata. <em>Journal of Computational and Graphical Statistics</em>, <em>29</em>(3), 681–687. <a href="https://doi.org/10.1080/10618600.2020.1777140">https://doi.org/10.1080/10618600.2020.1777140</a>
-</div>
-<div id="ref-tourr2020" class="csl-entry" role="listitem">
-Laa, U., Cook, D., &amp; Valencia, G. (2020b). A <span>S</span>lice <span>T</span>our for <span>F</span>inding <span>H</span>ollowness in <span>H</span>igh-<span>D</span>imensional <span>D</span>ata. <em>Journal of Computational and Graphical Statistics</em>, <em>29</em>(3), 681–687. <a href="https://doi.org/10.1080/10618600.2020.1777140">https://doi.org/10.1080/10618600.2020.1777140</a>
+Laa, U., Cook, D., &amp; Valencia, G. (2020). A <span>S</span>lice <span>T</span>our for <span>F</span>inding <span>H</span>ollowness in <span>H</span>igh-<span>D</span>imensional <span>D</span>ata. <em>Journal of Computational and Graphical Statistics</em>, <em>29</em>(3), 681–687. <a href="https://doi.org/10.1080/10618600.2020.1777140">https://doi.org/10.1080/10618600.2020.1777140</a>
 </div>
 <div id="ref-helmert" class="csl-entry" role="listitem">
 Lancaster, H. O. (1965). The <span>H</span>elmert <span>M</span>atrices. <em>The American Mathematical Monthly</em>, <em>72</em>(1), 4–12.
@@ -1411,13 +1413,13 @@ Urbanek, S., &amp; Theus, M. (2003). <span class="nocase">iPlots</span>: <span>H
 Vaidyanathan, R., Xie, Y., Allaire, J., Cheng, J., Sievert, C., &amp; Russell, K. (2023). <em>Htmlwidgets: HTML widgets for r</em>. <a href="https://github.com/ramnathv/htmlwidgets">https://github.com/ramnathv/htmlwidgets</a>
 </div>
 <div id="ref-R-compositions" class="csl-entry" role="listitem">
-van den Boogaart, K. G., Tolosana-Delgado, R., &amp; Bren, M. (2024). <em><span class="nocase">compositions</span>: <span>C</span>ompositional <span>D</span>ata <span>A</span>nalysis</em>. <a href="http://www.stat.boogaart.de/compositions/">http://www.stat.boogaart.de/compositions/</a>
+<span class="nocase">van den Boogaart, K. G., Tolosana-Delgado, R., &amp; Bren, M.</span> (2024). <em><span class="nocase">compositions</span>: <span>C</span>ompositional <span>D</span>ata <span>A</span>nalysis</em>. <a href="http://www.stat.boogaart.de/compositions/">http://www.stat.boogaart.de/compositions/</a>
 </div>
 <div id="ref-Rtsne2014" class="csl-entry" role="listitem">
-van der Maaten, L. J. P. (2014). Accelerating <span class="nocase">t-SNE</span> using <span>T</span>ree-<span>B</span>ased lgorithms. <em>Journal of Machine Learning Research</em>, <em>15</em>, 3221–3245.
+<span class="nocase">van der Maaten, L. J. P.</span> (2014). Accelerating <span class="nocase">t-SNE</span> using <span>T</span>ree-<span>B</span>ased lgorithms. <em>Journal of Machine Learning Research</em>, <em>15</em>, 3221–3245.
 </div>
 <div id="ref-Rtsne2008" class="csl-entry" role="listitem">
-van der Maaten, L. J. P., &amp; Hinton, G. E. (2008). Visualizing <span>H</span>igh-<span>D</span>imensional <span>D</span>ata using <span class="nocase">t-SNE</span>. <em>Journal of Machine Learning Research</em>, <em>9</em>, 2579–2605.
+<span class="nocase">van der Maaten, L. J. P., &amp; Hinton, G. E.</span> (2008). Visualizing <span>H</span>igh-<span>D</span>imensional <span>D</span>ata using <span class="nocase">t-SNE</span>. <em>Journal of Machine Learning Research</em>, <em>9</em>, 2579–2605.
 </div>
 <div id="ref-Va99" class="csl-entry" role="listitem">
 Vapnik, V. N. (1999). <em>The <span>N</span>ature of <span>S</span>tatistical <span>L</span>earning <span>T</span>heory</em>. Springer.
@@ -1471,7 +1473,7 @@ Wickham, H. (2016). <em><span class="nocase">ggplot2</span>: <span>E</span>legan
 Wickham, H. (2022). <em><span class="nocase">classifly</span>: <span>E</span>xplore <span>C</span>lassification <span>M</span>odels in <span>H</span>igh <span>D</span>imensions</em>. <a href="http://had.co.nz/classifly">http://had.co.nz/classifly</a>
 </div>
 <div id="ref-R-ggplot2" class="csl-entry" role="listitem">
-Wickham, H., Chang, W., Henry, L., Pedersen, T. L., Takahashi, K., Wilke, C., Woo, K., Yutani, H., Dunnington, D., &amp; van den Brand, T. (2024). <em><span class="nocase">ggplot2</span>: <span>C</span>reate <span>E</span>legant <span>D</span>ata <span>V</span>isualisations <span>U</span>sing the <span>G</span>rammar of <span>G</span>raphics</em>. <a href="https://ggplot2.tidyverse.org">https://ggplot2.tidyverse.org</a>
+<span class="nocase">Wickham, H., Chang, W., Henry, L., Pedersen, T. L., Takahashi, K., Wilke, C., Woo, K., Yutani, H., Dunnington, D., &amp; van den Brand, T.</span> (2024). <em><span class="nocase">ggplot2</span>: <span>C</span>reate <span>E</span>legant <span>D</span>ata <span>V</span>isualisations <span>U</span>sing the <span>G</span>rammar of <span>G</span>raphics</em>. <a href="https://ggplot2.tidyverse.org">https://ggplot2.tidyverse.org</a>
 </div>
 <div id="ref-R-tourr" class="csl-entry" role="listitem">
 Wickham, H., &amp; Cook, D. (2025). <em><span class="nocase">tourr</span>: <span>T</span>our <span>M</span>ethods for <span>M</span>ultivariate <span>D</span>ata <span>V</span>isualisation</em>. <a href="https://github.com/ggobi/tourr">https://github.com/ggobi/tourr</a>
@@ -1523,239 +1525,243 @@ Zhu, H. (2024). <em>kableExtra: Construct complex table with kable and pipe synt
 </div>
 </div>
 </section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
-window.document.addEventListener("DOMContentLoaded", function (event) {
-  const toggleBodyColorMode = (bsSheetEl) => {
-    const mode = bsSheetEl.getAttribute("data-mode");
-    const bodyEl = window.document.querySelector("body");
-    if (mode === "dark") {
-      bodyEl.classList.add("quarto-dark");
-      bodyEl.classList.remove("quarto-light");
-    } else {
-      bodyEl.classList.add("quarto-light");
-      bodyEl.classList.remove("quarto-dark");
-    }
-  }
-  const toggleBodyColorPrimary = () => {
-    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
-    if (bsSheetEl) {
-      toggleBodyColorMode(bsSheetEl);
-    }
-  }
-  toggleBodyColorPrimary();  
-  const icon = "";
-  const anchorJS = new window.AnchorJS();
-  anchorJS.options = {
-    placement: 'right',
-    icon: icon
-  };
-  anchorJS.add('.anchored');
-  const isCodeAnnotation = (el) => {
-    for (const clz of el.classList) {
-      if (clz.startsWith('code-annotation-')) {                     
-        return true;
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
       }
+      return false;
     }
-    return false;
-  }
-  const onCopySuccess = function(e) {
-    // button target
-    const button = e.trigger;
-    // don't keep focus
-    button.blur();
-    // flash "checked"
-    button.classList.add('code-copy-button-checked');
-    var currentTitle = button.getAttribute("title");
-    button.setAttribute("title", "Copied!");
-    let tooltip;
-    if (window.bootstrap) {
-      button.setAttribute("data-bs-toggle", "tooltip");
-      button.setAttribute("data-bs-placement", "left");
-      button.setAttribute("data-bs-title", "Copied!");
-      tooltip = new bootstrap.Tooltip(button, 
-        { trigger: "manual", 
-          customClass: "code-copy-button-tooltip",
-          offset: [0, -8]});
-      tooltip.show();    
-    }
-    setTimeout(function() {
-      if (tooltip) {
-        tooltip.hide();
-        button.removeAttribute("data-bs-title");
-        button.removeAttribute("data-bs-toggle");
-        button.removeAttribute("data-bs-placement");
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
       }
-      button.setAttribute("title", currentTitle);
-      button.classList.remove('code-copy-button-checked');
-    }, 1000);
-    // clear code selection
-    e.clearSelection();
-  }
-  const getTextToCopy = function(trigger) {
-      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
       for (const childEl of codeEl.children) {
         if (isCodeAnnotation(childEl)) {
           childEl.remove();
         }
       }
       return codeEl.innerText;
-  }
-  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
-    text: getTextToCopy
-  });
-  clipboard.on('success', onCopySuccess);
-  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
-    // For code content inside modals, clipBoardJS needs to be initialized with a container option
-    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
-    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
-      text: getTextToCopy,
-      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
     });
-    clipboardModal.on('success', onCopySuccess);
-  }
-    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
-    var mailtoRegex = new RegExp(/^mailto:/);
-      var filterRegex = new RegExp("https:\/\/dicook\.github\.io\/mulgar_book\/");
-    var isInternal = (href) => {
-        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
     }
-    // Inspect non-navigation links and adorn them if external
- 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
-    for (var i=0; i<links.length; i++) {
-      const link = links[i];
-      if (!isInternal(link.href)) {
-        // undo the damage that might have been done by quarto-nav.js in the case of
-        // links that we want to consider external
-        if (link.dataset.originalHref !== undefined) {
-          link.href = link.dataset.originalHref;
-        }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/dicook\.github\.io\/mulgar_book\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }
-    }
-  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
-    const config = {
-      allowHTML: true,
-      maxWidth: 500,
-      delay: 100,
-      arrow: false,
-      appendTo: function(el) {
-          return el.parentElement;
-      },
-      interactive: true,
-      interactiveBorder: 10,
-      theme: 'quarto',
-      placement: 'bottom-start',
-    };
-    if (contentFn) {
-      config.content = contentFn;
-    }
-    if (onTriggerFn) {
-      config.onTrigger = onTriggerFn;
-    }
-    if (onUntriggerFn) {
-      config.onUntrigger = onUntriggerFn;
-    }
-    window.tippy(el, config); 
-  }
-  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
-  for (var i=0; i<noterefs.length; i++) {
-    const ref = noterefs[i];
-    tippyHover(ref, function() {
-      // use id or data attribute instead here
-      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
-      try { href = new URL(href).hash; } catch {}
-      const id = href.replace(/^#\/?/, "");
-      const note = window.document.getElementById(id);
-      if (note) {
-        return note.innerHTML;
-      } else {
-        return "";
-      }
-    });
-  }
-  const xrefs = window.document.querySelectorAll('a.quarto-xref');
-  const processXRef = (id, note) => {
-    // Strip column container classes
-    const stripColumnClz = (el) => {
-      el.classList.remove("page-full", "page-columns");
-      if (el.children) {
-        for (const child of el.children) {
-          stripColumnClz(child);
-        }
-      }
-    }
-    stripColumnClz(note)
-    if (id === null || id.startsWith('sec-')) {
-      // Special case sections, only their first couple elements
-      const container = document.createElement("div");
-      if (note.children && note.children.length > 2) {
-        container.appendChild(note.children[0].cloneNode(true));
-        for (let i = 1; i < note.children.length; i++) {
-          const child = note.children[i];
-          if (child.tagName === "P" && child.innerText === "") {
-            continue;
-          } else {
-            container.appendChild(child.cloneNode(true));
-            break;
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
           }
         }
-        if (window.Quarto?.typesetMath) {
-          window.Quarto.typesetMath(container);
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
         }
-        return container.innerHTML
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
       } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
         if (window.Quarto?.typesetMath) {
           window.Quarto.typesetMath(note);
         }
-        return note.innerHTML;
-      }
-    } else {
-      // Remove any anchor links if they are present
-      const anchorLink = note.querySelector('a.anchorjs-link');
-      if (anchorLink) {
-        anchorLink.remove();
-      }
-      if (window.Quarto?.typesetMath) {
-        window.Quarto.typesetMath(note);
-      }
-      // TODO in 1.5, we should make sure this works without a callout special case
-      if (note.classList.contains("callout")) {
-        return note.outerHTML;
-      } else {
-        return note.innerHTML;
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
       }
     }
-  }
-  for (var i=0; i<xrefs.length; i++) {
-    const xref = xrefs[i];
-    tippyHover(xref, undefined, function(instance) {
-      instance.disable();
-      let url = xref.getAttribute('href');
-      let hash = undefined; 
-      if (url.startsWith('#')) {
-        hash = url;
-      } else {
-        try { hash = new URL(url).hash; } catch {}
-      }
-      if (hash) {
-        const id = hash.replace(/^#\/?/, "");
-        const note = window.document.getElementById(id);
-        if (note !== null) {
-          try {
-            const html = processXRef(id, note.cloneNode(true));
-            instance.setContent(html);
-          } finally {
-            instance.enable();
-            instance.show();
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
           }
         } else {
-          // See if we can fetch this
-          fetch(url.split('#')[0])
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
           .then(res => res.text())
           .then(html => {
             const parser = new DOMParser();
             const htmlDoc = parser.parseFromString(html, "text/html");
-            const note = htmlDoc.getElementById(id);
+            const note = htmlDoc.querySelector('main.content');
             if (note !== null) {
-              const html = processXRef(id, note);
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
               instance.setContent(html);
             } 
           }).finally(() => {
@@ -1763,185 +1769,161 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             instance.show();
           });
         }
-      } else {
-        // See if we can fetch a full url (with no hash to target)
-        // This is a special case and we should probably do some content thinning / targeting
-        fetch(url)
-        .then(res => res.text())
-        .then(html => {
-          const parser = new DOMParser();
-          const htmlDoc = parser.parseFromString(html, "text/html");
-          const note = htmlDoc.querySelector('main.content');
-          if (note !== null) {
-            // This should only happen for chapter cross references
-            // (since there is no id in the URL)
-            // remove the first header
-            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
-              note.children[0].remove();
-            }
-            const html = processXRef(null, note);
-            instance.setContent(html);
-          } 
-        }).finally(() => {
-          instance.enable();
-          instance.show();
-        });
-      }
-    }, function(instance) {
-    });
-  }
-      let selectedAnnoteEl;
-      const selectorForAnnotation = ( cell, annotation) => {
-        let cellAttr = 'data-code-cell="' + cell + '"';
-        let lineAttr = 'data-code-annotation="' +  annotation + '"';
-        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
-        return selector;
-      }
-      const selectCodeLines = (annoteEl) => {
-        const doc = window.document;
-        const targetCell = annoteEl.getAttribute("data-target-cell");
-        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
-        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
-        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
-        const lineIds = lines.map((line) => {
-          return targetCell + "-" + line;
-        })
-        let top = null;
-        let height = null;
-        let parent = null;
-        if (lineIds.length > 0) {
-            //compute the position of the single el (top and bottom and make a div)
-            const el = window.document.getElementById(lineIds[0]);
-            top = el.offsetTop;
-            height = el.offsetHeight;
-            parent = el.parentElement.parentElement;
-          if (lineIds.length > 1) {
-            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
-            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
-            height = bottom - top;
-          }
-          if (top !== null && height !== null && parent !== null) {
-            // cook up a div (if necessary) and position it 
-            let div = window.document.getElementById("code-annotation-line-highlight");
-            if (div === null) {
-              div = window.document.createElement("div");
-              div.setAttribute("id", "code-annotation-line-highlight");
-              div.style.position = 'absolute';
-              parent.appendChild(div);
-            }
-            div.style.top = top - 2 + "px";
-            div.style.height = height + 4 + "px";
-            div.style.left = 0;
-            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
-            if (gutterDiv === null) {
-              gutterDiv = window.document.createElement("div");
-              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
-              gutterDiv.style.position = 'absolute';
-              const codeCell = window.document.getElementById(targetCell);
-              const gutter = codeCell.querySelector('.code-annotation-gutter');
-              gutter.appendChild(gutterDiv);
-            }
-            gutterDiv.style.top = top - 2 + "px";
-            gutterDiv.style.height = height + 4 + "px";
-          }
-          selectedAnnoteEl = annoteEl;
-        }
-      };
-      const unselectCodeLines = () => {
-        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
-        elementsIds.forEach((elId) => {
-          const div = window.document.getElementById(elId);
-          if (div) {
-            div.remove();
-          }
-        });
-        selectedAnnoteEl = undefined;
-      };
-        // Handle positioning of the toggle
-    window.addEventListener(
-      "resize",
-      throttle(() => {
-        elRect = undefined;
-        if (selectedAnnoteEl) {
-          selectCodeLines(selectedAnnoteEl);
-        }
-      }, 10)
-    );
-    function throttle(fn, ms) {
-    let throttle = false;
-    let timer;
-      return (...args) => {
-        if(!throttle) { // first call gets through
-            fn.apply(this, args);
-            throttle = true;
-        } else { // all the others get throttled
-            if(timer) clearTimeout(timer); // cancel #2
-            timer = setTimeout(() => {
-              fn.apply(this, args);
-              timer = throttle = false;
-            }, ms);
-        }
-      };
-    }
-      // Attach click handler to the DT
-      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
-      for (const annoteDlNode of annoteDls) {
-        annoteDlNode.addEventListener('click', (event) => {
-          const clickedEl = event.target;
-          if (clickedEl !== selectedAnnoteEl) {
-            unselectCodeLines();
-            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
-            if (activeEl) {
-              activeEl.classList.remove('code-annotation-active');
-            }
-            selectCodeLines(clickedEl);
-            clickedEl.classList.add('code-annotation-active');
-          } else {
-            // Unselect the line
-            unselectCodeLines();
-            clickedEl.classList.remove('code-annotation-active');
-          }
-        });
-      }
-  const findCites = (el) => {
-    const parentEl = el.parentElement;
-    if (parentEl) {
-      const cites = parentEl.dataset.cites;
-      if (cites) {
-        return {
-          el,
-          cites: cites.split(' ')
-        };
-      } else {
-        return findCites(el.parentElement)
-      }
-    } else {
-      return undefined;
-    }
-  };
-  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
-  for (var i=0; i<bibliorefs.length; i++) {
-    const ref = bibliorefs[i];
-    const citeInfo = findCites(ref);
-    if (citeInfo) {
-      tippyHover(citeInfo.el, function() {
-        var popup = window.document.createElement('div');
-        citeInfo.cites.forEach(function(cite) {
-          var citeDiv = window.document.createElement('div');
-          citeDiv.classList.add('hanging-indent');
-          citeDiv.classList.add('csl-entry');
-          var biblioDiv = window.document.getElementById('ref-' + cite);
-          if (biblioDiv) {
-            citeDiv.innerHTML = biblioDiv.innerHTML;
-          }
-          popup.appendChild(citeDiv);
-        });
-        return popup.innerHTML;
+      }, function(instance) {
       });
     }
-  }
-});
-</script><nav class="page-navigation"><div class="nav-page nav-page-previous">
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script><nav class="page-navigation"><div class="nav-page nav-page-previous">
       <a href="./1-intro.html" class="pagination-link" aria-label="Picturing high dimensions">
         <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Picturing high dimensions</span></span>
       </a>          

@@ -2,10 +2,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.6.33">
+<meta name="generator" content="quarto-1.9.30">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <title>14&nbsp; Linear discriminant analysis – Interactively exploring high-dimensional data and models in R</title>
 <style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
 div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -18,8 +21,9 @@ ul.task-list li input[type="checkbox"] {
   vertical-align: middle;
 }
 /* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -30,7 +34,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -83,15 +87,16 @@ div.csl-indent {
 <link href="./15-forests.html" rel="next">
 <link href="./13-intro-class.html" rel="prev">
 <link href="./cover.png" rel="icon" type="image/png">
-<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-07ba0ad10f5680c660e360ac31d2f3b6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-b6a8276bf55561bdbc268162d41bd1f7.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-f9f98161c7b4448b9568ea5662a0cac7.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
+<link href="site_libs/bootstrap/bootstrap-e194f9b77bef675d061b88ac12283f50.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
   "collapse-after": 3,
@@ -118,7 +123,7 @@ div.csl-indent {
     "search-label": "Search"
   }
 }</script><script src="site_libs/kePrint-0.0.1/kePrint.js"></script><link href="site_libs/lightable-0.0.1/lightable.css" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script><script type="text/javascript">
+<script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script><script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script><script type="text/javascript">
 const typesetMath = (el) => {
   if (window.MathJax) {
     // MathJax Typeset
@@ -129,7 +134,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -145,7 +150,7 @@ window.Quarto = {
 };
 </script>
 </head>
-<body class="nav-sidebar floating">
+<body class="nav-sidebar floating quarto-light">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top"><nav class="quarto-secondary-nav"><div class="container-fluid d-flex">
@@ -433,23 +438,23 @@ W =
 <p>We can fit an LDA model using the <code>lda()</code> function from the <code>MASS</code> package. Here we have used the <code>penguins</code> data, assuming equal prior probability, to illustrate.</p>
 <p> </p>
 <div class="cell">
-<details class="code-fold"><summary>Load libraries</summary><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/source.html">source</a></span><span class="op">(</span><span class="st">"code/setup.R"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details class="code-fold"><summary>Load libraries</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/source.html">source</a></span><span class="op">(</span><span class="st">"code/setup.R"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <div class="cell">
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Code to fit the model</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Code to fit the model</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"data/penguins_sub.rda"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">p_lda</span> <span class="op">&lt;-</span> <span class="fu">lda</span><span class="op">(</span><span class="va">species</span><span class="op">~</span><span class="va">bl</span><span class="op">+</span><span class="va">bd</span><span class="op">+</span><span class="va">fl</span><span class="op">+</span><span class="va">bm</span>, </span>
 <span>             data<span class="op">=</span><span class="va">penguins_sub</span>,</span>
 <span>             prior<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">/</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">/</span><span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/options.html">options</a></span><span class="op">(</span>digits<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span>
-<span><span class="co"># p_lda</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="co"># p_lda</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Because there are three classes the dimension of the discriminant space is 2D. We can easily extract the group means from the model.</p>
 <div class="cell">
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Extract the sample means</span></span>
-<span><span class="va">p_lda</span><span class="op">$</span><span class="va">means</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Extract the sample means</span></span>
+<span><span class="va">p_lda</span><span class="op">$</span><span class="va">means</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>             bl    bd    fl    bm
 Adelie    -0.95  0.60 -0.78 -0.62
@@ -459,8 +464,8 @@ Gentoo     0.65 -1.10  1.16  1.10</code></pre>
 </div>
 <p>The coefficients to project the data into the discriminant space, that is the eigenvectors of <span class="math inline">\(W^{-1}B\)</span> are:</p>
 <div class="cell">
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Extract the discriminant space</span></span>
-<span><span class="va">p_lda</span><span class="op">$</span><span class="va">scaling</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Extract the discriminant space</span></span>
+<span><span class="va">p_lda</span><span class="op">$</span><span class="va">scaling</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>     LD1   LD2
 bl -0.24 -2.31
@@ -471,12 +476,12 @@ bm -1.22  1.24</code></pre>
 </div>
 <p>and the predicted values, which include class predictions, and coordinates in the discriminant space are generated as:</p>
 <div class="cell">
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Extract the fitted values</span></span>
-<span><span class="va">p_lda_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">p_lda</span>, <span class="va">penguins_sub</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Extract the fitted values</span></span>
+<span><span class="va">p_lda_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">p_lda</span>, <span class="va">penguins_sub</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The best separation between classes can be viewed from this object, which can be shown to match the original data projected using the <code>scaling</code> component of the model object (see <a href="#fig-p-lda" class="quarto-xref">Figure&nbsp;<span>14.1</span></a>).</p>
 <div class="cell">
-<details class="code-fold"><summary>Code to generate LDA plots</summary><div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Check calculations from the fitted model, and equations</span></span>
+<details class="code-fold"><summary>Code to generate LDA plots</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Check calculations from the fitted model, and equations</span></span>
 <span><span class="co"># Using the predicted values from the model object</span></span>
 <span><span class="va">p_lda_pred_x1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span><span class="va">p_lda_pred</span><span class="op">$</span><span class="va">x</span><span class="op">)</span></span>
 <span><span class="va">p_lda_pred_x1</span><span class="op">$</span><span class="va">species</span> <span class="op">&lt;-</span> <span class="va">penguins_sub</span><span class="op">$</span><span class="va">species</span></span>
@@ -504,7 +509,7 @@ bm -1.22  1.24</code></pre>
 <span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">theme</span><span class="op">(</span>aspect.ratio <span class="op">=</span> <span class="fl">1</span>, legend.title <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> </span>
 <span><span class="fu">ggarrange</span><span class="op">(</span><span class="va">p_lda1</span>, <span class="va">p_lda2</span>, ncol<span class="op">=</span><span class="fl">2</span>, </span>
-<span>          common.legend <span class="op">=</span> <span class="cn">TRUE</span>, legend <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span>          common.legend <span class="op">=</span> <span class="cn">TRUE</span>, legend <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details><div class="cell-output-display">
 <div id="fig-p-lda" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Two plots labelled (a) and (b) that are the same scatterplot, except the scale in each is different. Plot (a) has x-axis LD1 with labels -4, 0, 4 and 8 has y-axis LD2 with labels -6, -3, 0, 3 and 6. Plot (b) has x-axis LD1 with labels -4, 0, 4 and 8 and y-axis LD2 with labels -4, 0 and 4. There is a legend indicating colour is used to show species, with 3 levels: Adelie shown as brilliant greenish blue colour, Chinstrap shown as brilliant yellow colour and Gentoo shown as vivid red colour. The chart is a set of 313 big solid circle points of which about 97% can be seen. Red is separated from the other two clusters, but green and yellow are overlapped.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-p-lda-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -518,10 +523,10 @@ Figure&nbsp;14.1: Penguins projected into the 2D discriminant space, done two wa
 </div>
 <p>The <span class="math inline">\(W\)</span> and <span class="math inline">\(B\)</span> matrices cannot be extracted from the model object, so we need to compute these separately. We only need <span class="math inline">\(W\)</span> actually. It is useful to think of this as the pooled variance-covariance matrix. Because the assumption for LDA is that the population group variance-covariances are identical, we estimate this by computing them for each class and then averaging them to get the pooled variance-covariance matrix. It’s laborious, but easy.</p>
 <div class="cell">
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Compute pooled variance-covariance</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Compute pooled variance-covariance</span></span>
 <span><span class="va">p_vc_pool</span> <span class="op">&lt;-</span> <span class="fu">mulgar</span><span class="fu">::</span><span class="fu"><a href="https://dicook.github.io/mulgar/reference/pooled_vc.html">pooled_vc</a></span><span class="op">(</span><span class="va">penguins_sub</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,</span>
 <span>                               <span class="va">penguins_sub</span><span class="op">$</span><span class="va">species</span><span class="op">)</span></span>
-<span><span class="va">p_vc_pool</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="va">p_vc_pool</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>     bl   bd   fl   bm
 bl 0.31 0.18 0.13 0.18
@@ -539,18 +544,18 @@ bm 0.18 0.20 0.16 0.31</code></pre>
 </div>
 <p> </p>
 <div class="cell">
-<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Generate ellipses for each group's variance-covariance</span></span>
+<details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Generate ellipses for each group's variance-covariance</span></span>
 <span><span class="va">p_ell</span> <span class="op">&lt;-</span> <span class="cn">NULL</span></span>
 <span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span><span class="op">(</span><span class="va">penguins_sub</span><span class="op">$</span><span class="va">species</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">x</span> <span class="op">&lt;-</span> <span class="va">penguins_sub</span> <span class="op">|&gt;</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">species</span> <span class="op">==</span> <span class="va">i</span><span class="op">)</span></span>
 <span>  <span class="va">e</span> <span class="op">&lt;-</span> <span class="fu">gen_xvar_ellipse</span><span class="op">(</span><span class="va">x</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span>, n<span class="op">=</span><span class="fl">150</span>, nstd<span class="op">=</span><span class="fl">1.5</span><span class="op">)</span></span>
 <span>  <span class="va">e</span><span class="op">$</span><span class="va">species</span> <span class="op">&lt;-</span> <span class="va">i</span></span>
 <span>  <span class="va">p_ell</span> <span class="op">&lt;-</span> <span class="fu">bind_rows</span><span class="op">(</span><span class="va">p_ell</span>, <span class="va">e</span><span class="op">)</span></span>
-<span><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <div class="cell">
-<details class="code-fold"><summary>Code for penguins data and ellipse plots</summary><div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">lda1</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="va">penguins_sub</span>, <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">bl</span>, </span>
+<details class="code-fold"><summary>Code for penguins data and ellipse plots</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">lda1</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="va">penguins_sub</span>, <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">bl</span>, </span>
 <span>                         y<span class="op">=</span><span class="va">bd</span>, </span>
 <span>                         colour<span class="op">=</span><span class="va">species</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
@@ -569,7 +574,7 @@ bm 0.18 0.20 0.16 0.31</code></pre>
 <span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">theme</span><span class="op">(</span>aspect.ratio <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="fu">ggarrange</span><span class="op">(</span><span class="va">lda1</span>, <span class="va">lda2</span>, ncol<span class="op">=</span><span class="fl">2</span>, </span>
-<span>          common.legend <span class="op">=</span> <span class="cn">TRUE</span>, legend <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span>          common.legend <span class="op">=</span> <span class="cn">TRUE</span>, legend <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details><div class="cell-output-display">
 <div id="fig-lda-assumptions1" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Two plots labelled (a) and (b). Both have x-axis bl with labels -2, -1, 0, 1, 2 and 3 and y-axis bd with labels -2, -1, 0, 1 and 2. There is a legend indicating colour is used to show species, with 3 levels: Adelie shown as brilliant greenish blue colour, Chinstrap shown as brilliant yellow colour and Gentoo shown as vivid red colour. Plot (a) is a set of 333 big solid circle points of which about 97% can be seen, where differences between the three groups are visible. Plot (b) is a set of 450 big solid circle points arranged into three very similar shaped and oriented non-overlapping ellipses.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-lda-assumptions1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -582,7 +587,7 @@ Figure&nbsp;14.2: Scatterplot of flipper length by bill length of the penguins d
 </div>
 </div>
 <div class="cell">
-<details class="code-fold"><summary>Code for bushfires data and ellipse plots</summary><div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Now repeat for a data set that violates assumptions</span></span>
+<details class="code-fold"><summary>Code for bushfires data and ellipse plots</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Now repeat for a data set that violates assumptions</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="va">bushfires</span><span class="op">)</span></span>
 <span><span class="va">lda3</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="va">bushfires</span>, <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">log_dist_cfa</span>, </span>
 <span>                         y<span class="op">=</span><span class="va">log_dist_road</span>, </span>
@@ -610,7 +615,7 @@ Figure&nbsp;14.2: Scatterplot of flipper length by bill length of the penguins d
 <span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">theme</span><span class="op">(</span>aspect.ratio <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="fu">ggarrange</span><span class="op">(</span><span class="va">lda3</span>, <span class="va">lda4</span>, ncol<span class="op">=</span><span class="fl">2</span>, </span>
-<span>          common.legend <span class="op">=</span> <span class="cn">TRUE</span>, legend <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span>          common.legend <span class="op">=</span> <span class="cn">TRUE</span>, legend <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details><div class="cell-output-display">
 <div id="fig-lda-assumptions2" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Two plots labelled (a) and (b). Both have x-axis log_dist_cfa with labels 6, 7, 8, 9, 10 and 11 and y-axis log_dist_road with labels 0.0, 2.5, 5.0, 7.5 and 10.0. There is a legend indicating colour is used to show cause, with 4 levels: accident shown as brilliant greenish blue colour,  arson shown as light yellowish green colour,  burning_off shown as strong orange yellow colour and lightning shown as vivid red colour. Plot (a) is a set of 333 big solid circle points of which about 97% can be seen, with few differences between the four groups. Plot (b) is a set of 450 big solid circle points arranged into four differently shaped and oriented overlapping ellipses.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-lda-assumptions2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -628,7 +633,7 @@ Figure&nbsp;14.3: Scatterplot of distance to cfa and road for the bushfires data
 </div>
 <p>This approach extends to any dimension. We would use the same projection sequence to view both the data and the variance-covariance ellipses, as in <a href="#fig-penguins-lda-ellipses-html" class="quarto-xref">Figure&nbsp;<span>14.4</span></a>. It can be seen that there is some difference in the shape and size of the ellipses between species, in some projections, and also with the spread of points in the projected data. However, the differences are small, so it would be safe to assume that the population variance-covariances are equal.</p>
 <div class="cell">
-<details class="code-fold"><summary>Code for making animated gifs</summary><div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_ell</span> <span class="op">&lt;-</span> <span class="cn">NULL</span></span>
+<details class="code-fold"><summary>Code for making animated gifs</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_ell</span> <span class="op">&lt;-</span> <span class="cn">NULL</span></span>
 <span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span><span class="op">(</span><span class="va">penguins_sub</span><span class="op">$</span><span class="va">species</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">x</span> <span class="op">&lt;-</span> <span class="va">penguins_sub</span> <span class="op">|&gt;</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">species</span> <span class="op">==</span> <span class="va">i</span><span class="op">)</span></span>
 <span>  <span class="va">e</span> <span class="op">&lt;-</span> <span class="fu">gen_xvar_ellipse</span><span class="op">(</span><span class="va">x</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, n<span class="op">=</span><span class="fl">150</span>, nstd<span class="op">=</span><span class="fl">1.5</span><span class="op">)</span></span>
@@ -649,7 +654,7 @@ Figure&nbsp;14.3: Scatterplot of distance to cfa and road for the bushfires data
 <span>           <span class="fu">display_xy</span><span class="op">(</span>half_range<span class="op">=</span><span class="fl">0.9</span>, axes<span class="op">=</span><span class="st">"off"</span>, col<span class="op">=</span><span class="va">p_ell</span><span class="op">$</span><span class="va">species</span><span class="op">)</span>,</span>
 <span>           gif_file<span class="op">=</span><span class="st">"gifs/penguins_lda2.gif"</span>,</span>
 <span>           frames<span class="op">=</span><span class="fl">500</span>,</span>
-<span>           loop<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span>           loop<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <div id="fig-penguins-lda-ellipses-html" class="quarto-layout-panel">
@@ -687,7 +692,7 @@ Figure&nbsp;14.4: Checking the assumption of equal variance-covariance matrices 
 </div>
 <p> </p>
 <div class="cell">
-<details class="code-fold"><summary>Code for adding ellipses to data</summary><div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create an ellipse corresponding to pooled vc</span></span>
+<details class="code-fold"><summary>Code for adding ellipses to data</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create an ellipse corresponding to pooled vc</span></span>
 <span><span class="va">pool_ell</span> <span class="op">&lt;-</span> <span class="fu">gen_vc_ellipse</span><span class="op">(</span><span class="va">p_vc_pool</span>, </span>
 <span>                           xm<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html">ncol</a></span><span class="op">(</span><span class="va">p_vc_pool</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -718,11 +723,11 @@ Figure&nbsp;14.4: Checking the assumption of equal variance-covariance matrices 
 <span><span class="va">p_lda_all</span><span class="op">$</span><span class="va">type</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">p_lda_all</span><span class="op">$</span><span class="va">type</span>, </span>
 <span>   levels<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"mean"</span>, <span class="st">"data"</span>, <span class="st">"ellipse"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">shapes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">20</span><span class="op">)</span></span>
-<span><span class="va">p_pch</span> <span class="op">&lt;-</span> <span class="va">shapes</span><span class="op">[</span><span class="va">p_lda_all</span><span class="op">$</span><span class="va">type</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="va">p_pch</span> <span class="op">&lt;-</span> <span class="va">shapes</span><span class="op">[</span><span class="va">p_lda_all</span><span class="op">$</span><span class="va">type</span><span class="op">]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <div class="cell">
-<details class="code-fold"><summary>Code to generate animated gifs</summary><div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Code to run the tour</span></span>
+<details class="code-fold"><summary>Code to generate animated gifs</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Code to run the tour</span></span>
 <span><span class="fu">animate_xy</span><span class="op">(</span><span class="va">p_lda_all</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, col<span class="op">=</span><span class="va">p_lda_all</span><span class="op">$</span><span class="va">species</span>, pch<span class="op">=</span><span class="va">p_pch</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"data/penguins_tour_path.rda"</span><span class="op">)</span></span>
 <span><span class="fu">render_gif</span><span class="op">(</span><span class="va">p_lda_all</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, </span>
@@ -741,7 +746,7 @@ Figure&nbsp;14.4: Checking the assumption of equal variance-covariance matrices 
 <span>                      axes<span class="op">=</span><span class="st">"off"</span>, half_range <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span>,</span>
 <span>           gif_file<span class="op">=</span><span class="st">"gifs/penguins_lda_pooled2.gif"</span>,</span>
 <span>           frames<span class="op">=</span><span class="fl">500</span>,</span>
-<span>           loop<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span>           loop<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <div id="fig-penguins-lda-pooled-html" class="quarto-layout-panel">
@@ -785,13 +790,13 @@ Figure&nbsp;14.5: Checking how the pooled variance-covariance matches the spread
 </ol>
 <p>We’ll look at this for 2D using the LDA model fitted to <code>bl</code>, and <code>bd</code> of the <code>penguins</code> data.</p>
 <div class="cell">
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_bl_bd_lda</span> <span class="op">&lt;-</span> <span class="fu">lda</span><span class="op">(</span><span class="va">species</span><span class="op">~</span><span class="va">bl</span><span class="op">+</span><span class="va">bd</span>, data<span class="op">=</span><span class="va">penguins_sub</span>, </span>
-<span>                                  prior <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">/</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">/</span><span class="fl">3</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_bl_bd_lda</span> <span class="op">&lt;-</span> <span class="fu">lda</span><span class="op">(</span><span class="va">species</span><span class="op">~</span><span class="va">bl</span><span class="op">+</span><span class="va">bd</span>, data<span class="op">=</span><span class="va">penguins_sub</span>, </span>
+<span>                                  prior <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">/</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">/</span><span class="fl">3</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The fitted model means <span class="math inline">\(\bar{x}_{Adelie} = (\)</span> -0.95, 0.6<span class="math inline">\()^\top\)</span>, <span class="math inline">\(\bar{x}_{Chinstrap} = (\)</span> 0.89, 0.64<span class="math inline">\()^\top\)</span>, and <span class="math inline">\(\bar{x}_{Gentoo} = (\)</span> 0.65, -1.1<span class="math inline">\()^\top\)</span> can be added to the plots.</p>
 <p>The boundaries can be examined using the <code>explore()</code> function from the <code>classifly</code> package, which generates observations in the range of all values of<code>bl</code> and <code>bd</code> and predicts their class. <a href="#fig-lda-2D-boundary" class="quarto-xref">Figure&nbsp;<span>14.6</span></a> shows the resulting prediction regions, with the observed data and the sample means overlaid. </p>
 <div class="cell">
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Compute points in domain of data and predict</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Compute points in domain of data and predict</span></span>
 <span><span class="va">p_bl_bd_lda_boundaries</span> <span class="op">&lt;-</span> <span class="fu">explore</span><span class="op">(</span><span class="va">p_bl_bd_lda</span>, <span class="va">penguins_sub</span><span class="op">)</span></span>
 <span><span class="va">p_bl_bd_lda_m1</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="va">p_bl_bd_lda_boundaries</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">geom_point</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">bl</span>, y<span class="op">=</span><span class="va">bd</span>, </span>
@@ -809,7 +814,7 @@ Figure&nbsp;14.5: Checking how the pooled variance-covariance matches the spread
 <span>             <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">bl</span>, y<span class="op">=</span><span class="va">bd</span><span class="op">)</span>, </span>
 <span>             colour<span class="op">=</span><span class="st">"black"</span>, </span>
 <span>             shape<span class="op">=</span><span class="fl">3</span>,</span>
-<span>             size<span class="op">=</span><span class="fl">3</span><span class="op">)</span> </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span>             size<span class="op">=</span><span class="fl">3</span><span class="op">)</span> </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div id="fig-lda-2D-boundary" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Square divided into three regions by the coloured points, primarily a wedge of yellow (Chinstrap) extending from the top right divides the other two groups. The regions mostly contain the observed values, with just a few over the boundary in the wrong region.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-lda-2D-boundary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -822,15 +827,15 @@ Figure&nbsp;14.6: Prediction regions of the LDA model for two variables of the t
 </div>
 </div>
 <p> </p>
-<p>This approach can be readily extended to higher dimensions. One first fits the model with all four variables, and uses <code>explore()</code> to generate points in the 4D space with predictions, generating a representation of the prediction regions. <a href="#fig-penguins-lda-boundaries-html" class="quarto-xref">Figure&nbsp;<span>14.7</span></a> (a) shows the results using a slice tour <span class="citation" data-cites="slicetour">(<a href="references.html#ref-slicetour" role="doc-biblioref">Laa et al., 2020a</a>)</span>. Points inside the slice are shown in larger size. The slice is made in the centre of the data, to show the boundaries in this neighbourhood. As the tour progresses we see a thin slice through the centre of the data, parallel with the projection plane. In most projections there is some small overlap of points between groups, which happens because we are examining a 4D object with 2D. The slice helps to alleviate this, allowing a focus on the boundaries in the centre of the cube. In all projections the boundaries between groups is linear, as would be expected when using LDA. We can also see that the model roughly divides the cube into three relatively equally-sized regions.</p>
+<p>This approach can be readily extended to higher dimensions. One first fits the model with all four variables, and uses <code>explore()</code> to generate points in the 4D space with predictions, generating a representation of the prediction regions. <a href="#fig-penguins-lda-boundaries-html" class="quarto-xref">Figure&nbsp;<span>14.7</span></a> (a) shows the results using a slice tour <span class="citation" data-cites="slicetour">(<a href="references.html#ref-slicetour" role="doc-biblioref">Laa et al., 2020</a>)</span>. Points inside the slice are shown in larger size. The slice is made in the centre of the data, to show the boundaries in this neighbourhood. As the tour progresses we see a thin slice through the centre of the data, parallel with the projection plane. In most projections there is some small overlap of points between groups, which happens because we are examining a 4D object with 2D. The slice helps to alleviate this, allowing a focus on the boundaries in the centre of the cube. In all projections the boundaries between groups is linear, as would be expected when using LDA. We can also see that the model roughly divides the cube into three relatively equally-sized regions.</p>
 <p><a href="#fig-penguins-lda-boundaries-html" class="quarto-xref">Figure&nbsp;<span>14.7</span></a> (b) shows the three prediction regions, represented by points in 4D, projected into the discriminant space. Linear boundaries neatly divide the full space, which is to be expected because the LDA model computes it’s classification rules in this 2D space. In this view the data has been overlaid and it can be seen that the boundaries produced by LDA quite nicely separate the species, albeit some confusion between Adelie and Chinstrap. Overlaying the data on the slice tour in (a) could be useful but it also adds too many parts to the plot, possibly making it more difficult to focus on the boundary.</p>
 <p></p>
 <div class="cell">
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_lda</span> <span class="op">&lt;-</span> <span class="fu">lda</span><span class="op">(</span><span class="va">species</span> <span class="op">~</span> <span class="va">.</span>, <span class="va">penguins_sub</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>, prior <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">/</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">/</span><span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">p_lda_boundaries</span> <span class="op">&lt;-</span> <span class="fu">explore</span><span class="op">(</span><span class="va">p_lda</span>, <span class="va">penguins_sub</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_lda</span> <span class="op">&lt;-</span> <span class="fu">lda</span><span class="op">(</span><span class="va">species</span> <span class="op">~</span> <span class="va">.</span>, <span class="va">penguins_sub</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>, prior <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">/</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">/</span><span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">p_lda_boundaries</span> <span class="op">&lt;-</span> <span class="fu">explore</span><span class="op">(</span><span class="va">p_lda</span>, <span class="va">penguins_sub</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell">
-<details class="code-fold"><summary>Code for generating slice tour</summary><div class="sourceCode" id="cb20"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Code to run the tour</span></span>
+<details class="code-fold"><summary>Code for generating slice tour</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Code to run the tour</span></span>
 <span><span class="fu">animate_slice</span><span class="op">(</span><span class="va">p_lda_boundaries</span><span class="op">[</span></span>
 <span>  <span class="va">p_lda_boundaries</span><span class="op">$</span><span class="va">.TYPE</span> <span class="op">==</span> <span class="st">"simulated"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, </span>
 <span>              col<span class="op">=</span><span class="va">p_lda_boundaries</span><span class="op">$</span><span class="va">species</span><span class="op">[</span></span>
@@ -846,11 +851,11 @@ Figure&nbsp;14.6: Prediction regions of the LDA model for two variables of the t
 <span>           gif_file<span class="op">=</span><span class="st">"gifs/penguins_lda_boundaries.gif"</span>,</span>
 <span>           frames<span class="op">=</span><span class="fl">500</span>,</span>
 <span>           loop<span class="op">=</span><span class="cn">FALSE</span></span>
-<span>           <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span>           <span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <div class="cell">
-<details class="code-fold"><summary>Code for projecting into LDA space</summary><div class="sourceCode" id="cb21"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Project the boundaries into the 2D discriminant space</span></span>
+<details class="code-fold"><summary>Code for projecting into LDA space</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Project the boundaries into the 2D discriminant space</span></span>
 <span><span class="va">p_lda_b_sub</span> <span class="op">&lt;-</span> <span class="va">p_lda_boundaries</span><span class="op">[</span></span>
 <span>  <span class="va">p_lda_boundaries</span><span class="op">$</span><span class="va">.TYPE</span> <span class="op">==</span> <span class="st">"simulated"</span>, </span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span>, <span class="fl">6</span><span class="op">)</span><span class="op">]</span></span>
@@ -870,7 +875,7 @@ Figure&nbsp;14.6: Prediction regions of the LDA model for two variables of the t
 <span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">theme</span><span class="op">(</span>aspect.ratio <span class="op">=</span> <span class="fl">1</span>, </span>
 <span>        legend.position <span class="op">=</span> <span class="st">"bottom"</span>,</span>
-<span>        legend.title <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span>        legend.title <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <div id="fig-penguins-lda-boundaries-html" class="quarto-layout-panel">
@@ -918,7 +923,7 @@ Figure&nbsp;14.7: Examining the boundaries produced by the LDA model in the full
 Table&nbsp;14.1: Coefficients of the discriminant space, original and othonormalised. LD1 is the direction where Gentoo is separated from the others, and the coefficients suggest this is due to a contrast between bd and fl/bm. LD2 is where Adelie is different from Chinstrap, which is generated by a contrast between bl and bm.
 </figcaption><div aria-describedby="tbl-ds-coef-html-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
-<table class="do-not-create-environment cell caption-top table table-sm table-striped small" data-quarto-postprocess="true">
+<table class="cell caption-top table table-sm table-striped small">
 <colgroup>
 <col style="width: 20%">
 <col style="width: 20%">
@@ -1014,30 +1019,32 @@ Figure&nbsp;14.8: Using the radial tour (a) and local tour (b) to investigate th
 </section><section id="exercises" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="exercises">Exercises</h2>
 <p> </p>
 <ol type="1">
-<li>For the <code>simple_clusters</code> compute the LDA model, and make a plot of the data, with points coloured by the true class. Overlay variance-covariance ellipses, and a <span class="math inline">\(+\)</span> indicating the sample mean for each class. Is it reasonable to assume that the two classes are sampled from populations with the same variance-covariance?</li>
-<li>Examine the clusters corresponding to the true classes in the <code>clusters</code> data set, using a tour. Based on the shape of the data is the assumption of equal variance-covariance reasonable?</li>
-<li>Examine the pooled variance-covariance for the <code>clusters</code> data, overlaid on the data in a tour on the 5D. Does it fit the variance of each cluster nicely?</li>
-<li>There are several interesting data sets with class variables available on the <a href="http://ggobi.org/book/index.html">GGobi website</a>. Examine the differences between <code>type</code> of music, based on the the variables <code>lvar</code>, <code>lave</code>, <code>lmax</code>, <code>lfener</code>, <code>lfreq</code>. (It is best to remove the “New wave” class because there are too few observations.) Examine the pooled variance-covariance for the two types of music. Does it fit the variance of each cluster nicely?</li>
-</ol>
+<li><p>For the <code>simple_clusters</code> compute the LDA model, and make a plot of the data, with points coloured by the true class. Overlay variance-covariance ellipses, and a <span class="math inline">\(+\)</span> indicating the sample mean for each class. Is it reasonable to assume that the two classes are sampled from populations with the same variance-covariance?</p></li>
+<li><p>Examine the clusters corresponding to the true classes in the <code>clusters</code> data set, using a tour. Based on the shape of the data is the assumption of equal variance-covariance reasonable?</p></li>
+<li><p>Examine the pooled variance-covariance for the <code>clusters</code> data, overlaid on the data in a tour on the 5D. Does it fit the variance of each cluster nicely?</p></li>
+<li>
+<p>There are several interesting data sets with class variables available on the <a href="http://ggobi.org/book/index.html">GGobi website</a>. Examine the differences between <code>type</code> of music, based on the the variables <code>lvar</code>, <code>lave</code>, <code>lmax</code>, <code>lfener</code>, <code>lfreq</code>. (It is best to remove the “New wave” class because there are too few observations.) Examine the pooled variance-covariance for the two types of music. Does it fit the variance of each cluster nicely?</p>
 <p>The <code>music</code> data can be read using:</p>
+</li>
+</ol>
 <div class="cell">
-<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb22"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://readr.tidyverse.org">readr</a></span><span class="op">)</span></span>
+<details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://readr.tidyverse.org">readr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span></span>
 <span><span class="va">music</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html">read_csv</a></span><span class="op">(</span><span class="st">"http://ggobi.org/book/data/music-sub.csv"</span>,</span>
 <span>                  show_col_types <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html">rename</a></span><span class="op">(</span>title <span class="op">=</span> <span class="va">`...1`</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">type</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">type</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <ol start="5" type="1">
-<li>Fit an LDA model to the <code>simple_clusters</code> data, using the <code>cl</code> variables as the class. Examine the boundaries produced by the model, in 2D.</li>
-<li>Fit an LDA model to the <code>clusters</code> data, using the <code>cl</code> variables as the class. Examine the boundaries produced by the model in 5D.</li>
-<li>Assess the LDA assumptions for the <code>multicluster</code> data. Is LDA an appropriate model? Do you think it is still possible to produce a useful classification for this data? Fit it to check.</li>
-<li>Compute the first 12 PCs of the <code>sketches</code> data. Check the assumption of equal, elliptical variance-covariance of the 6 groups. Regardless of whether you decide that the assumption is satisfied or not, fit an LDA to the 12 PCs. Extract the discriminant space (the <code>x</code> component of the <code>predict</code> object), and examine the separation (or not) of the 6 groups in this 5D space. Is LDA providing a good classification model for this data?</li>
-<li>Even though the <code>bushfires</code> data does not satisfy the assumptions for LDA, fit LDA to the first five PCs. Examine the class differences in the 3D discriminant space.</li>
-<li>Compute the boundary between classes, for the LDA model where the prior probability reflects the sample size, and the LDA model where the priors are equal for all groups. How does the boundary between lightning cause fires and the other groups change?</li>
-<li>Using the <code>aflw</code> data (using the same subset of variables and players as used in Q3 of <a href="13-intro-class.html" class="quarto-xref"><span>Chapter 13</span></a>) compute:</li>
-</ol>
+<li><p>Fit an LDA model to the <code>simple_clusters</code> data, using the <code>cl</code> variables as the class. Examine the boundaries produced by the model, in 2D.</p></li>
+<li><p>Fit an LDA model to the <code>clusters</code> data, using the <code>cl</code> variables as the class. Examine the boundaries produced by the model in 5D.</p></li>
+<li><p>Assess the LDA assumptions for the <code>multicluster</code> data. Is LDA an appropriate model? Do you think it is still possible to produce a useful classification for this data? Fit it to check.</p></li>
+<li><p>Compute the first 12 PCs of the <code>sketches</code> data. Check the assumption of equal, elliptical variance-covariance of the 6 groups. Regardless of whether you decide that the assumption is satisfied or not, fit an LDA to the 12 PCs. Extract the discriminant space (the <code>x</code> component of the <code>predict</code> object), and examine the separation (or not) of the 6 groups in this 5D space. Is LDA providing a good classification model for this data?</p></li>
+<li><p>Even though the <code>bushfires</code> data does not satisfy the assumptions for LDA, fit LDA to the first five PCs. Examine the class differences in the 3D discriminant space.</p></li>
+<li><p>Compute the boundary between classes, for the LDA model where the prior probability reflects the sample size, and the LDA model where the priors are equal for all groups. How does the boundary between lightning cause fires and the other groups change?</p></li>
+<li>
+<p>Using the <code>aflw</code> data (using the same subset of variables and players as used in Q3 of <a href="13-intro-class.html" class="quarto-xref"><span>Chapter 13</span></a>) compute:</p>
 <ul>
 <li>a 2D representation using UMAP. (Make sure <code>position</code> is removed for the calculation.)</li>
 <li>Fit an LDA model, and predict the observations into the discriminant space. (Make sure to use standardised variables so the coefficients of the discriminant space can be interpreted. You may receive a warning that variables are collinear, but the model should still be usable.)</li>
@@ -1049,13 +1056,15 @@ Figure&nbsp;14.8: Using the radial tour (a) and local tour (b) to investigate th
 <p>Discuss what is learned from each representation of the data, relative to the differences between skills of the players. And also, using examine the coefficients of the discriminant space to explain how the skill sets of the player types are different.</p>
 <p>View the most important variables contributing to the discriminant space in a tour. Is it possible to distinguish the player types in this subset of variables?</p>
 <p>You can use this code to subset the data:</p>
+</li>
+</ol>
 <div class="cell">
-<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb23"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dicook.github.io/mulgar/">mulgar</a></span><span class="op">)</span></span>
+<details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dicook.github.io/mulgar/">mulgar</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="va">aflw</span><span class="op">)</span></span>
 <span><span class="va">aflw_sub</span> <span class="op">&lt;-</span> <span class="va">aflw</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">position</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"BPL"</span>, <span class="st">"FF"</span>, <span class="st">"RR"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>position <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">position</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">goals</span><span class="op">:</span><span class="va">tackles</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">goals</span><span class="op">:</span><span class="va">tackles</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <ol start="12" type="1">
@@ -1242,7 +1251,7 @@ Cortes, C., Pregibon, D., &amp; Volinsky, C. (2003). Computational <span>M</span
 Cortes, C., &amp; Vapnik, V. N. (1995). Support-<span>V</span>ector <span>N</span>etworks. <em>Machine Learning</em>, <em>20</em>(3), 273–297.
 </div>
 <div id="ref-Oc1885" class="csl-entry" role="listitem">
-d’Ocagne, M. (1885). <em><span>C</span>oordonnées <span>P</span>arallèles et <span>A</span>xiales: <span>M</span>éthode de <span>T</span>ransformation <span>G</span>éométrique et <span>P</span>rocédé <span>N</span>ouveau de <span>C</span>alcul <span>G</span>raphique dÉduits de la <span>C</span>onsidération des <span>C</span>oordonnées <span>P</span>aralléles</em>. Gauthier-Villars.
+<span class="nocase">d’Ocagne, M.</span> (1885). <em><span>C</span>oordonnées <span>P</span>arallèles et <span>A</span>xiales: <span>M</span>éthode de <span>T</span>ransformation <span>G</span>éométrique et <span>P</span>rocédé <span>N</span>ouveau de <span>C</span>alcul <span>G</span>raphique dÉduits de la <span>C</span>onsidération des <span>C</span>oordonnées <span>P</span>aralléles</em>. Gauthier-Villars.
 </div>
 <div id="ref-Dalgaard2002" class="csl-entry" role="listitem">
 Dalgaard, P. (2002). <em>Introductory <span>S</span>tatistics with <span>R</span></em>. Springer.
@@ -1251,7 +1260,7 @@ Dalgaard, P. (2002). <em>Introductory <span>S</span>tatistics with <span>R</span
 Dasu, T., Swayne, D. F., &amp; Poole, D. (2005). Grouping <span>M</span>ultivariate <span>T</span>ime <span>S</span>eries: A <span>C</span>ase <span>S</span>tudy. <em>Proceedings of the IEEE Workshop on <span>T</span>emporal <span>D</span>ata <span>M</span>ining: <span>A</span>lgorithms, <span>T</span>heory and <span>A</span>pplications, in Conjunction with the Conference on Data Mining, Houston, November 27, 2005</em>, 25–32.
 </div>
 <div id="ref-R-ggdendro" class="csl-entry" role="listitem">
-de Vries, A., &amp; Ripley, B. D. (2024). <em><span class="nocase">ggdendro</span>: <span>C</span>reate <span>D</span>endrograms and <span>T</span>ree <span>D</span>iagrams <span>U</span>sing <span class="nocase">ggplot2</span></em>. <a href="https://andrie.github.io/ggdendro/">https://andrie.github.io/ggdendro/</a>
+<span class="nocase">de Vries, A., &amp; Ripley, B. D.</span> (2024). <em><span class="nocase">ggdendro</span>: <span>C</span>reate <span>D</span>endrograms and <span>T</span>ree <span>D</span>iagrams <span>U</span>sing <span class="nocase">ggplot2</span></em>. <a href="https://andrie.github.io/ggdendro/">https://andrie.github.io/ggdendro/</a>
 </div>
 <div id="ref-fireorigin" class="csl-entry" role="listitem">
 Department of Environment, Land, Water &amp; Planning. (2019). <em><span class="nocase">Fire Origins - Current and Historical</span></em>. <a href="https://discover.data.vic.gov.au/dataset/fire-origins-current-and-historical">https://discover.data.vic.gov.au/dataset/fire-origins-current-and-historical</a>
@@ -1476,10 +1485,7 @@ Laa, U., Aumann, A., Cook, D., &amp; Valencia, G. (2023). New and <span>S</span>
 Laa, U., Cook, D., &amp; Lee, S. (2022). Burning <span>S</span>age: <span>R</span>eversing the <span>C</span>urse of <span>D</span>imensionality in the <span>V</span>isualization of <span>H</span>igh-<span>D</span>imensional <span>D</span>ata. <em>Journal of Computational and Graphical Statistics</em>, <em>31</em>(1), 40–49. <a href="https://doi.org/10.1080/10618600.2021.1963264">https://doi.org/10.1080/10618600.2021.1963264</a>
 </div>
 <div id="ref-slicetour" class="csl-entry" role="listitem">
-Laa, U., Cook, D., &amp; Valencia, G. (2020a). A <span>S</span>lice <span>T</span>our for <span>F</span>inding <span>H</span>ollowness in <span>H</span>igh-<span>D</span>imensional <span>D</span>ata. <em>Journal of Computational and Graphical Statistics</em>, <em>29</em>(3), 681–687. <a href="https://doi.org/10.1080/10618600.2020.1777140">https://doi.org/10.1080/10618600.2020.1777140</a>
-</div>
-<div id="ref-tourr2020" class="csl-entry" role="listitem">
-Laa, U., Cook, D., &amp; Valencia, G. (2020b). A <span>S</span>lice <span>T</span>our for <span>F</span>inding <span>H</span>ollowness in <span>H</span>igh-<span>D</span>imensional <span>D</span>ata. <em>Journal of Computational and Graphical Statistics</em>, <em>29</em>(3), 681–687. <a href="https://doi.org/10.1080/10618600.2020.1777140">https://doi.org/10.1080/10618600.2020.1777140</a>
+Laa, U., Cook, D., &amp; Valencia, G. (2020). A <span>S</span>lice <span>T</span>our for <span>F</span>inding <span>H</span>ollowness in <span>H</span>igh-<span>D</span>imensional <span>D</span>ata. <em>Journal of Computational and Graphical Statistics</em>, <em>29</em>(3), 681–687. <a href="https://doi.org/10.1080/10618600.2020.1777140">https://doi.org/10.1080/10618600.2020.1777140</a>
 </div>
 <div id="ref-helmert" class="csl-entry" role="listitem">
 Lancaster, H. O. (1965). The <span>H</span>elmert <span>M</span>atrices. <em>The American Mathematical Monthly</em>, <em>72</em>(1), 4–12.
@@ -1773,13 +1779,13 @@ Urbanek, S., &amp; Theus, M. (2003). <span class="nocase">iPlots</span>: <span>H
 Vaidyanathan, R., Xie, Y., Allaire, J., Cheng, J., Sievert, C., &amp; Russell, K. (2023). <em>Htmlwidgets: HTML widgets for r</em>. <a href="https://github.com/ramnathv/htmlwidgets">https://github.com/ramnathv/htmlwidgets</a>
 </div>
 <div id="ref-R-compositions" class="csl-entry" role="listitem">
-van den Boogaart, K. G., Tolosana-Delgado, R., &amp; Bren, M. (2024). <em><span class="nocase">compositions</span>: <span>C</span>ompositional <span>D</span>ata <span>A</span>nalysis</em>. <a href="http://www.stat.boogaart.de/compositions/">http://www.stat.boogaart.de/compositions/</a>
+<span class="nocase">van den Boogaart, K. G., Tolosana-Delgado, R., &amp; Bren, M.</span> (2024). <em><span class="nocase">compositions</span>: <span>C</span>ompositional <span>D</span>ata <span>A</span>nalysis</em>. <a href="http://www.stat.boogaart.de/compositions/">http://www.stat.boogaart.de/compositions/</a>
 </div>
 <div id="ref-Rtsne2014" class="csl-entry" role="listitem">
-van der Maaten, L. J. P. (2014). Accelerating <span class="nocase">t-SNE</span> using <span>T</span>ree-<span>B</span>ased lgorithms. <em>Journal of Machine Learning Research</em>, <em>15</em>, 3221–3245.
+<span class="nocase">van der Maaten, L. J. P.</span> (2014). Accelerating <span class="nocase">t-SNE</span> using <span>T</span>ree-<span>B</span>ased lgorithms. <em>Journal of Machine Learning Research</em>, <em>15</em>, 3221–3245.
 </div>
 <div id="ref-Rtsne2008" class="csl-entry" role="listitem">
-van der Maaten, L. J. P., &amp; Hinton, G. E. (2008). Visualizing <span>H</span>igh-<span>D</span>imensional <span>D</span>ata using <span class="nocase">t-SNE</span>. <em>Journal of Machine Learning Research</em>, <em>9</em>, 2579–2605.
+<span class="nocase">van der Maaten, L. J. P., &amp; Hinton, G. E.</span> (2008). Visualizing <span>H</span>igh-<span>D</span>imensional <span>D</span>ata using <span class="nocase">t-SNE</span>. <em>Journal of Machine Learning Research</em>, <em>9</em>, 2579–2605.
 </div>
 <div id="ref-Va99" class="csl-entry" role="listitem">
 Vapnik, V. N. (1999). <em>The <span>N</span>ature of <span>S</span>tatistical <span>L</span>earning <span>T</span>heory</em>. Springer.
@@ -1833,7 +1839,7 @@ Wickham, H. (2016). <em><span class="nocase">ggplot2</span>: <span>E</span>legan
 Wickham, H. (2022). <em><span class="nocase">classifly</span>: <span>E</span>xplore <span>C</span>lassification <span>M</span>odels in <span>H</span>igh <span>D</span>imensions</em>. <a href="http://had.co.nz/classifly">http://had.co.nz/classifly</a>
 </div>
 <div id="ref-R-ggplot2" class="csl-entry" role="listitem">
-Wickham, H., Chang, W., Henry, L., Pedersen, T. L., Takahashi, K., Wilke, C., Woo, K., Yutani, H., Dunnington, D., &amp; van den Brand, T. (2024). <em><span class="nocase">ggplot2</span>: <span>C</span>reate <span>E</span>legant <span>D</span>ata <span>V</span>isualisations <span>U</span>sing the <span>G</span>rammar of <span>G</span>raphics</em>. <a href="https://ggplot2.tidyverse.org">https://ggplot2.tidyverse.org</a>
+<span class="nocase">Wickham, H., Chang, W., Henry, L., Pedersen, T. L., Takahashi, K., Wilke, C., Woo, K., Yutani, H., Dunnington, D., &amp; van den Brand, T.</span> (2024). <em><span class="nocase">ggplot2</span>: <span>C</span>reate <span>E</span>legant <span>D</span>ata <span>V</span>isualisations <span>U</span>sing the <span>G</span>rammar of <span>G</span>raphics</em>. <a href="https://ggplot2.tidyverse.org">https://ggplot2.tidyverse.org</a>
 </div>
 <div id="ref-R-tourr" class="csl-entry" role="listitem">
 Wickham, H., &amp; Cook, D. (2025). <em><span class="nocase">tourr</span>: <span>T</span>our <span>M</span>ethods for <span>M</span>ultivariate <span>D</span>ata <span>V</span>isualisation</em>. <a href="https://github.com/ggobi/tourr">https://github.com/ggobi/tourr</a>
@@ -1885,239 +1891,243 @@ Zhu, H. (2024). <em>kableExtra: Construct complex table with kable and pipe synt
 </div>
 </div>
 </section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
-window.document.addEventListener("DOMContentLoaded", function (event) {
-  const toggleBodyColorMode = (bsSheetEl) => {
-    const mode = bsSheetEl.getAttribute("data-mode");
-    const bodyEl = window.document.querySelector("body");
-    if (mode === "dark") {
-      bodyEl.classList.add("quarto-dark");
-      bodyEl.classList.remove("quarto-light");
-    } else {
-      bodyEl.classList.add("quarto-light");
-      bodyEl.classList.remove("quarto-dark");
-    }
-  }
-  const toggleBodyColorPrimary = () => {
-    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
-    if (bsSheetEl) {
-      toggleBodyColorMode(bsSheetEl);
-    }
-  }
-  toggleBodyColorPrimary();  
-  const icon = "";
-  const anchorJS = new window.AnchorJS();
-  anchorJS.options = {
-    placement: 'right',
-    icon: icon
-  };
-  anchorJS.add('.anchored');
-  const isCodeAnnotation = (el) => {
-    for (const clz of el.classList) {
-      if (clz.startsWith('code-annotation-')) {                     
-        return true;
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
       }
+      return false;
     }
-    return false;
-  }
-  const onCopySuccess = function(e) {
-    // button target
-    const button = e.trigger;
-    // don't keep focus
-    button.blur();
-    // flash "checked"
-    button.classList.add('code-copy-button-checked');
-    var currentTitle = button.getAttribute("title");
-    button.setAttribute("title", "Copied!");
-    let tooltip;
-    if (window.bootstrap) {
-      button.setAttribute("data-bs-toggle", "tooltip");
-      button.setAttribute("data-bs-placement", "left");
-      button.setAttribute("data-bs-title", "Copied!");
-      tooltip = new bootstrap.Tooltip(button, 
-        { trigger: "manual", 
-          customClass: "code-copy-button-tooltip",
-          offset: [0, -8]});
-      tooltip.show();    
-    }
-    setTimeout(function() {
-      if (tooltip) {
-        tooltip.hide();
-        button.removeAttribute("data-bs-title");
-        button.removeAttribute("data-bs-toggle");
-        button.removeAttribute("data-bs-placement");
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
       }
-      button.setAttribute("title", currentTitle);
-      button.classList.remove('code-copy-button-checked');
-    }, 1000);
-    // clear code selection
-    e.clearSelection();
-  }
-  const getTextToCopy = function(trigger) {
-      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
       for (const childEl of codeEl.children) {
         if (isCodeAnnotation(childEl)) {
           childEl.remove();
         }
       }
       return codeEl.innerText;
-  }
-  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
-    text: getTextToCopy
-  });
-  clipboard.on('success', onCopySuccess);
-  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
-    // For code content inside modals, clipBoardJS needs to be initialized with a container option
-    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
-    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
-      text: getTextToCopy,
-      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
     });
-    clipboardModal.on('success', onCopySuccess);
-  }
-    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
-    var mailtoRegex = new RegExp(/^mailto:/);
-      var filterRegex = new RegExp("https:\/\/dicook\.github\.io\/mulgar_book\/");
-    var isInternal = (href) => {
-        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
     }
-    // Inspect non-navigation links and adorn them if external
- 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
-    for (var i=0; i<links.length; i++) {
-      const link = links[i];
-      if (!isInternal(link.href)) {
-        // undo the damage that might have been done by quarto-nav.js in the case of
-        // links that we want to consider external
-        if (link.dataset.originalHref !== undefined) {
-          link.href = link.dataset.originalHref;
-        }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/dicook\.github\.io\/mulgar_book\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }
-    }
-  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
-    const config = {
-      allowHTML: true,
-      maxWidth: 500,
-      delay: 100,
-      arrow: false,
-      appendTo: function(el) {
-          return el.parentElement;
-      },
-      interactive: true,
-      interactiveBorder: 10,
-      theme: 'quarto',
-      placement: 'bottom-start',
-    };
-    if (contentFn) {
-      config.content = contentFn;
-    }
-    if (onTriggerFn) {
-      config.onTrigger = onTriggerFn;
-    }
-    if (onUntriggerFn) {
-      config.onUntrigger = onUntriggerFn;
-    }
-    window.tippy(el, config); 
-  }
-  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
-  for (var i=0; i<noterefs.length; i++) {
-    const ref = noterefs[i];
-    tippyHover(ref, function() {
-      // use id or data attribute instead here
-      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
-      try { href = new URL(href).hash; } catch {}
-      const id = href.replace(/^#\/?/, "");
-      const note = window.document.getElementById(id);
-      if (note) {
-        return note.innerHTML;
-      } else {
-        return "";
-      }
-    });
-  }
-  const xrefs = window.document.querySelectorAll('a.quarto-xref');
-  const processXRef = (id, note) => {
-    // Strip column container classes
-    const stripColumnClz = (el) => {
-      el.classList.remove("page-full", "page-columns");
-      if (el.children) {
-        for (const child of el.children) {
-          stripColumnClz(child);
-        }
-      }
-    }
-    stripColumnClz(note)
-    if (id === null || id.startsWith('sec-')) {
-      // Special case sections, only their first couple elements
-      const container = document.createElement("div");
-      if (note.children && note.children.length > 2) {
-        container.appendChild(note.children[0].cloneNode(true));
-        for (let i = 1; i < note.children.length; i++) {
-          const child = note.children[i];
-          if (child.tagName === "P" && child.innerText === "") {
-            continue;
-          } else {
-            container.appendChild(child.cloneNode(true));
-            break;
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
           }
         }
-        if (window.Quarto?.typesetMath) {
-          window.Quarto.typesetMath(container);
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
         }
-        return container.innerHTML
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
       } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
         if (window.Quarto?.typesetMath) {
           window.Quarto.typesetMath(note);
         }
-        return note.innerHTML;
-      }
-    } else {
-      // Remove any anchor links if they are present
-      const anchorLink = note.querySelector('a.anchorjs-link');
-      if (anchorLink) {
-        anchorLink.remove();
-      }
-      if (window.Quarto?.typesetMath) {
-        window.Quarto.typesetMath(note);
-      }
-      // TODO in 1.5, we should make sure this works without a callout special case
-      if (note.classList.contains("callout")) {
-        return note.outerHTML;
-      } else {
-        return note.innerHTML;
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
       }
     }
-  }
-  for (var i=0; i<xrefs.length; i++) {
-    const xref = xrefs[i];
-    tippyHover(xref, undefined, function(instance) {
-      instance.disable();
-      let url = xref.getAttribute('href');
-      let hash = undefined; 
-      if (url.startsWith('#')) {
-        hash = url;
-      } else {
-        try { hash = new URL(url).hash; } catch {}
-      }
-      if (hash) {
-        const id = hash.replace(/^#\/?/, "");
-        const note = window.document.getElementById(id);
-        if (note !== null) {
-          try {
-            const html = processXRef(id, note.cloneNode(true));
-            instance.setContent(html);
-          } finally {
-            instance.enable();
-            instance.show();
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
           }
         } else {
-          // See if we can fetch this
-          fetch(url.split('#')[0])
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
           .then(res => res.text())
           .then(html => {
             const parser = new DOMParser();
             const htmlDoc = parser.parseFromString(html, "text/html");
-            const note = htmlDoc.getElementById(id);
+            const note = htmlDoc.querySelector('main.content');
             if (note !== null) {
-              const html = processXRef(id, note);
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
               instance.setContent(html);
             } 
           }).finally(() => {
@@ -2125,185 +2135,161 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             instance.show();
           });
         }
-      } else {
-        // See if we can fetch a full url (with no hash to target)
-        // This is a special case and we should probably do some content thinning / targeting
-        fetch(url)
-        .then(res => res.text())
-        .then(html => {
-          const parser = new DOMParser();
-          const htmlDoc = parser.parseFromString(html, "text/html");
-          const note = htmlDoc.querySelector('main.content');
-          if (note !== null) {
-            // This should only happen for chapter cross references
-            // (since there is no id in the URL)
-            // remove the first header
-            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
-              note.children[0].remove();
-            }
-            const html = processXRef(null, note);
-            instance.setContent(html);
-          } 
-        }).finally(() => {
-          instance.enable();
-          instance.show();
-        });
-      }
-    }, function(instance) {
-    });
-  }
-      let selectedAnnoteEl;
-      const selectorForAnnotation = ( cell, annotation) => {
-        let cellAttr = 'data-code-cell="' + cell + '"';
-        let lineAttr = 'data-code-annotation="' +  annotation + '"';
-        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
-        return selector;
-      }
-      const selectCodeLines = (annoteEl) => {
-        const doc = window.document;
-        const targetCell = annoteEl.getAttribute("data-target-cell");
-        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
-        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
-        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
-        const lineIds = lines.map((line) => {
-          return targetCell + "-" + line;
-        })
-        let top = null;
-        let height = null;
-        let parent = null;
-        if (lineIds.length > 0) {
-            //compute the position of the single el (top and bottom and make a div)
-            const el = window.document.getElementById(lineIds[0]);
-            top = el.offsetTop;
-            height = el.offsetHeight;
-            parent = el.parentElement.parentElement;
-          if (lineIds.length > 1) {
-            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
-            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
-            height = bottom - top;
-          }
-          if (top !== null && height !== null && parent !== null) {
-            // cook up a div (if necessary) and position it 
-            let div = window.document.getElementById("code-annotation-line-highlight");
-            if (div === null) {
-              div = window.document.createElement("div");
-              div.setAttribute("id", "code-annotation-line-highlight");
-              div.style.position = 'absolute';
-              parent.appendChild(div);
-            }
-            div.style.top = top - 2 + "px";
-            div.style.height = height + 4 + "px";
-            div.style.left = 0;
-            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
-            if (gutterDiv === null) {
-              gutterDiv = window.document.createElement("div");
-              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
-              gutterDiv.style.position = 'absolute';
-              const codeCell = window.document.getElementById(targetCell);
-              const gutter = codeCell.querySelector('.code-annotation-gutter');
-              gutter.appendChild(gutterDiv);
-            }
-            gutterDiv.style.top = top - 2 + "px";
-            gutterDiv.style.height = height + 4 + "px";
-          }
-          selectedAnnoteEl = annoteEl;
-        }
-      };
-      const unselectCodeLines = () => {
-        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
-        elementsIds.forEach((elId) => {
-          const div = window.document.getElementById(elId);
-          if (div) {
-            div.remove();
-          }
-        });
-        selectedAnnoteEl = undefined;
-      };
-        // Handle positioning of the toggle
-    window.addEventListener(
-      "resize",
-      throttle(() => {
-        elRect = undefined;
-        if (selectedAnnoteEl) {
-          selectCodeLines(selectedAnnoteEl);
-        }
-      }, 10)
-    );
-    function throttle(fn, ms) {
-    let throttle = false;
-    let timer;
-      return (...args) => {
-        if(!throttle) { // first call gets through
-            fn.apply(this, args);
-            throttle = true;
-        } else { // all the others get throttled
-            if(timer) clearTimeout(timer); // cancel #2
-            timer = setTimeout(() => {
-              fn.apply(this, args);
-              timer = throttle = false;
-            }, ms);
-        }
-      };
-    }
-      // Attach click handler to the DT
-      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
-      for (const annoteDlNode of annoteDls) {
-        annoteDlNode.addEventListener('click', (event) => {
-          const clickedEl = event.target;
-          if (clickedEl !== selectedAnnoteEl) {
-            unselectCodeLines();
-            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
-            if (activeEl) {
-              activeEl.classList.remove('code-annotation-active');
-            }
-            selectCodeLines(clickedEl);
-            clickedEl.classList.add('code-annotation-active');
-          } else {
-            // Unselect the line
-            unselectCodeLines();
-            clickedEl.classList.remove('code-annotation-active');
-          }
-        });
-      }
-  const findCites = (el) => {
-    const parentEl = el.parentElement;
-    if (parentEl) {
-      const cites = parentEl.dataset.cites;
-      if (cites) {
-        return {
-          el,
-          cites: cites.split(' ')
-        };
-      } else {
-        return findCites(el.parentElement)
-      }
-    } else {
-      return undefined;
-    }
-  };
-  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
-  for (var i=0; i<bibliorefs.length; i++) {
-    const ref = bibliorefs[i];
-    const citeInfo = findCites(ref);
-    if (citeInfo) {
-      tippyHover(citeInfo.el, function() {
-        var popup = window.document.createElement('div');
-        citeInfo.cites.forEach(function(cite) {
-          var citeDiv = window.document.createElement('div');
-          citeDiv.classList.add('hanging-indent');
-          citeDiv.classList.add('csl-entry');
-          var biblioDiv = window.document.getElementById('ref-' + cite);
-          if (biblioDiv) {
-            citeDiv.innerHTML = biblioDiv.innerHTML;
-          }
-          popup.appendChild(citeDiv);
-        });
-        return popup.innerHTML;
+      }, function(instance) {
       });
     }
-  }
-});
-</script><nav class="page-navigation"><div class="nav-page nav-page-previous">
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script><nav class="page-navigation"><div class="nav-page nav-page-previous">
       <a href="./13-intro-class.html" class="pagination-link" aria-label="Introduction to supervised classification">
         <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Introduction to supervised classification</span></span>
       </a>          

@@ -1,26 +1,26 @@
-## ----echo=knitr::is_html_output()--------------------------------------------
+## ----echo=knitr::is_html_output()-----------------------------------------
 #| code-summary: "Load libraries"
+#| message: false
 source("code/setup.R")
 
 
-## ----echo=knitr::is_html_output()--------------------------------------------
+## ----echo=knitr::is_html_output()-----------------------------------------
 #| message: false
 #| code-summary: Code for spiral plots
 library(Rdimtools)
 library(cardinalR)
 n_obs <- 1652  
 set.seed(259)
-swiss <- swiss_roll(n_obs, num_noise = 0)
+swiss <- gen_swissroll(n_obs)
 # Standardising ruins structure
 # swiss <- apply(swiss, 2, function(x) (x-mean(x))/sd(x))
-swiss[,3] <- swiss[,3] * 3 # This scale produces more recognisable results
 # Compute distance from (0,0) in first two coordinates - spiral
-swiss <- cbind(swiss, sqrt(swiss[,1]^2 +
-                           swiss[,2]^2))
-colnames(swiss) <- c("x", "y", "z", "d")
-swiss_tbl <- as_tibble(swiss)
+swiss <- swiss |>
+  mutate(x3 = x3 * 9) |>
+  mutate(d = sqrt(x1^2 + # More recognisable results
+                  x2^2))
 swiss_pca <- prcomp(swiss[,1:3], scale=FALSE)
-swiss_tbl <- bind_cols(swiss_tbl, as_tibble(swiss_pca$x))
+swiss_tbl <- bind_cols(swiss, as_tibble(swiss_pca$x))
 spiral1 <- ggplot(swiss_tbl, 
                   aes(x=PC2, 
                       y=PC3, 
@@ -51,87 +51,12 @@ spiral2 <- ggplot(swiss_iso,
         axis.text = element_blank(),
         legend.position = "none")
 
-#spiral1 + spiral2 + plot_layout(ncol=2)
 
 
-## ----------------------------------------------------------------------------
-#| fig-width: 4
-#| fig-height: 4
-#| out-width: 100%
-#| fig-cap: "PCA"
-#| fig-alt: "This is an untitled chart has x-axis 'PC2' and y-axis 'PC3' with no labels or legend. Colour is used to show a variable d. The chart is a set of 1652 solid circle points laid out in a spiral pattern, with colours starting with one end of the rainbow smoothly transitioning the the other end of the rainbow scale at the other end of the spiral."
-#| echo: false
-spiral1
-
-
-## ----------------------------------------------------------------------------
-#| fig-width: 4
-#| fig-height: 4
-#| out-width: 100%
-#| fig-cap: "isomap"
-#| fig-alt: "This is an untitled chart has x-axis 'PC2' and y-axis 'PC3' with no labels or legend. Colour is used to show a variable d. The chart is a set of 1652 solid circle points laid out in a slightly squashed rectangle, with colours starting with one end of the rainbow on the left and smoothly transitioning the the other end of the rainbow scale at the right."
-#| echo: false
-spiral2
-
-
-## ----------------------------------------------------------------------------
-#| fig-width: 4
-#| fig-height: 4
-#| out-width: 100%
-#| fig-cap: "PCA"
-#| fig-alt: "This is an untitled chart has x-axis 'PC2' and y-axis 'PC3' with no labels or legend. Colour is used to show a variable d. The chart is a set of 1652 solid circle points laid out in a spiral pattern, with colours starting with one end of the rainbow smoothly transitioning the the other end of the rainbow scale at the other end of the spiral."
-#| echo: false
-spiral1
-
-
-## ----------------------------------------------------------------------------
-#| fig-width: 4
-#| fig-height: 4
-#| out-width: 100%
-#| fig-cap: "isomap"
-#| fig-alt: "This is an untitled chart has x-axis 'PC2' and y-axis 'PC3' with no labels or legend. Colour is used to show a variable d. The chart is a set of 1652 solid circle points laid out in a slightly squashed rectangle, with colours starting with one end of the rainbow on the left and smoothly transitioning the the other end of the rainbow scale at the right."
-#| echo: false
-spiral2
-
-
-## ----------------------------------------------------------------------------
+## ----echo=knitr::is_html_output()-----------------------------------------
+#| message: false
 #| eval: false
-#| echo: false
-# swiss_tbl <- as_tibble(swiss)
-# spiral1 <- ggplot(swiss_tbl,
-#                   aes(x=x,
-#                       y=y,
-#                       colour=d)) +
-#   geom_point() +
-#   scale_colour_continuous_divergingx(palette="Zissou 1",
-#        mid=median(swiss_tbl$d)) +
-#   theme_minimal() +
-#   theme(aspect.ratio=1,
-#         axis.text = element_blank(),
-#         legend.position = "none")
-# swiss_pca <- prcomp(swiss[,1:3], scale=FALSE)
-# ggscatmat(swiss_pca$x)
-# ggplot(swiss_pca$x, aes(x=PC1, y=PC2)) + geom_point()
-# swiss_mds <- cmdscale(dist(swiss))
-# colnames(swiss_mds) <- c("mds1", "mds2")
-# swiss_mds <- as_tibble(swiss_mds) |>
-#   bind_cols(as_tibble(swiss))
-# ggplot(swiss_mds, aes(x=mds1, y=mds2, colour=d)) +
-#   geom_point() +
-#   scale_colour_continuous_divergingx(palette="Zissou 1",
-#        mid=median(swiss_mds$d)) +
-#   theme(aspect.ratio=1)
-# swiss_nmds <- monoMDS(dist(swiss[,1:3]),
-#                       model = "local")$points
-# colnames(swiss_nmds) <- c("nmds1", "nmds2")
-# swiss_nmds <- as_tibble(swiss_nmds) |>
-#   bind_cols(swiss_tbl)
-# ggplot(swiss_nmds, aes(x=nmds1, y=nmds2, colour=d)) +
-#   geom_point() +
-#   scale_colour_continuous_divergingx(palette="Zissou 1",
-#        mid=median(swiss_mds$d)) +
-#   theme(aspect.ratio=1)
-# 
+#| code-summary: Code for making tours
 # animate_xy(swiss[,1:3])
 # animate_xy(swiss[,1:3], guided_tour(holes()))
 # set.seed(432)
@@ -142,62 +67,49 @@ spiral2
 #            frames = 500,
 #            width = 300,
 #            height = 300)
-# 
-# swiss_lle <- do.lle(swiss2,
-#   ndim=2, type=c("knn", 20), #  type=c("enn", 0.5),
-#   weight=FALSE)$Y
-# colnames(swiss_lle) <- c("lle1", "lle2")
-# swiss_lle <- as_tibble(swiss_lle) |>
-#   bind_cols(swiss_tbl)
-# ggplot(swiss_lle, aes(x=lle1, y=lle2, colour=d)) +
-#   geom_point() +
-#   scale_colour_continuous_divergingx(palette="Zissou 1",
-#        mid=median(swiss_lle$d)) +
-#   theme(aspect.ratio=1)
-# 
-# swiss_df <- bind_cols(swiss, swiss_iso, swiss_lle)
-# shared_swiss_df <- SharedData$new(swiss_df)
-# p1 <- ggplot(shared_swiss_df, aes(x=iso1, y=iso2)) +
-#   geom_point()
-# gp1 <- ggplotly(p1, width=500, height=500) |>
-#   highlight(on = "plotly_selected",
-#               off = "plotly_doubleclick")
-# p2 <- ggplot(shared_swiss_df, aes(x=x, y=y)) +
-#   geom_point()
-# gp2 <- ggplotly(p2, width=500, height=500) |>
-#   highlight(on = "plotly_selected",
-#               off = "plotly_doubleclick")
-# p3 <- ggplot(shared_swiss_df, aes(x=lle1, y=lle2)) +
-#   geom_point()
-# gp3 <- ggplotly(p3, width=500, height=500) |>
-#   highlight(on = "plotly_selected",
-#               off = "plotly_doubleclick")
-# 
-# bscols(
-#      gp1, gp2, gp3,
-#      widths = c(4, 4, 4)
-#  )
-# 
-# swiss_df <- bind_cols(swiss, swiss_iso)
-# shared_swiss_df <- SharedData$new(swiss_df)
-# p1 <- ggplot(shared_swiss_df, aes(x=iso1, y=iso2)) +
-#   geom_point()
-# gp1 <- ggplotly(p1, width=300, height=300) |>
-#   highlight(on = "plotly_selected",
-#               off = "plotly_doubleclick")
-# p2 <- ggplot(shared_swiss_df, aes(x=x, y=y)) +
-#   geom_point()
-# gp2 <- ggplotly(p2, width=300, height=300) |>
-#   highlight(on = "plotly_selected",
-#               off = "plotly_doubleclick")
-# 
-# bscols(
-#      gp1, gp2,
-#      widths = c(5, 5)
-#  )
 
 
-## ----echo=knitr::is_html_output()--------------------------------------------
+## -------------------------------------------------------------------------
+#| fig-width: 4
+#| fig-height: 4
+#| out-width: 100%
+#| fig-cap: "PCA"
+#| fig-alt: "This is an untitled chart has x-axis 'PC2' and y-axis 'PC3' with no labels or legend. Colour is used to show a variable d. The chart is a set of 1652 solid circle points laid out in a spiral pattern, with colours starting with one end of the rainbow smoothly transitioning the the other end of the rainbow scale at the other end of the spiral."
+#| echo: false
+spiral1
+
+
+## -------------------------------------------------------------------------
+#| fig-width: 4
+#| fig-height: 4
+#| out-width: 100%
+#| fig-cap: "isomap"
+#| fig-alt: "This is an untitled chart has x-axis 'PC2' and y-axis 'PC3' with no labels or legend. Colour is used to show a variable d. The chart is a set of 1652 solid circle points laid out in a slightly squashed rectangle, with colours starting with one end of the rainbow on the left and smoothly transitioning the the other end of the rainbow scale at the right."
+#| echo: false
+spiral2
+
+
+## -------------------------------------------------------------------------
+#| fig-width: 4
+#| fig-height: 4
+#| out-width: 100%
+#| fig-cap: "PCA"
+#| fig-alt: "This is an untitled chart has x-axis 'PC2' and y-axis 'PC3' with no labels or legend. Colour is used to show a variable d. The chart is a set of 1652 solid circle points laid out in a spiral pattern, with colours starting with one end of the rainbow smoothly transitioning the the other end of the rainbow scale at the other end of the spiral."
+#| echo: false
+spiral1
+
+
+## -------------------------------------------------------------------------
+#| fig-width: 4
+#| fig-height: 4
+#| out-width: 100%
+#| fig-cap: "isomap"
+#| fig-alt: "This is an untitled chart has x-axis 'PC2' and y-axis 'PC3' with no labels or legend. Colour is used to show a variable d. The chart is a set of 1652 solid circle points laid out in a slightly squashed rectangle, with colours starting with one end of the rainbow on the left and smoothly transitioning the the other end of the rainbow scale at the right."
+#| echo: false
+spiral2
+
+
+## ----echo=knitr::is_html_output()-----------------------------------------
 #| label: fig-nldr-clusters
 #| fig-cap: "Two non-linear embeddings of the non-linear clusters data: (a) t-SNE, (b) UMAP. One suggests five clusters and the other four, and also disagree on the cluster shapes."
 #| fig-alt: "This chart has two plots titled '(a) t-SNE', with x-axis 'tsne1' and y-axis 'tsne2', and '(b) UMAP' with x-axis 'umap1' anf y-axis 'umap2'. The chart '(a)' is a set of 1268 solid circle points arranged with a strip going from bottom let to top right, two C-shapes above and below the line and two small concetration of dots at the middle bottom and top. The points in chart '(b)' are arranged like a tilted smiley face."
@@ -232,7 +144,7 @@ n2 <- ggplot(as.data.frame(cnl_umap), aes(x=V1, y=V2)) +
 n1 + n2
 
 
-## ----------------------------------------------------------------------------
+## -------------------------------------------------------------------------
 #| eval: false
 #| echo: false
 #| code-summary: "Code to create animated gif"
@@ -246,7 +158,7 @@ n1 + n2
 #            height = 300)
 
 
-## ----------------------------------------------------------------------------
+## -------------------------------------------------------------------------
 #| message: FALSE
 #| eval: false
 #| code-fold: false
@@ -259,7 +171,7 @@ n1 + n2
 # )
 
 
-## ----------------------------------------------------------------------------
+## -------------------------------------------------------------------------
 #| message: false
 #| eval: false
 #| code-fold: false
@@ -292,7 +204,7 @@ n1 + n2
 #  )
 
 
-## ----------------------------------------------------------------------------
+## -------------------------------------------------------------------------
 #| message: false
 #| eval: false
 #| code-summary: "Code to run liminal on the fake trees data"
@@ -312,7 +224,7 @@ n1 + n2
 # )
 
 
-## ----------------------------------------------------------------------------
+## -------------------------------------------------------------------------
 #| message: false
 #| eval: false
 #| echo: false
@@ -333,7 +245,7 @@ n1 + n2
 # n1 + n2
 
 
-## ----------------------------------------------------------------------------
+## -------------------------------------------------------------------------
 #| message: false
 # Answer to Q2
 library(Rdimtools)
@@ -341,16 +253,17 @@ library(cardinalR)
 
 n_obs <- 1652  
 set.seed(259)
-swiss <- swiss_roll(n_obs, num_noise = 0)
+swiss <- gen_swissroll(n_obs)
+swiss <- swiss |>
+  mutate(x3 = x3 * 9) |>
+  mutate(d = sqrt(x1^2 + # More recognisable results
+                  x2^2))
 # Standardise
-swiss_std <- apply(swiss, 2, function(x) (x-mean(x))/sd(x))
+swiss_std <- swiss |>
+  mutate_at(vars(contains("x")), function(x) (x-mean(x))/sd(x))
 # Compute distance from (0,0) in first two coordinates - spiral
-swiss_std <- cbind(swiss_std, sqrt(swiss[,1]^2 +
-                           swiss[,2]^2))
-colnames(swiss_std) <- c("x", "y", "z", "d")
-swiss_tbl <- as_tibble(swiss_std)
 swiss_pca <- prcomp(swiss_std[,1:3], scale=FALSE)
-swiss_tbl <- bind_cols(swiss_tbl, as_tibble(swiss_pca$x))
+swiss_tbl <- bind_cols(swiss_std, as_tibble(swiss_pca$x))
 spiral1 <- ggplot(swiss_tbl, 
                   aes(x=PC1, 
                       y=PC3, 
@@ -384,17 +297,19 @@ spiral2 <- ggplot(swiss_iso,
 spiral1 + spiral2 + plot_layout(ncol=2)
 
 
-## ----------------------------------------------------------------------------
+## -------------------------------------------------------------------------
 #| message: false
 # Answer to Q3
 n_obs <- 1652  
 set.seed(259)
-swiss <- swiss_roll(n_obs, num_noise = 0)
-swiss[,3] <- swiss[,3] * 3 
-swiss <- cbind(swiss, sqrt(swiss[,1]^2 +
-                           swiss[,2]^2))
-colnames(swiss) <- c("x", "y", "z", "d")
-swiss_tbl <- as_tibble(swiss)
+swiss <- gen_swissroll(n_obs)
+# Standardising ruins structure
+# swiss <- apply(swiss, 2, function(x) (x-mean(x))/sd(x))
+# Compute distance from (0,0) in first two coordinates - spiral
+swiss <- swiss |>
+  mutate(x3 = x3 * 9) |>
+  mutate(d = sqrt(x1^2 + # More recognisable results
+                  x2^2))
 set.seed(111)
 swiss_tsne <- Rtsne::Rtsne(swiss[,1:3])$Y
 colnames(swiss_tsne) <- c("tsne1", "tsne2")
@@ -432,7 +347,7 @@ swiss_umap <- ggplot(swiss_umap,
 swiss_tsne + swiss_umap + plot_layout(ncol=2)
 
 
-## ----------------------------------------------------------------------------
+## -------------------------------------------------------------------------
 #| message: false
 #| eval: false
 #| echo: false
@@ -450,7 +365,7 @@ swiss_tsne + swiss_umap + plot_layout(ncol=2)
 # # The t-SNE mapping of the penguins data inaccurately splits one of the clusters. The three clusters are clearly distinct when viewed with the tour.
 
 
-## ----------------------------------------------------------------------------
+## -------------------------------------------------------------------------
 #| message: false
 #| eval: false
 #| echo: false
@@ -469,7 +384,7 @@ swiss_tsne + swiss_umap + plot_layout(ncol=2)
 #         axis.text = element_blank())
 
 
-## ----------------------------------------------------------------------------
+## -------------------------------------------------------------------------
 #| message: false
 #| eval: false
 #| echo: false
@@ -491,7 +406,7 @@ swiss_tsne + swiss_umap + plot_layout(ncol=2)
 #         axis.text = element_blank())
 
 
-## ----------------------------------------------------------------------------
+## -------------------------------------------------------------------------
 #| label: pbmc
 #| message: false
 #| eval: false

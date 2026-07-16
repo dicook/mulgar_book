@@ -5,7 +5,7 @@ Non-linear dimension reduction (NLDR) aims to find a single low-dimensional repr
 \index{manifold}
 \index{interpoint distance}
 
-Most techniques only require an interpoint similarity or distance matrix as the main ingredient, rather than the full $p$-dimensional data. A classic example where only this information is used is the morse code data reported by @morsecode, and available in the `xgobi` software [@xgobi]. The data contains the counts of the number of times that a letter is mistaken for another letter collected in an experimental study. However, here we focus on problems where the full $p$-dimensional data is available, so we can also compare structure perceived using the tour on the high-dimensional space, relative to structure revealed in the low-dimensional embedding.
+Most techniques only require an interpoint similarity or distance matrix as the main ingredient, rather than the full $p$-dimensional data. A classic example where only this information is used is the morse code data reported by @morsecode, and available in the `xgobi` software [@xgobi]. The data, collected in an experimental study, contains the counts of the number of times that a letter is mistaken for another letter. However, here we focus on problems where the full $p$-dimensional data is available, so we can also compare structure perceived using the tour on the high-dimensional space, relative to structure revealed in the low-dimensional embedding.
 
 ::: {.content-visible when-format="html"}
 ::: info
@@ -32,7 +32,7 @@ The choices for defining $d_p$ are many, including ones that are locally, using 
 
 \index{data!swiss roll}
 
-The methods *isomap* [@isomap] and *local linear embedding* (LLE) are two methods where local distance is used, and they were designed to unwrap data from a manifold. `r ifelse(knitr::is_html_output(), '@fig-swiss-html', '@fig-swiss-pdf')` illustrates how the results on the classic swiss roll data can differ according to method, in useful ways. The observations lie on a 2D non-linear manifold in 3D. The data is a manufactured example introduced to illustrate the ability of isomap and LLE to unwrap the swiss roll and lay out the points in a rectangle as though one was travelling along the surface. 
+The methods *isomap* [@isomap] and *local linear embedding* (LLE) [@lle] are two methods where local distance is used, and they were designed to unwrap data from a manifold. `r ifelse(knitr::is_html_output(), '@fig-swiss-html', '@fig-swiss-pdf')` illustrates how the results on the classic swiss roll data can differ according to method, in useful ways. The observations lie on a 2D non-linear manifold in 3D. The data is a manufactured example introduced to illustrate the ability of isomap and LLE to unwrap the swiss roll and lay out the points in a rectangle as though one was travelling along the surface. 
 
 \index{software!Rdimtools}
 \index{software!cardinalR}
@@ -52,7 +52,7 @@ library(Rdimtools)
 library(cardinalR)
 n_obs <- 1652  
 set.seed(259)
-swiss <- gen_swissroll(n_obs, p=3)
+swiss <- gen_swissroll(n_obs)
 # Standardising ruins structure
 # swiss <- apply(swiss, 2, function(x) (x-mean(x))/sd(x))
 # Compute distance from (0,0) in first two coordinates - spiral
@@ -173,7 +173,7 @@ The classic swiss roll data constructed to illustrate isomap, as shown in (a) a 
 \index{dimension reduction!UMAP}
 \index{dimension reduction!projection pursuit (PP)}
 
-The swiss roll data is interesting in the sense that from a visual perspective it is interesting to be able to *discover* the spiral structure. This would be more challenging if the 2D spiral was in data with more than three variables, and all the additional ones were noise (like `z` in this example). Methods like projection pursuit, PCA or MDS can discover the spiral if all variables are measured on the same scale (say -1, 1) but not standardised because the variance of the spiral shape is different from that of noise. 
+The swiss roll data is interesting in the sense that from a visual perspective it is interesting to be able to *discover* the spiral structure. This would be more challenging if the 2D spiral was in data with more than three variables, and all the additional ones were noise. Methods like projection pursuit, PCA or MDS can discover the spiral if all variables are measured on the same scale (say -1, 1) but not standardised because the variance of the spiral shape is different from that of noise. 
 
 Being able to discover the manifold (here, a 2D surface matching a swiss roll) can be useful for conducting further analysis. The points are now organised according to distance relative to the manifold on which they live. This layout is like taming a lion, it feels like an achievement, but realistically it is very difficult to achieve from these methods: data scale choice or a different number of $k$ nearest neighbours, changes the layout dramatically. Organising the points into distance along the spiral could have equally been achieved by discovering the spiral, and computing radial distance, as done to produce the colouring of points in `r ifelse(knitr::is_html_output(), '@fig-swiss-html', '@fig-swiss-pdf')`. This approach would also extend beyond 3D, to any additional number of noise dimensions.
 
@@ -294,7 +294,7 @@ NLDR can provide useful low-dimensional summaries of high-dimensional structure 
 
 @fig-nldr-clusters shows that NLDR can produce useful low-dimensional summaries of structure in high-dimensional data. However, it can be a frustrating exercise because **very different** representations can result depending on the parameter choices, and even the random number seeding the fit. (You can check this by changing the `set.seed` in the code above, and by changing from the default parameters.) Also, it may not be possible to represent the high-dimensional structures faithfully in low dimensions. 
 
-Diagnosing a layout is an important first step to determine if it can be appropriately used in further analysis. The approach for doing this date back to the methods discussed in @ggvisjcgs. The NLDR view needs to be interactively linked to other plots of the data, and especially to a tour with the specific purpose to determine the faithfulness to the structure present in high dimensions. For example, with the data in @fig-nldr-clusters, we would want to know which of the two curved clusters in the UMAP representation correspond to the sine wave cluster.
+Diagnosing a layout is an important first step to determine if it can be appropriately used in further analysis. The approach for doing this dates back to the methods discussed in @ggvisjcgs. The NLDR view needs to be interactively linked to other plots of the data, and especially to a tour with the specific purpose to determine the faithfulness to the structure present in high dimensions. For example, with the data in @fig-nldr-clusters, we would want to know which of the two curved clusters in the UMAP representation correspond to the sine wave cluster.
 
 ### Using `liminal`
 \index{software!liminal}
@@ -433,13 +433,13 @@ The t-SNE representation clearly shows the linear structures of the data, but vi
     b. Change the number of nearest neighbours.
     c. Use t-SNE and UMAP to layout the swiss roll data. How does this compare with isomap and LLE layouts?
 
-3. This question uses the `penguins_sub` data 
+3. This question uses the `penguins_sub` data.
     a. Generate a 2D representation using t-SNE. Plot the points mapping the colour to species. What is most surprising? (Hint: Are the three species represented by three distinct clusters?)
     b. Re-do the t-SNE representation with different parameter choices, including using different random seeds. Are the results different each time, or do you think that they could be considered to be equivalent?
     c. Use `liminal` or `detourr` to link the t-SNE representation to a tour of the penguins. Highlight the points that have been placed in an awkward position by t-SNE from others in their species. Watch them relative to the others in their species in the tour view, and think about whether there is any rationale for the awkward placement.
     d. Try again using UMAP to make the 2D representation, and use `liminal` or  `detourr` to link with a tour to explore the result.
 
-4. Conduct your best t-SNE and UMAP representations of the `aflw` data. Compare and contrast what is learned relative to the first two principal components, and a tour. Use `liminal` or  `detourr` to link with a tour to help you answer. 
+4. Compute your best t-SNE and UMAP representations of the `aflw` data. Compare and contrast what is learned relative to the first two principal components, and a tour. Use `liminal` or  `detourr` to link with a tour to help you answer. 
 
 5. The `cardinalR` package can be used to generate various high-dimensional shapes. Generate data with 5 irregularly shaped clusters, centering them at different points in five dimensions. Check what this looks like using a grand tour. If you were to sketch a 2D layout that describes your data, what would it look like? Use PCA, t-SNE and UMAP to make 2D layouts. Can you find a choice of parameters that comes close to your idealised sketch?
 
@@ -491,7 +491,7 @@ library(cardinalR)
 
 n_obs <- 1652  
 set.seed(259)
-swiss <- gen_swissroll(n_obs, p=3)
+swiss <- gen_swissroll(n_obs)
 swiss <- swiss |>
   mutate(x3 = x3 * 9) |>
   mutate(d = sqrt(x1^2 + # More recognisable results
@@ -546,7 +546,7 @@ Playing with the scale of the third variable from 10-50 also changes the resulti
 # Answer to Q3
 n_obs <- 1652  
 set.seed(259)
-swiss <- gen_swissroll(n_obs, p=3)
+swiss <- gen_swissroll(n_obs)
 # Standardising ruins structure
 # swiss <- apply(swiss, 2, function(x) (x-mean(x))/sd(x))
 # Compute distance from (0,0) in first two coordinates - spiral

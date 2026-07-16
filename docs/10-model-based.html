@@ -2,10 +2,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.30">
+<meta name="generator" content="quarto-1.9.30">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <title>10&nbsp; Model-based clustering – Interactively exploring high-dimensional data and models in R</title>
 <style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
 div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -90,10 +93,10 @@ div.csl-indent {
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-de070a7b0ab54f8780927367ac907214.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-b6a8276bf55561bdbc268162d41bd1f7.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-500a5d93a5fbe3ec46dd1cb8b883cbc3.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
+<link href="site_libs/bootstrap/bootstrap-e194f9b77bef675d061b88ac12283f50.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
   "collapse-after": 3,
@@ -120,7 +123,7 @@ div.csl-indent {
     "search-label": "Search"
   }
 }</script><script src="site_libs/kePrint-0.0.1/kePrint.js"></script><link href="site_libs/lightable-0.0.1/lightable.css" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script><script type="text/javascript">
+<script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script><script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script><script type="text/javascript">
 const typesetMath = (el) => {
   if (window.MathJax) {
     // MathJax Typeset
@@ -131,7 +134,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -413,7 +416,7 @@ window.Quarto = {
 \]</span></p>
 <p>resulting in several model choices, ranging from simple to complex, as shown in <a href="#tbl-covariances-html" class="quarto-xref">Table&nbsp;<span>10.1</span></a>.</p>
 <div class="cell">
-<details class="code-fold"><summary>Load libraries</summary><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/source.html">source</a></span><span class="op">(</span><span class="st">"code/setup.R"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details class="code-fold"><summary>Load libraries</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/source.html">source</a></span><span class="op">(</span><span class="st">"code/setup.R"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <div class="cell">
@@ -422,7 +425,7 @@ window.Quarto = {
 Table&nbsp;10.1: Parameterizations of the covariance matrix.
 </figcaption><div aria-describedby="tbl-covariances-html-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
-<table class="table do-not-create-environment cell caption-top table-sm table-striped small" data-quarto-postprocess="true">
+<table class="table cell caption-top table-sm table-striped small">
 <thead><tr class="header">
 <th style="text-align: center;" data-quarto-table-cell-role="th">Model</th>
 <th style="text-align: center;" data-quarto-table-cell-role="th">Sigma</th>
@@ -558,14 +561,14 @@ Table&nbsp;10.1: Parameterizations of the covariance matrix.
 <span class="header-section-number">10.1</span> Examining the model in 2D</h2>
 <p>We start with two of the four real-valued variables (<code>bl</code>, <code>fl</code>) and the three <code>species</code>. The goal is to determine whether model-based methods can discover clusters that closely correspond to the three species. Based on the scatterplot in <a href="#fig-penguins-bl-fl" class="quarto-xref">Figure&nbsp;<span>10.1</span></a> we would expect it to do well, and suggest an elliptical variance-covariance of roughly equal sizes as the model.</p>
 <div class="cell">
-<details class="code-fold"><summary>Code to make plot</summary><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"data/penguins_sub.rda"</span><span class="op">)</span></span>
+<details class="code-fold"><summary>Code to make plot</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"data/penguins_sub.rda"</span><span class="op">)</span></span>
 <span><span class="fu">ggplot</span><span class="op">(</span><span class="va">penguins_sub</span>, <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">bl</span>, </span>
 <span>                         y<span class="op">=</span><span class="va">fl</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="co">#, </span></span>
 <span>                         <span class="co">#colour=species)) +</span></span>
 <span>  <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">geom_density2d</span><span class="op">(</span>colour<span class="op">=</span><span class="st">"#3B99B1"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">theme</span><span class="op">(</span>aspect.ratio <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span>  <span class="fu">theme</span><span class="op">(</span>aspect.ratio <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details><div class="cell-output-display">
 <div id="fig-penguins-bl-fl" class="quarto-float quarto-figure quarto-figure-center anchored" alt="The x axis is labelled bl and has tick marks at -2, -1, 0, 1, 2, 3, and the y axis is labelled fl with tick marks at -2, -1, 0, 1, 2. Black points and blue-green contour lines suggest three modes, one at bottom left, one at top right and one to the middle right. Contours are a little elliptical, except the third mode is only weakly formed.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-penguins-bl-fl-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -577,10 +580,10 @@ Figure&nbsp;10.1: Scatterplot of flipper length by bill length of the penguins d
 </div>
 </div>
 </div>
-<p>To draw ellipses in any dimension, a reasonable procedure is to sample points uniformly on a sphere, and then transform this into a sphere using the inverse of the variance-covariance matrix. The <code>mulgar</code> function <code>mc_ellipse()</code> does this for each cluster in the fitted model. </p>
+<p>To draw ellipses in any dimension, the procedure is to sample points uniformly on a sphere, and then transform this into a sphere using the inverse of the variance-covariance matrix. The <code>mulgar</code> function <code>mc_ellipse()</code> does this for each cluster in the fitted model. </p>
 <p> </p>
 <div class="cell">
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Fit the model, plot BIC, construct and plot ellipses</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Fit the model, plot BIC, construct and plot ellipses</span></span>
 <span><span class="va">penguins_BIC</span> <span class="op">&lt;-</span> <span class="fu">mclustBIC</span><span class="op">(</span><span class="va">penguins_sub</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">3</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="va">ggmc</span> <span class="op">&lt;-</span> <span class="fu">ggmcbic</span><span class="op">(</span><span class="va">penguins_BIC</span>, cl<span class="op">=</span><span class="fl">2</span><span class="op">:</span><span class="fl">9</span>, top<span class="op">=</span><span class="fl">4</span><span class="op">)</span> <span class="op">+</span> </span>
 <span>  <span class="fu">scale_color_discrete_divergingx</span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"Roma"</span><span class="op">)</span> <span class="op">+</span></span>
@@ -606,7 +609,7 @@ Figure&nbsp;10.1: Scatterplot of flipper length by bill length of the penguins d
 <span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">theme</span><span class="op">(</span>aspect.ratio<span class="op">=</span><span class="fl">1</span>, legend.position<span class="op">=</span><span class="st">"none"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">ggtitle</span><span class="op">(</span><span class="st">"(b)"</span><span class="op">)</span></span>
-<span><span class="va">ggmc</span> <span class="op">+</span> <span class="va">ggell</span> <span class="op">+</span> <span class="fu">plot_layout</span><span class="op">(</span>ncol<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="va">ggmc</span> <span class="op">+</span> <span class="va">ggell</span> <span class="op">+</span> <span class="fu">plot_layout</span><span class="op">(</span>ncol<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div id="fig-penguins-bl-fl-mc" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Two plots side by side. The left plot is a line plot, with x axis labelled Number of clusters and ticks at 2, 3, 4, 5, 6, 7, 8, 9, and y axis labelled BIC_vals and tick marks at -1650 and -1600. There are four coloured lines with different line types labelled EEE, EVE, EVV and VVE by the legend at top right. All peak at x=3 and decline rapidly at higher values. The highest point corresponds to EVE. The plot on the right has the same axes as the previous figure, but three colour groups with no legend. There are two main types of points with the darker ones forming three ellipses overlaying the scatter cloud, centred in each colour group. There is a plus in the middle of each ellipse shape.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-penguins-bl-fl-mc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -623,13 +626,13 @@ Figure&nbsp;10.2: Summary plots from model-based clustering: (a) BIC values for 
 <span class="header-section-number">10.2</span> Examining the model in high dimensions</h2>
 <p>Now we will examine how model-based clustering will group the penguins data using all four variables. <a href="#fig-penguins-bic" class="quarto-xref">Figure&nbsp;<span>10.3</span></a> shows the summary of different models, of which we would choose the four-cluster VEE, if we strictly followed the BIC choice. <a href="#fig-penguins-mc-html" class="quarto-xref">Figure&nbsp;<span>10.4</span></a> shows this model in a tour, and the best three-cluster model. You can see that the four-cluster result is inadequate, in various ways. One of the species (Chinstrap) does have a bimodal density, due to the two sexes, and we would expect that a four cluster solution might detect this. However, the four cluster solution doesn’t. Instead, it splits the large group of Gentoo into two clusters. This does happen to roughly match the two sexes. We suspect that this is accidental though, and the real reason for splitting this cluster is more analogous to how <span class="math inline">\(k\)</span>-means or Wards linkage hierarchical clustering, that a lower within-cluster variance is obtained by splitting a large elliptical cluster into two more spherical clusters. If we expected the clustering solution to include the sexes, we would expect that the best BIC would be 6 clusters, and the three species clusters would be divided into two roughly matching the two sexes in each species. Rather the four cluster solution is one that simply divides the biggest cluster into two, and doesn’t truly capture the shape of the data. The tour shows that the three-cluster solution with EEE parametrisation is the best match to the data shape. It fits the three clusters that we can visually see and no more. Thus this is the parsimonious model, the simplest model that adequately captures the data distribution. </p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">penguins_BIC</span> <span class="op">&lt;-</span> <span class="fu">mclustBIC</span><span class="op">(</span><span class="va">penguins_sub</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">penguins_BIC</span> <span class="op">&lt;-</span> <span class="fu">mclustBIC</span><span class="op">(</span><span class="va">penguins_sub</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="va">ggmc</span> <span class="op">&lt;-</span> <span class="fu">ggmcbic</span><span class="op">(</span><span class="va">penguins_BIC</span>, cl<span class="op">=</span><span class="fl">2</span><span class="op">:</span><span class="fl">9</span>, top<span class="op">=</span><span class="fl">7</span><span class="op">)</span> <span class="op">+</span> </span>
 <span>  <span class="fu">scale_color_discrete_divergingx</span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"Roma"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span> </span>
-<span><span class="va">ggmc</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="va">ggmc</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
-<div id="fig-penguins-bic" class="quarto-float quarto-figure quarto-figure-center anchored" alt="This is a line plot, with x axis labelled Number of clusters and ticks at 2, 3, 4, 5, 6, 7, 8, 9, and y axis labelled BIC_vals and tick marks at -2600, -2550, -2500 and -2450. There are four coloured lines with different line types labelled EEE (solid brown), EVE (small yellow dashes), VEE (medium light blue dashes) and VVE (large dark blue dashes) by the legend at right. The peak is at x=4 and corresponds to VEE. This curve has high values at x=3 and 5 also. Most lines peak at x=3, with the EEE staying fairly flat up to x=9, and the other two declining." data-fig-align="center">
+<div id="fig-penguins-bic" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center" alt="This is a line plot, with x axis labelled Number of clusters and ticks at 2, 3, 4, 5, 6, 7, 8, 9, and y axis labelled BIC_vals and tick marks at -2600, -2550, -2500 and -2450. There are four coloured lines with different line types labelled EEE (solid brown), EVE (small yellow dashes), VEE (medium light blue dashes) and VVE (large dark blue dashes) by the legend at right. The peak is at x=4 and corresponds to VEE. This curve has high values at x=3 and 5 also. Most lines peak at x=3, with the EEE staying fairly flat up to x=9, and the other two declining.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-penguins-bic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="10-model-based_files/figure-html/fig-penguins-bic-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="This is a line plot, with x axis labelled Number of clusters and ticks at 2, 3, 4, 5, 6, 7, 8, 9, and y axis labelled BIC_vals and tick marks at -2600, -2550, -2500 and -2450. There are four coloured lines with different line types labelled EEE (solid brown), EVE (small yellow dashes), VEE (medium light blue dashes) and VVE (large dark blue dashes) by the legend at right. The peak is at x=4 and corresponds to VEE. This curve has high values at x=3 and 5 also. Most lines peak at x=3, with the EEE staying fairly flat up to x=9, and the other two declining." width="576">
 </div>
@@ -640,7 +643,7 @@ Figure&nbsp;10.3: BIC values for the top models for 2-9 clusters on the penguins
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">penguins_mc</span> <span class="op">&lt;-</span> <span class="fu">Mclust</span><span class="op">(</span><span class="va">penguins_sub</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, </span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">penguins_mc</span> <span class="op">&lt;-</span> <span class="fu">Mclust</span><span class="op">(</span><span class="va">penguins_sub</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, </span>
 <span>                      G<span class="op">=</span><span class="fl">4</span>, </span>
 <span>                      modelNames <span class="op">=</span> <span class="st">"VEE"</span><span class="op">)</span></span>
 <span><span class="va">penguins_mce</span> <span class="op">&lt;-</span> <span class="fu">mc_ellipse</span><span class="op">(</span><span class="va">penguins_mc</span><span class="op">)</span></span>
@@ -653,10 +656,10 @@ Figure&nbsp;10.3: BIC values for the top models for 2-9 clusters on the penguins
 <span>  <span class="fu">bind_rows</span><span class="op">(</span><span class="fu">bind_cols</span><span class="op">(</span><span class="va">penguins_mce</span><span class="op">$</span><span class="va">ell</span>,</span>
 <span>                      type<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="st">"ellipse"</span>,</span>
 <span>                               <span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">penguins_mce</span><span class="op">$</span><span class="va">ell</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">mutate</span><span class="op">(</span>type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">type</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span>  <span class="fu">mutate</span><span class="op">(</span>type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">type</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell">
-<details class="code-fold"><summary>Code to make animated gifs</summary><div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">animate_xy</span><span class="op">(</span><span class="va">penguins_mc_data</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,</span>
+<details class="code-fold"><summary>Code to make animated gifs</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">animate_xy</span><span class="op">(</span><span class="va">penguins_mc_data</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,</span>
 <span>           col<span class="op">=</span><span class="va">penguins_mc_data</span><span class="op">$</span><span class="va">cl</span>,</span>
 <span>           pch<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">20</span> <span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="va">penguins_mc_data</span><span class="op">$</span><span class="va">type</span><span class="op">)</span><span class="op">]</span>, </span>
 <span>           axes<span class="op">=</span><span class="st">"off"</span><span class="op">)</span></span>
@@ -704,14 +707,14 @@ Figure&nbsp;10.3: BIC values for the top models for 2-9 clusters on the penguins
 <span>               half_range <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span>,</span>
 <span>           gif_file<span class="op">=</span><span class="st">"gifs/penguins_simpler_mc.gif"</span>,</span>
 <span>           frames<span class="op">=</span><span class="fl">500</span>,</span>
-<span>           loop<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span>           loop<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <div id="fig-penguins-mc-html" class="quarto-layout-panel">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-penguins-mc-html-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="quarto-layout-row">
 <div class="quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-penguins-mc-html" style="flex-basis: 50.0%;justify-content: flex-start;">
-<div id="fig-penguins-best_mc" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig.align="center" alt="Animation showing 2D projections from 4D. There are four colour groups and two types of points, x's and solid circles. The solid circles form elliptical shapes and the x's are more scattered. The four groups are paired into two's that are close together. There is a legend at top right marking blue as 1, light blue-green as 2, yellow as 3 and red as 4. There is no axis display, so the exact projection of the four variables cannot be determined. We can see that one cluster of points that was separated from two other clusters has been divided into two groups, probably unnecessarily.">
+<div id="fig-penguins-best_mc" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Animation showing 2D projections from 4D. There are four colour groups and two types of points, x's and solid circles. The solid circles form elliptical shapes and the x's are more scattered. The four groups are paired into two's that are close together. There is a legend at top right marking blue as 1, light blue-green as 2, yellow as 3 and red as 4. There is no axis display, so the exact projection of the four variables cannot be determined. We can see that one cluster of points that was separated from two other clusters has been divided into two groups, probably unnecessarily." data-fig.align="center">
 <figure class="quarto-float quarto-subfloat-fig figure"><div aria-describedby="fig-penguins-best_mc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="gifs/penguins_best_mc.gif" class="img-fluid figure-img" data-fig.align="center" data-ref-parent="fig-penguins-mc-html" alt="Animation showing 2D projections from 4D. There are four colour groups and two types of points, x's and solid circles. The solid circles form elliptical shapes and the x's are more scattered. The four groups are paired into two's that are close together. There is a legend at top right marking blue as 1, light blue-green as 2, yellow as 3 and red as 4. There is no axis display, so the exact projection of the four variables cannot be determined. We can see that one cluster of points that was separated from two other clusters has been divided into two groups, probably unnecessarily.">
 </div>
@@ -721,7 +724,7 @@ Figure&nbsp;10.3: BIC values for the top models for 2-9 clusters on the penguins
 </div>
 </div>
 <div class="quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-penguins-mc-html" style="flex-basis: 50.0%;justify-content: flex-start;">
-<div id="fig-penguins-simpler_mc" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig.align="center" alt="Another animation showing 2D projections from 4D, with only three coloured groups. The two types of points show the elliptical shapes fitting the data more snugly in all projections.">
+<div id="fig-penguins-simpler_mc" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Another animation showing 2D projections from 4D, with only three coloured groups. The two types of points show the elliptical shapes fitting the data more snugly in all projections." data-fig.align="center">
 <figure class="quarto-float quarto-subfloat-fig figure"><div aria-describedby="fig-penguins-simpler_mc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="gifs/penguins_simpler_mc.gif" class="img-fluid figure-img" data-fig.align="center" data-ref-parent="fig-penguins-mc-html" alt="Another animation showing 2D projections from 4D, with only three coloured groups. The two types of points show the elliptical shapes fitting the data more snugly in all projections.">
 </div>
@@ -930,7 +933,7 @@ Cortes, C., Pregibon, D., &amp; Volinsky, C. (2003). Computational <span>M</span
 Cortes, C., &amp; Vapnik, V. N. (1995). Support-<span>V</span>ector <span>N</span>etworks. <em>Machine Learning</em>, <em>20</em>(3), 273–297.
 </div>
 <div id="ref-Oc1885" class="csl-entry" role="listitem">
-d’Ocagne, M. (1885). <em><span>C</span>oordonnées <span>P</span>arallèles et <span>A</span>xiales: <span>M</span>éthode de <span>T</span>ransformation <span>G</span>éométrique et <span>P</span>rocédé <span>N</span>ouveau de <span>C</span>alcul <span>G</span>raphique dÉduits de la <span>C</span>onsidération des <span>C</span>oordonnées <span>P</span>aralléles</em>. Gauthier-Villars.
+<span class="nocase">d’Ocagne, M.</span> (1885). <em><span>C</span>oordonnées <span>P</span>arallèles et <span>A</span>xiales: <span>M</span>éthode de <span>T</span>ransformation <span>G</span>éométrique et <span>P</span>rocédé <span>N</span>ouveau de <span>C</span>alcul <span>G</span>raphique dÉduits de la <span>C</span>onsidération des <span>C</span>oordonnées <span>P</span>aralléles</em>. Gauthier-Villars.
 </div>
 <div id="ref-Dalgaard2002" class="csl-entry" role="listitem">
 Dalgaard, P. (2002). <em>Introductory <span>S</span>tatistics with <span>R</span></em>. Springer.
@@ -939,7 +942,7 @@ Dalgaard, P. (2002). <em>Introductory <span>S</span>tatistics with <span>R</span
 Dasu, T., Swayne, D. F., &amp; Poole, D. (2005). Grouping <span>M</span>ultivariate <span>T</span>ime <span>S</span>eries: A <span>C</span>ase <span>S</span>tudy. <em>Proceedings of the IEEE Workshop on <span>T</span>emporal <span>D</span>ata <span>M</span>ining: <span>A</span>lgorithms, <span>T</span>heory and <span>A</span>pplications, in Conjunction with the Conference on Data Mining, Houston, November 27, 2005</em>, 25–32.
 </div>
 <div id="ref-R-ggdendro" class="csl-entry" role="listitem">
-de Vries, A., &amp; Ripley, B. D. (2024). <em><span class="nocase">ggdendro</span>: <span>C</span>reate <span>D</span>endrograms and <span>T</span>ree <span>D</span>iagrams <span>U</span>sing <span class="nocase">ggplot2</span></em>. <a href="https://andrie.github.io/ggdendro/">https://andrie.github.io/ggdendro/</a>
+<span class="nocase">de Vries, A., &amp; Ripley, B. D.</span> (2024). <em><span class="nocase">ggdendro</span>: <span>C</span>reate <span>D</span>endrograms and <span>T</span>ree <span>D</span>iagrams <span>U</span>sing <span class="nocase">ggplot2</span></em>. <a href="https://andrie.github.io/ggdendro/">https://andrie.github.io/ggdendro/</a>
 </div>
 <div id="ref-fireorigin" class="csl-entry" role="listitem">
 Department of Environment, Land, Water &amp; Planning. (2019). <em><span class="nocase">Fire Origins - Current and Historical</span></em>. <a href="https://discover.data.vic.gov.au/dataset/fire-origins-current-and-historical">https://discover.data.vic.gov.au/dataset/fire-origins-current-and-historical</a>
@@ -1164,10 +1167,7 @@ Laa, U., Aumann, A., Cook, D., &amp; Valencia, G. (2023). New and <span>S</span>
 Laa, U., Cook, D., &amp; Lee, S. (2022). Burning <span>S</span>age: <span>R</span>eversing the <span>C</span>urse of <span>D</span>imensionality in the <span>V</span>isualization of <span>H</span>igh-<span>D</span>imensional <span>D</span>ata. <em>Journal of Computational and Graphical Statistics</em>, <em>31</em>(1), 40–49. <a href="https://doi.org/10.1080/10618600.2021.1963264">https://doi.org/10.1080/10618600.2021.1963264</a>
 </div>
 <div id="ref-slicetour" class="csl-entry" role="listitem">
-Laa, U., Cook, D., &amp; Valencia, G. (2020a). A <span>S</span>lice <span>T</span>our for <span>F</span>inding <span>H</span>ollowness in <span>H</span>igh-<span>D</span>imensional <span>D</span>ata. <em>Journal of Computational and Graphical Statistics</em>, <em>29</em>(3), 681–687. <a href="https://doi.org/10.1080/10618600.2020.1777140">https://doi.org/10.1080/10618600.2020.1777140</a>
-</div>
-<div id="ref-tourr2020" class="csl-entry" role="listitem">
-Laa, U., Cook, D., &amp; Valencia, G. (2020b). A <span>S</span>lice <span>T</span>our for <span>F</span>inding <span>H</span>ollowness in <span>H</span>igh-<span>D</span>imensional <span>D</span>ata. <em>Journal of Computational and Graphical Statistics</em>, <em>29</em>(3), 681–687. <a href="https://doi.org/10.1080/10618600.2020.1777140">https://doi.org/10.1080/10618600.2020.1777140</a>
+Laa, U., Cook, D., &amp; Valencia, G. (2020). A <span>S</span>lice <span>T</span>our for <span>F</span>inding <span>H</span>ollowness in <span>H</span>igh-<span>D</span>imensional <span>D</span>ata. <em>Journal of Computational and Graphical Statistics</em>, <em>29</em>(3), 681–687. <a href="https://doi.org/10.1080/10618600.2020.1777140">https://doi.org/10.1080/10618600.2020.1777140</a>
 </div>
 <div id="ref-helmert" class="csl-entry" role="listitem">
 Lancaster, H. O. (1965). The <span>H</span>elmert <span>M</span>atrices. <em>The American Mathematical Monthly</em>, <em>72</em>(1), 4–12.
@@ -1461,13 +1461,13 @@ Urbanek, S., &amp; Theus, M. (2003). <span class="nocase">iPlots</span>: <span>H
 Vaidyanathan, R., Xie, Y., Allaire, J., Cheng, J., Sievert, C., &amp; Russell, K. (2023). <em>Htmlwidgets: HTML widgets for r</em>. <a href="https://github.com/ramnathv/htmlwidgets">https://github.com/ramnathv/htmlwidgets</a>
 </div>
 <div id="ref-R-compositions" class="csl-entry" role="listitem">
-van den Boogaart, K. G., Tolosana-Delgado, R., &amp; Bren, M. (2024). <em><span class="nocase">compositions</span>: <span>C</span>ompositional <span>D</span>ata <span>A</span>nalysis</em>. <a href="http://www.stat.boogaart.de/compositions/">http://www.stat.boogaart.de/compositions/</a>
+<span class="nocase">van den Boogaart, K. G., Tolosana-Delgado, R., &amp; Bren, M.</span> (2024). <em><span class="nocase">compositions</span>: <span>C</span>ompositional <span>D</span>ata <span>A</span>nalysis</em>. <a href="http://www.stat.boogaart.de/compositions/">http://www.stat.boogaart.de/compositions/</a>
 </div>
 <div id="ref-Rtsne2014" class="csl-entry" role="listitem">
-van der Maaten, L. J. P. (2014). Accelerating <span class="nocase">t-SNE</span> using <span>T</span>ree-<span>B</span>ased lgorithms. <em>Journal of Machine Learning Research</em>, <em>15</em>, 3221–3245.
+<span class="nocase">van der Maaten, L. J. P.</span> (2014). Accelerating <span class="nocase">t-SNE</span> using <span>T</span>ree-<span>B</span>ased lgorithms. <em>Journal of Machine Learning Research</em>, <em>15</em>, 3221–3245.
 </div>
 <div id="ref-Rtsne2008" class="csl-entry" role="listitem">
-van der Maaten, L. J. P., &amp; Hinton, G. E. (2008). Visualizing <span>H</span>igh-<span>D</span>imensional <span>D</span>ata using <span class="nocase">t-SNE</span>. <em>Journal of Machine Learning Research</em>, <em>9</em>, 2579–2605.
+<span class="nocase">van der Maaten, L. J. P., &amp; Hinton, G. E.</span> (2008). Visualizing <span>H</span>igh-<span>D</span>imensional <span>D</span>ata using <span class="nocase">t-SNE</span>. <em>Journal of Machine Learning Research</em>, <em>9</em>, 2579–2605.
 </div>
 <div id="ref-Va99" class="csl-entry" role="listitem">
 Vapnik, V. N. (1999). <em>The <span>N</span>ature of <span>S</span>tatistical <span>L</span>earning <span>T</span>heory</em>. Springer.
@@ -1521,7 +1521,7 @@ Wickham, H. (2016). <em><span class="nocase">ggplot2</span>: <span>E</span>legan
 Wickham, H. (2022). <em><span class="nocase">classifly</span>: <span>E</span>xplore <span>C</span>lassification <span>M</span>odels in <span>H</span>igh <span>D</span>imensions</em>. <a href="http://had.co.nz/classifly">http://had.co.nz/classifly</a>
 </div>
 <div id="ref-R-ggplot2" class="csl-entry" role="listitem">
-Wickham, H., Chang, W., Henry, L., Pedersen, T. L., Takahashi, K., Wilke, C., Woo, K., Yutani, H., Dunnington, D., &amp; van den Brand, T. (2024). <em><span class="nocase">ggplot2</span>: <span>C</span>reate <span>E</span>legant <span>D</span>ata <span>V</span>isualisations <span>U</span>sing the <span>G</span>rammar of <span>G</span>raphics</em>. <a href="https://ggplot2.tidyverse.org">https://ggplot2.tidyverse.org</a>
+<span class="nocase">Wickham, H., Chang, W., Henry, L., Pedersen, T. L., Takahashi, K., Wilke, C., Woo, K., Yutani, H., Dunnington, D., &amp; van den Brand, T.</span> (2024). <em><span class="nocase">ggplot2</span>: <span>C</span>reate <span>E</span>legant <span>D</span>ata <span>V</span>isualisations <span>U</span>sing the <span>G</span>rammar of <span>G</span>raphics</em>. <a href="https://ggplot2.tidyverse.org">https://ggplot2.tidyverse.org</a>
 </div>
 <div id="ref-R-tourr" class="csl-entry" role="listitem">
 Wickham, H., &amp; Cook, D. (2025). <em><span class="nocase">tourr</span>: <span>T</span>our <span>M</span>ethods for <span>M</span>ultivariate <span>D</span>ata <span>V</span>isualisation</em>. <a href="https://github.com/ggobi/tourr">https://github.com/ggobi/tourr</a>
@@ -1623,13 +1623,14 @@ Zhu, H. (2024). <em>kableExtra: Construct complex table with kable and pipe synt
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy
