@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.30">
+<meta name="generator" content="quarto-1.9.38">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <title>18&nbsp; Diagnostics for classification models – Interactively exploring high-dimensional data and models in R</title>
 <style>
@@ -93,7 +93,7 @@ div.csl-indent {
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-b6a8276bf55561bdbc268162d41bd1f7.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="site_libs/bootstrap/bootstrap-e194f9b77bef675d061b88ac12283f50.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
@@ -387,7 +387,7 @@ window.Quarto = {
         <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Table of contents</h2>
    
   <ul>
-<li><a href="#sec-class-errorr" id="toc-sec-class-errorr" class="nav-link active" data-scroll-target="#sec-class-errorr"><span class="header-section-number">18.1</span> Errors for a single model</a></li>
+<li><a href="#sec-class-error" id="toc-sec-class-error" class="nav-link active" data-scroll-target="#sec-class-error"><span class="header-section-number">18.1</span> Errors for a single model</a></li>
   <li><a href="#sec-class-bnd" id="toc-sec-class-bnd" class="nav-link" data-scroll-target="#sec-class-bnd"><span class="header-section-number">18.2</span> Examining boundaries</a></li>
   <li><a href="#sec-class-explain" id="toc-sec-class-explain" class="nav-link" data-scroll-target="#sec-class-explain"><span class="header-section-number">18.3</span> Explainability</a></li>
   <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises">Exercises</a></li>
@@ -414,7 +414,7 @@ window.Quarto = {
 <p>The first is to examine where the model makes errors. This can be done by marking the errors with different symbols and making plots of the data including a tour. Another approach is to use linked brushing between a representation of the confusion matrix and other plots of the data to focus on selected mistakes, similar to what was shown in comparing cluster solutions in <a href="12-summary-clust.html#sec-compare-clusterings" class="quarto-xref"><span>Section 12.2</span></a>. What you are looking for is acceptable errors in neighbourhoods where the classes overlap, versus unacceptable errors where there is a big difference between classes but the architecture of the model is mismatched with the data distribution. This would indicate that the model has high bias. </p>
 <p>The second area is to examine where the model places the boundaries between classes, relative to the training sample. The purpose again is to learn where the model architecture is a good match with the data distribution.</p>
 <p>Lastly, it is important to understand it, by determining which variables contribute most to the classification. This is probably only useful if the model fit is first established to be good, although this can also help to understand how a model has gone bad (as we’ll see in <a href="#sec-class-explain" class="quarto-xref"><span>Section 18.3</span></a>). For linear boundaries interpretability can be global, applying to the entire data, as may be produced by partial dependence plots. With a highly non-linear model, there has been a rapid growth in newly designed metrics for local explainability. With interpretability, the focus is on how individual variables affect the classification, and thus methods such as the radial tour are especially useful. </p>
-<section id="sec-class-errorr" class="level2" data-number="18.1"><h2 data-number="18.1" class="anchored" data-anchor-id="sec-class-errorr">
+<section id="sec-class-error" class="level2" data-number="18.1"><h2 data-number="18.1" class="anchored" data-anchor-id="sec-class-error">
 <span class="header-section-number">18.1</span> Errors for a single model</h2>
 <p>To examine misclassifications, we can create a separate variable that identifies the errors or not. Constructing this for each class, and exploring in small steps is helpful. Let’s do this using the random forest model for the penguins fit. The random forest fit has only a few misclassifications. There are four Adelie penguins confused with Chinstrap, and similarly four Chinstrap confused with Adelie. There is one Gentoo penguin confused with a Chinstrap. This is interesting, because the Gentoo cluster is well separated from the clusters of the other two penguin species. </p>
 <div class="cell">
@@ -644,8 +644,11 @@ Figure&nbsp;18.3: Comparison of the boundaries produced by the LDA (a) and the N
 <div class="cell">
 <details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Split the data intro training and testing, as done in 17-nn chapter</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rsample.tidymodels.org">rsample</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidymodels.tidymodels.org">tidymodels</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tensorflow.rstudio.com/">keras</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidymodels.tidymodels.org">tidymodels</a></span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details><div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'dials' was built under R version 4.6.1</code></pre>
+</div>
+<details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tensorflow.rstudio.com/">keras</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"data/penguins_sub.rda"</span><span class="op">)</span> <span class="co"># from mulgar book</span></span>
 <span></span>
@@ -671,7 +674,7 @@ Figure&nbsp;18.3: Comparison of the boundaries produced by the LDA (a) and the N
 </details>
 </div>
 <div class="cell">
-<details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"data/p_train_pred.rda"</span><span class="op">)</span></span>
+<details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"data/p_train_pred.rda"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"data/p_test_pred.rda"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">p_train_pred_cat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/levels.html">levels</a></span><span class="op">(</span><span class="va">p_train</span><span class="op">$</span><span class="va">species</span><span class="op">)</span><span class="op">[</span></span>
@@ -691,7 +694,7 @@ Figure&nbsp;18.3: Comparison of the boundaries produced by the LDA (a) and the N
 </div>
 <p> </p>
 <div class="cell">
-<details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Explanations</span></span>
+<details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Explanations</span></span>
 <span><span class="co"># https://www.r-bloggers.com/2022/08/kernel-shap/</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/ModelOriented/kernelshap">kernelshap</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/ModelOriented/shapviz">shapviz</a></span><span class="op">)</span></span>
@@ -706,7 +709,7 @@ Figure&nbsp;18.3: Comparison of the boundaries produced by the LDA (a) and the N
 </details>
 </div>
 <div class="cell">
-<details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"data/p_exp_sv.rda"</span><span class="op">)</span></span>
+<details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"data/p_exp_sv.rda"</span><span class="op">)</span></span>
 <span><span class="va">p_exp_gentoo</span> <span class="op">&lt;-</span> <span class="va">p_exp_sv</span><span class="op">$</span><span class="va">Class_3</span><span class="op">$</span><span class="va">S</span></span>
 <span><span class="va">p_exp_gentoo</span> <span class="op">&lt;-</span> <span class="va">p_exp_gentoo</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">as_tibble</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -718,7 +721,7 @@ Figure&nbsp;18.3: Comparison of the boundaries produced by the LDA (a) and the N
 </details>
 </div>
 <div class="cell">
-<details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_row_id</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">p_exp_gentoo</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="va">p_exp_gentoo</span><span class="op">$</span><span class="va">species</span> <span class="op">==</span> <span class="st">"Gentoo"</span> <span class="op">&amp;</span></span>
+<details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_row_id</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">p_exp_gentoo</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="va">p_exp_gentoo</span><span class="op">$</span><span class="va">species</span> <span class="op">==</span> <span class="st">"Gentoo"</span> <span class="op">&amp;</span></span>
 <span>                                      <span class="va">p_exp_gentoo</span><span class="op">$</span><span class="va">pspecies</span> <span class="op">==</span> <span class="st">"Adelie"</span><span class="op">]</span></span>
 <span><span class="va">p_outlier</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="va">p_exp_sv</span><span class="op">$</span><span class="va">Class_1</span><span class="op">$</span><span class="va">S</span><span class="op">[</span><span class="va">p_row_id</span>,<span class="op">]</span><span class="op">)</span>,</span>
 <span>                     <span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="va">p_exp_sv</span><span class="op">$</span><span class="va">Class_2</span><span class="op">$</span><span class="va">S</span><span class="op">[</span><span class="va">p_row_id</span>,<span class="op">]</span><span class="op">)</span>,</span>
@@ -779,7 +782,7 @@ Table&nbsp;18.1: SHAP values for the Gentoo penguin misclassified as Adelie.
 </ul>
 <p></p>
 <div class="cell">
-<details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_exp_gentoo</span> <span class="op">|&gt;</span></span>
+<details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_exp_gentoo</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">species</span> <span class="op">==</span> <span class="st">"Gentoo"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">pivot_longer</span><span class="op">(</span><span class="va">bl</span><span class="op">:</span><span class="va">bm</span>, names_to<span class="op">=</span><span class="st">"var"</span>, values_to<span class="op">=</span><span class="st">"shap"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">mutate</span><span class="op">(</span>var <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">var</span>, levels<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"bl"</span>, <span class="st">"bd"</span>, <span class="st">"fl"</span>, <span class="st">"bm"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -793,7 +796,7 @@ Table&nbsp;18.1: SHAP values for the Gentoo penguin misclassified as Adelie.
 </details>
 </div>
 <div class="cell">
-<details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_pcp</span> <span class="op">&lt;-</span> <span class="va">p_exp_gentoo</span> <span class="op">|&gt;</span></span>
+<details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_pcp</span> <span class="op">&lt;-</span> <span class="va">p_exp_gentoo</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">species</span> <span class="op">==</span> <span class="st">"Gentoo"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">pcp_select</span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes_pcp</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
@@ -856,7 +859,7 @@ Figure&nbsp;18.4: SHAP values for the training set of Gentoo penguins, shown as 
 </div>
 <p>If we examine the data in <a href="#fig-penguins-bl-bm-bd" class="quarto-xref">Figure&nbsp;<span>18.5</span></a> the explanations make some sense. The misclassified penguin has an unusually small value on <code>bm</code>. That the SHAP value for <code>bm</code> was quite different from those of the other Gentoo penguins pointed to this being the potential issue with the model, particularly for this penguin. This penguin’s prediction is negatively impacted by <code>bm</code> being in the model.</p>
 <div class="cell">
-<details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Check position on bm</span></span>
+<details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Check position on bm</span></span>
 <span><span class="va">shap_proj</span> <span class="op">&lt;-</span> <span class="va">p_exp_gentoo</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">species</span> <span class="op">==</span> <span class="st">"Gentoo"</span>, <span class="va">error</span> <span class="op">==</span> <span class="st">"yes"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">select</span><span class="op">(</span><span class="va">bl</span><span class="op">:</span><span class="va">bm</span><span class="op">)</span></span>
@@ -934,14 +937,14 @@ Figure&nbsp;18.4: SHAP values for the training set of Gentoo penguins, shown as 
 <img src="18-summary-class_files/figure-html/fig-penguins-bl-bm-bd-1.png" class="img-fluid figure-img" style="width:100.0%" alt="Three scatterplots of bl, bd, fl vs bm. Colour is mapped to species. Shape is matched to error, with solid circles indicating a misclassification. There is one Gentoo error and five Adelie errors. In bd  vs bm species show a more linear separation, but some overlap in the boundary region between Adelie (blue) and Chinstrap (yellow). The misclassified Gentoo is at the bottom left edge of the Gentoo cluster. The Adelie errors are mostly in the overlapping regions between Adelie and Chinstrap, in bl vs bm, and intermixed in these clusters when they overlap in fl vs bm and bd vs bm.">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-penguins-bl-bm-bd-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;18.5: Plots of the training data with misclassified observations marked to help understand the SHAP values. The misclassified Gentoo penguin has an unusually low body mass value which makes it appear to be more like an Adelie penguin, particularly when considered in relation to it’s bill length.
+Figure&nbsp;18.5: Plots of the training data with misclassified observations marked to help understand the SHAP values. The misclassified Gentoo penguin has an unusually low body mass value which makes it appear to be more like an Adelie penguin, particularly when considered in relation to its bill length.
 </figcaption></figure>
 </div>
 </div>
 </div>
 <p>This is a good point to examine the boundary between Gentoo and Adelie penguins. Focusing on just two classes is easier, and it is between these two classes that the error in classification occurs. Examining the boundary can be achieved by simulating a large number of points in the data domain and predicting the class of these points. <a href="#fig-penguins-bndry" class="quarto-xref">Figure&nbsp;<span>18.6</span></a> shows these predictions, along with the observed training values. The scatterplots show the same pairs of variables as shown in <a href="#fig-penguins-bl-bm-bd" class="quarto-xref">Figure&nbsp;<span>18.5</span></a>. Pixel points indicate the simulated data covering the data domain, and allowing the boundary to be examined. The observed training data is overlaid, with solid circles indicating an error. It’s a bit messy but the most important part to see is that the boundary between classes is mostly in the vertical direction, which corresponds to cutting primarily on <code>bm</code>. It’s not completely <code>bm</code> because there is some overlap of the red and blue points here, and the direction is not quite vertical. Particularly, with <code>bd</code> there the direction of the boundary is slightly oblique. (Note that the white area in the top left of <code>bl</code> vs <code>bm</code> actually corresponds to the Chinstrap prediction region, which we have removed to focus on Adelie and Gentoo.)</p>
 <div class="cell">
-<details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Need to do the predictions and save because saved model</span></span>
+<details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Need to do the predictions and save because saved model</span></span>
 <span><span class="co"># appears to be machine-dependent</span></span>
 <span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">10000</span></span>
 <span><span class="va">p_sim</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="op">(</span>bl <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html">runif</a></span><span class="op">(</span><span class="va">n</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">min</a></span><span class="op">(</span><span class="va">penguins_sub</span><span class="op">$</span><span class="va">bl</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">max</a></span><span class="op">(</span><span class="va">penguins_sub</span><span class="op">$</span><span class="va">bl</span><span class="op">)</span><span class="op">)</span>,</span>
@@ -957,7 +960,7 @@ Figure&nbsp;18.5: Plots of the training data with misclassified observations mar
 </details>
 </div>
 <div class="cell">
-<details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"data/p_sim_pred.rda"</span><span class="op">)</span></span>
+<details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"data/p_sim_pred.rda"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"data/p_sim.rda"</span><span class="op">)</span></span>
 <span><span class="va">p_sim_class</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html">apply</a></span><span class="op">(</span><span class="va">p_sim_pred</span>, <span class="fl">1</span>, <span class="va">which.max</span><span class="op">)</span></span>
 <span><span class="va">p_sim_class</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Adelie"</span>, <span class="st">"Chinstrap"</span>, <span class="st">"Gentoo"</span><span class="op">)</span><span class="op">[</span><span class="va">p_sim_class</span><span class="op">]</span></span>
@@ -1066,7 +1069,7 @@ Figure&nbsp;18.7: Radial tour used to investigate where the boundary falls: (a) 
 <li><p>Why should it be possible to obtain a NN fit, where the architecture has two nodes in the hidden layer to do a dimension reduction, that is at least as good as the LDA model? Re-fit the NN model, by varying the random seed, to obtain the best fit possible. Save this model fit, and compare it with the LDA model.</p></li>
 <li><p>Examine misclassifications from a random forest model for the fake trees data between cluster 1 and 0, using the (a) principal components, (b) votes matrix. Describe where these show errors relative to their true and predicted class clusters. When examining the simplex, are the misclassifications the points that are furthest from any vertices?</p></li>
 <li><p>Examine the misclassifications for the random forest model on the sketches data, focusing on cactus sketches that were mistaken for bananas. Follow up by plotting the images of these errors, and describe whether the classifier is correct that these sketches are so poor their true cactus or banana identity cannot be determined.</p></li>
-<li><p>How do the errors from the random forest model compare with those of your best fitting NN model? Are the the corresponding images poor sketches of cacti or bananas?</p></li>
+<li><p>How do the errors from the random forest model compare with those of your best fitting NN model? Are the corresponding images poor sketches of cacti or bananas?</p></li>
 <li>
 <p>Now examine the misclassifications of the sketches data in the</p>
 <ol type="a">

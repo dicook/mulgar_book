@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.30">
+<meta name="generator" content="quarto-1.9.38">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <title>17&nbsp; Neural networks and deep learning – Interactively exploring high-dimensional data and models in R</title>
 <style>
@@ -93,7 +93,7 @@ div.csl-indent {
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-b6a8276bf55561bdbc268162d41bd1f7.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="site_libs/bootstrap/bootstrap-e194f9b77bef675d061b88ac12283f50.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
@@ -626,7 +626,7 @@ ________________________________________________________________________________
 <div class="info">
 <p>View the individual node models to understand how they combine to produce the overall model.</p>
 </div>
-<p>Because nodes in the hidden layers of NNs are themselves (relatively simple regression) models, it can be interesting to examine these to understand how the model is making it’s predictions. Although it’s rarely easy, most software will allow the coefficients for the models at these nodes to be extracted. With the penguins NN model there are two nodes, so we can extract the coefficients and plot the resulting two linear combinations to examine the separation between classes.</p>
+<p>Because nodes in the hidden layers of NNs are themselves (relatively simple regression) models, it can be interesting to examine these to understand how the model is making its predictions. Although it’s rarely easy, most software will allow the coefficients for the models at these nodes to be extracted. With the penguins NN model there are two nodes, so we can extract the coefficients and plot the resulting two linear combinations to examine the separation between classes.</p>
 <div class="cell">
 <details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Extract hidden layer model weights</span></span>
 <span><span class="va">p_nn_wgts</span> <span class="op">&lt;-</span> <span class="fu">keras</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/keras/man/get_weights.html">get_weights</a></span><span class="op">(</span><span class="va">p_nn_model</span>, trainable<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -830,7 +830,7 @@ Figure&nbsp;17.3: Plot of the data in the linear combinations from the two nodes
 <details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://keras3.posit.co/">keras3</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># download the data</span></span>
-<span><span class="va">fashion_mnist</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://keras3.posit.co/reference/dataset_fashion_mnist.html">dataset_fashion_mnist</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">fashion_mnist</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/keras/man/dataset_fashion_mnist.html">dataset_fashion_mnist</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># split into input variables and response</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">train_images</span>, <span class="va">train_labels</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/pkg/zeallot/man/operator.html">%&lt;-%</a></span> <span class="va">fashion_mnist</span><span class="op">$</span><span class="va">train</span></span>
@@ -856,14 +856,14 @@ Figure&nbsp;17.3: Plot of the data in the linear combinations from the two nodes
 <p>In the next step we define the neural network and train the model. Note that because we have many observations, even a very simple structure returns a good model. And because this example is well-known, we do not need to tune the model or check the validation accuracy.</p>
 <div class="cell">
 <details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># defining the model</span></span>
-<span><span class="va">model_fashion_mnist</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://keras3.posit.co/reference/keras_model_sequential.html">keras_model_sequential</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">model_fashion_mnist</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/keras/man/keras_model_sequential.html">keras_model_sequential</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">model_fashion_mnist</span> <span class="op">|&gt;</span></span>
 <span>  <span class="co"># flatten the image data into a long vector</span></span>
-<span>  <span class="fu"><a href="https://keras3.posit.co/reference/layer_flatten.html">layer_flatten</a></span><span class="op">(</span>input_shape <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">28</span>, <span class="fl">28</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/keras/man/layer_flatten.html">layer_flatten</a></span><span class="op">(</span>input_shape <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">28</span>, <span class="fl">28</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="co"># hidden layer with 128 units</span></span>
-<span>  <span class="fu"><a href="https://keras3.posit.co/reference/layer_dense.html">layer_dense</a></span><span class="op">(</span>units <span class="op">=</span> <span class="fl">128</span>, activation <span class="op">=</span> <span class="st">'relu'</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/keras/man/layer_dense.html">layer_dense</a></span><span class="op">(</span>units <span class="op">=</span> <span class="fl">128</span>, activation <span class="op">=</span> <span class="st">'relu'</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="co"># output layer for 10 categories</span></span>
-<span>  <span class="fu"><a href="https://keras3.posit.co/reference/layer_dense.html">layer_dense</a></span><span class="op">(</span>units <span class="op">=</span> <span class="fl">10</span>, activation <span class="op">=</span> <span class="st">'softmax'</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/keras/man/layer_dense.html">layer_dense</a></span><span class="op">(</span>units <span class="op">=</span> <span class="fl">10</span>, activation <span class="op">=</span> <span class="st">'softmax'</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">model_fashion_mnist</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://generics.r-lib.org/reference/compile.html">compile</a></span><span class="op">(</span></span>
 <span>  optimizer <span class="op">=</span> <span class="st">'adam'</span>,</span>
@@ -889,7 +889,7 @@ Figure&nbsp;17.3: Plot of the data in the linear combinations from the two nodes
 <span></span>
 <span><span class="co"># calculate activation for the hidden layer, this can be done</span></span>
 <span><span class="co"># within the keras framework</span></span>
-<span><span class="va">activations_model_fashion</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://keras3.posit.co/reference/keras_model.html">keras_model</a></span><span class="op">(</span></span>
+<span><span class="va">activations_model_fashion</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/keras/man/keras_model.html">keras_model</a></span><span class="op">(</span></span>
 <span>  inputs <span class="op">=</span> <span class="va">model_fashion_mnist</span><span class="op">$</span><span class="va">input</span>,</span>
 <span>  outputs <span class="op">=</span> <span class="va">model_fashion_mnist</span><span class="op">$</span><span class="va">layers</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">output</span></span>
 <span><span class="op">)</span></span>
